@@ -1,92 +1,84 @@
-# Data Pipeline
+# DAT — Data Pipeline
 
-How data gets from the backend into the browser and becomes queryable.
+How data gets from the backend into the browser and becomes queryable in DuckDB.
 
 ## Two pipelines
 
-The dashboard loads data in two parallel pipelines. Both feed into the same shared DuckDB instance.
+The dashboard loads data via two parallel pipelines on page open. Both feed into the same shared DuckDB-WASM instance.
 
-### Pipeline A — Parquet files (fast path)
-
-```
-V2 Progress Outputs API
-  → returns Azure Blob Storage URLs (with SAS tokens)
-  → browser downloads .parquet files
-  → files cached in OPFS (keyed by artefactHash)
-  → loaded into DuckDB as tables
-```
-
-Parquet files loaded:
-| File | DuckDB table | Size (typical) | Purpose |
-|------|-------------|----------------|---------|
-| `v2_actual_progress.parquet` | `actual_progress` | ~1 MB | Cumulative actual progress by date |
-| `v2_planned_progress.parquet` | `planned_progress` | ~1 MB | Cumulative planned/programme progress by date |
-| `v2_baseline_progress.parquet` | `baseline_progress` | ~500 KB | Baseline progress by date |
-| `v2_discipline_packages.parquet` | `category_groups` | 5-20 MB | Per-discipline/package progress by date |
-| `v2_activities_progress.parquet` | `activities_progress` | 50-200 MB | Per-activity progress (lazy, schedule tab) |
-
-### Pipeline B — REST API + artefacts (slower path)
+### Pipeline A — V2 Progress Outputs (parquet, fast path)
 
 ```
-Artefact API: getProjectModelArtefacts(projectId)
-  → returns array of artefact metadata (outputContent, models[], fileSizeBytes, artefactHash)
-  → browser downloads selected artefacts from blob storage
-  → cached in OPFS under models/{modelId}/
-  → loaded into DuckDB
+Progress Outputs API  →  Azure Blob Storage URLs
+  browser downloads .parquet files (or reads from OPFS cache)
+  files loaded into DuckDB as named tables
 ```
 
-Artefacts loaded:
+| API output name | DuckDB table | Purpose |
+|----------------|-------------|---------|
+| `planned-and-actual-category-groups` | `category_groups` | Per-discipline/package cumulative progress by calendar date |
+| `planned-and-actual-project` | `project_progress` | Project-level cumulative progress by calendar date |
+| `planned-and-actual-xyz-tracked-category-groups` | `category_groups_xyz` | Same as above but scoped to XYZ-tracked elements only |
+| `planned-and-actual-xyz-tracked-project` | `project_progress_xyz` | Same as above but scoped to XYZ-tracked elements only |
+
+The xyz-tracked variants are fetched at startup but only loaded into DuckDB when the user enables the "XYZ Tracked" filter toggle.
+
+All parquet files are cached in OPFS under `/duckdb-cache/{projectId}/dashboard/` and only re-downloaded when the backend's `artefactHash` changes.
+
+### Pipeline B — Artefacts + API (slower path)
+
+```
+Artefact API  →  Azure Blob Storage URLs
+  browser downloads selected artefacts (or reads from OPFS cache)
+  loaded into DuckDB
+```
+
 | Artefact type | DuckDB table | Purpose |
-|---------------|-------------|---------|
-| `element-status` | `element_status` | modelElementId → installationStatus |
-| `project-element-list` | `project_element_list` | modelElementId → sourceFileElementId (External ID) |
-| `svf2-object-id-map` | `svf2_object_id_map` | Forge dbId → modelElementId (for coloring) |
-| `client-element-metas` | _(not loaded upfront)_ | Element display names — queried remotely on hover |
+|--------------|-------------|---------|
+| `element-status` | `element_status` | modelElementId → installationStatus (Installed, Not Planned, …) |
+| `project-element-list` | `project_element_list` | modelElementId → sourceFileElementId (External ID / Revit GUID) |
+| `svf2-object-id-map` | `svf2_object_id_map` | External ID → Forge dbId (for 3D colouring) |
 
-REST APIs called:
-| API | Data | Used by |
-|-----|------|---------|
-| Activities API | Schedule activities | Schedule tab, Progress tab (via SharedDataLoader) |
-| Activity Categories API | Discipline/package/phase categories | Schedule columns, Progress filters |
-| Progress Weighting API | Weighting config (labor vs element-count) | Progress calculations |
-| Issues API | Quality issues | Quality tab |
-| 360 Captures API | Panoramic captures | 360 tab |
-| Folder API / Model API | Project folders and models | Model resolution (find federated model) |
+REST APIs called on page load:
+| API | DuckDB table | Used by |
+|-----|-------------|---------|
+| Activities API (via SharedDataLoader) | `api_activities` | PRG calculation, SCH Gantt rows |
+| Activity Categories API (via SharedDataLoader) | `activity_categories_flat` | PRG discipline/package filters, SCH columns |
+| Progress Weighting API | — (in-memory config) | PRG — determines labor vs element-count weighting |
 
-## Artefact matching (multi-model projects)
+### Lazy data (loaded on first tab open)
 
-A federated project has multiple sub-models (e.g. structure, MEP, architecture). The Artefact API returns one `svf2-object-id-map` per model per translation version. Picking the wrong one = zero colour matches = grey model.
+| Trigger | DuckDB table | Size | Purpose |
+|---------|-------------|------|---------|
+| User opens SCH tab | `activity_progress` | 50–200 MB | Per-activity progress snapshots by date |
+| User opens QLT tab | `issues`, `issue_categories` | API-driven | Quality issues from REST API (1000/page, paginated) |
+| User opens CAP tab | `captures_360` | API-driven | 360° capture records (URL, coordinates, timestamp) |
 
-**Matching logic (two levels):**
-1. Filter artefacts where `models[].modelId` matches the activated federated model.
-2. Narrow by `models[].modelVersionId` to pick the artefact from the correct translation run.
-3. Fallback: if no version match, take the first model-matched artefact.
-
-## SharedDataLoader
-
-Activities and categories are needed by both Progress and Schedule services. `SharedDataLoader` fetches them once and shares the result. It also stores schedule metadata (schedule name, revision dates) for the dashboard bar.
+The `activity_progress` parquet is prefetched into OPFS in the background on page load so the first SCH tab open reads from cache instead of downloading.
 
 ## Loading order
 
 ```
-1. DashboardProjectService constructor
-   ├─ _initializeModel()        → resolves federated model URN (async, fire-and-forget)
-   ├─ DashboardFilterService     → ready immediately
-   ├─ SharedDataLoader           → starts fetching activities + categories
-   ├─ DashboardScheduleService   → subscribes to SharedDataLoader
-   └─ DashboardProgressService   → starts Pipeline A + B, subscribes to Schedule filters
-       ├─ Pipeline A: V2 parquets downloaded → DuckDB tables created
-       ├─ Pipeline B: Artefacts downloaded → DuckDB tables created
-       ├─ _queryDataDateRange()  → determines real date range before spinner removal
-       └─ isLoadingFiles = false → spinner removed, first data visible
+DashboardProjectService starts
+  ├─ DashboardFilterService          ready immediately
+  ├─ SharedDataLoader                fetches activities + categories from REST
+  ├─ DashboardScheduleService        subscribes to SharedDataLoader
+  └─ DashboardProgressService        starts Pipeline A + B in parallel
+       ├─ Pipeline A: category_groups + project_progress → DuckDB
+       ├─ Pipeline B: element-status + project-element-list + svf2-object-id-map → DuckDB
+       ├─ _queryDataDateRange()       derives real date range from data
+       └─ isLoadingFiles = false      spinner dismissed, first data visible
 
-2. User opens Quality tab → DashboardQualityService.initialize()
-3. User opens 360 tab     → Dashboard360Service.initialize()
-4. User opens Schedule tab → lazy parquet prefetched from OPFS background cache
+User opens QLT tab → DashboardQualityService.initialize()
+User opens CAP tab → Dashboard360Service.initialize()
+User opens SCH tab → activity_progress loaded from OPFS
 ```
+
+## SharedDataLoader
+
+Activities and categories are shared between PRG and SCH. `SharedDataLoader` fetches them once and passes the result to both services. It also exposes schedule metadata (revision dates, schedule name) for the dashboard bar timestamp.
 
 ## Deep-dive
 
 - DuckDB table schemas: [`docs/dashboard/duckdb-tables/`](../../docs/dashboard/duckdb-tables/)
-- API output mapping: [`docs/dashboard/api/`](../../docs/dashboard/api/)
 - Progress calculation modes: [`docs/dashboard/progress-calculation-modes.md`](../../docs/dashboard/progress-calculation-modes.md)

@@ -1,4 +1,4 @@
-# 3D Viewer and Model
+# VWR — 3D Viewer and Model
 
 How the Forge viewer integrates with dashboard data to colour elements by installation status.
 

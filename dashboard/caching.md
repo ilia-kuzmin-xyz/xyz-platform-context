@@ -1,4 +1,4 @@
-# Caching Strategy
+# CCH — Caching Strategy
 
 How the dashboard avoids re-downloading hundreds of megabytes on every page load.
 

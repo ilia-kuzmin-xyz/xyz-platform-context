@@ -1,4 +1,4 @@
-# Schedule / Gantt Tab
+# SCH — Schedule
 
 Project schedule visualization with activity filtering that propagates to the Progress tab.
 

@@ -22,24 +22,24 @@ The Dashboard Page is an in-browser analytics surface that replaces PowerBI repo
 
 ## Sub-domains (tabs)
 
-| Tab | File | Status | Summary |
-|-----|------|--------|---------|
-| Progress | [progress-tab.md](progress-tab.md) | ✅ Live | Planned vs actual progress, SPI, discipline/package breakdown |
-| Quality | [quality-tab.md](quality-tab.md) | ✅ Live | Issue tracking, category breakdown, cost/time impact |
-| 360 | [360-tab.md](360-tab.md) | ✅ Live | Room-based panoramic captures with date/level filters |
-| Schedule | [schedule-tab.md](schedule-tab.md) | ✅ Live | Gantt chart with activity filtering that propagates to Progress |
-| Reports | — | 📋 Placeholder | Not implemented |
-| Dev | (built-in) | 🛠️ Dev-only | DuckDB table inspector + loading timeline (Ctrl+Shift+D) |
+| Code | Sub-domain | File | Status | Summary |
+|------|-----------|------|--------|---------|
+| **PRG** | Progress Tracking | [progress-tab.md](progress-tab.md) | ✅ Live | Planned vs actual progress, SPI, discipline/package breakdown |
+| **QLT** | Quality Management | [quality-tab.md](quality-tab.md) | ✅ Live | Issue tracking, category breakdown, cost/time impact |
+| **CAP** | 360° Captures | [360-tab.md](360-tab.md) | ✅ Live | Room-based panoramic captures with date/level filters |
+| **SCH** | Schedule | [schedule-tab.md](schedule-tab.md) | ✅ Live | Gantt chart with activity filtering that propagates to PRG |
+| **RPT** | Reports | — | 📋 Planned | Not implemented |
+| **DEV** | Dev Panel | (built-in) | 🛠️ Dev-only | DuckDB table inspector + loading timeline (Ctrl+Shift+D) |
 
 ## Cross-cutting topics
 
-| Topic | File |
-|-------|------|
-| Data pipeline (how data reaches the browser) | [data-pipeline.md](data-pipeline.md) |
-| 3D viewer and element mapping | [viewer-and-model.md](viewer-and-model.md) |
-| Caching strategy (OPFS, service worker, lazy loading) | [caching.md](caching.md) |
-| Known pitfalls and gotchas | [pitfalls.md](pitfalls.md) |
-| Planned work and tech debt | [roadmap.md](roadmap.md) |
+| Code | Topic | File |
+|------|-------|------|
+| **DAT** | Data Pipeline — how parquets and API data reach DuckDB | [data-pipeline.md](data-pipeline.md) |
+| **VWR** | 3D Viewer — element ID mapping and status colouring | [viewer-and-model.md](viewer-and-model.md) |
+| **CCH** | Caching — OPFS cache, service worker, lazy loading | [caching.md](caching.md) |
+| — | Known pitfalls and gotchas | [pitfalls.md](pitfalls.md) |
+| — | Roadmap and tech debt | [roadmap.md](roadmap.md) |
 
 ## Architecture at a glance
 
