@@ -36,7 +36,9 @@ User message
 | `app/pages/CanvasPage/components/ArtifactPanel.tsx` | Sandpack wrapper with hydration mount gate |
 | `app/pages/CanvasPage/components/SessionsPanel.tsx` | Session list overlay (project-scoped, shown on empty canvas) |
 | `app/services/canvasSessionService/canvas-session-api-service.ts` | Files API: list / load / save sessions |
-| `app/services/canvasSessionService/canvas-session.types.ts` | `SessionFile`, `PersistedDashboard`, `PersistedAskResult` |
+| `app/services/canvasSessionService/canvas-hydration-api-service.ts` | Files API: per-domain hydration persistence (`canvas-hydration-*`) |
+| `app/services/canvasSessionService/canvas-session.types.ts` | `SessionFile`, `PersistedDashboard`, `PersistedAskResult`, `HydrationFileRecord` |
+| `app/pages/CanvasPage/components/HydrationInspector.tsx` | Ctrl+Shift+H read-only hydration provenance overlay |
 
 ## Routes
 
@@ -53,8 +55,8 @@ Defined in `src/main/webapp/app/routes.tsx` lines 251–270.
 |------|--------|
 | [session-persistence-DONE.md](planning/session-persistence-DONE.md) | ✅ IMPLEMENTED |
 | [canvas-routing-DONE.md](planning/canvas-routing-DONE.md) | ✅ IMPLEMENTED |
-| [hydration-persistence-e2e.md](planning/hydration-persistence-e2e.md) | 🔵 CONCEPT — simple e2e scenario (v1 scope) |
-| [hydration-data-persistence.md](planning/hydration-data-persistence.md) | 🔵 CONCEPT — full analysis behind the e2e doc |
+| [hydration-persistence-e2e.md](planning/hydration-persistence-e2e.md) | ✅ IMPLEMENTED (v1) — e2e scenario + code touchpoints |
+| [hydration-data-persistence.md](planning/hydration-data-persistence.md) | 🔵 reference — full analysis + deferred v2 ideas |
 | [flat-dashboard-list-ux.md](planning/flat-dashboard-list-ux.md) | 🔵 CONCEPT — needs review |
 | [sketch-to-dashboard.md](planning/sketch-to-dashboard.md) | 🔵 CONCEPT |
 | [block-selection-editing.md](planning/block-selection-editing.md) | 🔵 CONCEPT |

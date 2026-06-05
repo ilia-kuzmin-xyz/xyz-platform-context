@@ -1,7 +1,7 @@
 # Hydration Persistence — E2E Scenario (v1)
 
-> **Status: CONCEPT — needs review.** Companion to [hydration-data-persistence.md](hydration-data-persistence.md)
-> (which holds the full analysis). This file is the simple version: what we build, nothing else.
+> **Status: ✅ IMPLEMENTED (v1, 2026-06-05).** Companion to [hydration-data-persistence.md](hydration-data-persistence.md)
+> (which holds the full analysis and the deferred v2 ideas). This file is the simple version: what we built, nothing else.
 
 ## Idea in one sentence
 
@@ -108,10 +108,22 @@ A failed download = treated as missing (one `catch`, not a retry subsystem).
 - No compression, no size caps, no hashing
 - No retry/fallback machinery — stale or missing file simply means today's pipeline path runs
 
-## Code touchpoints
+## Code touchpoints (as implemented)
 
 | File | Change |
 |------|--------|
-| `canvas-hydration-api-service.ts` (new) | list / load / save — clone of session service with new prefix |
-| `useCanvas.ts` | save hook on `artifact_data_complete`; storage branch in `openSession`; provenance state |
-| `HydrationInspector.tsx` (new) | read-only overlay + hotkey |
+| `services/canvasSessionService/canvas-hydration-api-service.ts` (new) | list / load / save — clone of session service, `canvas-hydration-{projectId}-{domain}.json` |
+| `services/canvasSessionService/canvas-session.types.ts` | `HydrationFileRecord` (newest file per domain + append-only accumulation totals) |
+| `services/serviceProvider.ts` | `CanvasHydration` getter |
+| `pages/CanvasPage/useCanvas.ts` | storage tier inside `runHydrate` (memory cache → storage → pipeline); save in both `artifact_data_partial` paths; `hydrationProvenance` state; `HYDRATION_STORAGE_TTL_MS = 30 min`; clear on project switch |
+| `pages/CanvasPage/components/HydrationInspector.tsx` (new) | read-only overlay |
+| `pages/CanvasPage/CanvasPage.tsx` | `Ctrl+Shift+H` toggle + render |
+
+Implementation notes:
+- The storage tier lives inside `runHydrate` — the single funnel all hydration already flows
+  through (`openSession`→`rehydrateSession`, `viewDashboard`). Storage payloads exit through the
+  same `onPartial` handler as SSE events, so the mount gate never knows the source (rule 5).
+- Saves fire per `artifact_data_partial` (each domain is delivered exactly once per stream),
+  guarded by `_hydrated:true` + equality-skip; a storage load seeds the equality signature so
+  freshly-loaded data is never re-saved.
+- The save hook covers BOTH live turns (`sendMessage`) and hydrate streams (`runHydrate`).
