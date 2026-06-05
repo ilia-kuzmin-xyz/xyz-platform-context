@@ -100,18 +100,128 @@ Or alternatively, one shared snapshot per project (not per session — data belo
 
 ---
 
-## Recommendation (needs human review)
+## Recommendation (refined 2026-06-05 — needs human review)
 
-**Likely best: Option A (per-project snapshot) + Option C (skeleton while refreshing)**
+**Rolling per-project hydration pack** — Option A with merge-on-write semantics. The pack is never speculatively created; it is a byproduct of normal usage: every completed hydration updates it and it becomes the default data source on open.
 
-1. Save a `canvas-hydration-{projectId}.json` snapshot on every hydration completion (overwrite-append, newest-wins). Include a `savedAt` timestamp per domain.
-2. On session open: download snapshot → populate immediately → show "Data from X hours ago" badge.
-3. In background: fire `mode:'hydrate'` for domains older than a configurable threshold (e.g. 30 min for issues, 6 h for rooms/parquet).
-4. When background refresh completes: replace data + remove the "stale" badge.
+### Pack shape — one file PER DOMAIN (decided over single-file, see below)
 
-**But this needs human review on:**
-- Acceptable staleness threshold per domain
-- Storage growth: how many snapshot files will accumulate? Need a cleanup strategy.
+```
+canvas-hydration-{projectId}-issues.json
+canvas-hydration-{projectId}-progress.json
+canvas-hydration-{projectId}-rooms.json
+canvas-hydration-{projectId}-photos.json
+```
+
+```json
+// each file (newest insertedOn wins, like sessions)
+{
+  "version": 1,
+  "projectId": "...",
+  "domain": "issues",
+  "savedAt": 1730000000000,
+  "payload": { ... }
+}
+```
+
+**Why per-domain and not one combined pack file:**
+
+| | One combined file | Per-domain files ✅ |
+|---|---|---|
+| Open | 1 GET | 1 list + N parallel GETs (~same wall time) |
+| Write cost | full ~2 MB pack re-uploaded even if one domain changed | only the changed domain (50–500 KB) |
+| Concurrency | read-merge-write race: two tabs/users merging different domains clobber each other (newest-wins) | no cross-domain clobbering; within a domain last-writer-wins is safe (both are valid fresh fetches) |
+| Merge logic | explicit in-memory merge step required | implicit in file layout — no merge code |
+
+### Format: JSON, not parquet (decided 2026-06-05)
+
+Compared against the dashboard's parquet+DuckDB experience. Parquet earns its keep there because: (a) data is large (50–200 MB `activity_progress`), (b) the consumer is a SQL engine (DuckDB-WASM) that queries without materializing, (c) tables are flat/columnar, (d) a backend pipeline produces the files. **None of these hold for canvas hydration**: payloads are 50–500 KB nested JSON, fully materialized into `props.data` for the Sandpack artifact, and the writer would be the browser persisting what SSE already delivered as JSON. Round-tripping through parquet just reconstructs the same JSON with extra machinery; gzip on JSON captures most of the compression win at this size.
+
+What we DO take from the dashboard: OPFS-style cache pattern, hash-based invalidation (`artefactHash` ≙ our hash-compare-before-save), lazy per-need loading (≙ per-dashboard `domainsRead` gate).
+
+**Flip condition**: if canvas artifacts ever *query* data instead of receiving full `props.data` (DuckDB-WASM on the canvas page, pipeline returning data references — pipeline-v2 territory), switch to parquet — and at that point reuse the dashboard's existing OPFS parquet cache (`/duckdb-cache/{projectId}/`) for shared domains instead of persisting a second copy.
+
+**Size invariant — "millions of entries" can't happen in JSON, but not because of the file format.** A hydration payload must stay *dashboard-renderable*: it travels as one SSE event, gets `JSON.parse`d on the main thread, and is materialized as React props. Millions of rows break that chain long before persistence (SSE event size → parse freeze → memory blowup). The dashboard handles millions of rows by never materializing them — blob → DuckDB → small query results. So:
+- The invariant is enforced **at the hydrator** (aggregate/cap/paginate), not at the storage layer. ⚠️ **No list-delivering domain is capped today**: `issues` full list (`hydrators.py:132`), `schedule` ALL activities via the revision endpoint (`hydrators.py:208-326` — a 20k-activity project ships 20k rows), `media.photos` fully paginated (`hydrators.py:334`). Only `progress` is bounded, by per-date aggregation. Large projects can already produce multi-MB payloads — if that becomes a real problem, bound it in the hydrator.
+- ⚠️ Stale docstring: `hydrators.py:12-15` claims "Schedule is intentionally count-only … never lists rows" — the hydrator below it delivers the full list. The "hard-capped at 1000 rows" there describes the activity-level *parquet* endpoint the pipeline deliberately does NOT use (it uses the schedule-revision endpoint to get everything). Do not cite that docstring; fix it.
+- Persistence defends itself with a **size guard**: if a domain payload serializes above a threshold (e.g. 5 MB), skip saving that domain (fall back to pipeline hydration on open) and log it — never silently persist something that will freeze the reader.
+
+### Write path
+
+1. Hydration completes (`artifact_data_complete`) with domains D₁…Dₙ
+2. For each domain: hash-compare payload vs last-loaded version; **save only changed domains** (one file each)
+3. Untouched domains keep their existing files + savedAt — coverage converges toward complete as the user works
+
+### Read path
+
+1. On session open: list `canvas-hydration-{projectId}-*` → GET newest of each in parallel
+2. **BARRIER — assemble before render.** Per-domain files are a storage layout, NOT a rendering trigger. Parallel GETs are awaited (`Promise.all`) and assembled into one `ProjectData` object; only then can any dashboard mount. The existing Sandpack mount-gate rule (mount ONCE with final data) is unchanged.
+3. **Gate is per-dashboard, not "all files".** Each dashboard mounts when `domainsRead ⊆ assembled domains` — it does not wait for domains it never reads.
+4. **Partial failure does not open the gate.** A failed GET or missing domain file → that dashboard's gate stays closed; fire `mode:'hydrate'` for just the missing domains (today's path). Never mount with holes — that is the profile-stub false-satisfaction pitfall in a new costume.
+5. Show per-dashboard "Data from X ago" badge if any of its domains is older than threshold
+6. Background `mode:'hydrate'` for stale domains → swap in → re-save changed domain files
+7. Ask answers: persisted results load from the session file as today; any re-execution waits behind the same assembled-data barrier
+
+### End-to-end experience (walkthrough, 2026-06-05)
+
+**Visit 1 — cold (no hydration files yet)**
+1. Open canvas → the `GET /files` call the SessionsPanel already makes also reveals hydration files (none yet) — no extra request
+2. Generate dashboard → MCP path exactly as today → render
+3. On `artifact_data_complete`: save each domain file — with three disciplines:
+   - **Only `_hydrated: true` payloads** — never save profile stubs (pitfall #1 again: a stub in storage would poison every future warm open)
+   - **Hash-compare before POST** — append-only makes needless saves permanent
+   - **Fire-and-forget AFTER render** — a failed save must never degrade the dashboard
+
+**Visit 2 — warm**
+1. Same `GET /files` → newest record per domain (`insertedOn` = authoritative savedAt, free from the list — don't trust the JSON body's own timestamp)
+2. Open session → **binary freshness decision per domain**: fresher than threshold → download (2 hops: file detail → signed blob URL, via `Storage.get` like sessions) → barrier → instant mount, source = `storage`. Staler → run the pipeline exactly as today (the slow path IS the current path — no new code).
+3. ~~Background refresh + swap + stale badge~~ — **deferred to v2** (see scope cut below)
+
+**Steady state**: new dashboards always run the pipeline anyway, so every generation refreshes storage through the equality-guarded save — the storage copy converges to "as fresh as the project's last activity" with no scheduled job. Ask answers piggyback on the same path.
+
+### V1 scope — deliberate anti-over-engineering cut (2026-06-05)
+
+V1 is: **a ~40-line file service (clone of `canvas-session-api-service.ts` with a `canvas-hydration-` prefix) + a save hook on `artifact_data_complete` + a load-before-hydrate branch in `openSession` + a read-only debug table.**
+
+| Cut from v1 | Why | Revisit when |
+|---|---|---|
+| Background refresh + mid-session swap + stale badge | Binary fresh/stale at open covers the core value; swap choreography is the most complex part of the design | v1 shows the staleness window is annoying in practice |
+| Per-domain staleness thresholds | One global constant (~30 min); per-domain tuning is speculative | observed need |
+| Actual hashing | String equality vs last-saved serialization — 5 lines | never, probably |
+| gzip/base64 packing | ~2 MB JSON over HTTP is fine | payloads measurably slow |
+| Inspector action buttons (refresh/force-save) | Read-only table delivers the visibility | someone asks |
+| `xyzDisplayName` rich metadata | Optional one-liner, nice-to-have | free to add anytime |
+
+### Hydration Inspector (hotkey TBD — any free combo)
+
+Read-only debug overlay alongside the existing dev overlay (`Ctrl+Shift+D`). Avoid plain `Ctrl+H` (browser history); otherwise the binding is a trivial detail.
+
+One row per domain: status (not loaded / loading / hydrated), **source** (`mcp` live vs `storage` + file age), size, last save result (`saved` / `skipped_unchanged` / `oversize_skipped` / `failed`). Footer: total hydration file count + bytes in the project (append-only orphan accumulation made visible — this tells us empirically whether equality-skip suffices or a cleanup story is needed when DELETE lands).
+
+Fed by a `hydrationProvenance` map in `useCanvas`:
+```ts
+{ domain, source: 'mcp' | 'storage',
+  hydratedAt,
+  storageMeta?: { fileReferenceId, insertedOn },
+  saveStatus: 'saved' | 'skipped_unchanged' | 'oversize_skipped' | 'failed' | null,
+  refreshing: boolean }
+```
+
+**Free metadata channels from the files API** (verified against `canvas-session-api-service.ts`):
+- `insertedOn` on the list record — savedAt without downloading the file
+- `xyzDisplayName` — set to e.g. `"issues • 1420 rows • 412 KB"` so the inspector shows row counts/sizes for files it never downloaded (same trick sessions use for the session name)
+
+### Two remaining risks
+
+**1. Write amplification (append-only storage).** No DELETE on files API — every domain save creates a new file. Per-domain layout already shrinks this (only changed domains, 50–500 KB each, not the 2 MB pack). Further mitigations (pick at review):
+- Hash-compare before save; skip if unchanged (rehydrating an unchanged project is the common case)
+- gzip+base64 the payload inside the file (~5–10× smaller for repetitive JSON) — benchmark whether the files API already compresses transfers first
+
+**2. Pack assumes domain payloads are dashboard-agnostic.** Persisting per-domain is only correct if "issues data" is identical regardless of which dashboard requested it. True today (hydrators fetch per-domain, project-wide). **Invariant to pin**: if scoped hydration is ever added (e.g. issues filtered to a date range), scoped fetches must NOT write to hydration files (or the file name must include the scope).
+
+**Still needs human review on:**
+- Acceptable staleness threshold per domain (issues ~30 min? rooms/parquet ~6–24 h?)
+- Write-amplification mitigation choice (hash-skip vs debounce vs both)
 - Security: is it OK to store raw issues/progress data in project files?
 - UX for the "stale data" indicator — how prominent? Dismiss-able?
 
@@ -121,6 +231,7 @@ Or alternatively, one shared snapshot per project (not per session — data belo
 
 - [ ] Domain-by-domain staleness thresholds agreed
 - [ ] Security/data residency confirmed
-- [ ] Storage growth strategy agreed (cleanup on DELETE endpoint availability? periodic?)
+- [ ] Write-amplification mitigation chosen (hash-skip / debounce / compression)
 - [ ] "Stale data" UX reviewed
-- [ ] Confirmed snapshot size is acceptable (benchmark a real project)
+- [ ] Confirmed pack size is acceptable (benchmark a real project; check if files API compresses transfers)
+- [ ] "Domain payloads are dashboard-agnostic" invariant documented in pipeline docs

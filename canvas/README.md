@@ -53,7 +53,8 @@ Defined in `src/main/webapp/app/routes.tsx` lines 251–270.
 |------|--------|
 | [session-persistence-DONE.md](planning/session-persistence-DONE.md) | ✅ IMPLEMENTED |
 | [canvas-routing-DONE.md](planning/canvas-routing-DONE.md) | ✅ IMPLEMENTED |
-| [hydration-data-persistence.md](planning/hydration-data-persistence.md) | 🔵 CONCEPT — needs review |
+| [hydration-persistence-e2e.md](planning/hydration-persistence-e2e.md) | 🔵 CONCEPT — simple e2e scenario (v1 scope) |
+| [hydration-data-persistence.md](planning/hydration-data-persistence.md) | 🔵 CONCEPT — full analysis behind the e2e doc |
 | [flat-dashboard-list-ux.md](planning/flat-dashboard-list-ux.md) | 🔵 CONCEPT — needs review |
 | [sketch-to-dashboard.md](planning/sketch-to-dashboard.md) | 🔵 CONCEPT |
 | [block-selection-editing.md](planning/block-selection-editing.md) | 🔵 CONCEPT |
