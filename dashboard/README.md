@@ -35,9 +35,12 @@ The Dashboard Page is an in-browser analytics surface that replaces PowerBI repo
 
 | Code | Topic | File |
 |------|-------|------|
+| **FLT** | Filter System — central state, propagation chain, per-service filter dimensions | [flt-filter-system.md](flt-filter-system.md) |
 | **DAT** | Data Pipeline — how parquets and API data reach DuckDB | [data-pipeline.md](data-pipeline.md) |
 | **VWR** | 3D Viewer — element ID mapping and status colouring | [viewer-and-model.md](viewer-and-model.md) |
 | **CCH** | Caching — OPFS cache, service worker, lazy loading | [caching.md](caching.md) |
+| — | Project Types — full-progress vs quality-only, what changes | [project-types.md](project-types.md) |
+| — | Startup Journey — from route entry to first data on screen | [startup-journey.md](startup-journey.md) |
 | — | Known pitfalls and gotchas | [pitfalls.md](pitfalls.md) |
 | — | Roadmap and tech debt | [roadmap.md](roadmap.md) |
 
