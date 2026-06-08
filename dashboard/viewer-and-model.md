@@ -132,14 +132,69 @@ element_status (parquet)  →  modelElementId + installationStatus
 
 All elements start as Not Planned (grey). Colours override via theming. The color service skips the full re-colouring pass if the filter change is not color-relevant (avoids a 14M-fragment visibility scan on every selection click).
 
-| Status | Hex |
-|--------|-----|
-| Installed | `#00ea6c` |
-| Installed Early | `#00ae49` |
-| Not Installed / Late | `#fd3d39` |
-| Late Start | `#e08613` |
-| Planned | `#ffde14` |
-| Not Planned | `#808080` |
+| Status | Code | Hex |
+|--------|------|-----|
+| Installed Early | 1 | `#00ae49` |
+| Installed | 2 | `#00ea6c` |
+| Planned | 0 | `#ffde14` |
+| Late Start | 3 | `#e08613` |
+| Late | 4 | `#fd3d39` |
+| Not Planned | NULL | `#808080` |
+
+### Status SQL — `buildInstallationStatusCaseSql`
+
+All status queries (viewer colouring, tooltip label, progress distribution) share one SQL builder: `dashboard-progress/utils/installation-status-sql.ts → buildInstallationStatusCaseSql(refDateExpr, columns)`. It produces a DuckDB CASE expression evaluated "as of" `refDateExpr`:
+
+```sql
+CASE
+  -- Installed Early: installed before the linked activity was due to start.
+  WHEN installationStatus = 'INSTALLED_ACCURATELY'
+       AND checkDate <= refDate
+       AND startDate IS NOT NULL
+       AND checkDate < startDate THEN 1
+
+  -- Installed: installed as of refDate. checkDate IS NULL handled for legacy rows.
+  WHEN installationStatus = 'INSTALLED_ACCURATELY'
+       AND (checkDate IS NULL OR checkDate <= refDate) THEN 2
+
+  -- Late: not installed and activity end date has passed.
+  WHEN endDate < refDate THEN 4
+
+  -- Late Start: not installed and activity has started.
+  WHEN startDate < refDate THEN 3
+
+  -- Planned: not installed but linked to a future activity.
+  WHEN startDate IS NOT NULL OR endDate IS NOT NULL THEN 0
+
+  -- Not Planned: no schedule link — excluded from colouring.
+  ELSE NULL
+END
+```
+
+**Key invariant — do not add `checkDate IS NULL` guards to the Late/Late Start/Planned branches.** The backend stamps `checkDate` on every status write, including a clear to `NOT_SET`, and never nulls it. So a not-installed element is always identified by `installationStatus`, never by an absent `checkDate`. Adding such a guard causes cleared-status elements (stale non-null `checkDate`, `installationStatus = NOT_SET`) to fall to `ELSE NULL` and turn grey instead of Late/Planned. This was the PLT-2741 regression.
+
+**`refDateExpr`** is always `MIN(sliderEndDate, TODAY)` — the refDate cap. This prevents a future slider position from marking elements as Late relative to a future date. The cap is only for status classification; element _visibility_ (displayDate) uses the raw slider end date.
+
+### `checkDate` semantics
+
+`checkDate` (`installationCheckDate` in the DB) is the backend's last-modified audit timestamp for element status, not an "is installed" flag:
+
+- Stamped on every status write, including a clear to `NOT_SET`.
+- Never set to NULL by the backend after it has been set once.
+- Used in the SQL only within the `INSTALLED_ACCURATELY` branches (Installed Early / Installed) to judge when the element was physically installed relative to the activity schedule.
+- Legacy rows (status set before the field existed) may have `checkDate IS NULL`; branch 2 above handles this with `OR checkDate IS NULL`.
+
+### `displayDate` — when elements become visible
+
+Each element has a computed `displayDate` controlling when it first appears as the slider advances:
+
+```
+displayDate =
+  INSTALLED_ACCURATELY AND checkDate IS NOT NULL → LEAST(checkDate, startDate)
+  otherwise                                      → startDate
+```
+
+An element is included in the query **only when `displayDate <= sliderEndDate`** (using the raw end date, not refDate). This produces the gradual reveal: planned elements appear yellow at their `startDate`; early-installed elements appear as soon as their `checkDate` is reached. Elements with no schedule (both dates NULL) are excluded by the status CASE returning NULL and are never coloured.
 
 ---
 

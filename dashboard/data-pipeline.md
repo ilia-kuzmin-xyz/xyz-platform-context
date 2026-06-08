@@ -78,6 +78,34 @@ User opens SCH tab → activity_progress loaded from OPFS
 
 Activities and categories are shared between PRG and SCH. `SharedDataLoader` fetches them once and passes the result to both services. It also exposes schedule metadata (revision dates, schedule name) for the dashboard bar timestamp.
 
+## Delta sync — editor status changes into DuckDB
+
+When the user changes an element's installation status in the editor (viewer sidebar), the change is persisted to the backend and also synced into the in-memory DuckDB `element_status` table so the dashboard colours update immediately without a page reload.
+
+**Flow:**
+```
+User sets status in editor
+  → InstallationStatusServiceV2.setElementStatus()
+      → POST /api/.../element-status (backend persisted)
+      → ArtefactLoader.insertDeltaStatusRecords(records)
+           → projects only { modelElementId, installationStatus,
+                             installationCheckDate, lastModifiedOn }
+           → duckdb.insertJSONByName('element_status', rows)
+      → InstallationStatusServiceV2 updates installationStatuses map
+      → recalculateElementStatuses(changedIds)
+      → DashboardProgressService.refreshColours()
+```
+
+**Why only 4 columns in the insert:** the parquet-loaded `element_status` table has exactly 4 columns (`modelElementId`, `installationStatus`, `installationCheckDate`, `lastModifiedOn`). Passing extra fields (e.g. `lastModifiedBy`) causes a DuckDB schema error. `ArtefactLoader.insertDeltaStatusRecords` explicitly projects to these 4. Do not add fields without also updating the parquet schema.
+
+**`InstallationStatusServiceV2` dual-map design:**
+
+The service maintains two maps:
+- `installationStatuses` — raw `{installationStatus, installationCheckDate}` as returned by the API. Source of truth.
+- `elementStatuses` — computed schedule-aware UI status (Installed Early, Late, etc.), derived from `installationStatuses` + linked activity dates.
+
+`getInstallationStatus()` reads from `installationStatuses` directly (not back-derived from the UI status). `calculateElementStatus()` always reads from `installationStatuses` and writes to `elementStatuses`, keeping the two maps in sync. This means `installationCheckDate` is always available for Installed Early classification — the previous design lost it by passing only `installationStatus` to the compute function.
+
 ## Deep-dive
 
 - DuckDB table schemas: [`docs/dashboard/duckdb-tables/`](../../docs/dashboard/duckdb-tables/)
