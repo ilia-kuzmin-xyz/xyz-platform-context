@@ -10,6 +10,7 @@ AI chat interface at `/canvas` and `/canvas/:mongoProjectId`. Users ask natural-
 | ART | Artifact & Hydration | [artifact-and-hydration.md](artifact-and-hydration.md) |
 | ASK | Ask Mode | [ask-mode.md](ask-mode.md) |
 | PDC | Project Data Cache (frontend) | [project-data-cache.md](project-data-cache.md) |
+| UX | Layout & Interaction Map | [canvas-ux.md](canvas-ux.md) |
 | — | Pitfalls | [pitfalls.md](pitfalls.md) |
 
 ## Architecture at a glance
@@ -57,6 +58,7 @@ Defined in `src/main/webapp/app/routes.tsx` lines 251–270.
 | [canvas-routing-DONE.md](planning/canvas-routing-DONE.md) | ✅ IMPLEMENTED |
 | [hydration-persistence-e2e.md](planning/hydration-persistence-e2e.md) | ✅ IMPLEMENTED (v1) — e2e scenario + code touchpoints |
 | [hydration-data-persistence.md](planning/hydration-data-persistence.md) | 🔵 reference — full analysis + deferred v2 ideas |
+| [canvas-topbar-tabs.md](planning/canvas-topbar-tabs.md) | 🔵 PLAN — local top bar + cross-session dashboard tabs (tasks #6–13) |
 | [flat-dashboard-list-ux.md](planning/flat-dashboard-list-ux.md) | 🔵 CONCEPT — needs review |
 | [sketch-to-dashboard.md](planning/sketch-to-dashboard.md) | 🔵 CONCEPT |
 | [block-selection-editing.md](planning/block-selection-editing.md) | 🔵 CONCEPT |
