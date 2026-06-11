@@ -1,132 +1,105 @@
-# PLT-2731 — Improve Dashboard Issues Loading Performance
+# PLT-2731 — Improve Issues Loading Performance (Dashboard + Viewer)
 
 **Jira:** https://xyzreality.atlassian.net/browse/PLT-2731
-**Area:** QLT — DashboardQualityService, issue fetching pipeline
-**Confidence:** 6/10 for implementation — the optimisations are clear, but the right approach must be validated by measuring real timings on ELN03. Human contribution required for measurement phase.
+**Area:** QLT — `dashboard-quality-service.ts` (Dashboard) + `issue-service.ts` (ViewerPage)
+**Confidence:** 7/10 for the client-side phase (clear, testable in code). The BE phase is a hard dependency for the structural ceiling — see the separate BE task.
+
+> **Revision note (re-contemplated):** The original draft proposed "parallel page fetching" (Option B) and "fire allLoaded on page 1" (Option C). Reading the actual code invalidated both as written. This revision corrects the plan and splits it into a client-only Phase 1 (ship now) and a BE-dependent Phase 2.
 
 ---
 
 ## Problem
 
-Loading ~2000 issues on ELN03 (production) takes 10+ seconds. Nothing renders until all issues are fully loaded and inserted into DuckDB. The user sees a spinner for the entire duration.
+Loading ~2000 issues on ELN03 takes 10+ seconds. Nothing renders until every page is fetched **and** inserted into DuckDB. The user stares at a blank spinner.
+
+Two domains load issues independently:
+
+| Domain | Service | Pipeline | Has incremental sync? | DuckDB? |
+|--------|---------|----------|----------------------|---------|
+| **Dashboard** (QLT tab) | `dashboard-quality-service.ts` | sequential cursor fetch (1000/page) → 20× batched DuckDB INSERT → `_allLoaded$` → first render | ❌ no | ✅ yes |
+| **ViewerPage** | `services/issue/issue-service.ts` | `fetchAllPaginatedWithIndexId` (500/page) → transform in memory → render pins | ✅ yes (`lastSyncDateTime`) | ❌ no |
 
 ---
 
-## Root cause
+## Three findings that reshape the solution
 
-**File:** `services/dashboard-quality/dashboard-quality-service.ts`
+### 1. The endpoint is cursor-based — parallel fetch is NOT possible client-side
+`GET /api/v2/projects/{id}/issues` paginates by `lastFetchedIndexId` (a cursor from the previous page's response). Page N's request **cannot be built without page N-1's response**. The original plan's `Promise.all(... fetchPage(i+2))` is unimplementable against this API. True parallelism requires a BE change (offset/page pagination, a higher max page size, or a bulk endpoint). → **Phase 2 / BE task.**
 
-Current pipeline is fully sequential and all-or-nothing:
+### 2. `recordCount` gives the true total on page 1 — this kills the "misleading count" concern
+`IIssueListResponse` returns `{ records, recordCount, lastFetchedIndexId }`. `recordCount` is the **total** issue count, available from the very first response. So we can decouple two numbers that the original plan conflated:
 
-```
-Page 1 (1000 issues) → wait → Page 2 (1000 issues) → wait
-  → loadIssuesToDuckDB(all 2000) → _allLoaded$.next(true) → first render
-```
+- **Total count** (header metric, "2000 issues") → from `recordCount`, correct from page 1.
+- **Loaded count** (how many rows are in DuckDB / memory right now) → grows as pages arrive.
 
-Three compounding bottlenecks:
+This is the answer to the worry about "showing 12 issues when there are 2000": we never display 12 as the total. We display **2000 (loading 1000…)** and only the *list* fills progressively. *(Verify once on ELN03 that `recordCount` is the project total, not the page length — cheap to confirm in the Network tab.)*
 
-| # | Bottleneck | Detail |
-|---|-----------|--------|
-| 1 | Sequential fetching | Pages fetched one at a time in a `while` loop (line 187). For 2000 issues = 2 sequential API calls. For 10k issues = 10 sequential calls. |
-| 2 | All-or-nothing rendering | `_allLoaded$.next(true)` fires only after ALL pages AND all DuckDB inserts complete (line 162). Nothing renders before this. |
-| 3 | Full metadata per issue | 37+ fields returned per issue (fileReferences, activityCategories, coordinates, financials). Some of these may not be needed for the initial list render. |
-
-**Endpoint:** `GET /api/v2/projects/{projectId}/issues?size=1000&lastFetchedIndexId=...`
-**Batch insert:** 100 issues per DuckDB INSERT (line 220). For 2000 issues = 20 INSERTs.
+### 3. `allLoaded$` is the render gate for viewer pinpoints — do NOT fire it early
+`use-pinpoints-initial-render.ts:49` renders pins for **all** issues, gated on `qualityService.allLoaded`. If we flip `_allLoaded$` to true after page 1 (original Option C), the viewer would paint a partial, spatially-misleading set of pins. **Pins and aggregates must wait for the full set; only the scrollable issue list may render progressively.** This is the crux of the user's concern and the reason naive progressive rendering is wrong.
 
 ---
 
-## Investigation plan (human contribution required)
+## Recommended solution
 
-Before implementing, we need to measure where time is actually spent. This requires connecting to ELN03 on production.
+### Phase 1 — Client-side only (ship now, no BE)
 
-### Step 1 — Baseline measurement
+Highest-confidence wins that need no BE change. Implement in `dashboard-quality-service.ts` (the slow path).
 
-**What to measure:**
-- Time for each API page call (Network tab: TTFB + transfer)
-- Time for DuckDB batch inserts (add `performance.now()` around `_loadIssuesToDuckDB`)
-- Time from `initialize()` call to first render
+**1a. Decouple total count from loaded count.**
+Capture `recordCount` from the first page into a new `_totalCount$`. Surface it through `use-quality-service` so the header and list show the true total immediately. The spinner becomes a determinate **"Loading 1000 / 2000 issues"** instead of a blank wait. Pure UX honesty — no behavioural risk.
 
-**How to connect to ELN03 production:**
-- Open the ELN03 project dashboard on production in Chrome DevTools
-- Network tab → filter by `/issues` → note timing for each page request
-- Add temporary timing logs to `dashboard-quality-service.ts` locally and deploy to staging with ELN03 data
+**1b. Optimise DuckDB ingestion.**
+Today: 20 sequential `INSERT` statements, each a string-built 100-row batch (line 220) — SQL parsing dominates. Replace with a single bulk load via DuckDB-WASM's JSON registration (`registerFileBuffer` + `INSERT INTO issues SELECT … FROM read_json_auto(...)`) or one multi-row INSERT. Expected to collapse the insert phase from ~20 round-trips to ~1. Measure first (1c) to confirm inserts are a real cost.
 
-**What we'll learn:**
-- Is the bottleneck in API network time? (→ parallelise fetching)
-- Is the bottleneck in DuckDB inserts? (→ optimise batch size or schema)
-- Is the bottleneck in the all-or-nothing wait? (→ progressive rendering)
+**1c. Add timing instrumentation.**
+Wrap `_fetchAllIssues` and `_loadIssuesToDuckDB` in `performance.now()` markers behind the existing logger. This is the "human contribution / measurement" step — it tells us how much of the 10s is network vs. DuckDB and proves the Phase-1 wins. Keep it; it also powers the BE task's before/after.
 
-### Step 2 — Scenario comparison
+**1d. Progressive LIST rendering — list only, with hard guards.**
+Add a separate `_firstPageLoaded$` signal (do **not** touch `_allLoaded$`). On first page: insert page 1 → emit the list so the table is interactive in ~1–2s. Keep loading remaining pages in the background, re-querying the list as they land.
+**Guards (these are the whole point):**
+- `_allLoaded$` stays false until every page is in DuckDB → **viewer pins and 360 pins keep waiting** (no partial-pin problem).
+- Overview/aggregate tiles (open count, cost, category summary, trend) show a "calculating…" state until `_allLoaded$`, because they are wrong over a partial set. Do **not** show partial aggregates.
+- The list shows the determinate progress indicator from 1a so a partial list never reads as complete.
 
-Once we can connect, measure these scenarios against each other:
+**1e. (Both domains) bump page size if the BE max allows.**
+Dashboard uses 1000/page, Viewer uses 500/page. If the BE accepts a larger `size`, raising it cuts sequential round-trips (2000 issues: 2 calls → 1). This is a one-line client change but **bounded by the BE's max page size** — confirm the cap (belongs to the BE task). Low effort, real win if allowed.
 
-| Scenario | Approach | Expected win |
-|---------|---------|-------------|
-| A (baseline) | Current sequential, all-or-nothing | ~10s |
-| B | Parallel page fetching (all pages in parallel after page 1 count) | Depends on API rate limit |
-| C | Progressive: show page 1 immediately, load rest in background | Page 1 visible in ~1-2s |
-| D | Reduce fields (if API supports `fields` param) | Smaller payload, faster transfer |
-| E | Larger page size (2000/page instead of 1000) | Fewer round-trips |
+**1f. (ViewerPage) leave pins all-or-nothing; lean on existing incremental sync.**
+`issue-service.ts` already renders all pins after full load and already does `lastSyncDateTime` incremental sync, so repeat opens are cheap. Do **not** add progressive pins here. Its only first-load levers are page size (1e) and field trimming (Phase 2). Optionally adopt the dashboard's `recordCount`-driven progress indicator for parity.
 
-### Step 3 — Implement the winning combination
+### Phase 2 — Backend (hard dependency for the structural ceiling)
 
-Most likely: B + C together (parallel + progressive) will give the biggest perceived improvement regardless of where the bottleneck is.
+Phase 1 makes the page *feel* fast (list in ~1–2s) and trims DuckDB time, but the **fetch wall-clock** is still bounded by sequential cursor paging over a fat 37-field payload. Beating that needs BE. See **`PLT-2731-BE-issues-loading.md`**:
 
----
-
-## Proposed implementation (pending measurement)
-
-### Option C — Progressive rendering (highest perceived performance gain)
-
-Emit page 1 results immediately so users see issues while the rest load:
-
-```
-_fetchPage(1) → loadIssuesToDuckDB(page1) → _allLoaded$.next(true) [PARTIAL]
-                                           → _queryAllData() → first render visible
-then in background:
-_fetchPage(2...N) → append to DuckDB → re-query
-```
-
-This requires changing `_allLoaded$` semantics (or adding a separate `_firstPageLoaded$` signal) so the filter subscriptions can start without waiting for all pages.
-
-### Option B — Parallel page fetching
-
-If page 1 returns a total count header, compute total pages and fire all requests simultaneously:
-
-```javascript
-const firstPage = await fetchPage(1)           // get count
-const totalPages = Math.ceil(total / 1000)
-const remaining = await Promise.all(
-  Array.from({ length: totalPages - 1 }, (_, i) => fetchPage(i + 2))
-)
-```
-
-Risk: if the API has rate limiting, parallel requests may be throttled. Measure on ELN03 first.
-
-### Option D — Reduce metadata
-
-If the API supports a `fields` query parameter, request only the fields needed for the issue list:
-`issueId, title, issueStatus, issueSeverityCategoryName, assigneeName, issueRaisedOn, cost, modelElementId, activityCategories`
-
-File references (`fullDownloadUrl`, `smallImageDownloadUrl`) only need to load when a user opens the detail panel. This could be a separate lazy fetch.
+- Parallelisable pagination (offset/page, or a documented higher max `size`, or a bulk/streaming endpoint).
+- A `fields` projection so the list fetch can drop `fileReferences` (URLs, thumbnails) and other detail-only fields, lazy-loaded when the detail panel opens.
+- Confirm/raise the max page `size`.
 
 ---
 
 ## Acceptance criteria
 
-- [ ] First visible issues render within 2 seconds for ELN03 (2000 issues)
-- [ ] Total load time for all 2000 issues is significantly reduced (target: under 5s)
-- [ ] Loading spinner has a progress indicator ("Loading 1000 / 2000 issues") rather than a blank spinner
-- [ ] Filtering and search work correctly during background loading (gracefully handle partial data)
-- [ ] No regression on small projects (< 100 issues)
+- [ ] Dashboard issue **list** is interactive within ~2s for ELN03 (2000 issues).
+- [ ] Header/overview shows the **true total** (`recordCount`) from the first page; spinner is determinate ("Loading X / Y").
+- [ ] **Viewer pins and aggregate tiles never render over a partial set** — they wait for `_allLoaded$` (no misleading pinpoint count, no wrong cost/open totals).
+- [ ] DuckDB ingestion time measurably reduced (single bulk load vs. 20 INSERTs).
+- [ ] Filtering/search behave correctly during background loading (operate on loaded rows; re-run as pages land).
+- [ ] No regression on small projects (<100 issues) or in ViewerPage pins.
+- [ ] Timing instrumentation present to compare baseline vs. Phase 1 vs. Phase 2.
 
 ---
 
-## Files to change (after investigation)
+## Files to change (Phase 1)
 
 | File | Change |
 |------|--------|
-| `services/dashboard-quality/dashboard-quality-service.ts` | Parallelise fetching, add progressive emit |
-| `quality-panel/hooks/use-quality-service.tsx` | Surface partial-load state for progress indicator |
-| `quality-panel/components/issue-table/issue-table.tsx` | Show progress text during partial load |
+| `services/dashboard-quality/dashboard-quality-service.ts` | capture `recordCount`→`_totalCount$`; add `_firstPageLoaded$`; emit list after page 1; keep `_allLoaded$` gated on full load; bulk DuckDB load; timing markers |
+| `quality-panel/hooks/use-quality-service.tsx` | surface `totalCount` + partial-load state |
+| `quality-panel/components/issue-table/issue-table.tsx` | determinate "Loading X / Y" indicator; list renders on partial data |
+| overview/aggregate tiles | "calculating…" state until `allLoaded` |
+| `services/issue/issue-service.ts` (optional) | page-size bump (1e), parity progress indicator |
+
+## Open questions (cheap to resolve)
+- Confirm `recordCount` = project total, not page length (Network tab, one request).
+- Confirm BE max `size` (drives 1e) — also in the BE task.
+- Measure 1c before committing to 1b/1d ordering.
