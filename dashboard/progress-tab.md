@@ -84,3 +84,12 @@ Projects with `progressProject = false` have no PRG tab. The PRG service is neve
 ## Key service
 
 `DashboardProgressService` in `services/dashboard-progress/`. Owns `ArtefactLoader` (Pipeline B artefacts), `ProgressOutputsV2Loader` (Pipeline A parquets), and all DuckDB queries.
+
+## Regression testing
+
+PRG has a hermetic golden-master test suite that catches silent numerical regressions before they reach production. See `docs/dashboard/progress-regression-testing-plan.md` for full details.
+
+- Fixtures: parquet snapshot from the dev reference project, stored in GitHub release `test-fixtures-dev-v1`
+- Run locally: `npm run fixtures:download` then `npm run jest:regression`
+- CI: runs on every PR (`pr-check.yaml`) and daily (`regression-check.yaml`)
+- Re-baseline after intentional changes: `UPDATE_BASELINE=1 npm run jest:regression`
