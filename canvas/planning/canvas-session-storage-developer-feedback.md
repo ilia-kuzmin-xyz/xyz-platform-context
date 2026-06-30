@@ -119,3 +119,76 @@ Out of scope (explicitly parked):
 6. Payload trimming of large domains (issues ~10 MB, schedule ~12 MB) is not pursued — we keep full domains and accept the heavier fetch/parse per the Option 1 decision.
 
 
+-------------------------------------------------------------------------------------------
+
+Implementation. Part 2
+
+Currently we got /project_id/canvas/ which displays sessions belong to the certain user. We also have /project_id/canvas/gallery where we display all tiles of sessions but we need to tweak the following
+1. Approach it in that way where /project_id/canvas is a private user editor room where he jumps between his sessions and can observe generated dashboard on left hand side and chat in right hand side. 
+Then, /canvas/gallery is a place where we display all published dashboards across all users, so he sees there his dashboards as same as dashboard of other users within the same project. But ofc those ones should be published as well
+
+Currently we don't have a "publish" option, but since we got a files endpoint I think when user clicks on publish, we should create a new file which is responsible for just telling a publish status and also would be good to make a screenshot of current dashboard version and save it under images and attach to file as well 
+
+
+-----
+
+a new vision
+
+after speaking with a VP of product we need to tweak logic
+- currently we got a /canvas where we dispay tab of sessions and we got /canvas/gallery
+
+VP of product asked to do the following
+- gallery should dispplay all sessions belongs to use published and not published yet. But we should badge them: [draft] / [published]. Hence we see all dashboards across users within the project, but we don't see drafts of other users, only ours
+- cards should include an image - currently a placeholder and leave as is, session name, author, when last updated and badge
+- by hovering cards we can also get access (trhough three dots button appearing) to rename / delete as same as we got currenlt on the session tab. All users can rename and dleete of session of each other, it's fine
+- by clicking on published we always get redirected to viewer mode of the dashboard, whereas by clicking on draft we go to edit mode (/canvas) to the given session, so I assume even though all edit sessions are currenly under /canvas we need to achieve havng /canvas/session_id.... But if a user wants to edit his puslibhsed dashboard, then he can find "edit" actions by clicking three dots in the card
+- we rename "my sessions" buttons to create a new one (dashboard)
+
+then speaking of canvas page
+- as I said above we need start having session_id for existing one in the url, but when we creare a new session, I assume we don't know session id yet, so probably it's fine to start with /canvas and once we get any new dashboard or saving anything to files then I think we can we can replace /canvas with /canvas/session_id, but contemplate on its efficieny more
+- one the canvas edit page, we remove displaying session tabs in there since we display all sessions in gallery tiles. So each edit canvas page belongs to a session
+
+given all these changes, also keep in mind how to keep a unified hydration storage file system to hyrate all dashboards immedaitelt - no matter on which page we open them
+
+> Claude — planning steps for the new vision (confidence 8):
+>
+> **Step 1 — Routes** (`pages/project/routes.tsx`)
+> - Add `:project_id/canvas/:session_id` → CanvasPage (edit mode for an existing session).
+> - Keep `:project_id/canvas` → CanvasPage in "new session" mode (no auto-open of last session).
+> - Keep `/canvas/gallery` and `/canvas/gallery/:session_id` — React Router v6 ranks the static `gallery` segment above `:session_id`, so no conflict.
+>
+> **Step 2 — CanvasPage: session from URL** (`CanvasPage.tsx`, `useCanvas.ts`)
+> - Replace the `?session=` param + auto-open-last logic with `useParams().session_id`: present → open that session; absent → start a fresh session immediately.
+> - URL upgrade: when a fresh session persists its first file (first `saveSession` success), `navigate('/canvas/{sessionId}', { replace: true })` — replace not push (no history spam), guard so it fires once, no remount (same route component).
+> - Remove the session tab strip from CanvasBar — the gallery is the session switcher now. Bar shows the session name (read-only); rename/delete move to gallery cards.
+>
+> **Step 3 — Gallery tiles: drafts + published** (`CanvasGalleryPage.tsx`)
+> - Tile set = `listSessions(projectId)` (all users, no filter) joined with `listPublishMarkers(projectId)`:
+>   - mine → always shown, badge `[draft]` or `[published]` from marker state;
+>   - others' → shown only when published.
+> - Card content: image placeholder (as-is), session name, author, "updated X ago", badge. Sort by updatedAt desc.
+> - Click: published → `/canvas/gallery/{sessionId}` (viewer); draft → `/canvas/{sessionId}` (edit).
+>
+> **Step 4 — Card hover menu (3-dots)** (`CanvasGalleryPage.tsx` + service)
+> - Hover/focus shows a 3-dots button → menu: Rename, Delete, and Edit (Edit shown on published cards — drafts open edit by click anyway).
+> - Rename/Delete must work without useCanvas (gallery has no canvas state): add service helpers — rename = load newest session file + save with new name; delete = load + save `{deleted: true}` (same soft-tombstone useCanvas.deleteSession uses today). Extract shared logic into CanvasSessionApiService so canvas + gallery don't drift.
+> - No permission gate — any user can rename/delete any session (per VP).
+>
+> **Step 5 — Buttons**
+> - Gallery: "My sessions" → "Create new dashboard" (primary yellow), navigates to bare `/canvas` (fresh session).
+> - Canvas bar keeps "Published dashboards" + "Publish" as shipped.
+>
+> **Step 6 — Unified hydration (verify, no redesign needed)**
+> - The basket is project-scoped, not route-scoped, so the new URLs change nothing structurally; storage files remain the shared tier for all pages.
+> - Verify: deep link straight to `/canvas/{sessionId}` hydrates from storage files (no live MCP when files are fresh); viewer page already reads the same files.
+> - Optional hardening: extract one shared "load stored domains" helper used by both runHydrate (canvas) and DashboardViewerPage so the two read paths can't diverge.
+>
+> **Edge cases pinned down**
+> - Session with dashboards but no marker → `[draft]`. Marker `unpublished` → `[draft]`.
+> - Published marker but session deleted → hide tile (already handled).
+> - Deleting a published session removes it from the gallery for everyone (tombstone wins over marker).
+> - New-session page reload before first save: nothing persisted, bare `/canvas` just starts clean — acceptable.
+>
+> **Order of work**: 1 → 2 (routing + tabs removal, the structural change) → 3 (tile model) → 4 (card menu) → 5 (buttons) → 6 (verification pass).
+
+
