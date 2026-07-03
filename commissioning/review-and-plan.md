@@ -69,10 +69,14 @@ The **real** data-driven, tested `commissioning-panel.tsx` (documented in `PLT-2
 ## Testing (no Playwright harness in hc-frontend yet)
 Rely on the existing co-located Jest suites (the PO added many, incl. adversarial) + typecheck + lint. Manual browser verification needed for: the real dashboard panel states, asset↔3D linking/isolation, `.xlsx` imports, and design-token parity.
 
-## Current state (as of resume)
-- ✅ Working branch `claude/compassionate-hypatia-q1x1fd` created off `feature/Commissioning`.
-- ✅ Feature-flag gating verified comprehensive.
-- ✅ C1 and D1 verified first-hand.
-- ✅ This domain doc set written (README, review-and-plan, design-legacy).
-- ⏳ **No code fixes committed yet.** Next: C1.
-- ⚠️ The `xyz-platform-context` repo push was **403 (policy denial)** in the sandbox — these docs may need to be committed from a local checkout with write access.
+## Current state — COMPLETE (branch `PLT-2861`, draft PR to master)
+- ✅ Feature-flag gating verified comprehensive (nothing leaks with the flag off).
+- ✅ **C1** — real `CommissioningPanel` wired into the dashboard tab; **`cx-*` prototype folder deleted** (11 files, incl. its tests). This also removed the duplicate design-token set → **D1 substantively resolved** (the real panel + subcomponents already use `theme.palette.base.*`).
+- ✅ **C4** — checklist import no longer drops token-only custom rows.
+- ✅ **C5** — no mis-link when clicking a linked asset mid-linking.
+- ✅ **C6** — linking mode no longer leaks on panel close.
+- ✅ **C2** — asset re-import preserves fields on blank/omitted cells (safer default chosen; old clear-on-empty test updated).
+- ✅ C3, C7, C8, C9, isolation-leak — verified **not reproducible** (left as-is; C7/C8 flagged as defensive nits).
+- ✅ Domain docs written; committed to the **local** context repo only (remote push is 403 policy).
+- **Remaining (controlled follow-up, not blocking the flag-gated MVP):** broader design-token/spacing consolidation across the asset/checklist *pages* (R-level, needs browser verification — no e2e harness); big-file decomposition (R1); `mapAnswerType` substring→allow-list hardening.
+- ⚠️ **Unit tests for C2/C4/C5/C6 not re-run locally** (node_modules got wedged mid-session); **CI validates on push**. Typecheck clean throughout.
