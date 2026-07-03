@@ -30,16 +30,22 @@ The **real** data-driven, tested `commissioning-panel.tsx` (documented in `PLT-2
 **Impact:** any project that enables the flag sees fake "Danny's Data Centres" data instead of its own. This is the headline defect to fix before merge.
 **Fix:** wire the real `CommissioningPanel` into the dashboard tab; delete or clearly quarantine the `cx-*` prototype (keep its visual design as the target styling for the real panel). Re-verify the real panel renders the states in the handoff doc (Loading→Error→Unavailable→Empty→Body).
 
-### C2–C10 — Correctness bugs from the initial review pass. **[CARRIED — re-verify each before fixing]**
-The first review fan-out (assets / checklists / viewer / dashboard sub-agents) surfaced these; the detailed write-ups were lost with the sandbox, so re-confirm each against the code before editing:
-- ~~**Asset import partial re-import data loss** — drops existing assets.~~ **[VERIFIED — CLAIM OVERSTATED]** `asset-register-service.applyImport` (`:57-69`) does `existing.map(...)` + writes `[...next, ...created]`, so whole assets are **preserved**. The *real* issue: matched assets merge as `{...asset, ...changes}`, so a re-import that **omits a column / has empty cells clears those fields** (e.g. a serial-only sheet blanks manufacturer/model/location on matched assets). The code comments call this intentional ("spreadsheet is source of truth"). **This is a dangerous UX default, not an unambiguous bug — needs a product decision** (preserve-on-empty vs clear-on-empty), so NOT silently changed. If we want the safer default: in `applyImport`, drop `undefined`/empty fields from `changes` before merging (`{...asset, ...definedOnly(changes)}`).
-- **Two `localStorage`-corruption crashes** — malformed/legacy stored JSON throws instead of degrading to empty. (asset register / checklist library services.)
-- **Checklist import token-only custom-row drop** — custom rows whose prompt is only an input-slot token (`#_#`/`###`) get dropped. (`ChecklistImport.utils.ts`.)
-- **Mis-link during linking mode** — a stale pre-existing selection can auto-link the wrong element. (`use-asset-element-linking.ts` — note the `armedRef` guard exists; confirm it fully covers.)
-- **Linking mode not cancelled on panel close** — leaves the viewer in linking state. (assets-panel.)
-- **`ChecklistStatusChip` crash** — on an unknown/absent status value. (`checklist-status-chip.tsx`.)
-- **RuleBuilder rule-wipe** — editing/saving can clear an existing rule set. (`RuleBuilderDialog`.)
-- **Falsy-id filtering** — `.filter(Boolean)`-style drops of legitimately falsy ids, or the reverse (keeping empty ids). (various link stores.)
+### C2–C10 — Carried findings, each re-verified first-hand. **The initial review was systematically pessimistic — most did not reproduce.**
+
+| # | Finding | Verdict | Action |
+|---|---------|---------|--------|
+| C2 | Asset import "partial re-import drops assets" | **OVERSTATED** — `applyImport` (`asset-register-service.ts:57-69`) preserves all existing assets. Real behaviour: matched rows merge `{...asset, ...changes}`, so an omitted column / empty cell **clears that field** (serial-only sheet blanks manufacturer/model/location). Comments call it intentional ("spreadsheet is source of truth"). | **Product decision, not a bug.** Safer default (if wanted): drop `undefined`/empty fields from `changes` before merge. Not changed. |
+| C3 | Two `localStorage`-corruption crashes | **NOT CONFIRMED** — both `asset-register-service` and `checklist-library-service` wrap `JSON.parse` in `try/catch` + `Array.isArray`, degrade to `[]`, and have adversarial tests. | none |
+| C4 | Checklist import: token-only custom-row drop | **CONFIRMED** — `ChecklistImport.utils.ts:278` returned `cleanLabel(text)` even when it collapsed to `''`, never falling through to a valid `customText`; row dropped as `missingText`. | **FIXED** — fall through when `cleanLabel(text)` is empty. |
+| C5 | Mis-link during linking mode | **CONFIRMED** (different mechanism) — the `armedRef` guard covers a stale start selection, BUT clicking an already-linked asset's chip (`selectLinkedElement`) fires the same selection pipeline and the armed effect commits *that* element to the asset being linked. | **FIXED** — `selectLinkedElement` returns early when `linkingAssetId` is set. |
+| C6 | Linking mode leaks on panel close | **CONFIRMED** — `linkingAssetId` lives in ViewerProvider context; close button never cancels it and there's no unmount cleanup → re-arms on reopen and can commit a stale pick. | **FIXED** — unmount cleanup clears `linkingAssetId`. |
+| C7 | `ChecklistStatusChip` crash on unknown status | **NOT CONFIRMED** — the status pipeline (`sanitiseStatuses` + `assertKnownStatus` + hook default) makes an invalid value unreachable. Defensive-nit only (a fallback would future-proof). | note only |
+| C8 | RuleBuilder rule-wipe | **NOT CONFIRMED** — the wipe mechanism exists but is unreachable via the single always-mounted call site (shared React-Query key resolves before the dialog can open). Fragile coupling — re-check if a 2nd call site is ever added. | note only |
+| C9 | Falsy-id filtering | **NOT CONFIRMED** — link stores key off non-empty UUIDs / viewer selection keys; no `.filter(Boolean)` drops a valid id. | none |
+| — | Isolation-restore leak | **NOT CONFIRMED** — both isolation hooks use a correct `hasIsolated`-ref + `return restore` cleanup. | none |
+| — | `mapAnswerType` uses `value.includes('custom')` (substring, no word boundary) | **LATENT FRAGILITY** — a future FG Answer Type containing "custom" as a substring would be misclassified. Rides on an unverified FG-schema invariant. | note — consider an allow-list |
+
+**Net:** of 9 carried findings, **3 confirmed & fixed (C4, C5, C6)**, 1 is a product decision (C2), 5 did not reproduce. The PO's code was more robust and better-tested than the initial pass implied.
 
 ### D1 — Design-legacy reinvention. **[VERIFIED first-hand]**
 `commissioning-dashboard/cx-tokens.ts` (and a second CX token set) hardcode colours/spacing that the file comments admit "mirror theme.ts darkColors". The app already exposes design tokens via MUI `theme.palette.base.*` + shared components (as used across Editor `/projects/:id/editor` and Dashboard `/projects/:id/dashboard`). See [design-legacy.md](./design-legacy.md).
