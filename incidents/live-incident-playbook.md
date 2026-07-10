@@ -226,6 +226,77 @@ One person can hold two roles; no role should be held by nobody. The most
 dangerous vacancy is **rigor guardian** — without it, "works now" closes
 incidents that aren't understood.
 
+### Message craft — the style that worked (observed, per message type)
+
+The thread's throughput came as much from *how* things were written as from
+what was investigated. The styles worth copying:
+
+**Questions — closed, answerable, routed.**
+The questions that produced results in minutes were narrow enough to have a
+one-line answer, and @-mentioned exactly one owner:
+- *"do we know if he got 401 or 403?"* · *"could you give me any email? I'll
+  check in logs"* · *"do you know when he accepted the one before that?"* ·
+  *"Sachin — how does a user get access to a project in api2, what creates the
+  record?"*
+Open questions without an addressee (*"why wasn't it an issue before?"*)
+floated unanswered all day. **Rule: one question per message, one owner per
+question, phrased so it can be answered with a value.**
+
+**Facts — verbatim artifacts, one-line caption, highlight the key part.**
+Nobody effective paraphrased evidence. Sergey pasted raw log lines and DB dumps
+as code blocks with the email/role highlighted; Pietro posted the DB row with
+`roleName=Dashboard Only` underlined, the DevTools 403 response, and captioned
+each with a single line ("*this is where I get the 403*", "*getting this error
+with this account, but if I go with my account, I don't*"). The caption states
+what the artifact *shows*, not a theory about it. **Rule: raw artifact + one
+interpretive line; mark the exact token that matters.**
+
+**Answers — direct, minimal, no hedging; "I don't know" said plainly.**
+*"no"* · *"nothing for the last 7 days"* · *"We didn't do anything"* · *"I'm
+not sure, may be better to ask Gennaro"* (a *good* answer: an honest gap plus
+the next hop). Answers quoted the question they answered (reply-quote), which
+kept three parallel tracks readable in one thread.
+
+**Hypotheses — phrased as questions, not claims.**
+*"is this caused by the Dashboard Only role instead of Viewer?"* · *"could
+this be related to a recent deployment?"* · *"is this because the user was
+invited using the old UI?"* — question-form invites testing and costs nothing
+to discard. Nobody had to walk back an assertion all day because almost nothing
+was asserted before evidence.
+
+**Scoping statements — explicitly bound every claim.**
+*"But this is from BE perspective only"* (Sergey) · *"this is separate from
+Luke's issue, it doesn't resolve the incident"* (FE token fix) · *"That's
+after he accepted — we don't know what it was before"* (Mostafa). These
+one-clause boundaries are what kept partial findings from being mistaken for
+the root cause.
+
+**Status declarations — state + so-far + evidence quality.**
+*"I'm currently investigating PAPI-3621, nothing so far, API logs are clean"* —
+owner, progress, and what was checked, in one line. Compare with silence, which
+forces the coordinator to chase.
+
+**Verdicts — short synthesis only after the artifact.**
+*"That might be it"* · *"That is the fix"* — five words max, immediately after
+reproducible evidence, never before it. A verdict this short is only safe
+because the artifact is right above it in the thread.
+
+**Corrections and disclosures — fast, unprompted.**
+*"Sorry wrong guy, it's federica…"* (Yash, self-corrected within minutes) ·
+*"The only thing I did — flushed the Redis cache ~2 hours ago"* (Sergey — the
+right form, though a day late; disclosures belong at action time, not
+discovery time).
+
+**Per-contributor style fingerprints (copy the fit-for-purpose one):**
+| Contributor | Signature form | When to use it |
+|---|---|---|
+| Sergey | verbatim log/DB block, key token highlighted, zero commentary | delivering evidence |
+| Pietro | screenshot + one-line caption + "next I'll try X" | repro & fix testing |
+| Darminder | hypothesis as a question + ≤5-word verdict after evidence | steering options |
+| Mostafa | one-line counter-fact ("we didn't do anything") | guarding attribution |
+| Yash | numbered inventory, one status per item | coordination checkpoints |
+| Ilia | routed mechanism question with 1 sentence of context + explicit "separate from X" scoping | eliminating theory-classes, splitting signals |
+
 ### Question bank (the ones that actually moved this incident)
 - "Give me the email of **one user who is broken right now**."
 - "Which endpoint, which HTTP status, which timestamp?"
