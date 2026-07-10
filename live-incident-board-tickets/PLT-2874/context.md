@@ -150,5 +150,3 @@ gap; escalate only if it turns out actual progress % is computed off the inflate
       at scrubber-end — does `dbids ≈ 695k` and `elems ≈ 628k`? That single query confirms/kills the hypothesis.
 - [ ] "Why now" — ask before closing (likely just first-noticed, not a regression, but confirm no recent
       svf2-map / linking deploy).
-</content>
-</invoke>
