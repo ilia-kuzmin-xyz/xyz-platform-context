@@ -8,6 +8,79 @@ below is what transfers.
 
 ---
 
+## The universal shape of a live incident
+
+Agendas differ — "user can't access", "colors render wrong and it worked
+before", "editor and dashboard disagree", "uploaded schedule doesn't match
+PowerBI" — but every live incident is the **same six questions**, answered in
+roughly this order. The whole July case, and every stall in it, maps onto them.
+
+**1. What exactly is observed — and can *we* observe it right now?**
+Convert a report ("something's off with colors") into a reproducible
+observation in our own hands: exact surface, exact entity, exact wrong value,
+timestamp, screenshot/recording. Until we can see it ourselves, we have a
+rumor, not an incident. *July case: the unlock was `msojo@switch.com` — a user
+broken **at that moment**. Three hours were lost on Luke, whose broken state
+had already been mutated away. The rule generalizes: investigate an instance
+that is wrong right now; a "fixed" instance carries no evidence.*
+
+**2. What did we expect — and on whose authority?**
+Every incident is a disagreement between observed and expected. Name the
+reference explicitly: a spec, a design token, the editor's value, PowerBI's
+number, "how it was last month". Half of visual/data incidents die here —
+the reference itself was wrong or was never what people remembered.
+*July case: "he could access before" was the assumed reference — Grafana then
+showed **no logins in 30 days**. The expectation was folklore. "It worked
+previously" is a claim to date with evidence, never a starting fact.*
+
+**3. What is the smallest broken-vs-working pair?**
+Find two instances that differ in as little as possible — one wrong, one right
+— and diff them. This is the single most powerful move in any incident,
+because **the diff *is* the diagnosis**. *July case: badams was Viewer on
+ATL06/07 (works) and "Dashboard Only" on ATL05 (broken) — same user, same
+tenant, same day; the only difference was the role. Equivalents: the same
+element colored right in the editor and wrong in the dashboard → diff the two
+data paths; the same activity correct in PowerBI and wrong after upload →
+walk the pipeline stage by stage until the numbers diverge; worked-yesterday
+vs broken-today → diff what shipped between.*
+
+**4. What decides that behavior?** (mechanism)
+Ask the owning engineer "which code path produces this — what does it read,
+what does it compare?" and confirm on **every layer independently** (in July,
+FE gate *and* api2 middleware each denied on their own). For a color: what
+maps value → color, and on which surface does the mapping run? For a data
+mismatch: which stage computes the aggregate? Mechanism turns mystery into
+lookup.
+
+**5. Why now?** (trigger)
+"It worked previously" demands a dated cause: a deploy, a data change, a
+manual action, an expired assumption. Ask explicitly, twice — at the start
+and before closing: *"what changed in the window — deploys AND manual prod
+actions (flushes, restarts, toggles, data fixes)?"* *July case: this question
+was asked once, never owned, and the trigger is still unknown — which means
+the incident can recur. An unanswered "why now" is an open incident wearing a
+closed label.*
+
+**6. Who else?** (cohort)
+The reported user/project/chart is a sample, not the population. Once the
+mechanism is known, query for everyone matching the broken shape (everyone on
+the legacy role; every chart using that palette path; every schedule uploaded
+since the deploy) and remediate in bulk — don't wait for the next ticket.
+
+**Two disciplines hold it together, whatever the agenda:**
+- **Single-variable changes, announced.** One change at a time against the
+  repro, every prod-touching action declared in-thread at action time. *July:
+  an unannounced Redis flush "fixed" two users mid-experiment and destroyed
+  attribution permanently.*
+- **Close on cause + trigger + cohort — never on "looks fine now".** Symptom
+  disappearance without those three is remission, not resolution.
+
+The rest of this document is the July case worked through this frame: the
+timeline, who played which role, the message styles that made it fast, and
+the phase-by-phase checklist.
+
+---
+
 ## TL;DR of the case (what it turned out to be)
 
 - **Root cause:** users holding the **legacy "Dashboard Only" role** (single
