@@ -28,3 +28,7 @@ Failure path already handled by mutation `onError` (stays on page). Keep toast.
 ## Confidence: 8/10 — pattern exists to reuse; review recommended for editor-init side-effects.
 
 ## Status: PR #2037 ready for review · Jira In Code Review · Sonar passed
+
+## Copilot review round (addressed)
+- Always dispatch getProjectDetails(id) (independent of working project) + guard on missing id.
+- Fix committed & pushed; thread resolved. PR body cleaned of auto-footer + test steps sharpened.
