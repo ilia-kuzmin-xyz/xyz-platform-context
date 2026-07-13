@@ -31,3 +31,8 @@ Shared tooltip already used — no new component. Fixes are overlay/state wiring
 
 ## Confidence: 8/10. #1,#2,#4 clearly correct & low-risk; #3 self-contained via click-clear.
 Manual verify in-env recommended (Gantt interaction) since no local runtime.
+
+## Status: PR #2038 ready for review · Jira In Code Review · Sonar passed
+## Self-review fix (2nd commit): "onClick" is NOT a dhtmlx gantt event — tooltip click-dismiss
+## now uses a capture-phase document mousedown listener (editor click handler calls
+## stopPropagation, bubble listeners would miss it). onMouseMove now detached by id.

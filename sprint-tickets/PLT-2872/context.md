@@ -27,3 +27,5 @@ Closure Reason field.
   >500 chars. Cannot test live API here → call it out in PR test steps.
 
 ## Confidence: 9/10 (frontend); BE acceptance of 1000 chars needs manual verify.
+
+## Status: PR #2036 ready for review · Jira In Code Review · Sonar passed

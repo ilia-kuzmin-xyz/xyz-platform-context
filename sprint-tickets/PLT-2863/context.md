@@ -26,3 +26,5 @@ Failure path already handled by mutation `onError` (stays on page). Keep toast.
 - Whether toast should show on editor page vs grid — keep showing it (acceptance allows either).
 
 ## Confidence: 8/10 — pattern exists to reuse; review recommended for editor-init side-effects.
+
+## Status: PR #2037 ready for review · Jira In Code Review · Sonar passed
