@@ -5,21 +5,27 @@ Per-ticket context + drafted recommended actions for tickets on the PLT
 routine — each run reads existing sub-folders before re-investigating, and
 appends/updates them.
 
-## Layout
+## Layout — flat list, tags in the folder name
+
+One folder per ticket, directly under this directory. No group/domain
+sub-directories — the group and domain are **tags in the folder name**:
 
 ```
 live-incident-board-tickets/
-  README.md                 ← this index
-  group-a/                  ← "needs evaluation" / "in analysis" / parked-with-customer
-    <domain-slug>/PLT-XXXX/
-      context.md            ← ticket + comments + code refs + hypothesis + confidence
-      recommended-action.md ← ONE drafted next step (comment / move / block) — NOT executed
-  group-b/                  ← "ready for dev" / "dev in progress" — context captured for dev reference
-    <domain-slug>/PLT-XXXX/ ← action-scenario TBD per current instructions
+  README.md
+  PLT-XXXX-<group>-<domain>/
+    context.md            ← ticket + comments + code refs + hypothesis + confidence
+    recommended-action.md ← ONE drafted next step (comment / move / block) — NOT executed
 ```
 
-**Domain slugs in use:** `filter-system`, `viewer-and-model`, `quality-management`,
-`360-captures`, `progress-tracking`, `data-pipeline`, `access-permissions`, `other`.
+- **`<group>` tag:** `groupA` (evaluate/clarify — Open/In Analysis/With Customer),
+  `groupB` (in dev pipeline — Ready For Development/Dev In Progress), or
+  `relocated` (moved off the PLT board — historical).
+- **`<domain>` tag:** `filter-system`, `viewer-and-model`, `quality-management`,
+  `360-captures`, `progress-tracking`, `data-pipeline`, `access-permissions`, `other`.
+
+Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes group
+(e.g. Open→Ready-For-Dev), rename the folder's group tag on the next run.
 
 ## Scope rules (this routine)
 
