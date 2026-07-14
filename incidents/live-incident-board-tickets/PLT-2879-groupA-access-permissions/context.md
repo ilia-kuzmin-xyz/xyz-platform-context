@@ -119,3 +119,73 @@ Matches commit `e201f2a` (files changed: `api-instance.ts` +47/-15, `api-instanc
 | Follow-up #1 trigger STILL OPEN | 6 |
 | Follow-up #2 cohort sweep STILL OPEN/UNKNOWN | 4 |
 | **What PLT-2879 is waiting on the customer for** (inferred; undocumented) | **4** |
+
+---
+
+## Update — 2026-07-14
+
+### New Jira comment (the only change to this ticket since the 07-13 pass)
+
+A 5th comment was posted **2026-07-13T18:27:13+0100** (comment id 107264) by
+**Darminder Atker** (assignee, FE lead) — this is AFTER the last triage commit
+`2057a6d`. Status is **unchanged: "With Customer"**; assignee unchanged. Verbatim:
+
+> "Source of the problem appears to be users have been invited previously with
+> old navigation and set with 'dashboard only' role. Users with this role should
+> have: \"userRoleCode\" : \"viewer_role\", \"userRoleName\" : \"Viewer\". The
+> authroities for this role are preset in the backend and users cannot edit. Now
+> that new navigation is being used and V1 is no longer being supported."
+
+This is an **internal diagnostic** posted by the assignee, not new customer
+information. The ball is therefore arguably **not** with the customer despite the
+label (see revised recommended-action).
+
+### Code re-verification (branch changed; the two gate files did NOT)
+
+- **Branch is now `claude/vigilant-franklin-4qs2ew`** (HEAD `54ed577`, commit date
+  2026-07-10). The 07-13 pass was on `claude/vigilant-franklin-katinq`. **The
+  branch name differs but the relevant files are byte-identical** — both files
+  are still last-touched by **PLT-2753 (#1959)** (`git log` confirms no newer
+  commit). No commissioning marker; non-commission branch → Commissioning OFF.
+- **`project-private-route.tsx:41`** — gate still `hasAnyAuthorities={[AUTHORITIES.PROJECT_VIEW, AUTHORITIES.PROJECT_EDIT]}`.
+  `DASHBOARD_VIEW` still absent. **Prior finding holds unchanged.**
+- **`private-route.tsx:50-53`** — denial UI still verbatim "You are not authorized
+  to access this page." (`error.http.403`). `hasAnyAuthority` (line 71-79) uses
+  `.some(...includes)` over the held authorities. Confirmed.
+- **`constants.ts`** — `PROJECT_VIEW: 'ProjectView'` (line 180), `DASHBOARD_VIEW:
+  'DashboardView'` (line 219). Confirmed.
+
+### Reconciliation: Darminder's comment vs the FE-gate hypothesis — **corroborates + refines** (no contradiction)
+
+- **`"userRoleCode": "viewer_role"` maps to a precise FE check.**
+  `userAuthorityUtils.ts:40` already keys on exactly this string:
+  `projectRoleSelector(projectId)(store.getState()) === 'viewer_role'`
+  (`projectRoleSelector` defined at `store/selectors.ts:152`). So the FE already
+  knows how to recognise Darminder's cohort — but that recognition lives in
+  `checkIsDashboardOnlyUser()` (routing/landing), **never in the route gate**.
+  This is the same "helper exists, gate doesn't use it" split documented in §4(c),
+  now confirmed from the product side by name.
+- **"old navigation invite" / "V1 no longer supported" maps to `isV1Project()`**
+  (`userAuthorityUtils.ts:34`, `V1Rules/v1ProductionRules`) and the standing TODO
+  at `project-private-route.tsx:30` ("once tab view is deprecated"). Darminder is
+  describing the **navigation/V1-deprecation migration as the trigger** — a
+  legacy `viewer_role` cohort invited under old-nav is now hitting the new-nav
+  gate. This is consistent with (not contradicted by) the code fact that the gate
+  itself was untouched since PLT-2753: the trigger is the migration around it, not
+  a gate deploy.
+- **"authorities are preset in the backend and users cannot edit"** — reinforces
+  that this cannot be self-served away by the customer; the fix must be code/role
+  (honor the role, or retire it), matching the playbook root cause.
+
+Net: Darminder (assignee, product/Jira side, without referencing the FE code)
+**independently confirms the exact mechanism** the 07-13 code pass found. Two
+independent angles now converge on the same root cause.
+
+### Confidence changes
+
+| Judgment | 07-13 | 07-14 | Why |
+|---|---|---|---|
+| FE gate requires ProjectView; DashboardView not honored | 9 | 9 | Re-verified, identical |
+| **Root-cause diagnosis (legacy `viewer_role`/DashboardView-only locked out by the gate)** | 9 (code only) | **9 (two independent angles)** | Assignee's Jira comment names `viewer_role` → maps to `userAuthorityUtils.ts:40` |
+| Follow-up #1 "why now" / trigger | 6 | **7** | Now partially answered: old-nav→new-nav / V1-deprecation migration (per assignee). Still no dated deploy/error-rate correlation, so not fully closed |
+| "What we're waiting on the customer for" | 4 | — (moot) | Superseded: the latest comment is an internal diagnostic, so the ball is not with the customer; the question is no longer the gating unknown |

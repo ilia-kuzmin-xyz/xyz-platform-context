@@ -43,6 +43,31 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-14 (delta — re-triage of changed tickets only)
+
+Checked which of the 12 tickets triaged on 07-13 (commit `2057a6d`) changed
+since. Only one substantive change; no full re-pass.
+
+- **PLT-2879 (Blocker, still With Customer) — ONLY ticket changed.** New comment
+  2026-07-13T18:27 by **assignee Darminder Atker** names the root cause from the
+  Jira/product side: old-nav "dashboard only" invite → `viewer_role` (backend-
+  preset authorities, user-uneditable) → incompatible with new nav / V1
+  deprecation. This **independently confirms** the 07-13 FE-gate finding
+  (`viewer_role` maps precisely to `userAuthorityUtils.ts:40`; gate at
+  `project-private-route.tsx:41` still doesn't honor it — re-verified unchanged,
+  now on branch `claude/vigilant-franklin-4qs2ew`). **Drafted action revised:**
+  reply cross-confirming from the FE side + route the one open decision (honor
+  `DashboardView` vs retire the legacy role) to Mostafa/Pietro; secondary: move
+  off "With Customer" (ball is internal, not with the client). Diagnosis conf
+  9, action conf 7. See the ticket folder's updated context.md / recommended-action.md.
+- **PLT-2890 & PLT-2892 → now "In Code Review"** (from Ready For Development and
+  In Analysis respectively). Both are **out of scope** per this routine's
+  exclusion list — no longer Group A/B, no action needed. Forward progress only.
+- **PLT-2891 unchanged** — still re-keyed to **PBD-2111, Done** (historical).
+- **No new Live Incident tickets** created on the PLT board since 07-13.
+
+---
+
 ## Run: 2026-07-13 (updated, second pass) — 12 in-scope tickets
 
 ### Group A (8) — evaluate / clarify
