@@ -32,3 +32,11 @@ Failure path already handled by mutation `onError` (stays on page). Keep toast.
 ## Copilot review round (addressed)
 - Always dispatch getProjectDetails(id) (independent of working project) + guard on missing id.
 - Fix committed & pushed; thread resolved. PR body cleaned of auto-footer + test steps sharpened.
+
+## BUILD FIX (after master merge)
+- master removed `getProjectDetails` from the project store + simplified PortfolioPage.handleOpenEditor
+  to just updateWorkingProject + navigate.
+- My stale `import { getProjectDetails }` broke the webpack/tsc build (TS2305) — Sonar had passed
+  because it does not run tsc. Removed the import/dispatch + useDispatch; now mirrors the current
+  handleOpenEditor. Committed as Ilia, pushed (7638066).
+- LESSON: SonarQube passing != build passing; the `build` check (gradle :webpack / tsc) is the real gate.
