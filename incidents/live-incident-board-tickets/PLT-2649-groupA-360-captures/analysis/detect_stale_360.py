@@ -54,23 +54,61 @@ print("stale rooms:", len({c.get('modelRoomId') for c in stale}),
       "| stale levels:", {(c.get('modelLevelId') or '')[:8] for c in stale},
       "| stale capture-points:", len({c.get('roomCapturePointId') for c in stale}))
 
-with open(f"{BASE}/PLT-2649-stale-360-captures.csv","w",newline="") as fh:
-    w=csv.writer(fh)
-    w.writerow(["classification","reason","fileReferenceId","roomCapturePointId",
-                "modelRoomId","modelLevelId","xMeters","yMeters","zMeters","fileName","imageTakenOn"])
-    for c,cl,rs in rows:
-        if cl in ("STALE","SUSPECT"):
-            w.writerow([cl,rs,c.get("fileReferenceId"),c.get("roomCapturePointId"),c.get("modelRoomId"),
-                        c.get("modelLevelId"),c.get("xMeters"),c.get("yMeters"),c.get("zMeters"),
-                        c.get("fileName"),c.get("imageTakenOn")])
+import re
+from collections import Counter, defaultdict
+TARGET_Y=0.0; REAL_L00="7026451f"
+def rname(c): return re.sub(r'_\d{6}_\d{6}.*$','', c.get("fileName") or "").strip()
+def floor(c):
+    m=re.search(r'-L(\d{2})-', c.get("fileName") or ""); return f"L{m.group(1)}" if m else ""
 
-# cohort summary for hand-off (rooms + capture points to remediate)
+# ---- TABLE 1: stale-pinpoints.csv — 75 rows, one per capture point (the tweak list) ----
+byPt=defaultdict(list)
+for c in stale: byPt[c["roomCapturePointId"]].append(c)
+with open(f"{BASE}/PLT-2649-stale-pinpoints.csv","w",newline="") as fh:
+    w=csv.writer(fh)
+    w.writerow(["pin_no","roomName","floor","captureCount","roomCapturePointId","modelRoomId",
+                "xMeters","currentY","zMeters","targetY","yOffset",
+                "currentLevelId(phantom)","correctLevelId(realL00)","action"])
+    for i,(pt,cs) in enumerate(sorted(byPt.items(),key=lambda kv:-len(kv[1])),1):
+        c0=cs[0]; nm=Counter(rname(c) for c in cs).most_common(1)[0][0]
+        w.writerow([i,nm,floor(c0) or "L00",len(cs),pt,c0["modelRoomId"],
+                    round(c0["xMeters"],3),round(c0["yMeters"],2),round(c0["zMeters"],3),
+                    TARGET_Y,round(TARGET_Y-c0["yMeters"],2),c0["modelLevelId"],REAL_L00,
+                    "set Y=0.0 (offset -50.4) OR reparent room to real L00 level"])
+
+# ---- TABLE 2: phantom-level-all-points.csv — all points on the phantom level (incl empty) ----
+ph_level=next(iter({c["modelLevelId"] for c in stale}))
+with open(f"{BASE}/PLT-2649-phantom-level-all-points.csv","w",newline="") as fh:
+    w=csv.writer(fh)
+    w.writerow(["roomCapturePointId","modelRoomId","userCapturePointId","xMeters","currentY",
+                "zMeters","targetY","yOffset","hasCaptures","captureCount"])
+    for r in [p for p in rcp if p.get("modelLevelId")==ph_level]:
+        n=len(byPt.get(r["roomCapturePointId"],[]))
+        w.writerow([r["roomCapturePointId"],r["modelRoomId"],r.get("userCapturePointId"),
+                    round(r["xMeters"],3),round(r["yMeters"],2),round(r["zMeters"],3),
+                    TARGET_Y,round(TARGET_Y-r["yMeters"],2),"yes" if n else "no(empty)",n])
+
+# ---- TABLE 3: stale-captures.csv — 1868 rows, one per image ----
+with open(f"{BASE}/PLT-2649-stale-captures.csv","w",newline="") as fh:
+    w=csv.writer(fh)
+    w.writerow(["fileReferenceId","roomCapturePointId","modelRoomId","roomName","floor",
+                "xMeters","currentY","zMeters","targetY","imageTakenOn","fileName"])
+    for c in sorted(stale,key=lambda x:(rname(x),x.get("imageTakenOn") or "")):
+        w.writerow([c["fileReferenceId"],c["roomCapturePointId"],c["modelRoomId"],rname(c),floor(c),
+                    round(c["xMeters"],3),round(c["yMeters"],2),round(c["zMeters"],3),
+                    TARGET_Y,c.get("imageTakenOn"),c.get("fileName")])
+
+# NOTE: the 30 "SUSPECT" horizontal outliers are NOT part of the 75-pin fix; they are
+# reported in the console line above only. Re-add a table here if they need follow-up.
+
+# ---- cohort summary JSON for hand-off ----
 cohort={
  "stale_level_id": sorted({c.get('modelLevelId') for c in stale}),
  "stale_room_ids": sorted({c.get('modelRoomId') for c in stale}),
  "stale_capture_point_ids": sorted({c.get('roomCapturePointId') for c in stale}),
  "counts": {"stale":len(stale),"suspect":len(susp),"ok":len(ok),"total":len(caps)},
- "stale_elevation_m": 50.4, "valid_top_elevation_m": iy[-1],
+ "stale_elevation_m": 50.4, "valid_top_elevation_m": iy[-1], "target_elevation_m": TARGET_Y,
 }
 with open(f"{BASE}/PLT-2649-stale-cohort.json","w") as fh: json.dump(cohort,fh,indent=2)
-print("wrote PLT-2649-stale-360-captures.csv and PLT-2649-stale-cohort.json")
+print("wrote: PLT-2649-stale-pinpoints.csv (75), phantom-level-all-points.csv, "
+      "stale-captures.csv (1868), stale-cohort.json")
