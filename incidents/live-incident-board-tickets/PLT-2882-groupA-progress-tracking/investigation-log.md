@@ -141,3 +141,70 @@ BE question, not an FE one.
 
 Status: diagnostic complete. Branch `PLT-linked-selection-diagnostics` (rebased on master,
 `console.log` only — **not for merge**). Awaiting BE answer + FE robustness ticket.
+
+## 2026-07-14/15 — cohort sweep attempts, 418-list verified, peer pushback answered
+
+### Cohort sweep: two tools failed, third works, BE still the right owner
+
+Goal: list ALL orphaned links project-wide (playbook #6), not just this activity's 418.
+
+1. **`__linkAudit()` (viewer-based) — failed.** FAR01 has **103 models**, not 2 (the "2" was
+   only this activity's membership). Needs every model rendered; worse, it silently counted
+   unresolvable elements as "unresolved" instead of failing loudly → reported 0 orphans with
+   both target models unloaded. Retired.
+2. **`scripts/orphaned-links-sweep.mjs` (artefact-based, runs on prod, read-only GETs) —
+   blind on this project.** Run result: 101 models, only **22 have an `svf2-object-id-map`
+   artefact**. Reason (code-verified): the artefact is produced for **Navisworks** models only
+   (`navisworks-model-mapper.ts:277`); **Revit** models get their externalId→dbId mapping from
+   Forge's property DB at load time (`revit-model-mapper.ts:22`) — no artefact exists. Both
+   PLT-2882 models are Revit. The 705k "orphans" from that run are useless (false positives);
+   CSV discarded.
+3. **Working combo (no branch deploy, prod-safe):**
+   - `scripts/console-geometry-harvest.js` — paste into prod editor console; loads each model's
+     Forge **property DB only** (`skipMeshLoad` + `loadAsHidden`, no meshes/render), harvests
+     `getExternalIdMapping` keys, unloads, downloads the union as a txt.
+   - `scripts/orphaned-links-sweep.mjs --geometry <file>` — translates harvested externalIds →
+     modelElementIds via each model's `client-element-metas` parquet, anti-joins activity_links.
+   All read-only (explicit `method: 'GET'` everywhere; only writes are local files).
+   Still: the cleaner long-term answer is a **BE-side query** against the translation data, and
+   a pipeline ask to **emit object-id-map for Revit too** (would also help dashboard selective
+   loading).
+
+### The 418 deletion list — verified against live API
+
+Console pull of all activity-links for activity `7c4f2509-3bce-4005-971d-46e82610b1a4`:
+**10,316 rows total → 9,898 `isDeleted` (link/unlink history) → 418 live**, distinct elements
+418 — exactly matches the editor. Gotcha for future scripts: the GET endpoint returns history;
+**always filter `!isDeleted`**, and paginate (1.84M links project-wide; `size` max 50k).
+
+Deletion path (not executed yet): `POST /api/v2/projects/{pid}/elements/activity-links/delete`
+with `[{activityId, modelElementId}]` (≤500/batch as the FE does; needs ELEMENT_EDIT+DELETE).
+Soft-delete; editor picks it up on sync. CSV of the 418 exported as the audit record.
+
+### Peer pushback (Jira comment) and the answer
+
+A developer checked a sample element and found it **present in the current versions'
+client-element-metas parquets**, and noted drag-and-drop upload auto-unlinks elements not in
+current versions — concluding the RCA is wrong. **His facts agree with our data** (we found
+`inParquet: 418` on both models); he checked the **metadata** layer, we checked **geometry**.
+The bug IS their disagreement. Two facts he hadn't seen:
+- source file `bb85941b…` has **18,908 elements in loaded geometry but 0 of its 141 linked
+  handles** — file present, elements gone → geometry-side removal, metadata retained;
+- other activities in the **same models** select fine (Yash's repro) → viewer mapping works.
+His auto-unlink point *supports* the RCA: that step reads the **element list**, which still
+contains the 418 — exactly why auto-unlink missed them. **Deletion of the 418 is ON HOLD until
+he's aligned** — his check deserved an answer, not an override.
+
+### Refined root cause (plain wording that landed with the team)
+
+Old ghost-element cases deleted whole **models** → linked elements survived partially in the
+remaining models. Here nobody deleted a model: both models were **re-uploaded**, and the piece
+of work these 418 represent (deep underground electrical — the activity is literally named
+"(Retired)") was **removed/redrawn** in the new versions. Removal boundary = the activity's own
+scope → all 418 vanish together → clean zero, in both models at once. The UI still says 418
+because the current version's **element list still contains elements its geometry doesn't** —
+that sync gap is the pipeline bug and the sharpest question for BE.
+
+Status: root cause explained end-to-end; 418 list verified and exported; deletion pending peer
+alignment; project-wide sweep pending harvest run or BE query; FE robustness fix still to be
+scheduled.
