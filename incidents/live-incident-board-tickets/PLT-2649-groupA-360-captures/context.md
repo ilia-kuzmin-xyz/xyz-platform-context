@@ -6,7 +6,7 @@
 - **Priority:** Major
 - **Project (site):** PA12
 - **Reporter & Assignee:** Masum Ahmed
-- **Created:** 2026-05-06 · **Last updated:** 2026-06-30
+- **Created:** 2026-05-06 · **Last updated:** 2026-07-13 (Pietro + Jason replies; triage doc refreshed 2026-07-15)
 - **Components / Labels:** none
 - **Attachments:** 2 PNG screenshots (see NEEDS HUMAN) + 1 broken inline blob in the description
 - **Domain slug:** `360-captures`
@@ -27,13 +27,13 @@ The `[NEW DASHBOARD]` title is **misleading** — analysis in-thread has already
 2. **Quality-tab pinpoints are placed correctly** on the same project/model. Ilia, 2026-05-11: *"the pinpoints work correctly on the quality tab."* → the viewer's coordinate-transform pipeline itself is sound; only the 360 inputs are wrong. (Code confirms both tabs share one transform — see Mechanism.)
 3. **It is a subset, not all pins.** Ilia, 2026-05-11 and 2026-05-12: *"for 60% of pinpoints the position is almost correct, but for the rest… broken or obsolete and was assigned to another pbp"*; *"60% of captures are assigned to the correct room position, but 40% need a review."* (Note the two comments phrase the split inconsistently — 60% correct/40% wrong vs, on 2026-06-30, "tweaking 60% … that inherited the old pbp." The exact fraction is an eyeball estimate from screenshots, not measured.)
 4. **Working hypothesis on the thread (Ilia + Pietro):** elevation is wrong because a subset of captures **"inherited the old pbp"** (project base point) — i.e. captures positioned against a since-superseded model base point / room elevation. Suggested remedy floated by Ilia: *"the client should probably reupload all 360 captures."*
-5. **Current stall:** Ilia asked Pietro Desiato (2026-06-30, comment 106186) *"who can assist us with tweaking 60% of the pinpoints position that inherited the old pbp?"* — **unanswered for ~2 weeks** (today 2026-07-13). The ticket is parked on an unassigned ownership question, not on active investigation.
+5. **Prior stall, now broken (see § "State as of 2026-07-15" below):** Ilia asked Pietro Desiato (2026-06-30, comment 106186) *"who can assist us with tweaking 60% of the pinpoints position that inherited the old pbp?"* — sat unanswered ~2 weeks, then Pietro replied on 2026-07-13 but **pivoted the conversation** from data-remediation to a product-feature idea (in-editor pin editing) and looped in product/design. The **original re-upload-vs-remap decision is still unanswered by anyone.**
 
-**Net:** root cause is localised to **source coordinate DATA for PA12's 360 captures**, not to frontend rendering. This is well-supported (two independent legacy-repro confirmations + working Quality tab on the same model).
+**Net:** root cause is localised to **source coordinate DATA for PA12's 360 captures**, not to frontend rendering. This is well-supported (two independent legacy-repro confirmations + working Quality tab on the same model). The conversation has since **forked into a data-remediation track and a product-feature track** — they are separable and the feature track must not block closing the incident (§ "State as of 2026-07-15").
 
 ---
 
-## Chronology (all 9 comments)
+## Chronology (all 11 comments)
 
 | Date | Author | Content |
 |------|--------|---------|
@@ -45,9 +45,42 @@ The `[NEW DASHBOARD]` title is **misleading** — analysis in-thread has already
 | 2026-05-14 16:56 | Masum Ahmed | Freshdesk #6622 → "Waiting on customer" |
 | 2026-06-05 13:49 | Yash Patel | Customer reply: *"same on the old one… problem with the room data in the Revit models"* |
 | 2026-06-19 08:51 | Yash Patel | Freshdesk #6622 → "Waiting on 3rd line" (back to us) |
-| 2026-06-30 16:49 | Ilia Kuzmin | @Pietro — "who can assist us with tweaking 60% of the pinpoints… that inherited the old pbp?" — **last activity, unanswered** |
+| 2026-06-30 16:49 | Ilia Kuzmin | @Pietro — "who can assist us with tweaking 60% of the pinpoints… that inherited the old pbp?" |
+| 2026-07-13 13:53 | Pietro Desiato | @Ilia "do we already have a list of those pins?" — floats a **product idea**: adjust pin position from the 360 editor; @Jason Fingland @Mostafa Kamel Hussien. **Does NOT answer the re-upload-vs-remap question.** |
+| 2026-07-13 14:11 | Jason Fingland (Product Designer) | Wary of manual pin-moving ("could mess with reality on site"). Prefers **auto mismatch-detection** (flag captures whose expected level/floor no longer matches computed position). Fallback if editing is wanted: show X/Y/Z in the details panel, editable, incl. **multi-edit** on multi-select; single-capture-wrong is an edge case for a different flow. |
 
-**Staleness:** last movement 2026-06-30 → **~13 days** untouched; the substantive analysis has been static since early June.
+**Staleness:** the ~13-day stall ended 2026-07-13 (Pietro + Jason replied). **But the original data-remediation question remains unanswered** — the thread moved sideways into feature direction, not forward to a decision. Substantive data analysis has been static since early June.
+
+---
+
+## State as of 2026-07-15 — three open threads (post Pietro + Jason replies)
+
+The 2026-07-13 replies broke the stall but did **not** answer the incident's original question. The conversation now holds **three separable threads**; keep them distinct so the interesting feature idea does not swallow the incident.
+
+**(a) The original data-remediation decision — STILL OPEN, and it is the incident.**
+For PA12's existing mis-placed captures, do we ask the client to **re-upload** against the current base point, or does **XYZ remap** the stale-base-point captures on our side? Nobody has answered this. This is the only thread that closes PLT-2649. It does **not** depend on (b) or (c).
+
+**(b) Pietro's "do we already have a list of those pins?" — answer: NO, not yet.**
+No one has enumerated the affected captures. The query to produce that list was already **scoped** in `recommended-action.md` § "Prerequisite evidence" (2026-07-13 draft): `captures_360.zMeters` for PA12 vs `project-levels.elevation` / `project-rooms` per `modelRoomId`. **It was never executed** — the "~60/40" split is still an eyeball estimate from screenshots, not a measured cohort. Running it now would let us answer Pietro concretely (exact count + which rooms) and is the prerequisite for both (a) and (c).
+
+**(c) The new feature-direction fork Jason raised — a *possible future capability*, NOT a remediation for PA12.**
+Two options are on the table, and Jason favours the first:
+- **Auto mismatch-detection** — flag captures whose expected level/floor no longer matches their computed position ("taken on L3 floorplan, now appears above L4"). Jason's preference; avoids letting users drift the model from as-built reality.
+- **Manual X/Y/Z edit** — expose editable coordinate fields in the details panel, with multi-edit on multi-select; single-capture-wrong treated as a separate edge-case flow.
+
+This is product roadmap, not incident closure. It should be split to its own ticket and must not gate the (a) decision for PA12's existing bad pins.
+
+### Ground-truth on Jason's "we have the Edit pattern in place in the Editor" claim
+
+**Verdict: accurate at the UI-scaffolding level.** A reusable inline-edit pattern genuinely exists in the 360 editor, so "reuse the Edit pattern" is a real option — but extending it to *coordinates* is not a pure frontend reuse; it needs a backend contract change and a currently-gated multi-edit path.
+
+- **The Edit pattern component exists:** `hc-frontend/.../viewer-x/components/blocks/capture-360-details/editor-capture-360-details-panel.tsx`. It already implements the full pattern Jason describes — a Pencil "Edit" button toggling `isEditMode` (line 174/291), Cancel/Save footer (lines 259-271), a slot that swaps a read-only display for an editable `TextField` in edit mode (`capturePointSlot`, lines 208-220), dirty-tracking + outside-click "shake" guard (lines 92-141), and a save handler (`onRenameCapturePoint`, lines 184-195). Permission-gated via `canEdit` / `canDelete` props.
+- **But today it edits only the capture-point *name*, not coordinates.** Adding X/Y/Z fields to the edit slot is straightforward on the FE; the coords (`xMeters/yMeters/zMeters`) already exist on `I360Capture` (`capture-360-api.types.ts:27-29`) but are **not displayed** in this panel.
+- **Backend is the real gate.** The update path `Capture360ApiService.patch360Capture()` (PATCH `/api/v2/projects/{id}/360captures/{fileReferenceId}`) exists, **but `I360CaptureUpdatePayload` accepts only `xyzDisplayName` and `description`** (`capture-360-api-service.ts:7-10`) — **not coordinates.** Manual X/Y/Z edit therefore requires an API/payload extension (and validation), not just wiring up the existing panel.
+- **Multi-edit is partially there but currently disabled.** The panel supports multi-room mode (`isMultiRoomMode`, `rooms[]`), but the Edit button is **hidden when `rooms.length > 1`** (line 290) — so Jason's multi-select edit would need that gate reworked.
+- Note: the *dashboard* QA `issue-details-panel.tsx` is **read-only** (no edit affordance). The genuine Edit pattern lives in the **ViewerPage editor**, which matches Jason's phrasing ("in the Editor").
+
+**Confidence:** that a reusable Edit-pattern component exists and could host coordinate fields — **8/10** (read the component directly). That it can be reused for X/Y/Z *without backend work* — **3/10** (the PATCH payload does not accept coordinates today; that is a backend contract change). These are for a *possible* feature only and do not affect the incident's data-remediation path.
 
 ---
 
@@ -97,7 +130,9 @@ The 360 pin Z comes straight from the **capture record's own stored coordinate**
 - **Rishi Bhugobaun** — on roster (Rishi, senior fullstack). One housekeeping comment only.
 - **Ilia Kuzmin** — the current operator (ilia.kuzmin@xyzreality.com), FE / "mechanism interrogator" in the playbook. Driving the analysis; not in the routing roster but internal.
 - **Yash Patel** — on roster (coordinator). Relaying client comms, as expected.
-- **Pietro Desiato** ("Pietro") — on roster (product owner). The correct escalation target; his unanswered 2026-06-30 question is the pivot.
+- **Pietro Desiato** ("Pietro") — on roster (product owner). Replied 2026-07-13 but pivoted to a feature idea and asked for a pin list rather than deciding re-upload-vs-remap; still the owner of the data-remediation decision (thread a).
+- **Jason Fingland** — Product Designer (not previously in this thread; pulled in 2026-07-13). Owns the *feature-direction* question (thread c: auto-detect vs manual edit). Not an owner of the data-remediation decision.
+- **Mostafa Kamel Hussien** — @-mentioned by Pietro 2026-07-13, has not yet replied. On the incident playbook roster as an FE "rigor guardian."
 
 ---
 
@@ -109,4 +144,6 @@ The 360 pin Z comes straight from the **capture record's own stored coordinate**
 - That the class of cause is **data, not new-dashboard code** — **8/10** (multiple independent confirmations; identical shared transform works for Quality).
 - That the **precise trigger** is the "old PBP / changed room elevation" and the **remediation path** (customer re-upload vs XYZ-side coordinate remap) — **4/10** (a plausible but unconfirmed hypothesis; not validated by querying `captures_360.zMeters` vs level/room elevation, nor by model-version history; the quantifying screenshots are unreadable to me).
 
-**Still needed to close (playbook Phase 6):** confirm the **trigger** (did PA12's federated model PBP / level elevations change, and when, relative to the mis-placed captures' upload dates?) and enumerate the **cohort** (which capture/room IDs are off) — both answerable by querying `captures_360` z against `project-levels`/`project-rooms` elevation. Then a single **ownership decision**: customer re-uploads, or XYZ remaps the stale-base-point captures.
+**Still needed to close (playbook Phase 6):** confirm the **trigger** (did PA12's federated model PBP / level elevations change, and when, relative to the mis-placed captures' upload dates?) and enumerate the **cohort** (which capture/room IDs are off) — both answerable by querying `captures_360` z against `project-levels`/`project-rooms` elevation. This same query also answers Pietro's "do we have a list of those pins?" (thread b) — it has **not** been run yet. Then a single **ownership decision** (thread a): customer re-uploads, or XYZ remaps the stale-base-point captures. **The feature-direction fork (thread c) is not required to close this incident** and should be split to its own ticket; do not let it hold PA12's remediation.
+
+**Confidence update (2026-07-15):** the 2026-07-13 replies add no new evidence about the *root cause* — they change the conversation's direction, not the diagnosis. The two confidence figures above are unchanged: **8/10** that the cause class is data (not new-dashboard code), **4/10** on the precise trigger + remediation path (still unvalidated because the `captures_360.zMeters`-vs-elevation query remains unrun).

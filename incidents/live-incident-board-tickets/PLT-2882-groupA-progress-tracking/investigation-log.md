@@ -141,3 +141,50 @@ BE question, not an FE one.
 
 Status: diagnostic complete. Branch `PLT-linked-selection-diagnostics` (rebased on master,
 `console.log` only — **not for merge**). Awaiting BE answer + FE robustness ticket.
+
+## 2026-07-14 (later, on-ticket) — root cause posted to Jira; concrete remediation proposed; now stalled on approval
+
+The "awaiting BE answer" framing above is superseded by what happened on the live Jira
+thread the same afternoon. The BE answer arrived inline and Ilia took the confirmed root
+cause all the way to a **concrete, approvable remediation**. Sequence (verbatim comments):
+
+1. **David Webb → Ilia (107351, 17:12:56+01:00)** — answering the "why does a model lack an
+   object-id-map parquet?" question: *"the object id map is generated for navis models
+   only"*. (This closes the sub-question raised mid-investigation; it does not change the
+   root cause below.)
+2. **Ilia (107356, 17:49:09+01:00)** — posts the full "latest updates" root-cause writeup
+   to the thread and lands on a proposal. Confirms: the 418 linked elements **no longer
+   exist in the current model versions**. Both models — `PC-…UND-AKS_REV1-V23` and
+   `QA-…UND-AKS_Northwest-V35` — were **re-uploaded**, and the deep-underground electrical
+   scope (exactly what this Retired activity covers) was **removed/redrawn** in the new
+   versions. Links point at elements that are gone; select/isolate correctly finds nothing.
+   The count still shows **418** because the model's **element-metadata file
+   (`client-element-metas`) still lists those elements while the geometry doesn't** — the
+   two are **out of sync for the same model version**. That is why the UI looks broken.
+   **Proposed fix (Ilia states he is confident in it): delete the 418 dead links on this
+   activity.** Addressed to **@Pietro Desiato** and **@Mostafa Kamel Hussien** as a yes/no
+   approval ask.
+3. **Ilia (107357, 17:53:34+01:00)** — attaches **`activity-7c4f2509-orphaned-418.csv`**
+   (attachment id **60732**, `text/csv`, 30,957 bytes ≈ 30 KB): *"here's the list of
+   linkings to be removed"*, again @-ing Mostafa and Pietro.
+
+This maps cleanly onto the diagnostic above: activity `7c4f2509-3bce-4005-971d-46e82610b1a4`
+= `FAR01UGD1220`, and the CSV is the enumerated list of the 418 `activity_links` rows whose
+`inParquetNotInGeometry` count was 418. The on-ticket writeup drops the source-file-level
+detail from the diagnostic (the 4 `sourceFileGuid`s, `bb85941b` etc.) but is otherwise the
+same finding, stated for a non-engineer audience.
+
+### Current stall point (as of 2026-07-15)
+
+The ticket is **no longer waiting on a BE explanation** — it is waiting on a **specific
+approval decision**: *delete the 418 dead links off activity `FAR01UGD1220`, yes or no?*
+Neither **Pietro Desiato** nor **Mostafa Kamel Hussien** has replied. The request (107356 +
+CSV in 107357) has sat **~1 day** unanswered. Jira status is still **In Analysis**;
+assignee still **Darminder Atker**.
+
+Note the two-track split from the diagnostic still holds and is **unchanged** by this
+proposal: (1) the approved data cleanup only fixes **this one activity**; (2) the **FE
+robustness gap** (count > 0 but silent 0-selection, no user feedback) is **not yet
+ticketed**; and (3) the **systemic "why now / cohort" question is still open** — see
+`recommended-action.md`, which is rewritten around it. The approval closes the single
+instance; it does **not** close the incident under the playbook (cause + trigger + cohort).

@@ -6,7 +6,7 @@
 - **Assignee:** Darminder Atker (fullstack lead) · **Reporter (Jira):** Yash Patel (support / incident coordinator)
 - **Original customer contact:** "Mikel" · **Project:** ML9 · **Software Area:** Web Viewer
 - **Linked Freshdesk:** #7286 (currently Open, last flipped to "Waiting on 3rd line" 2026-07-07)
-- Triage (continuation) date: 2026-07-13
+- Triage (continuation) date: 2026-07-13 · **updated 2026-07-15** (two new comments + one new attachment)
 
 ---
 
@@ -57,14 +57,37 @@ Read chronologically; the analysis is well advanced. Established facts and decis
   ownership question to Pietro / Mostafa.
 - 107206 (07-13, **Ilia**): asked Pietro/Mostafa whether the customer/BIM team had been reached out to so
   they could learn to set up the location properly.
-- 107208 (07-13, **Mostafa**): *"leave it with me."* ← **latest message; Mostafa (PO) now owns the
-  workflow/education follow-through.**
+- 107208 (07-13, **Mostafa**): *"leave it with me."* ← Mostafa (PO) picks up the workflow/education
+  follow-through.
+- 107317 (07-14 12:39, **Yash**, relaying customer via Freshdesk #7286; new attachment
+  `image-20260714-113920.png` — see §5): the customer proposes **two concrete alternatives of their own**.
+  Verbatim: *"As far as I understood, it is not possible to connect the rooms to the different models. If
+  it is possible to have a **drop-down list with all the different Location to select on the QA**, that
+  would be great. In case it is not possible, it would be ideal to **remove the Location part on the QA**,
+  to not create confusion and not appear as we have missing details on the Dashboard."* → i.e. the customer
+  would accept **either** a manual Location picker **or** just hiding the (empty, confusing) Location
+  section entirely.
+- 107320 (07-14 13:17, **Mostafa**): *"@Darminder Atker what is the difference between location and
+  location details"* ← **latest message.** A live, blocking product question — and one our prior pass
+  already answers precisely (§2a): "Location" (zone, auto-derived, read-only) vs "Location Detail"
+  (free-text, user-editable). See `recommended-action.md` for a ready-to-post answer.
 
-**Net thread state:** Root cause (empty Location = no named zones configured on ML9) is established and
-agreed by dev (Darminder) and product (Mostafa). What is unresolved is **non-engineering**: (1) *who* sets
-up named zones and *how* (self-serve? BIM team? internal?), because the customer doesn't know how; and
-(2) whether to build the "surface Phase on the detail panel" enhancement. As of today the ownership of (1)
-sits with **Mostafa** ("leave it with me"); (2) is still an open go/no-go for Darminder.
+**Net thread state (as of 2026-07-15):** Root cause (empty Location = no named zones configured on ML9) is
+established and agreed by dev (Darminder) and product (Mostafa). What is unresolved is **non-engineering**,
+and the customer's 07-14 message (107317) has *widened* the decision rather than narrowing it. There are now
+two distinct open items:
+- **(A) An immediate, answerable question** — Mostafa's 107320: *"what is the difference between location
+  and location details?"* This is not new investigation; §2a answers it exactly. Highest-leverage,
+  lowest-risk action on the ticket. A ready-to-post draft answer is in `recommended-action.md`.
+- **(B) A product decision, now 2-to-3-way.** Originally this was purely *"who configures named zones and
+  how"* (because the customer doesn't know how — 106728). The customer's own proposal (107317) reframes it
+  into a design choice: instead of (or as well as) teaching them to configure zones, do we
+  **(i)** make Location a **manual dropdown** on the QA issue (a genuine *new feature* — Location is
+  currently auto-derived and read-only, §2a–§2b), or **(ii)** **remove/hide the Location section** from the
+  QA UI so it stops looking like missing data, or **(iii)** keep auto-derivation and drive the
+  zone-configuration workflow as before? These are mutually-informed options for one owner (Mostafa) to
+  decide once he has the field distinction from (A). The older "surface Phase on the detail panel"
+  enhancement (106714) remains a separate open go/no-go for Darminder.
 
 **Ruled out / not in play:** No claim of a regression, no deploy trigger, no crash. Nobody has alleged the
 computation is wrong — only that it is empty and that the entry field is missing.
@@ -159,6 +182,15 @@ category config (environment-dependent) before Darminder spins up the separate t
 Per xyz-platform-context/CLAUDE.md scale, overall this sits at **7/10**: approach and mechanism are clear,
 but resolution is product/process-dependent and the two code-level follow-ups are environment-dependent.
 
+- **07-15 update — no change to the FE code diagnosis (still 8/10).** The two new comments (107317, 107320)
+  add no new engineering facts; §2a–§2c stand as written. What has shifted is the *resolution path*: it is
+  now more clearly a **2-to-3-way product decision** (manual Location dropdown vs remove/hide the Location
+  section vs keep auto-derivation + drive zone config), triggered by the customer proposing their own
+  alternatives. Note that option (i) — a manual dropdown — would be a **genuine new feature** (Location is
+  currently read-only), not a bug fix, so it would need its own scoping/estimate; option (ii) — hiding the
+  section — is a small FE change. This does not raise or lower the diagnosis confidence; it re-shapes what
+  "done" means for the ticket.
+
 ---
 
 ## 5. Attachments — NEEDS HUMAN
@@ -173,6 +205,11 @@ configured) is stated verbatim in text by Darminder — but for completeness:
 - ⚠️ **NEEDS HUMAN:** `image-20260701-114131.png` (Darminder, 07-01, attached to comment 106251) —
   inaccessible. Per its caption it is Darminder's screenshot evidencing that rooms/zones are not set up on
   ML9; contents not independently verified.
+- ⚠️ **NEEDS HUMAN:** `image-20260714-113920.png` (Yash, 07-14, attached to comment 107317, 59KB) —
+  inaccessible (same auth caveat as the others; cannot view). Per the comment text it is the customer's
+  screenshot showing the empty "Location" part of the QA they want a dropdown for, or removed. Contents not
+  independently verified — do not guess. Not load-bearing for the diagnosis (the customer's request is stated
+  verbatim in text), but a human should glance at it to confirm which UI surface the customer means.
 - ⚠️ **NEEDS HUMAN:** inline `blob:` images in the description and in comment 106245 — placeholder refs,
   not fetchable.
 

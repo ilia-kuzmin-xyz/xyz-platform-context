@@ -185,3 +185,13 @@ WHERE statusCode IS NOT NULL;   -- apply same status filter as the tile
 - `distinct_source_elements > editor's 440K` → scope difference (unlinked-but-statused elements included) → definition decision.
 
 **Revised position:** "not a bug" was too strong. Correct statement: *the dashboard number was never a count of linked source elements, so equality with the editor is not the right expectation — but vector 2 (duplicate status rows) would be a genuine counting defect and is cheaply testable with the query above.* Recommended action file still stands: clarify + run the diff query before any dev work.
+
+---
+
+## Recheck — 2026-07-15
+
+No new comments on the Jira thread since the 2026-07-13 second pass (still 1 comment total:
+Ilia's 2026-07-13 14:12 "I'm going to compare the data to see where the 30K-element difference
+comes from."). No reply posted yet. Status unchanged (`In Analysis`). No action needed this run —
+`recommended-action.md` (clarifying question + one-off verification query for Darminder) still
+stands as the next step; nobody has picked it up yet.

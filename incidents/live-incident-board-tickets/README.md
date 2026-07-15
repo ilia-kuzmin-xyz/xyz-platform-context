@@ -43,6 +43,37 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-15 — scope narrowed to In Analysis only; 3 of 4 tickets moved
+
+**Scope note (change from prior runs):** this run's task instructions defined Group A strictly as
+`Needs Evaluation` / `In Analysis` (no `With Customer`), and Group B as `Ready For Development` /
+`Dev In Progress` only — narrower than the 2026-07-13 run's own convention above, which folded
+`With Customer` into Group A as a judgment call. Following the letter of this run's brief: **only
+PLT-2649, PLT-2858, PLT-2874, PLT-2882 (all `In Analysis`) were re-triaged.** PLT-2879, PLT-2815,
+PLT-2619 (`With Customer`) were **not touched this run** — their folders/content are untouched and
+may be stale. PLT-2892 progressed `In Analysis → Ready For QA` and PLT-2890 progressed
+`Ready For Development → In Code Review`; both are now out of scope under either convention and
+were left as-is. Human: please confirm whether `With Customer` should be in-scope going forward —
+the scope rule above and this run's brief disagree.
+
+| Ticket | Domain | Delta since 07-13 | New recommended action | Conf. |
+|---|---|---|---|---|
+| PLT-2649 | 360-captures | Pietro finally replied (breaking a 2-week stall) but pivoted to a product-feature idea (in-editor pin editing); Jason (design) opened a feature-direction fork (auto-detect mismatch vs manual X/Y/Z edit). The original re-upload-vs-remap data decision is **still unanswered by anyone**. | 3-part reply: answer Pietro's "do we have a list of pins" (no — but the query is scoped, offer to run it), re-ask the data decision separately, split Jason's feature idea to its own ticket so it doesn't hold the incident hostage. Verified Jason's "Edit pattern" claim is accurate in code (`editor-capture-360-details-panel.tsx`) but the update API doesn't accept coordinates yet. | 8/10 cause, 4/10 trigger |
+| PLT-2858 | quality-management | Customer proposed two of their own fixes (manual Location dropdown, or remove the Location section entirely) — new attachment. Mostafa asked "what's the difference between location and location details" — a question our own §2a already answers. | **Two-part, low-risk**: (1) ready-to-post direct answer to Mostafa's question (zero new investigation needed, 9/10) — the single highest-leverage move available on any Group-A ticket this run; (2) route the customer's dropdown-vs-remove 3-way decision to Mostafa once (1) lands. | 8/10 diagnosis |
+| PLT-2874 | viewer-and-model | No new activity since 07-13 (still 1 comment, no reply). | Unchanged — clarifying question + one-off verification query, still unrun. | 6/10 |
+| PLT-2882 | progress-tracking | Investigation moved well past the docs: root cause **confirmed on-ticket** (stale `client-element-metas` parquet vs re-versioned geometry); Ilia proposed deleting the 418 dead links and asked Pietro/Mostafa for approval — **~1 day unanswered**. New CSV attachment (readable format, but 403'd on every fetch path tried — still needs a human with browser/Jira-session access, unlike the videos). | Lead with the **systemic/cohort question** ("does this parquet-desync recur on every re-versioned model, or is FAR01 one-off?") before rubber-stamping the single-activity delete — per playbook, closing on cohort beats a single-instance fix. Approval nudge is secondary. | 9/10 root cause |
+
+### Cross-ticket note this run
+
+Three of four tickets advanced from "stalled/awaiting" to "someone replied, but the reply pivoted
+or under-answered the actual blocking question" — Pietro (2649) and the unanswered-approval pattern
+(2882) both show the same shape: a person engaged, but the **specific closing decision** still sits
+unanswered. This matches the playbook's Phase-6 discipline (close on cause+trigger+cohort, not on
+"someone responded"). Consider whether recommended-action drafts should more consistently open with
+"here is the one closed question still unanswered" to counter this drift.
+
+---
+
 ## Run: 2026-07-13 (updated, second pass) — 12 in-scope tickets
 
 ### Group A (8) — evaluate / clarify

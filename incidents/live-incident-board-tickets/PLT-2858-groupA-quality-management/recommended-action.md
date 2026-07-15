@@ -1,20 +1,60 @@
 # PLT-2858 — Recommended action
 
-## Chosen: (a) Draft the next routed question to move analysis forward — addressed to **Mostafa Kamel Hussien** (PO), Pietro looped
+> **All messages below are DRAFTS for a human to review and post. Nothing here is or should be
+> auto-posted to Jira. Do not change ticket status or priority.**
 
-The reported symptom is diagnosed (empty "Location" = no named zones configured on ML9; the zone Location
-is auto-derived and read-only by design — `context.md §1–§2`). What is blocking the ticket is a
-**product/process decision**, not engineering, and a specific owner has just picked it up: Mostafa said
-*"leave it with me"* (comment 107208, 2026-07-13) in reply to Ilia. The highest-leverage move is to convert
-that open-ended commitment into a concrete, answerable decision — playbook style: one owner, closed
-questions, phrased for a value — and to hand Mostafa the two engineering findings that should shape it.
+## Chosen: (a) A two-part action — (1) answer Mostafa's live question NOW, then (2) surface the customer's two proposals as one product decision
 
-### Why (a), not the others
-- **Not (b) Ready For Development.** There is no dev fix for the reported symptom — it is data/config
-  (configure named zones) + customer education. The only *code* candidates I found are secondary and
-  need product prioritisation first: the GUID-not-label display gap (`context.md §2c`) and the
-  "surface Phase" idea (`§2d`, which may already be done). Sending the ticket to a dev now would be a no-op
-  on the actual complaint.
+Two new comments (2026-07-15 context) reshape the next step:
+- **107320 (Mostafa → Darminder):** *"what is the difference between location and location details?"* — a
+  live, blocking question we **already have the exact answer to** (`context.md §2a`). Answering it is the
+  single highest-leverage, lowest-risk move on this ticket: zero new investigation, unblocks the owner,
+  and it is a prerequisite for him to make the decision below sensibly.
+- **107317 (customer via Yash):** the customer proposed **two alternatives of their own** — a **manual
+  Location dropdown** on the QA, or, failing that, **remove the Location section** entirely so it stops
+  looking like missing data. That converts the old "who configures zones" question into a genuine
+  **product decision** (`context.md` Net thread state, option B).
+
+So the recommended action is **part 1: post the direct answer** (below), and **part 2: put the customer's
+two proposals to Mostafa as closed questions** once he has the field distinction. Part 1 needs no decision
+and should go first.
+
+### Part 1 — Direct answer to Mostafa (DRAFT; Darminder or Ilia to post; @Mostafa)
+
+Verbatim-artifact style — state the two fields, their code paths, done. No hedging.
+
+> @Mostafa — the two are separate fields on a QA issue:
+>
+> - **"Location"** = the zone. FE `locationId` / v2 API `issueLocationId`. **Auto-derived** from the
+>   project's configured named zones (floors/areas/rooms) and **read-only** — there is no control in the
+>   issue form that sets it (`issue-form.tsx` has no zone selector). Shown in the detail panel's
+>   **"Location"** row (`issue-details.tsx:139`). This is the one that's empty on ML9, because ML9 has no
+>   named zones configured.
+> - **"Location Detail"** = free text. FE `locationDescription` / v2 API `locationDetails`.
+>   **User-editable**, max 100 chars, entered in the form's **"Location Detail"** box
+>   (`issue-form.tsx:526-537`). Shown in the detail panel as **"Location Details"**.
+>
+> In short: "Location" is the auto zone (needs zones set up), "Location Detail" is the manual note the user
+> can type today.
+
+*(This is a direct answer, not a question — it needs no decision from anyone and can be posted immediately
+after a human confirms the field/line references still match the current code.)*
+
+---
+
+### Part 2 — Put the customer's two proposals to Mostafa as one decision (DRAFT)
+
+Only after Part 1. See the "Draft message for the thread" section below.
+
+### Why (a) — answer-then-decide — not the others
+- **Not (b) Ready For Development — yet.** There is still no dev fix for the *reported* symptom — it is
+  data/config (configure named zones) + customer education. The customer's two new proposals (107317) *could*
+  become dev work, but only **after** Mostafa picks one: a **manual Location dropdown** would be a genuine
+  **new feature** (Location is currently read-only, `context.md §2a–§2b`) needing its own scoping/estimate;
+  **removing/hiding the Location section** is a small FE change. Neither is actionable until product decides
+  which (Part 2). The other *code* candidates remain secondary and product-gated: the GUID-not-label display
+  gap (`context.md §2c`) and the "surface Phase" idea (`§2d`, which may already be done). Sending the ticket
+  to a dev today would be a no-op on the actual complaint.
 - **Not (c) With Technical Support / needs the client.** We are not waiting on information from the
   customer — we've diagnosed it. The customer already told us the blocker on their side (*"we don't know how
   to configure zones"*, comment 106728). We cannot give them a useful answer until product defines the
@@ -30,29 +70,35 @@ by both Darminder, 107109, and the customer, 106728, as the workflow authority).
 
 ---
 
-## Draft message for the thread (Darminder or Yash to post; @Mostafa, @Pietro)
+## Draft message for the thread — Part 2 (DRAFT; post only after Part 1; Darminder or Yash to post; @Mostafa, @Pietro)
 
-> @Mostafa @Pietro — to turn this into a concrete next step, three closed questions:
+> @Mostafa @Pietro — following the customer's message (107317), the "Location" question is now a product
+> decision. Three closed questions:
 >
-> 1. **Zone setup ownership + how-to.** Confirmed root cause: ML9's model has no named zones (floors/areas/
->    rooms) configured, so the auto-derived "Location" on every issue is empty. The customer (Mikel) has
->    said they've *never done this and don't know how*. Who owns configuring named zones — the customer's
->    BIM team, or us — and **is there a step-by-step we can hand them** (or a self-serve UI)? Without a
->    how-to we can give the customer, this can't move.
-> 2. **Cohort.** This affects **every project without named zones configured**, not just ML9. Do we want to
->    identify and proactively flag/remediate those, or handle per-ticket?
-> 3. **"Surface Phase" idea (your 107208 / 106714).** Heads-up before we spin a separate ticket: the issue
->    **detail panel already renders every project category type except Discipline/Package**
->    (`issue-details.tsx:151-158`), and Phase is a category type in the form. So Phase may already be shown —
->    can you confirm against ML9's config whether anything is actually missing?
+> 1. **Which direction for "Location" on the QA?** The customer offered two options themselves: (i) a
+>    **manual dropdown to pick Location on the QA**, or (ii) **remove the Location section** so it stops
+>    looking like missing data. For the record: (i) is a **new feature** — Location is currently auto-derived
+>    from named zones and read-only (`context.md §2a–§2b`), so it needs scoping/estimate; (ii) is a small FE
+>    change; and a third option (iii) is to **keep auto-derivation and get named zones configured** (the
+>    original plan — but the customer says they've *never done this and don't know how*, 106728). Which of
+>    (i)/(ii)/(iii) do we go with?
+> 2. **If (iii): zone-setup ownership + how-to.** Who owns configuring named zones — the customer's BIM
+>    team, or us — and **is there a step-by-step we can hand them** (or a self-serve UI)? Without a how-to,
+>    (iii) can't move.
+> 3. **Cohort.** Whatever we pick, empty "Location" affects **every project without named zones configured**,
+>    not just ML9. Do we identify and proactively flag/remediate those, or handle per-ticket?
 >
-> Separate FE finding to log (not the customer's symptom): even once zones are configured, the detail panel
-> shows the raw location **ID**, not the zone **name** — it binds to `issueLocationId` and never resolves it
-> to the `IIssueLocation.location` label (`issue-details.tsx:139`, `format-issues.ts:87`). Worth a small
-> follow-up ticket so that "fixing" the data gap doesn't just surface a GUID.
+> Two side-findings to log (neither is the customer's symptom):
+> - **"Surface Phase" idea (106714):** the detail panel **already renders every project category type except
+>   Discipline/Package** (`issue-details.tsx:151-158`), and Phase is a category type — so Phase may already
+>   be shown. Worth confirming against ML9's config before spinning a separate ticket.
+> - **GUID-not-label:** even once zones are configured, the detail panel shows the raw location **ID**, not
+>   the zone **name** — it binds to `issueLocationId` and never resolves it to the `IIssueLocation.location`
+>   label (`issue-details.tsx:139`, `format-issues.ts:87`). Small follow-up so "fixing" the data gap doesn't
+>   just surface a GUID.
 
-*(Three closed questions, one owner each, plus one explicitly-scoped side-finding — so the thread gets a
-decision, not another round of open-ended discussion.)*
+*(Three closed questions, one owner (Mostafa), plus two explicitly-scoped side-findings — so the thread gets
+a decision, not another round of open-ended discussion.)*
 
 ---
 
@@ -73,13 +119,20 @@ decision, not another round of open-ended discussion.)*
 ---
 
 ## Notes for the coordinator (Yash)
-- Freshdesk #7286 is Open / "Waiting on 3rd line" — the client is waiting for us. The honest client-facing
-  update is: *"root cause identified (location needs named zones set up in the model); we're confirming
-  internally who sets that up and the exact steps, and will come back with a how-to."* Do **not** promise a
-  code fix — there isn't one for this symptom.
+- Freshdesk #7286 is Open / "Waiting on 3rd line" — the client is waiting for us, and has now proposed their
+  own two options (dropdown vs remove the Location section, 107317). The honest client-facing update is:
+  *"root cause identified (location needs named zones set up in the model); thanks for the two suggestions —
+  we're deciding internally between adding a manual Location picker, removing the section, or helping you get
+  zones configured, and will come back with a direction."* Do **not** promise a specific outcome or a code
+  fix before Mostafa decides (Part 2) — a manual dropdown in particular would be a new feature, not a quick
+  fix.
 - **Priority mismatch to flag:** the ticket is **Critical**, but the diagnosis is a config/education gap
   with a manual workaround (free-text Location Detail) available. Worth confirming with Mostafa/Yash whether
   Critical still fits, so it isn't distorting the incident board.
 
-**Confidence in diagnosis: 8/10. Confidence in this being the right next step: ~7/10** (comms/process
-judgment; depends on how Mostafa wants to own zone-config ownership and the Phase idea).
+**Confidence in diagnosis: 8/10.**
+**Confidence in Part 1 (answering Mostafa) being the right next step: 9/10** — it directly answers a live,
+explicit question using analysis we already did (`context.md §2a`), needs no decision from anyone, and
+carries essentially no downside beyond a human confirming the code line references still hold.
+**Confidence in Part 2 (the routed product decision): ~7/10** — comms/process judgment; depends on how
+Mostafa wants to weigh the customer's dropdown-vs-remove proposals against driving zone configuration.
