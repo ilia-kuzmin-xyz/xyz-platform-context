@@ -43,6 +43,32 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Addendum: 2026-07-15 (later) — new ticket PLT-2906 (section box), on user request
+
+New Live Incident **PLT-2906** "Section box misaligned from model" (FAR01/FAR02+, Major, Open) came in
+2026-07-15. User asked specifically to find similar past tickets and review how they were resolved.
+
+**It is a recurrence in a known fix→regression→fix chain** (folder
+`PLT-2906-groupA-viewer-and-model/`):
+
+| Ticket | Fix |
+|---|---|
+| PLT-2651 (May) | FE orientation workaround (PCA heuristic), **PR #1871 → v26.2.3** |
+| PLT-2756 (Jun) | 26.2.3 regressed ATL5–7; reworked to min-area-rectangle oriented box, **PR #1933** (5 Jun) |
+| PLT-2771 (Jun) | "misaligned again"; **never re-fixed** — un-reproduced, closed administratively |
+| **PLT-2906 (Jul)** | **THIS** — "new style / no rectangular box / put it back" |
+
+**Code finding:** #1933 is the *only* section-box change in ~6 weeks; it changed the `tightness<0.9` gate
+that decides oriented-vs-world-aligned box, so FAR01/02 likely flipped to an oriented (rotated) box. No UI
+restyle exists in code (box is Forge-native). Most likely (b) fallout from #1933 — either a gate
+regression (FE fix) or by-design-but-unwanted (product decision: customer wants old box back). **Decisive
+unknowns:** the screenshot (rotated vs. absent box) and #1933's deploy date to FAR01/02 (~14 Jul onset).
+Recommended action drafted (route two closed questions to Rishi/Darminder; fork bug-vs-product); DRAFT
+only, nothing posted. **Key risk to flag:** each prior heuristic flip regressed a differently-oriented
+project — any FAR01 fix must be QA'd across 0°-true-north AND diagonal footprints before release.
+
+---
+
 ## Run: 2026-07-15 — scope narrowed to In Analysis only; 3 of 4 tickets moved
 
 **Scope note (change from prior runs):** this run's task instructions defined Group A strictly as
