@@ -110,3 +110,62 @@ The 360 pin Z comes straight from the **capture record's own stored coordinate**
 - That the **precise trigger** is the "old PBP / changed room elevation" and the **remediation path** (customer re-upload vs XYZ-side coordinate remap) — **4/10** (a plausible but unconfirmed hypothesis; not validated by querying `captures_360.zMeters` vs level/room elevation, nor by model-version history; the quantifying screenshots are unreadable to me).
 
 **Still needed to close (playbook Phase 6):** confirm the **trigger** (did PA12's federated model PBP / level elevations change, and when, relative to the mis-placed captures' upload dates?) and enumerate the **cohort** (which capture/room IDs are off) — both answerable by querying `captures_360` z against `project-levels`/`project-rooms` elevation. Then a single **ownership decision**: customer re-uploads, or XYZ remaps the stale-base-point captures.
+
+---
+
+## Update — 2026-07-15 — root cause NAILED from data exports (conf 4→9)
+
+Ilia supplied four raw PA12 exports (issues, two 360capture pages, roomcapturepoints).
+Analysis is in `analysis/` (reproducible: `python3 detect_stale_360.py <dir>`), outputs
+`PLT-2649-stale-360-captures.csv` (flagged rows) + `PLT-2649-stale-cohort.json` (IDs).
+
+### Method (the one Ilia proposed: issues = ground truth → envelope → filter 360)
+Issues are correctly aligned, so their coordinate span is the valid model envelope.
+360 captures outside it — specifically ABOVE it — are stale.
+
+### What the data proved
+1. **Vertical axis is `Y`, not Z** (within-level stdev of Y == 0.000 across all 9
+   levels; X/Z vary as the horizontal plan). Matches the viewer transform's `swapYZ=true`.
+   The earlier "wrong Z" framing was mislabelled — the wrong axis is **Y (elevation)**.
+2. **Issue envelope:** Y ∈ [−2.2, 22.1] (real levels L00–L03 = 0.0 / 5.3 / 10.6 / 15.9 m).
+3. **The stale cohort is one phantom level.** 1,868 of 6,565 captures-with-coords
+   (**28.5%**) sit at **Y = 50.4 m** — a ~50 m spike with a completely empty 16–47 m
+   gap beneath it (two disjoint bands). All 1,868 are on **one level id
+   `f0f4d409-…`**, spanning **75 rooms / 75 capture points**.
+4. **Filenames prove it and give the fix target.** 100% of the 1,868 stale captures
+   are filename-floor **`L00` (ground floor)** (`…PH1-L00-FOH-CORRIDOR…`). The 36
+   *correctly* placed L00 captures live on the real L00 level **`7026451f`** at
+   **Y = 0.0 m**. So `f0f4d409` is a **phantom/duplicate Level-00 defined 50.4 m too
+   high**; the correct elevation is **0.0 m** (offset = −50.4 m).
+5. **Capture Y == its roomCapturePoint Y exactly** (|dY| max 0.00 over 6,565) →
+   staleness is in the **room/capture-point definition**, not per-capture drift.
+6. **Not a one-time "old PBP" import.** Stale captures are spread evenly across the
+   whole timeline (2025-05 → 2026-07, ~28%/month incl. this month) — new captures
+   into these rooms **keep** coming out high. So the defect is a **standing wrong
+   elevation on the level/room data**, matching the customer's own words ("problem
+   with the room data in the Revit models") more precisely than "inherited the old pbp".
+7. Secondary: **30** captures are horizontal (X/Z) outliers within the Y envelope —
+   minor, listed as SUSPECT in the CSV, not part of the headline cohort.
+
+### Revised root cause (supersedes §"Working hypothesis")
+PA12 has a **duplicate Level-00 (`f0f4d409`, 75 rooms) defined at Y≈50.4 m instead of
+0.0 m**. All 1,868 captures assigned to those rooms inherit 50.4 m and render ~50 m too
+high in the viewer — in BOTH dashboards (shared upstream data), while Quality/issue pins
+(correct data) render fine. This is the whole "~40% too high" symptom, measured at 28.5%.
+
+### Remediation (now concrete — offset & target are known, no re-upload strictly needed)
+- **Correct elevation is derivable per capture from data** (filename floor code →
+  good-capture elevation map), so an **XYZ-side remap** is viable: for the 75 capture
+  points / 75 rooms on level `f0f4d409`, set Y 50.4 → 0.0 (or re-parent to real L00
+  `7026451f`). Deterministic, exact IDs in the cohort JSON. This is also exactly the
+  "detection pass when PBP changes" Jason floated (07-13) — already implemented here.
+- **OR source fix (customer/model):** correct level `f0f4d409`'s elevation in the Revit
+  room data. The customer already pointed here.
+- Either way we can now hand Pietro the exact list he asked for ("do we have a list of
+  those pins?", 07-13) instead of "re-upload everything".
+
+### Confidence (revised)
+- Cause = data, wrong **Level-00 elevation** (not new-dashboard code): **9/10**.
+- Cohort enumerated (which pins, correct target elevation): **9/10** (exact IDs + offset).
+- One residual human check: confirm PA12 has **no genuine ~50 m structure** (near-certain
+  — empty 16–47 m gap, zero issues above 22 m, all stale rows are L00 ground-floor).
