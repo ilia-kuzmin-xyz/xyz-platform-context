@@ -208,3 +208,25 @@ that sync gap is the pipeline bug and the sharpest question for BE.
 Status: root cause explained end-to-end; 418 list verified and exported; deletion pending peer
 alignment; project-wide sweep pending harvest run or BE query; FE robustness fix still to be
 scheduled.
+
+## 2026-07-16 — verification pass, no change
+
+Delta-check of fresh Jira (issue `updated` = 2026-07-15T10:53, last comment 107412) against this
+log: **nothing new since the 2026-07-14/15 entry.** The last Jira comment — Ilia's geometry-vs-
+metadata reply to David Webb ("agreed it's in current client-element-metas… but the
+sourceFileElementId isn't in the current translation's geometry; `bb85941b` has 18,908 elements
+yet 0 of its 141 linked handles; other activities in the same models select fine") — is the
+"answer" already recorded above.
+
+Open exactly as last recorded, nothing actioned:
+- **Peer (David Webb):** no further reply after 107412 — alignment neither confirmed nor withdrawn.
+- **BE sync-gap question** (why the current-version `client-element-metas` parquet lists 418
+  elements the same version's SVF/property-DB geometry lacks; is element-meta regenerated on
+  re-version) — **still unanswered.** David Webb answered only the narrower object-id-map question
+  (navis-only) on 07-14.
+- **Delete-418 approval:** Pietro / Mostafa have **not** responded to the 07-14 request; the 418
+  remain **not deleted** (nothing executed without alignment — good).
+- **Status:** still **In Analysis**; assignee still Ilia.
+
+Ticket idle ~1 day, effectively parked on (a) peer alignment with David Webb + (b) PO approval
+before the 418 deletion can proceed. No routing or confidence change (root cause remains 9/10).

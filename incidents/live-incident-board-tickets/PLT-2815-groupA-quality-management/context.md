@@ -7,6 +7,12 @@
 - **Reporter (Jira):** Masum Ahmed (support) · **Original customer:** "Paolo" · **Project:** ML9 (EUR)
 - **Linked Freshdesk:** #7126 — **already Closed 2026-07-06** (see discrepancy below)
 - Triage date: 2026-07-13
+- **Last verified: 2026-07-16 — NO CHANGE.** Fresh Jira pull identical to prior triage: still 13
+  comments (last is #106553, Freshdesk→Closed, 2026-07-06), status still "With Customer",
+  `resolution: null`, assignee still Yash. No customer reply, no close. This is a stale
+  nudge-to-close: Jira left open **10 days** after Freshdesk #7126 was closed (2026-07-06) and
+  **~23 days** after Mostafa's "leave as intended" decision (2026-06-23). Recommended action
+  unchanged (see recommended-action.md). Nothing time-sensitive; nudge-or-close is Yash's call.
 
 ---
 

@@ -48,6 +48,8 @@ Note for the human: the native Dashboard Page is now documented as ✅ Live (`da
 
 **Stale.** No movement since 2026-04-29; today is 2026-07-13 → **~75 days (≈10.5 weeks) untouched**, sitting on the live-incident board the whole time.
 
+> **Last verified 2026-07-16 — no change.** Re-checked fresh Jira JSON: still 4 comments (identical), no new attachments, status still "With Customer", `updated` still 2026-04-29. Ticket is now **~78 days stale**; the "mis-filed, needs reclassify/hand-off to product" finding was flagged at the prior pass (2026-07-13) and remains **unactioned 3 days later** — still not reclassified off the incident board, still assigned to support (Masum). Nothing here needs re-triage; it needs a human to actually execute the hand-off.
+
 ## Roster / ownership flags
 
 - **Masum Ahmed** (reporter + assignee) — **NOT on the provided team roster**. Behaves as a support/Freshdesk agent (posts the #6492 Freshdesk-status mirror comments). Ownership should move to product, not stay with support.

@@ -6,7 +6,60 @@
 - **Assignee:** Darminder Atker (fullstack lead) · **Reporter (Jira):** Yash Patel (support / incident coordinator)
 - **Original customer contact:** "Mikel" · **Project:** ML9 · **Software Area:** Web Viewer
 - **Linked Freshdesk:** #7286 (currently Open, last flipped to "Waiting on 3rd line" 2026-07-07)
-- Triage (continuation) date: 2026-07-13
+- Triage (continuation) date: 2026-07-13 · **Last delta-check: 2026-07-16**
+
+---
+
+## ⟢ UPDATE 2026-07-16 (delta pass — read first; append-only)
+
+Four comments + one attachment are NEW since the 07-13 pass (which ended at comment 107208,
+Mostafa "leave it with me"). Nothing changes the *diagnosis*; the ticket has moved on the
+*product-decision* and *customer-ask* fronts, and is now stalled on an internal clarification.
+
+**What's new, chronologically:**
+- **107317 (07-14 12:39, Yash relaying customer "Mikel"):** the customer has escalated from
+  "we don't know how to configure zones" to a **concrete binary product ask**:
+  > "As far as I understood, it is **not possible to connect the rooms to the different models**.
+  > If it is possible to have a **drop-down list with all the different Location to select on the
+  > QA**, that would be great. In case it is not possible, it would be ideal to **remove the
+  > Location part on the QA**, to not create confusion and not appear as we have missing details
+  > on the Dashboard."
+  → Two options on the table: **(A) make Location user-selectable via a dropdown**, or
+  **(B) remove the Location field** from the QA form/panel. New attachment `image-20260714-113920.png`
+  (id 60719, Yash) is the customer's screenshot of the "missing details" appearance — NEEDS HUMAN, see §5.
+- **107320 (07-14 13:17, Mostafa → Darminder):** *"what is the difference between location and
+  location details?"* → This is **exactly the §2a distinction** and it is the current blocker.
+  **Answer (verified in code this pass):** they are two different fields —
+  `locationId`/`issueLocationId` = the auto-derived **zone Location** (read-only, from named zones)
+  vs `locationDescription`/`locationDetails` = the **free-text "Location Detail"** box the user types.
+  Confirmed `format-issues.ts:87-88` (inbound) and `:146-147` (outbound). See §2a — unchanged and re-verified.
+- **107532 (07-16 14:42, Ilia):** chased Mostafa for an update.
+- **107533 (07-16 14:44, Mostafa → Ilia, @Darminder):** *"waiting on this since it was asked of me."*
+  → Read together with 107320: Mostafa is **waiting on Darminder to answer his 07-14 clarification
+  question** before he can drive the product decision. **The ball is in Darminder's court**, and the
+  answer already exists in-repo (above).
+
+**⚠️ Flag for a human — a factual disconnect worth resolving:** the customer now asserts zone→model
+configuration is **"not possible"**, which contradicts the week-old in-thread advice ("get your BIM
+team to configure named zones", 106252/106713). Either (i) that advice was not actionable for this
+project/model and the team should stop repeating it, or (ii) it *is* possible and the customer needs a
+concrete how-to. This should be pinned down before choosing between the customer's options A/B —
+otherwise option B (remove the field) risks removing a genuinely-configurable capability. NOT resolved
+in-thread.
+
+**Cross-check vs customer options:** Option B ("remove Location") is a small FE change (hide the panel
+row / form handling — the field is already not user-settable, §2b). Option A ("dropdown to select
+Location") is a larger product change: it would make the currently-auto, read-only zone Location
+user-editable, and interacts directly with the latent §2c gap (panel renders the raw `issueLocationId`
+GUID, not the zone name). Neither is the reported symptom's *fix* — both are product choices.
+
+**Status/metadata unchanged:** still In Analysis, assignee still Darminder, priority still Critical.
+Freshdesk #7286 last state recorded 07-07 (no new FD status comment in this delta).
+
+**Confidence after this pass:** diagnosis of the reported symptom still **8/10** (unchanged, and §2a
+re-verified in code). Confidence in the recommended next step **raised to ~8/10** — the immediate
+blocker (Mostafa's clarification question) now has a verified, in-repo answer to hand over, and the
+customer has narrowed the product decision to two concrete options. See `recommended-action.md`.
 
 ---
 

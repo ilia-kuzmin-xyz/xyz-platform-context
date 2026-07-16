@@ -1,5 +1,61 @@
 # PLT-2858 — Recommended action
 
+> **DRAFT ONLY — execute nothing.** No Jira comments, transitions, or edits. Drafts for a human to send.
+
+---
+
+## ⟢ UPDATED 2026-07-16 (supersedes the 07-13 draft below)
+
+The situation moved on 07-14–07-16 (see `context.md` § UPDATE 2026-07-16). The blocking step is no longer
+"ask Mostafa an open question" — it is now **Darminder answering the specific clarification Mostafa asked**
+(*"what is the difference between location and location details?"*, comment 107320, 07-14), which Mostafa is
+explicitly waiting on (107533, 07-16: *"waiting on this since it was asked of me"*). That answer already
+exists and was re-verified in code this pass. In parallel, the customer has **narrowed the product decision
+to two concrete options** (dropdown-to-select, or remove the field).
+
+**Recommended next step (still option (a): a routed reply — but now an ANSWER + a two-option decision, not an open question).**
+Route: **Darminder** answers Mostafa's question and states the two customer options; **Mostafa** (with
+Pietro) picks A vs B. Then back to the customer via **Yash**.
+
+### Draft reply for the thread (Darminder → @Mostafa, @Pietro)
+
+> @Mostafa — re your question, they're **two different fields**:
+> - **Location** (`issueLocationId`) — the **auto-derived zone** (floor/area/room). Read-only; the user
+>   can't set it. It's empty on ML9 because the model has no named zones configured. (`format-issues.ts:87`)
+> - **Location Detail** (`locationDetails`) — a **free-text box the user types** (max 100 chars). This one
+>   works today and shows in the panel as "Location Details". (`format-issues.ts:88`, `issue-form.tsx:526-537`)
+>
+> On the customer's request (comment 107317) they've given us two options, since they believe zone→model
+> config isn't possible for them:
+> 1. **Dropdown to select Location on the QA** — this is a real product change: it turns the auto/read-only
+>    zone Location into a user-editable field. Bigger scope, and it runs into a known display gap (the panel
+>    currently shows the raw location **ID**, not the zone name — `issue-details.tsx:139`).
+> 2. **Remove the Location field from the QA** — small FE change; avoids the "missing details" look on the
+>    dashboard they screenshotted.
+>
+> **Before we pick:** can we confirm whether named-zone configuration is actually available for this
+> project/model? The customer says it's "not possible", which contradicts our earlier "get your BIM team to
+> configure zones" advice. If it IS possible we should hand them a how-to instead of removing the field; if
+> it genuinely isn't, option 2 is the honest fix. @Pietro — do you know which is true for ML9's project type?
+
+*(One answer, one factual disconnect to close, one A/B decision with owners — so the thread resolves rather
+than loops.)*
+
+### Why this and not the alternatives
+- **Not Ready-For-Dev yet.** Both customer options are real work but neither should be built until Mostafa/
+  Pietro pick A vs B *and* the "is zone config possible?" question is settled — building the wrong one (or
+  removing a configurable capability) is worse than waiting one reply.
+- **Not With-Customer.** We owe the customer an answer, but it depends on the internal A/B + feasibility
+  decision first; relay via Yash *after*.
+- **Not Blocked.** Owner is engaged (Mostafa is actively waiting); the blocker is a one-line answer we can now supply.
+
+**Confidence: diagnosis 8/10 (unchanged, §2a re-verified). Next-step ~8/10** (up from 7 — the blocker now
+has a concrete, in-repo answer and the decision is narrowed to two options).
+
+---
+
+## Original 07-13 draft (retained for history)
+
 ## Chosen: (a) Draft the next routed question to move analysis forward — addressed to **Mostafa Kamel Hussien** (PO), Pietro looped
 
 The reported symptom is diagnosed (empty "Location" = no named zones configured on ML9; the zone Location

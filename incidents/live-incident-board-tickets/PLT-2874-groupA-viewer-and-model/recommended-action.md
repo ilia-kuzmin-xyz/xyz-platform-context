@@ -1,5 +1,7 @@
 # PLT-2874 — Recommended action
 
+> **DRAFT ONLY — execute nothing.** Nothing here is auto-posted or actioned in Jira; drafts are for a human to review, edit and send.
+
 ## Chosen: (a) Draft a clarifying question — establish the reference and pin the exact widgets before any dev work
 
 **Why (a), not the others:**
@@ -76,3 +78,17 @@ Outcome map:
 **Confidence in diagnosis: 6/10** (both code paths traced; specific cause of the Far01 gap is
 environment-dependent). **Confidence in this being the right next step: 8/10** — a clarifying question
 + one query is the low-cost move that decides bug-vs-by-design before any dev effort is committed.
+
+---
+
+## Delta 2026-07-16 — next step unchanged, minor routing note
+
+Fresh Jira check: ticket moved **Open → In Analysis**; one comment added, by **Ilia (operator)** on 07-13
+— *"I'm going to compare the data to see where the 30K-element difference comes from"* (tagging Yash).
+No answer yet from Mostafa (widgets/figures), **no query result from Darminder**, no COUNT diff posted.
+
+**The recommended action above still stands verbatim** — clarify + run the diff query before any dev.
+Only routing has shifted: Ilia appears to be taking on the comparison himself rather than it going to
+Darminder. Suggested nudge for the coordinator: confirm whether Ilia is now running the §4 query (if so,
+that closes the Darminder hand-off) and still get Mostafa's widget/figure confirmation, since the
+clarifying question (which numbers are actually being compared) remains unanswered.

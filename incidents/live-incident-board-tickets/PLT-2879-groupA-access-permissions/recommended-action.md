@@ -1,6 +1,10 @@
 # PLT-2879 — Recommended action
 
+> **DRAFT ONLY — execute nothing.** Every message below is a proposal for human review; do not post, transition, or comment on Jira.
+
 **Chosen action: (a) Post a status-check / closed question to Yash — keep status "With Customer". Draft only; do not execute.**
+
+> **Delta note (verified 2026-07-16):** action UNCHANGED. A new comment landed 2026-07-13 18:27 — Darminder wrote the **first in-ticket root-cause note** ("dashboard-only role, invited via old navigation; new navigation now used, V1 no longer supported"). This is a candidate **trigger** ("why now") but it is a hypothesis, undated, and does **not** answer what we are waiting on the customer for, nor report a customer confirmation — so the status-check to Yash remains the right next move. Two additions below: (i) route the trigger-ownership ask to Darminder since he raised it, and (ii) re-confirmed the FE gate is still unfixed (now `project-private-route.tsx:49` after a refactor — authority set unchanged), so the recurrence-risk caveat in Draft 1 stands and is stronger.
 
 ## Why (a), not (b)/(c)/(d)
 
@@ -25,6 +29,6 @@ The one hard gap in the record is that the ticket sits in **"With Customer" with
 ## After Yash replies — routing (for the human, not to execute now)
 - **If mbowser confirms access:** don't auto-close. Split the still-open incident work into a code/cohort ticket under **PAPI-3602 (Portfolio Permissions)** before resolving PLT-2879 — per playbook "close on cause + trigger + cohort, never on 'looks fine now'."
 - **If still broken / evidence returns:** re-open investigation; the FE gate root cause (`project-private-route.tsx:41` requires `ProjectView`) is confirmed present, so a `DashboardView`-only user would still be denied — that becomes the concrete fix.
-- **Trigger ("why now") owner still unassigned** — assign it; FE gate is unchanged since PLT-2753 (#1959), so look at api2/IAM/role-data or the Redis cache behaviour.
+- **Trigger ("why now")** — Darminder has now posted a candidate in the ticket (13 Jul: *new navigation adopted / V1 no longer supported*). This is progress but not a dated cause. Route back to **Darminder** (he raised it): "can we pin the V1-deprecation / new-nav cutover to a date and correlate it with the access-denial error rate?" FE route gate is still unchanged in authority terms (now `project-private-route.tsx:49` after a refactor), so the trigger remains a BE/IAM/nav-migration or Redis-cache event, not a FE-gate deploy.
 
 **Confidence in this recommendation: 7.** High that a status-check to Yash is the correct next move (the waiting-state is genuinely undocumented and the ball is plausibly with the customer); lower certainty on the precise customer ask, which is exactly what the draft resolves. Execute nothing without human review.

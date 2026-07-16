@@ -43,6 +43,65 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-16 (third pass) — 9 in-scope Group A tickets, 2 Group B (skipped)
+
+Full re-query of `project = PLT AND issuetype = "Live Incident"` against the exclusion
+list (With Technical Support / Ready For QA / In Code Review / release-family
+(READY FOR RELEASE, Customer Release Check, Done, ARCHIVED) / Blocked). 3 brand-new
+tickets triaged from scratch; 6 previously-triaged tickets delta-checked against fresh
+Jira data (comments re-diffed against what was already recorded — only genuinely new
+developments written up, per-file, append-only). Group B action scenario is still TBD
+per the operator — **Group B tickets are context-noted only, not triaged this run.**
+
+### Tickets that dropped out of scope since 07-13 (now excluded)
+
+PLT-2892 → READY FOR RELEASE · PLT-2890 → In Code Review · PLT-2759 → READY FOR RELEASE ·
+PLT-2742 → READY FOR RELEASE. All four progressed past the board stages this routine
+covers — no action needed here.
+
+### Group A (9) — evaluate / clarify
+
+| Ticket | Domain | Status | New this pass? | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|---|
+| **PLT-2909** | data-pipeline | Open | 🆕 new ticket | ATL08 CY-5200 shows spurious extra "linked" models — activity_links spans multiple models (unique-PK modelElementId ⇒ can't be an FE bug). Likely **same family as PLT-2385**; client says it affects all ATL05-08 | (a) mechanism + confirming query → Ilia; dedupe question → Rishi | 7/10 |
+| **PLT-2906** | viewer-and-model | In Analysis | 🆕 new ticket | Section Box mis-orients / stops rendering on FAR01/FAR02+ — our patches mutate **unsupported Forge internals**; no FE code changed since 06-17, so trigger is almost certainly an **Autodesk-side APS/LMV push** ~Jul 13-14, hitting every project | (a) mechanism + version-check repro → Ilia; "why now" (Autodesk release timeline) → Yash | 6/10 (mechanism 9/10, trigger 3-4/10) |
+| **PLT-2884** | progress-tracking | With Customer | 🆕 new ticket, **Critical** | New-dashboard Actual% < PowerBI — 3 candidate causes (missing-from-XER / **Pattern A backend parquet bug** on an intangible activity, already seen on ELN03 / PowerBI over-counting) all look identical from outside. Team told the client "it's your XER" on an **unverified** guess | (a) parallel in-house verification (single-activity diff) → Ilia, without disputing the client ask | 5/10 |
+| PLT-2882 | progress-tracking | In Analysis | No change (verified) | Root cause confirmed 07-14 (superseded model-content generation, parquet vs geometry mismatch); 418-element deletion still on hold pending peer alignment | unchanged — status-update pending peer + PO sign-off | 9/10 mech |
+| PLT-2879 | access-permissions | With Customer | **Yes** — Darminder posted first in-ticket root-cause hypothesis (V1-deprecation/new-nav cutover) 07-13 18:27 | Trigger partially named but unpinned/unowned; **FE gate fix still not landed** — `project-private-route.tsx` was refactored since without adding `DashboardView`; recurrence risk is live | unchanged — status-check → Yash; pin trigger → Darminder | 6-7/10 |
+| PLT-2874 | viewer-and-model | In Analysis | Minor — status Open→In Analysis, one comment (Ilia self-assigning the count diff) | 440K vs 470K gap still unexplained pending the COUNT(*) vs COUNT(DISTINCT) query; Darminder hasn't engaged | unchanged — explain + query, now likely run by Ilia not Darminder | 6/10 |
+| PLT-2858 | quality-management | In Analysis | **Yes** — customer narrowed to 2 options (add Location dropdown vs remove field); Mostafa's clarifying question to Darminder has sat unanswered ~2 days | Blocker has a code-verified answer already (`format-issues.ts:87-88`, Location=zone vs Location Detail=free-text) sitting undelivered | updated — Darminder → Mostafa/Pietro reply answering the question + A/B decision ask | 8/10 |
+| PLT-2815 | quality-management | With Customer | No change | Freshdesk closed 07-06, Jira still open 10 days later — pure hygiene gap | unchanged — nudge to close | 9/10 |
+| PLT-2619 | other | With Customer | No change | Mis-filed demo-relink request, now ~78 days stale since last activity, 3 days since flagged mis-filed with still no reclassification | unchanged — hand off to product | 8/10 |
+
+### Group B (2) — context only, NOT triaged this pass (scenario TBD)
+
+| Ticket | Domain | Status | Note |
+|---|---|---|---|
+| PLT-2649 | 360-captures | Dev In Progress | Moved from In Analysis (07-13 pass) into dev pipeline — prior finding (source-data Revit elevation issue) still holds; not re-verified this pass |
+| PLT-2385 | data-pipeline | Ready For Development | Unchanged since 07-13; **PLT-2909 (new, this pass) is a likely same-family duplicate** — see cross-ticket notes |
+
+### Cross-ticket notes
+
+- **PLT-2909 ↔ PLT-2385 (data-pipeline stale-link family):** both are `activity_links` rows surviving model re-versioning and pointing at content from the wrong/superseded model generation. PLT-2909's drafted action explicitly asks Rishi whether PLT-2385/PLT-2650's fix scope already covers ATL05-08 before any new dev ticket is cut — **do not duplicate the fix**.
+- **PLT-2882 ↔ PLT-2909/PLT-2385:** all three are variations on the same underlying pattern (activity-linking data outliving the model version it was created against) but are three **distinct mechanisms** (geometry-vs-metadata desync for 2882; multi-model cross-links for 2909/2385) — do not merge, but worth one shared BE conversation about `activity_links` lifecycle hygiene generally.
+- **PLT-2879** is the incident `live-incident-playbook.md` was written about. The FE gate fix is still outstanding after two passes — this is now the routine's longest-standing open recurrence risk on a **Blocker**-priority, client-facing ticket.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian/Freshdesk auth) — this pass
+
+- **PLT-2909** — 2 screenshots + inline blobs, one showing a separate "generate session id" error (split-off signal, needs exact text from Yash)
+- **PLT-2906** — `section_box.png`, the single decisive artifact for which failure mode (no-box / degenerate / tilted / plane-only); customer's model file (SharePoint link) for repro
+- **PLT-2884** — the attached XER (`EQIX_AT10x-A11x_Rev_02_updated20260427.xer`, decisive — grep for `EL1031000`), an xlsx, 3 PNGs
+- **PLT-2858** — new screenshot `image-20260714-113920.png` (not load-bearing — ask is stated verbatim in text)
+
+### 🚩 For the operator's attention (nothing executed, drafted only)
+
+1. **PLT-2884 (Critical)** — client was told "it's your data file" on an unverified guess; the symptom matches a known backend bug (Pattern A) that a re-upload cannot fix, and nobody has opened the attached XER to check. Highest-value single action this pass: run the one 15-minute diff before the client burns days on a re-upload that may not help.
+2. **PLT-2879 (Blocker)** — root-cause hypothesis now written down in-ticket, but the FE gate fix is still not in code (file was touched/refactored since without the fix), and no customer confirmation has been posted in 3 days. Recurrence risk from the original SWITCH incident is live.
+3. **PLT-2858** — internally stalled ~2 days on a question (Location vs Location Detail) that's already answered in the codebase; a one-line reply from Darminder unblocks a customer-facing decision.
+4. **PLT-2619 / PLT-2815** — both are cases where the routine keeps re-confirming the same verdict (mis-filed / needs-closing) every pass with no human action taken. Suggest just actioning these two directly rather than re-triaging again next run.
+
+---
+
 ## Run: 2026-07-13 (updated, second pass) — 12 in-scope tickets
 
 ### Group A (8) — evaluate / clarify

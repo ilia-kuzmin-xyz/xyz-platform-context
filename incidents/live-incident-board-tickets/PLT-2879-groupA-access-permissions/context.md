@@ -119,3 +119,25 @@ Matches commit `e201f2a` (files changed: `api-instance.ts` +47/-15, `api-instanc
 | Follow-up #1 trigger STILL OPEN | 6 |
 | Follow-up #2 cohort sweep STILL OPEN/UNKNOWN | 4 |
 | **What PLT-2879 is waiting on the customer for** (inferred; undocumented) | **4** |
+
+---
+
+## 8. Delta update — verified 2026-07-16 (CHANGE since 13 Jul)
+
+**One new comment since the 13 Jul triage.** The prior pass recorded 4 comments and stated "no comment after 8 Jul." The 13 Jul triage ran *before* 18:27; a 5th comment landed at 2026-07-13T18:27 and is now the ticket's `updated` timestamp. (Correction to §1: the last "With Customer" note earlier read as flipped 10 Jul with no comment — that remains true for the *status transition*; the new comment does not change the status, which is still **With Customer**.)
+
+### New comment — the first written root-cause note in the ticket
+- **id 107264 · 2026-07-13 18:27 · Darminder Atker (assignee/FE lead):**
+  > "Source of the problem appears to be users have been invited previously with old navigation and set with 'dashboard only' role. Users with this role should have `userRoleCode: viewer_role`, `userRoleName: Viewer`. The authorities for this role are preset in the backend and users cannot edit. Now that new navigation is being used and V1 is no longer being supported."
+
+### What it changes vs the 5 follow-ups
+- **#1 Trigger ("why now") — PARTIALLY ADDRESSED (was STILL OPEN).** This is the **first written "why now" hypothesis** in the record: *"now that new navigation is being used and V1 is no longer being supported."* It is consistent with the prior finding that the FE gate itself did not change (so the trigger is a migration/deprecation event, not a gate deploy). **But** it is a hypothesis ("appears to be"), undated, unowned, and **not** correlated to a deploy/error-rate timeline — so the playbook's bar (dated cause) is *not* met. Trigger conf raised 6 → **6-7** as a stated-but-unverified candidate. NEEDS HUMAN: assign an owner to pin the V1-deprecation/new-nav cutover to a date and correlate with the access-denial error rate.
+- **#2 Cohort sweep — STILL OPEN.** Comment *names* the cohort ("users invited via old navigation on the dashboard-only role") but gives **no evidence of enumeration or bulk migration**. Unchanged (conf 4).
+- **#3 FE code fix — STILL OPEN, re-verified on current branch.** `project-private-route.tsx` was **refactored** since the last pass (now `useQuery` + `useProjectAccessGuard` + `projectAuthoritiesQueryConfig`; gate moved line 41 → **line 49**; branch now `claude/vigilant-franklin-pg8h8b`), **but the accepted authority set is unchanged — still `[AUTHORITIES.PROJECT_VIEW, AUTHORITIES.PROJECT_EDIT]`, `DASHBOARD_VIEW` still absent.** The file being touched WITHOUT the fix landing means the recurrence risk is live and was *not* incidentally closed by the refactor. Conf 9.
+- **#4 Observability — unchanged (PARTIAL).**
+- **#5 Token race PR #2030 — unchanged (CLOSED).** (Not re-verified this pass; refactor of the auth route does not touch `api-instance.ts`.)
+
+### Reading of the state
+Darminder posted a **root-cause diagnosis (internal-facing)** onto a ticket that is sitting in **"With Customer"** — the comment does **not** answer "what are we waiting on the customer for," does **not** report a customer confirmation, and there is **no update from Yash**. So the single biggest gap flagged on 13 Jul (undocumented customer-ask) is **still open**. Net: the ticket is *diagnostically* one step further (mechanism now written down + a candidate trigger), but *operationally* unchanged — no fix, no sweep, no customer reply.
+
+**Staleness:** last activity 2026-07-13 18:27; quiet ~3 days as of 2026-07-16. Less stale than the 13 Jul pass feared (there WAS 13 Jul activity), but still a **Blocker** parked in With-Customer with root cause known-and-written yet unfixed, cohort un-swept, and customer confirmation unrecorded.

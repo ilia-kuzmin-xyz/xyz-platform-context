@@ -185,3 +185,19 @@ WHERE statusCode IS NOT NULL;   -- apply same status filter as the tile
 - `distinct_source_elements > editor's 440K` → scope difference (unlinked-but-statused elements included) → definition decision.
 
 **Revised position:** "not a bug" was too strong. Correct statement: *the dashboard number was never a count of linked source elements, so equality with the editor is not the right expectation — but vector 2 (duplicate status rows) would be a genuine counting defect and is cheaply testable with the query above.* Recommended action file still stands: clarify + run the diff query before any dev work.
+
+---
+
+## Delta-check 2026-07-16 (no material change)
+
+Re-checked the fresh Jira export against the 07-13 triage above. **Two small deltas, nothing substantive resolved:**
+
+1. **Status moved Open → In Analysis** (`statusCategory` = In Progress). Assignee unchanged (Darminder Atker). No resolution set. Priority still Minor.
+2. **One comment now exists** (previously zero) — id 107239, by **Ilia Kuzmin** (the operator running this routine, not a responder), `2026-07-13T14:12`, tagging Yash Patel: *"I'm going to compare the data to see where the 30K-element difference comes from."*
+
+**Interpretation:**
+- The comment is the operator self-assigning the investigation, **not** an answer to the §3 clarifying question and **not** technical evidence. **Darminder has not engaged**; the COUNT(*) vs COUNT(DISTINCT) diff query has **not** been run/posted; Mostafa has **not** confirmed which widgets or the exact figures. The "30K difference" phrasing matches the deep-dive's 440K/470K framing (not the description's 628K/695K ≈ 67K gap) — internally consistent, both scenarios already documented.
+- No new information bearing on bug-vs-by-design. **Hypothesis and confidence unchanged (6/10).** Next step is unchanged: the §4 / deep-dive query diff, now apparently to be run by Ilia himself rather than routed to Darminder.
+- Nothing alarming or time-sensitive: Minor, internal (Mostafa reporter), no client, no regression signal, no SLA pressure.
+
+*Last verified against fresh Jira export: 2026-07-16.*
