@@ -1,5 +1,41 @@
 # PLT-2649 — recommended action (DRAFT ONLY — execute nothing)
 
+## 2026-07-16 refresh — the routed question got answered; two deliverables now owed
+
+The 06-30 "who can help" question this file recommended got a reply on 07-13:
+**Pietro** engaged and **Jason Fingland** (product design) gave a substantive
+response (`context.md` § "2026-07-16 update"). The ticket is no longer stalled on
+ownership — it's now stalled on **producing the pin list Pietro asked for** (which
+this file already scoped below, in "Prerequisite evidence to attach" — that
+section is now the literal answer to his question, just needs running) and
+**deciding between Jason's two proposed approaches**:
+- **(i) detect-and-flag** — compare a capture's recorded floorplan/level against
+  its apparent position, surface a mismatch warning (Jason's preference; avoids
+  letting users move things and "mess with reality on site").
+- **(ii) allow editing** — expose X/Y/Z in the details panel via the existing
+  Editor edit-pattern, with multi-select (Jason's fallback if editing is wanted
+  at all).
+
+**Updated draft reply (owner: Ilia; @Pietro, @Jason, cc Mostafa):**
+
+> @Pietro @Jason — following up: the pin list is the same data step this ticket
+> already needed to confirm cohort/trigger (playbook). I'll run
+> `captures_360.zMeters` vs `project-levels`/room elevation for PA12 and post the
+> exact list of affected capture/room IDs + deviation.
+>
+> On the editing-vs-detect question — Jason's detect-and-flag ("captures taken on
+> Level 3 now appear above Level 4") sounds like the safer default given the
+> site-integrity concern. Do we want to greenlight that as the direction, or is
+> editing (via the existing Editor X/Y/Z pattern) still on the table for this
+> specific cohort? Happy to scope either once the list exists.
+
+This **supersedes only the "who" framing** of the original draft below; the
+"(a) re-upload vs (b) remap" decision and the evidence-gathering plan are still
+exactly what's needed — Pietro and Jason's exchange has simply made producing the
+list the concrete, immediate next action rather than a hypothetical.
+
+---
+
 ## Chosen action: (a) — draft the next reply (internal, one owner)
 
 Re-route the stalled ownership question to **Pietro Desiato** (product owner) with a crisp restatement of the confirmed root cause plus **one** closed, answerable decision question. This is the smallest move that unblocks a ticket that has sat unanswered since 2026-06-30.

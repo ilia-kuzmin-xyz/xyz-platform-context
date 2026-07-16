@@ -1,44 +1,85 @@
 # PLT-2882 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — draft the next reply (internal status update, one owner, one closed evidence step)
+**Superseded:** the original recommendation below this line (an "internal status
+update + one closed evidence step") was executed by Ilia in-thread on 2026-07-13/14
+and is now done. This is the **2026-07-16 refresh** reflecting where the ticket
+actually stands per `investigation-log.md`.
 
-Post an internal status update that (1) answers Yash's 2026-07-13 "any update?", (2) states the code-verified mechanism and the orphaned-links hypothesis in one place, and (3) names the **single closed data step** that will confirm or kill it. Keep **Ilia Kuzmin** as owner (he claimed the investigation on-ticket today); loop **Darminder** for the FE-robustness half.
+## Current state (per investigation-log.md, through 2026-07-15)
+
+- **Root cause confirmed (9/10):** the 418 dead links on activity `FAR01UGD1220`
+  point at element handles present in the model's `client-element-metas` parquet
+  but **absent from the loaded SVF geometry** — a metadata/geometry sync gap left
+  behind when the two models (`PC-...REV1-V23`, `QA-...Northwest-V35`) were
+  re-versioned and the deep-underground-electrical scope was redrawn.
+- **Peer disagreement raised and answered.** David Webb (BE) checked a sample
+  element, found it present in the current `client-element-metas`, and argued the
+  drag-and-drop auto-unlink step should have caught this — casting doubt on the
+  RCA. Ilia's reply (107412, 2026-07-15) reconciled it: David checked the
+  **metadata** layer (agrees, 418/418 present); Ilia's diagnostic checked the
+  **geometry** layer (0/418 present) — the sync gap between those two layers *is*
+  the bug, and is exactly why auto-unlink (which reads the metadata list) missed
+  them. **This reply has had no response from David as of 2026-07-15 — still open.**
+- **Deletion of the 418 dead links is ON HOLD**, pending David's alignment with the
+  corrected RCA (Ilia said as much explicitly: "Deletion of the 418 is ON HOLD
+  until he's aligned").
+- **FE robustness fix** (surface "N of M linked elements aren't in the loaded
+  model" instead of silently selecting nothing) is scoped but **not yet ticketed**.
+- **Cohort sweep** (playbook #6 — enumerate every activity project-wide with the
+  same 0-resolve pattern) has tooling but no result yet: two automated approaches
+  failed (`__linkAudit()` — wrong model-membership assumption; the artefact-based
+  sweep script — blind on Revit models, no `svf2-object-id-map`), a third
+  (console geometry harvest + sweep script) is prod-safe and ready to run but
+  **has not been run project-wide**, only validated on the one activity.
+- **Trigger** ("why now" — when/why the two models were re-versioned leaving stale
+  metadata) is still not confirmed by BE — the same open BE question from
+  07-14/15 (`investigation-log.md` "Data / pipeline" track).
+
+## Chosen action: (a) — two short, closed, routed follow-ups (no new investigation needed)
+
+The investigation itself is done to a high confidence; what's stalled is **two
+threads waiting on other people**, both answerable in one line each. Draft:
+
+> @David Webb — following up on the metadata-vs-geometry point: does the
+> correction above land? If so, I'll go ahead with deleting the 418 stale
+> `activity_links` rows (CSV already exported) unless you see a gap.
+>
+> @Mostafa @Pietro — parking two things for prioritisation once David confirms:
+> (1) a BE question on why `client-element-metas` and SVF geometry went out of
+> sync on re-version (this is likely to recur on any re-versioned model, not just
+> FAR01 — worth a data-pipeline ticket on its own), and (2) an FE ticket to stop
+> the linked-element panel showing a count that can silently resolve to zero
+> selectable elements.
 
 ## Why this and not the others
 
-- **Not (b) Ready For Development — yet.** We have a real FE robustness bug (Gantt shows a linked count > 0 while select/isolate silently resolves to 0 with no feedback — `context.md` § Mechanism). But the **user's actual goal** (isolate those retired elements) can only be met if the elements still exist; if the cause is orphaned links to a deleted/re-versioned model, the fix is **data**, not FE. Routing to Dev before the count-vs-selectable diff is run risks sending it to the wrong discipline. The July playbook is explicit: confirm mechanism with required-vs-actual evidence *before* routing. One small query flips this to (b) with a precise scope.
-- **Not (c) With Technical Support / client question.** We do **not** need anything from the client to progress — we have the activity ID, model, two session IDs, and two recordings. The next step is an internal data query, not a customer ask. Going back to the client now would just re-loop the ticket.
-- **Not (d) Blocked.** Nothing external blocks us; the next move is in our own hands (DuckDB console / dev session on FAR01).
-
-## Draft — internal reply (author: Ilia Kuzmin; @ Yash Patel, cc Darminder Atker)
-
-Playbook style: status = state + so-far + evidence quality; one owner; one closed next step; explicit scoping.
-
-> @Yash Patel — update on PLT-2882 (FAR01, can't select/isolate elements for activity `FAR01UGD1220`).
->
-> **Mechanism (confirmed in code):** the linked-element **count** on the Gantt comes from the raw `activity_links` bridge, but "Select/Isolate linked elements" resolves those IDs against the loaded model and **silently drops any that no longer exist there** — with no message. So an activity whose linked elements were orphaned (their model deleted or re-versioned) shows a count but selects nothing. That matches your repro: this activity fails, other activities in the same model work.
->
-> **Hypothesis (not yet confirmed against data):** the "(Retired)" activities point at elements from a superseded/removed model version, so their links are now orphaned. Note "retired" isn't a status we track — it's just part of the activity name.
->
-> **One step to confirm:** on FAR01 I'll compare `FAR01UGD1220` against one working activity — how many `activity_links` rows each has vs how many of those elements still resolve to the loaded model. If broken = "count > 0 but 0 resolvable", the cause is orphaned links (a data fix) plus a UI gap (we should tell the user "N linked elements aren't in the loaded model" instead of doing nothing).
->
-> **@Yash — one for the client/PM side:** was a FAR01 model **deleted or re-uploaded/re-versioned** recently (this model is `..._REV1-V23`)? That would explain when the links orphaned.
->
-> Scoping: this is the web viewer's activity-linking, not the dashboard filter panel; and it's not a missing "retired filter".
-
-## The one evidence step to run (owner: Ilia; ~15 min, needs dev/DuckDB on FAR01)
-
-The smallest broken-vs-working diff (playbook move #3), turning the hypothesis into a confirmed cause:
-
-1. For `FAR01UGD1220` **and** one working activity in `PC-APLD-FAR01-UND-AKS_REV1-V23`:
-   `SELECT COUNT(*) FROM activity_links WHERE activityId = '<id>'` → raw linked count.
-2. For those `modelElementId`s, count how many exist in `projectService.elements` (registry) and how many map via `viewerService.elementId2ModelId` / `elementId2DbId` to a **loaded** model.
-3. **Expected if hypothesis holds:** broken activity = raw count > 0, resolvable = 0 (or 0 mapped to a loaded model); working activity = raw ≈ resolvable. That confirms orphaned links and pinpoints which layer drops them (`linking-service.ts:757-761` vs the viewer maps in `use-linked-element-actions.ts:40-55`).
+- **Not more investigation** — the mechanism is confirmed to 9/10 with two
+  independent diagnostic runs (including a cold-cache re-run). Further digging
+  has diminishing returns; the blocker is now social (peer alignment + product
+  ticketing), not technical.
+- **Not (b) Ready For Development yet** — can't schedule the FE robustness fix or
+  the BE metadata-sync question without Mostafa/Pietro triaging them as their own
+  tickets first (this ticket's scope is the FAR01UGD1220 symptom, not a general
+  fix).
+- **Not (c) With Technical Support / client question** — nothing here needs the
+  client; both open threads are internal (David, then Mostafa/Pietro).
+- **Not (d) Blocked** — "on hold" is self-imposed pending a one-message reply, not
+  an external blocker; a status a human should chase rather than park.
 
 ## Follow-through the human should own (not executed here)
 
-- **After the diff:** if orphaned-data confirmed → split into two tracks: (i) **data fix** (re-link / clean stale `activity_links`, or restore the model) — hop to BE/data (Sergey / Sachin+Ali); (ii) **FE robustness fix** (surface "N of M linked elements not in the loaded model"; stop showing a count that can't be acted on) — Darminder. Then move the ticket to **Ready For Development** with that scope.
-- **Answer "why now"** (playbook #5): correlate the FAR01 model delete/re-version timeline against when links orphaned — assign an owner; don't let it drop.
-- **Cohort sweep** (playbook #6): once confirmed, enumerate all FAR01 activities (esp. "(Retired)") whose links resolve to 0 — remediate in bulk, don't wait for the next ticket.
-- **Watch the media** (NEEDS HUMAN): the two `.mp4`s tell whether the menu was greyed-out (all orphaned) or clickable-with-no-effect (model not loaded) — that decides the FE message wording.
-- **Post-close:** add a `dashboard/pitfalls.md` (or a viewer/linking pitfalls) entry: "activity linked-element count uses the raw `activity_links` bridge; select/isolate resolves against the loaded registry/model and silently drops orphans — a count > 0 can select 0."
+- Get David's explicit sign-off (or continued objection) on the corrected RCA,
+  then execute the 418-link deletion (`POST /api/v2/projects/{pid}/elements/activity-links/delete`,
+  batched ≤500, per `investigation-log.md`).
+- Run the prod-safe geometry-harvest + sweep combo **project-wide** on FAR01 to
+  get the actual cohort count (not yet done — only the one activity is verified).
+- File the FE robustness ticket and the BE metadata-sync-on-reversion question as
+  separate tickets once Mostafa/Pietro triage them — don't let them die inside a
+  ticket that's scoped to one activity.
+- Add the `dashboard/pitfalls.md` entry once closed: "activity linked-element
+  count uses the metadata parquet; select/isolate needs the SVF geometry —
+  re-versioning a model can desync the two, and the count doesn't know it."
+
+**Confidence in RCA: 9/10. Confidence this is the right next step: 8/10** — the
+two threads (David, Mostafa/Pietro) are the only things between "confirmed" and
+"closed."

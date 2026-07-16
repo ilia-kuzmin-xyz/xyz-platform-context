@@ -26,13 +26,26 @@
 | Project | "All SWITCH" |
 | Freshdesk | **#7374** (per comment "Ticket ID: 7374"), not #7316 as the playbook states — see discrepancy note |
 
-### Comment thread (short — 4 comments, all 8 Jul; the real investigation lived in a chat thread, not here)
+### Comment thread (5 comments total — 4 on 8 Jul, 1 on 13 Jul)
 1. 17:23 Yash → Darminder: "Jira for record."
 2. 17:48 Sergey: asks for user email + error screenshot.
 3. 18:01 Yash: Freshdesk 7374 → Waiting on 3rd line.
 4. 18:03 Yash: email = mbowser@switch.com + two inline error images (blob:… — **not retrievable ⚠️**).
+5. **[UPDATE 2026-07-16] 18:27 13-Jul, Darminder Atker:** *"Source of the problem
+   appears to be users have been invited previously with old navigation and set
+   with 'dashboard only' role. Users with this role should have:
+   `userRoleCode: viewer_role`, `userRoleName: Viewer`. The authorities for this
+   role are preset in the backend and users cannot edit. Now that new navigation
+   is being used and V1 is no longer being supported."* — this is Darminder
+   **independently corroborating** the exact root cause this file's §4 already
+   derived from code (legacy "Dashboard Only" / `viewer_role` users lacking
+   `ProjectView`, denied by the FE gate). It does not answer playbook follow-ups
+   #1 (trigger/why-now) or #2 (cohort sweep) — still open — nor does it state
+   what the ticket is waiting on the customer *for*. No comment since.
 
-There is **no comment after 8 Jul**. The move to "With Customer" (10 Jul) carries no explanation.
+The gap noted below ("no comment after 8 Jul") is **now stale as of 07-13** — see
+above — but the substance of the gap (no stated reason for "With Customer", no
+trigger, no cohort sweep) is unchanged as of 2026-07-16.
 
 ---
 

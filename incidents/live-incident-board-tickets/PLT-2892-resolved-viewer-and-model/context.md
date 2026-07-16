@@ -1,5 +1,24 @@
 # PLT-2892 — "LVN-BL1-Model in dashboard syncing forever" — triage context
 
+## ✅ RESOLVED — 2026-07-16 (folder retagged from groupA → resolved)
+
+Ticket moved to **READY FOR RELEASE** (15 Jul 13:35). Full arc, fast:
+- 2026-07-13 18:25 — Ilia found the bug in code: the dashboard page didn't handle
+  the edge case of a project with linked elements but **no applied statuses** —
+  the editor calculates colour visualization via activity links in that case, the
+  dashboard just failed. Hotfix authored same day.
+- 2026-07-15 13:28 — **Gennaro Boccia (QA) verified fixed on Staging 26.3.2.**
+- 2026-07-15 13:35 — Freshdesk → "Awaiting release"; Jira → READY FOR RELEASE.
+
+**No action needed this run** — excluded from Group A by the board's own scope
+rules (READY FOR RELEASE is in the exclusion list). Folder kept as historical
+context (same convention as PLT-2891). One good-news data point: from first
+triage message to QA-verified fix took under 48 hours — worth noting as a
+positive pattern for the playbook (edge-case bug, single owner, fast repro-to-fix,
+no unannounced prod changes).
+
+---
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2892
 - **Issue type:** Live Incident ("To track live incidents on site.")
 - **Status:** Open (category: To Do / blue-gray) — freshly triaged, no analysis on-thread yet.

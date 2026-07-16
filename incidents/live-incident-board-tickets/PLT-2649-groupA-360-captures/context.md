@@ -45,9 +45,15 @@ The `[NEW DASHBOARD]` title is **misleading** — analysis in-thread has already
 | 2026-05-14 16:56 | Masum Ahmed | Freshdesk #6622 → "Waiting on customer" |
 | 2026-06-05 13:49 | Yash Patel | Customer reply: *"same on the old one… problem with the room data in the Revit models"* |
 | 2026-06-19 08:51 | Yash Patel | Freshdesk #6622 → "Waiting on 3rd line" (back to us) |
-| 2026-06-30 16:49 | Ilia Kuzmin | @Pietro — "who can assist us with tweaking 60% of the pinpoints… that inherited the old pbp?" — **last activity, unanswered** |
+| 2026-06-30 16:49 | Ilia Kuzmin | @Pietro — "who can assist us with tweaking 60% of the pinpoints… that inherited the old pbp?" — unanswered for 2 weeks |
+| 2026-07-13 13:53 | Pietro Desiato | Replies at last: "do we already have a list of those pins? I think it could be interesting to have in the 360 editor a way of adjust the pin position from the editor" — @Jason Fingland @Mostafa |
+| 2026-07-13 14:11 | Jason Fingland | Substantive design response (see §"2026-07-16 update" below) — cautions against free XYZ editing, proposes PBP-mismatch detection instead, or if editing is offered, route it through the existing Editor edit-pattern with X/Y/Z fields + multi-select |
 
-**Staleness:** last movement 2026-06-30 → **~13 days** untouched; the substantive analysis has been static since early June.
+**Staleness — UPDATED:** the 2-week stall broke on 2026-07-13 with a real design
+exchange (Pietro + Jason). As of 2026-07-16 the thread is waiting on: (1) the pin
+list Pietro asked for — **nobody has produced it yet**, and (2) a decision between
+Jason's two proposed approaches. See "2026-07-16 update" below and the refreshed
+`recommended-action.md`.
 
 ---
 
@@ -98,6 +104,48 @@ The 360 pin Z comes straight from the **capture record's own stored coordinate**
 - **Ilia Kuzmin** — the current operator (ilia.kuzmin@xyzreality.com), FE / "mechanism interrogator" in the playbook. Driving the analysis; not in the routing roster but internal.
 - **Yash Patel** — on roster (coordinator). Relaying client comms, as expected.
 - **Pietro Desiato** ("Pietro") — on roster (product owner). The correct escalation target; his unanswered 2026-06-30 question is the pivot.
+
+---
+
+## 2026-07-16 update — design conversation, still no pin list
+
+The 07-13 exchange, in full:
+
+- **Pietro (107234):** *"do we already have a list of those pins? I think it could
+  be interesting to have in the 360 editor a way of adjust the pin position from
+  the editor — @Jason Fingland @Mostafa Kamel Hussien?"* — two asks bundled: (i) a
+  concrete list of affected pins, (ii) floating a pin-position-editing feature.
+- **Jason Fingland (107238), product designer, pushes back thoughtfully on (ii):**
+  *"We were trying to avoid allowing the user the ability to move things about too
+  much, as that could mess with reality on site."* Proposes an alternative that
+  doesn't require free editing: **detect mismatch by comparing the capture's
+  recorded floorplan/level against its apparent position** — his example wording:
+  *"These captures were taken using the Level 3 Floorplan, but now appear to be
+  higher than Level 4"* — i.e. a validation/flag pass, not a fix-it-yourself tool.
+  If editing is still wanted, he suggests reusing the **existing Editor edit
+  pattern**: show X/Y/Z coordinates in the details panel, allow multi-select edit.
+  He also flags an edge case: a *single* mis-placed capture within an otherwise-fine
+  capture point may need a different flow than a whole-point remap.
+
+**What this changes:**
+- The "who can help" ownership question (Ilia's 06-30 ask) is now **answered** —
+  Jason (product design) and implicitly Mostafa are engaged. The ticket is not
+  stalled on *ownership* anymore, it's stalled on **two concrete deliverables**
+  neither generated yet:
+  1. **The pin list** Pietro asked for (which captures/rooms are off, and by how
+     much) — this requires querying `captures_360.zMeters` against
+     `project-levels`/room elevation for PA12, exactly the data step this
+     context.md already identified (§ "Still needed to close") as unclosed. It is
+     the same query needed to confirm the trigger and cohort (playbook Q5/Q6) —
+     producing it now serves both Pietro's ask and the playbook's open items in
+     one pass.
+  2. **A decision between Jason's two options** — detect-and-flag (safer, matches
+     his site-integrity concern) vs. allow-editing via the Editor's existing X/Y/Z
+     pattern (more direct fix, but reopens the "could mess with reality on site"
+     risk he named). Nobody has stated a preference yet.
+- Confidence in the underlying root cause (source-data elevation defect, not FE
+  code) is unchanged at 8/10 — this update is about next-step routing, not
+  diagnosis.
 
 ---
 

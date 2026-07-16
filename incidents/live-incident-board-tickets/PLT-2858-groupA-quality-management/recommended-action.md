@@ -1,5 +1,31 @@
 # PLT-2858 — Recommended action
 
+## 2026-07-16 refresh — the ask changed, answer Mostafa first
+
+Since this draft was written (07-13), two things happened (`context.md` §4a): the
+customer gave an explicit, concrete preference — **a Location dropdown, or remove
+the field** — and Mostafa asked Darminder *"what is the difference between
+location and location details"* (107320, 07-14), still unanswered 2 days later.
+
+**Immediate next step, ahead of the three-question draft below:** answer Mostafa's
+question directly — it's already documented in `context.md` §2a and doesn't need
+new investigation:
+
+> @Mostafa — Location = the auto-derived, read-only zone field (empty on ML9
+> because no named zones are configured). Location Details = the free-text field
+> that already exists on the form today (`issue-form.tsx`, saved as
+> `locationDetails`) — the customer can use that right now if they just want to
+> jot a location note. Given their ask (dropdown of Locations, or remove the
+> field if not possible), do you want to (a) build a manual Location picker,
+> (b) point them at the existing free-text Location Details field as the answer,
+> or (c) hide the auto Location field when a project has no zones configured?
+
+Once Mostafa picks (a)/(b)/(c), *then* the original three-question draft below
+(zone-setup ownership, cohort, Phase-surfacing) still applies for the
+longer-term zone-configuration workflow — it's additive, not replaced.
+
+---
+
 ## Chosen: (a) Draft the next routed question to move analysis forward — addressed to **Mostafa Kamel Hussien** (PO), Pietro looped
 
 The reported symptom is diagnosed (empty "Location" = no named zones configured on ML9; the zone Location

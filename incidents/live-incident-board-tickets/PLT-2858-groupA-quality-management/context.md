@@ -161,6 +161,35 @@ but resolution is product/process-dependent and the two code-level follow-ups ar
 
 ---
 
+## 4a. Update — 2026-07-16 (two new comments since 07-13 "leave it with me")
+
+1. **Customer stated an explicit preference (via Yash, comment 107317, 2026-07-14).**
+   Verbatim: *"As far as I understood, it is not possible to connect the rooms to
+   the different models. If it is possible to have a drop-down list with all the
+   different Location to select on the QA, that would be great. In case it is not
+   possible, it would be ideal to remove the Location part on the QA, to not
+   create confusion and not appear as we have missing details on the Dashboard."*
+   This changes playbook-Q6 framing: the customer is no longer asking "how do we
+   configure zones" — they're proposing two concrete FE-shaped alternatives
+   (manual dropdown, or remove the field). Both are real product/dev asks,
+   not a support/education answer.
+2. **Mostafa asked Darminder a question that is still unanswered (comment 107320,
+   2026-07-14, no reply as of 2026-07-16 — 2 days):** *"what is the difference
+   between location and location details"*. This is directly answerable from §2a
+   above (already on file before Mostafa asked): **Location** = auto-derived,
+   read-only, from named zones (`locationId`/`issueLocationId`); **Location
+   Details** = the free-text field the form already exposes
+   (`locationDescription`/`locationDetails`, `issue-form.tsx:526-537`). The fact
+   product asked this suggests Mostafa may not have realised a manual field
+   already exists — which matters, because it's a candidate answer to the
+   customer's dropdown-or-remove ask (see recommended-action.md).
+
+**Net effect on diagnosis:** unchanged (8/10, config/data gap, not a bug). **Net
+effect on next step:** the two threads above are now the whole blocker — see the
+refreshed recommended-action.md.
+
+---
+
 ## 5. Attachments — NEEDS HUMAN
 
 I could not view any of the images (Jira/staging binary media requiring auth; the description/comment
