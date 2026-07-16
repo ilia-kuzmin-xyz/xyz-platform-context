@@ -43,6 +43,96 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-16 — 9 in-scope tickets (2 new, 1 resolved out, 1 further along)
+
+JQL: `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC` (100
+tickets returned, plus a targeted status query to confirm nothing else currently
+sits in Ready-For-Development/Dev-In-Progress/With-Technical-Support/Ready-For-QA/
+Needs-Evaluation). Compared against the 2026-07-13 run.
+
+### What changed since 07-13
+- **PLT-2892** (was Group A, In Analysis) → **resolved**: Ilia found + hotfixed the
+  bug same day (07-13), Gennaro verified on Staging 26.3.2 (07-15), now READY FOR
+  RELEASE → **out of scope**, folder retagged `PLT-2892-resolved-viewer-and-model`.
+  Under 48h triage-to-verified-fix — a good pattern to bank.
+- **PLT-2890 / 2759 / 2742** (were Group B) all progressed further along the
+  pipeline (In Code Review / READY FOR RELEASE) → now excluded by scope rules.
+  **Group B is effectively empty this run** except **PLT-2385** (still Ready For
+  Development, unchanged since 07-13 — context already captured, no new comments,
+  skipped this run per instruction).
+- **PLT-2906** and **PLT-2884** are **new** tickets, not seen on 07-13 — full
+  triage below.
+- **PLT-2882, PLT-2858, PLT-2649, PLT-2879** all got substantive new Jira activity
+  since 07-13 — docs updated in place (see per-ticket notes below).
+- **PLT-2874, PLT-2815, PLT-2619** — no new comments since 07-13; docs unchanged
+  and still accurate (2815, 2619 remain stale — see "Cross-ticket notes").
+
+### Group A (9) — evaluate / clarify
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| **PLT-2906** 🆕 | viewer-and-model | Open | Section Box lost its rectangular-cage rendering **across all models, FAR01+FAR02+other projects**, precise trigger 2026-07-14 ~13:00 UTC, no model change. Box style is 100% Forge `Autodesk.Section` (no custom gizmo), viewer pinned to `7.117.0` — no hc-frontend commit correlates with the trigger, pointing at a **Forge viewer-version/deploy change**, not our source. Different symptom class from the 3 historical alignment tickets (2651/2756/2771), same underlying fragility. | (a) self-repro + deploy/version-pin diff → Darminder; treat as fleet-wide | 8/10 mechanism, 5/10 specific trigger |
+| **PLT-2884** 🆕 | data-pipeline | With Customer | AT10x new-dashboard Actual% (23.85%) vs old/PowerBI (27.37%), −3.52pp. Mostafa blamed the customer's XER file (6 days silent since re-upload ask) — but the customer's own fact that **web-viewer Editor-Progress matches the OLD numbers** is unexplained by a bad-XER theory and is the signature of **Pattern A** (intangible/labour activities reading 0% actual in the new dashboard's parquet), same class as PLT-2385/2874. | (a) nudge Yash to re-chase customer **+** independent `EL1031000` Pattern-A query in parallel, don't wait on the XER alone | 8/10 known-pattern-class, 5/10 Pattern-A specifically, 4/10 XER-only |
+| PLT-2882 | progress-tracking | In Analysis | **Updated.** Root cause confirmed 9/10 (dead links point at elements dropped from SVF geometry but retained in metadata, from a model re-version). Peer (David Webb) pushback raised and answered by Ilia (07-15) — **no reply yet**; 418-link deletion on hold pending his alignment. | (a) two short closed follow-ups: @David for RCA sign-off, @Mostafa/@Pietro to ticket the BE metadata-sync question + FE robustness fix | 9/10 RCA, 8/10 next-step |
+| PLT-2879 | access-permissions | With Customer | Darminder's 07-13 comment (new since last run) independently corroborates the legacy "Dashboard Only"/`viewer_role` root cause this file already derived from code. Trigger + cohort sweep still open; "waiting on customer for what" still undocumented. | (a) status-check → Yash (unchanged) | 6-7/10 |
+| PLT-2874 | viewer-and-model | In Analysis | No change since 07-13. Editor vs dashboard count gap is plausibly by-design (dbId non-dedup) with one genuine defect vector (status-history double-counting) still worth a query. | (a) explain + `COUNT(*) vs COUNT(DISTINCT)` query → Darminder | 6/10 |
+| PLT-2858 | quality-management | In Analysis | **Updated.** Customer now explicitly wants a Location **dropdown or field removal** (07-14); Mostafa asked Darminder "location vs location details?" (07-14) — **unanswered 2 days**, directly answerable from this file's own §2a. | (a) answer Mostafa first (documented answer ready), then the original 3-question zone-workflow draft | 8/10 diagnosis |
+| PLT-2649 | 360-captures | In Analysis | **Updated.** The 2-week ownership stall broke 07-13: Pietro asked for the pin list (still not produced) and Jason Fingland gave a real design response (detect-and-flag vs allow-editing via Editor X/Y/Z). Root cause unchanged: source-data elevation defect, not FE. | (a) produce the pin list (same query this file already scoped) + surface the detect-vs-edit decision | 8/10 cause, 4/10 trigger/remediation |
+| PLT-2815 | quality-management | With Customer | No change. Rework cost Cat3€684<Cat4€843.60 reproduced to the cent = reference-data artifact; code correct; "as intended"; Freshdesk already Closed, Jira orphaned open ~3 weeks. | (c) nudge → Yash to accept/close | 9/10 |
+| PLT-2619 | other | With Customer | No change. Mis-filed as incident — demo relink request, now **~85 days** stale, internal product blocker (Pietro's question never answered). | (c) hand off to product + reclassify | 8/10 |
+
+### Group B (1) — in dev pipeline, skipped this run per instruction
+
+| Ticket | Domain | Status | Note |
+|---|---|---|---|
+| PLT-2385 | data-pipeline | Ready For Development | Unchanged since 07-13 (context already captured that run); no new comments. Not re-triaged this run. |
+
+### Resolved / out of scope this run
+
+- **PLT-2892** — hotfixed + QA-verified, READY FOR RELEASE. Folder retagged
+  `PLT-2892-resolved-viewer-and-model` (historical, same convention as PLT-2891).
+- **PLT-2890, PLT-2759, PLT-2742** — all progressed past Group B into In Code
+  Review / READY FOR RELEASE; no folders needed this run (2759/2742/2890 already
+  have folders from 07-13, left as historical — not re-triaged).
+
+### Cross-ticket notes
+
+- **New "count/linking correctness in the data pipeline" sibling:** PLT-2884 joins
+  **PLT-2385** and **PLT-2874** in this recurring theme — old-vs-new dashboard
+  disagreeing because the two pipelines compute the same metric differently. Worth
+  a single upstream ticket against the parquet generator's intangible-actual
+  fallback (Pattern A) rather than fixing each site report individually.
+- **PLT-2882 and PLT-2906 are both "we ride something we don't fully control"
+  stories** — 2882 is a metadata/geometry desync from model re-versioning; 2906 is
+  a dependency (Forge) version change outside our commit history. Different
+  domains, same shape: the bug isn't in code we wrote, it's in an assumption about
+  data/dependency freshness that silently broke.
+- **PLT-2906 is the most urgent open item this run** — Major, but the *shape*
+  (cross-project, simultaneous, precise timestamp, zero data variable) argues it
+  should be treated as higher urgency than its label, per playbook Q6 (cohort).
+- Still true from 07-13: **PLT-2879** is the incident `live-incident-playbook.md`
+  was written about; the FE gate fix (`project-private-route.tsx:41`) is still
+  unshipped — recurrence risk stands.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian/Freshdesk auth)
+
+Unchanged pattern — screenshots/media still not directly viewable by the agents.
+**New this run:** PLT-2906's `section_box.png` (decisive — shows the exact "new
+style"); PLT-2884's `.xlsx` (the customer's own old-vs-new activity list — HTTP
+403, not even a generic auth wall) and `.xer` schedule (also 403) — both are
+genuinely parseable file formats once a human pulls the bytes, unlike the PNGs.
+
+### Off-roster names seen
+
+- **Masum Ahmed** — reporter/assignee on 2649, 2619, 2385 (support/Freshdesk agent).
+- **David Webb** — BE/data-pipeline/dagster owner (commenter on 2385, and now the
+  peer-pushback voice on 2882).
+- **Hussein** (customer-side, PLT-2884) — do not confuse with **Mostafa Kamel
+  Hussien** (product owner) — different people, same-sounding name.
+- **Jason Fingland** — product designer, first appearance this run (PLT-2649).
+
+---
+
 ## Run: 2026-07-13 (updated, second pass) — 12 in-scope tickets
 
 ### Group A (8) — evaluate / clarify
