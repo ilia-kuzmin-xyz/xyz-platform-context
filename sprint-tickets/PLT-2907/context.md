@@ -24,12 +24,38 @@ orbiting smoothly. Repro project: HITT - DC5 -xv2 (`6a048b016948eba33123d734`).
   `setZoomTowardsPivot` are the programmatic pivot locks.
 - Camera state capture (`restoreCameraState`) documented for **ViewerPage only**.
 
-## Working hypothesis (pre-code-confirmation)
-On the first orbit interaction Forge recalculates the pivot / auto-fits. In
-full-progress mode the color/visibility pipeline constrains the visible bbox and/or a
-camera-fit runs after colours apply; in quality-only that path is skipped, so the
-pivot/fit resolves against an empty or full-model bounding box → instant zoom-out.
-Needs code confirmation (Explore agent running).
+## Confirmed root cause (code-verified)
+Key files:
+- `dashboard-panels/viewer/use-model-loader.tsx:332-342` — quality-only branch loads the
+  **FULL** model (no `selectiveDbIds`); progress mode loads only `element_base_data` dbIds.
+- `hooks/use-services-initialization.ts:66-86` — colour service NOT initialised in
+  quality-only → `_applyFragmentVisibility` / isolate never runs → visible bbox = whole raw model.
+- `hooks/use-model-loaded-events.ts:46-66` — quality-only `onModelRootLoaded` only dismisses the
+  loader; nothing seeds a camera target/pivot.
+- `services/dashboard-pinpoint-base-service.ts:271-306` — pivot lock only active when a pin is
+  selected; default quality-tab state is `_clearPivotLock()` → `setPivotSetFlag(false)`,
+  `setUsePivotAlways(false)` (Forge auto-pivot).
+- `viewer-service.ts:1111-1113, 831-834, 985-988` — every `fitToView` disabled for `isDashboard`.
+- `viewer-y.tsx:232` — profile `wheelSetsPivot: true`.
+
+**Mechanism:** quality-only = full model + no isolate + no pivot seed. On first orbit Forge
+derives its pivot from the large/off-centre world bbox (incl. stray/off-origin geometry the
+progress selective-load would exclude) → camera swings on a huge radius → reads as instant
+zoom-out. Progress mode avoids it because the selective load + colour-pipeline isolate give a
+tight, centred bbox.
 
 ## Decision log
-- (pending code map)
+- 2026-07-16: Root cause confirmed at architecture level (high confidence). BUT exact Forge
+  orbit mechanism + fix trade-offs (forcing `setUsePivotAlways`/`setZoomTowardsPivot` risks the
+  cursor-drift the team worked around; a fit/reframe risks regressing the currently-fine initial
+  view for ALL quality-only projects) are **not verifiable headless** — needs live orbit on
+  HITT - DC5 -xv2. Per "don't rush, risks are real": moved ticket to **Analysis In Progress**
+  and posted 3 concrete repro questions (comment 107518) that disambiguate the mechanism.
+  No code / PR this run.
+
+## Candidate fix (once mechanism confirmed)
+Seed a sane orbit pivot in the quality-only post-load path (`use-model-loaded-events.ts`
+`onObjectTreeCreated` / after GEOMETRY_LOADED). Lowest-risk option: `nav.setPivotPoint(nav.getTarget())`
+so orbit rotates about the framed view without moving the camera. Confirm it "sticks" against
+Forge's orbit hit-test, and whether `setPivotSetFlag(true)` is needed without reintroducing
+zoom drift. Add a `dashboard/pitfalls.md` note once resolved.
