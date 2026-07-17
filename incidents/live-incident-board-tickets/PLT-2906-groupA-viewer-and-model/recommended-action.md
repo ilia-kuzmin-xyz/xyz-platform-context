@@ -1,5 +1,59 @@
 # PLT-2906 — recommended action (DRAFT ONLY — execute nothing)
 
+## 2026-07-17 refresh — action revised after Teams input (Rishi/Tom) + True-North analysis
+
+**New chosen action:** ask **Yash to have the delivery/BIM team verify-and-report the
+True-North + export-coordinate facts** for FAR01/FAR02 (Ilia's proposal, validated
+against Revit behaviour in `context.md` §2026-07-17 — the assumption is mechanically
+sound), **plus** two parallel internal facts. Explicitly *report, don't change*: a
+non-zero TN is normal and usually correct; zeroing or re-exporting changes
+georeferencing (federation alignment, survey coordination, on-site AR) and is a
+decision, not a hygiene fix. TN also cannot explain the July-14 onset by itself
+(customer says models weren't updated), so the release-trigger question from the
+07-16 draft stays open in parallel.
+
+### Draft for Yash (relay to delivery/BIM team)
+
+> Hi Yash — engineering follow-up on the section box (PLT-2906 / FD #7424). We believe
+> the projects showing the changed box are the ones whose models carry a **non-zero
+> True North angle** (it's baked into the exported file and our viewer orients the box
+> from it). Could you ask the delivery/BIM team to **check and report — please don't
+> change anything yet**:
+>
+> 1. For the FAR01 and FAR02 models: what is the project's **Angle to True North** in
+>    Revit (Manage ▸ Position; visible on the Survey Point), and is that value
+>    **intentional** for the site? Please give the actual number(s).
+> 2. Which **coordinate option** are the models exported with (e.g. NWC "Coordinates:
+>    **Shared** vs **Internal**") — and is it the **same for every file** in the
+>    project?
+> 3. Did any export settings or re-exports change around **July 14**? (The user says
+>    the models weren't updated — we'd like to confirm nothing changed on the
+>    authoring side.)
+>
+> Why: a non-zero angle is perfectly normal — we don't want it "fixed" to 0 (that
+> would shift georeferencing). We need the exact values and per-file consistency to
+> decide whether the fix is on our side (viewer mishandling the angle) or the export
+> side (files disagreeing with each other).
+
+### Parallel internal facts (not for the customer)
+
+1. **Exact FAR01 TN angle from our side** (viewer console on FAR01: decompose
+   `viewer.model.getData().refPointTransform`, read the Z rotation). This one number
+   decides the code branch: **folded ≥ 5°** → our gate trusts Revit and never corrects
+   (`section-tool-orientation-math.ts:149`); **folded < 5° but non-zero** → our gate
+   silently **overrides** the real TN (Rishi's "incorrectly overrides the model").
+   Don't wait on delivery for this — it's a 2-minute console check.
+2. **Which release FAR01/FAR02 are on and what shipped ~13–14 Jul** (Rishi / release
+   owner) — carried over from the 07-16 draft; TN explains susceptibility, the release
+   explains timing. Both are needed to close per playbook Q5.
+
+**Status: keep In Analysis.** The 07-16 draft's Q1 (gizmo-absent vs merely-tilted, from
+the screenshot Yash has) also still stands — it's the cheapest disambiguator we have.
+
+---
+
+## 2026-07-16 draft (kept as history — superseded by the 07-17 refresh above)
+
 ## Chosen action: (a) — post ONE routed comment that pins the observation, asks the deploy trigger, and explicitly links the recurrence
 
 This is a **Major incident that is the 4th recurrence** of the same feature, where the

@@ -259,3 +259,108 @@ gizmo-absent vs merely-tilted; (b) FAR01/FAR02's current release version and whe
 oriented-box feature (or any Forge upgrade) shipped there — the trigger; (c) an explicit
 link to PLT-2651/2756/2771 and a **named engineering owner** for the section-box feature
 so this stops being closed on no-repro.
+
+---
+
+## 2026-07-17 — Teams input (Rishi, + Tom via Rishi) and the True-North analysis
+
+New evidence arrived off-Jira, in a Teams thread (Ilia ↔ Rishi Bhugobaun, 16:03–16:21):
+
+- **Rishi (16:06):** he had previously suggested this root cause — *"it was possible
+  that they do not set it [True North] for a project. If we could get them to set it
+  correctly I think it would solve the issue; the implementation I did is a best-effort
+  one to estimate the model-aligned BB — however it seems sometimes it incorrectly
+  overrides the model."* There are "various cases in the unit tests, maybe this is just
+  a new one." Floated alternative: a user-facing toggle between 'calculated axis' and
+  'default axis' for the section box — "but it's not great UX."
+- **Ilia (16:09):** empirical correlation — *"for most projects where the section box
+  works correctly the true north angle equals 0, whereas for FAR01 it's different."*
+- **Rishi, after checking with Tom (16:12):** *"we don't actually apply the true north
+  angle to models in the editor. It is set when exporting models from the Revit file;
+  this gets put into one of the Forge transforms which helps it internally orient it."*
+
+### Code check — how a non-zero True North actually flows through the gate
+
+Re-read `section-tool-orientation.ts` + `section-tool-orientation-math.ts` (branch
+`claude/vigilant-franklin-cs6txw`, read-only). Rishi/Tom's account is corroborated:
+the TN rotation arrives as `model.getData().refPointTransform`, consumed only when
+`loadOptions.applyRefPoint` is set (`section-tool-orientation.ts:94-96`) — exactly
+"one of the Forge transforms." The decisive branch logic
+(`shouldApplyOrientationPatch`, `section-tool-orientation-math.ts:141-152`):
+
+- **TN folded-to-nearest-axis ≥ 5°** (`ORIENTATION_MISMATCH_THRESHOLD_RAD`): patch
+  **refuses to fire** (`:149`) — the comment says the rotation "came from Revit shared
+  coordinates and is authoritative." SectionTool then uses stock-Forge behaviour:
+  default transform = the TN rotation. If the box is wrong in this branch, the code
+  never corrects it — by design.
+- **TN non-zero but folded < 5°** (small angles like 1–4°, or near-multiples of 90°):
+  treated as "effectively no rotation." If `tightness < 0.9` the patch **fires and
+  overwrites the real TN** with the min-area-rect estimate
+  (`refPointTransform.makeRotationZ(rect.angle)`, `section-tool-orientation.ts:115`) —
+  precisely Rishi's "sometimes it incorrectly overrides the model."
+- Two extra fragilities recorded while reading:
+  1. **`models[0]` dependency** — both the gate inputs and the footprint come from the
+     *first visible model only* (`:93`, `:104`), while the fitted box unions *all*
+     visible models (`:76`). FAR01 is a ~100-model federation → which model is
+     `models[0]` (load order / visibility) decides whether and how the patch fires.
+     Mixed TN values across files would make behaviour flip between sessions.
+  2. **`makeRotationZ` wipes the translation** component of `refPointTransform` (it
+     resets the whole matrix). Any *later* consumer of that transform on the same model
+     data sees a falsified transform. Possible cross-link to other alignment oddities
+     on patched projects (e.g. pin placement class of bugs).
+
+**Ilia's TN=0-works / TN≠0-breaks correlation is mechanically consistent with both
+hazardous branches.** TN=0 projects sit in the two well-tested paths (axis-aligned, or
+the 2651-style diagonal patch). TN≠0 projects land either in "authoritative, never
+corrected" (≥5°) or "silently overridden" (<5°). **Which branch FAR01 is in is decided
+by one number we don't have yet: the exact TN angle.** (From delivery's report, or from
+the viewer console on FAR01: decompose `viewer.model.getData().refPointTransform`.)
+
+### Revit-knowledge validation of the "ask delivery to check TN at export" plan
+
+Checked against standard Revit/APS behaviour — the assumption **has a real chance to be
+correct**, with important caveats on phrasing:
+
+- **True North is a project position property, not an export checkbox.** It's set via
+  Manage ▸ Position ▸ Rotate True North (or implicitly by Acquire Coordinates from a
+  linked/site file). What the *export step* decides is which coordinate basis lands in
+  the file: NWC "Coordinates: **Shared** vs **Internal**", IFC site placement, and for
+  RVT→Forge the shared-position transform travels in the derivative's AEC model data
+  (our `refPointTransform`). So "check it in Revit while exporting" is meaningful, but
+  the check spans **two** things: the TN angle itself *and* the export coordinate
+  setting.
+- **A non-zero TN is normal and usually correct** — real buildings rarely align to true
+  north. FAR01 having TN≠0 is *not* by itself an authoring error, and "set it to 0"
+  would change georeferencing — with blast radius on anything consuming shared
+  coordinates (multi-model federation alignment, survey coordination, on-site AR
+  alignment). The ask must be **verify-and-report, not change**.
+- **What would be a genuine export-side defect:** (a) *inconsistent* TN values or mixed
+  Shared/Internal export settings across the federated FAR01/FAR02 files — this breaks
+  cross-model alignment outright and also randomises our `models[0]` gate; (b) an
+  *accidental* TN nobody intended (wrong Acquire Coordinates source); (c) a *tiny* TN
+  (< 5°) — almost certainly unintentional, and exactly the value range our gate
+  silently overrides.
+- **TN cannot explain the July-14 onset by itself.** The customer states models were
+  not updated before the change appeared — TN lives in the exported file, so if files
+  didn't change, TN didn't change on July 14. TN explains **which projects are
+  susceptible**; the **trigger** (what shipped to FAR's channel ~13–14 Jul — release /
+  viewer version / load-options change engaging `applyRefPoint` differently) is still
+  the open why-now question from the 07-16 pass. Both must be answered to close per
+  playbook Q5.
+
+### Updated hypothesis ranking (2026-07-17)
+
+1. **(leading)** FAR01/FAR02 carry non-zero TN in their exported models; a ~13–14 Jul
+   release changed how that rotation engages (workaround reaching their channel, Forge
+   viewer change, or load-options change) → box now renders oriented differently ("new
+   style"), either trusted-but-wrong (≥5° branch) or overridden-and-wrong (<5° branch).
+2. Same, but the defect is purely the `<5°` override branch mis-firing on a small
+   accidental TN — pure code-side, delivery's report would show TN ≈ 1–4°.
+3. Export-side inconsistency across the federation (mixed TN / mixed Shared-Internal) —
+   delivery's per-file report decides.
+
+Confidence in the *direction* (TN ↔ refPointTransform ↔ box orientation chain): **8/10**
+— code-confirmed chain + independent empirical correlation + mechanism-owner agreement.
+Confidence in a *specific* root cause: still ~5/10 until we have (i) the exact TN
+angle(s), (ii) the release timeline, (iii) the screenshot/gizmo question from the
+07-16 pass.
