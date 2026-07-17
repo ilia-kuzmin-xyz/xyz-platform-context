@@ -6,7 +6,7 @@
 - **Assignee:** Darminder Atker (fullstack lead) · **Reporter (Jira):** Yash Patel (support / incident coordinator)
 - **Original customer contact:** "Mikel" · **Project:** ML9 · **Software Area:** Web Viewer
 - **Linked Freshdesk:** #7286 (currently Open, last flipped to "Waiting on 3rd line" 2026-07-07)
-- Triage (continuation) date: 2026-07-13
+- Triage (continuation) date: 2026-07-13 · **refreshed 2026-07-17**
 
 ---
 
@@ -57,14 +57,40 @@ Read chronologically; the analysis is well advanced. Established facts and decis
   ownership question to Pietro / Mostafa.
 - 107206 (07-13, **Ilia**): asked Pietro/Mostafa whether the customer/BIM team had been reached out to so
   they could learn to set up the location properly.
-- 107208 (07-13, **Mostafa**): *"leave it with me."* ← **latest message; Mostafa (PO) now owns the
-  workflow/education follow-through.**
+- 107208 (07-13, **Mostafa**): *"leave it with me."* ← Mostafa (PO) took the workflow/education follow-through.
 
-**Net thread state:** Root cause (empty Location = no named zones configured on ML9) is established and
-agreed by dev (Darminder) and product (Mostafa). What is unresolved is **non-engineering**: (1) *who* sets
-up named zones and *how* (self-serve? BIM team? internal?), because the customer doesn't know how; and
-(2) whether to build the "surface Phase on the detail panel" enhancement. As of today the ownership of (1)
-sits with **Mostafa** ("leave it with me"); (2) is still an open go/no-go for Darminder.
+**Continuation since 07-13 (refresh 2026-07-17) — the ticket has PIVOTED from "educate the BIM team" to a
+concrete product decision, and is now blocked on Darminder answering Mostafa, NOT on Mostafa:**
+- 107317 (07-14, **Yash** relaying customer **Mikel**): the customer's ask has crystallised into a
+  feature request. Verbatim: *"As far as I understood, it is not possible to connect the rooms to the
+  different models. If it is possible to have a **drop-down list with all the different Location to select
+  on the QA**, that would be great. In case it is not possible, it would be ideal to **remove the Location
+  part on the QA**, to not create confusion and not appear as we have missing details on the Dashboard."*
+  (snapshot `image` id `d837c44d-...` attached — see §5). → Two decision options on the table now:
+  **(1) make zone-Location a manual drop-down selector** (today there is no such control — `context.md §2b`);
+  or **(2) hide/remove the Location field from the QA** so an empty value stops reading as "missing data"
+  on the dashboard (this is the flip side of the empty-`issueLocationId` symptom — `§2a/§2c`). Note the
+  customer's premise — *"not possible to connect the rooms to the different models"* — is stated as **their
+  understanding, unverified**; it is unclear whether room→model linking is genuinely impossible for this
+  setup or simply was never done (the BIM-config path from before). ⚠️ open question for a human.
+- 107320 (07-14, **Mostafa** → Darminder): *"what is the difference between location and location details"*
+  → Mostafa is asking exactly the `§2a` distinction (auto-derived zone **Location** vs free-text
+  **Location Detail**). **Our context.md already answers this in full (§2a).** Darminder has **not** replied.
+- 107532 (07-16, **Ilia** → Mostafa): *"have you got any updates on this?"* (nudge).
+- 107533 (07-16 14:44, **Mostafa** → Ilia + Darminder): *"waiting on this since it was asked of me."*
+  ← **latest message; the comment that moved the `updated` timestamp to 07-16 14:44.** Read together with
+  107320: Mostafa considers the ball to be with **Darminder** to answer the location-vs-location-details
+  question before he can take the product decision forward. **The blocker is now Darminder, not Mostafa.**
+
+**Net thread state (07-17):** Root cause (empty Location = no named zones configured on ML9) is unchanged and
+still agreed. The "educate the customer/BIM team to configure zones" path has effectively stalled — the
+customer now believes room→model linking is *not possible* and has escalated to a **product feature
+decision**: give them a Location **selector**, or **remove** the Location field to stop it reading as
+missing data. The thread is blocked on a **trivial, already-answered question** (Mostafa's 107320,
+location vs location details = `§2a`) that Darminder has not yet responded to — so the highest-leverage
+move has shifted from "decision message → Mostafa" to **unblocking Darminder's reply and teeing up the
+two customer options as the decision**. The "surface Phase" enhancement (106714) remains an untouched
+open go/no-go.
 
 **Ruled out / not in play:** No claim of a regression, no deploy trigger, no crash. Nobody has alleged the
 computation is wrong — only that it is empty and that the entry field is missing.
@@ -175,6 +201,9 @@ configured) is stated verbatim in text by Darminder — but for completeness:
   ML9; contents not independently verified.
 - ⚠️ **NEEDS HUMAN:** inline `blob:` images in the description and in comment 106245 — placeholder refs,
   not fetchable.
+- ⚠️ **NEEDS HUMAN (NEW, 07-14):** the snapshot in comment 107317 (`blob:` id `d837c44d-95b3-4c68-8f6f-...`)
+  — per Mikel's caption it shows where the empty Location "appears as we have missing details on the
+  Dashboard." Not independently verified; likely the QA detail panel / dashboard row with a blank Location.
 
 ---
 
