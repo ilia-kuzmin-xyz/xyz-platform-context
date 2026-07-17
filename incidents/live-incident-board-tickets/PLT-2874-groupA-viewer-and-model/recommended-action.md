@@ -76,3 +76,24 @@ Outcome map:
 **Confidence in diagnosis: 6/10** (both code paths traced; specific cause of the Far01 gap is
 environment-dependent). **Confidence in this being the right next step: 8/10** — a clarifying question
 + one query is the low-cost move that decides bug-vs-by-design before any dev effort is committed.
+
+---
+
+## Refresh 2026-07-17 — re-owner the diff query (no other change)
+
+Re-pull (see `context.md §8`) shows **no new activity since 07-13** — still In Analysis, still
+assigned to Darminder, no query result posted, hypothesis neither confirmed nor refuted. **One
+correction to the plan above:** the sole comment on the ticket is **Ilia Kuzmin (07-13 14:12):
+"I'm going to compare the data to see where the 30K-element difference comes from."** So the
+`COUNT(*)` vs `COUNT(DISTINCT)` verification query (Deep-dive §"one query that settles bug-vs-by-design")
+is **already owned by Ilia, not Darminder** — the action is not "hand it to Darminder" but
+**"give Ilia the exact query so his in-flight comparison lands the decision cleanly, and post the
+result back on the ticket."**
+
+**Revised drafted action (one line):** *Reply to Ilia's comment with the `COUNT(*)` /
+`COUNT(DISTINCT objectId)` / `COUNT(DISTINCT modelElementId)` query (context.md Deep-dive) so his
+data comparison directly settles duplicate-status-rows (bug) vs UUID→dbId expansion (by-design); the
+widget-clarify question to Mostafa still stands in parallel.*
+
+**Confidence: unchanged at 6/10** — nothing was confirmed or refuted; the deciding query still has
+not been run.

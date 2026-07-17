@@ -6,8 +6,8 @@
 - **Assignee:** Darminder Atker (fullstack lead)
 - **Reporter (Jira):** Mostafa Kamel Hussien (product owner) — internal report, not a client ticket
 - **Project / model:** **Far01** (federated file)
-- **Created:** 2026-07-07 · **Comments:** none · **Attachments:** 2 PNG screenshots (see §7 Needs human)
-- Triage date: 2026-07-13
+- **Created:** 2026-07-07 · **Comments:** 1 (Ilia Kuzmin, 2026-07-13 — see §8) · **Attachments:** 2 PNG screenshots (see §7 Needs human)
+- Triage date: 2026-07-13 · **Refreshed: 2026-07-17** (see §8)
 
 ---
 
@@ -185,3 +185,18 @@ WHERE statusCode IS NOT NULL;   -- apply same status filter as the tile
 - `distinct_source_elements > editor's 440K` → scope difference (unlinked-but-statused elements included) → definition decision.
 
 **Revised position:** "not a bug" was too strong. Correct statement: *the dashboard number was never a count of linked source elements, so equality with the editor is not the right expectation — but vector 2 (duplicate status rows) would be a genuine counting defect and is cheaply testable with the query above.* Recommended action file still stands: clarify + run the diff query before any dev work.
+
+---
+
+## 8. Refresh 2026-07-17 — Jira re-pull (no new activity; one prior comment surfaced)
+
+Re-pulled PLT-2874 via JQL (the `getJiraIssue` endpoint timed out four times; `searchJiraIssuesUsingJql` returned the full record incl. comments). State of play:
+
+- **Status:** still **In Analysis**. **Assignee:** still **Darminder Atker**. **`updated`: 2026-07-13T14:12:18+01:00** — identical to the prior triage's last-known update. **No genuinely new activity since 07-13.**
+- **One comment exists** (the prior context.md header said "Comments: none" — corrected above). It is the *only* comment, and it predates/coincides with the last triage timestamp, so it was almost certainly posted just as the 07-13 pass ran:
+  > **Ilia Kuzmin**, 2026-07-13 14:12:01 — "@Yash Patel, I'm going to compare the data to see where the 30K-element difference comes from."
+- **Nobody ran the `COUNT(*)` vs `COUNT(DISTINCT)` query** or otherwise posted a result. Darminder has not responded. **The non-DISTINCT-count hypothesis is therefore neither confirmed nor refuted** — the deciding evidence (the §7 / Deep-dive query against Far01) still does not exist.
+- **Signal in the comment:** Ilia states the difference is **~30K** — which matches the **440K vs 470K (+30K)** figures from the Deep-dive scenario, *not* the description's 628K vs 695K (+67K). So the two figure-pairs in this ticket describe the *same* structural gap seen at two different date-range/model states; "30K" is Ilia's own current read. It also tells us the **data-comparison work is already owned and in-progress by Ilia himself** (who is running this refresh) — i.e. the drafted "run the diff query" step is effectively already assigned, not to Darminder but to Ilia.
+- **Attachments:** re-confirmed unfetchable — one WebFetch attempt on the underlying media URL returned **HTTP 403 Forbidden**, and the description embeds them as `blob:` object URLs (browser-local, inherently non-fetchable). Remains a **needs-human** item; nothing load-bearing is missing (§7).
+
+**Net:** no change to the mechanism analysis or the confidence score (**stays 6/10** — the blocker is environment-dependent query execution, not code understanding, and that query still hasn't been run). The only material update is that the data-diff is now explicitly owned by Ilia per his 07-13 comment.
