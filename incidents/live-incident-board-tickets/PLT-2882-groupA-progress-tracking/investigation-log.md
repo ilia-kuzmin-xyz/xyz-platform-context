@@ -208,3 +208,36 @@ that sync gap is the pipeline bug and the sharpest question for BE.
 Status: root cause explained end-to-end; 418 list verified and exported; deletion pending peer
 alignment; project-wide sweep pending harvest run or BE query; FE robustness fix still to be
 scheduled.
+
+## 2026-07-17 — refresh: no new Jira activity since 07-15; ticket idle on three human gates
+
+Re-pulled all 11 comments. **The last comment is still Ilia's 2026-07-15 10:53 rebuttal to David
+Webb** (comment 107412) — the one the 07-14/15 entry above already records — and the issue `updated`
+timestamp equals that same moment. **Nothing has happened in the two days since.** Status unchanged:
+**In Analysis**. No new evidence, no new theory, no reply, no approval.
+
+What is waiting on a human, precisely (none of it in our own hands):
+
+1. **Peer (BE) alignment — David Webb has not replied.** He challenged the RCA on 07-15 10:15
+   (the sample element *is* in the current `client-element-metas`; drag-and-drop upload already
+   auto-unlinks elements not in current versions ⇒ "not sure I agree"). Ilia answered 38 min later
+   (metadata agrees on all 418, but the **geometry** side is empty; source file `bb85941b` has
+   18,908 elements in geometry yet **0 of its 141 linked handles**; other activities in the same
+   models select fine; auto-unlink reads the **element list**, which still carries the 418 — so it
+   *supports* the RCA rather than refuting it). **David has posted nothing since.** Deletion of the
+   418 remains ON HOLD pending his alignment.
+2. **Product approval — Pietro & Mostafa have not replied.** Ilia asked both to approve deleting the
+   418 dead links (07-14 17:49) and posted the list (17:53). Neither responded.
+3. **BE pipeline "why" — unanswered.** David answered only the narrow question (object-id-map is
+   generated for **Navis models only**, 07-14 17:12 — matches our `navisworks-model-mapper.ts:277`
+   finding). The deeper root-cause question — *why does the current version's `client-element-metas`
+   parquet still list 418 elements whose geometry the same version dropped, and is that artefact
+   regenerated on re-version?* — has no answer.
+
+Nobody else on the roster (Darminder, Sergey, Sachin, Ali Seyedof) has commented. **Assignee is now
+Ilia Kuzmin** (self-assigned since he claimed the investigation on 07-13; the ticket was originally
+assigned to Darminder).
+
+Net: the *investigation* is finished and the RCA is confirmed (9/10, unchanged); the *ticket* is idle,
+waiting on peer alignment + product approval + one BE pipeline answer. It needs a nudge and a clean
+split, not more analysis. See `recommended-action.md` (2026-07-17 refresh).

@@ -2,11 +2,11 @@
 
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2882
 - **Issue type:** Live Incident ("To track live incidents on site.") · Software / Web Viewer
-- **Status:** **In Analysis** (category: In Progress / yellow). ⚠️ The triage brief said "Open" — it is **not**; it is already In Analysis and actively being worked. Freshdesk #7379, last set "Waiting on 3rd line" (2026-07-09) — i.e. back on us.
+- **Status:** **In Analysis** (category: In Progress / yellow) — **still In Analysis as of the 2026-07-17 refresh, idle since 07-15**. ⚠️ The triage brief said "Open" — it is **not**; it is already In Analysis and actively being worked. Freshdesk #7379, last set "Waiting on 3rd line" (2026-07-09) — i.e. back on us.
 - **Priority:** Major
 - **Project (site):** APLD — FAR01
-- **Reporter:** Yash Patel (coordinator/support) · **Assignee:** Darminder Atker (fullstack lead)
-- **Created:** 2026-07-09 · **Last updated:** 2026-07-13
+- **Reporter:** Yash Patel (coordinator/support) · **Assignee:** **Ilia Kuzmin** (self-assigned since claiming the investigation 2026-07-13; originally Darminder Atker, who still owns the FE-robustness half)
+- **Created:** 2026-07-09 · **Last updated:** 2026-07-15 (Jira; last comment = Ilia's rebuttal to David Webb — nothing since)
 - **Components / Labels:** none
 - **Attachments:** 2 × `.mp4` screen recordings + 2 inline blob images in comment 1 (all unreadable here — see NEEDS HUMAN)
 - **Domain slug chosen:** `progress-tracking` (deviates from the default `filter-system` — justified below)
@@ -85,11 +85,15 @@ The default `filter-system` (FLT) is the **dashboard's** central filter state (`
 
 ## Confidence (per xyz-platform-context CLAUDE.md scale)
 
-- **Mechanism identified in code** (Gantt count uses raw `activity_links`; select/isolate silently drops elements not in the loaded registry/model; no user feedback): **8/10** — read directly from source with file:line.
-- **That orphaned links are the operative root cause for `FAR01UGD1220` specifically:** **5/10** — it fits the symptom, the working-vs-broken pair, and the assignee-team's own hypothesis, but is **not yet confirmed against data** (no `activity_links` query for this activity, no repro dissecting count vs selectable set). Environment-dependent; needs a human/data step.
-- **That this is a bug, not a feature gap:** **8/10** — feature works for other activities; "retired" has no code footprint.
+> **Updated 2026-07-17.** The data step this block used to flag as unrun has been run (twice, incl.
+> cold cache) and the root cause is confirmed — see `investigation-log.md` § "2026-07-14 — ROOT
+> CAUSE CONFIRMED". Scores below supersede the pre-confirmation 07-13 estimate.
 
-**Overall triage confidence: ~6/10.** Clear direction; final cause and FE-vs-data split need one data/repro step.
+- **Mechanism identified in code** (Gantt/panel count comes from parquet-resolved elements; select/isolate needs viewer geometry, which has 0; `setAggregateSelection([])` fails silently — no feedback): **9/10** — read from source, then confirmed by the diagnostic run.
+- **Root cause = element-metadata (`client-element-metas`) parquet vs SVF geometry disagree for the same re-uploaded model version:** **9/10** (was 5/10) — confirmed against data: all 418 in parquet, `dbIdHitCount: 0` / `inGeometry: 0` on both models, reproduced twice incl. cold OPFS cache. David Webb's independent metadata check *agrees* with our data (his facts confirm parquet-side presence; the disagreement is with the geometry side). Remaining unknown is purely *why the pipeline left the metadata behind* — a BE question, not an FE one.
+- **That this is a bug, not a feature gap:** **9/10** — feature works for other activities in the same model; "retired" has no code footprint.
+
+**Overall triage confidence: ~8/10** (was ~6/10). Root cause confirmed at 9/10; the discount to 8 is not code uncertainty but the two open **human/environment-dependent** gates — (i) BE peer alignment (David Webb hasn't replied to the rebuttal) + product approval to delete the 418 (Pietro/Mostafa silent), and (ii) the unanswered BE pipeline "why does the artefact retain dead elements on re-version" question.
 
 ---
 
