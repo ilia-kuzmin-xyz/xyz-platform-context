@@ -13,6 +13,20 @@
 
 ---
 
+## Refresh: 2026-07-17 — NOTHING has changed since 07-13
+
+Re-pulled from Jira on 2026-07-17. **Zero movement** since the last pass:
+- **Status:** still `With Customer` (unchanged).
+- **Last updated:** still `2026-04-29T13:17` — the ticket has not been touched at all.
+- **Comments:** still exactly the same **4 comments** (last is the 29 Apr Freshdesk-status mirror). No new activity.
+- **Assignee:** still Masum Ahmed (support/off-roster).
+- **Reclassified?** No — still typed `Live Incident`, still on the live-incident board.
+- **Handed to product?** No — the 07-13 drafted action `(c) hand off to product + reclassify` was **not executed**; the two open internal questions (which dashboard to relink; is the release blocker cleared) remain unanswered in-thread.
+
+**Process signal (surface plainly, do not soften):** a ticket that was assessed as **mis-filed** on 07-13 — a product/demo relink request, not a customer-blocking incident — has continued to sit on the **live-incident board**, untouched, for another 4 days. It is now **~79 days stale** (last update 29 Apr) and **~85 days since original report** (23 Apr). The same recommendation (reclassify + hand to product) has now been on record without action for a full triage cycle. Repeated non-action on the same recommendation is itself the finding: a live-incident board is not the place for a ~3-month-old internal backlog item, and its continued presence there both inflates the incident board and buries a legitimate product task where product won't see it. This needs a human to either action the hand-off or explain why it is being kept as an incident — not another silent re-parking.
+
+---
+
 ## Classification: (ii) content/config request — MIS-FILED on the live-incident board
 
 This is **not a bug**. There is no error, no reproduction, no broken user, no "worked-before/broken-now". It is a request to **relink / migrate a sales-demo dashboard ("Mission Critical Dashboard") off the old PowerBI system onto the new native (non-PowerBI) dashboard**, so it renders faster for client demos.
@@ -46,7 +60,9 @@ Note for the human: the native Dashboard Page is now documented as ✅ Live (`da
 
 ## Staleness
 
-**Stale.** No movement since 2026-04-29; today is 2026-07-13 → **~75 days (≈10.5 weeks) untouched**, sitting on the live-incident board the whole time.
+**Stale, and getting staler with no action.** No movement since 2026-04-29.
+- As of **2026-07-13**: ~75 days (≈10.5 weeks) untouched.
+- As of **2026-07-17** (this refresh): **~79 days untouched** (last update 29 Apr) / **~85 days since original report** (23 Apr) — still sitting on the live-incident board the whole time, with a documented "reclassify + hand off" recommendation that has now gone one full triage cycle unactioned.
 
 ## Roster / ownership flags
 
@@ -68,7 +84,7 @@ Per the task rule, a deep hc-frontend dive is not justified for a content/config
 
 ## Confidence
 
-**8 / 10** (per CLAUDE.md scale: high confidence, minor unknowns). The classification (content/config relink request, mis-filed as an incident, internally parked not customer-blocked) is directly supported by the description and comments. The only unknowns are external/environmental: the current release status and the Freshdesk #6492 detail — neither of which changes the classification.
+**9 / 10** (raised from 8/10 on 2026-07-17). The classification (content/config relink request, mis-filed as an incident, internally parked not customer-blocked) is directly supported by the description and comments, and is now reinforced by a second observation showing the ticket completely frozen for another 4 days with the prior recommendation unactioned. The only unknowns remain external/environmental: the current release status and the Freshdesk #6492 detail — neither of which changes the classification or the process finding.
 
 ## Doc refs
 
