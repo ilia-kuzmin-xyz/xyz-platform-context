@@ -12,28 +12,18 @@ decision, not a hygiene fix. TN also cannot explain the July-14 onset by itself
 (customer says models weren't updated), so the release-trigger question from the
 07-16 draft stays open in parallel.
 
-### Draft for Yash (relay to delivery/BIM team)
+### Draft for Yash (relay to delivery/BIM team) — shortened per Ilia, 07-17
 
-> Hi Yash — engineering follow-up on the section box (PLT-2906 / FD #7424). We believe
-> the projects showing the changed box are the ones whose models carry a **non-zero
-> True North angle** (it's baked into the exported file and our viewer orients the box
-> from it). Could you ask the delivery/BIM team to **check and report — please don't
-> change anything yet**:
->
-> 1. For the FAR01 and FAR02 models: what is the project's **Angle to True North** in
->    Revit (Manage ▸ Position; visible on the Survey Point), and is that value
->    **intentional** for the site? Please give the actual number(s).
-> 2. Which **coordinate option** are the models exported with (e.g. NWC "Coordinates:
->    **Shared** vs **Internal**") — and is it the **same for every file** in the
->    project?
-> 3. Did any export settings or re-exports change around **July 14**? (The user says
->    the models weren't updated — we'd like to confirm nothing changed on the
->    authoring side.)
->
-> Why: a non-zero angle is perfectly normal — we don't want it "fixed" to 0 (that
-> would shift georeferencing). We need the exact values and per-file consistency to
-> decide whether the fix is on our side (viewer mishandling the angle) or the export
-> side (files disagreeing with each other).
+> Hi Yash — follow-up on the section box (PLT-2906 / FD #7424). We suspect this is
+> tied to the models' **True North angle**, so as a first step could you ask the
+> delivery/BIM team to **check the True North angle in Revit** (Manage ▸ Position ▸
+> Angle to True North) for the FAR01/FAR02 models and report the actual value(s) —
+> and whether it's the same across all exported files? **Please don't change
+> anything yet** — a non-zero angle is normal; we just need the exact number to tell
+> whether the fix is on our side or the export side.
+
+(Longer variant with the export-coordinate + July-14 questions kept below in the
+07-16 history section, if the thread needs the full detail later.)
 
 ### Parallel internal facts (not for the customer)
 
