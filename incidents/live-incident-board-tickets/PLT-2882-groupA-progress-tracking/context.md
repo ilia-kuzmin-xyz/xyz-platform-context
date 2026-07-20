@@ -116,3 +116,145 @@ The default `filter-system` (FLT) is the **dashboard's** central filter state (`
 - `xyz-platform-context/dashboard/flt-filter-system.md` — the dashboard FLT system; confirmed *not* involved (no "retired"/activityType-status filter matches this symptom).
 - `xyz-platform-context/planning/PLT-room-floor-progress-filter.md:168-196` & `PLT-2773-pr-description.md:16-44` — describe the `activity_links` bridge (element↔activity) and note projects can lack rows; useful background on the same table this bug reads.
 - `xyz-platform-context/incidents/live-incident-playbook.md` — tone/pattern for the recommended reply.
+
+---
+
+## Update — 2026-07-20 (second capture; extends the 07-13 baseline above)
+
+Live ticket re-pulled (11 comments, still **In Analysis**, assignee now **Ilia
+Kuzmin**). No new activity after Ilia's 2026-07-15 10:53 rebuttal — the ticket
+is **stuck on an unresolved technical disagreement with a pending
+destructive-action approval** (Ilia's proposal to delete 418 links; Pietro
+Desiato / Mostafa Kamel Hussien have neither approved nor rejected; David Webb
+has not answered the rebuttal).
+
+**New attachments since 07-13** (all behind Atlassian auth — NEEDS HUMAN to open,
+but their existence is load-bearing):
+- `activity-7c4f2509-orphaned-418.csv` (Ilia, 07-14 17:53, 31 KB) — the exact 418
+  element↔activity links proposed for deletion. This is the destructive-action payload.
+- `client-element-metas a3029b9f-3fe7-47c2-a8b6-1f8fc7827190.parquet` (David Webb,
+  07-15, 1.19 MB) — current metadata for PC model version.
+- `client-element-metas 55e72347-830f-4aa2-88a4-8b2bb0cae08c.parquet` (David Webb,
+  07-15, 4.41 MB) — current metadata for QA model version.
+
+### The investigation since 07-13 (verified against the live thread)
+1. **07-14 17:09 (Ilia):** the 418 elements' models have **no object-id-map parquet**.
+2. **07-14 17:12 (David Webb):** *"the object id map is generated for navis models only."*
+3. **07-14 17:49 (Ilia):** both models (PC-…AKS_REV1-V23, QA-…Northwest-V35) were
+   **re-uploaded**; the deep-underground-electrical scope was removed/redrawn; the
+   418 links point at gone elements; **count still 418 because client-element-metas
+   still lists them while geometry doesn't**. Proposes: **delete the 418 links.**
+4. **07-15 10:15 (David Webb) — pushback:** disagrees with the root cause. States
+   model drag-and-drop already has a final step that **unlinks elements not in
+   current model versions**. Traces one example (activity `7c4f2509-…`, element
+   `bcb3fc02-…`): the element **IS present in both current client-element-metas
+   parquets** (versions `a3029b9f-…`, `55e72347-…`).
+5. **07-15 10:53 (Ilia) — rebuttal (latest):** agrees the element is in current
+   client-element-metas (all 418), **but** on the geometry side its
+   `sourceFileElementId` is **not** in the current version's **forge property DB /
+   externalId mapping**. Source file `bb85941b` has 18,908 elements in geometry but
+   **zero of its 141 linked ones**; other activities in the same model select fine.
+   Conclusion: metadata lists elements the current translation's geometry lacks —
+   which is also why the drag-and-drop auto-unlink didn't catch them.
+
+### Code adjudication — does the frontend support Ilia or David Webb?
+
+The two artifacts each side is pointing at are **genuinely two independent
+resolution layers** in the frontend, produced by different pipeline stages:
+
+- **Layer 1 — metadata (`client-element-metas` parquet).** Loaded in
+  `components/project-x/entities/model-entity.ts:237-296` (`loadElementMetadata`),
+  keyed by `modelElementId`, storing each element's `sourceFileElementId`; it
+  populates `projectService.elements` and syncs `project_element_list`. **This is
+  the layer David Webb checked** ("element is in both parquets") and the layer the
+  Gantt **count** and `getElementsForActivity` (`linking-service.ts:757-761`)
+  resolve against — so David is correct that the element resolves *here*.
+- **Layer 2 — translated geometry (forge externalId→dbId map).** Built at model
+  load in `services/model-loaders/model-mapping-service.ts:337-450`
+  (`_getDbIdsForElementIds`) via `getExternalIdMappingWithCache`; for Revit models
+  that is `services/model-loaders/revit-model-mapper.ts:22-36`, which calls Forge's
+  `model.getExternalIdMapping` — i.e. the **translated derivative / property DB**,
+  exactly David's and Ilia's "forge property DB / externalId mapping." Stored as
+  `model.elementId2dbId` (keyed by `sourceFileElementId`).
+
+**Select/isolate resolves through Layer 2, not Layer 1.** `model-entity.ts:342-380`
+(`getDbIdsForElements` / `getDbIdForElement`) look up
+`element.metadata.sourceFileElementId` in `elementId2dbId`. The linked-elements
+tree does the same: `useLinkedElementsTreeData.ts:82-119` (`collectV2`) pulls
+`{modelId, sourceFileElementId}` from **metadata**, then calls
+`model.getDbIdsWithChildren(sourceFileElementId)`; if that returns empty the model
+is pushed to `modelsToShowAsNodes` and **no dbId is added to `allowed`** → nothing
+selectable/isolable, no error. This is exactly the observed symptom.
+
+**Verdict: Ilia's refined 10:53 claim is the one consistent with the code.**
+An element can be present in Layer 1 (metadata) yet have its `sourceFileElementId`
+absent from Layer 2 (forge translation) for the *same* model version — and
+select/isolate depends entirely on Layer 2. **David's counter-check does not
+actually refute Ilia:** he verified Layer 1 (metadata), but select/isolate fails
+in Layer 2, which he did not check. So the two men are not contradicting each
+other — they are describing two different layers, and the failing operation lives
+in the one Ilia named.
+
+**Is same-version metadata/geometry drift code-plausible? Yes.** `client-element-metas`
+(pipeline/dagster artifact) and the forge/APS translation (geometry + property DB
+with externalIds) are generated independently; nothing in the frontend guarantees
+their element sets match for a given `modelVersionId`. Critically, David's own
+"object-id-map is navis-only" comment cuts **for** Ilia here: these are **Revit**
+models (they lack an object-id-map by design — so the missing object-id-map is a
+**red herring**, correctly killed by David), and for Revit the metadata↔geometry
+alignment relies **solely** on `sourceFileElementId` matching the forge externalId
+set. There is no object-id-map safety-net artifact for Revit, so metadata/geometry
+drift on a Revit model has nothing to catch it — including the drag-and-drop
+auto-unlink if that step validates against metadata rather than the translated
+geometry.
+
+**Drag-and-drop auto-unlink: not in the frontend.** A repo-wide search of
+`hc-frontend` finds **no** "unlink elements not in current model version" logic —
+it is a **backend/dagster** step (David Webb's domain). If it keys off
+`client-element-metas` / `project_element_list` (which still list the 418) rather
+than the forge-translated externalIds, it would fail to catch exactly these — which
+is Ilia's explanation. **This cannot be confirmed from the frontend; it needs the
+backend owner (David) to say what that step compares against.** That is the single
+question that both closes the disagreement and belongs to him.
+
+### The destructive-action caution (why the delete must not be approved yet)
+- The delete of 418 prod links is **irreversible** and is sitting on an
+  **unresolved** disagreement with the **pipeline owner dissenting** — precisely the
+  playbook's "no unannounced/unapproved destructive prod action" anti-pattern.
+- Ilia's own two comments imply **different root causes with different correct
+  fixes**: (17:49) "elements legitimately removed by re-versioning" → deleting dead
+  links is reasonable cleanup; (10:53) "elements still in current metadata but
+  missing from current geometry" → the defect is a **metadata/geometry sync failure
+  on the current version**, whose correct fix is to **regenerate the metadata /
+  re-translate the model**, not delete links. If the model is later re-translated
+  correctly, deleted links do **not** come back — you would have destroyed valid
+  progress linkages.
+- The **one decisive check neither side has posted**: take the 418
+  `sourceFileElementId`s and test membership in the **current translation's forge
+  externalId set** for versions `a3029b9f-…` / `55e72347-…`. Ilia asserts absent
+  (from one source file, `bb85941b`: 141 linked, 0 present); David has not verified
+  Layer 2 at all. Confirming all 418 are metadata-present + geometry-absent settles
+  it and also tells whether the fix is "delete links" vs "re-translate/regenerate
+  metadata."
+
+### Revised confidence
+- **Mechanism — select/isolate resolves via the forge externalId layer (Layer 2),
+  distinct from the metadata/count layer (Layer 1):** **8–9/10** (read from source,
+  file:line above).
+- **Ilia's refined root cause (metadata present, geometry externalId absent) is the
+  operative one:** **7/10** — code-consistent and matches the working-vs-broken pair,
+  up from 6/10; still short of confirmed because the metadata-present + geometry-absent
+  property has been shown for one source file, not verified across all 418, and the
+  pipeline owner disputes it.
+- **That the 418-link delete is the correct remedy:** **4/10** — even if Ilia's cause
+  holds, delete vs re-translate is undecided, and deletion is irreversible.
+- **Overall: ~7/10 on cause direction, with an explicit HOLD on the destructive
+  action** until the Layer-2 membership check is agreed between Ilia and David.
+
+### NEEDS HUMAN (new, beyond the 07-13 list)
+- Open `activity-7c4f2509-orphaned-418.csv` and the two `client-element-metas`
+  parquets to run the Layer-2 membership check (418 `sourceFileElementId`s vs the
+  current forge externalId map) — the single fact that settles Ilia vs David.
+- Backend/dagster: what does the model drag-and-drop "unlink elements not in current
+  model versions" step compare against — `client-element-metas`/`project_element_list`
+  metadata, or the translated geometry externalIds? (David Webb owns this.)

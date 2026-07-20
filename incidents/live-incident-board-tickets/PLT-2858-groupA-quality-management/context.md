@@ -186,3 +186,125 @@ configured) is stated verbatim in text by Darminder — but for completeness:
   Worth a KB entry once the workflow is settled.
 - Naming drift (also flagged on PLT-2815): `CLAUDE.md` layout lists `qlt-quality.md`; the actual file is
   `dashboard/quality-tab.md`.
+
+---
+
+## Update — 2026-07-20
+
+Re-pulled the live issue. **No activity after 2026-07-16** — the ticket's `updated` timestamp is
+`2026-07-16T14:44:34` (comment 107533), so the thread is exactly as the 07-13 capture left it plus the
+four developments below. Still **In Analysis**, **Critical**, assignee Darminder, reporter Yash. Open 19+
+days (since 07-01). The ticket is now **doubly stalled**.
+
+### 7a. New thread activity (07-14 → 07-16)
+
+- **107317 (07-14 12:39, Yash relaying customer "Mikel"):** customer confirms *"it is not possible to
+  connect the rooms to the different models"* — i.e. they tried the BIM-team route from the 07-01/07-07
+  branch and it did not work for them. Proposes **two alternatives**:
+  - **(a)** add a **drop-down of all Location options** to select on the QA form; or
+  - **(b)** if (a) isn't possible, **remove the Location field entirely** from the QA issue so it doesn't
+    *"appear as we have missing details on the Dashboard."*
+  - Attached `image-20260714-113920.png` (⚠️ inaccessible — see §5; presumed the dashboard/detail view
+    showing the empty Location).
+- **107320 (07-14 13:17, Mostafa → Darminder):** *"what is the difference between location and location
+  details"* — **unanswered** in-thread. (Answered below in §7b; this is what the recommended-action draft
+  now hands back to him.)
+- **107532 (07-16 14:42, Ilia):** nudged Mostafa for an update.
+- **107533 (07-16 14:44, Mostafa, latest):** *"waiting on this since it was asked of me"* — deflecting;
+  neither answers Darminder's 107320 question nor gives a decision on the customer's two options.
+
+**Net:** two independent blockers now sit unresolved — (1) Mostafa's own location-vs-location-details
+question (107320), open 6 days; (2) the customer's concrete dropdown-or-remove proposal (107317), no
+response for 6 days. The original config/ownership question ("who configures zones, how") is now
+effectively **dead-ended on the customer side** — they've told us the BIM route doesn't work for them, so
+"go configure zones" is no longer a viable answer; a **product/FE decision** on the two proposals is what
+unblocks it.
+
+### 7b. Direct answer to Mostafa's 107320 question (location vs location details) — code-verified 07-20
+
+Re-read all four files; the §2a table is **still accurate** (line refs current). Stated plainly enough to
+paste into a reply:
+
+| | **"Location"** | **"Location Detail(s)"** |
+|---|---|---|
+| What it is | The **named zone** (floor / area / room) the issue's element sits in | A **free-text note** the user types |
+| How it's set | **Auto-derived** by the platform from the element's position vs the project's configured named zones — **read-only**, no form control | **User-typed** free text, max 100 chars |
+| FE field | `locationId` (`issue-view-model.ts:45`) | `locationDescription` (`issue-view-model.ts:46`) |
+| API field | `issueLocationId` (`issue-api-service.types.ts:77`) | `locationDetails` (`:94`) |
+| Form control | **None** — not editable in the web viewer | `issue-form.tsx:527-537`, label **"Location Detail"** |
+| Panel row | `issue-details.tsx:139`, label **"Location"** | `issue-details.tsx:140`, label **"Location Details"** |
+| Why empty on ML9 | `issueLocationId` is null — ML9 has no named zones configured | N/A — works today; anyone can type in it |
+
+One-liner for Mostafa: **"Location" is the auto-assigned zone (from the model's named floors/areas/rooms;
+read-only, empty on ML9 because no zones are set up). "Location Detail" is a free-text box the user fills
+in themselves — unrelated to zones, and it works today.**
+
+### 7c. Code-feasibility of the customer's two proposals (engineering size only — NOT a product call)
+
+**Proposal (a) — dropdown of Location/zone options on the QA form:**
+- **The lookup list is already available client-side.** `useIssueParameters()` returns
+  `issueParameters.issueLocations: IIssueLocation[]` = `{ issueLocationId, location }`
+  (`issue-api-service.types.ts:176-179`, `:216`; V1 mapping `useIssueParameters.ts:71-77`). The form
+  **already fetches it** (`issue-form.tsx:56`) and never uses it.
+- **The write path already exists end-to-end.** `toIssuePayload` already emits
+  `set('issueLocationId', form.locationId)` (`format-issues.ts:146`), and `IssueFormSubmitPayload` carries
+  `locationId`. So a new `<FormSelect name='locationId' … options={issueParameters.issueLocations…}>` —
+  a near-copy of the existing Stage/Outcome selects (`issue-form.tsx:556-578`) — is a **small,
+  self-contained FE change**.
+- **BUT two big caveats** (why "small in code" ≠ "solves this ticket"):
+  1. **Empty on ML9.** `issueLocations` is populated from the *same* project-configured named zones that
+     are missing on ML9. On ML9 (and every zone-less project) the dropdown renders **empty** — so (a)
+     does **not** fix this customer's actual complaint; it only helps projects that *have* configured
+     zones. This is the same data gap wearing a new hat.
+  2. **Product-model change, needs Darminder/Mostafa + likely BE.** Location is currently *auto-derived
+     from geometry* and read-only by design (Darminder, 106248/106250). A manual dropdown lets a user set
+     `issueLocationId` **independently of the element's actual position** — a semantic change. Needs
+     confirmation that api-v2 **persists** a manually-set `issueLocationId` and doesn't overwrite it on the
+     next auto-derivation pass (out-of-repo; Sachin/Ali). So: small FE effort, but gated on a product
+     decision and a BE behaviour check, and it still leaves ML9 empty.
+
+**Proposal (b) — hide the Location row when zones aren't configured:**
+- **Trivial FE change, no BE work.** The `Detail` component **already supports a `hidden` prop**, used
+  right above for Discipline/Package (`issue-details.tsx:131`, `:135` — `hidden={!disciplineCategoryType}`).
+  Hiding the Location row is a one-liner: `hidden={!compare('locationId')}` (hide when empty) or, better,
+  gate on the project having zones at all — `hidden={!issueParameters?.issueLocations?.length}` (hide the
+  row for the whole zone-less cohort, not just per-issue). `issueParameters` is already in scope in the
+  detail panel (`issue-details.tsx:35`).
+- **Directly resolves the customer's stated concern** (*"not appear as missing details"*) with essentially
+  zero risk.
+- **⚠️ Two detail surfaces.** This file is the **viewer** issue detail panel. The customer's screenshot
+  says *"on the Dashboard"* — the **dashboard** quality panel has its own detail component
+  (`components/dashboard-panels/quality-panel/components/issue-details-panel/issue-details-panel.tsx`).
+  Whichever surface the customer sees (likely the dashboard) must be the one changed; possibly both. The
+  hide mechanism is equally trivial on either, but the exact target surface should be confirmed against the
+  attachment (⚠️ NEEDS HUMAN — attachment inaccessible).
+
+**Latent gap still stands (§2c).** Even if zones *do* get configured on a project, the panel binds
+`compare('locationId')` and renders the raw **GUID**, never resolving it to `IIssueLocation.location`
+(`issue-details.tsx:139`; `toIssue` copies only the id, `format-issues.ts:87`). So "fix the data" alone
+surfaces a GUID. A complete answer for zone-configured projects = **resolve id→label** (small; the
+`issueLocations` lookup that powers proposal (a)'s dropdown is exactly what's needed here too) **+** hide
+when empty (proposal b).
+
+### 7d. Cohort — still open, still important (playbook Q6)
+
+The decision between (a) and (b) hinges on **how many projects have unconfigured named zones**. If most
+projects never configure zones (plausible — ML9's customer says they've "never done this"), then a
+dropdown (a) is dead weight almost everywhere and **hiding-when-empty (b) is the right default**, with the
+dropdown as an *enhancement only for zone-configured projects*. If zone config is common, the balance
+shifts. **⚠️ NEEDS HUMAN / DATA:** no query available to me to count zone-less projects — needs a
+platform/DB check (how many projects have zero rows in the issue-locations / named-zones parameter). This
+is the single fact that would make the (a)-vs-(b) recommendation firm rather than directional.
+
+### 7e. Revised confidence
+
+- **Location-vs-Location-Detail answer (§7b): 9/10** — read end-to-end across all four files; line refs
+  current; directly answers 107320.
+- **Feasibility read (§7c): 8/10** — the client-side lookup and the write path are both present in code, so
+  the FE sizing is solid. The −2 is out-of-repo: whether api-v2 honours a manually-set `issueLocationId`
+  (proposal a) is asserted-by-design, not verified by me.
+- **Which proposal is right (a vs b): 6/10** — clear engineering direction (b is tiny + no-BE + solves the
+  complaint; a is small-FE-but-empty-on-ML9 + product/BE-gated), but the *product* call and the cohort
+  count are not mine to settle.
+- **Overall: 7/10** (unchanged framing from §4 — the block is product/process, now sharpened to a concrete
+  two-option decision rather than an open ownership question).
