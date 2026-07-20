@@ -43,6 +43,78 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-20 — 9 in-scope tickets (Group B skipped this run)
+
+Per updated task scope, **Group B action-scenario is still TBD and explicitly skipped
+this run** — only PLT-2385 remains Group B (still Ready For Development, untouched,
+context not refreshed). All effort went into Group A: 3 brand-new tickets triaged from
+scratch, 2 tickets with major new thread activity refreshed, 3 unchanged tickets
+re-verified with no new comments (folders left as-is).
+
+### Board movement since 2026-07-13
+
+- **Resolved / left scope (6):** PLT-2892, PLT-2879, PLT-2759, PLT-2742 → **Done**;
+  PLT-2890 → **In Code Review**; PLT-2649 → **With Technical Support**. No folder
+  changes made for these (out of current scope; historical folders kept as-is).
+- **New to the board (3):** PLT-2906, PLT-2909, PLT-2884.
+- **Unchanged, re-verified no new activity (3):** PLT-2874 (only a same-topic note
+  added 07-13, already captured), PLT-2815 (Freshdesk closed 07-06, Jira still With
+  Customer, no new comments), PLT-2619 (still stale since 04-29).
+
+### Group A (8) — evaluate / clarify
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| PLT-2906 | viewer-and-model | Open | Section box misaligned across **all** FAR01/FAR02 models since 07-14, **no model re-upload** — points at our own `SectionToolOrientation` heuristic (min-area-rect box-fit hack), not the True North data Ilia is chasing with the BIM team | (a) internal comment to FE/viewer owner — did the orientation heuristic/thresholds ship or change around 07-14? Runs parallel to the BIM ask, doesn't block on it | 7/10 |
+| PLT-2909 | viewer-and-model | In Analysis | **Likely NOT the same cause as PLT-2882** despite Ilia's on-ticket assumption (opposite symptom shape — too many models shown, not too few elements). `activity-linking-list` panel adds model nodes even with zero resolvable elements; closer to PLT-2385's shared-ID fan-out | (a) un-conflate from 2882, link to 2385 instead, one distinguishing DuckDB test on CY-5200 | 6/10 |
+| PLT-2884 | progress-tracking | With Customer | **Mostafa's "bad XER file" diagnosis may be premature** — the mismatch direction (new < old) matches the documented **Pattern A** (intangible activities, `LinkedElements=0` → `ActualProgress=0`), a Platform-side bug that reproduces with a *valid* XER. Customer has been silent ~1 week after being asked to re-upload | (a) pair the status-nudge with a 5-min internal check on EL1031000 before leaning further on the re-upload story | 6/10 |
+| PLT-2882 | progress-tracking | In Analysis | Orphaned-link theory now **actively disputed in-thread** (Ilia vs. David Webb); code review sides with Ilia (they're reading different resolution layers) but neither side has posted the one fact that would settle it. **A destructive fix (delete 418 links) is still pending Pietro/Mostafa approval, unresolved since 07-14** | (a) **HOLD the deletion**; route one closed Layer-2 membership question to David Webb to settle cause before touching data | 7/10 cause, 4/10 that delete is correct |
+| PLT-2858 | quality-management | In Analysis | Customer now proposes concrete fixes (zone dropdown, or hide the field) after saying they can't configure rooms; Mostafa's question to Darminder (location vs. location-detail) sat unanswered 2 days, then Mostafa deflected again on 07-16 | (a) answer Mostafa's question inline + recommend **hide-when-empty** (trivial FE, no BE) over the dropdown (which wouldn't even help ML9) | 8/10 |
+| PLT-2874 | viewer-and-model | Open | *(unchanged from 07-13 — see context.md)* Editor vs dashboard element-count gap is a non-DISTINCT row count, 3 inflation vectors identified, one query settles bug-vs-by-design | *(unchanged)* explain + `COUNT(*) vs COUNT(DISTINCT)` query → Darminder | 6/10 |
+| PLT-2815 | quality-management | With Customer | *(unchanged — Freshdesk already closed 07-06, Jira orphaned open)* | *(unchanged)* nudge → Yash to accept/close the Jira to match Freshdesk | 9/10 |
+| PLT-2619 | other | With Customer | *(unchanged — still stale since 04-29, ~12 weeks now)* Mis-filed demo-relink request | *(unchanged)* hand off to product + reclassify | 8/10 |
+
+### Group B (1) — skipped this run per task scope
+
+| Ticket | Domain | Status | Note |
+|---|---|---|---|
+| PLT-2385 | data-pipeline | Ready For Development | Not refreshed this run (Group B action-scenario still TBD, out of scope). Prior context from 07-13 stands. |
+
+### Cross-ticket notes (new this run)
+
+- **PLT-2909 vs PLT-2882 — do not conflate.** Ilia (on-ticket, live) has assumed these
+  share a root cause; independent code review this run concludes they most likely
+  don't (opposite symptom direction, different failing code path). 2909 is closer to
+  **PLT-2385**'s shared-Revit-unique-ID fan-out pattern. Flagging because this
+  assumption is currently steering Ilia's live investigation of 2909.
+- **PLT-2882's pending data deletion.** Ilia proposed deleting 418 "dead" links on
+  2026-07-14 and asked Pietro/Mostafa to approve; as of this run **no approval, and
+  the root-cause theory behind the deletion is itself disputed by David Webb with no
+  resolution posted**. This is a live pending-destructive-action-with-unresolved-cause
+  situation — see PLT-2882/recommended-action.md.
+- **PLT-2884's diagnosis may be wrong.** The team told the customer their XER file was
+  bad; the comparison-skill's documented Pattern A (intangible activities) reproduces
+  the exact symptom with a *valid* file. Worth a 5-minute internal check before the
+  customer spends more time re-exporting a file that may not be the problem.
+- **PLT-2906 regression, not data.** Customer explicitly ruled out a model update, and
+  the symptom hit two projects at once on one day — that shape means the trigger is
+  our own code (the `SectionToolOrientation` heuristic), not something to chase in the
+  customer's Revit file, even though the parallel True North ask is still worth having.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian/Freshdesk auth)
+
+New this run: **PLT-2906** (`section_box.png`), **PLT-2909** (both screenshots — the
+decisive artifact for bare-vs-phantom model nodes), **PLT-2884** (3 screenshots + xlsx
++ XER — the xlsx attempt returned a genuine 403 from the attachment-content API, not a
+proxy fault). Carried over unresolved: PLT-2882 (2 videos + 2 inline images), PLT-2858
+(4 images), PLT-2874 (2 images), PLT-2815 (2 screenshots + inline images).
+
+### Off-roster names seen (new)
+
+- No new off-roster names this run.
+
+---
+
 ## Run: 2026-07-13 (updated, second pass) — 12 in-scope tickets
 
 ### Group A (8) — evaluate / clarify
