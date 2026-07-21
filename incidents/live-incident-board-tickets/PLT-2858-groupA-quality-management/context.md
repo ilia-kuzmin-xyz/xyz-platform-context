@@ -178,6 +178,30 @@ configured) is stated verbatim in text by Darminder — but for completeness:
 
 ---
 
+## 7. Update — 2026-07-21 (this run): thread has stalled in a circular loop
+
+New comments since the 07-13 snapshot above (ticket last updated 2026-07-16, still "In Analysis"):
+
+- **107317 (07-14, Yash relaying customer "Mikel"):** customer pushed back with two concrete,
+  answerable proposals instead of vague confusion: *(i)* give a **dropdown of all Locations** to
+  pick from manually, or *(ii)* if that's not possible, **remove the Location field from the QA
+  form entirely** so it doesn't look like missing data on the dashboard.
+- **107320 (07-14, Mostafa → Darminder):** *"what is the difference between location and location
+  details"* — **never answered in-thread.** This is exactly §2a above (Location = auto-derived
+  zone `locationId`, read-only; Location Detail = free-text `locationDescription`, user-editable)
+  — the answer already existed in this file from the 07-13 pass but was not relayed back to
+  Mostafa.
+- **107532 (07-16, Ilia nudges Mostafa again):** *"have you got any updates on this?"*
+- **107533 (07-16, Mostafa):** *"waiting on this since it was asked of me."* — Mostafa appears to
+  be treating his own unanswered 107320 question as the blocker on his "leave it with me"
+  commitment (107208). **This is a circular stall**: Mostafa owes the zone-ownership decision;
+  Darminder (or anyone) owes Mostafa the Location-vs-Location-Detail answer; nobody has closed the
+  second loop, so the first is stuck too.
+
+**Net effect:** five days of no forward motion (07-16 → today, 07-21) purely because a two-line
+factual answer was never posted. This is now the single highest-leverage unblock available on this
+ticket — see revised `recommended-action.md`.
+
 ## 6. Doc / KB gaps noted (not edited — outside PLT-2858 folder per task scope)
 
 - `dashboard/quality-tab.md` documents the QLT tab (issue list, filters, categories) but says **nothing

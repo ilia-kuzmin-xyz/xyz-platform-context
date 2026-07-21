@@ -1,5 +1,32 @@
 # PLT-2858 — Recommended action
 
+## 2026-07-21 update: the blocker changed — answer Mostafa's question first, then re-ask
+
+Since this file was drafted (07-13), the thread stalled in a circular loop (`context.md §7`):
+Mostafa's 07-14 question to Darminder ("what is the difference between location and location
+details") was never answered, and Mostafa is now citing that silence as the reason his own
+"leave it with me" commitment hasn't moved (07-16: *"waiting on this since it was asked of
+me"*). **The highest-leverage single action right now is not the three-question message below —
+it's a two-line factual answer that unblocks it first.** Post this ahead of (or merged into) the
+three-question message:
+
+> @Mostafa — answering your 107320 question directly: **Location** is the auto-derived zone field
+> (`locationId` in code) — read-only, populated from the project's configured named zones/rooms,
+> empty if none are configured (that's ML9's issue). **Location Detail** is a separate free-text
+> field (`locationDescription`) the user can type into today — unrelated to zones, works right now.
+> They're independent fields, not two views of the same thing.
+>
+> Also, from the customer (Mikel, 107317): they've proposed two options if zone setup isn't
+> feasible on their side: (i) a dropdown of Locations to pick manually, or (ii) removing the
+> Location field from the QA form so it doesn't look like missing data. Worth weighing against the
+> zone-setup path when you decide ownership.
+
+Everything below (the three-question draft) still applies and should follow this — it was written
+before the circular stall existed and remains the right shape for the zone-ownership /cohort/Phase
+questions once Mostafa isn't stuck on the definitional one.
+
+---
+
 ## Chosen: (a) Draft the next routed question to move analysis forward — addressed to **Mostafa Kamel Hussien** (PO), Pietro looped
 
 The reported symptom is diagnosed (empty "Location" = no named zones configured on ML9; the zone Location

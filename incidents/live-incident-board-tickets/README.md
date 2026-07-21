@@ -43,6 +43,63 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-21 — 8 in-scope Group A tickets (Group B not deep-dived, per task scope)
+
+Query: `project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With Technical
+Support", "Ready For QA", "In Code Review", "READY FOR RELEASE", "Customer Release Check", "Done",
+"Archived", "Blocked")` — 14 hits, 5 of which are `ARCHIVED (NOT RELEASED)` (treated as archived,
+excluded) → **9 truly in scope**, 8 Group A + 1 Group B.
+
+### Since last run (2026-07-13 → 2026-07-21) — moved out of scope or resolved
+- **PLT-2892, PLT-2879** → **Done.**
+- **PLT-2742, PLT-2759** → **Done** (backend PAPI-3344 shipped + backfill landed).
+- **PLT-2890** → **Ready For QA** (advanced past Group B scope).
+- **PLT-2649** → **With Technical Support** — excluded from this routine's scope by the status
+  list, **but flag this one**: the last comment on it (07-17) is **Yash asking Ilia "which model
+  do they need to change the level in?"** in response to Ilia's own 07-16 ask (correct level
+  `f0f4d409` elevation 50.4→0) — that question is still unanswered as of this run. The status
+  transition reads as "handed to technical support to relay to the BIM team," not as "we no longer
+  owe an answer." Worth a direct reply even though it's technically out of this routine's scope.
+
+### Group A (8) — evaluate / clarify
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| PLT-2909 | progress-tracking | In Analysis (**new**) | ATL05-08: activity linking-list shows wrong/extra models. Code-verified: **different, opposite-direction defect from PLT-2882** — `ElementEntity.getModels()` over-claims model membership from un-deduped `client-element-metas` parquet rows (no geometry filter), vs. PLT-2882's under-resolution/orphaning. Related pipeline family, not a duplicate — a PLT-2882 fix won't fix this. | (a) scoping-correction reply + one parquet-dedup data query | 8/10 mech, 5/10 same-family |
+| PLT-2906 | viewer-and-model | Open (**new**) | Section box misalignment, FAR01/FAR02 + others, no re-upload. Code-verified: our own **unconditional `SectionToolOrientation` patch** rotates the box to fit diagonal building footprints — **not** driven by Revit True North (which the assignee had asked the customer to check). True North only explains *which* projects are hit; the actual trigger is a **deploy** of this feature. This overturns the on-ticket hypothesis. | (a) internal course-correction — stop chasing customer True-North data, confirm deploy date instead | 9/10 mech, 8/10 trigger |
+| PLT-2884 | data-pipeline | With Customer (**new**) | EQX-AT10x dashboard % variance already attributed to a bad source XER file (product/Mostafa); customer asked to re-upload 07-10, no confirmation since. Purely a stale status-check now. | (c) nudge → Yash → customer | 8/10 |
+| PLT-2882 | progress-tracking | In Analysis (unchanged since 07-15) | Root cause confirmed (element-metadata parquet vs SVF geometry disagree after model re-version); 418-link deletion **on hold pending peer alignment**; BE question re: why pipeline leaves stale metadata still open. See `investigation-log.md`. | carried forward — awaiting BE answer, no new action this run | 9/10 root cause |
+| PLT-2858 | quality-management | In Analysis (stalled 07-16→07-21) | Root cause unchanged (ML9 has no configured zones). **New this run:** thread hit a circular stall — Mostafa's 07-14 question to Darminder ("difference between Location and Location Detail") was never answered, and Mostafa is citing that silence as blocking his own "leave it with me." Code gives the answer directly (`issue-details.tsx:139-140`) — unblocking it is now the highest-leverage move. Customer also proposed two concrete fallback options (dropdown, or remove the field). | (a) **revised**: post the 2-line unblocking answer first, then the original 3-question message | 8/10 diagnosis, 9/10 on the unblock |
+| PLT-2815 | quality-management | With Customer (unchanged since 07-06) | Rework-cost variance reproduced to the cent as a reference-data artifact; code correct; "as intended." | carried forward — nudge → accept/close still stands | 9/10 |
+| PLT-2619 | other | With Customer (unchanged since 04-29) | Mis-filed as incident — demo relink request, stale, internal product blocker. | carried forward — hand off to product still stands | 8/10 |
+| PLT-2874 | viewer-and-model | In Analysis (unchanged since 07-13) | Editor vs dashboard element-count gap — dashboard "Total" is a non-DISTINCT row count. Unchanged; no new Jira activity this run. | carried forward — `COUNT(*) vs COUNT(DISTINCT)` explainer still stands | 6/10 |
+
+### Group B (1) — not deep-dived this run (scope TBD, per task instructions)
+- **PLT-2385** — unchanged, `Ready For Development`. Context from 2026-07-13 run still stands
+  (folder: `PLT-2385-groupB-data-pipeline/`).
+
+### Cross-ticket notes (this run)
+- **PLT-2882 + PLT-2909 are now a confirmed two-member cohort** of the same metadata-pipeline
+  weakness (stale `client-element-metas` after model re-upload/re-version), manifesting in
+  **opposite directions** — orphaning (2882) vs. over-claiming (2909). Worth surfacing to BE as one
+  pipeline-hardening ask rather than two independent bugs.
+- **PLT-2906 is a reminder to verify a hypothesis in code before asking the customer for data** —
+  the assignee's own on-ticket ask (Revit True North) turned out to be unable to explain or fix the
+  symptom; the actual trigger (a deploy) was internal all along.
+- **PLT-2858 is a reminder that "leave it with me" can silently mask a dependency** — the real
+  blocker was a small unanswered question, not the big product decision it looked like.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian/Freshdesk auth) — this run
+- **PLT-2906**: `FAR01.png`/`FAR02.png` (True North screenshots, 07-20) and `section_box.png` — per
+  the code findings, these will confirm *scope*, not deliver a fix; don't block the internal
+  deploy-date check on reading them.
+- **PLT-2909**: `image-20260716-112218.png`, `image-20260716-112527.png` — would confirm which UI
+  surface + disambiguate the two separate bugs reported in one ticket.
+- **PLT-2884**: `.xlsx` variance export + `.xer` schedule file — not needed for the current
+  decision (nudge only); relevant only if the customer disputes the diagnosis after re-upload.
+
+---
+
 ## Run: 2026-07-13 (updated, second pass) — 12 in-scope tickets
 
 ### Group A (8) — evaluate / clarify
