@@ -102,8 +102,13 @@ Each outcome names the exact backend field to fix; none points at frontend code.
   portfolio for the same shape (null `actualDate` on activities that are 100% installed;
   Key-Milestone rows whose `projectId` doesn't join) and remediate in bulk — don't wait for the next
   project to be reported.
-- **Screenshot (NEEDS HUMAN):** confirm which surface Thomas is on and which ELN04 diamonds are
-  miscoloured — corroborative only; the payload read is decisive.
+- **Screenshot — resolved 2026-07-22:** turned out to be the Schedule tab's mapping screen (not the
+  Portfolio widget), showing `DH4 Ready for Energization` at Planned=100%/Actual=100%/Elements=0.
+  Confirms milestones' "Actual %" comes from the imported schedule's own percent-complete field, not
+  installation roll-up — sharpens Pietro's hypothesis to "schedule import can set Actual %=100
+  without stamping a real Actual Finish date." Does **not** by itself confirm `actualDate` is null —
+  the payload read below is still the decisive step. Also surfaced a live "2530 un-mapped activities"
+  banner on this exact schedule, worth cross-referencing against PLT-2918 (same mapping screen).
 - **Doc gap:** after resolution, add to `dashboard/progress-tab.md` / `pitfalls.md` that milestone
   status is backend-supplied (`reporting.vw_KeyMilestone`), the FE renders it verbatim, and
   completion depends on the schedule activity's Actual End Date — not on the installation %.

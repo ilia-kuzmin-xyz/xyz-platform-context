@@ -186,10 +186,31 @@ a portfolio-dashboard home.
 
 ## 8. NEEDS HUMAN (unreadable media, undocumented prior fix, data I can't query)
 
-- ⚠️ **1 screenshot attachment** on PLT-2917 — binary media behind Atlassian auth, **not viewable
-  here**. Do not guess its contents. It is the fastest way to confirm (i) which surface Thomas is
-  on (Portfolio dashboard vs the `progress-dashboard/:id` report — §2 caveat), and (ii) exactly
-  which diamonds are miscoloured for ELN04.
+- ✅ **RESOLVED 2026-07-22 (Ilia supplied the screenshot directly, out of band).** It is **not** a
+  screenshot of the Portfolio-dashboard Milestone widget — it's the **Schedule tab's mapping/import
+  screen** for schedule `101342_LIVE-2-25-26_For_new_dashboard_test_updated__I_(3)` (banner:
+  "2530 un-mapped activities → Open mapping"), same surface as PLT-2918. Row shown:
+  `DH4 Ready for Energization` (`PMILE5030`, Sector G / DH 4 East) — Discipline=`Milestone`,
+  Package=`Key milestone`, Phase=`Sector G`, **WBS Location = blank**, **Planned % Complete = 100%,
+  Actual % Complete = 100%**, **Elements = 0**, End=04/06/2026.
+  - `Elements = 0` confirms milestones carry no linked geometry — their "Actual % Complete" can't
+    come from installation-status roll-up; it must come straight from the imported schedule's own
+    percent-complete field (P6/XER-style `phys_complete_pct`), which reads 100% here.
+  - This **sharpens, not just confirms, Pietro's diagnosis.** The Milestone widget (§3) reads a
+    *different, specific* field — `actualDate` (Actual End Date) in `vw_KeyMilestone` — not "Actual
+    % Complete." The screenshot's single "End" column (04/06/2026) does **not** disambiguate whether
+    that is a stamped Actual Finish or just the planned/current finish carried on a 0-duration
+    milestone regardless of completion state — so this does **not** by itself prove Actual End Date
+    is populated. The refined, testable hypothesis: **the schedule import can set Actual % Complete
+    = 100 without stamping a real Actual Finish date** (a known P6/XER data-quality gap), and the
+    Milestone widget only trusts the latter field. Still needs the `/milestones` payload (§8 below)
+    to confirm `actualDate` specifically, distinct from % complete.
+  - New signal not previously visible: the **"2530 un-mapped activities"** banner on this same
+    schedule is a live data-quality flag on the exact schedule the customer is complaining about.
+    This row's Discipline/Package/Phase are filled (so it isn't itself in the unmapped pool for
+    those), but WBS Location is blank — worth checking whether the unmapped-activity count and the
+    milestone Actual-Finish gap share a common import-time cause (see PLT-2918, same mapping screen,
+    different symptom — both may trace to the same schedule-(re)import event).
 - ⚠️ **Pietro's earlier fix is undocumented** — no ticket / PR / commit reference. **Ask him
   exactly what he changed** (code? a Key-Milestone re-mapping? stamping Actual End Dates? which
   projects?) *before* re-diagnosing, or we risk re-investigating something already ruled out and
