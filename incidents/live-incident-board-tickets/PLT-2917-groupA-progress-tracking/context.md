@@ -45,15 +45,43 @@ gantt that groups project tracks by region and draws one diamond per key milesto
   prior history**. The ticket was raised **2026-07-21**, 11 days later. This is a brand-new
   feature meeting real client key-milestone data for the first time (see §6, "why now").
 
-⚠️ **Route-vs-widget caveat (NEEDS HUMAN, §8):** the pasted URL `progress-dashboard/<24-hex id>`
-resolves to `ProgressReportPage`, not `PortfolioDashboardPage` (`routes.tsx:88-104`; the id is a
-24-hex Mongo project id per `useAnalytics.tsx:11-12`). The Milestone widget lives on
-`PortfolioDashboardPage` (route `progress-dashboard`, **no id**). The multi-project FAR01/ELN03/
-ELN04 tracks in the report are unambiguously the Milestone-widget layout, so the diagnosis targets
-that widget — but confirm from the screenshot which surface Thomas is on. Note also that
-`usePortfolioId()` **ignores the URL id** and always resolves the tenant's **default** portfolio
-(`usePortfolioId.ts:26-29`), so the widget's data set is "the default portfolio's milestones",
-independent of the link.
+⚠️ **SURFACE CORRECTION (2026-07-22, second pass — supersedes the original §2 bet).** The pasted
+URL `progress-dashboard/<24-hex id>` resolves to `ProgressReportPage` (`routes.tsx:88-95`), and
+that page is **a PowerBI embed** — `ProgressReportPage.tsx:3-4` imports `powerbi-client-react`,
+`:163-167` renders `<PowerBIEmbed>` with a report config fetched via
+`ProgressDashboard.getProjectDashboardInfo(projectId)` (`:61-65`). It contains **no native
+milestone code at all**. The native `MilestoneWidget` lives on `PortfolioDashboardPage`, which is
+routed at a *different* path (`routes.tsx:245`), not on the customer's URL. So the surface Thomas
+is complaining about is most likely the **per-project PowerBI Progress dashboard**, visited once
+per project (which reads "For FAR01 → … For ELN04 → …" naturally as three separate page visits),
+NOT the portfolio Milestone widget the original analysis targeted.
+
+**Operator confirmation (2026-07-22):** `cloud.xyzreality.com/progress-dashboard/<id>` is the
+**old, PowerBI-based dashboard**; the new native dashboards live under `/projects/<project_id>/…`
+(the in-viewer DuckDB dashboard documented in `xyz-platform-context/dashboard/`). So this ticket's
+failing surface is definitively the **old PowerBI progress dashboard**. Note the repo tooling:
+the `dashboard-progress-comparison` skill exists specifically for Platform-vs-PowerBI data
+discrepancies and may be reusable here.
+
+**Why the diagnosis survives the correction:** the milestone *state* shown on either surface comes
+from the reporting DB, not from FE logic. The native widget provably reads
+`reporting.vw_KeyMilestone` (§3); the PowerBI report reads the same reporting schema (unverified
+which exact view/table its milestone visual binds — flag for the report owner, likely
+Hussein/PowerBI per PLT-2884). Either way the FE/report layer renders what the reporting DB says,
+and the editor↔dashboard disagreement lives in the **schedule → reporting-DB sync**, not in
+`hc-frontend`. The §3–§4 mechanism analysis of the native widget is retained below both as the
+verified half of that claim and because the widget shares the same upstream data and will show the
+same wrongness.
+
+**How an activity becomes a "milestone" (operator clarification, 2026-07-22):** "mapped as Key
+Milestones" = the customer classified the activities in the editor's category-mapping screen with
+**Discipline = `Milestone` and Package = `Key milestone`** (confirmed by the supplied screenshot —
+see §8). The reporting view presumably selects on that mapping (consistent with its name
+`vw_KeyMilestone`). This adds a FAR01-specific failure candidate: if the view/report filters on an
+**exact package/discipline label match** and FAR01's package label differs (e.g. `Key Milestones`
+plural, case, or a tenant-specific name), every FAR01 milestone silently falls out of the view —
+zero showing, while ELN03/ELN04 (matching labels) show but with wrong status/dates. Cheap check:
+compare the literal Discipline/Package labels across the three projects in the editor.
 
 ---
 

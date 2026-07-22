@@ -1,12 +1,26 @@
 # PLT-2917 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
-renderer; done/late/complete all come from the backend `vw_KeyMilestone` / Actual End Date),
-(2) asks **Pietro** the one closed question that unblocks everything — *what did your earlier fix
-touch?* — and (3) names the single backend data step that confirms the cause per project.
+> **⚠️ Surface correction (2026-07-22, second pass — read context.md §2 first):** the customer's
+> URL is the **old PowerBI progress dashboard** (`ProgressReportPage` = PowerBI embed), not the
+> native Portfolio Milestone widget this draft originally assumed. The core routing conclusion is
+> unchanged — the defect is in the schedule→reporting-DB data, not FE code — but the decisive
+> evidence step shifts from the `/portfolios/:id/milestones` API to **querying the reporting DB
+> view directly (`reporting.vw_KeyMilestone`, or whichever dataset the PBI milestone visual
+> binds — confirm with Hussein/PowerBI)**, and a FAR01-specific check is added: compare the
+> literal Discipline/Package labels (`Milestone` / `Key milestone`) across FAR01 vs ELN03/ELN04
+> in the editor, since an exact-label filter in the view would silently drop a project whose
+> package is named differently. The `/milestones` API dump remains useful only as a proxy if it
+> reads the same view. The draft below is kept with this correction applied where it matters.
+
+## Chosen action: (a) — internal reply that (1) states the code-verified mechanism (the dashboard
+layer renders reporting-DB milestone state; done/late/complete all come from
+`vw_KeyMilestone`-family data / Actual End Date, with no FE date logic), (2) asks **Pietro** the
+one closed question that unblocks everything — *what did your earlier fix touch?* — and (3) names
+the single backend data step that confirms the cause per project.
 
 Owner of the investigation stays **Ilia Kuzmin** (assignee). Two routed questions, one owner each:
-**Pietro** (his prior fix) and a **backend/data engineer** (the `vw_KeyMilestone` payload dump).
+**Pietro** (his prior fix) and a **backend/reporting engineer** (the `vw_KeyMilestone` /
+PBI-dataset dump for the three projects).
 
 ## Why this and not the other routings
 
