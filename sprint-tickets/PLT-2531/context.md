@@ -1,8 +1,12 @@
 # PLT-2531 — Element Details Panel: show all models an element belongs to
 
 **Type:** Task · **Parent epic:** PLT-2717 (Q2 2026 Bugs and Improvements)
-**Jira status (as of 2026-07-22 run):** moved to **Analysis In Progress** — blocked on clarification.
-**Local decision:** DO NOT DEVELOP yet. Not 95% confident (open behaviour questions). No hc-frontend branch, no PR.
+**Jira status (as of 2026-07-22, second pass):** **In Code Review** — implemented.
+**Resolution:** Ilia supplied the design (Element_Details_Panel.dc.html) in-session; it answered both
+open questions (Q1: link → element dbId via fitToView, same ↗ affordance; Q2: unloaded → greyed +
+Load button → spinner → link). Implemented on branch `PLT-2531`, draft PR:
+https://github.com/XYZReality/hc-frontend/pull/2060 (subscribed for CI/review follow-up).
+See plan.md for verified data paths and design decisions.
 
 ## What the ticket asks
 Today the Element Details panel shows only ONE model for an element even when it
