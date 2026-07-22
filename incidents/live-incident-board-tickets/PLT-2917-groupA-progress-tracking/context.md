@@ -186,6 +186,39 @@ Two backend/data conditions produce this; the FE cannot invent markers:
 
 ---
 
+## 5b. Leading unifying hypothesis (added 2026-07-22): PBI reads a stale/different schedule version
+
+The supplied screenshot carries two hints the original analysis didn't have: the schedule is
+named `101342_LIVE-2-25-26_For_new_dashboard_test_updated__I_(3)` — the "`(3)`" implying
+**multiple uploads/revisions of this schedule exist** — and the header shows a
+**"Baseline & Current"** toggle. If the PowerBI pipeline (or the reporting view it reads) is bound
+to an **older schedule version or the baseline** rather than the current schedule Thomas edits,
+that single cause explains all three projects at once:
+
+- **FAR01 — none showing:** the key-milestone mapping (Discipline=`Milestone`,
+  Package=`Key milestone`) was applied to the *current* schedule; an older snapshot has no such
+  mapping → the view selects zero rows.
+- **ELN03 — should be done:** the 100% actuals / finish dates were entered after the snapshot the
+  report reads → milestones look incomplete.
+- **ELN04 — past look late, future look done:** statuses/dates from an outdated snapshot are
+  simply inconsistent with today's timeline.
+
+It also fits the recurrence: if Pietro's earlier fix was a data action on the **current**
+schedule, it would never reach a report pinned to an older upload. **Status: hypothesis only** —
+testable by asking the PBI report owner (Hussein, per PLT-2884) which dataset/schedule version the
+milestone visual binds, and whether it distinguishes baseline vs current. This is the first thing
+to check once the client confirms the surface (see recommended-action.md).
+
+## 5c. Open product/definitional question (no owner yet)
+
+If the schedule shows **Actual % Complete = 100** but no **Actual Finish date** was ever stamped
+in the source P6/XER, which is authoritative for "milestone complete" on a dashboard? Today the
+reporting side keys on the date (`actualDate`), so a %-complete-without-date milestone renders
+incomplete. Whether that is "customer data hygiene issue — stamp your actual dates" or "platform
+gap — derive completion from % when the date is absent" is a product decision nobody has made
+explicitly. Route to Mostafa/Pietro once the mechanics are confirmed; don't let the eventual fix
+embed this decision silently.
+
 ## 6. Why now? (trigger, playbook Q5)
 
 - **Primary:** the Milestone Performance widget is **11 days old** — shipped 2026-07-10 (PR #2031 /
@@ -240,6 +273,17 @@ a portfolio-dashboard home.
     those), but WBS Location is blank — worth checking whether the unmapped-activity count and the
     milestone Actual-Finish gap share a common import-time cause (see PLT-2918, same mapping screen,
     different symptom — both may trace to the same schedule-(re)import event).
+- ⚠️ **Screenshot provenance unconfirmed** — the schedule-mapping screenshot supplied out of band
+  on 2026-07-22 (§ above) matches the shape of the customer's inline image in Yash's comment
+  ("Dh4 Ready for energization = 100%", 1533×223) but it was not confirmed whether it IS that
+  image or Ilia's own repro. Distinction matters mildly (customer-evidence vs our-repro); confirm
+  when convenient.
+- ⚠️ **Description's three inline images (one per project) are broken** in the ticket for all
+  three projects — the drafted reply to Yash asks Thomas to re-attach them; nothing dashboard-side
+  has been seen by anyone on our side yet.
+- ⚠️ **PBI report binding unknown** — which dataset/view and which schedule version the PowerBI
+  milestone visual reads (baseline vs current, which upload). Owner to ask: Hussein (PowerBI, per
+  PLT-2884). Decisive for hypothesis §5b.
 - ⚠️ **Pietro's earlier fix is undocumented** — no ticket / PR / commit reference. **Ask him
   exactly what he changed** (code? a Key-Milestone re-mapping? stamping Actual End Dates? which
   projects?) *before* re-diagnosing, or we risk re-investigating something already ruled out and
