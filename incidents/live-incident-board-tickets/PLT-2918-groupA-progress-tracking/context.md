@@ -106,7 +106,33 @@ The Jira "Software Area" is Web Viewer, but that names the *surface*, not the do
 
 ## NEEDS HUMAN (media I cannot read / data I cannot query)
 
-- ⚠️ **4 image attachments on the Jira ticket** — screenshots (per the description: last-week's export showing Precast WBS Locations, and the web-viewer view with them removed). **Binary media behind Atlassian auth — not viewable here. Do not guess contents.** They are the fastest way to confirm (i) whether the viewer shows the WBS Location column *empty* vs *populated with Sequence values* (delete vs re-point), and (ii) the exact set of affected Precast activities.
+- ✅ **RESOLVED 2026-07-22 — Ilia supplied all 4 attachments out of band.** Decoded contents:
+  1. **Export xlsx (last week):** Precast-package activities (A4160–A4300, A139820–920,
+     CON-PREC-10xx, 56256xx) with full rows: Discipline=CSA, Package=Precast,
+     Phase=Core-&-Shell, and **WBS Location populated** — Area A/B, C/D, E/F, G/H, J/K.
+     `A4300` ("Complete Repairs/Patches 30-72") = **Area G/H** (red-circled in a zoom shot).
+     Columns include Planned/Installed/%/Intangible%, Start/Finish, Actual Start/Finish,
+     Critical, Tangible. **This file doubles as the recovery source** — it holds the full
+     activity-ID → WBS Location mapping for Precast.
+  2. **Web viewer now:** same activities show Discipline=CSA, Package=Precast,
+     Phase=Core & Shell **intact**, but **WBS Location = "-" on every row**. So in the
+     *viewer* the values are **empty, not re-pointed to Sequence values** (the client's
+     "changed into sequences" phrasing remains unexplained — possibly what they saw in the
+     mapping panel or another surface; keep as open sub-question).
+  3. **⚠️ Two decisive new facts from the viewer screenshot:**
+     - Schedule selector shows **`AUS01-260712-C_updated1` tagged "Current"** — the name
+       implies an upload dated ~2026-07-12 plus an "updated1" re-upload. **`A4300`'s dates
+       differ between export and viewer** (18–24 Nov 2026 vs 13–19 Nov 2026) → the viewer
+       is on a **different (newer) schedule revision** than the export was cut from. The
+       "why now" trigger (§Q5, previously unknown) is now evidence-backed: **a schedule
+       re-upload happened in the window.**
+     - Banner: **"2119 un-mapped activities"** — mass unmapping, consistent with mappings
+       not carrying to the new revision, not with a targeted edit of one package.
+  4. **The critical differential:** Discipline/Package/Phase — the three **hardcoded**
+     category types — survived the re-upload; **WBS Location — a *dynamic* type — did
+     not.** Any candidate mechanism must explain this split (see investigation-log.md for
+     the refined mixed-ID-space + destructive-save composition and the queries that
+     settle delete-vs-orphan).
 - ⚠️ **Data / history check (needs Activity API v2 or DB access on AUS01):** for `A4300` and a few other Precast activities, do the persisted category mappings for the WBS Location type **still exist** (and just not render) or were they **deleted**? If there is an audit/lastModified trail on `activity_category_mapping`, when and by whom were the WBS Location rows for Precast last changed? This is the delete-vs-overwrite + "who/when" diff.
 - ⚠️ **Trigger (needs BE/ops + PM):** was the **AUS01 schedule re-uploaded/re-imported** between the export date and now? Was anyone **editing the data-mapping panel** for steel-frame "sequences" in that window? Any **deploy** touching category hydration/save? (playbook Q5 — dated cause, assign an owner.)
 - ⚠️ **Verify the "it worked last week" reference:** confirm the export was pulled from the same project/environment/schedule version currently loaded in the viewer (not a different revision).
