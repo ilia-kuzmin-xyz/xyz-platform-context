@@ -28,6 +28,13 @@ questions, phrased for a value — and to hand Mostafa the two engineering findi
 by both Darminder, 107109, and the customer, 106728, as the workflow authority). Relay to the customer
 (Mikel) via **Yash** only after the workflow answer exists.
 
+**2026-07-22 re-check:** unchanged since 07-16 — Ilia nudged ("any updates?"), Mostafa replied "waiting on
+this since it was asked of me" (still unresolved, 6 days after his own "leave it with me"). The three
+closed questions below are now overdue; this has stalled on the SAME owner for 9 days since the customer's
+"we don't know how" (106728). Escalation candidate: if no answer within another few days, consider looping
+Pietro directly (he was independently named as workflow authority by both Darminder and the customer) rather
+than re-nudging Mostafa a second time.
+
 ---
 
 ## Draft message for the thread (Darminder or Yash to post; @Mostafa, @Pietro)

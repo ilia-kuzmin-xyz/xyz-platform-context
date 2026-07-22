@@ -57,8 +57,15 @@ Read chronologically; the analysis is well advanced. Established facts and decis
   ownership question to Pietro / Mostafa.
 - 107206 (07-13, **Ilia**): asked Pietro/Mostafa whether the customer/BIM team had been reached out to so
   they could learn to set up the location properly.
-- 107208 (07-13, **Mostafa**): *"leave it with me."* ← **latest message; Mostafa (PO) now owns the
-  workflow/education follow-through.**
+- 107208 (07-13, **Mostafa**): *"leave it with me."* — Mostafa (PO) took ownership of the
+  workflow/education follow-through.
+- 107532 (07-16, **Ilia**): follow-up nudge — *"have you got any updates on this?"*
+- 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* ← **latest message
+  (2026-07-22 re-check: still the last comment, 6 days stalled).** Ambiguous phrasing, but reads as
+  Mostafa himself still blocked/pending on someone else — i.e. "leave it with me" (07-13) did not
+  convert into an answer, and the ownership question from `recommended-action.md` Q1 (who configures
+  zones + is there a how-to) remains unresolved 9 days after the customer said "we don't know how"
+  (106728, 07-07). Freshdesk #7286 is still Open.
 
 **Net thread state:** Root cause (empty Location = no named zones configured on ML9) is established and
 agreed by dev (Darminder) and product (Mostafa). What is unresolved is **non-engineering**: (1) *who* sets
