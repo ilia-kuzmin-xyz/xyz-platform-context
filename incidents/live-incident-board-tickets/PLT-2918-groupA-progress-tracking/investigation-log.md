@@ -215,6 +215,37 @@ never delete types the user didn't explicitly clear (`category-mapping-service.t
 review the descendant-type-clearing cascade (`:643-650`) for a confirm/undo. Now a
 confirmed real-world data-loss bug, not a theoretical vector.
 
+## Confidence layering (stated explicitly, 2026-07-22 review with Ilia)
+
+- **9/10 — what the data shows:** single-type, subtree-shaped, deleted-not-orphaned
+  loss with the measured per-package numbers. Fact from queries, not interpretation.
+- **8/10 — the destructive-save code path exists** and would produce exactly this
+  shape (file:line-verified). Soft spot: only the FE side is readable; BE behaviour
+  on `deleteMappings` / re-upload is unverified.
+- **6–7/10 — that the destructive save is what actually fired.** Fingerprint match,
+  not an observation: no session witness, no timestamp, no user. Live alternatives a
+  BE-side selective cleanup on re-upload, a bulk import overwrite, or a deliberate
+  unacknowledged manual clear. This is why the comment says "working theory".
+- **5/10 — cohort beyond Precast** (Roof/Earthworks/Painting…): inferred from the
+  client's "everything was 100% mapped" claim; the export only proves Precast.
+- Caveats: dev-panel data = what the mappings API *returns* (if BE soft-deletes and
+  filters, "deleted" means "hidden" and recovery is easy); the "2 Precast survivors =
+  cascade boundary" reading is untested.
+- **Resolution:** the BE audit converts 6–7 → 9–10 (deletions traced to a save
+  session) or refutes it (deletions timestamped to the upload job → BE pipeline
+  track). **The plan is robust either way** — guard/audit/export-diff/restore are
+  correct under every candidate mechanism; only step 5 (FE fix ticket) rides on the
+  theory, and it's sequenced last deliberately.
+
+## Ticket state on hand-off (2026-07-22, switching to another ticket)
+
+- Final informal comment drafted (recommended-action.md) — **awaiting Ilia to post**.
+- Then: waiting on (a) Sachin/Ali audit answer, (b) Paddy's full export via Yash.
+- Guard active in spirit but NOT yet communicated on the ticket — posting the comment
+  is what makes it real. Until then AUS01 mapping-panel saves remain a live risk.
+- Next session pick-up: build the restore list from whichever lands first (audit set
+  or export diff); then draft the FE fix ticket (merge-not-mirror + cascade guard).
+
 ## ASK LIST (information / debugging needed)
 
 | # | What | Owner | Why |

@@ -15,7 +15,43 @@ against live data; re-upload carry-over refuted). Sequence:
    `category-mapping-service.ts:265-271` + descendant-cascade guard `:643-650`)
    → Ready For Development.
 
-### Draft comment (author: Ilia; @ Yash, @ Sachin, @ Ali)
+### FINAL draft comment (informal revision Ilia requested — post THIS one; @ Yash)
+
+> Hi @Yash, I've dug into this today. Here's how I see it.
+>
+> **Confirmed from live data:** the Precast WBS Locations are genuinely deleted from
+> the project data, not just hidden. I checked all ~10k mappings on AUS01. 7,879
+> activities still have WBS Location, so it wasn't a blanket wipe. Precast lost 19 of
+> 21, and there are similar holes nobody reported yet: Roof 37/40, Earthworks 52/196,
+> Painting 34/410, some Partitions and Level 1 commissioning. Discipline/Package/Phase
+> are intact everywhere.
+>
+> **My working theory:** the schedule re-upload around Jul 12 (`AUS01-260712-C_updated1`)
+> surfaced ~2119 unmapped activities, someone then worked in the mapping panel to fix
+> them. Our mapping Save has a dangerous behaviour: it deletes any category value
+> that's blank in the panel's memory, and edits cascade down whole subtrees. That
+> produces exactly this pattern (one type wiped across specific branches, everything
+> else untouched). It also explains the "changed into sequences" Paddy saw: steel
+> frame sequence values briefly bleeding onto Precast during that session.
+>
+> To be clear, the deletion and its scope are confirmed. Which action deleted them is
+> still a theory until we get an audit trail, I'm asking the api-v2 team for deletion
+> timestamps on the mapping records.
+>
+> Meanwhile, two things:
+> 1. ⚠️ please make sure nobody presses Save in the AUS01 mapping panel for now,
+>    another session could wipe more values
+> 2. can you ask Paddy for the full export from last week (all packages, not just
+>    Precast)? Diffing it against current state gives us the complete restore list,
+>    including losses he hasn't noticed
+>
+> Good news is the data is recoverable. Worst case we re-map from his export, best
+> case backend restores the deleted records directly.
+
+(Separate ping to Sachin/Ali about the `activity_category_mapping` audit trail goes
+out after this, or fold in with @-mentions.)
+
+### Earlier formal draft (superseded by the informal one above)
 
 > Update on PLT-2918 — root cause identified, data recovery needed before any code fix.
 >
