@@ -1,5 +1,63 @@
 # PLT-2918 — recommended action (DRAFT ONLY — execute nothing)
 
+## ⚠️ SUPERSEDED (2026-07-22, after live-data investigation) — current action below
+
+Investigation converged (see investigation-log.md rounds 1–3): root cause = the
+mapping panel's destructive Save (single-type, subtree-shaped deletion confirmed
+against live data; re-upload carry-over refuted). Sequence:
+
+1. **Post the comment below** (root cause + guard + two routed asks). Ilia posts.
+2. Sachin/Ali: audit/soft-delete on `activity_category_mapping` → restore set.
+3. Yash → Paddy: full last-week export (all packages) → recovery diff (losses
+   extend beyond Precast: Roof, Earthworks, Painting, Partitions, Level 1).
+4. Restore data (BE restore or re-map from export) — unblocks the client's report.
+5. Only then: FE dev ticket (merge-not-mirror `saveDataMapping`
+   `category-mapping-service.ts:265-271` + descendant-cascade guard `:643-650`)
+   → Ready For Development.
+
+### Draft comment (author: Ilia; @ Yash, @ Sachin, @ Ali)
+
+> Update on PLT-2918 — root cause identified, data recovery needed before any code fix.
+>
+> **What happened (confirmed against live data today):** the WBS Location mappings
+> weren't lost by the schedule re-upload — they were **deleted by the mapping panel's
+> Save**. The save logic treats the in-memory activity as the full source of truth:
+> any category type that's null in memory gets its persisted mapping deleted, and
+> edits cascade to every descendant activity, clearing descendant types
+> (`category-mapping-service.ts:265-271`, `:643-650`). One editing session after the
+> `AUS01-260712-C_updated1` re-upload (likely fixing the "2119 un-mapped activities"
+> — the steel-frame sequence work) wiped WBS Location across whole subtrees while
+> leaving Discipline/Package/Phase intact.
+>
+> **Evidence (DuckDB, current revision):** 7,879 WBS Location mappings still exist
+> and are keyed to current activities, so this is not a re-upload/carry-over failure.
+> The loss is single-type and subtree-shaped with sharp boundaries — Precast 19 of 21
+> missing, Roof 37/40, Earthworks 52/196, Painting 34/410, while dozens of packages
+> are 100% intact. The deleted values exist neither on current activities nor as
+> orphaned rows → deleted outright.
+>
+> ⚠️ **Until recovery is done, please make sure nobody presses Save in the AUS01
+> mapping panel** — each save session can widen the loss.
+>
+> **@Sachin / @Ali — one question:** is there an audit trail or soft-delete on
+> `activity_category_mapping`? Need: deletion timestamps + user for WBS-Location-type
+> rows on AUS01 since ~Jul 12. That dates the trigger and gives us the exact restore
+> set (ideally a soft-delete restore).
+>
+> **@Yash — one ask for Paddy:** the full last-week export (all packages — the
+> attached one is filtered to Precast). Diffing it against current state gives the
+> complete recovery list; the data shows losses beyond Precast (Roof, Earthworks,
+> Painting, Partitions, Level 1 commissioning) that likely haven't been noticed yet.
+>
+> Scoping: the re-upload itself and the "2119 un-mapped" banner are separate,
+> expected behaviour (dropped activities orphan their mappings); the defect is the
+> destructive save. FE fix (make Save merge instead of mirror + cascade guard) will
+> be raised as a separate dev ticket once recovery is underway.
+
+---
+
+## ORIGINAL (superseded) chosen action — kept for the record
+
 ## Chosen action: (a) — post the first analysis comment: state the code-verified mechanism, name the ONE data check that pins delete-vs-overwrite, and ask the ONE closed trigger question
 
 This ticket is fresh (Open, no analysis yet). The single highest-value move is to (1) convert the client's report into a mechanism the team can act on, (2) run/assign the one data diff that decides *deleted vs re-pointed*, and (3) get the dated "why now" question to an owner **now**, before the trail goes cold (playbook: an unanswered "why now" is an open incident wearing a closed label). Keep **Ilia Kuzmin** (assignee) as owner of the code + data step; route the trigger question to **Yash Patel** for the client/PM side.
