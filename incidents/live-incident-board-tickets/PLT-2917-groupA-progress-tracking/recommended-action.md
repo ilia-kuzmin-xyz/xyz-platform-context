@@ -1,5 +1,45 @@
 # PLT-2917 — recommended action (DRAFT ONLY — execute nothing)
 
+> **⚠️⚠️ THIRD REVISION (2026-07-22, after Mostafa's in-thread update — read context.md §5a):**
+> surface is the **PowerBI portfolio dashboard** and the mechanism question is now concrete —
+> PMILE5030 is absent from the **activity parquet**. The client-clarification draft below is
+> **largely superseded**: Q1 (which dashboard) and Q3 (which surface/value) are answered by
+> Mostafa; only Q2 (re-attach the broken screenshots) retains value, and can ride along later.
+> The new primary action is an **internal reply answering Mostafa's direct question**, plus one
+> routed backend question:
+>
+> **Draft reply (author: Ilia; @ Mostafa, @ Pietro, cc Yash):**
+>
+> > @Mostafa — very likely yes, it's because it's a milestone. The activity parquet
+> > (`v2_activities_progress`) is the weight-based progress output: it only carries
+> > ActualWeight/PlannedWeight per activity per date, and those weights come from linked
+> > elements. PMILE5030 has 0 linked elements (milestones always do), so it contributes no
+> > weight rows and never appears in that parquet — structurally, regardless of the 100% set in
+> > the editor. The editor's 100% lives on the activity record (activityStatus / actual dates in
+> > api-v2), which the new dashboard merges in — but a PBI dashboard reading only the parquet
+> > will never see milestones.
+> >
+> > **@Sachin/@Ali (or David) — one question to confirm:** does the progress-outputs job emit
+> > rows for activities with zero linked elements/weights? If not (expected), the fix is a
+> > decision, not a bug-hunt: either progress-outputs emits milestone rows sourced from the
+> > activity's manual %/actual dates, or the PBI portfolio dashboard joins activity-record
+> > fields for milestone-type activities. Which is preferred?
+> >
+> > Side-note on ELN04 ("past look late, future look done"): if the PBI visual derives status
+> > from planned dates when actuals are absent, that's exactly what structurally-absent actuals
+> > would look like — same root cause, different rendering. Hussein can confirm what the visual
+> > binds.
+>
+> Confidence in the milestone-absence mechanism: 7/10 (FE-side code-verified; the parquet
+> identification and the PBI binding need the pipeline owner's confirmation). If confirmed, this
+> ticket becomes a **product decision + pipeline change**, not FE work — likely re-route to
+> backend with Mostafa/Pietro owning the "where should milestone completion come from" decision.
+>
+> Everything below this line is the earlier (now partially superseded) state, kept for the
+> record.
+
+---
+
 > **⚠️ Surface correction (2026-07-22, second pass — read context.md §2 first):** the customer's
 > URL is the **old PowerBI progress dashboard** (`ProgressReportPage` = PowerBI embed), not the
 > native Portfolio Milestone widget this draft originally assumed. The core routing conclusion is

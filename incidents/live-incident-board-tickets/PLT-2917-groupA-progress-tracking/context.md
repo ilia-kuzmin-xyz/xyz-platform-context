@@ -186,7 +186,57 @@ Two backend/data conditions produce this; the FE cannot invent markers:
 
 ---
 
-## 5b. Leading unifying hypothesis (added 2026-07-22): PBI reads a stale/different schedule version
+## 5a. ⚠️ SECOND REFRAME (Mostafa update, 2026-07-22 — supersedes parts of §2/§5b below)
+
+Mostafa, in-thread (paraphrased verbatim enough): *"it's a different issue. For activity PMILE5030
+in ELN03 — he's done it to be 100% in the editor but Pietro is saying it's not coming up in the
+**activity parquet file**. Is that because it's a milestone? This is for the **PowerBI dashboard
+for portfolio**."*
+
+Two corrections to everything above:
+1. **Surface (third and hopefully final answer):** the PowerBI **portfolio** dashboard — not the
+   per-project PBI embed the ticket URL pointed at (§2), and not the native Portfolio widget (§3).
+   The URL in the description was a red herring throughout.
+2. **Data path:** the milestone state there is fed by **the activity parquet**, and Pietro's
+   finding is that PMILE5030 has **no rows in it at all** — not `vw_KeyMilestone.actualDate`
+   (that path belongs to the native widget only).
+
+**Answer to Mostafa's "is that because it's a milestone?" — very likely YES (code-grounded):**
+The activity parquet is almost certainly `v2_activities_progress.parquet`, the **weight-based
+progress output** (FE consumes it via the "V2 progress-outputs API",
+`dashboard-schedule/loaders/activity-progress-v2-loader.ts:17,56`). Its per-activity content is
+only `ActualWeight` / `PlannedWeight` per date (`dashboard-schedule/types.ts:5-12`), and progress
+% is derived as `SUM(ActualWeight)/TotalPlannedWeight` (`types.ts:62-63`). Weights come from
+linked elements — and milestone activities have **Elements = 0** (confirmed for PMILE5030 in the
+supplied screenshot). Zero linked elements ⇒ zero weight contribution ⇒ **no rows in the parquet,
+structurally, regardless of anything set in the editor.** The customer's "100% in the editor" is
+a *different field family* — the api-v2 activity record (`activityStatus` / `actualFinishDate`,
+`types.ts:14-27`). The NEW dashboard merges parquet + api-v2 (`MergedActivityData`, `types.ts:1-33`)
+so it can still show milestone data; a PBI dashboard reading **only the parquet** never sees
+milestones at all.
+
+**Sharp consequence:** milestones are structurally invisible to any weight-parquet-fed surface.
+No editor action by the customer can fix ELN03; the fix is a pipeline/product decision (either
+progress-outputs emits milestone rows sourced from the activity's manual %/actual dates, or the
+PBI portfolio dashboard joins the activity-record fields for milestone-type activities).
+
+**Held-back caveats (do not overclaim):**
+- ELN04's "past look late / future look done" is NOT explained by pure absence — something *is*
+  rendering there with wrong states. Different sub-mechanism or the PBI visual derives status
+  from planned dates alone when actuals are absent (which WOULD look exactly like "past = late,
+  future = done"!). Actually note: planned-dates-only rendering predicts precisely ELN04's
+  symptom — past-planned milestones with no actuals look "late", future-planned ones look
+  "upcoming/ok". Worth testing once the PBI visual's fields are known.
+- FAR01's "none showing" fits absence-from-parquet directly IF that visual lists parquet
+  activities — consistent, unconfirmed.
+- The identification "activity parquet = v2_activities_progress" is inferred from FE code
+  (7/10); the PBI portfolio dashboard could consume a separate BI export — the pipeline owner
+  (Sachin/Ali for api-v2 progress-outputs; David Webb for the data pipeline; Hussein for the PBI
+  report binding) must confirm.
+- §5b's stale-schedule-version hypothesis is now **demoted** (structural absence explains ELN03
+  better) but not dead — it still could contribute to FAR01/ELN04.
+
+## 5b. (Demoted by §5a) Earlier unifying hypothesis: PBI reads a stale/different schedule version
 
 The supplied screenshot carries two hints the original analysis didn't have: the schedule is
 named `101342_LIVE-2-25-26_For_new_dashboard_test_updated__I_(3)` — the "`(3)`" implying
