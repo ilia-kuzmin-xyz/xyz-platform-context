@@ -97,6 +97,66 @@ query 0 reveals it.
 - Q4: if `with_discipline ≈ activities` while `with_wbs_location ≈ 0`, the
   hardcoded-vs-dynamic differential is confirmed at data level.
 
+## 2026-07-22 (later) — Dev-panel results, rounds 1–2: selective loss; orphans found
+
+Ilia ran queries 1–7 on AUS01 (current revision `AUS01-260712-C_updated1`):
+
+**Round 1 (queries 1–4):**
+| check | result |
+|---|---|
+| WBS Location rows existing project-wide (Q1) | **7,879** — NOT deleted wholesale |
+| Sampled WBS rows keyed to current revision (Q2, n=20) | all `true` — NOT orphaned wholesale; values like `S27 - TFO`, `S12 - Data Hall`, `Flex 18` (steel-frame/data-hall "sequence"-style locations) |
+| A4300/A4290/A4160 current rows (Q3) | discipline=CSA, package=Precast present; `wbs location = NULL` |
+| Coverage (Q4) | activities 11,115 · with_discipline 9,878 · with_package 9,878 · **with_wbs_location 7,848** → ~2,030-activity hole ≈ the "2,119 un-mapped" banner |
+
+**Round 2 (queries 5–7):**
+- **Q5 (hole by package):** spans **51 packages** — dominated by non-physical work:
+  Procurement 1,028 · Key milestone 217 · Design 152 · Retired 88 · Earthworks 52 ·
+  UG Telecom 47 · Preconstruction 40 · Partitions 38 · Roof 37 · Painting 34 …
+  **Precast 19** … long tail to 1. → NOT one wiped subtree; most of the hole is
+  plausibly **never-mapped non-physical activities** (locations don't apply to
+  Procurement/Design/Milestones), with a smaller set of genuinely-lost physical
+  packages inside it — Precast (≈100% of its ~19-21 activities) is the reported one.
+- **Q6 (A4300 full row):** columns are exactly `discipline, package, phase,
+  wbs location` — **AUS01 has NO "Sequence" category type.** The client's "changed
+  into sequences" therefore refers to **S-prefixed WBS Location *values*** (steel-frame
+  sequence-style locations like `S12 - Data Hall`) appearing on Precast rows — i.e.
+  a mis-assignment episode before the blanking, not a type re-point.
+- **Q7 (orphans):** **9,878 mapping rows match current itemIds; 255 do NOT** —
+  orphaned rows keyed to old-revision itemIds exist. **Prime suspect:** the
+  re-upload's mapping carry-over missed a subset (Precast's dates DID change between
+  revisions), stranding their WBS Location mappings on old IDs — possibly holding the
+  lost `Area A/B…G/H` values, recoverable by re-keying.
+
+**Revised mechanism ranking:**
+1. **Partial carry-over miss on re-upload (BE)** — most of the project's mappings
+   (incl. 7,848 WBS values) carried fine; a subset (Precast among them) did not, and
+   their rows are candidates for the 255 orphans. → Queries 8/9 below decide.
+2. **Destructive FE save** — demoted from primary cause to **standing risk**: any
+   mapping-panel Save purges orphans permanently (and may already have, for some).
+3. Blanket dynamic-type carry-over failure — **refuted** (7,848 carried).
+
+**Next queries (issued to Ilia):**
+```sql
+-- Q8: per-package coverage — separates "wiped" (total=missing) from "never mapped"
+SELECT f.package, COUNT(*) AS total, COUNT(f."wbs location") AS with_wbs,
+       COUNT(*) - COUNT(f."wbs location") AS missing
+FROM api_activities a JOIN activity_categories_flat f ON f.activityId = a.itemId
+GROUP BY f.package ORDER BY missing DESC;
+
+-- Q9: smoking gun — do the 255 orphans hold the lost Precast "Area ..." values?
+SELECT f.activityId, f.discipline, f.package, f.phase, f."wbs location"
+FROM activity_categories_flat f
+LEFT JOIN api_activities a ON a.itemId = f.activityId
+WHERE a.itemId IS NULL ORDER BY f.package LIMIT 40;
+
+-- Q9b: orphan summary by package
+SELECT f.package, COUNT(*) AS orphan_rows, COUNT(f."wbs location") AS with_wbs
+FROM activity_categories_flat f
+LEFT JOIN api_activities a ON a.itemId = f.activityId
+WHERE a.itemId IS NULL GROUP BY f.package ORDER BY orphan_rows DESC;
+```
+
 ## ASK LIST (information / debugging needed)
 
 | # | What | Owner | Why |
