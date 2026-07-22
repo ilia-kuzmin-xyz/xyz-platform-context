@@ -12,7 +12,62 @@
 > package is named differently. The `/milestones` API dump remains useful only as a proxy if it
 > reads the same view. The draft below is kept with this correction applied where it matters.
 
-## Chosen action: (a) — internal reply that (1) states the code-verified mechanism (the dashboard
+## CHOSEN ACTION (revised 2026-07-22 after operator review): client clarification FIRST, via Yash
+
+The original draft (kept below for the record) argued "Not With Technical Support — we need
+nothing from Thomas." **Operator review overturned that**: (a) the inline screenshots in the
+description are broken for all three projects, so we have never seen what the customer sees;
+(b) the ticket URL points at the **old PowerBI dashboard** while the new dashboard lives at
+`/projects/<id>/dashboard`, so even the target surface is ambiguous; (c) no concrete example
+exists for FAR01 at all. Per the playbook, we cannot build a broken-vs-working pair without a
+concrete instance — so the next step IS a client round-trip after all.
+
+### Draft reply (author: Ilia; @ Yash Patel, who relays to Thomas)
+
+> Hi @Yash — before we take this on, three clarifications from Thomas please. The inline
+> screenshots in the description are broken for all three projects, so right now we can't see
+> what he sees.
+>
+> 1. **Which dashboard is this about?** The link in the ticket
+>    (`cloud.xyzreality.com/progress-dashboard/…`) is the **old PowerBI dashboard**. Does he
+>    expect the issue fixed there, on the **new dashboard** (`/projects/<project-id>/dashboard`),
+>    or does it appear on both?
+> 2. **Could he re-attach the screenshots** — one per project (FAR01, ELN04, ELN03), showing the
+>    milestones as he currently sees them?
+> 3. **What exactly is wrong, per project — one example each:** activity ID + what is shown vs
+>    what he expects (format like his ELN03 example: "Dh4 Ready for Energization = 100% → not
+>    showing 100%"). Specifically: is the problem (a) the milestone status/date display on the
+>    dashboard, (b) the progress % values in the schedule panel, or (c) elements not highlighting
+>    in the 3D viewer for those milestone activities?
+>
+> Scoping: on our side the schedule data looks right in the editor — Dh4 Ready for Energization
+> is mapped Discipline=Milestone / Package=Key milestone and shows Actual 100% — so the
+> disagreement is between the editor and *some* dashboard surface; we need to pin which one
+> before routing this to the right team (PowerBI/reporting vs platform).
+
+Playbook conformance: three closed questions, one relay owner (Yash), each answerable with a
+value/artifact; scoping line states what is already verified so it isn't re-litigated. If Thomas
+answers (c), the ticket may partially self-resolve — milestone activities carry **Elements = 0**
+by design, so "no elements highlighted for a milestone" is expected behaviour, not a bug.
+
+Optional 4th question (next round, once surface is pinned — trigger discipline): *"Did these
+milestones ever display correctly on that dashboard — if yes, roughly when did it change?"*
+
+**Status routing:** posting this ⇒ move ticket to **With Technical Support** (client
+clarification owned by Yash) — per this board's convention that puts it out of triage scope
+until the answers land.
+
+**Still owed internally (separate message, separate owner — do not lose):** ask **Pietro** what
+his earlier fix touched (code vs data action, which projects) — unchanged from the original
+draft below. The stale-schedule-version hypothesis (schedule name `…updated__I_(3)`, PBI possibly
+pinned to an older upload — see context.md) is the leading unifying candidate to test once the
+surface is confirmed.
+
+---
+
+## ORIGINAL (superseded) chosen action — kept for the record
+
+(a) — internal reply that (1) states the code-verified mechanism (the dashboard
 layer renders reporting-DB milestone state; done/late/complete all come from
 `vw_KeyMilestone`-family data / Actual End Date, with no FE date logic), (2) asks **Pietro** the
 one closed question that unblocks everything — *what did your earlier fix touch?* — and (3) names
