@@ -57,8 +57,9 @@ per project (which reads "For FAR01 → … For ELN04 → …" naturally as thre
 NOT the portfolio Milestone widget the original analysis targeted.
 
 **Operator confirmation (2026-07-22):** `cloud.xyzreality.com/progress-dashboard/<id>` is the
-**old, PowerBI-based dashboard**; the new native dashboards live under `/projects/<project_id>/…`
-(the in-viewer DuckDB dashboard documented in `xyz-platform-context/dashboard/`). So this ticket's
+**old, PowerBI-based dashboard**; the new native dashboard lives at
+`/projects/<project_id>/dashboard` (the in-viewer DuckDB dashboard documented in
+`xyz-platform-context/dashboard/`). So this ticket's
 failing surface is definitively the **old PowerBI progress dashboard**. Note the repo tooling:
 the `dashboard-progress-comparison` skill exists specifically for Platform-vs-PowerBI data
 discrepancies and may be reusable here.
