@@ -157,6 +157,64 @@ LEFT JOIN api_activities a ON a.itemId = f.activityId
 WHERE a.itemId IS NULL GROUP BY f.package ORDER BY orphan_rows DESC;
 ```
 
+## 2026-07-22 (round 3) — VERDICT: deleted, not orphaned; destructive FE save re-crowned as primary
+
+**Q8 (per-package coverage, 91 packages) — the loss is single-type, subtree-shaped,
+sharp-bounded:**
+| package | total | with_wbs | missing |
+|---|---|---|---|
+| Procurement | 1,043 | 15 | 1,028 |
+| Key milestone | 219 | 2 | 217 |
+| Design | 152 | 0 | 152 |
+| Retired | 88 | 0 | 88 |
+| Earthworks | 196 | 144 | 52 |
+| UG Telecom | 47 | 0 | 47 |
+| Partitions | 680 | 642 | 38 |
+| Roof | 40 | 3 | 37 |
+| Painting | 410 | 376 | 34 |
+| Level 1 (Comm.) | 344 | 324 | 20 |
+| **Precast** | **21** | **2** | **19** |
+| …long tail… | | | |
+| dozens of packages | | | **0 missing** (BMS 434/434, Ext. Wire Pulls 591/591, Containment-current, EPMS 108/108…) |
+
+**Q9/Q9b (orphan inspection) — orphan theory REFUTED for Precast:** the 255 orphans
+are dominated by General Preconstruction (59), Exterior Wire Pulls (54), Procurement
+(38), Painting (23), Design (14) — i.e. **activities dropped from the new schedule
+version** (normal re-upload debris; several carry old yard-phase values like
+`Elec Yard`, and only 31/255 have any WBS value). **Precast has just 2 orphan rows,
+0 with WBS values.** The lost `Area A/B…G/H` values exist in NEITHER current rows NOR
+orphans → **deleted from the mappings data outright.** Corollary: itemIds are stable
+across re-uploads for surviving activities — carry-over is NOT the failure mode.
+
+**Verdict (mechanism ranking, final):**
+1. **FE destructive save + descendant cascade (context.md §B+§C) — PRIMARY, 8/10.**
+   Selective single-type deletion across specific subtrees with survivors at cascade
+   boundaries (Precast 2/21, Roof 3/40) while discipline/package/phase remain intact
+   everywhere is exactly the fingerprint `saveDataMapping` + descendant-type-clearing
+   produces. Plausible session: re-upload surfaces "2,119 un-mapped" → someone opens
+   the mapping panel to fix (incl. steel-frame S-value work — the client's
+   "sequences" sighting on Precast) → Save(s) delete WBS Location across every
+   cascaded subtree.
+2. Re-upload carry-over miss — refuted (stable itemIds, mappings survived).
+3. Wholesale deletion / wholesale orphaning — refuted earlier.
+
+**Remaining to confirm:** the BE audit (deletion timestamps + user) — turns 8/10 into
+a dated, attributed fact and enumerates the restore set.
+
+**Recovery paths:**
+- BE audit/soft-delete restore (if available) — cleanest.
+- Else: client's **full** last-week export (the attachment covers only the Precast
+  filter) diffed against current state = complete restore list. Q8 implies losses
+  beyond Precast (Roof, Earthworks, Painting, Partitions, Level 1…) the client hasn't
+  reported yet — proactively enumerate (playbook Q6 cohort), don't wait for the next
+  ticket.
+- **Guard stands:** no mapping-panel Saves on AUS01 until restoration completes.
+
+**FE fix (Darminder, own ticket):** make `saveDataMapping` merge instead of mirror —
+never delete types the user didn't explicitly clear (`category-mapping-service.ts:265-271`);
+review the descendant-type-clearing cascade (`:643-650`) for a confirm/undo. Now a
+confirmed real-world data-loss bug, not a theoretical vector.
+
 ## ASK LIST (information / debugging needed)
 
 | # | What | Owner | Why |
