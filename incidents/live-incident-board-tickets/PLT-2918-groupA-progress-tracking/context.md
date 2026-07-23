@@ -1,8 +1,17 @@
 # PLT-2918 — "HITT - AUS01 WBS Location Mapping Removed automatically on web viewer" — triage context
 
+> **Update 2026-07-23.** The mechanism analysis below was posted to the ticket 07-22 and Ilia then
+> independently confirmed it against live data: WBS Location mappings are genuinely **deleted** (not
+> hidden) for 19/21 Precast, 37/40 Roof, 52/196 Earthworks, 34/410 Painting + some Partitions/L1
+> commissioning on AUS01; Discipline/Package/Phase are intact everywhere. Working theory: a July-12
+> re-upload surfaced ~2,119 unmapped activities, then a mapping-panel session to fix them triggered
+> the destructive per-type Save (§Mechanism B). **Yash has asked directly what to do next — see the
+> `recommended-action.md` Update 2026-07-23 for the drafted reply, the two-ticket split (BE recovery /
+> FE prevention fix), and the fileable fix (file:line) for the FE Save merge bug.**
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2918
 - **Issue type:** Live Incident · Software Area: **Web Viewer**
-- **Status:** **Open** (genuinely fresh — no analysis posted by the assignee yet)
+- **Status:** **Open** (status when this context.md was first written — see update above for what's changed since)
 - **Priority:** Major
 - **Project (site):** **HITT — AUS01**
 - **Reporter (Jira):** Yash Patel (support/coordinator) · **Assignee:** Ilia Kuzmin

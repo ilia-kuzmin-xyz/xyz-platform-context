@@ -8,6 +8,11 @@
 - **Linked Freshdesk:** #7126 — **already Closed 2026-07-06** (see discrepancy below)
 - Triage date: 2026-07-13
 
+> **Re-checked 2026-07-23 — no new comments since 07-06.** Status unchanged (With Customer), Freshdesk
+> side already Closed. Recommendation unchanged: nudge Yash to align the Jira status (With Customer →
+> Done) with the already-closed Freshdesk ticket; nothing further to investigate (9/10, data artifact,
+> as-intended per Mostafa 06-23).
+
 ---
 
 ## 1. What "error" means here — WRONG VALUE, not a crash

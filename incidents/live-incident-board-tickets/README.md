@@ -43,6 +43,71 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-23 — no new tickets; a recheck pass, 2 tickets exited scope, 1 real development, 2 flags
+
+Board re-queried in full (`project = PLT AND issuetype = "Live Incident"`, all 178 issues paged and
+scanned for status). **No ticket newly entered** Open / In Analysis / With Customer / Ready For
+Development / Dev In Progress since 07-22 — every currently-in-scope ticket was already tracked. This
+run is a recheck-for-new-activity pass over the 10 previously-tracked tickets, not a fresh-discovery
+pass.
+
+### Left scope this run (2) — both moved to With Technical Support
+
+| Ticket | Domain | Was → Now | Note |
+|---|---|---|---|
+| PLT-2917 | progress-tracking | Open → With Technical Support | Mostafa clarified this ticket is actually about a different symptom (`PMILE5030`/ELN03 activity-parquet gap) than the original description; Yash acknowledged; no question currently outstanding to Ilia. Benign exit. |
+| PLT-2649 | 360-captures | In Analysis → With Technical Support | ⚠️ **Not benign** — see flag below. A direct question to Ilia has sat unanswered 6 days; the status move doesn't reflect the ball actually being with the client. |
+
+### Group A (8 remaining in scope) — status of today's recheck
+
+| Ticket | Domain | Status | What changed today | Conf. |
+|---|---|---|---|---|
+| PLT-2918 | progress-tracking | Open | **Real development.** Yash confirmed the destructive-save theory against live data (genuine deletion, ~160 activities across 5 packages) and asked directly "what would you suggest as further course of action?" — drafted a reply (2-ticket split: BE recovery via possible audit trail / re-derive-from-export vs manual re-key; FE prevention fix now precise enough to file, file:line in `recommended-action.md`) | 8/10 mechanism, unconfirmed BE recovery path |
+| PLT-2906 | viewer-and-model | Open | No new comments. Stall on **our** side is now 3 days (was 2) — customer's True-North screenshots (07-20) still unanalysed | 6-7/10 |
+| PLT-2909 | progress-tracking | In Analysis | No new comments since 07-17. Diagnostic (`window.__linkDiagnose('CY-5200')` on ATL08) not yet reported run | 6/10 |
+| PLT-2874 | viewer-and-model | In Analysis | ⚠️ **Self-stall flagged** — see below. Status moved Open→In Analysis since 07-13 but no analysis or clarifying question was ever posted; 10 days silent on our own promise | 6/10 unchanged |
+| PLT-2884 | data-pipeline | With Customer | No new comments (Freshdesk bot noise only). Now 10 days since the re-upload nudge, 14 since the original report | 8/10 |
+| PLT-2858 | quality-management | In Analysis | No new comments since 07-16. Now 7 days since Mostafa's "waiting on this since it was asked of me" | 8/10 |
+| PLT-2882 | progress-tracking | In Analysis | No new comments since 07-15. Root cause still confirmed; the 418-link deletion still awaits Pietro/Mostafa approval (asked 07-14) | 9/10 root cause |
+| PLT-2815 | quality-management | With Customer | No new comments since 07-06. Freshdesk side already Closed — Jira status just needs aligning | 9/10 |
+| PLT-2619 | other | With Customer | No new comments since 04-29 (~85 days stale). Still mis-filed as an incident | 8/10 |
+
+### Group B (1) — confirmed still in scope
+
+- **PLT-2385** — confirmed **still Ready For Development** today. (Correction to the 07-22 run's
+  note: only PLT-2890/2759/2742 actually moved out of Group B scope by 07-22 — PLT-2385 did not, it
+  remained Ready For Development throughout.) No new comments since 07-17. Per this routine's scope,
+  Group B action-scenario stays TBD/skipped.
+
+### ⚠️ Flag 1 — PLT-2649: a live question to Ilia is aging inside a ticket the routine would otherwise skip
+
+The ticket left scope (→ With Technical Support) after Yash asked, 2026-07-17: *"Before I ask them to
+correct level in a model, can you please tell me which model they need to change the level? Thank
+you."* **Six days, no reply.** The original finding never named a model (only a level GUID,
+`f0f4d409`, and elevation values) — that omission is the actual gap, not new complexity. The routine's
+exclusion-by-status rule would otherwise hide this. **Recommended immediate action (not executed):**
+re-derive which PA12 model owns that level and reply to Yash — see
+`PLT-2649-groupA-360-captures/context.md` for the full note.
+
+### ⚠️ Flag 2 — PLT-2874: a self-made promise, unfulfilled for 10 days
+
+Ilia commented "I'm going to compare the data" on 2026-07-13 and never posted a result or the
+already-drafted clarifying question to Mostafa (the ticket's reporter, internal PO). Status quietly
+moved Open → In Analysis on the strength of that one comment, but nothing has moved since. Lowest-cost
+unblock: post the drafted question or run the one-off DuckDB diff already specified in
+`PLT-2874-groupA-viewer-and-model/recommended-action.md`.
+
+### Cross-ticket notes (this run)
+
+- Both exits-from-scope this run (2917, 2649) left via the same status (With Technical Support), but
+  for opposite reasons — one because the loop with the client legitimately continues (2917), one
+  because our own side left a question unanswered (2649). Status alone doesn't distinguish these; worth
+  remembering that "With Technical Support" is not always "ball is elsewhere."
+- No new attachments to flag this run — no new tickets entered scope, so the attachment backlog from
+  07-22 (PLT-2918, 2917, 2909, 2906, 2884) is unchanged and still unread by any agent.
+
+---
+
 ## Run: 2026-07-22 — 7 fresh/updated Group A tickets, Group B currently empty
 
 Board re-queried (`project = PLT AND issuetype = "Live Incident"`) and filtered per the

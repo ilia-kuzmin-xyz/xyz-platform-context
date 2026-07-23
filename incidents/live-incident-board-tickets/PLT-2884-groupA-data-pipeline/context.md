@@ -10,6 +10,12 @@
 - **Created:** 2026-07-09 · **Last updated:** 2026-07-20
 - Triage date: 2026-07-22
 
+> **Re-checked 2026-07-23 — no new substantive comments** (only Freshdesk status bot noise, flipping
+> Closed/Waiting-on-customer). It is now **14 days** since the original report and **10 days** since
+> Ilia's 07-13 nudge asking whether the customer re-uploaded — still silent. Confidence and
+> recommended action unchanged (8/10 root-cause-diagnosed; escalate the silence to Yash, consider
+> With-Customer → With-Technical-Support given Critical priority + 10-day silence).
+
 ---
 
 ## 1. What is observed (playbook Q1)

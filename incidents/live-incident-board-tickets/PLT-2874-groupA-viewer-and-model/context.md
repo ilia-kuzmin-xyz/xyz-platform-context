@@ -1,8 +1,18 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+> ⚠️ **Re-checked 2026-07-23 — self-stall, 10 days.** The only comment on this ticket is Ilia's own,
+> 2026-07-13: *"I'm going to compare the data to see where the 30K-element difference comes from."*
+> Neither that comparison nor the drafted clarifying question to Mostafa (see `recommended-action.md`
+> — never actually posted) has been delivered in the 10 days since. Status has since moved **Open →
+> In Analysis** (presumably on the strength of that comment alone), but there is no analysis result
+> and no clarifying question in-thread — this is a promise made and not followed up, on our own
+> ticket, to an internal PO. Lowest-cost unblock: either post the drafted clarifying question now, or
+> run the one-off DuckDB diff in `recommended-action.md` and report back — either closes the loop
+> Mostafa is waiting on.
+
 - **Domain slug:** viewer-and-model (justification in §6)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2874
-- **Type:** Live Incident · **Priority:** Minor · **Status:** Open
+- **Type:** Live Incident · **Priority:** Minor · **Status:** In Analysis (was Open at 07-13 triage)
 - **Assignee:** Darminder Atker (fullstack lead)
 - **Reporter (Jira):** Mostafa Kamel Hussien (product owner) — internal report, not a client ticket
 - **Project / model:** **Far01** (federated file)

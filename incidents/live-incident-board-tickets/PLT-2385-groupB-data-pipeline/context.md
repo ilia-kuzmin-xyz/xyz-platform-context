@@ -10,6 +10,12 @@
 - **Priority:** **Critical**
 - **Project (site):** HITT — DC10 -V2x
 - **Reporter & Assignee:** **Masum Ahmed** — support/Freshdesk agent. ⚠️ **Off dev roster** (not one of the named dev/PO/QA contributors). A support agent holding an assignment on a Ready-For-Dev ticket usually means no engineer currently owns the code work here — see recommended-action.
+
+> **Re-checked 2026-07-23 — status confirmed still Ready For Development** (the 07-22 run's note that
+> this had "moved to Ready For QA or Done" does not hold for this specific ticket — only the other
+> three Group-B tickets from 07-13 made that move; PLT-2385 is still here). Last comment is Freshdesk
+> noise (07-17, "Waiting on customer"). Per this routine's scope, Group B action-scenario is still
+> TBD/skipped — no new context captured beyond confirming it remains in scope.
 - **Created:** 2026-01-28 · **Last updated:** 2026-05-06
 - **Components / Labels:** none
 - **Domain slug chosen:** `data-pipeline` (deviates-toward from the alternative `progress-tracking` — justified at the bottom)

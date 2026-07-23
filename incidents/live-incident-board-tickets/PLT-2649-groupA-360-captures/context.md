@@ -1,5 +1,22 @@
 # PLT-2649 — "[NEW DASHBOARD] PA12 360 pins appear too high" — triage context
 
+> **Update 2026-07-23 — OUT OF SCOPE as of today, status = With Technical Support. ⚠️ But there is a
+> live, unanswered question addressed directly to Ilia, open 6 days.** After the 07-13 recommended
+> action below was acted on (Ilia asked Yash to get the delivery/BIM team to correct one level's
+> elevation, `f0f4d409` 50.4→0, in the source model), **Yash asked back on 2026-07-17 11:07**: *"Before
+> I ask them to correct level in a model, can you please tell me which model they need to change the
+> level? Thank you."* **This has had no reply as of 2026-07-23** — 6 days. The ticket's Jira status
+> moved to "With Technical Support" (Freshdesk → "Waiting on customer" 2026-07-17) in the meantime,
+> which would normally take this out of the routine's scope, but the open question is on **our** side,
+> not the client's — Yash cannot act until Ilia names the model. **The original 07-16 comment never
+> named a model** — it gave only the level GUID (`f0f4d409`) and elevation values (50.4→0), which is
+> exactly the gap Yash is flagging; nothing in this ticket's thread or in this context.md identifies
+> which of PA12's federated source models owns that level. **Recommended immediate action (not
+> executed): Ilia re-derives the model name** (re-run whatever inspection produced the `f0f4d409`
+> finding and capture which model export it came from) **then replies to Yash** with the model name,
+> so the 6-day stall clears. This is time-sensitive because the fix is unfinished on our side, not
+> because of new complexity.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2649
 - **Issue type:** Live Incident ("To track live incidents on site.")
 - **Status:** In Analysis (category: In Progress / yellow). Freshdesk #6622, last set to "Waiting on 3rd line" (2026-06-19) — i.e. back on us.

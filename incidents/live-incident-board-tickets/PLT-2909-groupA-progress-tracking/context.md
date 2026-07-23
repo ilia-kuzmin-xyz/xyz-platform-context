@@ -10,6 +10,10 @@
 - **Domain slug chosen:** `progress-tracking` (matches sibling PLT-2882 — justified below).
 - **Concrete repro handed to us:** activity **`CY-5200`**, schedule **`29475-16-RL3`**, project **ATL08**. Model that *actually* contains the linked elements: **`PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_EquipmentOthers_Bld2-V1`** — but "several models appear."
 
+> **Re-checked 2026-07-23 — no new comments since 07-17.** Status unchanged (In Analysis). The
+> recommended diagnostic (run PLT-2882's `window.__linkDiagnose('CY-5200')` on ATL08) has not yet been
+> reported as run. No change to the drafted action.
+
 ---
 
 ## One-line symptom

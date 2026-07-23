@@ -10,6 +10,11 @@
 - **Triage date:** 2026-07-22
 
 > ⚠️ **This ticket is not fresh and it is not parked on the client.** It is mid-investigation and **the ball is on OUR side.** The customer answered Ilia's True-North question on **2026-07-20**; as of 2026-07-22 that answer sits **unanalysed** and no one has replied. It has been **~2 days stalled on Ilia's own follow-through**, not on the customer. (See §NEEDS HUMAN and `recommended-action.md`.)
+>
+> **Re-checked 2026-07-23 — still no reply, no new comments.** Status unchanged (Open). It is now **3
+> days** since the customer's True-North screenshots (07-20) with no analysis posted — the stall is
+> aging, not resolving. Same recommended action as 07-22: Ilia analyses the screenshots and runs the
+> orientation diagnostic on FAR01/FAR02 before anything goes back to the client.
 
 ---
 

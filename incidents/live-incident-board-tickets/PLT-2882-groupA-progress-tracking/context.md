@@ -10,6 +10,11 @@
 - **Components / Labels:** none
 - **Attachments:** 2 × `.mp4` screen recordings + 2 inline blob images in comment 1 (all unreadable here — see NEEDS HUMAN)
 - **Domain slug chosen:** `progress-tracking` (deviates from the default `filter-system` — justified below)
+
+> **Re-checked 2026-07-23 — no new comments since 07-15.** Status unchanged (In Analysis). Root cause
+> remains confirmed (9/10); deletion of the 418 dead links still on hold pending Pietro/Mostafa
+> approval (asked 07-14, no recorded answer). This is the sibling ticket PLT-2909 depends on — its
+> diagnostic (`window.__linkDiagnose`) is still worth running there regardless of this approval.
 - **Session IDs given:** customer `platform-web-1d4edbe3-...`; Yash's repro `platform-web-1a50c359-...`
 - **Model in question:** `PC-APLD-FAR01-UND-AKS_REV1-V23`
 

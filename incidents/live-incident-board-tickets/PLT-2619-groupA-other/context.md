@@ -11,6 +11,11 @@
 - **External link:** Freshdesk ticket #6492 (client-facing origin — not accessible from here)
 - **Domain slug:** `other` (product/config request; touches the Dashboard domain but is not a dashboard code task)
 
+> **Re-checked 2026-07-23 — no new comments since 04-29 (~85 days stale).** Status unchanged (With
+> Customer), Freshdesk side already "Awaiting release" as of 04-29. Recommendation unchanged: this is
+> mis-filed as a live incident (a demo-dashboard relink request, not a defect) — hand off to
+> product/reclassify rather than continuing to carry it on the incident board.
+
 ---
 
 ## Classification: (ii) content/config request — MIS-FILED on the live-incident board

@@ -1,5 +1,15 @@
 # PLT-2917 — "Progress Dashboard" (milestones wrong) — triage context
 
+> **Update 2026-07-23 — OUT OF SCOPE as of today, status = With Technical Support.** Sequence since
+> the 07-22 triage below: Ilia (this routine's drafted 3-clarification-question comment) was posted
+> 07-22 09:30; Mostafa replied same day that this ticket is actually about a *different*, more
+> specific symptom than the original description — activity `PMILE5030` on ELN03, marked 100% in the
+> editor but not reflected in the activity parquet file used for the PowerBI portfolio dashboard;
+> Yash acknowledged ("will be more precise from now on") and the ticket then moved to **With
+> Technical Support**. No question is currently outstanding addressed to Ilia — the ball is with
+> support/Freshdesk. Folder kept as historical context per convention; re-check if it re-enters Open/
+> In Analysis/With Customer.
+
 - **Domain slug:** `progress-tracking` (justification in §7)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2917
 - **Type:** Live Incident · **Priority:** Major · **Status:** **Open**

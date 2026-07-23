@@ -8,6 +8,11 @@
 - **Linked Freshdesk:** #7286 (currently Open, last flipped to "Waiting on 3rd line" 2026-07-07)
 - Triage (continuation) date: 2026-07-13
 
+> **Re-checked 2026-07-23 — no new comments since 07-16.** Status unchanged (In Analysis). It is now
+> **7 days** since Mostafa's "waiting on this since it was asked of me" with no decision delivered on
+> zone-config ownership, and the customer's "we don't know how" reply is now 9 days old. Escalation
+> risk is rising — worth looping Pietro directly per the 07-22 note if this drags further.
+
 ---
 
 ## 0. One-line framing

@@ -1,5 +1,82 @@
 # PLT-2918 — recommended action (DRAFT ONLY — execute nothing)
 
+> ## Update 2026-07-23 — Yash's follow-up now confirmed the destructive-save mechanism with live data; drafting the reply to his direct question
+>
+> Since the analysis comment below was posted (07-22 17:33), Ilia ran the data check independently
+> and confirmed on the live ticket: WBS Location mappings are **genuinely deleted** (not hidden) for
+> **19/21 Precast, 37/40 Roof, 52/196 Earthworks, 34/410 Painting**, plus some Partitions and
+> Level-1-commissioning activities on AUS01 — 7,879/~10k activities untouched, and
+> Discipline/Package/Phase intact everywhere (only WBS Location hit, consistent with §Mechanism B: the
+> destructive per-type diff only nulls types absent from the in-memory `activityItem`). Working theory
+> posted: a **July 12 schedule re-upload** surfaced ~2,119 unmapped activities, and someone then
+> **worked the mapping panel to fix them** — that Save session is what triggered the destructive
+> per-type delete across the touched subtrees.
+>
+> **Yash replied 07-22 18:08, asking directly: *"so basically it was due to a schedule reupload on Jul
+> 12 and somehow it was messed up. Only possible solution from here is to manually correct them? what
+> would you suggest as further course of action?"*** — this is now the single open question on this
+> ticket. Drafted reply below.
+>
+> ### Draft reply to Yash (author: Ilia Kuzmin)
+>
+> > Yes — re-upload surfaced the unmapped activities, then the mapping-panel Save wiped WBS Location
+> > across whatever subtrees got touched in that session (it deletes any category type that's empty in
+> > memory for a changed activity — confirmed in code, not specific to this one save).
+> >
+> > Manual re-keying isn't the first move — two better recovery paths, in order:
+> > 1. **Ask BE whether `activity_category_mapping` keeps soft-delete/audit rows** for the ~160
+> >    affected activities. If yes, this is a one-time bulk restore, not manual re-entry.
+> > 2. **If not, re-derive from the export you already have** (it holds e.g. `A4300` = AREA G/H) and
+> >    script a bulk re-create from that file rather than hand-typing ~160 rows.
+> > Manual re-entry is the fallback only if both of those come back empty.
+> >
+> > Separately, I'm filing a **prevention fix**: category-mapping Save currently treats "empty in
+> > memory" as "user wants this deleted" for *every* category type on a changed activity, not just the
+> > one edited — that's what let one WBS-Location cleanup session wipe Discipline-sibling data.  Fix
+> > is scoped (touched-type tracking through `mapping-service.ts` into `saveDataMapping`), targeting
+> > Darminder's queue.
+> >
+> > Recovery and prevention are two separate tickets — recovery is urgent/BE, prevention is a
+> > dev-scoped FE fix; no need to block one on the other.
+>
+> ### Prevention fix — precise enough to file as its own dev ticket
+>
+> **Root gap:** change-tracking is activity-grained only. `_localChangedIds`/`_changedActivityIds`
+> (`mapping-service.ts:69-70`, populated `:496-501`) are `Set<activityId>` — which *category types*
+> changed within an activity is computed at edit time (`computeCategoryMapUpdates` in
+> `category-mapping-service.ts` returns `updates` keyed by `categoryTypeId`, consumed at
+> `data-mapping-dropdown.tsx:85-92` → `mapping-service.ts:491-512`) but discarded before Save runs —
+> `_updateActivityData` has the touched-type keys in `data` at `:496-501` and records only the
+> activity id. (Proof the granular signal is recoverable: undo history already stores per-type
+> previous/updates at `:469`.)
+>
+> **A never-touched type and an explicitly-cleared type are already distinguishable** — clearing a
+> dropdown sets `updates[typeId] = null` explicitly (incl. descendant auto-clears,
+> `computeCategoryMapUpdates:643-650`); an untouched type never appears in `updates` at all.
+>
+> **Fix, two call sites:**
+> 1. `mapping-service.ts:496-501` — change `_localChangedIds`/`_changedActivityIds` from
+>    `Set<activityId>` to `Map<activityId, Set<categoryTypeId>>`, populated from `Object.keys(data)`.
+> 2. `category-mapping-service.ts` `saveDataMapping()` (~249-273) — iterate only each activity's
+>    **touched** categoryTypeIds instead of all `getCategoryTypes()`; the delete branch (~265-271)
+>    then only fires for types the user actually cleared.
+>
+> **Explicitly out of scope for this fix:** the descendant-cascade clear
+> (`computeCategoryMapUpdates` step 3, ~643-650) that nulls descendant category types when a parent
+> changes — that may be intended behaviour; note it in the dev ticket but don't fold it into the same
+> patch.
+>
+> **No existing recovery/audit mechanism found on the FE/API surface** —
+> `IActivityCategoryMapping` has no `deletedAt`/version field, `deleteMappings` is a hard
+> `/mapping/delete` POST, and `activity_categories_flat` / OPFS parquet are rebuilt from the live API
+> (no snapshot to roll back to). Whether the **backend DB** keeps soft-deletes is unknown — that's
+> the BE question in the draft reply above, and the fastest possible recovery path if it exists.
+>
+> **Confidence:** mechanism/fix-shape 8/10 (traced end-to-end with file:line); that BE has a
+> recoverable audit trail — unknown, needs a BE answer, not guessable from this codebase.
+
+---
+
 ## Chosen action: (a) — post the first analysis comment: state the code-verified mechanism, name the ONE data check that pins delete-vs-overwrite, and ask the ONE closed trigger question
 
 This ticket is fresh (Open, no analysis yet). The single highest-value move is to (1) convert the client's report into a mechanism the team can act on, (2) run/assign the one data diff that decides *deleted vs re-pointed*, and (3) get the dated "why now" question to an owner **now**, before the trail goes cold (playbook: an unanswered "why now" is an open incident wearing a closed label). Keep **Ilia Kuzmin** (assignee) as owner of the code + data step; route the trigger question to **Yash Patel** for the client/PM side.
