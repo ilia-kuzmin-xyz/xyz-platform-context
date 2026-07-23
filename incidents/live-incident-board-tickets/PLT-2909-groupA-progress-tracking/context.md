@@ -98,11 +98,42 @@ Yash, comment 1: *"when I tried to generate session id it gave me an error."* Th
 
 ## NEEDS HUMAN
 
-- ⚠️ **2 image attachments on PLT-2909** (behind Atlassian auth — not viewable here). These are Kyriakos's screenshots of the wrong model list; they would confirm *which* surface (grouped-links count panel vs isolation tree) and how many extra models appear. **Do not guess contents.**
+- ✅ **RESOLVED 2026-07-22 — Ilia supplied the screenshots.** Decoded:
+  1. **The failing surface is the "Linked elements" panel** (ViewerPage, ATL08-xv2,
+     schedule `29475-16-RL3`). Activity `CY-5200` ("Install CH 6-1 Raceways in Chiller
+     Yard - DH 08.2 - Chiller Yard - Area 06 North", 6 linked elements) lists **six
+     models**: `PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_DistributionBoardsPanels_Bld1-V1`,
+     `…DistributionBoardsPanels_Bld3-V1`, `…EquipmentOthers_Bld1-V1`,
+     `…EquipmentOthers_Bld2-V1` (expanded — its element renders yellow in the viewer),
+     `…EquipmentOthers_Bld3-V1`, and **`SWITCH - ATL8-260703`**. Matches Kyriakos:
+     only Bld2-V1 shows real geometry.
+  2. **Trigger candidate found in the model name:** `SWITCH - ATL8-260703` reads as a
+     **federated model dated 2026-07-03** — 13 days before the ticket. If that's a fed
+     re-upload, it's the "why now" (playbook Q5). Confirm with BE/ops.
+  3. **Third candidate mechanism (added):** all listed models are `PC-EXCEL_*`
+     per-building Excel imports + one federated model. So the extra models could be
+     (a) **stale parquet generations** (PLT-2882's mechanism), (b) **genuine metadata
+     overlap** — the same Excel element rows imported into several building models'
+     `client-element-metas`, or (c) **legitimate federated membership** — an element
+     naturally listed in both its source model and the fed model (in which case part
+     of the list is by-design and the "bug" is partly a display/UX question).
+     `__linkDiagnose`'s per-model `inParquet`/`inGeometry` distinguishes all three.
+  4. **ATL08 schedule panel has more category columns** than AUS01 (Building + WBS
+     Location visible) — irrelevant to this bug, noted for cross-project context.
 - ⚠️ **Data confirmation on ATL08** (needs a dev/editor session): run `window.__linkDiagnose('CY-5200')` per `recommended-action.md`; specifically compare `modelMembership` (parquet) against `parquetVsGeometryByMongoModelId` (`inParquet` vs `inGeometry`) for each listed model. Extra models with `inParquet > 0, inGeometry = 0` (or non-membership) = confirmed ghost membership = same mechanism as PLT-2882.
 - ⚠️ **Model type of `PC-EXCEL_SWITCH_ATL8_…`** — Revit vs Navisworks decides the mapper path (`revit-model-mapper.ts` vs `navisworks-model-mapper.ts`) and whether an `svf2-object-id-map` artefact exists. Confirm before assuming PLT-2882's Revit findings transfer.
 - ⚠️ **Trigger (BE/ops):** was an ATL08 model (esp. `PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_EquipmentOthers_Bld2`) re-uploaded/re-versioned recently, and does its timing line up with when the model list went wrong?
-- ⚠️ **Session-log-sync error** — separate track; owner = BE/logging. Needs the actual error text from Yash (see side-finding).
+- ✅ **Session-log-sync error decoded (2026-07-22, screenshot supplied):** the Sync
+  session logs modal fails with **`Loading chunk 7443 failed (missing:
+  https://cloud.xyzreality.com/app/7443.150d83fd09a7ceb153dc.chunk.js)`** — a
+  **stale-deploy lazy-chunk 404**: the user's browser holds an old app shell whose
+  hashed chunk was replaced by a redeploy. NOT a log-upload failure, NOT related to
+  linking. User-side fix: hard refresh (Ctrl+F5). Platform-side fix: a
+  chunk-load-failure handler (catch `ChunkLoadError` on lazy imports → prompt/auto
+  reload) — small standalone FE ticket. Operational note: every stale-tab user hitting
+  ANY lazy-loaded dialog gets this until they refresh, so support should reply
+  "hard-refresh first" to such reports. Separate track, own ticket; do not fold into
+  PLT-2909's fix.
 
 ---
 
