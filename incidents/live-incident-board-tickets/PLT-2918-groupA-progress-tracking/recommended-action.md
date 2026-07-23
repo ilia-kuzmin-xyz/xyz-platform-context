@@ -1,6 +1,68 @@
 # PLT-2918 — recommended action (DRAFT ONLY — execute nothing)
 
-## ⚠️ SUPERSEDED (2026-07-22, after live-data investigation) — current action below
+## ✅ CURRENT STATE (2026-07-22 evening) — messages finalized, ready to post
+
+Yash replied on the ticket with a partial misread ("so it was the reupload that messed
+it up; only solution is manual correction?"). Two corrections baked into the final
+reply below: (1) the reupload only set the stage, the save session did the deleting;
+(2) manual is the LAST resort behind BE restore and a scripted re-map.
+
+**Ownership split (agreed with Ilia):**
+| # | Step | Owner |
+|---|---|---|
+| 1 | Post the Yash reply below | Ilia |
+| 2 | Audit + soft-delete/restore questions | **Sachin (BE)** — message below |
+| 3 | Full last-week export from Paddy (all packages) | Yash → client |
+| 4 | Recovery: BE restore if possible, else one-off re-map script via existing mapping API (NOT a code change, no deploy — PLT-2882 sweep-script pattern, ~half a day) | Sachin or Ilia |
+| 5 | FE fix ticket — the ONLY real development in the plan: merge-not-mirror `saveDataMapping` (`category-mapping-service.ts:265-271`) + cascade guard (`:643-650`). Warranted even if audit shifts attribution — Save deleting untouched types is a standing hazard | **Ilia (FE)**, after recovery starts |
+
+Guard throughout: no Saves in the AUS01 mapping panel until step 4 completes.
+
+### FINAL reply to Yash (v2 — post this)
+
+> @Yash almost. The reupload itself didn't delete anything, it just left ~2119
+> activities unmapped. Looks like someone then fixed them in the mapping panel, and
+> our Save has a bug: it can delete category values it shouldn't. So the reupload set
+> the stage, the save did the deleting. I'm confirming this with the api-v2 team via
+> the audit trail.
+>
+> Manual correction is the last resort, not the only option:
+> 1. backend restore of the deleted records (checking with Sachin)
+> 2. if that fails, I re-apply them with a script from Paddy's export
+> 3. manual only if both fail
+>
+> Can you ask Paddy for the full export from last week (all packages, not just
+> Precast)? Roof, Earthworks and Painting have losses too that he hasn't noticed yet.
+>
+> Separately I'll raise an FE ticket to fix the Save bug itself, so this can't happen
+> again.
+>
+> ⚠️ And please make sure nobody presses Save in the AUS01 mapping panel until we've
+> restored.
+
+### Message to Sachin (ticket comment with @, or Slack)
+
+> Hi @Sachin, need your help on PLT-2918 (AUS01, HITT). Around ~2030 activities lost
+> their "WBS Location" category mappings, other category types untouched. The rows
+> are gone from the mappings API output, and I suspect our mapping panel's save
+> deleted them in one session sometime after Jul 12. Two questions:
+>
+> 1. **Audit:** do we keep any history on activity category mappings
+>    (`activity_category_mapping`)? I need deletion timestamps + user for WBS
+>    Location rows on AUS01 since Jul 12. One example to anchor the lookup: activity
+>    A4300, itemId `9d0fed9c-c79d-4c53-9446-454516ab3e11`, its WBS Location was
+>    "Area G/H" until last week, mapping now gone.
+> 2. **Restore:** are deletions soft (flag) or hard? If soft, can you restore the
+>    deleted WBS Location rows for AUS01 in bulk? That would close the recovery in
+>    one move, otherwise I'll re-apply them by script from the client's export.
+>
+> The timestamps matter beyond recovery: they tell us whether the deletions match one
+> mapping-panel save session (my theory) or came from the schedule upload job, which
+> changes what we fix.
+
+---
+
+## ⚠️ SUPERSEDED (2026-07-22, after live-data investigation) — earlier sequencing below
 
 Investigation converged (see investigation-log.md rounds 1–3): root cause = the
 mapping panel's destructive Save (single-type, subtree-shaped deletion confirmed
