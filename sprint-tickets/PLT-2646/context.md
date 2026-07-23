@@ -45,3 +45,5 @@ Manual verify in-env recommended (Gantt interaction) since no local runtime.
 - After master merge, `build` fails at the Trivy scan: websocket-driver 0.7.4 CVE-2026-54466 CRITICAL (fixed 0.7.5).
 - Repo-wide, blocks every PR. Hotfix already open: PR #2048 (bump to 0.7.5). Did NOT open a duplicate.
 - Our PLT-2646 code compiles clean; unblock = merge #2048 to master, then merge master into the PR.
+
+## FINAL: PR #2038 MERGED ✅

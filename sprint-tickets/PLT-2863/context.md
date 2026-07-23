@@ -40,3 +40,5 @@ Failure path already handled by mutation `onError` (stays on page). Keep toast.
   because it does not run tsc. Removed the import/dispatch + useDispatch; now mirrors the current
   handleOpenEditor. Committed as Ilia, pushed (7638066).
 - LESSON: SonarQube passing != build passing; the `build` check (gradle :webpack / tsc) is the real gate.
+
+## FINAL: PR #2037 MERGED ✅ (rishib approved; toast-after-navigate + closeProjectSettingsModal review fixes by Ilia)
