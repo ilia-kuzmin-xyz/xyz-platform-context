@@ -53,6 +53,40 @@ finding). If ELN03's containment models are Revit-mapped, `element_base_data` ma
 mapping for ALL their elements and A3 will over-count — the mismatch itself would tell us the
 model type and push confirmation back to the editor/`__linkDiagnose` route.
 
-Status: awaiting A3 output (+ editor re-run if needed). After that: export ID list → deletion
-approval (Pietro/Mostafa) → soft-delete batches (PLT-2882 endpoint pattern) → verify Containment
-reaches 100% on next parquet regeneration.
+## 2026-07-24 (later) — A3 + A4 executed: dead-link list PRODUCED, editor step obsolete
+
+**A3 matched A2 exactly:** `no_geometry_row` = 34 / 3 / 114 / 1 / 41 per activity,
+`row_but_null_objectid` = 0 everywhere. So for ELN03's containment models, `element_base_data`
+membership is a **reliable geometry-existence oracle** (the models are on the svf2-object-id-map
+path), and "not installed" ≡ "no geometry" for these five activities — the customer really did
+claim everything claimable.
+
+**A4 returned exactly 193 rows** (`userItemId, activityId, modelElementId`) — the complete
+deletable dead-link list, produced entirely from the dashboard's DuckDB. **No editor
+`__linkDiagnose` run needed** (its earlier failure — wrong active schedule, no models loaded — is
+moot). Activity UUIDs confirmed in the output, e.g. JUPSA21030 = `a9dfadf0-c52c-4a1f-8675-dd43ec1d1b6d`,
+KUPSD21420 = `2f7b16e8-813c-41d4-bafd-8801d0f1a929`, JSCOR1060 = `a29ba508-6654-4cdf-8475-48ea46e0e4e1`.
+
+**Audit record:** operator to export A4 as CSV (explorer's CSV button) and attach to the Jira
+ticket before any deletion — same discipline as PLT-2882's 418-row CSV.
+
+### Method note for future runs (new, generalizes)
+
+`activity_links LEFT JOIN element_base_data … WHERE ebd.modelElementId IS NULL` is a **pure
+dashboard-side dead-link detector** — no branch, no editor session, no harvest scripts — valid on
+any project whose models produce svf2-object-id-map artefacts (Navisworks path; NOT Revit-mapped
+models, where element_base_data lacks rows for everything and this over-counts). Validate per
+project the way A3 did here: cross-check counts against `installed` on activities the customer
+claims are fully done, and expect `row_but_null_objectid = 0`.
+
+### Expected post-remediation state
+
+After the 193 links are soft-deleted and the Progress Outputs parquet regenerates:
+KUPSB21200 88/88, JUPSC21480 110/110, JUPSA21030 111/111, JSCOR1060 53/53, KUPSD21420 111/111 —
+all 100% → **Containment package 100%**, variance clears.
+
+Status: list ready + verified. Remaining: CSV export (operator) → deletion approval
+(Pietro/Mostafa, drafted in recommended-action.md) → one soft-delete batch (193 ≤ 500/batch,
+`POST /api/v2/projects/{pid}/elements/activity-links/delete`, needs ELEMENT_EDIT+DELETE) →
+verify dashboard after next parquet regeneration → ELN03-wide cohort query (below) → BE trigger
+question stays with the PLT-2882/2909 thread.

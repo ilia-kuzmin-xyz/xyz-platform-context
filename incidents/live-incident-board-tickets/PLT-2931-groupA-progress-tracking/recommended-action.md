@@ -1,6 +1,43 @@
 # PLT-2931 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — run the two confirmation queries + one diagnostic (all in-house), post one internal status update, and fold the BE root-cause thread into the existing PLT-2882/PLT-2909 conversation
+## ⚠️ 2026-07-24 (later) — confirmation DONE same-day; action is now the deletion-approval step
+
+The queries below were executed the same day (see `investigation-log.md`): all five dashboard
+percentages equal installed ÷ linked exactly, and the full **193-row dead-link list** was produced
+from the dashboard's DuckDB alone (A4). The action is no longer "confirm" — it is:
+
+1. **Export A4 as CSV** and attach to the ticket (audit record, PLT-2882 discipline).
+2. **Post the approval comment** (draft below, updated with the confirmed numbers).
+3. On approval: **one soft-delete batch** — `POST /api/v2/projects/{pid}/elements/activity-links/delete`
+   with the 193 `[{activityId, modelElementId}]` pairs (≤500/batch so one call; needs
+   ELEMENT_EDIT+DELETE; soft-delete, editor picks it up on sync).
+4. **Verify** after the next Progress Outputs parquet regeneration: all five activities → 100%,
+   Containment → 100%.
+5. **Cohort:** run the ELN03-wide dashboard-side detector (investigation-log § Method note) and
+   attach its output to the same approval thread — one approval loop for the whole project beats
+   five.
+
+### Draft — approval comment (author: Ilia; @ Pietro Desiato, @ Mostafa, cc Yash) — UPDATED with confirmed numbers
+
+> Confirmed on ELN03 with data (query outputs attached): the five Containment activities are capped
+> below 100% by **193 links pointing at elements that no longer exist in the current model
+> geometry** — KUPSB21200: 34 of 122, JUPSA21030: 114 of 225, KUPSD21420: 41 of 152, JUPSC21480: 3
+> of 113, JSCOR1060: 1 of 54. In every case installed ÷ linked equals the dashboard % to two
+> decimals, and everything that has geometry IS installed — the customer's claiming was correct.
+> All five are TK_Complete in the schedule. Same family as PLT-2882's 418 (FAR01) and PLT-2909
+> (ATL08); note JUPSC21480 was PLT-2675's exemplar in May, so this is a partial-cleanup recurrence.
+>
+> **Approval requested:** soft-delete these 193 dead links (same endpoint + audit pattern as
+> PLT-2882 — CSV attached, deletion is reversible history, evidence parquets untouched). After the
+> next dashboard data refresh all five activities read 100% and Containment clears to 100%.
+>
+> Scoping: dashboard and editor agree with each other; the pipeline question of *why* re-uploads/
+> re-imports leave dead links behind stays with the open PLT-2882/PLT-2909 BE thread — ELN03 is now
+> the third confirmed project on it.
+
+## Original plan (executed same-day; kept for the record)
+
+### Chosen action: (a) — run the two confirmation queries + one diagnostic (all in-house), post one internal status update, and fold the BE root-cause thread into the existing PLT-2882/PLT-2909 conversation
 
 No new tooling, no new diagnostics branch: branch **`PLT-linked-selection-diagnostics`** already
 exists on origin and `window.__linkDiagnose()` plus two DuckDB Explorer queries (context.md §
