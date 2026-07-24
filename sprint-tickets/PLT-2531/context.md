@@ -1,7 +1,7 @@
 # PLT-2531 — Element Details Panel: show all models an element belongs to
 
 **Type:** Task · **Parent epic:** PLT-2717 (Q2 2026 Bugs and Improvements)
-**Jira status (as of 2026-07-22, second pass):** **In Code Review** — implemented.
+**Jira status:** **Ready For QA** — PR #2060 MERGED 2026-07-24. Ticket complete pending QA.
 **Resolution:** Ilia supplied the design (Element_Details_Panel.dc.html) in-session; it answered both
 open questions (Q1: link → element dbId via fitToView, same ↗ affordance; Q2: unloaded → greyed +
 Load button → spinner → link). Implemented on branch `PLT-2531`, draft PR:

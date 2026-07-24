@@ -1,6 +1,6 @@
 # PLT-2531 — Implementation plan
 
-**Status:** DONE — implemented, draft PR https://github.com/XYZReality/hc-frontend/pull/2060, Jira → In Code Review (2026-07-22). Design received from Ilia (Element_Details_Panel.dc.html) — both
+**Status:** MERGED — PR https://github.com/XYZReality/hc-frontend/pull/2060 merged 2026-07-24 (approved by Rishi), Jira → Ready For QA. Final shape: section collapsed by default, name-sorted rows, store-backed membership + in-memory fallback. Design received from Ilia (Element_Details_Panel.dc.html) — both
 open questions resolved; ticket moved to Dev In Progress. Branch: `PLT-2531` off master.
 
 ## Design decisions (from the .dc.html mock + ticket text)
