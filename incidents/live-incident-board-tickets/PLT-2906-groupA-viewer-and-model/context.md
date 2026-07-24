@@ -501,3 +501,8 @@ real source — 11/11 pass. **CI must run the suite on the branch**, and the one
 remaining human check stands: open FAR01 with the branch build, toggle the section
 box, confirm it hugs the building (expected: box at the true 2.29° bearing, patch
 never fires).
+
+**PR:** draft [#2069](https://github.com/XYZReality/hc-frontend/pull/2069)
+(`PLT-2906-section-box-true-north` → `master`) — explanation + test steps in the PR
+body. Undraft after: CI/jest green + manual FAR01/FAR02 check (box hugs building,
+diagnostic reads `wouldPatch: false`) + ATL07/ATL08 regression check.
