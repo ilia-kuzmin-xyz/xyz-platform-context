@@ -169,3 +169,66 @@ high in the viewer — in BOTH dashboards (shared upstream data), while Quality/
 - Cohort enumerated (which pins, correct target elevation): **9/10** (exact IDs + offset).
 - One residual human check: confirm PA12 has **no genuine ~50 m structure** (near-certain
   — empty 16–47 m gap, zero issues above 22 m, all stale rows are L00 ground-floor).
+
+---
+
+## Update — 2026-07-16..24 — twin-room question closed, defective MODEL identified (conf 9.5)
+
+Working sessions with Ilia using live exports (rooms REST, `project-rooms.parquet`,
+`project-levels.parquet`, `models.json`). Levels snapshot archived at
+`analysis/PA12-levels.csv` (92 levels).
+
+### Jira thread moved
+- 07-16 Ilia posted: ask project delivery to correct level `f0f4d409` elevation 50.4 → 0.
+- 07-17 Yash asked: **"which model do they need to change?"** → answered below.
+- Pietro raised durability ("if we reposition rooms manually, next re-upload reverts")
+  and "are there existing rooms to link to?" → both answered below.
+
+### Are there twin rooms to re-link to? — NO (definitive, two independent keys)
+- Revit source identity: 0/75 phantom rooms share `sourceFileRoomHandle`/`sourceFileRoomId`
+  with any other room (602-room REST export).
+- Name match: 0/101 phantom room names exist among the 291 correct-elevation rooms
+  (rooms parquet, includes capture-less rooms).
+- The correct-elevation "L00 @0" rooms belong to the GT/generator building
+  (`7026451f`), not the DC building. Correct DC-0G levels exist (`344df6bc`,
+  `f72da41e` @ ~0) but are EMPTY (0 and 1 rooms). So "re-link capture points to
+  existing correct rooms" has no target; the fix must move the rooms/level.
+
+### Why re-linking in platform data wouldn't work anyway
+Coordinates are FROZEN COPIES at every layer (level.elevation → room.centerY →
+capturePoint.yMeters → capture.yMeters; capture Y == point Y exactly for all 6,565).
+The dashboard draws from `captures_360.yMeters` (`dashboard-360-service.ts:541-543`),
+and `PATCH /360captures/{id}` cannot change coordinates (metadata only). Repointing
+`modelLevelId` moves nothing. Any platform-side patch is also overwritten on the next
+model re-import (Pietro's durability objection, confirmed by the 2025-12-04 batch).
+
+### Trigger + physical impossibility (levels parquet)
+- All 75 phantom rooms inserted **2025-12-04** in a 354-room re-import batch.
+- DC building by level: L00 = **50.4** (!), L01 = 5.3, L02 = 10.6, L03 = 15.9.
+  Ground floor above the roof → impossible → L00 elevation is the defect; target ~0.
+- The phantom level comes from ONE source Revit link file (`2210cd43-…`) that carries
+  a whole level family at ~48-73 m ("SS - 0G - FFL", "GT - 0G - FFL", "Limit PLU"…) —
+  a real-world/NGF-style site datum, vs project zero used by the rest. Fixing only
+  DC-L00 leaves the same trap armed for SS/GT/FH pins; align the LINK'S datum.
+
+### THE ANSWER FOR YASH — which model
+**`PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24_detached`** (Architectural, version V1,
+modelId `a0908c2a-5340-4d47-aa00-cfcb26094555`, versionId `72784494-…`, uploaded
+**2025-12-04** = exactly the phantom-room insert date). All 101 phantom rooms
+materialize only from this model. Sibling QA/PC variants reference the level but
+host no phantom rooms.
+
+### Solution ranking (confidence it durably resolves)
+1. **~90%** Fix at source model: align link `2210cd43`'s shared coordinates/datum
+   (or set "DC - 0G - FFL" to ~0) in the model above, re-upload. Everything inherits.
+2. ~70% Re-host DC-L00 rooms onto empty correct level `344df6bc` in the source model
+   (only if that level is live, not a stale leftover).
+3. ~95% immediate / ~20% durable: platform-side Y-patch of 101 points + 1,868 captures
+   (stopgap only; requires api-v2 to also re-sync `captures_360`).
+4. ~5% re-link only (no coordinate change): does nothing.
+5. ~10% Jason's per-capture editor: future feature, not this remediation.
+
+### Console-script gotcha (for future runs)
+Fetching `/models` without `size` returned 503; the app's exact form
+`/models?size=10000` works. On the editor page, console fetches can hang forever —
+check the DevTools context is `top`, or just save the JSON from the Network tab.
