@@ -364,3 +364,76 @@ Confidence in the *direction* (TN ↔ refPointTransform ↔ box orientation chai
 Confidence in a *specific* root cause: still ~5/10 until we have (i) the exact TN
 angle(s), (ii) the release timeline, (iii) the screenshot/gizmo question from the
 07-16 pass.
+
+---
+
+## 2026-07-20/24 — True-North values arrived; gate math is decisive
+
+**Ticket state changed:** status **In Analysis → Open**, assignee **Darminder → Yash
+Patel** (as of 07-20). Ilia's shortened TN ask was posted 07-17 (comment 107675); Yash
+relayed the customer's answer 07-20 (comment 107771) with two Jira-native attachments,
+**FAR01.png / FAR02.png** (ids 61049/61048) — Revit Project-Base-Point screenshots.
+Yash's trailing note: "I've asked for True North angle in Revit models" (per-model
+values may still follow). Values, read by Ilia from the screenshots:
+
+| Project | Angle to True North (Revit) | Folded to nearest axis | < 5° guard? |
+|---|---|---|---|
+| FAR01 | **272.2914°** | **+2.2914°** | passes (unprotected) |
+| FAR02 | **177.71°** | **−2.29°** | passes (unprotected) |
+
+(Also visible: shared-site survey coordinates — FAR01 N/S 495070', E/W 2877153';
+FAR02 N/S 495360', E/W 2878793', Elev 893' — confirming shared coordinates are in
+play, i.e. `refPointTransform` carries a large translation too.)
+
+### What the numbers decide
+
+1. **Both projects land in the hazardous `<5°` branch.** `shouldApplyOrientationPatch`
+   (`section-tool-orientation-math.ts:149`) folds 272.2914° → +2.2914° and 177.71° →
+   −2.29°: both inside `ORIENTATION_MISMATCH_THRESHOLD_RAD` (5°), so the guard that
+   was designed to defer to "authoritative Revit shared coordinates" does **not**
+   protect them. Whether the patch fires now hinges **only** on `tightness < 0.9` —
+   and a long DC hall genuinely tilted 2.29° in world space inflates its world AABB
+   enough to plausibly dip under 0.9.
+2. **The two values corroborate each other as intentional georeferencing.**
+   272.2914 = 270 + 2.29 and 177.71 = 180 − 2.29: one site bearing ≈ 2.29° off grid
+   north, with the two files' project norths a quarter-turn apart. This is a real
+   surveyed site angle, **not** an authoring error. **Nothing for delivery/customer to
+   fix in Revit** — the ball is entirely platform-side.
+3. **Coherent end-to-end story (mechanism + susceptibility + timing):** before the
+   workaround reached FAR's channel, stock Forge oriented the box from
+   `refPointTransform` (the real 272.29°/177.71°) → box aligned with the buildings.
+   After (~Jul 14 release), the `<5°` guard treats the real 2.29° as noise; if
+   tightness < 0.9 the patch fires and **overwrites the correct Revit rotation** with
+   a `models[0]`-footprint estimate. On a ~100-model federation, `models[0]` is
+   load-order-dependent and its footprint angle can be anything → wrong theta applied
+   to every visible model → the customer's "new style / doesn't display the
+   rectangular box."
+4. TN=0 projects are unaffected in both branches — exactly Ilia's Teams observation.
+
+### Remaining unknown (one measurement)
+
+Does the patch actually fire on FAR01, and with what theta? Needs a live-session
+readout of `models[0]` identity + `tightness` + `rect.angle`. →
+**`far01-console-diagnostic.js`** (this folder): paste into the console on a fresh
+FAR01 viewer page **before** activating the section box (the patch mutates
+`refPointTransform` in place and caches per service instance — run it first).
+Fallback if no `NOP_VIEWER` handle: instrumented diagnostics branch (PLT-2882
+`window.__linkDiagnose` pattern).
+
+### Fix shape (once confirmed — for the dev ticket)
+
+- **Respect a real small rotation:** skip the patch when `refPointTransform` carries a
+  measurably non-zero rotation (tighten 5° → ~0.5°, distinguishing true-zero from
+  surveyed small bearings), **and/or** skip when `|rect.angle − folded(existingRotZ)|`
+  is small — agreement means the existing transform is already right and patching can
+  only degrade it.
+- **Stop keying the whole federation off `models[0]`** (compute gate/footprint across
+  visible models, or per-model).
+- **Stop wiping the translation:** `refPointTransform.makeRotationZ(θ)` resets the
+  full matrix — compose rotation with the existing translation instead.
+- Regression set per the 07-16 note: aligned building (SWITCH-ATL07), diagonal
+  building (SWITCH-ATL08), **and now a small-TN federation (FAR01)**.
+
+**Confidence: 8/10** on root-cause class (unprotected `<5°` override of intentional
+small TN); the models[0]-theta readout is the last confirmation before this is
+dev-ready.

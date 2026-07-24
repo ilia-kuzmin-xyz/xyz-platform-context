@@ -1,6 +1,39 @@
 # PLT-2906 — recommended action (DRAFT ONLY — execute nothing)
 
-## 2026-07-17 refresh — action revised after Teams input (Rishi/Tom) + True-North analysis
+## 2026-07-24 refresh — TN values arrived (07-20); one measurement left before dev-ready
+
+FAR01 TN = **272.2914°**, FAR02 TN = **177.71°** — both fold to **±2.29°**, inside the
+5° guard → both projects sit in the unprotected `<5°` override branch, and the values
+corroborate each other as intentional georeferencing (see context.md §07-20/24).
+**Delivery/customer have nothing to fix in Revit.**
+
+**Next step (platform-side, Ilia):** run `far01-console-diagnostic.js` (this folder) on
+a fresh FAR01 viewer session **before** activating the section box. It prints, per
+visible model: `rotZ`/folded angle, `tightness`, min-area-rect angle, `wouldPatch` —
+and flags `models[0]`, whose values alone decide the patch for the whole federation.
+- `wouldPatch=true` with `rect.angle` ≉ ±2.29° → root cause fully confirmed → move to
+  **Ready for Development** with the fix shape in context.md (respect small real TN /
+  agreement check / de-models[0] / preserve translation).
+- `wouldPatch=false` → patch isn't firing; pivot to stock-Forge/`applyRefPoint`
+  behaviour on FAR's release (re-open the release-timeline question with Rishi).
+- No `NOP_VIEWER` handle → instrumented diagnostics branch (PLT-2882 pattern) on
+  `hc-frontend`.
+
+**Draft reply for the ticket (to Yash, closes his loop — post when ready):**
+
+> Thanks Yash — the screenshots are exactly what we needed. The True North angles
+> (FAR01 272.29°, FAR02 177.71°) are consistent and intentional — **the customer/BIM
+> team doesn't need to change anything in Revit.** The values confirm the issue is on
+> our side: our section-box orientation logic treats a small real angle (~2.3°) as
+> "no rotation" and can override the correct one. We're reproducing on FAR01 now and
+> will raise the dev fix; no further info needed from the customer at this point.
+
+Release-timeline question to Rishi (what shipped to FAR ~Jul 14) is still worth an
+answer for the post-mortem, but no longer blocks the fix.
+
+---
+
+## 2026-07-17 refresh — action revised after Teams input (Rishi/Tom) + True-North analysis (superseded)
 
 **New chosen action:** ask **Yash to have the delivery/BIM team verify-and-report the
 True-North + export-coordinate facts** for FAR01/FAR02 (Ilia's proposal, validated
