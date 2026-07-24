@@ -7,6 +7,10 @@ open questions (Q1: link → element dbId via fitToView, same ↗ affordance; Q2
 Load button → spinner → link). Implemented on branch `PLT-2531`, draft PR:
 https://github.com/XYZReality/hc-frontend/pull/2060 (subscribed for CI/review follow-up).
 See plan.md for verified data paths and design decisions.
+**2026-07-24 follow-up:** testing found the Load button unreachable — `ElementEntity.models`
+only holds loaded models, so unloaded ones never listed. Fixed in 454a766 (membership from
+`elementStore.getModelsForElement()`, project-wide list, unioned + name-sorted); 12 tests pass.
+Pitfall recorded in dashboard/pitfalls.md.
 
 ## What the ticket asks
 Today the Element Details panel shows only ONE model for an element even when it

@@ -63,3 +63,14 @@ Things that have broken before (or will break if you're not careful).
 **What happens:** If `dispose()` doesn't `.complete()` all BehaviorSubjects, dangling subscriptions survive the component unmount and continue receiving stale emissions on the next project load.
 
 **Rule:** Every BehaviorSubject created in a service must be `.complete()`d in `dispose()`. There were ~31 subjects; only 11 were completed before the fix.
+
+## ElementEntity.models only reflects LOADED models (PLT-2531)
+
+`ElementEntity.models` is populated by `ModelEntity.loadElementMetadata()`, which runs
+via `fetchModelElements(model)` only when that model is loaded into the viewer. Any
+"which models does this element belong to" feature that must include **unloaded** models
+cannot read it — it will silently only ever see loaded ones (the PLT-2531 Load button
+was dead code because of this). Use the project-wide element list instead:
+`projectService.elementStore.getModelsForElement(modelElementId)`
+(duckdb-element-store.ts:86, loaded at project init), and union with the in-memory ids
+as a fallback. Precedent: issue-deleted-model-details.tsx:51.
