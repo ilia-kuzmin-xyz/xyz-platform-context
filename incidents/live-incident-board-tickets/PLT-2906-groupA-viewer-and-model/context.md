@@ -475,3 +475,29 @@ bearings); optionally skip when the estimate disagrees wildly with a plausible
 correction; preserve the translation (`makeRotationZ` wipes it); regression set
 ATL07 (aligned) + ATL08 (diagonal, TN=0 — the case the workaround exists for) +
 FAR01 (small real TN, compound footprint).
+
+---
+
+## 2026-07-24 — hotfix implemented on dedicated branch
+
+**Branch:** `hc-frontend` → **`PLT-2906-section-box-true-north`** (based on
+`origin/master` @ fa8af91, pushed). Diff confined to the
+`section-tool-orientation/` folder:
+
+1. `ORIENTATION_MISMATCH_THRESHOLD_RAD` **5° → 0.5°** — absorbs float noise on a
+   true-zero rotation only; real surveyed bearings (FAR 2.29°) are now authoritative.
+2. Patch now **composes** the new rotation with the existing translation/scale
+   instead of `makeRotationZ` (which reset the matrix and wiped the
+   shared-coordinates offset for later `refPointTransform` readers).
+3. Tests: FAR01 (rotZ 87.7086°, tightness 0.8806) + FAR02 pinned as must-NOT-patch;
+   float-noise rotations pinned as still-patching; existing ATL07/ATL08/API2 cases
+   untouched and still green. Design note `.md` updated (thresholds, FAR01 row in
+   the verified-cases table, compose rationale).
+
+**Verification caveat:** `npm ci` is blocked in the triage environment (private
+registry `@xyzreality/dhtmlx-gantt` → 401), so jest could not run locally. The full
+case matrix (7 pre-existing + 4 new) was executed against the esbuild-transpiled
+real source — 11/11 pass. **CI must run the suite on the branch**, and the one
+remaining human check stands: open FAR01 with the branch build, toggle the section
+box, confirm it hugs the building (expected: box at the true 2.29° bearing, patch
+never fires).
