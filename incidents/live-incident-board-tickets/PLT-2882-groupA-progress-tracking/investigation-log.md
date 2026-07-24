@@ -208,3 +208,26 @@ that sync gap is the pipeline bug and the sharpest question for BE.
 Status: root cause explained end-to-end; 418 list verified and exported; deletion pending peer
 alignment; project-wide sweep pending harvest run or BE query; FE robustness fix still to be
 scheduled.
+
+## 2026-07-24 re-check — no new comments here since 07-15 (unchanged); cross-ticket update from sibling PLT-2909
+
+PLT-2882 itself is unchanged (still the most recent comment is David Webb's 07-15 pushback answer,
+already reflected above). But **sibling ticket PLT-2909 got its ATL08 diagnostic run on 2026-07-23**,
+confirming the same ghost-model-metadata mechanism on a *different* model family (**PC-EXCEL
+spreadsheet import**, not Revit re-upload) — see
+`../PLT-2909-groupA-progress-tracking/context.md` §Update. Two consequences for this ticket:
+
+- **The "FE fix (hide models not in geometry)" this file already scopes (§ "2. FE robustness")
+  now explicitly covers PLT-2909's symptom too** — Ilia's 07-23 comment on PLT-2909 states the FE
+  fix will be tracked here, not as a separate ticket. When that fix is scheduled, scope it against
+  *both* tickets' repro data (Revit re-upload family here; PC-EXCEL import family on PLT-2909).
+- **A second, independent BE question is now open on the sibling ticket** (Ali Seyedof, re: why
+  `client-element-metas` for PLT-2909's model has elements it doesn't own) — different trigger
+  hypothesis (Excel importer cross-writing buildings) than this ticket's "re-uploaded model,
+  content removed/redrawn." Worth keeping distinct until Ali answers — do not assume one BE fix
+  closes both; the parquet-vs-geometry *symptom* is shared, the *pipeline defect* producing stale
+  metadata may not be.
+
+No change to this ticket's own status (still: deletion of the 418 dead links on hold pending peer
+alignment, which David Webb's 07-15 reply already resolved in-thread — see above). Confidence
+unchanged at 9/10 root cause.

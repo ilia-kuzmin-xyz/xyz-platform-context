@@ -1,6 +1,25 @@
 # PLT-2909 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — reuse PLT-2882's existing diagnostic against `CY-5200` on ATL08, then post one internal status update
+## ⚠️ 2026-07-24 update — the diagnostic below WAS run (07-23); action now is to wait on Ali Seyedof
+
+Ilia ran exactly the diagnostic this file recommends, on 2026-07-23, and it confirmed the
+ghost-model hypothesis on ATL08/`CY-5200` (model `DistributionBoardsPanels_Bld1-V1`, PC-EXCEL
+import, source file `dd20b121`) — see `context.md` §Update. He already posted the routed question
+to **Ali Seyedof** (client-element-metas ownership for that model) and stated the FE fix will be
+tracked under **PLT-2882**, not here.
+
+**Nothing further to draft right now** — the one open item is Ali Seyedof's answer, which is his
+to give, not ours to chase yet (posted 07-23, one day old as of this re-check; not yet
+stale enough to warrant a nudge — revisit if it sits past ~1 week, per the pattern on PLT-2649/
+PLT-2858 in this same run). The merge-or-fork decision below is now **resolved as "merge into
+PLT-2882"** for the FE fix; the only remaining fork is the BE root-cause ticket for the Excel
+importer, which is Ali's to scope once he answers.
+
+---
+
+## Action as originally drafted (executed 2026-07-23 — kept for the record)
+
+### Chosen action: (a) — reuse PLT-2882's existing diagnostic against `CY-5200` on ATL08, then post one internal status update
 
 **Do NOT re-invent tooling.** PLT-2882 already produced `window.__linkDiagnose(activityId?)` on branch **`PLT-linked-selection-diagnostics`** (console-only, not for merge), which prints, per model, both **`modelMembership`** (parquet-claimed models + loaded state) and **`parquetVsGeometryByMongoModelId`** (`inParquet` vs `inGeometry`). That is *exactly* the evidence PLT-2909 needs — the tool already answers "which models does the metadata claim, and does their geometry actually contain these elements?" The fastest, single next step is to **run the same tool on the new repro**, not to build anything.
 

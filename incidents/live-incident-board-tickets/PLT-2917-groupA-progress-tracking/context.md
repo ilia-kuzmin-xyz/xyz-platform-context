@@ -8,7 +8,23 @@
 - **Project link given:** `https://cloud.xyzreality.com/progress-dashboard/69a964b9380af76aed8faa97` · Software Area: Dashboard
 - **Created:** 2026-07-21 · **Attachments:** 1 screenshot (unreadable here — see §8 NEEDS HUMAN)
 - **Recurrence:** Pietro Desiato already "worked on" this once; the customer replied it is *still* not fixed. Treat the earlier fix with suspicion per the playbook (symptom did **not** even disappear).
-- Triage date: 2026-07-22
+- Triage date: 2026-07-22 · **Re-checked 2026-07-24 — see §Update, new comments landed same-day as the 07-22 triage and were not yet folded in**
+
+---
+
+## ⚠️ Update — 2026-07-24: the actual reply posted differs from the draft, and a new clarification narrows the mechanism further
+
+Three comments exist on the ticket, all timestamped 2026-07-22, that this file's body (below) does not yet account for:
+
+1. **Ilia (07-22 09:30)** posted **three clarifying questions to Thomas** (via Yash) — which dashboard (old PowerBI-link vs new `/projects/<id>/dashboard`), re-attach the broken screenshots per project, and one concrete example per project in the "activity ID + shown vs expected" format. **This is a different question than the one `recommended-action.md` drafted** ("what did Pietro's earlier fix touch?") — the real reply asked the customer, not Pietro. Net: **this ticket is currently, correctly, in a With-Customer-shaped wait state** (even though its Jira status still reads "Open"), and no further action is needed from us until Thomas/Pietro answer.
+2. **Mostafa (07-22 09:33) — new information, not previously captured:** *"it's a different issue. For activity **PMILE5030** in ELN03, he's done it to be 100% in the editor but Pietro is saying it's **not coming up in the activity parquet file**. Is that because it's a milestone? This is for the **power bi dashboard for portfolio**."* This is Mostafa clarifying that at least the ELN03 complaint is specifically about a milestone activity missing from the **PowerBI portfolio activity-parquet export** — a different (older) surface than the `PortfolioDashboardPage`/Milestone-widget mechanism this file diagnoses below.
+3. **Yash (07-22 09:42)** apologizes for conflating the two — confirms this ticket now covers **both** the original Milestone-widget symptom (FAR01/ELN04/ELN03, §1-§4 below) **and** Mostafa's PMILE5030/PowerBI-export variant.
+
+**Investigated (2026-07-24, hc-frontend + xyz-platform-context):** hc-frontend does **not** generate the activity parquet PowerBI reads — that pipeline is backend ("Progress Outputs" service → Azure Blob → consumed by the browser; `dashboard/data-pipeline.md:9-26`), and the native Dashboard is documented as **replacing** PowerBI, i.e. a separate surface (`dashboard/README.md:5`). No milestone-exclusion logic of any kind exists in this repo (checked the two activity-parquet schema docs under `docs/dashboard/api/` — neither has an `IsMilestone`/milestone-exclusion column). **So Mostafa's question ("is that because it's a milestone?") most likely resolves to the exact same mechanism already diagnosed below, not a separate export bug:** PMILE5030 is probably missing/wrong in the PowerBI activity parquet for the identical reason ELN03's other milestones look wrong in the native widget — **the schedule activity's Actual End Date was never stamped, even though the element is 100% installed** (§4 ELN03, and `portfolio-api.types.ts:123-146`, `reporting.vw_KeyMilestone`). Both the old PowerBI export and the new Milestone widget most likely read the same underlying schedule/Actual-End-Date source; a stamping gap there would explain both surfaces at once. This **raises** rather than lowers confidence in the existing diagnosis — it is corroboration from a second, independent surface (PowerBI export) rather than a competing hypothesis.
+
+**Revised understanding:** this is not "milestones are excluded from the parquet because they're milestones" — no such rule exists in code anywhere we own. It is one more instance of "Actual End Date not stamped despite the work being 100% done," now confirmed to affect at least two surfaces (native Milestone widget + legacy PowerBI activity parquet) for the same activity family. **No action needed from us right now** — we are correctly waiting on Thomas's answers to Ilia's three questions (07-22). Revisit once the customer replies.
+
+---
 
 ---
 

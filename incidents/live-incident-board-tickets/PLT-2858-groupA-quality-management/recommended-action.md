@@ -35,11 +35,23 @@ closed questions below are now overdue; this has stalled on the SAME owner for 9
 Pietro directly (he was independently named as workflow authority by both Darminder and the customer) rather
 than re-nudging Mostafa a second time.
 
+**2026-07-24 re-check: still no new comments — the escalation trigger above has now fired.** It has been
+8 days since Mostafa's "waiting on this since it was asked of me" (07-16), 11 days since his own "leave it
+with me" (07-13) never converted into an answer, and **17 days** since the customer said "we don't know how"
+(106728, 07-07). This is now the stalest open loop across this run's Group A tickets (worse than PLT-2649's
+7 days and PLT-2906's 4 days). **Recommended change of approach: stop re-nudging Mostafa a third time and
+loop Pietro directly**, per the escalation candidate flagged two runs ago — Pietro was independently named
+as the workflow authority by both Darminder (107109) and the customer themselves (106728: *"Who should be
+able to clarify this? Pietro? Ali?"*), so going to him directly is not a new escalation path, it's the one
+the thread itself already pointed at. Draft below updated accordingly — @Pietro moved to primary, Mostafa cc'd.
+
 ---
 
-## Draft message for the thread (Darminder or Yash to post; @Mostafa, @Pietro)
+## Draft message for the thread (Darminder or Yash to post; **@Pietro primary as of 07-24**, cc @Mostafa)
 
-> @Mostafa @Pietro — to turn this into a concrete next step, three closed questions:
+> @Pietro — looping you directly since Mikel asked for you by name (106728) and Darminder named you as the
+> workflow authority (107109). Mostafa's had this since 07-13 ("leave it with me") without a resolution, so
+> rather than a third nudge on the same person, three closed questions to whoever can actually decide:
 >
 > 1. **Zone setup ownership + how-to.** Confirmed root cause: ML9's model has no named zones (floors/areas/
 >    rooms) configured, so the auto-derived "Location" on every issue is empty. The customer (Mikel) has

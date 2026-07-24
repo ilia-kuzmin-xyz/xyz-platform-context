@@ -9,7 +9,7 @@
 - **Attachments:** `section_box.png` (description); 2 × True-North screenshots in comment 6 (2026-07-20) — **all unviewable here, see NEEDS HUMAN**
 - **Triage date:** 2026-07-22
 
-> ⚠️ **This ticket is not fresh and it is not parked on the client.** It is mid-investigation and **the ball is on OUR side.** The customer answered Ilia's True-North question on **2026-07-20**; as of 2026-07-22 that answer sits **unanalysed** and no one has replied. It has been **~2 days stalled on Ilia's own follow-through**, not on the customer. (See §NEEDS HUMAN and `recommended-action.md`.)
+> ⚠️ **This ticket is not fresh and it is not parked on the client.** It is mid-investigation and **the ball is on OUR side.** The customer answered Ilia's True-North question on **2026-07-20**; as of 2026-07-22 that answer sat **unanalysed** and no one had replied. **2026-07-24 re-check: still true, no new comments — now ~4 days stalled on Ilia's own follow-through**, not the customer. This is the same shape as PLT-2649 in this same run (a customer/team answer sitting on our side, unactioned) — worth noticing as a pattern across this run, not just this ticket. (See §NEEDS HUMAN and `recommended-action.md`.)
 
 ---
 

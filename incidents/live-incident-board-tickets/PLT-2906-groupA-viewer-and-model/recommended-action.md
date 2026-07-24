@@ -2,7 +2,7 @@
 
 ## Chosen action: (a) — Ilia analyses the True-North data he already has + runs one in-house diagnostic, then posts an internal status update
 
-The ticket is **stalled on our own side**: the customer answered Ilia's True-North question on **2026-07-20** and no one has responded or analysed it in ~2 days. The highest-leverage move is **not** another routing transition — it is for **Ilia to close his own open loop**: read the two True-North screenshots, run the shipped DevTools diagnostic against FAR01/FAR02, and post the finding. Everything needed is already in our hands (model file shared 07-16; screenshots delivered 07-20; the debug snippet is in the repo).
+The ticket is **stalled on our own side**: the customer answered Ilia's True-North question on **2026-07-20** and no one has responded or analysed it — ~2 days as of the 07-22 pass, **now ~4 days as of this 07-24 re-check** (no new comments in between; still fully actionable, nothing new needed from the customer). The highest-leverage move is **not** another routing transition — it is for **Ilia to close his own open loop**: read the two True-North screenshots, run the shipped DevTools diagnostic against FAR01/FAR02, and post the finding. Everything needed is already in our hands (model file shared 07-16; screenshots delivered 07-20; the debug snippet is in the repo).
 
 ## Why this, and explicitly NOT the other routing options
 

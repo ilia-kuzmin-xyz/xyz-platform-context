@@ -1,8 +1,30 @@
 # PLT-2649 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — draft the next reply (internal, one owner)
+## ⚠️ 2026-07-24 re-check — supersedes the action below; answer Yash's question first
+
+The situation has moved past "re-route to Pietro" (that already happened, 07-13 — see `context.md` §Update). Root cause is now a **named level + a named wrong value** (level `f0f4d409`, elevation 50.4 → should be 0), stated by Ilia on 07-16. Yash then asked, on **07-17**, the one fact needed to act on it — *"which model?"* — and it has sat unanswered **7 days**.
+
+**Chosen action now: (a′) — post the model identifier Yash asked for, then let Yash take the specific re-upload/correction request to the client's project-delivery team.** This is not a new investigation; §Update in `context.md` shows Ilia already had enough to name the exact level id and both its wrong and correct values, so the model it belongs to should be a lookup against that same analysis, not fresh work.
+
+- **Not (c) With Technical Support / client question — yet.** Yash cannot productively go back to the client until he has the model name; going to the client with "which model has level f0f4d409" would just relay our own internal question outward. Answer internally first, *then* Yash's client message becomes the specific, actionable one Jason Fingland's UX framing wants ("these captures used Level 3, now read as Level 4").
+- **Not (b) Ready For Development.** Still no frontend fix — the fix is a one-value correction in the source Revit model plus a re-import; nothing in `hc-frontend` changes for the root cause itself. (Jason Fingland's X/Y/Z-in-details-panel editing idea, 07-13, is a separate, optional future capability — not this ticket's fix.)
+- **Not (d) Blocked.** Identical to PLT-2906's diagnosis: this reads as blocked-on-the-client only if you don't notice the last move in the thread is *ours*, unanswered.
+
+## Draft — reply to Yash (author: Ilia Kuzmin)
+
+> @Yash Patel — level `f0f4d409` (elevation currently 50.4, should be 0) belongs to **[MODEL NAME — Ilia to fill in from his 07-16 analysis]**. Once project delivery corrects that one value and the model is re-imported, rooms → points → captures all inherit the fix — no per-capture re-upload needed. Worth relaying to them as a single, precise ask rather than "re-upload everything."
+
+*(Bracketed placeholder is intentional — this draft cannot invent the model name; it is the one fact this run could not source. Posting a guess would be worse than the current silence.)*
+
+---
+
+## Action as originally drafted 2026-07-13 (superseded, kept for the record)
+
+### Chosen action: (a) — draft the next reply (internal, one owner)
 
 Re-route the stalled ownership question to **Pietro Desiato** (product owner) with a crisp restatement of the confirmed root cause plus **one** closed, answerable decision question. This is the smallest move that unblocks a ticket that has sat unanswered since 2026-06-30.
+
+**This happened** — Pietro replied 07-13 (§Update in `context.md`), so the routing below is historical context, not a live instruction.
 
 ## Why this and not the others
 

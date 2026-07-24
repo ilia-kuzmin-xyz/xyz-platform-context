@@ -1,6 +1,26 @@
 # PLT-2917 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
+## ⚠️ 2026-07-24 re-check — this action is superseded; a different reply was already posted
+
+The draft below (from the 07-22 pass) was never posted verbatim. What actually went out on
+2026-07-22 was **Ilia asking Thomas three clarifying questions directly** (which dashboard,
+re-attach screenshots per project, one concrete example per project) — see `context.md` §Update.
+Mostafa then flagged a related-but-distinct symptom in reply (activity `PMILE5030` missing from
+the legacy PowerBI activity-parquet export), which this run's investigation ties back to the
+**same** Actual-End-Date-not-stamped mechanism diagnosed below (`context.md` §Update — "raises
+rather than lowers confidence").
+
+**Current recommended action: none — wait.** The ticket is correctly in a customer-wait state
+(Thomas hasn't answered Ilia's 07-22 questions yet). Nothing internal is gating progress right
+now. **Re-check when Thomas replies**, and at that point the plan below (pull the `/milestones`
+payload for FAR01/ELN03/ELN04) is still the right next internal step — it wasn't invalidated,
+just not yet due.
+
+---
+
+## Action as originally drafted 2026-07-22 (kept for the record; resume from here once the customer replies)
+
+### Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
 renderer; done/late/complete all come from the backend `vw_KeyMilestone` / Actual End Date),
 (2) asks **Pietro** the one closed question that unblocks everything — *what did your earlier fix
 touch?* — and (3) names the single backend data step that confirms the cause per project.

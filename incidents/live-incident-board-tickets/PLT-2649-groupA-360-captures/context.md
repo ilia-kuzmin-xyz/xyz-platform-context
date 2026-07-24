@@ -2,14 +2,39 @@
 
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2649
 - **Issue type:** Live Incident ("To track live incidents on site.")
-- **Status:** In Analysis (category: In Progress / yellow). Freshdesk #6622, last set to "Waiting on 3rd line" (2026-06-19) — i.e. back on us.
+- **Status:** **Open** (⚠️ reverted/re-set from "In Analysis" as of the 2026-07-24 re-check — status label moved backwards even though the thread has since made its most concrete progress yet, see §Update below). Freshdesk #6622, last set to "Waiting on 3rd line" (2026-06-19) — i.e. back on us.
 - **Priority:** Major
 - **Project (site):** PA12
-- **Reporter & Assignee:** Masum Ahmed
-- **Created:** 2026-05-06 · **Last updated:** 2026-06-30
+- **Reporter:** Masum Ahmed · **Assignee (current):** **Yash Patel** (reassigned off Masum Ahmed since the 2026-07-13 doc — the roster-fit issue flagged then is resolved)
+- **Created:** 2026-05-06 · **Last updated:** 2026-07-17 (see §Update — new comments the 07-13 pass never saw)
 - **Components / Labels:** none
 - **Attachments:** 2 PNG screenshots (see NEEDS HUMAN) + 1 broken inline blob in the description
 - **Domain slug:** `360-captures`
+
+---
+
+## ⚠️ Update — 2026-07-24 re-check: root cause now CONFIRMED to a single value; stalled 7 days on OUR OWN unanswered question
+
+**This ticket was not touched in the 2026-07-22 run** (it re-checked 2918/2917/2909/2906/2884/2882/2858 only — see `README.md`). Four real comments landed after the 2026-06-30 "last activity" this file previously recorded, and they change the picture substantially:
+
+| Date | Author | Content |
+|---|---|---|
+| 2026-07-13 13:53 | **Pietro Desiato** | Answers Ilia's 06-30 ownership question indirectly — asks back: *"do we already have a list of those pins? I think it could be interesting to have in the 360 editor a way of adjust the pin position from the editor"* — @Jason Fingland @Mostafa |
+| 2026-07-13 14:11 | **Jason Fingland** (product designer) | Pushes back on free-form pin editing (*"could mess with reality on site"*); proposes instead: detect when a PBP change makes existing captures inconsistent with their recorded floor/level (*"these captures were taken using the Level 3 Floorplan, but now appear higher than Level 4"*), and separately floats showing X/Y/Z in the details panel with multi-edit if XYZ does want manual editing |
+| **2026-07-16 17:39** | **Ilia Kuzmin** | **⭐ The root-cause finding, not in the previous doc at all:** *"we should ask the project delivery to correct level `f0f4d409` elevation **50.4 → 0** in the source model. We need one value change; rooms→points→captures all inherit it on re-import."* — this is no longer a hypothesis ("~40% inherited an old pbp"); it names **one specific level object, its current wrong elevation, and its correct value**, and states the inheritance chain explicitly (level → rooms → points → captures). |
+| **2026-07-17 11:07** | **Yash Patel** | *"Before I ask them to correct level in a model, can you please tell me **which model** they need to change the level? Thank you."* — **unanswered for 7 days as of this 07-24 re-check.** |
+
+**Net effect on the diagnosis:** the "~60/40, unconfirmed trigger" framing in the rest of this file (§ chronology, § confidence) is now **superseded** — Ilia's 07-16 comment reads as a confirmed, specific finding (a named level object with a named bad value), not the earlier eyeballed fraction. The **only thing separating this ticket from being handed back to the client with a precise, actionable fix request is one fact Ilia already has and hasn't posted: which model contains level `f0f4d409`.**
+
+**This is the same failure shape as PLT-2906** (sibling ticket, same investigator): the customer/team is not the blocker — **our own unposted answer is**. Yash asked a closed, one-value question exactly per the playbook's "one question per message, phrased so it can be answered with a value" — and it has sat for a week.
+
+**Revised confidence (2026-07-24):**
+- **That the class of cause is data (level elevation), not frontend code:** **9/10** (up from 8/10) — Ilia's 07-16 finding names a specific level + specific wrong value + explicit inheritance chain (level → rooms → points → captures), which is a much stronger claim than the earlier "~40% inherited an old pbp" eyeball estimate.
+- **Precise trigger / remediation path:** now effectively **decided in principle** (correct the one elevation value, re-import) — what's missing is purely the pointer (which model), not a mechanism question. This flips the old "4/10, unvalidated hypothesis" line below into a "trivial to close, if answered" state.
+
+**Recommended immediate action (see `recommended-action.md` for full draft): answer Yash's 07-17 question today.** This is not a re-investigation — it is surfacing a fact Ilia's own 07-16 comment implies he already has (he named the level id and its wrong/correct values; the model it belongs to should be a lookup, not new analysis).
+
+---
 
 ---
 

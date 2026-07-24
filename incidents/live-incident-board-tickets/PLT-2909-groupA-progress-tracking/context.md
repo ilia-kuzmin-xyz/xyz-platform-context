@@ -12,6 +12,33 @@
 
 ---
 
+## ⚠️ Update — 2026-07-24: the ATL08 diagnostic recommended below WAS run, and confirmed the hypothesis
+
+**New comment, 2026-07-23 (Ilia Kuzmin), not part of the 07-22 pass this file otherwise reflects:**
+
+> Ran the diagnostic on ATL08 for CY-5200. The model **DistributionBoardsPanels_Bld1-V1 is a ghost**: metadata claims the 6 elements, geometry and its cloud list have none of them. Bld2 and the federated model are real, selection works fine, so it's purely a wrong model list.
+>
+> Same defect family as PLT-2882 but here it's **PC-EXCEL imports**, all 6 elements from one source file (`dd20b121`). Suspect the excel import wrote the same rows into several buildings' metadata.
+>
+> **@Ali Seyedof**: can you check why client-element-metas for that Bld1 model (`00156181-fca5-4a7c-acdf-a12ce924c252`) has elements it doesn't own?
+>
+> FE fix (hide models not in geometry) will be **tracked in PLT-2882**, not as a separate PLT-2909 fix.
+
+**What this settles, against the open questions this file raised below (§ "Same root cause?", § Confidence):**
+- **CONFIRMED on ATL08**, not just "same family, needs confirmation" — the `inParquet > 0 / inGeometry = 0` ghost-model pattern is exactly what `recommended-action.md`'s diagnostic step predicted, and it fired.
+- **New, more specific mechanism detail:** the stale-metadata source here is a **PC-EXCEL (spreadsheet) import**, not a Revit re-upload/re-version as in PLT-2882 — Ilia's hypothesis is that the **Excel import path wrote the same element rows into more than one building's `client-element-metas`**. This is a distinct trigger from PLT-2882's "re-uploaded model, content removed/redrawn" story, even though the downstream symptom (parquet claims elements geometry doesn't have) is identical. Confirms the §"independent verdict" caveat below was right to insist on ATL08-specific evidence rather than assuming PLT-2882's Revit findings transferred as-is.
+- **Ownership is now assigned and routed:** Ali Seyedof (api-v2, per the roster's Sachin+Ali api-v2 pairing) has an open, closed question — why does Bld1's `client-element-metas` claim elements it doesn't own. **Awaiting his answer; nothing internal blocks us further.**
+- **FE fix is explicitly folded into PLT-2882**, not tracked separately here — avoids duplicate FE tickets for what both sibling tickets agree is one "hide models the geometry can't back" change.
+
+**Revised confidence:**
+- **Same root-cause family as PLT-2882, confirmed on ATL08:** **9/10** (up from 7/10) — no longer inferred, directly diagnosed.
+- **Model-type nuance (PC-EXCEL vs Revit) affects the BE-side trigger, not the FE symptom:** **8/10** — code-consistent (§ Mechanism below already flagged Navisworks/PC-EXCEL as the open variable) and now named in the actual diagnostic output.
+- **Overall triage confidence: ~8/10** (up from 6/10) — mechanism, layer, and now the specific model/source-file are all confirmed; the only remaining unknown is Ali Seyedof's answer on *why* the Excel importer cross-wrote buildings, which is a BE implementation detail, not a diagnosis gap.
+
+**Recommended action now: internal status update only (@Ali Seyedof's question stands; no re-diagnosis needed) — see `recommended-action.md` §2026-07-24 update.**
+
+---
+
 ## One-line symptom
 
 In the **web viewer (ViewerPage)**, the UI that lists **which models contain the elements linked to a schedule activity** shows **too many models** — models that do **not** contain any element linked to the activity. Kyriakos: *"the elements exist only in one model … however several models appear."* Yash reproduced it on ATL08 / `CY-5200`.
