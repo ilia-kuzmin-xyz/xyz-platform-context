@@ -1,6 +1,50 @@
 # PLT-2906 — recommended action (DRAFT ONLY — execute nothing)
 
-## 2026-07-24 refresh — TN values arrived (07-20); one measurement left before dev-ready
+## 2026-07-24 (later) — RCA confirmed live; action = post RCA + move to Ready For Development
+
+Diagnostic run on FAR01 confirmed all three legs (see context.md §07-24): folded TN
+−2.2914° < 5° guard; tightness 0.8806 < 0.9 → patch fires; estimated angle −20.46°
+vs correct −2.29° → ~18° error applied to the whole `Navis` federated model.
+
+**Action:** post the RCA comment below on PLT-2906, link PLT-2651/2756/2771 as the
+prior recurrences, and move the ticket to **Ready For Development**.
+
+### Draft RCA comment (for the ticket)
+
+> Root cause confirmed on FAR01. The project's True North angle (272.29°, i.e. 2.29°
+> off-axis — intentional georeferencing, consistent with FAR02's 177.71°) falls below
+> the 5° "effectively-zero" threshold in our section-box orientation workaround (from
+> PLT-2651/PLT-2756), so it's treated as no-rotation. The footprint tightness on FAR01
+> measures 0.8806 — just under the 0.9 trigger — so the workaround fires and replaces
+> the **correct** Revit rotation with a footprint-estimated **−20.46°** (~18° wrong),
+> applied to the whole federated model. That is the misaligned "new style" box.
+> **No Revit/model changes are needed from the customer** — the fix is on our side:
+> respect small real True-North rotations (the threshold's job is float noise, not
+> surveyed bearings), don't override a transform that already matches the geometry,
+> and preserve the transform's translation. Regression set: ATL07 (aligned), ATL08
+> (diagonal, TN=0 — the case the workaround exists for), FAR01 (small TN, compound
+> footprint). Borderline tightness (0.88 vs 0.90) also explains why reports are
+> intermittent across projects/sessions.
+
+### Dev-ticket sketch
+
+- `section-tool-orientation-math.ts:141-152` — tighten
+  `ORIENTATION_MISMATCH_THRESHOLD_RAD` 5° → ~0.25–0.5° (trust any measurable Revit
+  rotation), and/or add an agreement check (skip patch when the existing folded
+  rotation already explains the footprint tilt).
+- `section-tool-orientation.ts:115` — compose rotation with existing translation
+  instead of `makeRotationZ` (full-matrix reset).
+- `section-tool-orientation.ts:93,104` — de-`models[0]`: gate/footprint should not be
+  decided by load order (secondary; FAR01 has a single Navis model so not the trigger
+  here, but it's a latent hazard for multi-model sessions).
+- Unit tests: FAR01 case (rotZ 87.71°, tightness 0.88, rect −20.46° → must NOT patch)
+  alongside the existing ATL07/ATL08 cases.
+
+Release-timeline question (what shipped to FAR ~Jul 14) → Rishi, post-mortem only.
+
+---
+
+## 2026-07-24 refresh — TN values arrived (07-20); one measurement left before dev-ready (superseded)
 
 FAR01 TN = **272.2914°**, FAR02 TN = **177.71°** — both fold to **±2.29°**, inside the
 5° guard → both projects sit in the unprotected `<5°` override branch, and the values

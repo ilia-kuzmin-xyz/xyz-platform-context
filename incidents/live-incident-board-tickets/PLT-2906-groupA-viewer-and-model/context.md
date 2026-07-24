@@ -437,3 +437,41 @@ Fallback if no `NOP_VIEWER` handle: instrumented diagnostics branch (PLT-2882
 **Confidence: 8/10** on root-cause class (unprotected `<5°` override of intentional
 small TN); the models[0]-theta readout is the last confirmation before this is
 dev-ready.
+
+---
+
+## 2026-07-24 — live diagnostic run on FAR01: ROOT CAUSE CONFIRMED
+
+Ilia ran `far01-console-diagnostic.js` on a fresh FAR01 session (before box
+activation). Output — one visible model:
+
+| field | value | meaning |
+|---|---|---|
+| name / models[0] | `Navis` | single federated Navisworks model |
+| applyRefPoint | `true` | shared-coordinates transform is applied |
+| rotZ | `87.7086°` | ≡ Revit's 272.2914° (360−272.29); folds to **−2.2914°** |
+| foldedDeg | `−2.2914` | **< 5° guard → unprotected**, exactly as computed 07-20 |
+| tightness | `0.8806` | **< 0.9 → patch fires** (barely — explains "sometimes") |
+| rectAngleDeg | `−20.4632` | the angle the patch would write — **~18° wrong** |
+| wouldPatch | `true` | confirmed firing |
+
+**Verdict (9/10).** All three legs measured live: (1) the intentional 2.29° True-North
+bearing slips under `ORIENTATION_MISMATCH_THRESHOLD_RAD` (5°); (2) compound-footprint
+tightness 0.8806 crosses the 0.9 trigger; (3) the min-area-rect estimate of the whole
+federated footprint (−20.46°) bears no relation to the building bearing (−2.29°) —
+the patch overwrites a **correct** Revit rotation with an angle ~18° off, for every
+model in the session. This is the customer-visible misalignment. The heuristic's
+compound-footprint failure (site + multiple halls → min-area rect at −20°) also means
+the estimate is unreliable in general, not just here.
+
+Notes: tightness at 0.8806 sits a hair under the threshold — visibility changes can
+move it across 0.9, which explains intermittent reports across projects/sessions.
+Residual unknowns (non-blocking): which release delivered the workaround to FAR's
+channel ~Jul 14 (Rishi, for the post-mortem); verify FAR02 shows the same firing.
+
+**Dev-ready.** Fix shape as documented in §07-20/24: trust any measurably non-zero
+Revit rotation (tighten 5° → ~0.25–0.5°, its purpose is float noise, not real
+bearings); optionally skip when the estimate disagrees wildly with a plausible
+correction; preserve the translation (`makeRotationZ` wipes it); regression set
+ATL07 (aligned) + ATL08 (diagonal, TN=0 — the case the workaround exists for) +
+FAR01 (small real TN, compound footprint).
