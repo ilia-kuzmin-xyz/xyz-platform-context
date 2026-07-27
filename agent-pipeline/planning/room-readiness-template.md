@@ -62,7 +62,21 @@ project-element-list.parquet     modelElementId ↔ sourceFileElementId
   ⨝ project-levels.parquet       modelLevelId → levelName
 ```
 
-Same four artefacts the dashboard registers for its Floor+Room filter (`_buildRoomFilteredElementsSql`). Combined with `element-status.parquet` (already downloaded by `viewer_mapper`) → **% installed per room**. Add `activity-categories-flat.parquet` → per-package breakdown.
+Same four artefacts the dashboard registers for its Floor+Room filter (`_buildRoomFilteredElementsSql`). Combined with `element-status.parquet` (already downloaded by `viewer_mapper`) → **% installed per room**. Per-package breakdown comes from the **API** (`activities_categories` + `activities_mapping`), not a parquet — see the field notes below.
+
+Confirmed on the reference project (`scripts/inspect_room_artefacts.py`):
+
+| Artefact | Rows | Size | Note |
+|---|---|---|---|
+| `element-room-mapping` | 166,014 | 1.1 MB | keys on `sourceFileElementId` — **no `modelElementId`** |
+| `project-rooms` | 534 | 0.1 MB | `roomName`, `plan2D`, `ownerModelLevelId`; **no type field** |
+| `project-levels` | 5 | ~0 | |
+| `project-element-list` | 3,165,504 | **60.2 MB** | **required** as the `sourceFileElementId ↔ modelElementId` bridge |
+| `element-status` | 467,624 | 9.1 MB | already fetched by `viewer_mapper` — reuse, don't re-download |
+
+Two consequences: the join costs ~61 MB cold (cache it hard — geometry only changes on re-translation), and **only 166k of 467k status-bearing elements are room-mapped (~35%)**, so per-room readiness will legitimately not reconcile with project-level progress (structure, risers and external elements belong to no room). Say so in the UI.
+
+**Scale check:** 534 rooms across 5 levels — 18× the mockup's 29/4. "All rooms by level" needs scrolling/collapsing rather than ~107 cards per level, and "Rooms requiring attention" needs real ranking instead of a fixed top-4.
 
 ### Verified field notes (don't re-derive these)
 
