@@ -123,12 +123,17 @@ Phase 0b½ classifies viewer intent (NONE/DISPLAY/INTERACTIVE). Only INTERACTIVE
 ```json
 { "format": "grouped",
   "statusDbIds": { "Installed": [dbId…], "Late": [dbId…], … },
+  "roomDbIds":   { "<room_id>": [dbId…], … },   // Room Readiness only
   "issueElements": [ /* full records, issue-linked only */ ],
   "totalElements": 1404520, "statusElements": 1044589 }
 ```
 
 ~8MB. SSE `viewer_mapping` carries this; `viewer_config` carries the palette (`build_viewer_config`, deterministic — field + INSTALLATION_STATUS_PALETTE). Both emitted in Phase 0d, BEFORE `artifact_skeleton`.
 
-**`GET /api/viewer-mapping/{project_id}`** → the grouped wire mapping **plus** a bundled `config` (so FE restore works even when the persisted config is absent). Used by the FE to refetch on session restore (the mapping is too big to persist). 404 if the project has no viewer parquets.
+**`roomDbIds`** appears only when the Room Readiness template is active. The rooms rollup returns a room→`modelElementId` index; `to_wire_format(mapping, room_element_ids)` trades it for dbIds **server-side** so no GUID ever reaches the browser. Rooms that resolve to zero dbIds are dropped — isolating to an empty set reads as a broken viewer, and the component falls back to the whole building. Measured on the reference project: 502/502 rooms, 151,296 of 161,519 room-mapped elements resolved (93.7%), +1.34MB.
+
+This is why **Phase 0c½ (rooms) runs before Phase 0d (viewer mapper)** — the index must exist while the wire format is built. Both are sequential and pre-compose, so the order is free.
+
+**`GET /api/viewer-mapping/{project_id}`** → the grouped wire mapping **plus** a bundled `config` (so FE restore works even when the persisted config is absent). Used by the FE to refetch on session restore (the mapping is too big to persist). 404 if the project has no viewer parquets. **`?rooms=1`** additionally resolves `roomDbIds`, at the cost of a second ~60MB parquet join — only pass it when the restored artifact actually uses room isolation.
 
 Palette keys (exact): `Installed`, `Installed Early`, `Planned`, `Late Start`, `Late`, `Not Planned`.
