@@ -43,6 +43,55 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-27 — 2 brand-new tickets, 4 updated with major new evidence, 4 re-verified unchanged, Group B skipped by design
+
+Board re-queried (`project = PLT AND issuetype = "Live Incident"`) and filtered per the
+scope rules above. This run also excluded **`Customer Release Check`** as a status
+alongside the original five — treated as part of the "awaiting release" family (a
+release sign-off gate, not an open dev/analysis question). Flagging this explicitly
+since it widens the exclusion list beyond what's written above; revisit if that
+judgment call turns out wrong.
+
+**Group B (3): PLT-2385, PLT-2918, PLT-2874** — all three still in scope
+(Ready For Development / Dev In Progress) and all three already have folders from a
+prior run. Per this run's instructions, Group B action-scenario work is **deliberately
+skipped** (still TBD, per README's existing note) — no new investigation, folders
+left as-is.
+
+### Group A (10) — 2 new, 4 updated, 4 re-verified no-change
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| PLT-2931 | progress-tracking | In Analysis (**new**) | Third confirmed instance of the PLT-2882 family (dead links after re-upload) — **arrives pre-diagnosed with data**: 193 dead links cap 5 ELN03 Containment activities below 100%, installed/linked reproduces the dashboard % to 2dp exactly. Only open question is an **approval**, not a diagnosis — Ilia asked Pietro/Mostafa to soft-delete, ~3 days no reply. **Correction surfaced:** PLT-2882's "same endpoint" soft-delete does **not exist in the codebase** — grepped, zero hits — so this would be the family's *first* deletion, not a repeat of an established one. Also connects to a **4th relative, PLT-2385/PLT-2650**, where David Webb named the systemic cause: dagster's auto-cleanup trusts the same stale metadata artifact. | (a)/(c) approval-chase nudge to Pietro/Mostafa, corrected wording (first deletion, not a repeat) + one pre-flight query (Containment is a weighted mean, "clears to 100%" isn't automatic) | 8/10 |
+| PLT-2923 | viewer-and-model | With Customer (**new**) | QA structural-fab **.ifc** model loads on the Atom helmet but not the web viewer — smallest broken-vs-working pair. Code-verified: the web viewer's ID-mapping step accepts **only** `rvt`/`nwd`/`nwc` (`model-mapping-service.ts:296,312-324`); anything else throws, is silently swallowed (no `finally` on `loadDocuments`), and leaves a **permanent "Loading model…" spinner with no error surfaced** — a real FE resilience gap independent of whether IFC should be supported at all. | (c) status stays With Customer (customer ask is only 4 days old and genuine) **+ one parallel-track internal diagnostic** — a single console line from Yash's own repro session settles which of 3 branches (FE format-reject / Forge translation fail / empty derivative) is live, no customer file needed | 6/10 diagnosis, 8/10 next-step |
+| PLT-2909 | progress-tracking | In Analysis (**updated**) | ATL08 diagnostic (requested last run) **ran and confirmed** the ghost-model hypothesis — but on a **third** model (`DistributionBoardsPanels_Bld1-V1`), not the one the client named as correct. **Trigger hypothesis revised**: not generic re-upload/re-version, but a **PC-EXCEL import writing the same source rows into multiple buildings' metadata** (source file `dd20b121`) — confirmed there's no Excel model mapper in the viewer (`rvt`/`nwd`/`nwc` only), so this is metadata-side contamination, not a geometry-mapper issue. @Ali Seyedof tagged for the BE side. | (c) monitor — ball is with Ali Seyedof; cohort-sweep question folded into the same thread; corrected a wrong client-facing ask | 8/10 (was 6/10) |
+| PLT-2649 | 360-captures | With Customer (**updated — breakthrough**) | Root cause now **fully pinpointed**: model `PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24_detached`, level `DC - 0G - FFL` at +50.4m vs project datum ~0 (siblings at 5.3/10.6/15.9), origin = a linked file federated 48-73m off. Scope: **101 rooms / ~1,870 captures** (retires the old "~60/40 eyeball estimate" — it's level-scoped, not fractional). Fix = one elevation value + model re-upload; **no captures need re-taking**. Correctly moved to With Customer for project delivery to action. | (c) no status change — already correctly With Customer; one narrow ETA-chase + cohort question (other models/projects with linked files at non-datum elevation) | 9/10 (was 4/10 on trigger) |
+| PLT-2884 | data-pipeline | With Customer (**updated**) | No new substance — Freshdesk close/reopen churn on 07-20 is bookkeeping noise. Now **~14 days** of customer silence since the XER re-upload request (07-13), ~17 days since the original report. Firmed the 07-22 run's "consider escalating" into a concrete recommendation. | (c) coordinator nudge with a **deadline + consequence** (re-upload by ~5 working days or close as unable-to-reproduce, reopenable) + With Customer → With Technical Support | 8/10 diagnosis, 9/10 next-step |
+| PLT-2815 | quality-management | With Customer (**updated**) | Functionally resolved 3+ weeks ago (Mostafa's "as intended" call 06-23, Freshdesk closed 07-06) with zero activity since — the only open item is **Jira board hygiene**, not analysis. | (a) transition Jira to Done/Closed, drafted 1-line closing comment citing the decision + Freshdesk closure | 9/10 |
+| PLT-2917 | progress-tracking | Open (**re-verified, no change**) | Same as 07-22 run — no new comments since 2026-07-22 09:42. | — (unchanged) | 6/10 |
+| PLT-2882 | progress-tracking | In Analysis (**re-verified, no change**) | Same as 07-22 run — no new comments since 2026-07-15. Note: still awaiting the same Pietro/Mostafa approval that PLT-2931 is now also waiting on (see correction above — the soft-delete endpoint doesn't exist yet for either). | — (unchanged; flag the endpoint correction if anyone updates this folder next) | 9/10 root cause |
+| PLT-2858 | quality-management | In Analysis (**re-verified, no change**) | Same as 07-22 run — no new comments since 2026-07-16 (Mostafa: "waiting on this since it was asked of me"). Now **11 days** stalled on his zone-config-ownership decision. | — (unchanged draft stands) | 8/10 |
+| PLT-2619 | other | With Customer (**re-verified, no change**) | Same as prior runs — no new comments since 2026-04-29 ("Awaiting release"). Still parked on the non-PowerBI dashboard release. | — (unchanged) | 8/10 |
+
+### Cross-ticket notes (this run)
+
+- **The PLT-2882 family is now 3 confirmed instances (2882/FAR01, 2909/ATL08, 2931/ELN03) plus a likely 4th relative (2385/2650) and an unconfirmed possible 5th (2658, cited by Yash on 2931 — not yet in this board's folders, worth pulling next run).** The pattern is wide enough that a single cross-cutting backend ticket (why does re-upload / import leave dead links in `client-element-metas` instead of cleaning them up) is worth raising explicitly with Pietro/Mostafa alongside the individual approvals — see PLT-2931's `recommended-action.md`.
+- **Important correction surfaced this run:** both PLT-2882's and PLT-2931's docs previously implied (or stated) that PLT-2882 already has a working soft-delete endpoint that PLT-2931 would simply reuse. A code grep this run found **no such endpoint or diagnostic branch in the codebase** — PLT-2882's 418 dead links were never actually deleted. This likely explains why Pietro/Mostafa's approval has sat silent on both tickets: it's a **first-of-its-kind** deletion, not a routine repeat. Anyone picking up PLT-2882 next should reconcile its `recommended-action.md` wording with this finding (out of scope to edit this run — PLT-2882 itself had no new Jira comments, so its file was intentionally left alone per the "only touch what changed" rule).
+- **PLT-2923 and PLT-2892 (prior run) are the same defect *shape*:** a model load fails and the viewer gives no terminal error state, just a spinner that never clears. Worth scoping one FE-resilience ticket across both rather than two, per PLT-2923's `recommended-action.md` follow-through section.
+- **Ali Seyedof** (api-v2 team, off original roster) is now a named owner on PLT-2909 — add to the roster if this pattern continues.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian auth) — this run
+
+**PLT-2931** (2 screenshots + the CSV backing Ilia's table — the CSV especially would let a future run verify the per-activity numbers independently rather than trusting the pasted table), **PLT-2923** (1 screenshot — now secondary evidence only; the console-line diagnostic in `recommended-action.md` matters more and doesn't need it). PLT-2649's screenshots are now explicitly downgraded to non-load-bearing (root cause no longer depends on them).
+
+### Still-outstanding doc chores (flagged, not done, across multiple runs now)
+
+- `dashboard/pitfalls.md` — no 360-pin-elevation / capture-coordinate entry yet (flagged first in the 07-13 PLT-2649 run, still open).
+- `dashboard/360-tab.md:49` — still says pin coords come "from its `modelRoomId`"; code says they come from the capture record's own `xMeters/yMeters/zMeters`. Still open.
+- `dashboard/viewer-and-model.md` §"three-ID mapping chain" — doesn't state that non-`rvt`/`nwd`/`nwc` formats are rejected; PLT-2923 recommends making this explicit.
+
+---
+
 ## Run: 2026-07-22 — 7 fresh/updated Group A tickets, Group B currently empty
 
 Board re-queried (`project = PLT AND issuetype = "Live Incident"`) and filtered per the
