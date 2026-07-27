@@ -91,6 +91,7 @@ curl -X POST http://localhost:8000/api/cache/invalidate \
 | [data-profile-slim-down.md](planning/data-profile-slim-down.md) | 🟡 T1 done, T2–T5 pending |
 | [ux-uplift.md](planning/ux-uplift.md) | 🔵 CONCEPT |
 | [model-switcher.md](planning/model-switcher.md) | 🔵 CONCEPT — needs review |
+| [room-readiness-template.md](planning/room-readiness-template.md) | 🔵 DESIGN — first named report template; layout, per-block data coverage, safe prompt wiring |
 
 ## See also
 
