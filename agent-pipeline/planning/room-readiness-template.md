@@ -45,7 +45,7 @@ Assessed against real sources (API v2, parquet artefacts, MCP tools) — see §3
 | 6 | Readiness by room type | 90% | Room type = name parse; planned-% care |
 | 7 | All rooms by level | 95% | Room type only in tooltip — droppable |
 | 8 | Room summary (drill) | 80% | GC actual %, next milestone |
-| 9 | Packages (drill) | 75% | GC column; needs `activity-categories-flat` wired |
+| 9 | Packages (drill) | 75% | GC column; needs `activities_categories` + `activities_mapping` MCP tools wired (API, **not** a parquet) |
 | 10 | Milestones (drill) | 10% | No room link — **drop from MVP** |
 
 **Overview ≈ 87% · drill-down ≈ 55% · whole canvas ≈ 78%.**
@@ -65,6 +65,11 @@ project-element-list.parquet     modelElementId ↔ sourceFileElementId
 Same four artefacts the dashboard registers for its Floor+Room filter (`_buildRoomFilteredElementsSql`). Combined with `element-status.parquet` (already downloaded by `viewer_mapper`) → **% installed per room**. Add `activity-categories-flat.parquet` → per-package breakdown.
 
 ### Verified field notes (don't re-derive these)
+
+- **Packages/disciplines come from the API, not a parquet.** `activity_categories_flat` is a DuckDB *table name*; the dashboard builds it from `Activity.listCategories()` + `Activity.listMappings()`. MCP exposes both: `xyz_get_projects_project_id_activities_categories` and `..._activities_mapping`. (An earlier note here wrongly called this artefact "MISSING".)
+- **`xyz_get_projects_project_id_rooms` exists but is a thin index** — `modelRoomId, sourceFileRoomId, sourceFileRoomHandle, insertedOn` only. No roomName/geometry/type. The `project-rooms` **parquet** is the only source for names, levels and polygons.
+- **Reference project has placeholder categories** (`A1`, `Test category 1`), so the Packages block can't be validated there even though it's buildable.
+- **Never infer "X doesn't exist" from the pipeline log** — it shows what was *called*, not what's available (the pipeline uses ~9 of 95 tools). Use `scripts/list_mcp_tools.py` and `scripts/inspect_room_artefacts.py`.
 
 - **Capture dates come from `360captures` (`imageTakenOn`), NOT `room_capture_points`** — the latter has *no date field at all* (`createdFrom, modelLevelId, modelRoomId, projectId, roomCapturePointId, userCapturePointId, x/y/zMeters`).
 - **Some captures have no `modelRoomId`** (e.g. manually uploaded screenshots) and are silently dropped by the hydrator's `if not rid: continue`. So "360 coverage N/M" counts only room-tagged captures and can under-report.
