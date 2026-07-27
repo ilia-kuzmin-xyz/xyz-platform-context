@@ -105,3 +105,30 @@ function App(props: { data: ProjectData; theme?: 'light' | 'dark' }): React.Reac
 `POST /api/profile-cache/clear` → clears T1 cache globally
 
 `POST /api/cache/invalidate` → `{ project_id, keys?: string[] }` — empty keys clears T1 + all T2 for that project
+
+---
+
+## 3D Viewer colour mapping (INTERACTIVE viewer intent)
+
+**Model**: hardcoded `claude-fable-5` (`agents/config.py`). Fable = always-on thinking (send NO `thinking` param), needs larger `max_tokens` (thinking shares the budget), inconsistent `\uXXXX` escaping (see FE pitfall 14).
+
+Phase 0b½ classifies viewer intent (NONE/DISPLAY/INTERACTIVE). Only INTERACTIVE runs the parquet mapper (Phase 0d).
+
+**Clarifier promotion**: broad prompts never name the model, so the keyword classifier can't infer INTERACTIVE. The clarifier's multi-select "which sections?" question (rule 8 = the only multi_select) gets a **"3D viewer"** option appended when `capabilities.viewer`. If the user ticks it, `server.py` overrides the decision to INTERACTIVE.
+
+**Mapper** (`agents/viewer_mapper.py`): downloads `svf2-object-id-map` + `element-status` + `activity-links` parquets, JOINs via pandas → per-element `{dbId (=objectId), modelElementId, installationStatus, activityId}`. Cached in T2 (`VIEWER_MAPPING`, 2h). ~1.4M elements on a full project.
+
+**Wire format** (`to_wire_format()`): the full mapping is ~140MB JSON → crashes the browser. Ship GROUPED instead:
+
+```json
+{ "format": "grouped",
+  "statusDbIds": { "Installed": [dbId…], "Late": [dbId…], … },
+  "issueElements": [ /* full records, issue-linked only */ ],
+  "totalElements": 1404520, "statusElements": 1044589 }
+```
+
+~8MB. SSE `viewer_mapping` carries this; `viewer_config` carries the palette (`build_viewer_config`, deterministic — field + INSTALLATION_STATUS_PALETTE). Both emitted in Phase 0d, BEFORE `artifact_skeleton`.
+
+**`GET /api/viewer-mapping/{project_id}`** → the grouped wire mapping **plus** a bundled `config` (so FE restore works even when the persisted config is absent). Used by the FE to refetch on session restore (the mapping is too big to persist). 404 if the project has no viewer parquets.
+
+Palette keys (exact): `Installed`, `Installed Early`, `Planned`, `Late Start`, `Late`, `Not Planned`.

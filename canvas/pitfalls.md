@@ -47,3 +47,71 @@
 **Cause**: Pipeline `thread_store` is in-memory (6h TTL), wiped on server restart. Composer can't find `last_artifact` for EDIT context.
 
 **Rule**: On EDIT turns against a restored session, send `prior_artifact: { tsx, title, summary, domainsRead }` in the `/api/chat` body. Pipeline falls back to it when `thread.last_artifact` is absent.
+
+---
+
+## Viewer (3D colour visualisation) — see [viewer-colouring.md](viewer-colouring.md)
+
+## 7. Manual `fragId2dbId` visibility loop never converges on large models
+
+**Symptom**: Viewer blank (or a random partial subset) on load; a filter click "fixes" it. `fragment visibility: 0 visible, 15999580 hidden`.
+
+**Cause**: Post-load fragment hiding reads `model.getFragmentList().fragments.fragId2dbId`, which is NOT populated while a 16M-fragment federated model streams. The loop matches 0 (or a random partial) of 16M. A filter click works only because it re-runs later, once geometry is loaded.
+
+**Rule**: Don't hide fragments after load. Use **selective loading** (`loadOptions.ids = statusDbIds`) so only tracked geometry loads, and `setThemingColor` (Forge applies per-fragment as they stream — no matching loop). Filtering uses high-level `viewer.isolate()` / `showAll()`. Retry/stability/`colorEpoch` heuristics do NOT fix an unready map — they were all reverted.
+
+## 8. `< 800000` selective-load cap → "50% coloured, 50% raw"
+
+**Symptom**: Half the model is coloured by status, half shows raw material.
+
+**Cause**: A guard `if (selectiveDbIds.length < 800000)` skipped selective loading for real projects (~1M status dbIds) → the FULL model loaded → untracked elements showed raw.
+
+**Rule**: No upper cap — pass all status dbIds to `loadOptions.ids`, same as the dashboard.
+
+## 9. Sandpack HMR ignores a changed static JSON import
+
+**Symptom**: On restore, viewer stays uncoloured; `mapping has 0 status elements` even though the refetch succeeded. `[HMR] Nothing hot updated`.
+
+**Cause**: ForgeViewer imports `viewer-mapping.json` statically. When the host `updateFile()`s it after mount, Sandpack does an HMR no-op — it won't re-run the module's top-level import.
+
+**Rule**: Mount the viewer runner **once, only when the mapping is already in state** (stable key). Don't mount early and patch via `updateFile`. During generation the pipeline emits `viewer_mapping` BEFORE the skeleton, so the first mount already has it; restore refetches first.
+
+## 10. Sandpack 100001-iteration loop cap kills a 16M-fragment model
+
+**Symptom**: `RangeError: Potential infinite loop: exceeded 100001 iterations`.
+
+**Cause**: Sandpack injects a per-loop iteration counter capped at 100001. A federated model's loops legitimately exceed it. (The native dashboard isn't sandboxed → no cap.)
+
+**Rule**: Ship `/sandbox.config.json` = `{"infiniteLoopProtection": false}` into the VFS for viewer dashboards only. Non-viewer artifacts keep the guard.
+
+## 11. `arr.push(...bigArray)` stack overflow
+
+**Symptom**: `RangeError: Maximum call stack size exceeded` in viewer init.
+
+**Cause**: `selectiveDbIds.push(...ids)` spreads a 200k+ element array as function args → exceeds the argument-count limit. (Array-literal spread `[...arr]` is fine — it iterates.)
+
+**Rule**: Use a loop, never function-call spread, on large arrays.
+
+## 12. Blank canvas looks like a hang (no loading indicator)
+
+**Symptom**: Canvas empty for many seconds on a large model; looks broken.
+
+**Cause**: The model IS loading (16M fragments stream slowly) but `phase` went `ready` right after load kickoff, so no overlay showed.
+
+**Rule**: Keep a determinate loading bar (Forge `PROGRESS_UPDATE_EVENT` → %) up until `applyColours` first paints fragments. Also: paint AFTER `consolidateModel()` (it async-rebuilds meshes and discards visibility set before it).
+
+## 13. Library route (`/canvas/library/:id`) is a separate component
+
+**Symptom**: Viewer coloured on the editable canvas but not on the published/library view; no `[Canvas]` logs.
+
+**Cause**: `DashboardViewerPage` doesn't use `useCanvas`. It rendered the Sandpack runner without `viewerMapping`/`viewerConfig`.
+
+**Rule**: When touching viewer wiring, fix BOTH routes. `DashboardViewerPage` fetches the mapping+config itself from `GET /api/viewer-mapping/:projectId`.
+
+## 14. Fable emits inconsistent `\uXXXX` escaping in artifact text
+
+**Symptom**: Report shows literal `\u2014` instead of `—`.
+
+**Cause**: Fable is inconsistent about backslash count in JSON Unicode escapes; after `json.loads` some render fine (`\u2014`), some show literally (`\u2014`).
+
+**Rule**: Pipeline `_decode_unicode_escapes()` collapses any backslash-escaped `\uXXXX` in tsx/title/summary to the real character before returning.
