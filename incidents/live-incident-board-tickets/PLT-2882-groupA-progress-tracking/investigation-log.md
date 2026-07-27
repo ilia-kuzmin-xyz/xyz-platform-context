@@ -231,3 +231,33 @@ spreadsheet import**, not Revit re-upload) — see
 No change to this ticket's own status (still: deletion of the 418 dead links on hold pending peer
 alignment, which David Webb's 07-15 reply already resolved in-thread — see above). Confidence
 unchanged at 9/10 root cause.
+
+## 2026-07-27 — progress-impact check before deletion: FAR01UGD1220 is absent from `activity_progress`
+
+Pietro asked whether the cleanup would move progress numbers, and whether the affected
+activities would become intangible once their links are gone. Checked on the FAR01 dashboard:
+
+- **FAR01 has both weighting bases populated** — `TotalPlannedLaborUnits` 1,660,128 and
+  `TotalLinkedElements` 798,535. Note the skill's weighting-detection query tests labour first,
+  so its `LABOUR_HOURS` verdict only means labour data exists, **not** that element-weighting is
+  unavailable. Both views are selectable by users; treat "which weighting" as a per-viewer toggle,
+  not a project property.
+- **`FAR01UGD1220` has ZERO rows in `activity_progress`** (`rows_in_activity_progress = 0`), with
+  `api_activities.itemId` confirmed as `7c4f2509-3bce-4005-971d-46e82610b1a4`, matching the
+  deletion CSV exactly, so this is a genuine absence and not a join miss.
+
+**Consequence: deleting the 418 links changes no progress number, in either weighting mode.** The
+activity is already invisible to the progress rollups (plausibly because it is retired / excluded
+from the current schedule revision the progress outputs cover). The 418 surface only in the
+viewer/schedule panel, which reads `activity_links` directly — that is the symptom being fixed.
+
+The "activity flips from tangible to intangible once it has 0 linked elements" risk raised during
+review is therefore **not applicable here**: it cannot flip within a calculation it does not
+participate in. That risk remains valid in general for any activity that *does* have
+`activity_progress` rows and whose links are all dead, so keep the check in the pre-deletion
+routine.
+
+**Pre-deletion check worth reusing on any future cleanup:** before deleting all of an activity's
+links, confirm whether it has rows in `activity_progress` and what its `PlannedLaborUnits` are.
+Zero rows means no progress impact; rows plus labour units means it will flip to the intangible
+path and its percentage will come from reported labour instead.
