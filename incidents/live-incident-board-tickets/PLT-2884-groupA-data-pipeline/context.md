@@ -8,7 +8,32 @@
 - **Assignee / Reporter:** Yash Patel (support)
 - **Project:** EQX-AT10x (ID `6808f6afae311c4f8409624f`) · **Software Area:** Dashboard
 - **Created:** 2026-07-09 · **Last updated:** 2026-07-20
-- Triage date: 2026-07-22
+- Triage date: 2026-07-22 · **Re-checked: 2026-07-27** (see UPDATE below)
+
+---
+
+## UPDATE 2026-07-27 — still silent, ~14 days; status churn only
+
+**No new substance since the 07-22 run. The diagnosis in §3–§4 stands unchanged**
+(bad/incomplete source XER, product-diagnosed by Mostafa and corroborated by the
+customer's own Power BI check) — nothing here re-opens the root cause.
+
+- **~14 days of customer silence.** The corrected XER re-upload was requested on
+  **2026-07-13** (Yash: "have asked customer to reupload after rectify it on their
+  end"). As of today there is still **no reply and no re-upload**. That is ~14 days
+  on the re-upload ask, and **~17 days since the original report (2026-07-09)**.
+- **The only new activity is status noise.** The two 07-20 Jira comments —
+  Freshdesk #7384 → **Closed** (09:22), then → **Waiting on customer** (09:23),
+  i.e. closed and reverted a minute later — carry **no new information**: no
+  customer reply, no new data, no change to the analysis. Treat as a Freshdesk
+  bookkeeping flip-flop, not a state change.
+- **Jira unchanged:** still **With Customer**, priority still **Critical**.
+- **Effect on the recommendation:** none of the substance changes, but the 07-22
+  "consider With-Customer → With-Technical-Support" note is now materially
+  stronger — 14 days, not 9, on a Critical. See `recommended-action.md`
+  (firmed up 2026-07-27).
+- **Still NEEDS HUMAN:** attachments remain unviewable (§8) and the re-upload
+  confirmation is still outstanding.
 
 ---
 
@@ -107,9 +132,11 @@ from the source XER.
 8. **Yash 07-20 09:22** — Freshdesk → Closed, then **07-20 09:23** → Waiting on
    customer again (Jira status remains "With Customer").
 
-**Net state:** cause + fix known since 07-10; **9+ days stalled purely waiting on
-the customer to re-upload a corrected XER, with silence on their end.** That
-stall is the actionable finding, not a code mystery.
+*(No further comments after 07-20 as of 2026-07-27 — see UPDATE at top.)*
+
+**Net state:** cause + fix known since 07-10; **~14 days (as of 2026-07-27)
+stalled purely waiting on the customer to re-upload a corrected XER, with silence
+on their end.** That stall is the actionable finding, not a code mystery.
 
 ## 6. FE / pipeline robustness gap re: silent-incomplete-XER ingestion (secondary)
 

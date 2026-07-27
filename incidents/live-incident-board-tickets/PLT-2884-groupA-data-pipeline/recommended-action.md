@@ -1,16 +1,29 @@
 # PLT-2884 — Recommended action
 
-## Chosen: (c-style) Coordinator status-check → Yash, plus a proposed status move
+*(Firmed up 2026-07-27 — same action as the 07-22 draft, escalated: silence is now
+~14 days, not 9. The diagnosis is untouched; see `context.md` UPDATE 2026-07-27.)*
+
+## Chosen: (c-style) Coordinator chase → Yash, **with a deadline**, and move to With Technical Support
 
 Root cause is **already known and agreed** (bad/incomplete source XER, product-
 diagnosed by Mostafa on 07-10, corroborated by the customer's own Power BI
 finding). The fix is **customer-side** (re-export a complete XER in P6 and
-re-upload). The ticket has sat **9+ days** (since Ilia's 07-13 nudge) in "With
-Customer" with **no customer response** — Freshdesk was even flipped Closed →
-Waiting-on-customer on 07-20 with no new information. So the one useful move is a
-**coordinator nudge to Yash**: has the customer re-uploaded? If not, should this
-stop sitting passively in "With Customer" and move to **With Technical Support**
-so someone actively chases the client rather than waiting in silence?
+re-upload). The ticket has now sat **~14 days** since the re-upload was requested
+(07-13) with **no customer response** — the only movement was a Freshdesk
+Closed → Waiting-on-customer flip-flop on 07-20 that carried no information.
+
+The 07-22 run said *consider* the status move. At 14 days on a **Critical**, that
+is no longer a "consider": passively parked past two weeks with a known fix is a
+stalled ticket, not a waiting one. So the move is a **coordinator chase to Yash**
+with (1) a concrete follow-up deadline and stated consequence, and (2) the
+**With Customer → With Technical Support** transition so it is actively owned
+rather than silently ageing on the board.
+
+**Why nudge rather than keep waiting:** silence is not information — every extra
+week makes the eventual re-upload harder to correlate with the reported numbers,
+and a Critical that no one is chasing looks parked when it is actually stuck.
+**Why not re-diagnose:** nothing new arrived to diagnose; the cause is settled and
+re-running the analysis would burn effort on an answer we already have.
 
 **Owner:** **Yash Patel** (assignee / support coordinator; owns the client
 channel). One question, routed, answerable with a status.
@@ -29,24 +42,30 @@ channel). One question, routed, answerable with a status.
 - **Not "close as resolved".** Cause + fix are known, but per the playbook an
   incident closes on **confirmation**, not on "we told them what to do." The
   corrected XER has not been re-uploaded/verified. Closing now would be remission,
-  not resolution (playbook Phase 6).
+  not resolution (playbook Phase 6). The deadline framing above is deliberately
+  *close as **unable to reproduce without corrected data***, reopenable on the
+  file — not "resolved". Different thing; don't let it become a silent resolve.
 
 ---
 
-### Draft status-check comment (for Yash / coordinator to post — do NOT auto-post)
+### Draft chase-up comment (for Yash / coordinator to post — do NOT auto-post)
 
 > @Yash — PLT-2884 has been "With Customer" since 10 Jul with the fix already
 > identified (incomplete source XER — activities missing from the customer's own
 > schedule export; Mostafa diagnosed this and the customer's Power BI check found
-> the same). It's now 9+ days with no re-upload and no response.
+> the same). The corrected re-upload was asked for on **13 Jul — that's ~14 days
+> ago with no reply**. The only movement since was the Freshdesk Closed →
+> Waiting-on-customer flip on 20 Jul, which didn't add anything.
 >
-> Two quick things:
-> 1. **Has the customer re-exported and re-uploaded a corrected XER yet?** If yes,
->    we can verify the new numbers reconcile and close. If no —
-> 2. **Can we move this to With Technical Support and actively chase the client?**
->    It's Critical priority; sitting silently in "With Customer" for 9+ days on a
->    Critical isn't really "parked", it's stalled. A direct follow-up (or a short
->    Loom showing them the P6 re-export step) would unstick it.
+> Proposing we stop waiting passively:
+> 1. **Can you chase the customer directly with a deadline?** Suggested framing:
+>    *"We still need the corrected XER re-exported from P6 to verify. If we don't
+>    hear back by [+5 working days], we'll close this as unable-to-reproduce
+>    without corrected source data — happy to reopen immediately once the file
+>    lands."* A short Loom of the P6 re-export step would remove the last excuse.
+> 2. **Move this to With Technical Support.** It's Critical priority and has been
+>    silent for two weeks — that isn't "parked with the customer", it's stalled,
+>    and it needs an owner who is actively chasing.
 >
 > For the record — this is expected to be data-side, not a platform bug: the old
 > (Power BI) dashboard reads from a pipeline that keeps activities from earlier
@@ -54,8 +73,10 @@ channel). One question, routed, answerable with a status.
 > reflects only the current, incomplete schedule, so it reads *lower* (23.85%).
 > A complete XER should bring them back in line.
 
-*(Closed, routed to one owner, answerable with a status. Q1 gets the outstanding
-fact; Q2 proposes the status transition with a one-line justification.)*
+*(Closed, routed to one owner, answerable with a status. Q1 puts a deadline and a
+stated consequence on the customer ask; Q2 makes the status transition a decision
+rather than a suggestion. Note the deadline is a **proposal** — the actual date and
+whether we're willing to close on it is Yash's/support's call, not the agent's.)*
 
 ---
 
@@ -75,7 +96,8 @@ fact; Q2 proposes the status transition with a one-line justification.)*
 - **Attachments remain NEEDS HUMAN** (screenshots, .xlsx, .xer) — see
   `context.md §8`.
 
-**Confidence in diagnosis: 8/10.** **Confidence in this being the right next step:
-9/10** — cause is settled; the only lever left is chasing the customer, and the
-status question (With Customer vs With Technical Support) is the concrete decision
-to force.
+**Confidence in diagnosis: 8/10** (unchanged — no new evidence either way).
+**Confidence in this being the right next step: 9/10** — cause is settled; the only
+lever left is chasing the customer, and at ~14 days on a Critical the status move
+(With Customer → With Technical Support) is the concrete decision to force rather
+than merely suggest.

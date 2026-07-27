@@ -10,6 +10,30 @@
 
 ---
 
+## UPDATE 2026-07-27 — functionally resolved; only Jira board hygiene remains
+
+No further activity on the ticket since the last triage. As of today:
+
+- **3+ weeks since the "as intended" product decision** (Mostafa via Rishi, comment 105647,
+  **2026-06-23**) — never revisited, never challenged by the customer.
+- **3+ weeks since Freshdesk #7126's final "Closed" state (2026-07-06)**. Note the churn on the
+  support side: set **Closed 2026-07-03**, then **"Waiting on customer" 2026-07-03** (same day,
+  contradictory), then **Closed again 2026-07-06** — which is the final state. **No comments since
+  2026-07-06.**
+- Paolo never came back with questions, and never took up the "reach out to Josh (customer success)"
+  route. Silence here reads as acceptance, not as a pending customer action.
+
+**Conclusion:** this ticket is **functionally resolved**. The engineering question is answered
+(not a bug — §2, §7), the product question is answered ("leave as intended" — §4), and the
+customer-facing ticket is closed. Nothing is outstanding to evaluate, analyse, or develop.
+
+**The only open item is Jira board hygiene.** The Jira issue is still sitting in **"With Customer"**
+on the PLT board and has not been transitioned to Done/Closed — a **status mismatch** against the
+Freshdesk-side resolution (§4, "Discrepancy to flag"). Left as-is it is an orphaned open Live
+Incident distorting the board. See `recommended-action.md`.
+
+---
+
 ## 1. What "error" means here — WRONG VALUE, not a crash
 
 This is a **perceived wrong-value / inverted-ordering** report, **not** a hard error/crash and
