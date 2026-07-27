@@ -85,6 +85,22 @@ After the 193 links are soft-deleted and the Progress Outputs parquet regenerate
 KUPSB21200 88/88, JUPSC21480 110/110, JUPSA21030 111/111, JSCOR1060 53/53, KUPSD21420 111/111 —
 all 100% → **Containment package 100%**, variance clears.
 
+## 2026-07-24 — audit CSVs validated (both tickets), ready to attach
+
+Operator exported both detail files; validated programmatically:
+
+| File | Rows | Per-activity | Activity UUIDs | Dupes | Format |
+|---|---|---|---|---|---|
+| PLT-2931 (ELN03) | **193** ✅ | JSCOR1060 1, JUPSA21030 114, JUPSC21480 3, KUPSB21200 34, KUPSD21420 41 — **matches A2/A3 exactly** | one UUID per activity, no bleed | 0 | ASCII, LF, no BOM |
+| PLT-2882 (FAR01) | **418** ✅ | FAR01UGD1220 418, activityId `7c4f2509-3bce-4005-971d-46e82610b1a4` — matches the investigation log | 0 | ASCII, LF, no BOM |
+
+Also checked: every `modelElementId` is a well-formed UUID; distinct-ID count equals row count in
+both files (193 / 418 — no repeats); zero cross-file overlap (different projects, as expected);
+all rows exactly 3 fields (`userItemId,activityId,modelElementId`) so they parse directly into the
+`{modelElementId, activityId}` payload with no cleanup.
+
+Both files are attachment-ready and deletion-ready. Each fits one ≤500 batch.
+
 Status: list ready + verified. Remaining: CSV export (operator) → deletion approval
 (Pietro/Mostafa, drafted in recommended-action.md) → one soft-delete batch (193 ≤ 500/batch,
 `POST /api/v2/projects/{pid}/elements/activity-links/delete`, needs ELEMENT_EDIT+DELETE) →
