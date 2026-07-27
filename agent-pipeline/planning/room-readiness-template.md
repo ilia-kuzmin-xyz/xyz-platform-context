@@ -96,12 +96,35 @@ Mirrors the **viewer** pattern exactly (classify → gate → conditional fetch 
 ```
 [0b]   Profiler            + capabilities.rooms (are the 4 room artefacts present?)
 [0b½]  Viewer intent       (unchanged)
-[0b¾]  TEMPLATE classifier pure keyword → RoomReadiness | None      ← NEW
-[0c]   Clarifier           "Room readiness" as a module option; user pick overrides
+[0c]   Clarifier           returns "template": "room_readiness" | null   ← NEW (LLM)
+                           + "Room readiness" as a module option
 [0d]   Viewer mapper       (unchanged)
-[0d½]  Room readiness data only when template active → per-room rows ← NEW
-[1]    Composer            + template prompt block, only when active ← NEW
+[0d½]  Room readiness data only when template active → per-room rows    ← NEW
+[1]    Composer            + template prompt block, only when active    ← NEW
 ```
+
+### Detection is LLM-based, not keyword
+
+**Explicit decision: do NOT use a keyword function.** Phrasing is unpredictable — *"are we ready to hand over L2?"*, *"what's blocking sign-off"*, *"which spaces can we close out"* share no reliable tokens. (The room *names* on the reference project vary just as wildly; question phrasing is worse.)
+
+Constraint that fixes where the call lives: **detection must happen at phase 0, before hydration**, because it gates the expensive room join — and the composer runs *in parallel* with the hydrators, so the composer cannot be the decider.
+
+Reuse the clarifier's existing LLM call rather than adding one:
+
+| Path | Decision source | Cost |
+|---|---|---|
+| FRESH turn | Clarifier returns extra field `"template": "room_readiness" \| null` | **free** — same call |
+| Continuation (answers present) | The module picks — user ticked "Room readiness" | free |
+| EDIT turn | Inherit from thread state (prior artifact was the template) | free |
+| `skip_clarifier` | Small standalone classify call | ~1s, rare |
+
+Gate everything on `capabilities.rooms` — projects without room artefacts never classify at all.
+
+Carry over from the viewer classifier:
+- **Conservative instruction** — return `null` unless clearly about room/space readiness or handover; ambiguity → generic flow.
+- **Return a `reason`**, emitted as an `intent_step` (like `viewer_intent`) so the dev overlay shows *why*, and a wrong call is visible rather than mysterious.
+
+New risk accepted: an LLM can false-positive where a keyword list wouldn't fire. Contained by the capability gate, the clarifier survey (user sees "Room readiness" ticked and can untick before generating), and the logged reason.
 
 ### The safety property (why this can't break existing reports)
 
@@ -141,12 +164,57 @@ Structure it so a template = `{ detector, required_data, prompt_section }`. Room
 
 ---
 
-## 5. Build order
+## 5. Implementation strategy (skeptically reviewed)
 
-1. **Data first** — per-room join (4 parquets + element-status), `capabilities.rooms`, T2 cache. Worthless to write the template before this exists.
-2. Validate the room-name → type parse against the real room list; check per-room planned % against the dashboard.
-3. Template classifier + clarifier option + conditional prompt block.
-4. Composer template section (layout + blocks + the exact status/colour rules from the mockup).
+### Scope cut: v1 = overview only
+
+The drill-down (blocks 8–10) is 55% covered and carries every unresolved gap — GC %, milestones, and the only dependency on `activity-categories-flat`. The overview is 87% covered and is the screen that was actually reviewed.
+
+**v1 = the 7 overview blocks. Drill-down is v2.** This halves the scope, removes a parquet dependency, and drops all three unresolved gaps out of the critical path. Room cards stay clickable (state exists) — clicking just does nothing until v2.
+
+### Verify before coding
+
+The dashboard has an explicit guard — *"Missing room parquets … room filtering unavailable"* — which means these artefacts are **routinely absent**. Their existence and columns on the reference project are **not yet confirmed**.
+
+**Step 0 is a throwaway script** that lists artefacts and prints columns + row counts for `project-element-list`, `element-room-mapping`, `project-rooms`, `project-levels`. Writing the hydrator before this is coding blind — the same mistake that cost a day on the viewer (assumed no element→room link existed; it did).
+
+Specifically unverified: whether `element-room-mapping` already carries `modelElementId`, which would make `project-element-list` (the largest of the four — one row per element) unnecessary.
+
+### Cost is a real UX risk
+
+`viewer_mapper` already spends 30–60s on 3 parquets / 1.4M rows. Adding up to 4 more could double that, on top of Fable's minutes-long compose → a **3-minute** report. T2 (2h) fixes repeats, not the first run.
+
+Mitigations: reuse `element-status` already fetched by `viewer_mapper` (don't download twice); drop `project-element-list` if the bridge is unnecessary; download in parallel like the viewer mapper; emit `intent_step` progress so the wait is visible.
+
+### Planned % — highest-risk item, make it optional
+
+It is **duplicated business logic**: the canonical implementation is TypeScript + DuckDB in the dashboard, it feeds a denominator that already caused a live incident, and a Python reimplementation can silently drift.
+
+**Ship it nullable.** If validation against the dashboard fails, emit `planned: null` and let the TSX degrade — no "Behind" band, no vs-plan chips, no white marker. Blocks still render. Don't let the riskiest number block the release.
+
+### Template fidelity — accept it won't be pixel-perfect
+
+The TSX is LLM-generated, so the grid will approximate the mockup, not match it. That's inherent to a prompt-based template. The alternative — a hardcoded TSX component with data slots — would be pixel-perfect but not tweakable by chat, which is a stated requirement. Trade-off accepted deliberately.
+
+### Two PRs, data first
+
+1. **PR 1 — data.** `rooms_readiness` domain + `capabilities.rooms` + T2 cache + tests. Independently valuable: it also unlocks **room isolation in the canvas viewer**, which has its own use.
+2. **PR 2 — template.** Clarifier `template` field + module option + conditional prompt block + composer template section.
+
+### Prove the isolation, don't assert it
+
+Add a regression test that snapshots the assembled prompt blocks for a **non-template** request and asserts they are byte-identical before/after the change. The "won't break other reports" guarantee is only real if it's tested.
+
+### Order
+
+```
+0. Verify artefacts + columns (throwaway script)          ← blocking
+1. Validate room-name → type parse on the real room list
+2. PR 1: rooms_readiness domain (planned % nullable)
+3. Validate planned % vs dashboard for the same rooms
+4. PR 2: detection + conditional prompt + template section
+5. v2: drill-down (packages, GC, milestones)
+```
 
 ## See also
 
