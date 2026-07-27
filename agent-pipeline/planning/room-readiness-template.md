@@ -1,6 +1,10 @@
 # Room Readiness — report template (PLT-TBD)
 
-🔵 **DESIGN — not implemented.** Source of truth for the layout: Mostafa's mockup (`Room Readiness Canvas.dc.html`, Claude-designed, XYZ design system).
+🟢 **v1 IMPLEMENTED (pipeline).** Overview blocks only; drill-down is v2. Source of truth for the layout: Mostafa's mockup (`Room Readiness Canvas.dc.html`).
+
+**Shipped:** `agents/rooms_readiness.py` (room↔element rollup, planned %, 360 coverage), `agents/room_types.py` (LLM ruleset → deterministic typing), `agents/report_templates.py` (conditional prompt block), clarifier module option, server Phase 0d½, `capabilities.rooms`. 226 tests.
+
+**Verified end-to-end on the reference project:** template activates from the clarifier answer, rollup resolves 502 rooms in ~66s cold (2h cache), and the composer scored **10/10 on template adherence** — 3-column 430px grid, two rows, ranks by variance, nulls as em-dash, scrolling room matrix, grouping by level and type, ForgeViewer embedded, element counts shown.
 
 First **named template** for the Infinite Canvas: when we're confident the user is asking about room readiness, produce a fixed layout with fixed blocks instead of letting the composer improvise. User can still tweak it afterwards via chat.
 
@@ -180,6 +184,26 @@ Consequences:
 ### Generalisation
 
 Structure it so a template = `{ detector, required_data, prompt_section }`. Room readiness is the first; future templates (progress briefing, QA pack) drop into the same registry without touching the base prompt. Build for one, shape for many — don't build a framework up front.
+
+---
+
+## 4b. What real data changed about the design
+
+Measured on the reference project — these are in the shipped template prompt:
+
+| Mockup assumption | Reality | Consequence |
+|---|---|---|
+| "Rooms behind plan: 5" | **496 of 502** are behind (project is 100% planned vs 55.55% actual) | Rank attention by `variance`; a `behind` boolean is useless |
+| 29 rooms over 4 levels | **502 rooms over 3 levels** | Room matrix must scroll; no fixed top-4 list |
+| "360 coverage 15/29, 14 need recapture" | every capture is **164–298 days** old → 7-day rule gives 0/502 | Report `rooms_with_capture` + `median_capture_age_days`, not freshness alone |
+| Readiness = installed + checklists | checklists are the Supabase MVP | Label as "installed elements within schedule scope" |
+| — | many rooms have **1–2 elements** in scope | Show element counts beside percentages or 0%/100% misleads |
+
+Two denominator errors were found by measuring rather than reasoning, and both produced plausible-looking dashboards:
+1. `installed / has-status-row` → **386 of 395 rooms at 100%** (element-status only holds *scanned* elements, nearly all of which are installed).
+2. `installed-anywhere / schedule-scope` → **max 131.7%** (numerator not a subset of the denominator).
+
+Shipped: `pct = (installed AND activity-linked) / activity-linked`. Cross-check: room planned median **100%** matches project planned **100%**; room actual 44.6% vs project 55.55% (different basis — element count over room-mapped elements vs labour-weighted over all).
 
 ---
 
