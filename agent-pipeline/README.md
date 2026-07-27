@@ -30,7 +30,7 @@ python -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 Healthy startup: `pipeline: Pipeline v2 ready — 92 MCP tools loaded`
 
 Required env vars: `ANTHROPIC_API_KEY`, `XYZ_MCP_SERVER_URL`, `CORS_ALLOWED_ORIGINS`.  
-Model hardcoded in `agents/config.py` as `claude-opus-4-7`.
+Model hardcoded in `agents/config.py` as `claude-fable-5` (was `claude-opus-4-7`). Fable specifics: thinking is ALWAYS on — send no `thinking` param; `max_tokens` must be generous because thinking shares that budget (composer 96k, ask/clarifier 12k); it emits inconsistent `\uXXXX` escaping (see [data-contracts.md](data-contracts.md) + canvas pitfall 14).
 
 ## File map
 
@@ -40,7 +40,11 @@ Model hardcoded in `agents/config.py` as `claude-opus-4-7`.
 | `agents/intent_classifier.py` | Pure function: FRESH / EDIT / SKETCH / SWITCH_PROJECT / OFF_TOPIC |
 | `agents/project_resolver.py` | Phase 0a: fuzzy project matching |
 | `agents/profiler.py` | Phase 0b: parallel data probes (counts + samples) |
-| `agents/clarifier.py` | Phase 0c: survey questions for FRESH turns |
+| `agents/clarifier.py` | Phase 0c: survey questions for FRESH turns (+ "3D viewer" module option) |
+| `agents/viewer_intent_classifier.py` | Phase 0b½: NONE / DISPLAY / INTERACTIVE (pure, keyword-based) |
+| `agents/viewer_mapper.py` | Phase 0d: parquet download + element→dbId JOIN; `to_wire_format()` |
+| `agents/viewer_config_builder.py` | Phase 0d: deterministic colour config (field + palette) |
+| `agents/viewer_palettes.py` | `INSTALLATION_STATUS_PALETTE` — exact status→colour keys |
 | `agents/artifact_composer.py` | Phase 1: streaming Claude call → TSX |
 | `agents/hydrators.py` | Phase 2: parallel domain fetchers |
 | `agents/ask_agent.py` | Ask mode: generates JS spec instead of full dashboard |
