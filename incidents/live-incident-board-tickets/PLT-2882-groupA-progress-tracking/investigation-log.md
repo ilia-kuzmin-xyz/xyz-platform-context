@@ -261,3 +261,26 @@ routine.
 links, confirm whether it has rows in `activity_progress` and what its `PlannedLaborUnits` are.
 Zero rows means no progress impact; rows plus labour units means it will flip to the intangible
 path and its percentage will come from reported labour instead.
+
+## 2026-07-27 — pre-deletion baseline captured (FAR01)
+
+Before running the approved cleanup, a full snapshot of live activity links was taken from
+`GET /api/v2/projects/{id}/elements/activity-links` (paginated, 50k/page, `!isDeleted` filtered,
+saved as `links-backup-FAR01-before-cleanup.csv`).
+
+- **FAR01 live links before deletion: 799,259**
+- **Expected after deleting the approved 418: 798,841**
+
+Re-running the same snapshot after the deletion and diffing the count is the safety check: a drop
+of exactly 418 confirms the endpoint removed only what was sent. Any larger drop means
+over-deletion, and the backup CSV is the restore source.
+
+Incidental corroboration: the progress parquet reports `TotalLinkedElements` = 798,535 for FAR01,
+i.e. *fewer* than the live link count. Consistent with the finding above that some links
+(including this activity's 418) are absent from `activity_progress` and therefore contribute
+nothing to progress rollups.
+
+Project ids for the record (postgres, the canonical ones api-v2 takes; the 24-hex value in the
+dashboard URL is the legacy mongo id and will NOT work):
+- ELN03 `ca64b06a-36bd-48da-9540-07ee6ab136c6`
+- FAR01 `b28712bb-0691-4db2-a626-85c2f1f5ead6`
