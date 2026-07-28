@@ -1,19 +1,41 @@
 # PLT-2884 — Recommended action
 
-## Chosen: (c-style) Coordinator status-check → Yash, plus a proposed status move
+## RE-CHECK 07-28: escalation is now due, not optional
+
+**Re-verified via Jira on 07-28 — nothing has changed since the 07-22 triage.**
+Same 10 comments, same "With Customer" status, last activity of any kind was
+07-20 (a content-free Freshdesk flip). No re-upload, no reply, no visible
+follow-up on the 07-22-drafted nudge below. **This is now 15 days since the
+customer was asked to re-upload, 18 days since root cause was diagnosed, and 8
+days since the ticket had any activity at all — on a Critical-priority live
+incident.**
+
+**Revised recommendation: move status to (c) With Technical Support now.** The
+07-22 draft posed this as a question ("should we move it?"); a second
+consecutive silent check confirms the answer is yes. Waiting for a third check
+before acting would mean ~3 weeks of a Critical ticket sitting with no owner
+actively chasing it. Post the nudge comment below **and** perform the status
+transition (`With Customer` → `With Technical Support`, Jira transition id
+`16`, confirmed available/unconditional) rather than just asking about it.
+
+---
+
+## Chosen: (c) With Technical Support — status move + explanatory comment
 
 Root cause is **already known and agreed** (bad/incomplete source XER, product-
 diagnosed by Mostafa on 07-10, corroborated by the customer's own Power BI
 finding). The fix is **customer-side** (re-export a complete XER in P6 and
-re-upload). The ticket has sat **9+ days** (since Ilia's 07-13 nudge) in "With
+re-upload). The ticket has sat **15 days** (since Ilia's 07-13 nudge) in "With
 Customer" with **no customer response** — Freshdesk was even flipped Closed →
-Waiting-on-customer on 07-20 with no new information. So the one useful move is a
-**coordinator nudge to Yash**: has the customer re-uploaded? If not, should this
-stop sitting passively in "With Customer" and move to **With Technical Support**
-so someone actively chases the client rather than waiting in silence?
+Waiting-on-customer on 07-20 with no new information, and **nothing at all has
+happened in the 8 days since**. Passively waiting in "With Customer" has now
+been tried across two triage cycles and produced nothing; the concrete move is
+to transition to **With Technical Support** so someone actively chases the
+client rather than the ticket waiting in silence.
 
 **Owner:** **Yash Patel** (assignee / support coordinator; owns the client
-channel). One question, routed, answerable with a status.
+channel). One question, routed, answerable with a status — plus the status
+transition itself.
 
 **Why NOT the other options:**
 - **Not Ready-For-Development.** There is **no confirmed FE/pipeline bug**. The
@@ -30,6 +52,10 @@ channel). One question, routed, answerable with a status.
   incident closes on **confirmation**, not on "we told them what to do." The
   corrected XER has not been re-uploaded/verified. Closing now would be remission,
   not resolution (playbook Phase 6).
+- **Not staying in "With Customer" for a third check.** This was a live option on
+  07-22 ("consider" moving); after a second consecutive re-check (07-28) shows
+  zero movement, staying put is no longer a neutral choice — it's letting a
+  Critical ticket coast on inertia. Escalating now is the change from last time.
 
 ---
 
@@ -38,15 +64,17 @@ channel). One question, routed, answerable with a status.
 > @Yash — PLT-2884 has been "With Customer" since 10 Jul with the fix already
 > identified (incomplete source XER — activities missing from the customer's own
 > schedule export; Mostafa diagnosed this and the customer's Power BI check found
-> the same). It's now 9+ days with no re-upload and no response.
+> the same). It's now **15 days** with no re-upload and no response, and the
+> ticket has had **zero activity of any kind for 8 days**. This is Critical
+> priority — I'm moving it to **With Technical Support** now rather than
+> checking in again in another week.
 >
-> Two quick things:
-> 1. **Has the customer re-exported and re-uploaded a corrected XER yet?** If yes,
->    we can verify the new numbers reconcile and close. If no —
-> 2. **Can we move this to With Technical Support and actively chase the client?**
->    It's Critical priority; sitting silently in "With Customer" for 9+ days on a
->    Critical isn't really "parked", it's stalled. A direct follow-up (or a short
->    Loom showing them the P6 re-export step) would unstick it.
+> One quick thing so we can close this out fast once it moves:
+> 1. **Has the customer re-exported and re-uploaded a corrected XER yet?** If
+>    yes, let's verify the new numbers reconcile and close. If no, can you
+>    actively chase (call/Loom showing the P6 re-export step) rather than
+>    waiting for them to come back on their own — two asks over 15 days
+>    haven't produced a response.
 >
 > For the record — this is expected to be data-side, not a platform bug: the old
 > (Power BI) dashboard reads from a pipeline that keeps activities from earlier
@@ -54,8 +82,9 @@ channel). One question, routed, answerable with a status.
 > reflects only the current, incomplete schedule, so it reads *lower* (23.85%).
 > A complete XER should bring them back in line.
 
-*(Closed, routed to one owner, answerable with a status. Q1 gets the outstanding
-fact; Q2 proposes the status transition with a one-line justification.)*
+*(Closed, routed to one owner, answerable with a status. States the transition
+as already decided rather than asking permission — two silent checks in a row
+on a Critical ticket is enough evidence.)*
 
 ---
 

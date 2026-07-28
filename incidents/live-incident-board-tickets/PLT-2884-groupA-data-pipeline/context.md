@@ -7,8 +7,54 @@
   client)
 - **Assignee / Reporter:** Yash Patel (support)
 - **Project:** EQX-AT10x (ID `6808f6afae311c4f8409624f`) · **Software Area:** Dashboard
-- **Created:** 2026-07-09 · **Last updated:** 2026-07-20
-- Triage date: 2026-07-22
+- **Created:** 2026-07-09 · **Last updated:** 2026-07-20T09:35 (Jira `updated` field
+  unchanged since prior check — confirmed via re-fetch)
+- Triage date: 2026-07-22 · **Re-check date: 2026-07-28 (this update)**
+
+---
+
+## 0. RE-CHECK 07-28 — delta since 07-22 (READ FIRST)
+
+**Nothing happened.** Re-fetched the issue (`getJiraIssue`, full comment list) and
+diffed against the 07-22 record:
+
+- **Comment count: still exactly 10**, same IDs, same content, ending at the same
+  last comment — Yash, **07-20 09:23**, "Ticket ID: 7384 - Freshdesk ticket status
+  changed to : Waiting on customer." **Zero new comments in the 6 days since the
+  last triage.**
+- **Jira status: unchanged** — still `With Customer` (status id `10711`,
+  category "In Progress"). No transition has been executed; `getTransitionsForJiraIssue`
+  confirms `With Technical Support` (transition id `16`) is available and
+  unconditional right now, i.e. nothing is blocking that move mechanically.
+- **Jira `updated` timestamp: 2026-07-20T09:35:11+0100** — i.e. the issue itself
+  has had **zero activity of any kind (comment, field change, or transition) for
+  8 days**, on top of already being flagged stalled 6 days ago.
+- **No re-upload evidence.** No comment from Yash, the customer, or anyone else
+  referencing a new XER, a Freshdesk re-open, or a reconciliation check. The
+  attachment list is unchanged (still just the original 3 screenshots, the
+  `.xlsx`, and the 07-10 `.xer` — no new attachment).
+- **No nudge appears to have gone out.** The 07-22 triage drafted a coordinator
+  nudge to Yash (see `recommended-action.md`) but per this board's convention
+  that draft is **not auto-posted** — and indeed there is no corresponding
+  comment in the fetched history, so either it wasn't posted or Yash hasn't
+  replied. Either way, the open question ("has the customer re-uploaded?") is
+  **still unanswered**.
+
+**Updated stall math (from today, 2026-07-28):**
+- Since root cause diagnosed (07-10): **18 days**.
+- Since Ilia's re-upload nudge / Yash's "still waiting" reply (07-13): **15 days**.
+- Since the last Freshdesk↔Jira touch (07-20, itself content-free — a Closed→
+  Waiting-on-customer flip with no new info): **8 days**.
+
+**Conclusion: this is now materially worse than the 07-22 finding, not just
+"unchanged."** A Critical-priority ticket with a known fix has now gone through
+two consecutive silent check-ins (07-22 and 07-28) with no customer response and
+no visible internal follow-up in between. The 07-22 recommendation to "consider"
+moving to With Technical Support should be treated as **due now**, not as a
+soft option — see the revised `recommended-action.md`.
+
+Everything in §1–§8 below is the 07-22 root-cause analysis, still valid and
+unchanged — re-verified against the fresh fetch, no new evidence contradicts it.
 
 ---
 
@@ -106,10 +152,17 @@ from the source XER.
    their end. still waiting for them to get back with outcome."
 8. **Yash 07-20 09:22** — Freshdesk → Closed, then **07-20 09:23** → Waiting on
    customer again (Jira status remains "With Customer").
+9. **(re-check 07-28)** — no comment #9 exists. Re-fetched via Jira API: still
+   10 comments total, still ends at item 8 above. **8 more days of complete
+   silence** since item 8, on top of the 9+ days already flagged on 07-22.
 
-**Net state:** cause + fix known since 07-10; **9+ days stalled purely waiting on
-the customer to re-upload a corrected XER, with silence on their end.** That
-stall is the actionable finding, not a code mystery.
+**Net state:** cause + fix known since 07-10; **now 15 days stalled** purely
+waiting on the customer to re-upload a corrected XER (since Yash's 07-13
+"still waiting" reply), **18 days since root cause was diagnosed**, and
+**8 days since the last touch of any kind on the ticket** — including no
+evidence the 07-22-drafted coordinator nudge was ever posted. That stall is
+the actionable finding, not a code mystery, and it has now gone unaddressed
+across two consecutive triage passes.
 
 ## 6. FE / pipeline robustness gap re: silent-incomplete-XER ingestion (secondary)
 

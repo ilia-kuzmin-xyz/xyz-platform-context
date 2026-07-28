@@ -2,11 +2,29 @@
 
 - **Domain slug:** quality-management
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2815
-- **Type:** Live Incident · **Priority:** Major · **Status:** With Customer
+- **Type:** Live Incident · **Priority:** Major · **Status:** With Customer (unchanged)
 - **Assignee:** Yash Patel (also the incident coordinator / client-comms owner — note)
 - **Reporter (Jira):** Masum Ahmed (support) · **Original customer:** "Paolo" · **Project:** ML9 (EUR)
 - **Linked Freshdesk:** #7126 — **already Closed 2026-07-06** (see discrepancy below)
-- Triage date: 2026-07-13
+- Triage date: 2026-07-13 · Re-checked 2026-07-22 (no change) · Re-checked 2026-07-28 (no change — third check)
+
+## 0. Re-check log (2026-07-28, third check, no change)
+
+Fetched live Jira state via `getJiraIssue`. **Zero delta since 2026-07-13/07-22:**
+- Comment count still 13, last comment still id 106553 ("Freshdesk ticket status changed to: Closed",
+  Yash Patel, 2026-07-06T10:18). No comment from Paolo, Josh, Mostafa, or anyone else since.
+- `updated` field on the issue is still **2026-07-06T10:18:45+01:00** — i.e. the Jira has not been
+  touched in any way (no comment, no field edit, no transition) for **22 days**.
+- Status still **With Customer**, `resolution: null`. Checked `getTransitionsForJiraIssue`: a **"Done"**
+  transition (id 7) is directly available from the current status — nothing is structurally blocking
+  closing this from where it sits.
+
+**Read on the situation:** this is not "still legitimately waiting on the client." The Freshdesk side
+(the channel the customer actually replies through) was closed by Yash on 2026-07-06 — i.e. the
+customer-facing side of this was already wrapped up over three weeks ago. The Jira ticket is not
+waiting on a pending answer; it is **stale because nobody moved it after Freshdesk closed**. There is
+nothing left to verify: root cause was pinned 07-13 (data artifact, not a bug), product ruled "leave as
+intended" 06-23, and the customer channel closed 07-06. Continuing to carry this as "With Customer" implies an open question that no longer exists.
 
 ---
 
@@ -128,8 +146,10 @@ intended for now" by Mostafa.
 
 **Confidence: 9/10 on the diagnosis** — code path read end-to-end, shipped JSON verified against the
 Confluence source, and both customer-reported figures reproduced to the exact cent (600×1.14=684.00,
-740×1.14=843.60). **~7/10 on the recommended next step**, which is a coordination/comms judgment (see
-recommended-action.md), not a code-testable fact.
+740×1.14=843.60). **9/10 on the recommended next step as of 07-28** (upgraded from 7/10 on 07-13) — the
+open coordination question ("nudge-then-close, or close outright") has been resolved by 22 days of
+silence plus Freshdesk already closed: there is nothing left to verify, and the only remaining action is
+a board-hygiene move (Done), not a comms judgment.
 
 **Needs human (does not block diagnosis):**
 - ⚠️ 2 Jira attachments (`Screenshot 2026-06-17 135944.png`, `...140026.png`, by Yash) and the 2 inline

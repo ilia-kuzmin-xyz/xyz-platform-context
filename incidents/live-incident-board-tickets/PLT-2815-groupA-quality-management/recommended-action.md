@@ -1,69 +1,66 @@
 # PLT-2815 — Recommended action
 
-## Chosen: (c) Keep "With Customer" — draft the exact closing/unblock question for Yash to relay
+## Update (2026-07-28, third re-check): move to Done — nothing left to verify
 
-**Why (c), not the others:**
-- **Not (b) Ready For Development.** There is no code defect. The calculation faithfully implements the
-  product-owned reference-table fallback rules (evidence in `context.md §2`); the only possible change
-  is **data** in the "Issue Rework Reference Table" (Confluence, UX/Product-owned), and **Mostafa has
-  already ruled "leave it as intended for now"** (comment 105647, 2026-06-23). Sending this to a dev
-  would be a no-op.
-- **Not (d) Blocked.** Nothing is technically blocking us; we are deliberately parked awaiting the
-  client's response to the answer we already gave.
-- **Not (a) fresh clarifying reply.** The clarification (it's as intended; questions → Josh) was
-  already delivered. What is missing is a **close-the-loop confirmation from the customer**, plus the
-  fact that it has been silent ~3 weeks and Freshdesk #7126 already closed (2026-07-06). The right move
-  is a precise nudge that lets us close the Jira — that is exactly what (c) is for.
+Superseding the 07-13 draft below. **This ticket should be closed, not nudged again.**
 
-**Owner:** Yash Patel (assignee + client-comms owner) → relay via **Josh (customer success)** → to
-**Paolo (ML9)**. One owner, one closed question, per the playbook.
+Live Jira check today shows **zero delta** across three consecutive re-checks (07-13, 07-22, 07-28):
+comment count unchanged (13, last id 106553), issue `updated` timestamp still 2026-07-06T10:18 (22 days
+untouched), status still "With Customer," `resolution: null`. `getTransitionsForJiraIssue` confirms a
+direct **"Done"** transition (id 7) is available from the current status.
 
----
+**Why this is a close, not another nudge:**
+- Root cause was pinned 07-13 at 9/10 confidence: not a bug, a reference-data artifact (package-specific
+  Cat3 £600 undercutting a generic-fallback Cat4 £740 for CSA/Underground Services). Code is correct.
+- Product (Mostafa, via Rishi, comment 105647, 2026-06-23) already ruled **"leave it as intended for
+  now."** That decision hasn't been revisited and nothing new has surfaced to reopen it.
+- The customer-facing channel is already closed: **Freshdesk #7126 was set to Closed on 2026-07-06**
+  by Yash Patel — the customer side of this conversation is done.
+- 22 days of silence since Freshdesk closed, with no reply, no question, no pushback from Paolo. There
+  is no pending answer to wait for. The "With Customer" status is not describing an active state —
+  it's a stale label nobody updated after the Freshdesk ticket closed.
 
-### Draft nudge for Yash to relay to the customer (via Josh)
-
-> Hi Paolo — following up on the estimated rework cost for CSA / Underground Services (ticket #7126 /
-> PLT-2815). We checked the calculation: the two figures come from our standard Issue Rework Reference
-> Table, and they're produced by different lookup rules — the **Category 3** value (€684.00) is the
-> **package-specific** rate for Underground Services, while the **Category 4** value (€843.60) falls
-> back to the **general CSA** rate because there is no package-specific Category 4 figure for
-> Underground Services. That's why Cat 4 shows higher than Cat 3 in this one package. The reference
-> figures themselves are maintained by our product team and are intended values.
->
-> Could you confirm one thing so we can close this out: **are you happy to proceed with the values as
-> they stand, or would you like our product team to review the specific Underground Services Category 3
-> figure?** If any further questions on the numbers, Josh in Customer Success can pick those up.
-
-*(Closed question, single decision for the customer: accept-as-is vs request a product review of the
-one figure. Answerable in one line, so the Jira can then be closed or escalated.)*
+**Owner:** Yash Patel (assignee) — the only action needed from him is the board move itself, not a
+customer follow-up.
 
 ---
 
-### Attach these facts to the ticket / have ready when the customer replies
+### Drafted board action (not executed)
 
-If the customer pushes back (likely, since their premise is correct), hand product this precise
-evidence — it materially sharpens the "as intended" decision, which was taken on 2026-06-23 **before**
-this exact mechanism was pinned:
+> Transition PLT-2815 → **Done**.
+> Resolution note: *Not a bug — reference-data artifact in the Issue Rework Reference Table (CSA /
+> Underground Services Cat3 vs Cat4 fallback ordering). Root cause and reproduction in PLT-2815 comment
+> history / this ticket's context.md. Product (Mostafa) ruled leave-as-intended 2026-06-23. Customer's
+> Freshdesk ticket #7126 already closed 2026-07-06 with no follow-up in 22 days. Closing to match the
+> resolved customer-facing ticket.*
 
-- The inversion is driven by **`Cat3 | CSA | Underground Services = £600`**, which is anomalously low:
-  lower than the generic Cat3 CSA (£2,003.33) **and** the generic Cat4 CSA (£740.00), and a steep
-  cliff within the package (Cat1 £54,560 → Cat2 £7,125.71 → Cat3 £600). `rework_reference.json:65-67,83`.
-- There is **no `Cat4 | CSA | Underground Services` row**, so Cat4 uses the generic CSA fallback (£740).
-- Route a product/data question to **Mostafa / Pietro** (Pietro authored the reference table): *"Is the
-  £600 Cat3 Underground Services figure correct, and should a package-specific Cat4 row be added?"*
-  This is a one-line, evidence-backed decision — not dev work.
+If Yash prefers a paper trail before closing, a one-line comment before the transition is enough —
+this is now a formality, not a fresh clarifying question:
+
+> Closing this out — Freshdesk #7126 has been closed since 07-06 with no further questions from the
+> customer, and product already confirmed the values are as intended (06-23). Nothing left to verify
+> on our side.
+
+---
+
+### Reference — evidence bundle if product ever revisits the £600 figure
+
+Kept for continuity, not for immediate action (product already declined to change it 06-23):
+- `Cat3 | CSA | Underground Services = £600` is anomalously low: below the generic Cat3 CSA (£2,003.33)
+  *and* the generic Cat4 CSA (£740.00) — `rework_reference.json:65-67,83`.
+- No package-specific `Cat4 | CSA | Underground Services` row exists, so Cat4 uses the generic CSA
+  fallback (£740).
+- If this resurfaces, route to **Mostafa / Pietro** (Pietro authored the reference table) as a data
+  question, not a dev ticket.
 
 ---
 
 ## Notes for the coordinator (Yash)
 
-- **Freshdesk/Jira status mismatch:** Freshdesk #7126 is **Closed** (2026-07-06) while this Jira is
-  still **"With Customer."** A legitimate alternative to the nudge above is simply to **close PLT-2815**
-  (resolution: not-a-bug / working-as-intended, product-owned data) to match the closed support ticket.
-  That option falls outside the four actions I was asked to choose from, so it needs your call — but if
-  you'd rather not re-open a settled conversation with the client, closing is the cleaner path given
-  ~3 weeks of silence.
-- Either way this stays **out of the dev queue** until product changes the reference data.
+- This is the **third consecutive re-check with no change** (07-13 → 07-22 → 07-28). The ticket has been
+  sitting resolved-but-open for 3+ weeks. Recommend closing today rather than scheduling a fourth check.
+- Stays out of the dev queue either way — no code change is warranted.
 
-**Confidence in diagnosis: 9/10. Confidence in this being the right next step: ~7/10** (comms judgment;
-depends on whether Yash prefers to nudge-then-close or close outright).
+**Confidence in diagnosis: 9/10. Confidence in this being the right next step: 9/10** (up from 7/10 on
+07-13 — the remaining uncertainty back then was "nudge vs close"; three weeks of confirmed silence plus
+Freshdesk already closed resolves that in favour of closing).

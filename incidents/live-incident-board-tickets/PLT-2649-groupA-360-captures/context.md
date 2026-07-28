@@ -2,14 +2,33 @@
 
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2649
 - **Issue type:** Live Incident ("To track live incidents on site.")
-- **Status:** In Analysis (category: In Progress / yellow). Freshdesk #6622, last set to "Waiting on 3rd line" (2026-06-19) — i.e. back on us.
+- **Status:** **With Customer** (category: In Progress / yellow) — changed since last check. Freshdesk #6622 mirrored to "Waiting on customer" 2026-07-24 (Yash Patel, comment 108112), matching the Jira status.
 - **Priority:** Major
 - **Project (site):** PA12
 - **Reporter & Assignee:** Masum Ahmed
-- **Created:** 2026-05-06 · **Last updated:** 2026-06-30
+- **Created:** 2026-05-06 · **Last updated:** 2026-07-24
 - **Components / Labels:** none
 - **Attachments:** 2 PNG screenshots (see NEEDS HUMAN) + 1 broken inline blob in the description
 - **Domain slug:** `360-captures`
+
+---
+
+## DELTA since last check (2026-07-13 → 2026-07-28 re-check)
+
+**Last recorded check:** 2026-07-13, status then "In Analysis," last comment on file was Ilia's 2026-06-30 unanswered question to Pietro. **This re-check found 6 new comments (107234 → 108113) and a status change to With Customer.** Root cause has been **substantially refined and upgraded in confidence** — see revised hypothesis below; the old "captures inherited an old PBP → client re-uploads captures" framing is **superseded**.
+
+1. **2026-07-13 (same day as last check, later that afternoon) — Pietro answered.** Pietro Desiato (comment 107234) replied to Ilia's 06-30 question, asking whether we already have a list of the affected pins, and floated a **product idea**: an in-editor way to adjust pin position, looping in **Jason Fingland** (designer) and **Mostafa Kamel Hussien**. *(Timestamp 13:53 — likely just after the prior triage snapshot was taken that day, which is why it read as "unanswered" then.)*
+2. **2026-07-13 — Jason Fingland pushed back** (107238) on broad manual pin-editing (risk of drifting from as-built reality). He proposed instead: detect captures whose position no longer matches their expected level/floorplan after a PBP change ("taken on Level 3 but now appears on Level 4"), and, if editing is wanted, expose X/Y/Z in the existing Editor details panel (supports multi-edit). **This product-design sub-thread was never explicitly closed** — see "Open side-thread" below.
+3. **2026-07-16 — Ilia found the precise root cause** (107545): a **specific Revit level**, id `f0f4d409`, has elevation **50.4** where it should be **0**; fix that one value and "rooms→points→captures all inherit it on re-import." This replaces the earlier "old PBP / re-upload captures" hypothesis with a **single source-model data-entry error**.
+4. **2026-07-17 — Yash asked which model** (107622) needs the correction.
+5. **2026-07-24 — Ilia gave full, quantified detail** (108107): model **`PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24_detached`** (Architectural, V1, uploaded 2025-12-04). Level **"DC - 0G - FFL"** sits at **+50.4 m** vs the rest of the DC building's project datum (DC-01-FFL = 5.3, DC-02 = 10.6, DC-03 = 15.9) — ground floor ends up above the roof. **101 rooms, ~1870 captures** float ~50 m too high as a result. Cause: that level comes from a **linked file inside the federation** whose levels all sit at 48–73 m (a shared-coordinates misalignment), not from any per-capture PBP drift. **Fix:** align the linked file's shared coordinates, or set "DC - 0G - FFL" to ≈0 and re-upload the model — **rooms/points/captures inherit the fix automatically on re-import; no captures need re-taking or re-uploading.**
+6. **2026-07-24 — Yash relayed this to the customer** and flipped Freshdesk #6622 to "Waiting on customer" (108112) — **this is why the ticket is now "With Customer."** Not a re-ask of the stalled internal question; the internal question WAS answered (by Ilia's own follow-up investigation, not by Pietro), and the resulting concrete, specific ask has been sent to the client's project delivery team.
+
+**Why the 2026-07-22 run didn't touch this ticket:** consistent with the timeline above, the ticket was almost certainly still **"In Analysis"** on 07-22 — Ilia's decisive comments (precise level ID, model name, elevation values) weren't posted until 07-16 and 07-24, and the Jira status only flipped to "With Customer" on 07-24, two days *after* the 07-22 run. Nothing to fault; the run's ticket-selection by status simply predated the flip.
+
+**Net effect on the working hypothesis:** upgrade, not overturn. The class-of-cause call ("data, not frontend code") holds and is now nailed down precisely: **one linked-file level offset in one federated model**, not a diffuse "60% of captures have a stale PBP." The "~60/40 split" language from May was an eyeball estimate from screenshots; the actual mechanism explains a **discrete, boundaried cohort** (one building's ground floor, 101 rooms / ~1870 captures) rather than a scattered per-capture problem — which fits "distinct floor floats above the roof" better than "random subset misplaced."
+
+**Open side-thread — not blocking, but not closed either:** Pietro/Jason/Mostafa's 07-13 discussion about an in-editor pin-adjustment / mismatch-detection feature (comments 107234, 107238) has had no reply since Jason's 107238. It's now largely moot for *this* incident (Ilia's fix requires no manual pin editing — captures inherit the corrected elevation automatically), but it reads like a live product idea that got overtaken by the faster data-fix path and never got an explicit "shelve it" or "spin it into a backlog ticket." Worth a nudge so it doesn't quietly die mid-thread on an otherwise-closing incident ticket.
 
 ---
 
@@ -45,9 +64,16 @@ The `[NEW DASHBOARD]` title is **misleading** — analysis in-thread has already
 | 2026-05-14 16:56 | Masum Ahmed | Freshdesk #6622 → "Waiting on customer" |
 | 2026-06-05 13:49 | Yash Patel | Customer reply: *"same on the old one… problem with the room data in the Revit models"* |
 | 2026-06-19 08:51 | Yash Patel | Freshdesk #6622 → "Waiting on 3rd line" (back to us) |
-| 2026-06-30 16:49 | Ilia Kuzmin | @Pietro — "who can assist us with tweaking 60% of the pinpoints… that inherited the old pbp?" — **last activity, unanswered** |
+| 2026-06-30 16:49 | Ilia Kuzmin | @Pietro — "who can assist us with tweaking 60% of the pinpoints… that inherited the old pbp?" |
+| 2026-07-13 13:53 | Pietro Desiato | Answers: asks for a list of affected pins; floats in-editor pin-adjust feature idea. @Jason @Mostafa |
+| 2026-07-13 14:11 | Jason Fingland | Cautions against broad manual editing; proposes detecting level-mismatched captures instead; if editing wanted, use Editor's X/Y/Z details-panel pattern |
+| 2026-07-16 17:39 | Ilia Kuzmin | Root cause pinned: level `f0f4d409` elevation 50.4 → should be 0; fix inherited on re-import, rooms→points→captures |
+| 2026-07-17 11:07 | Yash Patel | Asks which model needs the level correction |
+| 2026-07-24 13:23 | Ilia Kuzmin | Full detail: model `PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24_detached`; level "DC - 0G - FFL" +50.4m vs datum; 101 rooms/~1870 captures affected; linked-file shared-coords misalignment; fix = correct level + re-upload, no capture re-upload needed |
+| 2026-07-24 13:55 | Yash Patel | Freshdesk #6622 → "Waiting on customer" (relayed to client) — **Jira status now With Customer** |
+| 2026-07-24 13:56 | Yash Patel | Acks Ilia |
 
-**Staleness:** last movement 2026-06-30 → **~13 days** untouched; the substantive analysis has been static since early June.
+**Staleness:** last movement 2026-07-24 → **~4 days** since last comment (as of 2026-07-28); genuinely waiting on an external party (client project delivery), not stalled on an internal unanswered question.
 
 ---
 

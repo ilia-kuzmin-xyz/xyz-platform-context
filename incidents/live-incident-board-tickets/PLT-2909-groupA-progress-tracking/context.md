@@ -1,5 +1,55 @@
 # PLT-2909 — "Models/Elements linked to an activity appear wrong" — triage context
 
+## RE-CHECK 2026-07-28 — delta since last write (07-25 write, covering state through 07-22)
+
+**The diagnostic WAS run.** New comment (id `108005`, Ilia Kuzmin, **2026-07-23**, not
+reflected in the prior write-up) closes the central open question below:
+
+> Ran the diagnostic on ATL08 for CY-5200. The model `DistributionBoardsPanels_Bld1-V1` is a
+> ghost: metadata claims the 6 elements, geometry and its cloud list have none of them. Bld2 and
+> the federated model are real, selection works fine, so it's purely a wrong model list. Same
+> defect family as PLT-2882 but here it's PC-EXCEL imports, all 6 elements from one source file
+> (`dd20b121`). Suspect the excel import wrote the same rows into several buildings' metadata.
+> @Ali Seyedof: can you check why client-element-metas for that Bld1 model
+> (`00156181-fca5-4a7c-acdf-a12ce924c252`) has elements it doesn't own?
+> FE fix (hide models not in geometry) will be tracked in PLT-2882.
+
+**What this changes vs the 07-22 picture:**
+1. **"Same root-cause family, needs its own ATL08 confirmation" → CONFIRMED, by Ilia's own
+   diagnostic run.** Ghost model membership verified: `DistributionBoardsPanels_Bld1-V1` claims 6
+   elements the geometry/cloud list doesn't have; Bld2 + federated model are clean. Matches the
+   predicted shape (`inParquet > 0, inGeometry = 0`) exactly.
+2. **Trigger differs from PLT-2882's — this is NOT a re-upload/re-version story.** PLT-2882's
+   confirmed trigger was content re-versioned within federated Revit models. Here Ilia's working
+   hypothesis is **import-time duplication**: the PC-EXCEL import wrote the same element rows into
+   more than one building's `client-element-metas`. Same *symptom family* (parquet says yes,
+   geometry says no), **different mechanism** — a write-time data bug, not a stale-generation
+   drift. The "Model type Revit vs Navisworks decides the mapper path" open question from 07-22
+   is now moot for attribution purposes — the confirmed lead is the **Excel importer**, not the
+   Revit/Navisworks mapper split.
+3. **FE-fix routing decided:** no separate PLT-2909 FE fix — folded into PLT-2882's tracked FE
+   robustness item ("hide models not in geometry"). Consistent with this doc's own prior
+   conclusion (§ Mechanism) that both surfaces share one fix.
+4. **BE root-cause ask now has a named owner: Ali Seyedof** (not the generic Sergey/Sachin/Ali
+   roster guess below) — asked directly why Bld1's `client-element-metas` contains elements it
+   doesn't own.
+5. **Silence since:** as of 2026-07-28 (5 days), **no reply from Ali Seyedof or Yash** since the
+   07-23 comment. Ticket status unchanged (**In Analysis**), assignee unchanged (Ilia). This is
+   now a "diagnosis done, waiting on BE" state, not a "diagnosis pending" state — the
+   recommended action changes accordingly (see `recommended-action.md`).
+6. **Side-finding (session-id error)** — still no reply/error text from Yash. Unchanged, still its
+   own track.
+7. **Kyriakos's own attachments/screenshots** — still unopened (auth-gated), still NEEDS HUMAN,
+   but now lower-value: the diagnostic already answered "which surface, how many extra models"
+   for the CY-5200 repro (1 ghost model: Bld1) more precisely than the screenshots would.
+
+**Net verdict change:** confidence on "same root-cause family" moves from **7/10 → 9/10**
+(data-confirmed by the assignee, not just architecturally implied). Confidence on "ATL08
+attribution" moves from **5/10 → 8/10** (confirmed mechanism; residual uncertainty is only
+*why* the Excel importer double-writes rows, which is Ali's open question, not ours).
+
+---
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2909
 - **Issue type:** Live Incident · Software Area: **Web Viewer**
 - **Status:** **In Analysis** · **Priority:** Medium

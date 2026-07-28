@@ -6,10 +6,44 @@
 - **Priority:** Medium
 - **Project:** PLT (XYZ SW Platform : Platform)
 - **Reporter & Assignee:** Masum Ahmed
-- **Created:** 2026-04-23 · **Last updated:** 2026-04-29
+- **Created:** 2026-04-23 · **Last updated:** 2026-07-27 (new comment; see delta below — status/substance unchanged since 2026-04-29)
 - **Components / Labels / Attachments:** none
 - **External link:** Freshdesk ticket #6492 (client-facing origin — not accessible from here)
 - **Domain slug:** `other` (product/config request; touches the Dashboard domain but is not a dashboard code task)
+
+---
+
+## RE-CHECK #3 (2026-07-28) — THIRD CONSECUTIVE CONFIRM. STOP RE-CONFIRMING.
+
+**Prior checks:** 2026-07-13 (this file first written, confidence 8/10, action drafted: hand off to
+product + reclassify) → 2026-07-22 (confirmed unchanged, no delta) → **2026-07-28 (this check)**.
+
+**Delta since 2026-07-22:** exactly one new comment, no status change, no field change:
+
+| Date | Author | Content |
+|------|--------|---------|
+| 2026-07-27 11:04 | Yash Patel | "@Ilia Kuzmin can we update this to new dashboard if not done already? thanks" |
+
+That is the entire delta. Everything else — status (`With Customer`), assignee/reporter (Masum Ahmed),
+priority (Medium), the two open questions to Pietro (which dashboard to relink to; whether the
+non-PowerBI release is actually ready) — is **identical** to the 07-13 and 07-22 snapshots. Pietro
+never answered either question, in-thread or otherwise.
+
+**Why the new comment does not count as progress:** Yash's comment does not answer either open
+question — it re-asks the ticket to be actioned ("if not done already") without knowing whether the
+target dashboard has even been decided, and directs the ask at Ilia (an FE commenter, not the product
+owner who holds the actual decision, and not the person carrying out relink work). It is a **nudge to
+close the loop**, not new information. The ticket is functionally exactly where it was on 04-29: parked
+on an unanswered product decision, mislabeled "With Customer" while the customer isn't actually the
+blocker.
+
+**Verdict: nothing has genuinely moved in ~90 days** (04-29 → 07-28), across three separate
+recheck cycles (07-13, 07-22, 07-28), despite being flagged as mis-filed and internally-blocked
+every time. Re-confirming this a fourth time next cycle would add no value — see
+`recommended-action.md`, now updated to a decisive reclassify-or-close call instead of a repeated
+"hand off" recommendation.
+
+---
 
 ---
 
@@ -35,6 +69,7 @@ Not (i) bug (no defect/repro), not (iii) feature (nothing new is being built for
 | 2026-04-27 10:10 | Ilia Kuzmin | "@Pietro Desiato, do you know which dashboard we should relink for them?" |
 | 2026-04-27 10:19 | Ilia Kuzmin | "@Masum Ahmed, can we tell the client that we're waiting for a non-powerbi dashboard release to update this?" |
 | 2026-04-29 13:17 | Masum Ahmed | Freshdesk #6492 mirror → status "Awaiting release" |
+| 2026-07-27 11:04 | Yash Patel | "@Ilia Kuzmin can we update this to new dashboard if not done already? thanks" — NEW, re-check #3 delta, does not answer either open question (see Re-check #3 section above) |
 
 ## What it is actually waiting on
 
@@ -46,7 +81,11 @@ Note for the human: the native Dashboard Page is now documented as ✅ Live (`da
 
 ## Staleness
 
-**Stale.** No movement since 2026-04-29; today is 2026-07-13 → **~75 days (≈10.5 weeks) untouched**, sitting on the live-incident board the whole time.
+**Stale, and now confirmed stale across three separate recheck cycles.** No *substantive* movement
+since 2026-04-29; today is 2026-07-28 → **~90 days (≈13 weeks) with the core blockers unresolved**,
+sitting on the live-incident board the whole time. A single comment landed on 2026-07-27 (Yash Patel,
+see Re-check #3 above) but it repeats the ask rather than resolving it — the product decision and
+release-confirmation blockers identified on 07-13 are still open on 07-28.
 
 ## Roster / ownership flags
 
