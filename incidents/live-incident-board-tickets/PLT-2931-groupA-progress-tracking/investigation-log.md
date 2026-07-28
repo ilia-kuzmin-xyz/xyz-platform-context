@@ -144,3 +144,35 @@ WHERE a.userItemId IN ('KUPSB21200','JSCOR1060','JUPSA21030','KUPSD21420','JUPSC
 GROUP BY a.userItemId
 ```
 Expect 88 / 53 / 111 / 111 / 110.
+
+## 2026-07-28 — FIX CONFIRMED after parquet regeneration (ELN03)
+
+Post-refresh verification, all predictions held exactly:
+
+| Activity | Before | After | Denominator now |
+|---|---|---|---|
+| KUPSB21200 | 72.13 | **100** | 88 |
+| JUPSA21030 | 49.33 | **100** | 111 |
+| KUPSD21420 | 73.03 | **100** | 111 |
+| JUPSC21480 | 97.35 | **100** | 110 |
+| JSCOR1060 | 98.15 | **100** | 53 |
+
+`Containment` package (292 activities): **100% element-weighted and 100% labour-weighted**, up from
+97%. The denominators dropping to exactly the installed counts is the proof the parquet picked up
+the deletion rather than the percentages moving for some other reason.
+
+**PLT-2931 is resolved.** Chain closed end to end: symptom → mechanism (installed ÷ linked with a
+denominator inflated by dead links) → 193 links identified and audited → approved → deleted and
+verified (572,591 → 572,398) → parquet regenerated → percentages correct.
+
+### What is NOT closed by this
+
+Per the playbook, this closes on cause and remediation but **not trigger**. Still open:
+- Why re-uploads/imports leave element metadata out of sync with geometry (BE, with Dave and Ali).
+- Whether the unlink step on upload can compare against geometry instead of the element list. This
+  is the change that would make the whole family self-correcting.
+- FE guard: never surface a count the user cannot act on.
+- Model delete leaves links behind unless a checkbox is ticked, and the plain delete path hardcodes
+  it off (`confirm-model-deletion.tsx:103-112`). Pietro agreed this deserves its own ticket.
+- Cohort: only the five reported activities were remediated on ELN03. A project-wide sweep has not
+  been run on either project.
