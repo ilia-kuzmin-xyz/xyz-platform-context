@@ -149,3 +149,80 @@ Yash, comment 1: *"when I tried to generate session id it gave me an error."* Th
 - `xyz-platform-context/incidents/live-incident-playbook.md` — six-questions frame; "split signals into separate tracks"; "close on cause+trigger+cohort, not on works-now".
 </content>
 </invoke>
+
+---
+
+## ⚠️ 2026-07-28 — CROSS-WRITE PROVEN, and the scope is project-wide, not six elements
+
+Investigated from the ATL08 editor's `project_element_list` (columns `modelId`,
+`modelElementId`, `sourceFileElementId`). No BE access needed; this settles the hypothesis Ilia
+posted on 07-23 without waiting for Ali.
+
+### The proof
+
+Took one element claimed by 10 models and listed the claimants. **All ten rows carry the identical
+`sourceFileElementId` `358ee0bc-147c-463f-afab-c0fc246c9cb5-0076e41f`** — one row, from one source
+file. Of the ten models, **nine are `isFederated: false` siblings**, only one is the federation:
+
+| Model | Federated |
+|---|---|
+| `SWITCH - ATL8-260703` | **true** (legitimate) |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Lighting_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_ConduitsInternal_Bld1-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_ConduitsInternal_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_ConduitsUG_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Containments_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_DataDevices_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Security_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_BracketsAndSupports_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Conduits Internal-V1_X` | false |
+
+These are mutually exclusive systems, and they span **both buildings**. A single element cannot be
+a light fitting, a security device, a bracket and a conduit, in Bld1 and Bld2 at once. A source
+file belongs to one model. **The PC-EXCEL import is writing its rows into other models' element
+lists.**
+
+### Scope
+
+- 128 models in the project, exactly one federation in this sample, so the **legitimate claimant
+  count is 2** (own model + federation).
+- Distribution across all 686,088 elements: 180,142 at 1 claimant, 139,106 at 2 (normal),
+  **366,840 at 3 or more (53% of the project)**, 96,184 at 5+, 27,671 at 10+, tail to 19.
+- The ghost model from the ticket (`00156181-…`, DistributionBoardsPanels_Bld1) claims 686 elements
+  of which **650 (95%) are also claimed by other models**.
+
+So this is not "6 elements on activity CY-5200". Over half of ATL08's element metadata carries at
+least one spurious model claim, which supports Kyriakos's original statement that it affects all of
+ATL05-08.
+
+### Trigger
+
+Eight of the nine spurious claimants were imported by the same author between **2026-07-06 and
+07-08**, a single batch of PC-EXCEL imports; the ticket was raised 07-16. The outlier
+(`Conduits Internal-V1_X`, note the malformed name with a space and `_X` suffix) was imported
+2026-04-03 by a different author, so the defect is not unique to that one batch.
+
+### Why this cannot be remediated the way PLT-2882 / PLT-2931 were
+
+Those were fixed by deleting bad **link rows** via api-v2, which we own and can script. Here the
+links are correct, the elements genuinely exist, and selection works. What is wrong is the
+**generated element-metadata artefact** for each model. That cannot be fixed by deleting links; it
+requires fixing the importer and regenerating the affected models' metadata. **Backend only.**
+
+### Revised severity
+
+Previously assessed as display-only and left at Medium. Still no evidence it moves progress
+(progress is computed from `activity_links`, which are unaffected), but "half the project's element
+metadata is wrong" is a data-integrity problem, and anything that counts or filters elements per
+model is potentially reading it. Worth re-checking the Medium priority with product.
+
+### Confidence
+
+- **Cross-write is real and is the PC-EXCEL import path: 9/10.** Identical sourceFileElementId
+  across nine non-federated sibling models of incompatible system types is not explicable any other
+  way.
+- **Scope figure (366,840 elements with a spurious claim): 8/10.** Rests on the legitimate baseline
+  being 2, verified on one sampled element. If some projects nest federations, the baseline could be
+  3 for parts of the model tree, which would reduce but not remotely eliminate the number.
+- **No progress impact: 7/10.** Reasoned from progress being computed off `activity_links`, not
+  independently measured.
