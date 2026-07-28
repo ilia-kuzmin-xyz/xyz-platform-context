@@ -3,12 +3,44 @@
 - **Domain slug:** `progress-tracking` (justification in §7)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2917
 - **Type:** Live Incident · **Priority:** Major · **Status:** **Open**
-- **Assignee:** Ilia Kuzmin · **Reporter (Jira):** Yash Patel (support) · original client reporter: **Thomas**
-- **Freshdesk:** Ticket 7420, status "Waiting on 3rd line" (i.e. back on us)
+- **Assignee (as of 07-28): Yash Patel** — changed from Ilia Kuzmin (recorded 07-22); ticket has bounced back to support, consistent with clarifying questions being asked of the client. **Reporter (Jira):** Yash Patel (support) · original client reporter: **Thomas**
+- **Freshdesk:** Ticket 7420, status "Waiting on 3rd line" (i.e. back on us) — as of 07-22; not re-confirmed 07-28.
 - **Project link given:** `https://cloud.xyzreality.com/progress-dashboard/69a964b9380af76aed8faa97` · Software Area: Dashboard
-- **Created:** 2026-07-21 · **Attachments:** 1 screenshot (unreadable here — see §8 NEEDS HUMAN)
-- **Recurrence:** Pietro Desiato already "worked on" this once; the customer replied it is *still* not fixed. Treat the earlier fix with suspicion per the playbook (symptom did **not** even disappear).
-- Triage date: 2026-07-22
+- **Created:** 2026-07-21 · **Attachments (as of 07-28): 2** — the original `image-20260721-123812.png` (still unreadable, blob placeholder in description) **and** a new `ELN03 Milestones Dashboard.xlsx` added 07-27 (see DELTA §0, still unviewable — auth-blocked).
+- **Recurrence:** Pietro Desiato already "worked on" this once (re: the original 3-symptom description); the customer replied it is *still* not fixed. Treat the earlier fix with suspicion per the playbook (symptom did **not** even disappear).
+- Triage date: 2026-07-22 · **Re-checked: 2026-07-28 (this run) — see DELTA §0 below.**
+
+---
+
+## 0. DELTA since 2026-07-22 (re-check on 2026-07-28, 6 days later)
+
+**Something changed — this is not a "nothing new" re-check.** Three things moved:
+
+**(a) Ticket scope was narrowed the same day as the last triage, but the narrowing was never captured in this file.** Comments `107904`–`107906` (all 2026-07-22, 09:30–09:42) were on the ticket before/around the 07-22 write but are absent from the analysis above. In order:
+- **107904 (Ilia Kuzmin, assignee at the time):** asked Thomas, via Yash, three clarifying questions — (1) which dashboard: the old PowerBI link in the ticket, the new `/projects/<id>/dashboard`, or both; (2) re-attach one screenshot per project (FAR01/ELN04/ELN03); (3) one concrete example per project in the format "activity ID + shown vs expected", and whether the problem is (a) dashboard milestone display, (b) schedule-panel progress %, or (c) viewer highlighting. **This is a different, broader clarifying action than the one drafted in the 07-22 `recommended-action.md`** (which proposed asking Pietro what his earlier fix touched) — the real ticket owner took an independent, not-yet-fully-answered path.
+- **107905 (Mostafa Kamel Hussien):** *"it's a different issue. For activity **PMILE5030** in ELN03, he's done it to be 100% in the editor but Pietro is saying it's not coming up in the **activity parquet file**. Is that because it's a milestone? This is for the **Power BI dashboard for portfolio**."*
+- **107906 (Yash Patel):** confirms the split — the original description (FAR01/ELN04/ELN03, "worked on" by Pietro already) is a **separate, prior** issue; **this ticket (PLT-2917) is actually tracking the PMILE5030/ELN03 parquet issue Mostafa raised**, on the Power BI Portfolio dashboard specifically.
+
+This matters because the 07-22 analysis in §1–§9 below did all its code archaeology against **`hc-frontend`'s `PortfolioDashboardPage` / `MilestoneWidget` / `reporting.vw_KeyMilestone`** — the *new* React dashboard's data path. If 107906 is taken literally, the ticket's real target is the **old Power BI Portfolio dashboard** and the **parquet generator**, a different pipeline. See DELTA (c) for why this is likely moot in practice.
+
+**(b) New comment + new attachment, 2026-07-27 (`108243`, Yash relaying the client):** *"Little update about ELN03 ... All milestones are not updated. Please have a look when free."* Attached: **`ELN03 Milestones Dashboard.xlsx`** (real Jira attachment, not a `blob:` placeholder) plus an inline Freshdesk-hosted screenshot.
+- The **xlsx is unviewable** — `WebFetch` on the Jira attachment-content URL returned `403 Forbidden` (tried once, per playbook policy; needs a human with Jira session/API token).
+- The **inline Freshdesk screenshot resolved** (redirect chain to a signed S3 URL rendered as a real PNG — read via the Read tool). **It is decisive evidence**, see (c).
+
+**(c) The screenshot confirms the root-cause hypothesis with concrete activity IDs — no longer just theory.** It shows two things side by side: a dark milestone-status panel (red-diamond "Missed" cards) and a schedule/activity export table. Read together:
+
+| Activity | ID | Planned Finish | Status shown (widget) | Actual % Complete (schedule data) |
+|---|---|---|---|---|
+| DH4 Ready for Energization | **PMILE5030** | Apr 6, 2026 | **Missed** | **100%** |
+| DH5 SUB AND MECH ROOMS Ready for Energization | PMILE5010 | Apr 6, 2026 | **Missed** | **100%** |
+| DH6 Ready for Energization | PMILE5040 | Apr 6, 2026 | **Missed** | **100%** |
+| DH6 SUB AND MECH ROOMS Ready for Energization | PMILE5020 | Apr 6, 2026 | **Missed** | **100%** |
+
+All four are flagged `Key milestone`, all four have a **past** planned finish (Apr 6, 2026 vs. today 2026-07-28), all four show **Actual % Complete = 100%** in the schedule/activity data, yet the milestone widget marks all four **Missed**. This is exactly the §4 "ELN03 — definitional trap" mechanism from the 07-22 analysis (installation/progress says done, but the field the widget actually reads — Actual Finish / `status`/`actualDate` in `vw_KeyMilestone` — was never stamped), now **anchored to four real activity IDs** instead of a general hypothesis. It also directly matches **`dashboard-progress-comparison` skill → Known Bug Patterns Library → Pattern A** ("Intangible activities reporting 0% actual on Platform... first observed on **ELN03**") — milestones are typically zero-linked-element (intangible) activities, and Pattern A is a **confirmed, previously-diagnosed** bug where the parquet generator's intangible fallback doesn't propagate reported completion into the output the dashboards read. Whether this ticket's widget is the new `vw_KeyMilestone`-backed one or the Power BI one (per DELTA (a)), **the mechanism and the affected IDs are the same** — so the surface ambiguity from (a) does not block the next step.
+
+**(d) Still unanswered:** no one has answered Ilia's three clarifying questions (107904) or the "what did your earlier fix touch" question (never actually posted — the drafted 07-22 comment was never sent; only a different, real comment went out). **Pietro has not commented directly on the ticket at all** — all his input is second-hand via Yash/Mostafa.
+
+**Net assessment:** the situation **moved forward**, but not via anyone answering the open questions — via the client sending more (partially decodable) evidence. The recommended action must change: we now have four named activity IDs to test directly, which is strictly better than "pull the payload and eyeball it." See updated `recommended-action.md`.
 
 ---
 
@@ -213,16 +245,23 @@ a portfolio-dashboard home.
   status):** **9/10** — read every relevant line (`milestoneStatus.ts`, `MilestoneMarker.tsx`,
   `portfolioMilestonesData.ts`, `portfolio-api.types.ts`) plus the unit tests.
 - **Root cause is backend `vw_KeyMilestone` / Actual-End-Date population (common thread across all
-  three symptoms):** **6/10** — strongly supported by the code path + Pietro's own diagnosis, but
-  **not yet verified against the actual `/milestones` payload** for these three projects. FAR01's
-  zero could alternatively be a `projectId` join mismatch (a data-shape issue, still backend, but a
-  different fix) — cheaply testable.
-- **This is NOT primarily a frontend bug:** **8/10** — the FE contains no logic that could produce
-  the reported done/late inversion; the one *latent* FE weakness is the silent join-drop
+  three symptoms):** **7/10 as of 07-28** (was 6/10) — the 07-27 screenshot (DELTA §0c) confirms,
+  with four named activity IDs (PMILE5030/5010/5040/5020), that ELN03 milestones sit at Actual % =
+  100% in the schedule data while showing `Missed` in the widget — the exact mechanism, no longer
+  just theory. Still **not yet verified against the raw `/milestones` payload or `vw_KeyMilestone`
+  row** for those IDs — that would close the gap to 9/10. FAR01's zero-rows case is unconfirmed by
+  the new evidence (no FAR01 data arrived) and could still be the `projectId` join mismatch.
+- **This is NOT primarily a frontend bug:** **8/10** — unchanged; the FE contains no logic that could
+  produce the reported done/late inversion; the one *latent* FE weakness is the silent join-drop
   (`portfolioMilestonesData.ts:53`) which hides FAR01 rows with no warning.
+- **This matches a known, previously-confirmed bug (`dashboard-progress-comparison` skill, Pattern
+  A — intangible activities on ELN03 not propagating completion into parquet output):** **7/10** —
+  same project, same shape (labour/intangible milestone activity, complete upstream, not reflected
+  downstream); not proven identical without seeing the parquet/view row directly.
 
-**Overall triage confidence: ~6/10.** Mechanism and layer are clear; the exact backend cause per
-project needs one data-payload step.
+**Overall triage confidence: ~7/10 as of 07-28** (was ~6/10 on 07-22). Mechanism and layer are clear
+and now anchored to real IDs; which exact pipeline stage (vw_KeyMilestone population vs. the parquet
+generator's intangible fallback, DELTA §0a/c) still needs one direct data read to pin down.
 
 ---
 

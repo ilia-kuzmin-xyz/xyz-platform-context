@@ -43,6 +43,85 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-28 — 2 new tickets, 10 re-checked, 3 Group B, 2 closures confirmed
+
+Board re-queried (`project = PLT AND issuetype = "Live Incident"`), scope rules
+applied as written above (this run corrected a mistake made mid-run: an early
+draft JQL wrongly excluded `With Customer` — the scope rules above were already
+correct, the query just hadn't matched them yet). **13 tickets in scope.**
+
+### Group A (10)
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| PLT-2931 | progress-tracking | In Analysis (**new**) | 193 dead links (superseded geometry) cap 5 ELN03 Containment activities below 100% — **3rd confirmed occurrence** of the same defect family as PLT-2882/2909 | (a) nudge Pietro/Mostafa, bundle with PLT-2882's identical stalled ask | 8/10 |
+| PLT-2923 | viewer-and-model | With Customer (**new**) | QA structural-fab IFC model fails in web viewer, loads fine on-device — hypothesis: Forge/IFC translation yields zero renderable fragments (named failure branch in `viewer-service.ts:1006-1020`), unconfirmed | (a) ask Yash to re-repro his own failing session with DevTools console open — evidence available now, doesn't need the customer | 5/10 |
+| PLT-2917 | progress-tracking | Open | Assignee flipped Ilia→Yash; new client screenshot (actually rendered, unlike prior blobs) pins the bug to 4 named ELN03 activity IDs, all Actual%=100 but shown "Missed" — matches `dashboard-progress-comparison` skill's known "Pattern A" | (a) comment to Pietro with the 4 named IDs — narrower/cheaper than the old "pull the whole payload" ask | 7/10 (↑ from 6) |
+| PLT-2909 | progress-tracking | In Analysis | ATL08 diagnostic run confirmed ghost model membership; trigger differs from PLT-2882 (suspected PC-EXCEL import-time row duplication, not re-upload); BE (Ali Seyedof) tagged, **5 days unanswered** | (a) nudge `@Ali Seyedof` + status update to Yash | 8/10 (↑ from 6) |
+| PLT-2884 | data-pipeline | With Customer | Zero delta since 07-22 — **15 days silent** since re-upload was requested, 18 since root cause, Critical priority | (a) **escalate now** (upgraded from "consider"): With Customer → With Technical Support + nudge to Yash stating the move as decided | diag 8/10, next-step 10/10 |
+| PLT-2882 | progress-tracking | In Analysis | Still no deletion of 418 dead links, **14 days** unanswered approval; scope now **3 tickets** (2882/2909/2931) on the same gate; ⚠️ a 07-27 follow-up comment is visible in the Jira changelog but **absent from the live comment list** — possible deletion, needs a human to check | (a) escalation nudge to Pietro/Mostafa citing all 3 tickets + the vanished-comment anomaly | 9/10 root cause |
+| PLT-2858 | quality-management | In Analysis | Zero technical delta, but escalation trigger from 07-22 is now met: Mostafa 12 days silent, Pietro tagged 3× with no reply; customer's dropdown-vs-remove-field proposal also unanswered | (a) redirected: comment goes to **Pietro directly** now, Mostafa cc'd, explicit day-counts | 8/10 |
+| PLT-2815 | quality-management | With Customer | **22 days** stale since Freshdesk #7126 closed on the customer side; nothing left to verify | (a) **direct close**: move to Done citing root cause + Freshdesk closure — no further customer nudge | 9/10 |
+| PLT-2649 | 360-captures | With Customer | Major delta: Pietro answered the 07-13 question same-day; Ilia then pinpointed exact cause — Revit level `f0f4d409` sits +50.4m off datum, floating ~1870 captures ~50m high; status flip is a genuine customer wait (Yash relayed the ask 07-24), not silence | (a) no status change needed (already correct); internal nudge to close a now-moot side-thread | 9/10 (↑ from 8) |
+| PLT-2619 | other | With Customer | **~90 days** stale across 3 rechecks; still mis-filed as an incident (it's a demo relink request); new comment (07-27) just re-asks the same unanswered question a 3rd time | (a) hardened: force reclassify Live Incident→Task + reassign Masum→Pietro/Mostafa now, with a Won't-Do/archive fallback if no owner in 5 business days | 9/10 (↑ from 8) |
+
+### Group B (3) — context capture + dev-readiness only
+
+| Ticket | Domain | Status | One-line finding | Fix owner / readiness | Conf. |
+|---|---|---|---|---|---|
+| PLT-2918 | progress-tracking | Dev In Progress (flipped from Open) | 07-22 hypothesis (destructive per-type diff in `saveDataMapping()`, category-mapping-service.ts:265-271) **confirmed against live data** — ~10k mappings checked, WBS Location genuinely wiped across 5 disciplines, not just Precast | Data remediation in progress (Sachin, backend restore/script); the actual FE code fix has **no filed/linked ticket yet** — owner likely Darminder | 8/10 (↑ from 5-6) |
+| PLT-2874 | viewer-and-model (folder tag corrected — was mistakenly `data-pipeline` in a prior run) | Dev In Progress | Scope grew: Yash linked Freshdesk #7514 (project LVN-BL1) showing the same dashboard-vs-editor count mismatch independently of Far01, plus a 3rd/4th counter (schedule tab, "996 un-mapped activities") | Query-diff (§4 in context.md) needed on Far01 + LVN1; Darminder/Ilia (fix), Yash (customer), product flag if it's a real defect vs a labelling call | 6/10 |
+| PLT-2385 | data-pipeline | Ready For Development | Forks shipped/progressed (PLT-2650 **Released**, UX-1109 **Ready For QA**) but both explicitly exclude DC10's actual trigger (upload-time stale link, not delete) — root fix still **unticketed** on the BE side | Whoever picks this up should file the missing "BE-2 upload-path" ticket first, then resolve PLT-2385 pointing to it | 6/10 |
+
+### Closed since last run (informational — no action)
+
+- **PLT-2892** ("model syncing forever") — now **Done**. Real root cause differed
+  from the 07-13 hang/Promise.all hypothesis: projects with linked elements but no
+  applied statuses broke the dashboard's colouring fallback. Self-resolved same-day
+  by Ilia, hotfix verified on Staging by Gennaro (07-15), Freshdesk #7399 closed
+  07-17. Darminder/Sachin/Ali were never actually needed. The timeout/watchdog gap
+  flagged in 07-13 is still a real, separate follow-up worth tracking independently.
+- **PLT-2906** (section-box rotation) — now **In Code Review**. The 07-22
+  hypothesis (angle-folding bug substituting an estimate for small True-North
+  angles) is confirmed — Ilia analysed the customer's screenshots (07-24) and a fix
+  was coded, but **no PR is linked from Jira**, so whether it's a general threshold
+  fix or a narrow FAR01/FAR02 patch can't be verified from here — worth a PR-diff
+  check before this ships.
+
+### Cross-ticket notes (this run)
+
+- **The parquet/geometry cluster is now 3 tickets deep and the single most
+  actionable item this run:** PLT-2882 (FAR01), PLT-2909 (ATL08), PLT-2931 (ELN03)
+  are the same stale-metadata-vs-superseded-geometry defect family, and all three
+  are gated on the **same unanswered Pietro/Mostafa approval** (oldest ask now 14
+  days). One product decision unblocks all three.
+- **Two Group A tickets crossed their own stated escalation threshold this run**
+  (PLT-2858, PLT-2884) — both had a "nudge once, escalate if still silent" plan
+  from 07-22, and both got silence, so both actions are now framed as decisions
+  rather than requests this time.
+- **PLT-2882's vanished comment** is the one item this run that isn't a triage
+  finding so much as a data-integrity flag: a comment visible in the issue
+  changelog is not in the current comment list. Could be an accidental delete,
+  could be a permissions/visibility quirk — a human should check Jira's audit log
+  directly rather than take our word for it.
+- **PLT-2649 is this run's good-news story:** a vague "re-upload and see" question
+  became a named, precise, one-line fix (single elevation correction) once Pietro
+  actually answered — worth noting as a pattern: With Customer isn't always
+  "stalled," sometimes it's "we did our job and now genuinely wait."
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian/Freshdesk auth) — this run
+
+**PLT-2931** (2 blob screenshots — low priority, CSV data already confirms the
+mechanism independently), **PLT-2923** (1 screenshot), **PLT-2917** (an `.xlsx`
+attachment — 403, needs a human Jira session; note the *new* inline screenshot on
+this ticket DID render and was read — not everything is stuck), **PLT-2858** (1
+new image, `image-20260714-113920.png`), **PLT-2874** (original 2 Jira blob
+screenshots still stuck, but 2 Freshdesk-hosted screenshots on a linked ticket
+WERE successfully read this pass — Freshdesk links are sometimes viewable even
+when Jira's own blob URLs never are).
+
+---
+
 ## Run: 2026-07-22 — 7 fresh/updated Group A tickets, Group B currently empty
 
 Board re-queried (`project = PLT AND issuetype = "Live Incident"`) and filtered per the

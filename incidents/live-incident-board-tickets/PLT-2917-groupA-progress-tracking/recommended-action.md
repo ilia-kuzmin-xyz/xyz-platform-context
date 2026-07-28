@@ -1,115 +1,107 @@
 # PLT-2917 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
-renderer; done/late/complete all come from the backend `vw_KeyMilestone` / Actual End Date),
-(2) asks **Pietro** the one closed question that unblocks everything — *what did your earlier fix
-touch?* — and (3) names the single backend data step that confirms the cause per project.
+**Re-checked 2026-07-28 (6 days after the 07-22 draft below was written). The situation moved
+forward — see `context.md` DELTA §0 — so this action is refreshed, not just re-confirmed.**
 
-Owner of the investigation stays **Ilia Kuzmin** (assignee). Two routed questions, one owner each:
-**Pietro** (his prior fix) and a **backend/data engineer** (the `vw_KeyMilestone` payload dump).
+## What changed since 07-22 (why the action changed)
+
+- The 07-22 draft's plan was "ask Pietro exactly what he touched" + pull the `/milestones` payload
+  blind. That comment was **never actually posted** — instead the real ticket owner (Ilia, assignee
+  at the time) posted a **different**, broader set of clarifying questions to the client (which
+  dashboard, re-attach screenshots, per-project example) on 07-22. Those remain **unanswered**, and
+  the ticket has since been handed back to **Yash Patel** (assignee as of 07-28).
+- Two same-day comments (Mostafa, Yash — 07-22) narrowed the ticket's real target to **PMILE5030 /
+  ELN03 / the parquet-generator or Power BI Portfolio dashboard**, distinct from the original
+  3-project description Pietro already looked at once.
+- A 07-27 client update ("all milestones are not updated") arrived with a **decodable screenshot**
+  (the xlsx attachment is still auth-blocked, but the inline Freshdesk image rendered) showing
+  **four named ELN03 activity IDs — PMILE5030, PMILE5010, PMILE5040, PMILE5020** — all Key
+  milestones, all past-due (planned finish Apr 6, 2026), all **Actual % Complete = 100%** in the
+  schedule data, all shown **`Missed`** in the milestone widget.
+
+That last point changes the next step from "go get a payload and see what's in it" to "go get the
+payload **for these four specific IDs and confirm the exact field that disagrees**" — a much
+cheaper, more targeted ask.
+
+## Chosen action: (a) — internal reply that (1) states the confirmed mechanism with the four new
+IDs, (2) asks the backend/data owner (Pietro, since he's the one who said "Actual End Date should
+have a value but doesn't" and is the one referenced as the parquet-file source) to check those four
+IDs specifically against `vw_KeyMilestone` / the parquet output, and (3) separately flags that
+Ilia's three 07-22 clarifying questions to the client are still open and should be closed out (or
+dropped, since Mostafa/Yash's 07-22 comments already answered "which dashboard" = Power BI Portfolio).
+
+Owner stays with the ticket's current assignee, **Yash Patel** (support), to relay; the technical
+question routes to **Pietro** (backend/data) as before, now with a concrete repro instead of a
+generic ask.
 
 ## Why this and not the other routings
 
-- **Not Ready For Development.** There is **no frontend fix to build.** The FE renders milestone
-  status verbatim from the backend — colour = `status` from `vw_KeyMilestone`
-  (`milestoneStatus.ts:14-30`, `MilestoneMarker.tsx:100/122`), completion = `actualDate`
-  (`portfolioMilestonesData.ts:83/118`), with no date-vs-now logic that could cause the reported
-  done/late inversion (context §3–§4). Sending this to FE dev would re-diagnose a backend/data
-  defect on the wrong layer. (One *latent* FE robustness item exists — the silent
-  `if (!project) continue` join-drop at `portfolioMilestonesData.ts:53` that would hide FAR01's rows
-  with no warning — but that's a follow-up, not the customer's fix.)
-- **Not With Technical Support / back to the client.** We need nothing from Thomas to progress — we
-  have three project codes and the mechanism. The next artifact (the `/milestones` payload) is an
-  internal pull. Bouncing to the client would just re-loop the ticket, which already recurred once.
-- **Not Blocked.** Nothing external blocks us; pulling the milestone payload and asking Pietro one
-  question are both in-house and immediate.
+- **Not Ready For Development.** Still no FE fix to build — unchanged from 07-22 (context.md §3–§4).
+  The new evidence, if anything, reinforces this: the mismatch (Actual %=100 vs status=Missed) lives
+  entirely in the backend field, not in how the FE renders it.
+- **Not With Technical Support / back to the client.** The client has now given us more than enough —
+  four exact activity IDs, a planned-finish date, and a %. Asking Thomas for more would waste the
+  goodwill of a client who already sent a spreadsheet. The open questions left over from 07-22
+  (which dashboard, etc.) are largely answered by Mostafa/Yash's own comments and can be closed
+  internally rather than re-asked.
+- **Not Blocked.** Nothing external blocks the next step; it's an internal data/DB query against four
+  named IDs.
 
-## The recurrence discipline (why Pietro's question comes first)
+## Draft — internal reply (author: Yash Patel or Ilia; @ Pietro Desiato)
 
-Pietro already "worked on" this and it came back **still broken**, with no ticket/PR/commit
-recorded (context §6, §8). Per the playbook, an undocumented fix mid-incident destroys attribution:
-we cannot tell whether his change was code or data, which projects it covered, or whether it
-reverted. Asking *exactly what he touched* **before** re-diagnosing is the playbook's "why now"
-discipline — it prevents us re-investigating something already ruled out and tells us whether the
-recurrence is "fix didn't cover FAR01/ELN04" vs "data reverted".
-
-## Draft — internal reply (author: Ilia Kuzmin; @ Pietro Desiato, @ Yash Patel)
-
-Playbook style: mechanism stated once, verbatim field names, one closed question per owner, explicit
-scoping.
-
-> Update on PLT-2917 (milestones wrong on the Portfolio/Progress dashboard, FAR01 / ELN03 / ELN04).
+> Update on PLT-2917 (ELN03 milestones showing "Missed" despite being complete).
 >
-> **Mechanism (confirmed in code):** the Milestone widget doesn't *compute* done / late / complete —
-> it renders those states straight from the backend. The diamond colour comes only from the
-> milestone's `status` field, and "complete" comes from `actualDate` (the Actual End Date). Both are
-> passed through raw from `reporting.vw_KeyMilestone`; the frontend does no date-vs-today comparison.
-> So whatever the view returns is what shows:
-> - **ELN04 "past = late, future = done":** the view is returning `status`/`actualDate` values that
->   don't match the timeline (e.g. `actualDate` set on a not-yet-due milestone). Not a UI bug.
-> - **ELN03 "should be done / 100% not showing":** matches your read, Pietro — if Actual End Date is
->   null in the view, the milestone is neither coloured Complete nor counted on-time. Note the widget
->   has no "%": the "100%" is the progress/installation figure, so the real issue is *installed 100%
->   but the schedule activity's Actual End Date was never stamped.*
-> - **FAR01 "none showing":** either the view returns no Key-Milestone rows for FAR01, or its rows
->   carry a `projectId` that doesn't match the project id from `/dashboard` (the widget silently drops
->   milestones whose project id doesn't join).
+> The client's 07-27 update gives us four concrete IDs to check — no more guessing needed:
+> **PMILE5030, PMILE5010, PMILE5040, PMILE5020** (all ELN03, all Key milestones, planned finish
+> Apr 6 2026). Per the client's own schedule export, all four are **Actual % Complete = 100%**, but
+> the milestone widget shows all four as **Missed**.
 >
-> **@Pietro — one question before I re-dig:** what did your earlier fix change exactly — code, or a
-> data action (re-mapping Key Milestones / stamping Actual End Dates), and for which projects? That
-> tells us whether the recurrence is "didn't cover FAR01/ELN04" or "the data reverted", so I don't
-> re-diagnose what you've already ruled out.
+> **@Pietro** — two asks, both scoped to these four IDs specifically:
+> 1. What does `reporting.vw_KeyMilestone` (or the parquet output, whichever this widget reads —
+>    need to confirm per Mostafa's 07-22 comment that this is the Power BI Portfolio dashboard) show
+>    for `status` and `actualDate`/Actual Finish for PMILE5030/5010/5040/5020? If `actualDate` is
+>    null while the activity is 100% complete, that confirms the Actual-Finish-never-stamped
+>    mechanism you flagged on 07-21.
+> 2. Separately — what did your **earlier fix** (the one that didn't hold, per the client's 07-21
+>    reply) actually change? Still don't know if it was code, a Key-Milestone remap, or a manual
+>    date stamp, or which projects it covered. Needed so we don't re-diagnose something you already
+>    ruled out.
 >
-> **Next step (mine, internal):** pull `GET /portfolios/<id>/milestones` for FAR01/ELN03/ELN04 and
-> read `status`, `actualDate`, `plannedDate`, `projectId` per milestone — that pins each symptom to
-> the exact field (see below).
->
-> Scoping: this is the Milestone Performance widget on the Portfolio dashboard, and the fix is
-> backend/data (`vw_KeyMilestone` / Actual End Date), not the frontend.
+> Also closing the loop on the 07-22 clarifying questions to the client: which-dashboard is answered
+> (Power BI Portfolio, per Mostafa) — no need to chase Thomas for that specific point again.
 
-## The one evidence step to run (owner: Ilia + backend/data; ~15 min, needs API/DB access)
+## The one evidence step to run (owner: Pietro / backend-data; ~10 min, needs DB/parquet access)
 
-The smallest broken-vs-working diff (playbook move #3) — dump what the FE actually receives and read
-it per symptom:
+Narrower than the 07-22 version because we now have exact IDs:
 
-1. `GET /api/v2/portfolios/<default-portfolio-id>/milestones` (or query `reporting.vw_KeyMilestone`
-   directly) for **FAR01, ELN03, ELN04**. For each milestone read `projectId`, `status`,
-   `actualDate`, `plannedDate`, `forecastDate`.
-2. Cross-check each project's `projectId` against the `projectId` returned by
-   `GET /portfolios/<id>/dashboard` (the join key at `portfolioMilestonesData.ts:51-57`).
-3. **Expected reads if the backend/data hypothesis holds:**
-   - **FAR01** = zero rows returned → mapping/inclusion gap; **or** rows returned but `projectId`
-     ≠ the `/dashboard` id → join-miss (data-shape bug), silently dropped at
-     `portfolioMilestonesData.ts:53`.
-   - **ELN04** = future-dated milestones carry `status = COMPLETE` and/or a **future `actualDate`**;
-     past ones carry `status = MISSED` → view is mis-classifying against the timeline.
-   - **ELN03** = milestones the client says are done have `actualDate = null` (and `status` ≠
-     `COMPLETE`) → Actual End Date not stamped, confirming Pietro's diagnosis.
-
-Each outcome names the exact backend field to fix; none points at frontend code.
+1. Query `reporting.vw_KeyMilestone` (or the parquet/`activity_progress` equivalent per DELTA §0a)
+   filtered to `PMILE5030, PMILE5010, PMILE5040, PMILE5020` — read `status`, `actualDate`,
+   `plannedDate`, `projectId`.
+2. Cross-check against the schedule source's Actual Finish Date / % Complete for the same four IDs
+   (the client's own export already shows 100%, so this should be a fast confirm/deny).
+3. Expected read if the hypothesis holds: `actualDate` is null (or `status != COMPLETE`) for all
+   four despite Actual % Complete = 100% upstream — confirms the Actual-Finish-never-stamped /
+   intangible-fallback mechanism (context.md §4 ELN03, DELTA §0c, and `dashboard-progress-comparison`
+   skill Pattern A).
 
 ## Follow-through the human should own (not executed here)
 
-- **After the payload read:** route the confirmed cause to backend/data (the `vw_KeyMilestone`
-  owner) — Actual-End-Date population and/or the Key-Milestone → project-id mapping. Only *then*
-  consider a ticket for the FE robustness follow-up (surface a warning instead of silently dropping
-  milestones that don't join — `portfolioMilestonesData.ts:53`), which is cosmetic relative to the
-  data fix.
-- **"Why now" (playbook Q5):** the widget shipped 2026-07-10 (PR #2031 / PLT-2763), 11 days before
-  the ticket — first exposure to real data. Confirm no schedule re-import or data action on
-  FAR01/ELN03/ELN04 in that window (ties into Pietro's prior fix).
-- **Cohort (playbook Q6):** once the field defect is known, query `vw_KeyMilestone` across the whole
-  portfolio for the same shape (null `actualDate` on activities that are 100% installed;
-  Key-Milestone rows whose `projectId` doesn't join) and remediate in bulk — don't wait for the next
-  project to be reported.
-- **Screenshot (NEEDS HUMAN):** confirm which surface Thomas is on and which ELN04 diamonds are
-  miscoloured — corroborative only; the payload read is decisive.
-- **Doc gap:** after resolution, add to `dashboard/progress-tab.md` / `pitfalls.md` that milestone
-  status is backend-supplied (`reporting.vw_KeyMilestone`), the FE renders it verbatim, and
-  completion depends on the schedule activity's Actual End Date — not on the installation %.
-  (Not editing outside this folder per task constraints — noting only.)
+- **FAR01 / ELN04** — no new evidence arrived for these two in the 07-22→07-28 window; the 07-22
+  hypotheses (zero-rows/join-miss for FAR01, backend status/actualDate inversion for ELN04) stand
+  unverified. Don't let the ELN03 evidence substitute for checking these two separately.
+- **Attachment access** — both the `ELN03 Milestones Dashboard.xlsx` (Jira-native, 403'd) and, ideally,
+  a working Jira session would let a human read the full spreadsheet rather than the one screenshot
+  crop that rendered. Worth 2 minutes for whoever has a browser session open.
+- **Cohort (playbook Q6):** once confirmed, check whether other Key-Milestone activities across the
+  portfolio show the same `Actual %=100 / status=Missed` split — this is likely systemic to any
+  intangible (no-linked-element) milestone activity, not just these four.
+- **Doc gap:** after resolution, add to `dashboard/progress-tab.md` / `pitfalls.md` (per the 07-22
+  note, still outstanding) that milestone completion depends on Actual Finish Date being stamped
+  separately from progress %, and that this has a known failure mode for intangible/labour-based
+  activities (cross-ref `dashboard-progress-comparison` skill Pattern A).
 
-**Confidence in diagnosis: 6/10** (mechanism/layer verified in code; exact backend cause per project
-needs the payload). **Confidence in this being the right next step: 8/10** — asking Pietro what he
-changed + one internal data read is the lowest-cost move that both avoids re-diagnosing a recurrence
-and pins the defect to a field, before any dev effort is spent on the wrong layer.
+**Confidence in diagnosis: 7/10** (up from 6/10 — real activity IDs + a confirmed matching bug
+pattern, still short of seeing the actual `vw_KeyMilestone`/parquet row). **Confidence in this being
+the right next step: 8/10** — same logic as 07-22 (internal data pull, no dev spend on the wrong
+layer) but now targeted at four named IDs instead of "the payload" in general, which is strictly
+cheaper and faster to action.
