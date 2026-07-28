@@ -106,3 +106,41 @@ Status: list ready + verified. Remaining: CSV export (operator) → deletion app
 `POST /api/v2/projects/{pid}/elements/activity-links/delete`, needs ELEMENT_EDIT+DELETE) →
 verify dashboard after next parquet regeneration → ELN03-wide cohort query (below) → BE trigger
 question stays with the PLT-2882/2909 thread.
+
+## 2026-07-27 — DELETION EXECUTED AND VERIFIED (ELN03)
+
+Approved by Pietro (both tickets, same approval). The 193 dead links across the five Containment
+activities were soft-deleted via
+`POST /api/v2/projects/ca64b06a-36bd-48da-9540-07ee6ab136c6/elements/activity-links/delete`.
+
+**Verified by before/after snapshot of live links (API-side, same script both times):**
+
+| | Live links |
+|---|---|
+| Before | 572,591 |
+| After | **572,398** |
+| Delta | **exactly 193** |
+
+The 572,591 baseline independently matched the earlier DuckDB `activity_links` count, so two
+sources agreed before the change. Backup `links-backup-ELN03-before-cleanup.csv` retained.
+
+Sibling PLT-2882 (FAR01) executed in the same session: 799,259 → 798,841, exactly 418.
+**Combined: 611 dead links removed across two projects, zero over-deletion.**
+
+### Still to confirm (parquet-dependent, not immediate)
+
+Percentages do NOT move until the Progress Outputs parquet regenerates. Once it has, expect:
+KUPSB21200 72.13 → 100, JUPSA21030 49.33 → 100, KUPSD21420 73.03 → 100, JUPSC21480 97.35 → 100,
+JSCOR1060 98.15 → 100, and the **Containment package 97% → 100%**. Project-level movement is
+negligible (~0.03pp), as predicted for Pietro before approval.
+
+Interim check that does not need the parquet (client resync only):
+
+```sql
+SELECT a.userItemId, COUNT(al.modelElementId) AS links_now
+FROM api_activities a
+LEFT JOIN activity_links al ON al.activityId = a.itemId
+WHERE a.userItemId IN ('KUPSB21200','JSCOR1060','JUPSA21030','KUPSD21420','JUPSC21480')
+GROUP BY a.userItemId
+```
+Expect 88 / 53 / 111 / 111 / 110.
