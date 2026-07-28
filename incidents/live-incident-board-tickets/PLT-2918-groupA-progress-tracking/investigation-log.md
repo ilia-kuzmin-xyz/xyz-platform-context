@@ -104,3 +104,69 @@ clean but was meaningless — it aborted on config errors before type-checking a
 
 Follow the procedure in `../../data-remediation-runbook.md` for the restore: snapshot first, exact
 expected delta, verify with the same measurement.
+
+## 2026-07-28 — reproduction attempts all FAILED; do not repeat them blind
+
+Three routes were tried to reproduce the bug at runtime on a dev project. **None worked.** Recording
+them so the next person does not burn the same hours.
+
+### What the bug actually needs
+
+`_mappings` (fetched from the API, keyed by `mapping.activityId`) must hold a mapping that
+`activityItem` does not have. `activityItem` is hydrated **once at schedule build** from
+`getCategoryMapForActivity(item.itemId)` (`components/scheduler-service/utils.ts:41`). Both
+conditions are required — the delete branch reads `this._mappings.get(id)`, so if the client does
+not know about the mapping there is nothing to delete, and if the value is hydrated it is an
+update rather than a delete.
+
+**In a healthy, fully-hydrated project the bug cannot fire.** Editing a column and seeing nothing
+bad happen on `master` is expected and is NOT evidence the bug is absent.
+
+### Route 1 — edit one column, expect another to vanish. FAILED
+
+The first test steps written for the PR assumed this worked. It does not: every type has a
+hydrated value, so Save issues updates, never deletes.
+
+**Extra trap:** Discipline and Package are **parent and child**. Changing Discipline legitimately
+clears Package (`computeCategoryMapUpdates` nulls all descendant types,
+`category-mapping-service.ts:653-660`). That happens identically on master and on the fix branch,
+so this pair can never demonstrate the bug. Any test needs two **unrelated** category types.
+
+### Route 2 — two tabs racing. FAILED
+
+Theory: Tab 1 builds its schedule with column B blank, Tab 2 sets B, Tab 1's react-query refetches
+`_mappings` on window focus, producing the divergence. Tested on master: **no delete fired.**
+Either the cache did not refetch, or it refetched and re-hydrated the schedule at the same time,
+which closes the gap rather than opening it.
+
+Operator did observe a **different real bug** while doing this: two tabs each saving their own
+stale in-memory state, last write wins, ending with DisciplineA + PackageB where PackageB belongs
+under DisciplineB. An inconsistent hierarchy written silently. **That is on the update path, is
+not fixed by PR #2078, and deserves its own ticket.**
+
+### Route 3 — schedule re-upload. UNVERIFIED, likely also fails
+
+This is the real-world trigger on AUS01, but the mechanism does not obviously survive scrutiny:
+uploading creates a **new `scheduleRevisionId`** (`schedule-upload-service.tsx:149-165`), and the
+parser builds activities with every category field null (`mapToActivity`,
+`schedule-parser.ts:327-345`). If the new revision's activities get **new** ids, `_mappings` holds
+nothing for them and no delete can fire. Whether ids are reused across revisions, and whether the
+backend carries mappings forward, is a **backend question that cannot be answered from this repo**.
+
+### Recommendation
+
+**Stop trying to manufacture the state.** The cheapest remaining route to a real repro is to ask
+whoever performed the AUS01 mapping session around Jul 12 what they actually did — that person
+triggered it once already. Yash can identify them.
+
+Otherwise ship on: the destructive branch is plainly visible in the diff, the AUS01 damage pattern
+(one type wiped across specific branches, others intact, 7,879 WBS Locations surviving so not a
+blanket wipe) fits that code path and little else, the unit tests pin the decision logic, and the
+change only ever **narrows** a destructive operation so its failure mode is under-deleting, never
+new data loss.
+
+### Honest caveat on the analysis in this folder
+
+The mechanism was read from source, not observed at runtime. Three separate confident predictions
+about how to trigger it were wrong. Treat the "how it gets into that state" part of the diagnosis
+as unproven; the "what the code does once in that state" part is solid and test-covered.
