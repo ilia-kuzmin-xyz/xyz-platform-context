@@ -284,3 +284,25 @@ Project ids for the record (postgres, the canonical ones api-v2 takes; the 24-he
 dashboard URL is the legacy mongo id and will NOT work):
 - ELN03 `ca64b06a-36bd-48da-9540-07ee6ab136c6`
 - FAR01 `b28712bb-0691-4db2-a626-85c2f1f5ead6`
+
+## 2026-07-27 — DELETION EXECUTED AND VERIFIED (FAR01)
+
+Approved by Pietro. The 418 dead links on `FAR01UGD1220` were soft-deleted via
+`POST /api/v2/projects/b28712bb-0691-4db2-a626-85c2f1f5ead6/elements/activity-links/delete`.
+
+**Verified by before/after snapshot of live links (same script, same measurement):**
+
+| | Live links |
+|---|---|
+| Before | 799,259 |
+| After | **798,841** |
+| Delta | **exactly 418** |
+
+No over-deletion. Backup CSV `links-backup-FAR01-before-cleanup.csv` retained as the restore
+source if ever needed.
+
+**Measurement gotcha worth remembering:** immediately after the deletion the schedule panel showed
+798,751, which looked like 508 removed. That number counts **elements**, not **links** — an element
+linked to more than one activity is one element but several links, so the two metrics differ by
+roughly the number of multi-linked elements (~90 here). Always verify link deletions with the same
+API-side link count used for the baseline, never against an element count in the UI.
