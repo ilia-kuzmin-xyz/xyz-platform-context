@@ -69,6 +69,25 @@ this run's action-drafting per this run's own instructions — noted, not re-inv
 | PLT-2906 | viewer-and-model | Open | No new comments — still stalled on **our own** unanalysed True-North screenshots, now ~4 days (was ~2) | unchanged: Ilia analyses the screenshots + runs the in-repo diagnostic | 6-7/10 unchanged |
 | PLT-2882 | progress-tracking | In Analysis | No new comments on the ticket itself; cross-referenced sibling PLT-2909's new finding (two distinct trigger hypotheses — Revit re-upload here vs Excel-import cross-write there — same downstream symptom) | none — deletion still on hold pending peer alignment (already resolved in-thread) | 9/10 unchanged |
 
+### 2026-07-28 session — outcomes
+
+Three tickets moved materially. Full detail in each folder's `investigation-log.md`.
+
+| Ticket | Outcome |
+|---|---|
+| **PLT-2931** (ELN03) | **RESOLVED.** 193 dead links deleted and verified (572,591 → 572,398), parquet refreshed, all five activities at 100%, Containment cleared 97% → 100%. |
+| **PLT-2882** (FAR01) | **Remediated.** 418 dead links deleted and verified (799,259 → 798,841). Activity has no `activity_progress` rows so no percentages moved, as predicted before approval. Root-cause and FE-guard follow-ups still open. |
+| **PLT-2909** (ATL08) | **Cross-write proven without backend help.** Nine non-federated sibling models of incompatible system types claim one identical `sourceFileElementId`. Scope is 366,840 elements (53% of the project), not the six in the ticket. Not remediable by link deletion — the generated metadata itself is wrong, so it is a backend fix. |
+| **PLT-2918** (AUS01) | **FE fix raised**, PR [#2078](https://github.com/XYZReality/hc-frontend/pull/2078) on branch `PLT-2918`. Sachin confirmed mappings are hard-deleted with no history, so the backend restore option is closed and the data recovery must be a re-apply from the client's export. Not started. |
+
+**Two new reference docs** came out of this session, both worth reading before the next incident of
+this family: `../recurring-defect-patterns.md` (what these keep turning out to be) and
+`../data-remediation-runbook.md` (how to execute a bulk data fix safely, including the traps that
+nearly caused wrong conclusions — elements vs links, mongo vs postgres ids, `isDeleted` history,
+parquet lag).
+
+---
+
 ### Late addition (same day, operator-requested): PLT-2931 — third project hit by the stale-links family
 
 | Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
