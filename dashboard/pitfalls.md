@@ -63,3 +63,31 @@ Things that have broken before (or will break if you're not careful).
 **What happens:** If `dispose()` doesn't `.complete()` all BehaviorSubjects, dangling subscriptions survive the component unmount and continue receiving stale emissions on the next project load.
 
 **Rule:** Every BehaviorSubject created in a service must be `.complete()`d in `dispose()`. There were ~31 subjects; only 11 were completed before the fix.
+
+## Linked-element count can exceed what geometry can back
+
+An activity's linked-element **count** and its **model list** are built from the element metadata
+parquet (`client-element-metas` / `project_element_list`), while **selection** needs the loaded
+geometry. `model.elementId2dbId` is the intersection of the two
+(`model-mapping-service.ts:372-384`), so when metadata retains elements the current model version's
+geometry no longer has, the UI shows a count the user can never act on and select/isolate silently
+resolves to nothing.
+
+The same divergence inflates the denominator of backend-computed progress
+(`InstalledElements / LinkedElements`), capping affected activities below 100% permanently.
+
+Confirmed on three projects with two different triggers (model re-upload, and PC-EXCEL import
+cross-writing buildings). Full recognition signature, diagnostic queries and remediation procedure:
+`incidents/recurring-defect-patterns.md` § Pattern 1, and `incidents/data-remediation-runbook.md`.
+
+Quick test: if a displayed percentage equals `installed / linked` exactly, the denominator is the
+bug.
+
+## svf2-object-id-map exists only for Navisworks-path models
+
+`navisworks-model-mapper.ts:277` emits it; Revit models get their externalId to dbId mapping from
+Forge's property DB at load time instead (`revit-model-mapper.ts:22`). Anything built on that
+artefact, including `element_base_data` and therefore any dead-link detection that relies on it,
+silently returns useless results on Revit-mapped projects rather than failing. Validate per project
+before trusting such a query: on FAR01 only 22 of 101 models had the artefact, and a sweep based on
+it produced 705k false positives.
