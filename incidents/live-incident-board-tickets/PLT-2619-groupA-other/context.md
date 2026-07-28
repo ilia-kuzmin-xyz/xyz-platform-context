@@ -107,7 +107,12 @@ Per the task rule, a deep hc-frontend dive is not justified for a content/config
 
 ## Confidence
 
-**8 / 10** (per CLAUDE.md scale: high confidence, minor unknowns). The classification (content/config relink request, mis-filed as an incident, internally parked not customer-blocked) is directly supported by the description and comments. The only unknowns are external/environmental: the current release status and the Freshdesk #6492 detail — neither of which changes the classification.
+**9 / 10** (up from 8/10 at 07-13; per CLAUDE.md scale: high confidence, minor-to-none unknowns).
+Three consecutive rechecks (07-13, 07-22, 07-28) with no substantive change raises confidence in the
+classification *and* in the staleness verdict — this is no longer a judgment call, it's an observed
+90-day pattern. The only remaining unknowns are external/environmental (Freshdesk #6492 detail,
+whether the native dashboard covers this specific demo project) — neither changes the recommendation
+to force-reclassify/close rather than re-confirm again.
 
 ## Doc refs
 

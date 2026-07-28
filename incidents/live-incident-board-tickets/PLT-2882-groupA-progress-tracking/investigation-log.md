@@ -208,3 +208,58 @@ that sync gap is the pipeline bug and the sharpest question for BE.
 Status: root cause explained end-to-end; 418 list verified and exported; deletion pending peer
 alignment; project-wide sweep pending harvest run or BE query; FE robustness fix still to be
 scheduled.
+
+## 2026-07-28 — third re-check: still not deleted; scope now 3 projects; one oddity found
+
+Live comments on PLT-2882 (`fields:["comment"]`) are **still 11 total, last one 07-15**
+(David Webb/Ilia peer-alignment exchange already logged above) — unchanged from the 07-22
+check. **But** the issue's `updated` timestamp is **2026-07-27T10:26:30**, newer than any
+visible comment. Pulling `expand=changelog` explains why: there **was** a comment added
+07-27T10:26 by Ilia Kuzmin (id `1519663` in the changelog), body preserved in the changelog's
+`fromString` —
+
+> "Reviving the deletion approval asked on 14 Jul, which never got an answer… @Pietro Desiato
+> @Mostafa Kamel Hussien approval requested: soft-delete these 418 links… Same defect family
+> has now been confirmed on two more projects: PLT-2909 (ATL08) and PLT-2931 (ELN03, 193
+> links, approval requested there today). Approving both together makes sense."
+
+— but that comment is **not present** in the current comment list. The changelog entry's shape
+(`from:null, fromString:<full body>, to:null, toString:null`) is Jira's signature for a
+**comment that was later deleted**, not one that's merely hidden by pagination (total=11 is
+exact, matches the 11 IDs already logged). **So: Ilia re-asked for approval on 07-27, and that
+ask is no longer visible on the ticket.** Cannot tell from the API alone whether this was an
+accidental self-delete, a retraction, or a tooling glitch — flagging as NEEDS HUMAN (ask Ilia
+directly; check Jira audit log / admin trash if recoverable).
+
+**Net effect regardless of why the comment vanished: the approval ask has had zero response
+for 14 days (07-14 → 07-28), and the one attempt to chase it is currently invisible to anyone
+reading the ticket fresh** — which itself explains why nothing has moved.
+
+**Scope has grown.** Checked the two sibling tickets named in the vanished comment directly:
+- **PLT-2909** (ATL08, "models/elements linked to an activity appear wrong") — same family,
+  confirmed 07-23 (comment `108005`): model `DistributionBoardsPanels_Bld1-V1` is a "ghost" —
+  claimed in metadata, absent from geometry/cloud list. FE fix (hide models not in geometry)
+  explicitly tracked under **this** ticket (PLT-2882), not filed separately. Still **In
+  Analysis**, no PM response.
+- **PLT-2931** (ELN03, "Containment package should be 100% but is not") — same family,
+  confirmed 07-24 (comment `108138`): **193** dead links across 5 Containment activities,
+  installed/linked ratio matches dashboard % exactly in every case. Approval requested
+  07-24 for **also** soft-deleting these 193 — **same open ask, now 4 days silent**. Still
+  **In Analysis**.
+
+So the single Pietro/Mostafa approval gate is now blocking **three** live-incident tickets and
+**611** (418+193) confirmed dead links, not one. No reply from either PM on any of the three
+threads as of this check.
+
+**Nothing else material changed:** no status transition, no new assignee (still Ilia Kuzmin,
+since 07-15), no FE-robustness ticket filed yet, no BE answer on why re-uploads leave metadata
+out of sync with geometry.
+
+**This is the third consecutive re-check with no forward progress on the actual ask
+(delete-approval).** Given the 14-day silence, the cross-ticket blast radius, and the fact the
+one follow-up nudge isn't even visible on the ticket anymore, this now clears the bar for an
+escalation nudge — see updated `recommended-action.md`.
+
+Confidence: root cause **9/10** (unchanged, still the strongest-held number on this board).
+Approval-gate-is-the-blocker: **9/10** — directly evidenced by the changelog and by the two
+sibling tickets hitting the identical silence pattern.

@@ -1,6 +1,54 @@
 # PLT-2858 — Recommended action
 
-## Chosen: (a) Draft the next routed question to move analysis forward — addressed to **Mostafa Kamel Hussien** (PO), Pietro looped
+## 2026-07-28 re-check: ESCALATE — address to Pietro directly, Mostafa cc'd (upgraded from "consider")
+
+**Delta since 07-22: none.** Zero comments/activity since 107533 (07-16) — confirmed via Jira (26 comments
+total, `updated` timestamp still 07-16). Mostafa never answered; Pietro has been tagged twice (106713,
+107109, 107206) but has never once replied. It is now **15 days** since Mostafa's "leave it with me"
+(107208, 07-13), **12 days** since his own "waiting on this since it was asked of me" went unanswered by
+him in substance (107533, 07-16), and **21 days** since the customer said they don't know how to configure
+zones (106728, 07-07) — on a **Critical** ticket. The 07-22 note's contingency ("if no answer within another
+few days, consider looping Pietro directly") is now overdue by that same standard. Also newly folded in from
+07-14 (pre-dates 07-22 but was missing from this file, see `context.md §-1`): the customer has floated a
+concrete product fork — build a real Location selector, or remove the field entirely — which raises the
+stakes of continued silence beyond just "who configures zones."
+
+**Action, upgraded:** stop re-nudging Mostafa alone. Post directly to **Pietro** (not as a cc this time),
+with Mostafa still tagged for continuity, and make the ask a closed decision rather than an open question.
+See the revised draft message immediately below (replaces the 07-22 draft — the original three-question
+draft further down this file is now superseded, kept for record only).
+
+### Draft message for the thread (Darminder or Yash to post — @Pietro primary, @Mostafa cc'd)
+
+> @Pietro Desiato — looping you in directly, as this has now sat unanswered for 15 days since @Mostafa
+> Kamel Hussien picked it up ("leave it with me", 107208) and 12 days since his last update went nowhere
+> (107533). You were independently named as the workflow authority both by Darminder (107109) and by the
+> customer themselves (106728) — bringing you in straight rather than through a third nudge to Mostafa.
+> This is Critical priority and Freshdesk #7286 has been open since 07-01.
+>
+> Three closed questions:
+> 1. **Zone setup ownership + how-to.** Root cause confirmed: ML9's model has no named zones (floors/
+>    areas/rooms) configured, so the auto-derived "Location" is empty on every issue. The customer says
+>    they've never done this and don't know how, and separately (107317, 07-14) that connecting rooms
+>    across models "is not possible" on their side. Who owns configuring named zones — customer's BIM team
+>    or us — and is there an actual how-to we can hand them?
+> 2. **Product fork the customer already proposed (107317, 07-14) — needs a ruling either way:** build a
+>    real Location drop-down the user can pick from, **or** remove the Location field from the QA form/
+>    detail panel entirely, since as-is it reads as broken/missing data on the Dashboard. This has been
+>    sitting for 14 days with no response.
+> 3. **Cohort.** Same empty-Location gap will show on every project without named zones configured, not
+>    just ML9 — worth a stance (proactive sweep vs. per-ticket) once (1)/(2) are settled.
+>
+> Separate FE finding to log regardless of the above (not the reported symptom): once zones exist, the
+> detail panel would show the raw location **ID**, not the zone name — `issue-details.tsx:139`,
+> `format-issues.ts:87`. Small follow-up ticket, not urgent.
+
+*(Direct to Pietro, closed questions, explicit day-counts to convey urgency on a Critical ticket — not
+another open-ended ask to Mostafa.)*
+
+---
+
+## Original analysis (2026-07-22 and earlier, superseded above) — Chosen: (a) Draft the next routed question to move analysis forward — addressed to **Mostafa Kamel Hussien** (PO), Pietro looped
 
 The reported symptom is diagnosed (empty "Location" = no named zones configured on ML9; the zone Location
 is auto-derived and read-only by design — `context.md §1–§2`). What is blocking the ticket is a
@@ -37,7 +85,7 @@ than re-nudging Mostafa a second time.
 
 ---
 
-## Draft message for the thread (Darminder or Yash to post; @Mostafa, @Pietro)
+## [SUPERSEDED 2026-07-28 — kept for record] Draft message for the thread (Darminder or Yash to post; @Mostafa, @Pietro)
 
 > @Mostafa @Pietro — to turn this into a concrete next step, three closed questions:
 >
@@ -90,3 +138,18 @@ decision, not another round of open-ended discussion.)*
 
 **Confidence in diagnosis: 8/10. Confidence in this being the right next step: ~7/10** (comms/process
 judgment; depends on how Mostafa wants to own zone-config ownership and the Phase idea).
+
+---
+
+## 2026-07-28 re-check — updated notes for the coordinator
+
+- **Priority mismatch flag still stands and is now sharper:** Critical priority, 21 days since the customer
+  said they don't know how to proceed, 15 days since a named owner (Mostafa) took it and produced nothing.
+  If Critical is meant to reflect urgency, the ticket's actual velocity contradicts it — surface this to
+  Mostafa/Pietro alongside the escalation, not as a separate ask.
+- **Confidence in diagnosis: unchanged, 8/10** (no new technical information this pass — root cause was
+  never in question).
+- **Confidence in the escalation being the right next step: 8/10** (up from 7/10) — this is no longer a
+  judgment call between plausible options; the 07-22 note's own stated trigger condition ("no answer within
+  a few days") has been met and then some (12 days), so directly looping the second named owner is the
+  mechanical next step, not a debatable one.

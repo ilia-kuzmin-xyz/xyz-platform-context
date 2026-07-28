@@ -1,13 +1,15 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
-- **Domain slug:** viewer-and-model (justification in §6)
+- **Domain slug:** viewer-and-model (unchanged — re-confirmed 2026-07-28, see §8)
+- **Group:** groupB (Dev In Progress) — renamed from groupA 2026-07-28; folder was stale on the
+  group tag only (last content pass was 2026-07-13/25, before the status moved off Open)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2874
-- **Type:** Live Incident · **Priority:** Minor · **Status:** Open
-- **Assignee:** Darminder Atker (fullstack lead)
+- **Type:** Live Incident · **Priority:** Minor · **Status:** Dev In Progress (was Open at last check)
+- **Assignee:** Darminder Atker (fullstack lead) — Jira assignee field; comment activity below is Ilia Kuzmin
 - **Reporter (Jira):** Mostafa Kamel Hussien (product owner) — internal report, not a client ticket
-- **Project / model:** **Far01** (federated file)
-- **Created:** 2026-07-07 · **Comments:** none · **Attachments:** 2 PNG screenshots (see §7 Needs human)
-- Triage date: 2026-07-13
+- **Project / model:** **Far01** (federated file) — now also confirmed on **LVN-BL1 / LVN_260723** via linked customer ticket, §8
+- **Created:** 2026-07-07 · **Comments:** 2 (added since last check, see §8) · **Attachments:** 2 PNG screenshots on this Jira issue (still unviewable, blob URLs) + 2 PNG screenshots on the linked Freshdesk ticket (now viewed, see §8)
+- Triage date: 2026-07-13 (first pass) → **re-checked 2026-07-28 (delta below)**
 
 ---
 
@@ -185,3 +187,68 @@ WHERE statusCode IS NOT NULL;   -- apply same status filter as the tile
 - `distinct_source_elements > editor's 440K` → scope difference (unlinked-but-statused elements included) → definition decision.
 
 **Revised position:** "not a bug" was too strong. Correct statement: *the dashboard number was never a count of linked source elements, so equality with the editor is not the right expectation — but vector 2 (duplicate status rows) would be a genuine counting defect and is cheaply testable with the query above.* Recommended action file still stands: clarify + run the diff query before any dev work.
+
+---
+
+## 8. Delta since last check (2026-07-13/25 → 2026-07-28)
+
+**Status moved Open → Dev In Progress.** Two new Jira comments (issue previously had none):
+
+1. **Ilia Kuzmin, 2026-07-13T14:12** (same day as original triage, evidently posted after the
+   first-pass note but before the "second pass" deep-dive in §"Deep-dive" above — the ~30K gap
+   investigated there, 440K vs 470K, is this comment's "30K-element difference"):
+   > "@Yash Patel, I'm going to compare the data to see where the 30K-element difference comes
+   > from." — confirms a dev was already running exactly the §4 diff-query experiment; the
+   > deep-dive section above is very likely that investigation's output.
+
+2. **Yash Patel, 2026-07-27T09:56** — linked PLT-2874 to a **live client-facing Freshdesk ticket**,
+   `support.xyzreality.com/a/tickets/7514` ("LVN1 - Total number of elements in dashboard not
+   matching"), reported independently by a customer on a **different project (LVN-BL1)**. Quoting Yash's
+   paraphrase of the customer: *"The total number of elements shown in the Dashboard doesn't match
+   with the total linked elements in the Fed file, neither with the total linked elements shown in
+   the schedule section."* This is materially new: it (a) confirms the symptom is **not Far01-
+   specific** — same shape of bug on an unrelated project — and (b) surfaces a **third disagreeing
+   counter** (the Schedule/Gantt tab's per-activity "Elements" column) not analysed in §1–7.
+
+**Freshdesk attachments — viewable this pass** (briefing note: Freshdesk inline-media URLs are
+usually auth-blocked; this time the redirect chain resolved to a signed, unauthenticated S3 URL and
+both images loaded):
+
+- **Screenshot 1 (dashboard view, project "LVN - BL1 -xv2"):** viewer overlay tile reads
+  **`ELEMENTS  Selected: 0  Total: 71,965`** — this is the exact `DashboardElementStats` widget
+  from §2b (`dashboard-element-stats.tsx:46,49`), confirming which widget the customer is reading.
+- **Screenshot 2 (editor view, same project, model `LVN_260723` under a `FEDERATED` folder):** three
+  more numbers visible simultaneously:
+  - Model Details panel — **"Elements linked to Latest Program": Linked 61,303 / Total 221,373**
+    (28%), **Linked Activities: 292** (this is the §2a `ModelDetailsPanel.tsx` widget).
+  - Left-rail "ELEMENTS" tile — **Selected: 221,373  Total: 221,373** (full fed-file element count,
+    a fourth counter not previously in scope — this is the raw model/fragment count, not a DB count).
+  - Schedule/Gantt row **"LVN - 2026-07-12 July Mid-Month"**, "Elements" column — **81,826**, and a
+    banner above the grid: **"996 un-mapped activities"** with an "Open mapping" action.
+
+**New lead: "996 un-mapped activities."** This is the first concrete evidence of *why* the
+schedule-tab counter (81,826) disagrees with both the editor "Linked" (61,303) and the dashboard
+"Total" (71,965): if ~1,000 activities have no element mapping, then depending on which join
+direction each counter uses (`activity_links` inner-joined from elements vs from activities), the
+same underlying link table can yield different totals — inner join drops unmapped rows one way,
+outer join keeps them the other way. This is a **join-direction/completeness hypothesis on top of**,
+not a replacement for, the axes already identified in §3 (identity unit, scope, pipeline, filter,
+label). It has not been traced to specific SCH/schedule-tab.md code in this pass — flagged as the
+next research step, not yet resolved to file:line.
+
+**Does the delta change the domain call?** No. Re-checked against `dashboard/data-pipeline.md` and
+`dashboard/viewer-and-model.md` (2026-07-28): `element_base_data` (the view at the centre of the
+"second pass" deep-dive root cause — status-history duplication, UUID→dbId expansion) is documented
+under **`viewer-and-model.md:111,211`**, not `data-pipeline.md`. `data-pipeline.md` owns *how parquet
+gets into DuckDB*; the actual counting defect under investigation is in *how the viewer/colouring
+layer queries and dedupes that data* once it's loaded — squarely VWR. The 2026-07-22 README pass
+that tagged this ticket `data-pipeline` appears to be a misclassification (likely from
+`dashboard-progress-service.ts` living in a `services/dashboard-progress/` folder and being
+conflated with the Pipeline A/B data-loading domain) — **corrected back to `viewer-and-model` here**.
+The new schedule-tab counter (81,826) is a secondary data point living in SCH territory, but it does
+not shift the primary mechanism, which remains the `element_base_data` / colour-service dedup
+question already under active dev investigation.
+
+**Confidence: unchanged at 6/10** for the root-cause hypothesis (still needs the §4 query diff to
+confirm dbId-expansion vs status-history duplication vs join-direction on Far01/LVN1); **confidence
+that domain = viewer-and-model: 8/10** (doc-cross-checked, not just re-asserted).

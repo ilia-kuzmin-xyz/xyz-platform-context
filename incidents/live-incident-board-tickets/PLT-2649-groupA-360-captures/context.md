@@ -45,14 +45,14 @@ The `[NEW DASHBOARD]` title is **misleading** — analysis in-thread has already
 1. **The same misplacement exists in the legacy PowerBI dashboard.** Ilia Kuzmin, 2026-05-11 (comment 101985): *"it seems there's an issue with the pinpoints coordinates since the powerbi dashboard has the same problem."* → rules out a new-dashboard code-path regression. **Independently confirmed by the customer**, relayed by Yash Patel 2026-06-05 (comment 104443): *"It's the same on the old one, which suggests a problem with the room data in the Revit models."**
 2. **Quality-tab pinpoints are placed correctly** on the same project/model. Ilia, 2026-05-11: *"the pinpoints work correctly on the quality tab."* → the viewer's coordinate-transform pipeline itself is sound; only the 360 inputs are wrong. (Code confirms both tabs share one transform — see Mechanism.)
 3. **It is a subset, not all pins.** Ilia, 2026-05-11 and 2026-05-12: *"for 60% of pinpoints the position is almost correct, but for the rest… broken or obsolete and was assigned to another pbp"*; *"60% of captures are assigned to the correct room position, but 40% need a review."* (Note the two comments phrase the split inconsistently — 60% correct/40% wrong vs, on 2026-06-30, "tweaking 60% … that inherited the old pbp." The exact fraction is an eyeball estimate from screenshots, not measured.)
-4. **Working hypothesis on the thread (Ilia + Pietro):** elevation is wrong because a subset of captures **"inherited the old pbp"** (project base point) — i.e. captures positioned against a since-superseded model base point / room elevation. Suggested remedy floated by Ilia: *"the client should probably reupload all 360 captures."*
-5. **Current stall:** Ilia asked Pietro Desiato (2026-06-30, comment 106186) *"who can assist us with tweaking 60% of the pinpoints position that inherited the old pbp?"* — **unanswered for ~2 weeks** (today 2026-07-13). The ticket is parked on an unassigned ownership question, not on active investigation.
+4. **Working hypothesis on the thread as of 2026-06-30 (Ilia + Pietro):** elevation is wrong because a subset of captures **"inherited the old pbp"** (project base point) — i.e. captures positioned against a since-superseded model base point / room elevation. Suggested remedy floated by Ilia: *"the client should probably reupload all 360 captures."* **⚠️ SUPERSEDED as of 2026-07-16/24 — see DELTA section above.** The actual root cause turned out to be a single mis-set level elevation in a linked file, not per-capture PBP drift, and the remedy is a model-level fix + re-upload (not a per-capture client re-upload). Kept here for chronological accuracy only.
+5. **Then-current stall (as of the 2026-07-13 check):** Ilia asked Pietro Desiato (2026-06-30, comment 106186) *"who can assist us with tweaking 60% of the pinpoints position that inherited the old pbp?"* — was read as unanswered at that time. **Now resolved — Pietro replied same day (13:53), and Ilia independently drove the investigation to a precise root cause by 2026-07-24.** See DELTA section above for the full follow-on chronology.
 
-**Net:** root cause is localised to **source coordinate DATA for PA12's 360 captures**, not to frontend rendering. This is well-supported (two independent legacy-repro confirmations + working Quality tab on the same model).
+**Net (revised):** root cause is localised to **source coordinate DATA for PA12's 360 captures**, not to frontend rendering — and is now pinned to a specific, bounded mechanism (one linked-file level offset) rather than an inferred pattern. This is well-supported (two independent legacy-repro confirmations + working Quality tab on the same model + a named model/level/elevation-delta/cohort-size).
 
 ---
 
-## Chronology (all 9 comments)
+## Chronology (all 16 comments)
 
 | Date | Author | Content |
 |------|--------|---------|
@@ -115,24 +115,27 @@ The 360 pin Z comes straight from the **capture record's own stored coordinate**
 - ⚠️ **`image-20260506-094327.png`** (684 KB, Masum Ahmed, 2026-05-06) — the reporter's screenshot, presumably new-dashboard 360 pins floating high vs PowerBI. **Key evidence; not readable here** (binary PNG behind Atlassian auth). Do not guess contents.
 - ⚠️ **`Screenshot 2026-05-11 154311.png`** (1.22 MB, Ilia Kuzmin, 2026-05-11) — attached with the "PowerBI same problem / Quality tab correct / 60% roughly right" comment; presumably shows the 60/40 pattern. **Key evidence; not readable here.**
 - ⚠️ **Inline description image** — a broken `blob:` URL (`id=UNKNOWN_MEDIA_undefined`); likely the same as the 05-06 PNG. Not resolvable.
-- ⚠️ The precise quantities the human needs — **how high (metres), which specific captures/rooms, exact good/bad fraction** — live only in these screenshots and in Freshdesk #6622. My analysis relies on the thread's *textual* descriptions of them, not the images.
+- ⚠️ The precise quantities originally needed — **how high (metres), which specific captures/rooms, exact good/bad fraction** — were assumed to live only in the unreadable screenshots. **UPDATE:** Ilia has since supplied the precise numbers directly in text (comment 108107, 2026-07-24): elevation delta 50.4 m, level `f0f4d409` / "DC - 0G - FFL", 101 rooms, ~1870 captures. The screenshots are now corroborating-only, not blocking — the analysis no longer depends on them.
 
 ## Roster / ownership flags
 
-- **Masum Ahmed** (reporter + assignee) — **NOT on the provided roster.** Behaves as a support/Freshdesk agent (posts all #6622 status mirrors). A support agent should not remain the assignee of an incident whose next step is a product/data decision.
+- **Masum Ahmed** (reporter + assignee) — **NOT on the provided roster.** Behaves as a support/Freshdesk agent (posts all #6622 status mirrors). A support agent should not remain the assignee of an incident whose next step is a product/data decision. **Still unchanged as of this re-check** — worth flagging again since the ticket is now close to actionable closure.
 - **Rishi Bhugobaun** — on roster (Rishi, senior fullstack). One housekeeping comment only.
-- **Ilia Kuzmin** — the current operator (ilia.kuzmin@xyzreality.com), FE / "mechanism interrogator" in the playbook. Driving the analysis; not in the routing roster but internal.
-- **Yash Patel** — on roster (coordinator). Relaying client comms, as expected.
-- **Pietro Desiato** ("Pietro") — on roster (product owner). The correct escalation target; his unanswered 2026-06-30 question is the pivot.
+- **Ilia Kuzmin** — the current operator (ilia.kuzmin@xyzreality.com), FE / "mechanism interrogator" in the playbook. Drove the analysis all the way to a named model/level/elevation root cause; not in the routing roster but internal.
+- **Yash Patel** — on roster (coordinator). Relaying client comms, incl. the 07-24 specific ask to project delivery, as expected.
+- **Pietro Desiato** ("Pietro") — on roster (product owner). Replied 2026-07-13 (no longer unanswered); his feature-idea sub-thread with Jason is now the only loose end (see DELTA).
+- **Jason Fingland** — on roster (product designer). Weighed in 2026-07-13 with a design counter-proposal; thread with Pietro/Mostafa unresolved, non-blocking for this ticket's closure.
+- **Mostafa Kamel Hussien** — on roster (product owner). Was @-mentioned by Pietro 2026-07-13, has not yet replied.
 
 ---
 
-## Working hypothesis + confidence
+## Working hypothesis + confidence (revised 2026-07-28)
 
-**Hypothesis:** PLT-2649 is a **source-data defect, not a frontend bug** — a subset (~40%, unverified) of PA12's 360 capture coordinates carry a wrong elevation (Z), most plausibly because those captures were positioned against a superseded project base point / room elevation in the Revit model ("inherited the old pbp"). The viewer transform and the Quality-tab equivalent are provably correct, and the symptom reproduces in legacy PowerBI, so no frontend code change would fix it.
+**Hypothesis (updated, supersedes the "old PBP / re-upload captures" framing):** PLT-2649 is a **source-data defect, not a frontend bug** — precisely, one **Revit level** ("DC - 0G - FFL") inside a **linked file** in PA12's federated model `PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24_detached` carries a **shared-coordinates elevation offset** (+50.4 m vs the DC building's ~0 project datum). Every room/capture hosted on that level (101 rooms, ~1870 captures) inherits the bad elevation, which is why the pins float ~50 m too high. The viewer transform and Quality-tab equivalent remain provably correct (unchanged from prior finding); the fix is a **single elevation-value correction in the source model + re-upload**, not a per-capture remap or client re-upload of captures.
 
 **Confidence (per CLAUDE.md scale):**
-- That the class of cause is **data, not new-dashboard code** — **8/10** (multiple independent confirmations; identical shared transform works for Quality).
-- That the **precise trigger** is the "old PBP / changed room elevation" and the **remediation path** (customer re-upload vs XYZ-side coordinate remap) — **4/10** (a plausible but unconfirmed hypothesis; not validated by querying `captures_360.zMeters` vs level/room elevation, nor by model-version history; the quantifying screenshots are unreadable to me).
+- That the class of cause is **data, not new-dashboard code** — **9/10** (unchanged conclusion, now further corroborated by a concrete, bounded mechanism instead of an inferred pattern).
+- That the **precise trigger and cohort** are correct — **8/10** (up from 4/10): Ilia has named the exact model, exact level ID, exact elevation delta, and the exact affected room/capture count. Residual uncertainty is only in **how** this was verified (comment doesn't show the query/tool used — could not independently confirm `captures_360.zMeters` against `f0f4d409`'s elevation from this codebase-only vantage point) and whether the fix has actually been performed yet (it's just been asked for, not confirmed done).
+- That the **remediation path is closed and correct** — **8/10**: level fix + model re-upload, no capture re-upload, is a clean, low-risk ask already sent to the client (2026-07-24). Only the client's turnaround time is unknown.
 
-**Still needed to close (playbook Phase 6):** confirm the **trigger** (did PA12's federated model PBP / level elevations change, and when, relative to the mis-placed captures' upload dates?) and enumerate the **cohort** (which capture/room IDs are off) — both answerable by querying `captures_360` z against `project-levels`/`project-rooms` elevation. Then a single **ownership decision**: customer re-uploads, or XYZ remaps the stale-base-point captures.
+**Still needed to close:** client's project delivery team corrects the "DC - 0G - FFL" level elevation and re-uploads the model; then confirm 360 pins render correctly on re-import. Separately (non-blocking): Pietro/Jason's in-editor pin-adjustment idea (07-13) should get an explicit close-out — either shelved as unnecessary now that the root cause doesn't require manual per-pin editing, or spun into its own backlog ticket if the team still wants the capability for future cases.

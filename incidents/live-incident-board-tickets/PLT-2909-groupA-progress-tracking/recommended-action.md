@@ -1,48 +1,98 @@
 # PLT-2909 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — reuse PLT-2882's existing diagnostic against `CY-5200` on ATL08, then post one internal status update
+## RE-CHECK 2026-07-28 — action superseded, new action drafted below
 
-**Do NOT re-invent tooling.** PLT-2882 already produced `window.__linkDiagnose(activityId?)` on branch **`PLT-linked-selection-diagnostics`** (console-only, not for merge), which prints, per model, both **`modelMembership`** (parquet-claimed models + loaded state) and **`parquetVsGeometryByMongoModelId`** (`inParquet` vs `inGeometry`). That is *exactly* the evidence PLT-2909 needs — the tool already answers "which models does the metadata claim, and does their geometry actually contain these elements?" The fastest, single next step is to **run the same tool on the new repro**, not to build anything.
+The 07-22 recommended action was **"run PLT-2882's `__linkDiagnose('CY-5200')` on ATL08."**
+That step is **DONE** — Ilia ran it himself and posted results on-ticket 2026-07-23 (see
+`context.md` § RE-CHECK). Re-running it or re-drafting that ask would be redundant. The
+open item now is different: **the diagnostic's own follow-up question (asked of Ali Seyedof,
+07-23) has sat unanswered for 5 days**, and Yash hasn't acknowledged the finding either. The
+action below replaces the old one.
 
-### The one step to run (owner: Ilia; ~15 min; needs dev/editor session on ATL08)
+---
 
-1. Checkout `PLT-linked-selection-diagnostics`; open the **editor** on **ATL08**, schedule **`29475-16-RL3`**; load the models involved.
-2. Select activity **`CY-5200`** → `window.__linkDiagnose('CY-5200')` → capture the JSON.
-3. Read it as a **model-list** question (not a 0-selection question):
-   - **How many models does `modelMembership` list?** (this is what the panel renders via `getModels()` — `useGroupedLinks.ts:30`.)
-   - For each listed model, `inParquet` vs `inGeometry`. **A model with `inParquet > 0` but `inGeometry = 0` is a ghost — parquet claims membership its geometry can't back → confirms the same stale-metadata mechanism as PLT-2882, now manifesting as "extra models."**
-   - Cross-check against Kyriakos's claim: only **`PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_EquipmentOthers_Bld2-V1`** should have real geometry hits; the others should be `inGeometry = 0`.
-4. Run the same call for **one working activity** in the same schedule (broken-vs-working diff, playbook #3).
+## Chosen action: (a) — nudge for a response, not new investigation
 
-**Expected if same-mechanism:** several models in `modelMembership`, only one with `inGeometry > 0`, the rest `inParquet > 0 / inGeometry = 0`. That both confirms PLT-2909 and extends PLT-2882's RCA with the "ghost model membership" surface.
-**If instead** every listed model has real geometry hits, the mechanism is different (genuine multi-model membership / a bad activity→model join) and PLT-2909 forks from PLT-2882 — route accordingly.
+**Do NOT re-run the diagnostic or re-derive the mechanism** — both are settled (ghost model
+`DistributionBoardsPanels_Bld1-V1`: parquet claims 6 elements, geometry/cloud list has 0; Bld2 +
+federated model clean; same defect *family* as PLT-2882, but the trigger here looks like
+**PC-EXCEL import-time duplication**, not a re-upload/re-version). What's missing is a reply.
 
-### Draft internal reply (author: Ilia; @ Yash Patel, cc Darminder Atker) — playbook style, DRAFT ONLY
+### Draft internal comment (author: Ilia; @ Ali Seyedof, cc Yash Patel) — playbook style, DRAFT ONLY
 
-> @Yash Patel — on PLT-2909 (ATL08, `CY-5200` shows models that don't contain its linked elements).
+> @Ali Seyedof — following up on my 07-23 question: for ATL08's `DistributionBoardsPanels_Bld1`
+> model (`00156181-fca5-4a7c-acdf-a12ce924c252`), why does its `client-element-metas` list the 6
+> elements from source file `dd20b121` when neither the geometry nor the model's cloud list
+> contain them? My working guess is the PC-EXCEL importer wrote the same source-file rows into
+> more than one building's metadata — if you can confirm/deny from the import pipeline side,
+> that closes this out. It's the last open question on PLT-2909.
 >
-> I looked at the code path that lists "which models an activity is linked to." It builds that model list purely from the element **metadata** parquet (`client-element-metas`), not from the loaded 3D geometry — so if the metadata still lists an element as belonging to a model whose current geometry no longer contains it (e.g. after a model re-upload/re-version), that model shows up in the list anyway. That is the same stale-metadata defect confirmed in PLT-2882, just showing up as *wrong models listed* instead of *nothing selected*.
+> @Yash Patel — status for the client: this is confirmed as the same defect family as PLT-2882
+> (metadata says an element belongs to a model; the model's actual geometry doesn't have it), so
+> "several models appear" for one activity is real but harmless-to-select-from (selecting from
+> the correct model, Bld2, works fine — the extra model in the list is just noise). The FE fix
+> (stop listing models that can't back their claimed elements) is already tracked under PLT-2882,
+> so no separate FE ticket needed here. Once Ali confirms the import-side cause we can close this
+> as duplicate-root-cause / linked to PLT-2882.
 >
-> You were right to be cautious that they might not be identical — the symptom shape is different and I haven't confirmed it on ATL08 yet. So one concrete step: I'll run the PLT-2882 diagnostic (`__linkDiagnose`) against `CY-5200` on ATL08 and check, per listed model, whether its geometry actually contains the activity's elements. If the extra models come back "in metadata, not in geometry," it's the same root cause and we fold them together; if not, PLT-2909 gets its own track.
->
-> Separately — the **"session id gave an error"** you hit is the Help-menu *Sync session logs* upload, not this bug; can you paste the exact error text? I'll route that to whoever owns log sync as its own item.
->
-> One for the client/PM side: was the ATL08 model `PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_EquipmentOthers_Bld2` re-uploaded/re-versioned recently? That would explain when the model list went wrong.
->
-> Scope: this is the web-viewer activity-linking panel, not the dashboard filter panel.
+> Separately, still need the exact error text for the **"session id gave an error"** issue you
+> flagged 07-16 — unrelated to this, routing to log-sync owner once I have it.
 
 ## Why this and not the others
 
-- **Why reuse the diagnostic, not build new tooling:** PLT-2882 already invested in `__linkDiagnose` and it emits the per-model parquet-vs-geometry breakdown that *is* the PLT-2909 question. Building a bespoke "model list" probe would duplicate it and delay confirmation. Reuse is the highest-leverage move (playbook: repro-in-our-hands > archaeology).
-- **Not (b) Ready For Development yet.** The FE robustness fix is real and probably *shared* with PLT-2882 (never list a model whose geometry can't back the linked elements; reconcile the count/model-list with geometry). But routing to dev before the ATL08 diagnostic risks mis-scoping: we don't yet know if the extra models are ghosts (metadata bug → data fix + FE guard) or genuine membership (a different join bug). One diagnostic flips this to (b) with precise scope — and lets PLT-2909 + PLT-2882 be fixed as one FE change.
-- **Not (c) With Technical Support / back to client.** We have everything to progress internally: activity id, schedule, project, the named model, and a working diagnostic. The only client-side asks (was the model re-uploaded; the session-id error text) ride along in the reply; they don't gate the diagnostic. Bouncing to the client now would re-loop the ticket.
-- **Not (d) Blocked.** Nothing external blocks the diagnostic; it's in our hands on ATL08.
+- **Why (a) and not closing/merging into PLT-2882 outright:** Ilia's own comment already commits
+  the FE fix to PLT-2882, but the **BE root cause differs** (import-time duplication vs
+  re-versioning) and is still unconfirmed by Ali — merging the tickets fully before Ali replies
+  would bury a possibly-distinct data bug (the Excel importer) inside a ticket about a different
+  pipeline path (Revit re-versioning). Keep them linked, not merged, until Ali answers.
+- **Not (b) Ready For Development.** The *FE* half is arguably dev-ready (and already riding on
+  PLT-2882), but PLT-2909 itself still has an open BE question with no answer — moving the whole
+  ticket to dev-ready would drop that thread.
+- **Not (c) With Technical Support.** Nothing further is needed from the client; the block is
+  purely internal (Ali's reply).
+- **Not (d) Blocked.** 5 days of silence on an internal Slack/Jira ping isn't yet "blocked" in the
+  playbook sense — a nudge is the right-sized action before escalating.
 
 ## Follow-through the human should own (not executed here)
 
-- **Merge-or-fork decision:** after the diagnostic, either link PLT-2909 to PLT-2882 as the same root cause (add PLT-2909's "ghost model membership" surface to PLT-2882's RCA) or fork it with its own mechanism.
-- **Model-type check:** confirm whether `PC-EXCEL_SWITCH_ATL8_…` is Revit or Navisworks — decides whether PLT-2882's Revit-specific findings (no `svf2-object-id-map` artefact; property-DB mapping) transfer. See PLT-2882 investigation-log cohort-sweep notes.
-- **Session-log-sync error:** open a separate item once Yash supplies the error text; owner = BE/logging. Do not attach it to the linking fix.
-- **Trigger + cohort (playbook #5/#6):** if confirmed, get the ATL08 re-upload timeline (why now) and sweep all activities across ATL05-08 whose links resolve to ghost models — bulk remediation, not per-ticket.
-- **Watch the 2 attachments (NEEDS HUMAN):** they confirm which surface (grouped-links count panel vs isolation tree) and how many extra models — useful for FE-message wording.
-</content>
+- **If Ali confirms the Excel-importer duplication:** this becomes a BE data-pipeline fix
+  (de-dupe / scope `client-element-metas` writes per building) — separate from PLT-2882's
+  re-versioning fix, even though the FE symptom and FE fix are shared.
+- **Cohort sweep for ATL05-08:** once the import bug is confirmed, check whether other
+  ATL05-08 projects/buildings show the same cross-building duplication (Kyriakos's "present for
+  all ATL05-08 projects" claim) — likely a project-wide re-import or backfill, not per-ticket.
+- **Formal Jira link:** add a "relates to" / "is caused by same defect as" link between PLT-2909
+  and PLT-2882 once the merge-or-fork call is made, so the FE fix isn't silently orphaned from
+  this ticket.
+- **Session-log-sync error:** still needs Yash's exact error text; still its own track, still
+  unresolved as of 07-28.
+- **2 image attachments:** still unopened; now lower-value evidence (diagnostic already answered
+  what they'd show) — optional confirmation only, not a blocker.
+
+---
+
+## ORIGINAL 07-22 action (superseded, kept for record)
+
+<details>
+<summary>Original chosen action: reuse PLT-2882's `__linkDiagnose` on ATL08 (now completed 07-23)</summary>
+
+**Do NOT re-invent tooling.** PLT-2882 already produced `window.__linkDiagnose(activityId?)` on
+branch **`PLT-linked-selection-diagnostics`** (console-only, not for merge), which prints, per
+model, both **`modelMembership`** (parquet-claimed models + loaded state) and
+**`parquetVsGeometryByMongoModelId`** (`inParquet` vs `inGeometry`). This was the fastest,
+single next step to confirm PLT-2909's mechanism on its own data — **now done** (see RE-CHECK
+above for the result).
+
+The original run steps (owner: Ilia; ~15 min; dev/editor session on ATL08), for reference:
+1. Checkout `PLT-linked-selection-diagnostics`; open the editor on ATL08, schedule
+   `29475-16-RL3`; load the models involved.
+2. Select activity `CY-5200` → `window.__linkDiagnose('CY-5200')` → capture the JSON.
+3. Read `modelMembership` vs `inParquet`/`inGeometry` per model — a model with
+   `inParquet > 0, inGeometry = 0` is a ghost.
+4. Run the same call for one working activity in the same schedule (broken-vs-working diff).
+
+**Actual result (07-23, Ilia):** `DistributionBoardsPanels_Bld1-V1` — ghost, 6/6 elements
+unbacked by geometry. Bld2 + federated model — clean, selection works. Confirms same defect
+*family* as PLT-2882; trigger suspected to be PC-EXCEL import duplication, not re-versioning.
+
+</details>

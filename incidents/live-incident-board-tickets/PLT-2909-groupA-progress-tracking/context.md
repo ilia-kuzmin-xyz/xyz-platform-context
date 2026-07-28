@@ -58,7 +58,7 @@ attribution" moves from **5/10 → 8/10** (confirmed mechanism; residual uncerta
 - **Created:** 2026-07-16.
 - **Attachments:** 2 images (⚠️ unreadable behind Atlassian auth — see NEEDS HUMAN).
 - **Domain slug chosen:** `progress-tracking` (matches sibling PLT-2882 — justified below).
-- **Concrete repro handed to us:** activity **`CY-5200`**, schedule **`29475-16-RL3`**, project **ATL08**. Model that *actually* contains the linked elements: **`PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_EquipmentOthers_Bld2-V1`** — but "several models appear."
+- **Concrete repro handed to us:** activity **`CY-5200`**, schedule **`29475-16-RL3`**, project **ATL08**. Model that *actually* contains the linked elements: **`PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_EquipmentOthers_Bld2-V1`** — but "several models appear." **Confirmed 07-23 (Ilia's diagnostic): the ghost is `DistributionBoardsPanels_Bld1-V1` (`00156181-fca5-4a7c-acdf-a12ce924c252`) — parquet claims 6 elements from source file `dd20b121`, geometry/cloud list has 0. Bld2 + the federated model are real and select fine.**
 
 ---
 
@@ -137,31 +137,39 @@ Yash, comment 1: *"when I tried to generate session id it gave me an error."* Th
 
 ## Confidence (per xyz-platform-context CLAUDE.md scale)
 
-- **Model list is built from parquet metadata (`getModels()` / `project_element_list`) with no geometry intersection, so stale/over-broad metadata → extra models:** **8/10** — read directly from source (`useGroupedLinks.ts:30`, `element-entity.ts:39-43`, `model-entity.ts:255-280`, `useLinkedElementsTreeData.ts:97-116`).
-- **That this stale-parquet mechanism is what `CY-5200`/ATL08 actually hit:** **5/10** — fits the symptom and Kyriakos's "one model but several appear" precisely, matches PLT-2882's confirmed data shape, but is **unconfirmed on ATL08**, on a **different model type** (`PC-EXCEL`, likely Navisworks), and a benign metadata-overlap alternative isn't excluded.
-- **Same root-cause *family* as PLT-2882:** **7/10**.
-- **Session-id error is a separate track:** **8/10**.
+*(Original 07-22 scores below; superseded by the 07-28 RE-CHECK where noted.)*
 
-**Overall triage confidence: ~6/10** — clear mechanism and a cheap confirmation path (reuse PLT-2882's diagnostic); final attribution needs one diagnostic run on ATL08.
+- **Model list is built from parquet metadata (`getModels()` / `project_element_list`) with no geometry intersection, so stale/over-broad metadata → extra models:** **8/10** — read directly from source (`useGroupedLinks.ts:30`, `element-entity.ts:39-43`, `model-entity.ts:255-280`, `useLinkedElementsTreeData.ts:97-116`). Unchanged.
+- **That this stale-parquet mechanism is what `CY-5200`/ATL08 actually hit:** ~~5/10~~ → **8/10 (CONFIRMED 07-23)** — Ilia's own diagnostic run found `DistributionBoardsPanels_Bld1-V1` as a ghost (parquet claims 6 elements, geometry/cloud list has 0), Bld2 + federated model clean. Residual uncertainty is now only *why* the parquet is wrong (Ali's open BE question), not *whether* it's the same shape.
+- **Same root-cause *family* as PLT-2882:** ~~7/10~~ → **9/10 (CONFIRMED 07-23, data not just architecture)**. Note: family, not identical trigger — see below.
+- **Trigger is a re-upload/re-version (PLT-2882-style):** **downgraded, likely wrong for this ticket** — Ilia's 07-23 comment instead points at **PC-EXCEL import-time duplication** (same rows written into multiple buildings' metadata). Treat PLT-2882's "re-upload" trigger as NOT assumed to transfer here; the metadata-write bug looks import-specific.
+- **Session-id error is a separate track:** **8/10**. Unchanged — no new info.
+
+**Overall triage confidence: ~6/10 → 8/10 as of 07-28** — mechanism and ATL08 attribution are now data-confirmed by the assignee; what remains is BE's answer on *why* the Excel importer double-writes rows (Ali Seyedof, asked 07-23, no reply as of 07-28) and the merge/fork paperwork (PLT-2909 vs PLT-2882 linkage, FE fix already routed to PLT-2882).
 
 ---
 
 ## NEEDS HUMAN
 
-- ⚠️ **2 image attachments on PLT-2909** (behind Atlassian auth — not viewable here). These are Kyriakos's screenshots of the wrong model list; they would confirm *which* surface (grouped-links count panel vs isolation tree) and how many extra models appear. **Do not guess contents.**
-- ⚠️ **Data confirmation on ATL08** (needs a dev/editor session): run `window.__linkDiagnose('CY-5200')` per `recommended-action.md`; specifically compare `modelMembership` (parquet) against `parquetVsGeometryByMongoModelId` (`inParquet` vs `inGeometry`) for each listed model. Extra models with `inParquet > 0, inGeometry = 0` (or non-membership) = confirmed ghost membership = same mechanism as PLT-2882.
-- ⚠️ **Model type of `PC-EXCEL_SWITCH_ATL8_…`** — Revit vs Navisworks decides the mapper path (`revit-model-mapper.ts` vs `navisworks-model-mapper.ts`) and whether an `svf2-object-id-map` artefact exists. Confirm before assuming PLT-2882's Revit findings transfer.
-- ⚠️ **Trigger (BE/ops):** was an ATL08 model (esp. `PC-EXCEL_SWITCH_ATL8_ELEC_XYZ_EquipmentOthers_Bld2`) re-uploaded/re-versioned recently, and does its timing line up with when the model list went wrong?
-- ⚠️ **Session-log-sync error** — separate track; owner = BE/logging. Needs the actual error text from Yash (see side-finding).
+*(Updated 07-28 — items resolved by the 07-23 diagnostic are struck through; new items added.)*
+
+- ~~⚠️ Data confirmation on ATL08 (run `__linkDiagnose('CY-5200')`)~~ — **DONE 07-23** by Ilia. Result: `DistributionBoardsPanels_Bld1-V1` is the ghost (6 elements, `inParquet:6/inGeometry:0`); Bld2 + federated model clean.
+- ~~⚠️ Model type of `PC-EXCEL_SWITCH_ATL8_…` (Revit vs Navisworks)~~ — **moot**: the confirmed lead is the PC-EXCEL importer duplicating rows, not a mapper-path difference.
+- ⚠️ **2 image attachments on PLT-2909** (behind Atlassian auth — not viewable here). Now lower priority — the 07-23 diagnostic already answers "which surface / how many extra models" more precisely than the screenshots would. Leave as optional confirmation only.
+- ⚠️ **NEW — Ali Seyedof hasn't answered** (asked 07-23, silent as of 07-28, 5 days): why does Bld1's `client-element-metas` (`00156181-fca5-4a7c-acdf-a12ce924c252`) contain 6 elements it doesn't own, sourced from file `dd20b121`. This is now the single blocking question — needs a nudge (see `recommended-action.md`).
+- ⚠️ **Trigger (BE/ops), reframed:** not "was the model re-uploaded" (that was the PLT-2882-style guess) but "did the PC-EXCEL import for ATL08 write the same source-file rows into more than one building's metadata, and is that reproducible for other ATL05-08 projects" — this is Ali's question to answer, and it also answers Kyriakos's "present for all ATL05-08 projects" cohort claim.
+- ⚠️ **Session-log-sync error** — separate track; owner = BE/logging. Needs the actual error text from Yash (see side-finding). Unchanged, still no reply.
+- ⚠️ **Merge-or-link decision** — PLT-2909's FE fix is already stated (by Ilia, on-ticket) to be tracked under PLT-2882. A human should decide whether to formally link the two Jira issues (e.g. "relates to" / "duplicates" the FE-robustness half) so the fix isn't tracked in two places once Darminder picks it up.
 
 ---
 
 ## Roster / ownership notes
 
-- **Ilia Kuzmin** — assignee here *and* the operator who root-caused PLT-2882; owns the diagnostic branch. Correct owner to run the ATL08 diagnostic (mechanism interrogator).
-- **Darminder Atker** — FE robustness half (PLT-2882 assignee); same FE fix likely covers both symptoms (surface geometry-vs-metadata disagreement; stop listing models with no resolvable geometry).
-- **Yash Patel** — coordinator/client channel; rightly flagged the "same cause?" uncertainty — this write-up answers it as *same family, needs ATL08 data*.
-- **BE/data (Sergey / Sachin+Ali / David Webb)** — if confirmed, the root-cause fix (why the parquet retains superseded/foreign model membership after re-upload) is theirs, as in PLT-2882.
+- **Ilia Kuzmin** — assignee; **ran the ATL08 diagnostic himself 07-23** and confirmed ghost membership. Now waiting on Ali, not running further diagnostics.
+- **Darminder Atker** — FE robustness half (PLT-2882 assignee); Ilia has already stated the FE fix ("hide models not in geometry") will be tracked under PLT-2882, covering both symptoms.
+- **Ali Seyedof** — **NEW as of 07-23**: tagged directly by Ilia to explain why Bld1's `client-element-metas` contains foreign elements. **No reply as of 07-28** — the actual blocker right now.
+- **Yash Patel** — coordinator/client channel; rightly flagged the "same cause?" uncertainty on 07-17 — now answered *(same family, confirmed on ATL08, different trigger than PLT-2882)*, but Yash hasn't acknowledged the 07-23 finding either.
+- **BE/data (Sergey / Sachin+Ali / David Webb)** — superseded for this ticket by the direct Ali Seyedof ask; keep as fallback if Ali doesn't respond.
 
 ---
 

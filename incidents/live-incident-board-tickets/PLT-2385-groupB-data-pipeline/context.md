@@ -251,14 +251,18 @@ backing the warning modal (how many other models share these element IDs).
 
 ## Confidence
 
-**6 / 10.** The mechanism and root cause are well-established: diagnosed in-thread by
-the senior fullstack (Rishi) and the BE/data owner (David Webb), and independently
-corroborated in code (links keyed on `modelElementId` with no model-type field; shared
-IDs across models are a known, handled concept; the only prune fires on model-delete).
-Held below 7 because: (a) the actual fix is **backend/data-pipeline + a product-UX
-decision**, not something implementable or fully testable from this FE repo; (b) the
-fix scope was debated for ~3 months (Jan→May) and split into PLT-2650/UX-1109 whose
-delete-time-warning approach does **not** obviously cover this incident's shared-ID /
-re-version trigger; (c) the decisive PowerBI-export screenshot is unreadable here
-(mitigated by transcribed numbers); (d) cohort is under-quantified (lon1x2 mentioned,
-no ticket).
+**6 / 10 (unchanged by this recheck).** The mechanism and root cause are well-established:
+diagnosed in-thread by the senior fullstack (Rishi) and the BE/data owner (David Webb),
+and independently corroborated in code (links keyed on `modelElementId` with no
+model-type field; shared IDs across models are a known, handled concept; the only prune
+fires on model-delete). Held below 7 because: (a) the actual fix is **backend/data-pipeline
++ a product-UX decision**, not something implementable or fully testable from this FE
+repo; (b) the fix scope was debated for ~3 months (Jan→May) and split into
+PLT-2650/UX-1109 — **confirmed by this recheck (07-28):** PLT-2650 shipped (Released,
+verified Staging 26.2.5) but its own scope doc explicitly defers the "upload path" — the
+re-version trigger that actually caused DC10 — to an unticketed future BE piece; (c) the
+decisive PowerBI-export screenshot is unreadable here (mitigated by transcribed numbers);
+(d) cohort is under-quantified (lon1x2 mentioned, no ticket). Not raised above 6 despite
+UX-1109 nearing completion (Ready For QA, 07-23) because its broader "model-type progress
+exclusion" direction, if adopted, still needs a **new**, currently nonexistent BE ticket
+before it touches this incident.

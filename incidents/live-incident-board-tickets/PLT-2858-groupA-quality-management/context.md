@@ -7,6 +7,50 @@
 - **Original customer contact:** "Mikel" · **Project:** ML9 · **Software Area:** Web Viewer
 - **Linked Freshdesk:** #7286 (currently Open, last flipped to "Waiting on 3rd line" 2026-07-07)
 - Triage (continuation) date: 2026-07-13
+- **Re-check date: 2026-07-28 (this pass).** Prior re-check: 2026-07-22.
+
+---
+
+## -1. 2026-07-28 re-check — DELTA SINCE 07-22: NONE. Escalation now due.
+
+**Verified via Jira fetch:** total comments still 26; last comment is still **107533** (Mostafa, 07-16,
+*"waiting on this since it was asked of me"*); issue `updated` timestamp is still `2026-07-16T14:44:34+0100`.
+**Zero activity of any kind — no comment, no status change, no reassignment — since 07-16.** Status unchanged
+(In Analysis), assignee unchanged (Darminder), priority unchanged (Critical).
+
+- **Did Mostafa ever answer?** No. His "leave it with me" (107208, 07-13) has produced nothing actionable in
+  15 days; his own acknowledgement that he's "waiting on this since it was asked of me" (107533, 07-16) is
+  now 12 days stale with no follow-up from him.
+- **Did anyone loop in Pietro?** Tagged twice — by Darminder (106713, 107109) and by Ilia (107206) — but
+  **Pietro has never once replied anywhere in this 26-comment thread.** He was named, not looped: nobody
+  has asked him directly/solely for a decision; he's always been a co-tag alongside Mostafa, who then
+  absorbed the ask ("leave it with me") without Pietro weighing in.
+- **Elapsed time (as of 2026-07-28):**
+  - 21 days since the customer said "we don't know how" to configure zones (106728, 07-07).
+  - 15 days since Mostafa took ownership ("leave it with me", 107208, 07-13).
+  - 12 days since the last nudge went unanswered in substance (107532/107533, 07-16).
+  - 6 days of complete silence since the 07-22 re-check (which itself found no change since 07-16).
+
+**Correction/backfill — two comments + one attachment that predate 07-22 but were missing from the prior
+version of this file** (found on this re-fetch, not new since 07-22, but change the picture enough to
+record now):
+- **107317 (07-14, Yash relaying customer):** the customer went further than "we don't know how" — they now
+  say *"it is not possible to connect the rooms to the different models"* and propose **two concrete
+  alternatives**: (i) a real drop-down of Locations to pick from on the QA form, or (ii) **remove the
+  Location field from the QA entirely**, because as-is it reads as missing/broken data on the Dashboard.
+  Attachment `image-20260714-113920.png` (Yash, 07-14) accompanies this — ⚠️ **NEEDS HUMAN**, same
+  Jira-media-auth limitation as the others (§5).
+- **107320 (07-14, Mostafa → Darminder):** *"what is the difference between location and location
+  details"* — Mostafa was actively engaging with the mechanics at that point, which makes the subsequent
+  12 days of total silence more notable: he had the technical picture and still hasn't closed the loop.
+- **Why this matters for the recommended action:** the customer isn't just waiting on a how-to anymore —
+  they've floated a product-level fork (build a selector vs. remove the field) that only Mostafa/Pietro can
+  rule on. That decision has been sitting unanswered even longer than the "zone-config ownership" question
+  the 07-22 note focused on.
+
+**Conclusion:** the 07-22 note's own contingency — *"if no answer within another few days, consider looping
+Pietro directly"* — has now been overtaken by 12 days of continued silence on a Critical ticket. Escalation
+action below is upgraded from "consider" to "do it": loop Pietro directly and stop re-nudging Mostafa alone.
 
 ---
 
@@ -180,7 +224,11 @@ configured) is stated verbatim in text by Darminder — but for completeness:
 - ⚠️ **NEEDS HUMAN:** `image-20260701-114131.png` (Darminder, 07-01, attached to comment 106251) —
   inaccessible. Per its caption it is Darminder's screenshot evidencing that rooms/zones are not set up on
   ML9; contents not independently verified.
-- ⚠️ **NEEDS HUMAN:** inline `blob:` images in the description and in comment 106245 — placeholder refs,
+- ⚠️ **NEEDS HUMAN:** `image-20260714-113920.png` (Yash, 07-14, attached to comment 107317) — inaccessible.
+  Per its caption, the customer's screenshot of the QA Location field looking empty/broken on the Dashboard,
+  supporting their "remove the field" proposal (§-1). Not independently verified.
+- ⚠️ **NEEDS HUMAN:** inline `blob:` images in the description and in comments 106245, 107109 (i.e. the
+  original mocks and the customer's inline screenshot in 107317's markdown body) — placeholder refs,
   not fetchable.
 
 ---

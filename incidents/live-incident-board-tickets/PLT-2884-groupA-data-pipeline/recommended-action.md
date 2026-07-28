@@ -104,7 +104,10 @@ on a Critical ticket is enough evidence.)*
 - **Attachments remain NEEDS HUMAN** (screenshots, .xlsx, .xer) — see
   `context.md §8`.
 
-**Confidence in diagnosis: 8/10.** **Confidence in this being the right next step:
-9/10** — cause is settled; the only lever left is chasing the customer, and the
-status question (With Customer vs With Technical Support) is the concrete decision
-to force.
+**Confidence in diagnosis: 8/10** (unchanged — no new evidence on re-check).
+**Confidence in this being the right next step: 9/10 → 10/10 as of 07-28** — cause
+was already settled; the re-check adds that the "wait and ask" approach has now
+been tried twice with zero result, which removes the remaining ambiguity about
+*whether* to escalate. The only open question is *when* Yash/the coordinator
+actually executes the transition — that still needs a human to click it (this
+run does not post comments or transition status per the board's playbook rules).
