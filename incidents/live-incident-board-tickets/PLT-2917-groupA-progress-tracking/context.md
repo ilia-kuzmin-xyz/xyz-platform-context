@@ -132,6 +132,12 @@ data / view defect**, not a frontend rendering bug.
 
 ## 2. What is the surface? (which page / widget)
 
+> **⚠️ Superseded 07-29 — read §0.2 first.** §2–§4 analyse the **new Portfolio dashboard's Milestone
+> Performance widget**. As of the 07-22 09:33/09:42 comments the ticket is scoped to the **PowerBI
+> portfolio report** at `/progress-dashboard/:id` (a `PowerBIEmbed`, no FE milestone logic) and to the
+> **activity parquet**. Keep §2–§4 as background for the description's original complaint — the
+> route-vs-widget caveat below is now **resolved in favour of PowerBI**, not the widget.
+
 The failing widget is the **Milestone Performance** widget — a per-project "upcoming milestones"
 gantt that groups project tracks by region and draws one diamond per key milestone. It exists in
 **exactly one place** in the codebase: `PortfolioDashboardPage`.
@@ -284,10 +290,27 @@ a portfolio-dashboard home.
 
 ## 8. NEEDS HUMAN (unreadable media, undocumented prior fix, data I can't query)
 
-- ⚠️ **1 screenshot attachment** on PLT-2917 — binary media behind Atlassian auth, **not viewable
-  here**. Do not guess its contents. It is the fastest way to confirm (i) which surface Thomas is
-  on (Portfolio dashboard vs the `progress-dashboard/:id` report — §2 caveat), and (ii) exactly
-  which diamonds are miscoloured for ELN04.
+**Re-checked 2026-07-29 — attachment access re-tested and still blocked:** a direct GET on
+`/rest/api/3/attachment/content/61396` returns **HTTP 403**. Both attachments remain unreadable here;
+do not guess their contents.
+
+- ⚠️ **NEW (07-27) `ELN03 Milestones Dashboard.xlsx`** (203 KB, uploaded by Yash with the client's
+  "all milestones are not updated" update) — **now the most load-bearing unread artifact on this
+  ticket.** From its name it is very likely the client's own per-milestone export for ELN03
+  (expected vs shown), i.e. it may already contain the activity-ID-level shown-vs-expected list that
+  Ilia asked for on 07-22 and never got. **A human should open it before anyone re-asks the client.**
+- ⚠️ **1 inline image in the 07-27 comment** — hosted on `eucattachment.freshdesk.com` behind a JWT
+  token, not resolvable here.
+- ⚠️ **1 screenshot attachment** (07-21, `image-20260721-123812.png`) — binary media behind Atlassian
+  auth, **not viewable here**. Do not guess its contents. Less decisive than it was on 07-22: §0.2
+  now settles the surface question from code, so this is corroborative only (which ELN04 diamonds are
+  miscoloured).
+- ⚠️ **The activity-parquet row for `PMILE5030` (ELN03)** — the decisive artifact for the re-scoped
+  issue: does `actual_progress_combined_methods` contain **any** row for that `ActivityId`, and what
+  are its `ProgressMethod`, `PlannedLaborUnits`, `LinkedElements`? And does the **generator** skip
+  `itemType = 'Milestone'` by rule or by zero-weight side-effect? The generator is backend/dagster —
+  not in this repo, so I cannot read it (§0.3 is an inference from schema + FE code, not a read of
+  the generator).
 - ⚠️ **Pietro's earlier fix is undocumented** — no ticket / PR / commit reference. **Ask him
   exactly what he changed** (code? a Key-Milestone re-mapping? stamping Actual End Dates? which
   projects?) *before* re-diagnosing, or we risk re-investigating something already ruled out and
@@ -321,6 +344,26 @@ a portfolio-dashboard home.
 
 **Overall triage confidence: ~6/10.** Mechanism and layer are clear; the exact backend cause per
 project needs one data-payload step.
+
+### Re-check 2026-07-29 — revised scores
+
+- **Surface is the PowerBI portfolio report, not our renderer:** **9/10** (was an open caveat at
+  6/10) — confirmed twice over: in code (`ProgressReportPage.tsx` is a `PowerBIEmbed`) and by
+  Mostafa in-ticket (*"this is for the power bi dashboard for portfolio"*).
+- **The FE is not the defect on either half:** **9/10** (was 8/10) — on the PowerBI surface the FE
+  holds no milestone data at all, and on the platform surface no `itemType` predicate exists in the
+  progress queries.
+- **"`PMILE5030` is absent from the activity parquet because milestones have no progress basis
+  (0 labour units / 0 linked elements)":** **6/10** — schema- and parser-supported inference
+  (§0.3), consistent with the repo's own `itemType = 'Activity'` test scoping, but the parquet
+  **generator itself is backend and unread**. One query settles it.
+- **Both halves reduce to "milestone completion must come from Actual Finish Date, which isn't
+  populated":** **6/10** — an attractive single through-line backed by Pietro's own independent
+  read, but it joins two symptoms that the team has not yet formally linked.
+
+**Revised overall triage confidence: ~6-7/10.** Up slightly: the surface question is now closed and
+the mechanism is sharper and better evidenced, but the two decisive artifacts (the parquet row and
+the 07-27 xlsx) are still out of reach and the ticket still carries two unsplit signals.
 
 ---
 
