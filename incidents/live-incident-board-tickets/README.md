@@ -38,8 +38,58 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 - **Group B** context is now captured (per "populate context for all"), but the
   Group B *action* scenario is still TBD — so their `recommended-action.md` files
   are short (dev-readiness note + fix ownership), not full drafted actions.
+- **As of the 2026-07-29 run:** Group B tickets are skipped entirely (no deep
+  dive, no context update) — only a folder group-tag rename if a ticket's
+  status moved A→B. Revisit once the Group B action scenario is defined.
 - Actions are **drafted only** — a human reviews `recommended-action.md` and
   executes any Jira comment / transition manually.
+
+---
+
+## Run: 2026-07-29 — 7 Group A tickets re-triaged (1 new), Group B skipped by design
+
+Board re-queried (`project = PLT AND issuetype = "Live Incident"`), filtered per
+scope rules above → 8 in-scope tickets: 7 Group A (deep re-check/new) + 1 Group B
+(PLT-2874, housekeeping rename only — Group B deep dives are out of scope this
+run per updated instructions, see scope rules above).
+
+### Group A (7) — 1 brand-new, 6 re-checked (4 materially changed, 2 confirmed unchanged)
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| PLT-2923 | viewer-and-model | With Customer (**new**) | Web viewer only supports `rvt`/`nwd`/`nwc` (`model-mapping-service.ts:296`); an unsupported format (e.g. IFC) throws and fails **silently** on initial load — no toast on that path. Second possible variant: supported file + missing element metas → every node hidden (PLT-2574 shape). 6 days silent, 3 unanswered client questions | (a) comment — mechanism + one closed Q ("do other WI1 models load?") + move **With Customer → In Analysis** (we are the blocker, not the client) | 7/10 |
+| PLT-2917 | progress-tracking | Open (**re-scoped under us**) | Ticket's actual scope changed mid-flight since 07-22: now about milestone `PMILE5030` (ELN03) — 100% in editor, missing from the **PowerBI portfolio's activity parquet**. Third instance of the "two surfaces disagree, FE is a faithful renderer" family (with PLT-2884, PLT-2874). 3 client questions still unanswered; Pietro silent 8 days | (a) split the two signals, answer Mostafa with schema evidence, run one parquet query — internally, not back to the client | 6-7/10 |
+| PLT-2884 | data-pipeline | With Customer | Still no re-upload — **16 days silent on a Critical ticket**, 20 days open. New: XER filename metadata shows **Rev 02, data-dated 27 Apr** (~2.4mo stale) and a combined AT10x-A11x export — both fit "missing source activities" better than "bad export" | (a) **escalate With Customer → With Technical Support** (now the recommendation, not an option) + ask internally "is there a Rev 03?" | 8/10 diag, 9/10 next-step |
+| PLT-2858 | quality-management | In Analysis | **Prior 2 runs (07-13, 07-22) missed two 07-14 comments**: customer withdrew the configure-zones ask for a Location dropdown/removal; Mostafa's real blocking question to Darminder ("what's the difference between location and location details?") went **unanswered 15 days** — the stall is an unanswered dev question, not a withheld PO decision as assumed | (a) post the code-derived answer to Mostafa's question + the two customer options with cost attached; loop Pietro directly (escalation trigger from 07-22 has now fired) | 8/10 |
+| PLT-2815 | quality-management | With Customer | Confirmed **pure process gap** — nothing technical pending, 23 days silent since Freshdesk closed, nobody acted on 2 prior close recommendations. New: ran the cohort sweep Paolo asked for — **18 of 37 package series show inverted Cat3/Cat4 costs**, 12 of which the "different lookup rules" explanation does **not** cover (worst: Mechanical/VESDA, 2.2×) | (c) short direct close-nudge → Yash naming the 23/36-day figures; split the 18-inversion sweep into its own product ticket for Mostafa/Pietro | 9/10 |
+| PLT-2649 | 360-captures | With Customer | **Root cause pinned** (was mistakenly carried as "parked" — it was skipped, not re-checked, on 07-22): level "DC-0G-FFL" mis-datumed at **+50.4m** instead of ≈0 in one federation-link source model → ~101 rooms / ~1870 captures float ~50m high. Fix = one source-model value + re-upload; **no capture re-upload needed**. 5 days parked — legitimately customer-side now | (a) internal comment disambiguating V1-vs-V14 model naming + stating "no regression, wrong since 2025-12-04 upload"; split Pietro/Jason's 360-editor UX thread into its own ticket | 9/10 cause |
+| PLT-2619 | other | With Customer | Still **mis-filed** (demo relink request) — **89 consecutive days of zero activity**, 97 days old, 93 days with the pivotal decision open. Yash's 07-27 nudge misrouted to FE (Ilia) instead of product | (c) reclassify off the PLT board to PBD (precedent: PLT-2891→PBD-2111); point at the existing open decision **PBD-1298** instead of re-asking Pietro from scratch | 9/10 |
+
+### Group B (1) — housekeeping only, deep dive skipped by design
+
+| Ticket | Domain | Status | Note |
+|---|---|---|---|
+| PLT-2874 | viewer-and-model | Dev In Progress (moved from In Analysis) | Folder retagged `groupA`→`groupB`. First of the three "two surfaces disagree" tickets (2874/2884/2917) to actually reach dev — worth a `dashboard/pitfalls.md` entry once its fix lands. No action drafted; Group B action scenario still TBD per scope rules. |
+
+### Closed / moved out of scope since last run (informational — no action)
+
+- **PLT-2882** → **Done** (root cause confirmed: stale parquet vs superseded model geometry).
+- **PLT-2892** → **Done**. **PLT-2879** → still Done (unchanged).
+- **PLT-2906**, **PLT-2918** → **In Code Review** (fixes landed; out of this routine's scope now).
+- **PLT-2909** → **With Technical Support** (was `groupA-progress-tracking`; now excluded).
+- **PLT-2890** → **Ready For QA** (was Group B).
+
+### Cross-ticket notes (this run)
+
+- **The "two surfaces disagree, FE is a faithful renderer" theme is now 3-for-3** (PLT-2874 in Dev In Progress, PLT-2884 progress-%, PLT-2917 milestone status) plus a first fix in flight — this is the moment to write the named pattern into `dashboard/pitfalls.md` per the 07-22 note's own trigger condition.
+- **PLT-2858 and PLT-2815 share the same bottleneck shape**: a Mostafa/product decision question asked once and left unanswered for 2+ weeks while the ticket ages on "With Customer"/"In Analysis". Worth raising as one coordinator item to Yash rather than two separate nudges.
+- **PLT-2649's mis-datumed federation link is a new defect class**, distinct from the stale-parquet family (PLT-2882/2909) — candidate for a cohort sweep across other federation-linked models once confirmed.
+- **PLT-2815 surfaced a latent regression risk**: PLT-2561 (Dev In Progress, unassigned, 69 days stale) would remove floating-point rounding from the exact cost hook PLT-2815's numbers depend on (`740×1.14 = 843.5999999999999`) — flagged loudly as *not* a fix for 2815, but worth a heads-up to whoever eventually picks up PLT-2561.
+- **Process observation, this run:** of the 6 re-checked tickets, 4 (PLT-2884, PLT-2858, PLT-2815, PLT-2619) are stalled purely on **our own** unanswered internal question or un-actioned recommendation, not on the customer. Only PLT-2649 (customer re-upload) and part of PLT-2917 (Pietro) are genuinely customer/product-side waits. Worth a standing reminder that "With Customer" does not always mean the ball is actually with the customer.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian auth) — this run
+
+**PLT-2923** (1 screenshot — decisive: disambiguates error-toast vs empty-viewport, i.e. which failure variant), **PLT-2917** (`ELN03 Milestones Dashboard.xlsx` — decisive, 403-confirmed unread), **PLT-2884** (3 screenshots + `.xlsx` + `.xer` — the `.xer` is the single most decisive unread artifact across this run), **PLT-2858** (4 screenshots, 1 new from 07-14 — decisive for which UI surface), **PLT-2815** (2 PNGs + inline blobs — corroborative only, cause already confirmed), **PLT-2649** (2 PNGs — corroborative only now that root cause is pinned). **PLT-2619**: none (zero media on the Jira side).
 
 ---
 
