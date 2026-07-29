@@ -1,5 +1,15 @@
 # PLT-2884 — Recommended action
 
+> **Re-checked 2026-07-29 — situation unchanged, recommendation ESCALATED.** The
+> 07-22 draft below stands on substance but is now understated: the silence has
+> gone from 9 days to **16 days** (last substantive comment 07-13) and the ticket
+> is **20 days old on Critical**. The status move that was posed as an option
+> ("consider With Technical Support") should now be posed as the **default**, and
+> there is a concrete check we can run **without** the customer. See
+> **§ Escalated action (2026-07-29)** at the end — use that draft, not the 07-22 one.
+
+---
+
 ## Chosen: (c-style) Coordinator status-check → Yash, plus a proposed status move
 
 Root cause is **already known and agreed** (bad/incomplete source XER, product-
@@ -79,3 +89,131 @@ fact; Q2 proposes the status transition with a one-line justification.)*
 9/10** — cause is settled; the only lever left is chasing the customer, and the
 status question (With Customer vs With Technical Support) is the concrete decision
 to force.
+
+---
+---
+
+# Escalated action (2026-07-29) — use this draft
+
+## What changed since 07-22: nothing on the ticket, everything about the wait
+
+Verified via `getJiraIssue`: status still **With Customer**, priority still
+**Critical**, `updated` still **2026-07-20 09:35**, **10 comments (none new)**,
+**5 attachments (none new)**, no resolution, no remote links. No sibling ticket
+picked the issue up (`context.md §9`). **The customer has not re-uploaded.**
+
+Silence clocks to 2026-07-29 (`context.md §9`):
+
+- **20 days** since the incident was raised (Critical).
+- **19 days** since we told the customer what to fix.
+- **16 days** since the last substantive comment (Yash, 07-13 — "still waiting").
+- **9 days** since the last activity of any kind, and that was an **automated
+  Freshdesk status echo**, not information.
+
+Per the playbook, a Critical live incident that has produced **no new information
+in 16 days** is not "parked with the customer" — it is **stalled with nobody
+driving it**. That is the finding, and it is now the entire ticket.
+
+## Two changes to the 07-22 recommendation
+
+**1. The status move is no longer an option to consider — it is the recommendation.**
+Move **With Customer → With Technical Support** and give the chase an owner. "With
+Customer" is an accurate description of who owes the artifact, but it is a
+misleading description of who owes the *action*: for 16 days nobody on our side has
+been accountable for getting it. (Same failure mode the playbook logs as *"evidence
+requests without owners"* — the HAR ask that "sat idle all day", and *"the trigger
+question left unanswered"* — asked once, never owned.)
+
+**2. There is now a check we can run WITHOUT the customer.** The XER attachment is
+named `EQIX_AT10x-A11x_Rev_02_updated20260427.xer` — i.e. the schedule we were given
+is labelled **Rev 02, data-dated 27 April 2026** (`context.md §9`; inference from the
+filename, content still unreadable here). If Rev 02 is still what AT10x holds, then
+a ~2.4-month-stale revision *by itself* explains missing May–June activities, and the
+New DB is arguably reporting correctly. Also note it is a **combined AT10x-A11x
+multi-project export** — a classic partial-export shape.
+
+So the sharp question stops being "has the customer re-uploaded?" (which we have
+asked twice and got silence) and becomes **"what revision is AT10x actually on, and
+is there a newer one in P6?"** — answerable internally, in minutes, by a human with
+file or DB access. This unsticks us from waiting on a non-responsive client, which
+is the playbook's core move: *get the observation into our own hands*
+(Phase 4 / "find an internal repro" — here, read our own stored revision).
+
+---
+
+### Draft escalation comment (for a human to post — do NOT auto-post)
+
+> @Yash — PLT-2884 re-check. This is a **Critical** live incident that is **20 days
+> old** and has had **no new information for 16 days** (your 13 Jul "still waiting
+> for them to get back" is the last real update; the only thing since is the
+> Freshdesk status bounce on 20 Jul). The customer has not re-uploaded — no new
+> attachment, no comment.
+>
+> Proposing two things:
+>
+> 1. **Move it to With Technical Support and give the chase an owner.** The fix is
+>    the customer's, but the *follow-up* is ours and for 16 days it hasn't been
+>    anyone's. On a Critical, silence isn't "parked".
+> 2. **One check we can do without them.** The XER we hold is
+>    `EQIX_AT10x-A11x_Rev_02_updated20260427.xer` — **Rev 02, data-dated 27 Apr
+>    2026**. Can someone confirm *which revision AT10x is currently running on*, and
+>    whether the customer has issued a **Rev 03** in P6 since April? If AT10x is
+>    still on an April Rev 02, that alone explains the missing activities (anything
+>    progressed in May–June wouldn't be in it) — and it means the new dashboard is
+>    reporting the current schedule *correctly*, which is a much better answer to
+>    give the client than "please re-upload".
+>
+> Also worth noting it's a **combined AT10x-A11x** export — if the P6 export had only
+> part of the project selected, that would produce exactly the gap Hussein saw in
+> Power BI.
+>
+> Recap for anyone new: old dashboard (Power BI) reads from a pipeline that keeps
+> activities from earlier schedule revisions, so it reads **higher** (27.37%); new
+> dashboard (Platform) reflects only the current revision, so it reads **lower**
+> (23.85%). Expected to be data-side, not a platform bug.
+
+*(One owner, one status decision, one internally-answerable question — each with a
+one-line justification. Nothing asserted beyond the evidence: the revision claim is
+explicitly framed as read off the filename and put as a question.)*
+
+---
+
+### If the answer to the revision question is "AT10x is on Rev 02 / no Rev 03 exists"
+
+Then this ticket can be **closed properly rather than chased indefinitely** — but
+close it on the *cause*, not on the silence:
+
+- State the root cause: current schedule revision is Rev 02 (27 Apr), incomplete
+  relative to actual progress; Platform reports it faithfully.
+- State the trigger: the Power BI → Platform migration exposed a pre-existing
+  divergence (Power BI retained stale-revision activities and masked it).
+- State the cohort — **this is the open item nobody has swept**: *any other project
+  whose current schedule revision is materially older than its recorded progress*
+  will show the same Old-vs-New gap. Worth one query before closing (playbook
+  Phase 6: close on cause + trigger + cohort, never on "looks fine now").
+
+### Escalate further if unanswered
+
+If there is still no response by **~2026-08-01** (i.e. ~3 more days, ~19 days of
+silence), loop in **Mostafa** (who made the original diagnosis) or **Pietro** —
+they own the product-side call on whether a stale-revision project should be told
+"working as intended" and closed, versus kept open awaiting a client re-upload that
+may never come. That is a product decision, not a support-chase decision, and
+16 days of silence is evidence it needs making.
+
+---
+
+## Confidence (2026-07-29)
+
+- **Diagnosis: 8/10** — unchanged. The Rev-02/April date-stamp reinforces the
+  existing hypothesis but is filename-level inference, so it does not raise the
+  score; the two residual unknowns from `context.md §8` are untouched.
+- **This being the right next step: 9/10** — the ticket state is verified
+  unambiguously (no new comments/attachments), and the recommendation now includes a
+  check that does not depend on the non-responsive customer, which strictly dominates
+  the 07-22 "nudge and wait" version.
+- **Attachments still NEEDS HUMAN** — 3 screenshots, the `.xlsx` activity-level diff,
+  and the 4.35 MB `.xer` (`context.md §8`). The `.xer` is the single most decisive
+  unread artifact: parsing it against the prior revision would confirm the missing
+  activities directly. Filename metadata was readable; **contents were not, and were
+  not guessed at.**

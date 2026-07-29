@@ -7,8 +7,8 @@
   client)
 - **Assignee / Reporter:** Yash Patel (support)
 - **Project:** EQX-AT10x (ID `6808f6afae311c4f8409624f`) · **Software Area:** Dashboard
-- **Created:** 2026-07-09 · **Last updated:** 2026-07-20
-- Triage date: 2026-07-22
+- **Created:** 2026-07-09 · **Last updated:** 2026-07-20 (unchanged as of 2026-07-29)
+- Triage date: 2026-07-22 · **Re-checked: 2026-07-29 (§9 — no movement)**
 
 ---
 
@@ -186,3 +186,106 @@ depend on the customer, not on code.
     human/backend with file access.
 - ⚠️ **NEEDS HUMAN / support** — confirm with the customer whether the corrected
   XER has been re-uploaded (open item since 07-13; see recommended-action.md).
+
+---
+
+## 9. Re-check 2026-07-29 — no movement; stall is now the whole story
+
+Re-queried `getJiraIssue` (fields incl. comment/attachment/status) plus
+`getJiraIssueRemoteIssueLinks` and a project-wide JQL sweep for AT10x/EQX siblings.
+**Nothing has changed on this ticket since the 07-22 triage.**
+
+### What was verified as unchanged
+
+| Field | 07-22 triage | 07-29 re-check |
+|---|---|---|
+| Status | With Customer | **With Customer** (unchanged) |
+| Priority | Critical | **Critical** (unchanged) |
+| Assignee / Reporter | Yash Patel | Yash Patel (unchanged) |
+| `updated` | 2026-07-20 | **2026-07-20 09:35** (unchanged) |
+| Comment count | 10 | **10 — no new comments** |
+| Attachments | 5 | **5 — no new upload** |
+| Resolution | null | null |
+| Remote issue links | — | **none** (no Freshdesk/PBD link on the Jira side) |
+
+- **Did the customer re-upload? No.** The decisive negative evidence is the
+  **attachment list**: still exactly 5 items, the newest of which is Yash's
+  `EQIX_AT10x-A11x_Rev_02_updated20260427.xer` from **2026-07-10 09:25**. A
+  corrected re-export would almost certainly have arrived here (or as a comment)
+  as it did the first time. Nothing since.
+- **No new ticket supersedes it.** JQL over `project = PLT` for AT10x/EQX returns
+  only historical/closed siblings (PLT-2694 Done, PLT-2554 Ready-For-Release,
+  PLT-2551 Closed, PLT-1787 Archived) — none related to this progress mismatch.
+  So the incident was not quietly re-raised elsewhere; it is simply parked.
+
+### Silence clocks (to 2026-07-29)
+
+| Measured from | Event | Days |
+|---|---|---|
+| 2026-07-09 18:55 | Ticket created | **20 days** open |
+| 2026-07-10 10:47 | Root cause established; customer asked to rectify + re-upload | **19 days** with no fix delivered |
+| 2026-07-13 10:56 | **Last substantive human comment** (Yash: "still waiting for them to get back") | **16 days** |
+| 2026-07-20 09:23 | Last activity of any kind — an **automated Freshdesk status echo**, zero new information | **9 days** |
+
+The 07-22 run reported "9+ days silent" measured from the 07-13 nudge. On the same
+basis that figure is now **16 days**. The only thing that has happened in between is
+a Freshdesk state bounce (Closed 09:22 → Waiting-on-customer 09:23 on 07-20), which
+carries no information about the customer — if anything it suggests someone nearly
+closed a Critical incident that was never verified fixed (playbook Phase 6:
+"remission, not resolution"), then reverted.
+
+### One new hard fact — the XER is labelled Rev 02 / 27 Apr 2026
+
+The attachment metadata (readable even though the file content is not) gives a
+filename that was not exploited in the 07-22 pass:
+
+```
+EQIX_AT10x-A11x_Rev_02_updated20260427.xer   (4.35 MB, uploaded 2026-07-10 09:25)
+```
+
+Three inferences, **all from the filename only** — flagged as inference, not
+verified content (the file itself remains unreadable here, see §8):
+
+1. **`Rev_02` / `updated20260427`** — the schedule the Platform was working from is
+   labelled revision 02, data-dated **27 April 2026**, i.e. **~2.4 months stale**
+   relative to the 09 July report. Anything the customer added or progressed in
+   May–June would legitimately be absent from it. That is a *cleaner and more
+   specific* form of "activities missing from the source data" than "bad export":
+   the New DB may simply be honestly reporting an old revision.
+2. **`AT10x-A11x`** — this is a **combined, multi-project XER** covering two
+   projects. Multi-project exports are a classic source of partial-activity loss
+   (filtered project selection in P6 at export time), which fits the customer's own
+   Power BI finding.
+3. It sharpens §3's mechanism: Power BI (Old DB) retaining activities from *prior*
+   revisions vs Platform (New DB) honouring only the current revision produces
+   exactly the observed direction (27.37% > 23.85%) if the current revision is a
+   stale/partial Rev 02.
+
+**This converts the coordinator question from vague to checkable** — instead of
+"has the customer re-uploaded?", ask "**is Rev 02 (27 Apr) still the current
+schedule on AT10x, and has a Rev 03 been issued in P6 since?**" A human with file
+or DB access can answer that in minutes without the customer (see
+recommended-action.md).
+
+### Hypothesis & confidence — unchanged, marginally reinforced
+
+Root cause (incomplete/stale source XER; Old-DB-vs-New-DB = Power BI vs Platform
+sourcing) stands, now with the Rev-02/April date-stamp as corroborating detail.
+**Confidence stays 8/10** — the reinforcement is filename-level inference, which
+does not clear the two residual unknowns (§8: which ingestion path AT10x used, and
+confirmation from a corrected XER). No re-diagnosis warranted; the actionable
+finding continues to be the **stall**, and it has roughly doubled in length.
+
+### Cross-ticket movement noted this run (informational)
+
+- **PLT-2882 → Done** (was In Analysis). The sibling stale-metadata ticket closed;
+  its `context.md §6` "silently drops without warning" pattern reference still
+  stands as the analogy for the §6 hardening candidate here.
+- **PLT-2874 → Dev In Progress** (was In Analysis). This is the first of the three
+  "two dashboard surfaces disagree on a number, FE is a faithful renderer" tickets
+  (PLT-2874 element counts / PLT-2884 progress % / PLT-2917 milestones) to reach
+  dev — the board README flagged that as the trigger for writing the pattern up in
+  `dashboard/pitfalls.md`. Worth doing on the next run.
+- **PLT-2917** still Open; **PLT-2385** still Ready For Development; **PLT-2890**
+  now Ready For QA (out of this routine's scope).
+- **Domain slug kept:** `data-pipeline` (§7 reasoning unaffected).
