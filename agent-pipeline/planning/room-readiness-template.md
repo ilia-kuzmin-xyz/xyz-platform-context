@@ -2,6 +2,10 @@
 
 🟢 **v1 IMPLEMENTED (pipeline).** Overview blocks only; drill-down is v2. Source of truth for the layout: Mostafa's mockup (`Room Readiness Canvas.dc.html`).
 
+**Shipped since the first pass:** per-room **Packages** breakdown, room
+isolation in the 3D viewer, `target_date` per room, and a hand-built reference
+artefact. See § Later findings.
+
 **Shipped:** `agents/rooms_readiness.py` (room↔element rollup, planned %, 360 coverage), `agents/room_types.py` (LLM ruleset → deterministic typing), `agents/report_templates.py` (conditional prompt block), clarifier module option, server Phase 0d½, `capabilities.rooms`. 226 tests.
 
 **Verified end-to-end on the reference project:** template activates from the clarifier answer, rollup resolves 502 rooms in ~66s cold (2h cache), and the composer scored **10/10 on template adherence** — 3-column 430px grid, two rows, ranks by variance, nulls as em-dash, scrolling room matrix, grouping by level and type, ForgeViewer embedded, element counts shown.
@@ -264,3 +268,69 @@ Add a regression test that snapshots the assembled prompt blocks for a **non-tem
 - [phases.md](../phases.md) — where 0b¾ / 0d½ slot in
 - [data-contracts.md](../data-contracts.md) — viewer mapping wire format (same pattern)
 - [../../canvas/viewer-colouring.md](../../canvas/viewer-colouring.md) — the viewer pattern this mirrors
+
+
+---
+
+## Later findings (implementation, not design)
+
+### Packages was buildable after all
+
+Originally scored "55% — activities_mapping can't be joined to category names".
+Wrong: `category_types` carries a type whose `typeName` is **Package**, and
+`activities_categories_category_type_id` returns `activityCategoryId` alongside
+`categoryName`. That closes the chain:
+
+```
+room -> elements -> activityId -> activityCategoryId -> categoryName
+```
+
+`agents/room_packages.py` picks the Package type (falling back to Discipline)
+and `_rollup_packages()` aggregates installed/in-scope per room per package.
+
+Two things that would silently corrupt it:
+- **`activities_mapping` returns every category dimension at once** — area,
+  responsibility, level. Without filtering by `categoryTypeId`, every room shows
+  the same handful of unrelated "packages". Pinned by a test.
+- An element linked to several activities counts **once per package it
+  touches**, so package rows deliberately do not sum to the room total. That
+  matches the design (per-package completion, not a partition).
+
+Verified: all 502 rooms get a breakdown. The reference project only defines
+three packages and one is named `Test1`, so it looks thin there while being
+correct — a properly configured project has ~18.
+
+### Room isolation in the viewer
+
+`roomDbIds` in the viewer mapping (see data-contracts). 502/502 rooms resolve,
+151,296 of 161,519 room-mapped elements (93.7%) find a dbId, 0 stray. No GUID
+reaches the browser.
+
+**The number that shapes the UX: a room holds a median of 18 tracked elements**
+(min 1, max ~6,900), and 218 of 502 have five or fewer. Isolating those looks
+like nothing happened. Mitigations: ghosting keeps spatial context, the camera
+frames the selection, cards show element counts, and rooms with
+`elements_tracked === 0` are not selectable. Sell the 3D as *"where in the
+building is this room's tracked work"*, not *"here is the room"*.
+
+### Still not derivable
+
+`Open blockers` (needs checklists), `+N this week` (needs historical
+recompute), the Packages **GC** column, and **Milestones** (first fix / second
+fix / install complete / QA closed / ready for handover — no field carries
+them, no room link). The design mockup fakes all of these: its package
+percentages come from a hash of the room name, its milestone dates are string
+literals, and GC is `actual` minus a pseudo-random offset. Do not port them.
+
+### The reference artefact
+
+`XYZ_AgentPipeline/reference/room-readiness-artifact.tsx` — the approved design
+ported by hand to the composer's component contract, driven entirely from
+`props.data.rooms`. The composer re-derives the layout every run and varies;
+this does not, so it is the dependable demo and a worked example of the
+contract. `install-room-readiness.js` writes it into a canvas session through
+the project files API (idempotent), `inspect-session.js` reports what a session
+is carrying.
+
+Note the files API takes the **platform** project id — the mongo id in the
+canvas URL returns "An error occurred while checking project access".

@@ -115,3 +115,50 @@
 **Cause**: Fable is inconsistent about backslash count in JSON Unicode escapes; after `json.loads` some render fine (`\u2014`), some show literally (`\u2014`).
 
 **Rule**: Pipeline `_decode_unicode_escapes()` collapses any backslash-escaped `\uXXXX` in tsx/title/summary to the real character before returning.
+
+---
+
+## The Sandpack VFS has a hard payload ceiling (~9MB)
+
+Everything the artefact imports is serialised into the Sandpack iframe, and
+`/viewer-mapping.json` dominates it. Past roughly 9MB the bundler fails with
+`Couldn't connect to server … ERROR: TIME_OUT` **before it boots** — so it
+presents as a network/infra problem, not as anything to do with your data.
+
+This bit us the moment room isolation added 1.19MB of `roomDbIds` to an
+already-marginal 8.19MB. The fix was encoding dbId groups as sorted-delta
+base36 (9.37MB → 2.46MB), not trimming the feature.
+
+Before adding anything to the viewer mapping, measure it. `statusDbIds` alone
+is a million integers.
+
+## A dashboard's `domainsRead` must name real hydration domains only
+
+`completeHydration()` marks a dashboard ready only when **every** entry in its
+`domainsRead` appears in the set of domains that actually delivered — which is
+only ever `issues, schedule, progress, media, viewer, rooms`.
+
+`project` and `capabilities` are **profile keys, not domains**. Listing them
+means the gate never opens: the dashboard keeps whatever data it mounted with
+and silently renders empty states. The symptom is domain-shaped ("No 3D model
+available for this project") which sends you looking at the model rather than
+at the declaration.
+
+Corollary for artefact code: gate the viewer on `data.viewer.urn`, never on
+`data.capabilities.viewer`. `capabilities` rides in the profile and can be
+absent on a restore even when the model is perfectly available.
+
+## `viewer.isolate()` semantics depend on the ghosting flag
+
+The dashboard sets `setGhosting(false)`, which is right for a status filter —
+non-matching elements should vanish. Copy that verbatim for room isolation and
+`isolate()` **hides** the remainder instead of ghosting it, so a room holding a
+median of 18 elements leaves an apparently empty canvas.
+
+Also note `viewer.isolate([])` *clears* isolation (shows everything) rather than
+hiding everything — so an empty visible set silently reverts to the whole
+building, which reads as a dead click.
+
+Toggle ghosting with the selection, and set a deterministic home camera after
+load: `AggregatedView` restores whatever view the document carried, which on a
+federated model is often edge-on or inside the geometry.

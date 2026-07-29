@@ -121,12 +121,30 @@ Phase 0b½ classifies viewer intent (NONE/DISPLAY/INTERACTIVE). Only INTERACTIVE
 **Wire format** (`to_wire_format()`): the full mapping is ~140MB JSON → crashes the browser. Ship GROUPED instead:
 
 ```json
-{ "format": "grouped",
-  "statusDbIds": { "Installed": [dbId…], "Late": [dbId…], … },
-  "roomDbIds":   { "<room_id>": [dbId…], … },   // Room Readiness only
+{ "format": "grouped-v2",
+  "statusDbIds": { "Installed": "<encoded>", "Late": "<encoded>", … },
+  "roomDbIds":   { "<room_id>": "<encoded>", … },   // Room Readiness only
   "issueElements": [ /* full records, issue-linked only */ ],
   "totalElements": 1404520, "statusElements": 1044589 }
 ```
+
+**dbId groups are sorted-delta base36 strings**, `.`-separated (`encode_db_ids()`
+server-side, `decodeDbIds()` in `ForgeViewerStatic.ts`; the viewer still accepts
+plain int arrays so an older cached mapping keeps rendering).
+
+This is not a micro-optimisation — it is what keeps the canvas loadable. The
+whole mapping is serialised into the **Sandpack VFS** as `/viewer-mapping.json`,
+and past roughly 9MB the bundler dies with `Couldn't connect to server /
+TIME_OUT` before it boots. Measured on the reference project:
+
+| | int arrays | delta+base36 |
+|---|---|---|
+| `statusDbIds` | 8.19 MB | 2.10 MB |
+| `roomDbIds` | 1.19 MB | 0.36 MB |
+| **whole wire** | **9.37 MB** | **2.46 MB** |
+
+Adding `roomDbIds` at 1.19MB was what pushed it over the edge, so any future
+addition to this payload needs the same scrutiny.
 
 ~8MB. SSE `viewer_mapping` carries this; `viewer_config` carries the palette (`build_viewer_config`, deterministic — field + INSTALLATION_STATUS_PALETTE). Both emitted in Phase 0d, BEFORE `artifact_skeleton`.
 
