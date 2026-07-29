@@ -1,14 +1,112 @@
 # PLT-2917 — "Progress Dashboard" (milestones wrong) — triage context
 
-- **Domain slug:** `progress-tracking` (justification in §7)
+- **Domain slug:** `progress-tracking` (justification in §7; the case for `data-pipeline` strengthened on 07-29 — see §0)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2917
-- **Type:** Live Incident · **Priority:** Major · **Status:** **Open**
-- **Assignee:** Ilia Kuzmin · **Reporter (Jira):** Yash Patel (support) · original client reporter: **Thomas**
+- **Type:** Live Incident · **Priority:** Major · **Status:** **Open** (round-tripped: Open → With Technical Support 07-22 → Open 07-23)
+- **Assignee:** **Yash Patel** (was Ilia Kuzmin; auto-reassigned 2026-07-22 09:31 when Ilia flipped it to With Technical Support) · **Reporter (Jira):** Yash Patel (support) · original client reporter: **Thomas**
 - **Freshdesk:** Ticket 7420, status "Waiting on 3rd line" (i.e. back on us)
 - **Project link given:** `https://cloud.xyzreality.com/progress-dashboard/69a964b9380af76aed8faa97` · Software Area: Dashboard
-- **Created:** 2026-07-21 · **Attachments:** 1 screenshot (unreadable here — see §8 NEEDS HUMAN)
+- **Created:** 2026-07-21 · **Last updated:** 2026-07-27 10:55 · **Comments:** 6 · **Attachments:** 2 (07-21 screenshot + **new 07-27 `ELN03 Milestones Dashboard.xlsx`**) — both unreadable here, see §8 NEEDS HUMAN
 - **Recurrence:** Pietro Desiato already "worked on" this once; the customer replied it is *still* not fixed. Treat the earlier fix with suspicion per the playbook (symptom did **not** even disappear).
-- Triage date: 2026-07-22
+- Triage dates: 2026-07-22 (initial) · **2026-07-29 (re-check — CHANGED, see §0)**
+
+---
+
+## 0. RE-CHECK 2026-07-29 — ⚠️ CHANGED: the ticket's subject was re-scoped on 07-22 and the 07-22 triage below missed it
+
+The 07-22 pass snapshotted the ticket at ~09:29, minutes **before** three comments landed that
+change what this ticket is about. Those comments, plus a status round-trip and a new 07-27 comment
++ attachment, are all new to this file. **The FE-Milestone-widget analysis in §2–§4 below is not
+wrong, but it describes the wrong surface for the ticket as now scoped** — keep it as background
+(it still covers the *description's* original complaint), and read §0 as the operative diagnosis.
+
+### 0.1 What actually happened on the ticket (timeline, from the changelog)
+
+| When | Who | Event |
+|---|---|---|
+| 07-21 13:35 | Pietro | Created, assigned to **Ilia** |
+| 07-21 13:39 | Yash | Comment + attachment `image-20260721-123812.png`; relays "This is not fixed… ELN03 Dh4 Ready for energization = 100% → not showing 100%"; *"Pietro says the Actual End Date should have a value but it doesn't"* |
+| 07-22 09:30 | **Ilia** | 3 clarification questions to Thomas: (1) **which dashboard** — notes the ticket link `cloud.xyzreality.com/progress-dashboard/…` is *"the old PowerBI dashboard"*; (2) re-attach one screenshot per project (description's inline images are broken); (3) per-project activity ID + shown-vs-expected, and is it (a) milestone status/date display, (b) progress % in the schedule panel, or (c) elements not highlighting in the viewer |
+| 07-22 09:31 | Ilia / automation | Status **Open → With Technical Support**; automation reassigns to **Yash** |
+| 07-22 09:33 | **Mostafa** | ⚠️ **The reframe:** *"it's a different issue. For activity **PMILE5030** in **ELN03** he's done it to be 100% in the editor but Pietro is saying **it's not coming up in the activity parquet file**. **Is that because it's a milestone?** This is for the **power bi dashboard for portfolio**."* |
+| 07-22 09:42 | **Yash** | *"Apologies for not being clear. The issue mentioned in Description above was looked into by Pietro. **This ticket is raised for the issue user is having as mentioned by Mostafa.**"* |
+| 07-23 15:54 | Yash | Status **With Technical Support → Open** — ball flipped back to us **with none of Ilia's three questions answered** |
+| 07-27 10:55 | Yash | Relays user: *"Little update about ELN03. All milestones are not updated. Please have look when free."* + **new attachment `ELN03 Milestones Dashboard.xlsx`** (203 KB) + one inline Freshdesk-hosted image |
+
+**Pietro has still posted nothing.** The 07-22 drafted question (*what did your earlier fix
+touch?*) is **8 days unanswered** — but Yash's 09:42 correction partially answers its *scope*:
+Pietro's undocumented work was on the **description's** complaint, and PLT-2917 is officially raised
+for **Mostafa's** issue. Both halves are still live (the client says the description half isn't
+fixed either), so the ticket now carries **two overlapping signals with no split** — exactly the
+playbook's Phase-2 anti-pattern (§5 of the playbook: "two signals in one thread without early split").
+
+### 0.2 Surface — now settled, and it is not the new widget
+
+Ilia's read in-ticket is confirmed in code: **`/progress-dashboard/:id` is a PowerBI embed, not our
+renderer.**
+- `routes.tsx:88-95` → `progress-dashboard/:id` → `ProgressReportPage`.
+- `pages/ProgressReportPage/ProgressReportPage.tsx:3-4` imports `powerbi-client` / `PowerBIEmbed`;
+  `:163-166` renders `<PowerBIEmbed>` in a `powerbi-report-wrapper`. Our only contribution is
+  fetching an embed URL + access token (`services/progressDashboardService/` →
+  `IDashboardEmbedReportInfo { reportUrl, accessToken, snapshotPageName }`).
+- **There is therefore no frontend milestone logic on this surface at all** — a stronger version of
+  the 07-22 "faithful renderer" finding: on the PowerBI report the FE cannot even see the milestone
+  data, let alone mis-render it. It resolves the §2 "route-vs-widget caveat" **in favour of PowerBI**.
+- Mostafa says the same thing in words: *"This is for the power bi dashboard for portfolio."*
+
+### 0.3 Mechanism for the re-scoped issue — "is that because it's a milestone?" → *probably yes, and arguably by design*
+
+Mostafa's question is answerable from the schema and the parser, and the answer is the most useful
+thing in this re-check. The feed in question is the **activity progress parquet**
+(`activity_progress` / `actual_progress_combined_methods`).
+
+- **A milestone has no work content to compute progress from.** The parquet carries
+  `ActualProgress` with `ProgressMethod ∈ {ElementProgress, LaborUnits}` and the two weights
+  `PlannedLaborUnits` / `LinkedElements` (`docs/dashboard/duckdb-tables/schedule-schemas.md:26-40`).
+  A P6 milestone is zero-duration: **0 planned labour units and normally 0 linked elements** →
+  *both* progress methods have a zero basis. A generator that computes progress per activity has
+  nothing to emit for it. Our own parser states the premise explicitly:
+  *"Individual 0-hour activities (**milestones**, level-of-effort, hammocks) are allowed — the check
+  is on the schedule total, not per activity"*
+  (`schedule-upload-service/schedule-parser/schedule-parser.ts:140-141`).
+- **`itemType` marks them as a separate class.** `api_activities.itemType` = `"Task"` / `"Milestone"`
+  (`schedule-schemas.md:66`), and the repo's own progress regression fixture scopes its universe with
+  `WHERE itemType = 'Activity'`
+  (`dashboard-progress/utils/progress-queries-v2-api.regression.test.ts:445`) — i.e. milestone rows
+  are already treated as not-a-progress-row in our test model.
+- **The FE does not filter milestones out, so the absence is upstream.** There is **no `itemType`
+  predicate anywhere** in `dashboard-progress/utils/progress-queries-v2-api.ts` (grep: zero hits),
+  and the only predicate applied when loading the activity parquet is the schedule revision —
+  `WHERE ScheduleRevisionId = '…'` (`dashboard-schedule/loaders/activity-progress-v2-loader.ts:113-115`).
+  If a row for `PMILE5030` existed it would be read. It doesn't exist → **parquet generation
+  (backend/dagster), not FE, not PowerBI.**
+- **Consequent product finding (the through-line to the description half):** a milestone's
+  completion is not a *percentage* — it is an **Actual Finish Date**. That is exactly what Pietro
+  independently reported for the description half (*"the Actual End Date should have a value but it
+  doesn't"*, and `reporting.vw_KeyMilestone.actualDate` per §3). So **both halves of this ticket
+  reduce to one gap: milestone completeness has to be driven by Actual Finish Date, and that date
+  isn't being populated/propagated** — asking for a milestone's "100%" is asking a quantity that
+  isn't defined for it in either progress method.
+
+### 0.4 New open question this re-check creates (routed, not guessed)
+
+*"He's done it to be 100% in the editor"* — **what does that mean mechanically?** I can find **no
+manual percent-complete / progress-override write path in the FE** (grep across
+`src/main/webapp/app` for `percentComplete|manualProgress|progressOverride|markComplete` returns
+only PDF-export progress in `progressDashboardService.types.ts:48`). So "set to 100% in the editor"
+must be one of: linked elements marked Installed, an Actual Finish Date entered, or a P6-side edit
+re-uploaded. **Which one decides whether a milestone can carry progress at all**, and it is a
+one-line answer from Mostafa/Pietro. Do not assume.
+
+### 0.5 What did *not* change
+
+- Still **Open**, still Group **A**, still Major, still `progress-tracking` (see §7; the
+  activity-parquet mechanism strengthens the `data-pipeline` re-file argument, but the folder tag is
+  kept for continuity with the README table and the PLT-2882/2909 sibling sort).
+- The §3 finding (FE renders `vw_KeyMilestone` verbatim, no FE date logic) is **unchanged and still
+  correct** for the new Portfolio Milestone widget — it is simply not the surface the ticket is now
+  scoped to.
+- Nobody has answered Ilia's three clarifications, and no Pietro comment exists.
 
 ---
 
