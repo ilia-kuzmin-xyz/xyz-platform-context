@@ -378,3 +378,20 @@ the 07-27 xlsx) are still out of reach and the ticket still carries two unsplit 
 - Sibling triage `PLT-2882` / `PLT-2874` — precedent that "count/status wrong on screen" often
   resolves to a backend/data source, not FE; same investigate-the-payload-first discipline applies.
 - `incidents/live-incident-playbook.md` — six-questions frame + message craft used above.
+
+**Added 2026-07-29 (for the re-scoped issue):**
+- `dashboard/data-pipeline.md` — Pipeline A/B and the lazy `activity_progress` parquet (50-200 MB,
+  loaded on SCH tab open); the table this ticket's missing row belongs to.
+- `dashboard/progress-tab.md` — the three PRG calculation modes and the weighting formula; note the
+  documented rule *"if a package has 0 weight (no hours or elements), it's excluded from the
+  denominator"* — the same zero-weight logic that plausibly excludes a milestone (§0.3).
+- `hc-frontend/docs/dashboard/duckdb-tables/schedule-schemas.md:26-40, 60-69` —
+  `actual_progress_combined_methods` and `api_activities` column lists, incl. `itemType`
+  (`"Task"` / `"Milestone"`).
+- **Skill `dashboard-progress-comparison`** ("Compare Platform Dashboard (DuckDB/parquet) vs Power BI
+  Dashboard data when investigating discrepancies") — exists precisely for this ticket shape and is
+  the right tool for the confirmation step; see recommended-action.
+- **Doc gap (now larger):** neither `dashboard/` nor the incident notes record that
+  `/progress-dashboard/:id` is a **PowerBI embed** while `/progress-dashboard` (no id) is our own
+  Portfolio dashboard. That single confusable pair cost the 07-22 pass its surface identification and
+  is worth one line in `dashboard/pitfalls.md` — it will recur on PLT-2884 / PLT-2874-shaped tickets.
