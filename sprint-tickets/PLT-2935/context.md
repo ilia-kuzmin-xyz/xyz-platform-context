@@ -1,8 +1,9 @@
 # PLT-2935 — [Dashboard] Freeze planned progress % for sales project `69e232b2c222e55fa039eab2`
 
 **Type:** Task · **Priority:** Minor · No parent epic.
-**Jira status (as of 2026-07-30 run):** **Ready For Development** — clarifications resolved.
-**Local decision:** UNBLOCKED. Approach agreed (date-cap, see below). Next run: branch `PLT-2935` off master and implement.
+**Jira status (as of 2026-07-30 run):** **In Code Review** — implemented.
+**PR:** XYZReality/hc-frontend#2080 (draft), branch `PLT-2935` off master `7e243fe`.
+**Local decision:** IMPLEMENTED via date-cap. Awaiting CI + review.
 
 ## What the ticket asks
 Sales/demo project. The **planned progress %** keeps creeping up; Mostafa wants it fixed
@@ -68,6 +69,34 @@ Planned frozen at July while actual stays live means **variance and SPI will dri
 flatteringly** over time (actual climbs against a fixed planned). Acceptable for a sales
 demo, but it should be stated explicitly, not buried.
 
-## Next run
-- Branch `PLT-2935` off latest hc-frontend master; implement the cap; draft PR.
-- Do NOT hardcode a percentage. Do NOT freeze actual. Do NOT replace the date (cap it).
+## What shipped (PR #2080, draft)
+- **NEW** `dashboard-progress/utils/frozen-planned-progress.ts` — project→date map plus
+  `resolveFrozenPlannedEndDate` (returns null when no freeze applies, so other projects
+  skip the extra queries entirely) and `mergeFrozenCategoryPlanned` (overlays frozen
+  planned per `ActivityCategoryId`, leaves actual live).
+- `dashboard-progress-service.ts` — `_buildFrozenPlannedFilters()`; planned re-resolved
+  with the capped filters at the overview + per-package sites in BOTH the activity-level
+  and project/package-level paths.
+- `dashboard-project-service.ts` — exposed `mongoProjectId` getter (was private).
+- Unit spec `frozen-planned-progress.test.ts` (matches jest `testMatch`, not regression-ignored).
+
+**Frozen surfaces:** overview Planned, per-package planned, and (derived) variance/SPI.
+**Left live, deliberately:** actual, the trend-chart planned line (each point is date-stamped
+and historically accurate — the line extends rather than inflates; clamping would make the
+curve stop dead mid-chart), and the unfiltered category summary (feeds filter options only).
+
+## Gotchas found while implementing (do not relearn these)
+- `DashboardProgressService.projectId` returns the **Postgres UUID**, not the Mongo id.
+  Keying the freeze on it would have silently never fired. The Mongo id lives on
+  `DashboardProjectService._mongoProjectId` (`params.project_id` from the URL). There's a
+  regression test pinning this.
+- `node_modules` is absent in the scheduled-run container and **`npm ci` cannot complete** —
+  401 from `npm.pkg.github.com` for the private `@xyzreality/dhtmlx-gantt`. So jest and a
+  full tsc cannot run locally; CI is the first real run. Workaround used: compile the pure
+  helper standalone with a throwaway tsc and execute the spec's cases directly in node.
+- Prettier `printWidth` is 100 but is NOT wired into eslint, and master already carries 75
+  over-long lines in `dashboard-progress-service.ts` — so long lines don't fail CI.
+
+## Open assumption
+Frozen date = `2026-07-24` (when raised), one named constant. If it doesn't match the
+screenshotted figure it's a one-constant change.
