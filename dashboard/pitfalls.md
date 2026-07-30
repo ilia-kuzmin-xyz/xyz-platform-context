@@ -91,3 +91,35 @@ artefact, including `element_base_data` and therefore any dead-link detection th
 silently returns useless results on Revit-mapped projects rather than failing. Validate per project
 before trusting such a query: on FAR01 only 22 of 101 models had the artefact, and a sweep based on
 it produced 705k false positives.
+
+## The dashboard element count is a geometry-object count, not an element count
+
+`coloredDbIds` is assembled from `objectId`s to paint the viewer, then reused as a statistic and
+displayed under the label "Elements" (`dashboard-color-service.ts:679-698`,
+`dashboard-element-stats.tsx:41/49`). A federated file holds more objects than elements, because
+the same element can sit in several sub-models and each copy is its own object. On FAR01 that is
+737,093 objects against 668,978 distinct elements, **9.24% more**, which is the whole of PLT-2874.
+
+Comparing that figure to the editor's "Linked" count is meaningless: `ModelDetailsPanel.tsx:222`
+counts distinct `modelElementId`. Before diffing any two counts across these surfaces, run
+`COUNT(*)` against `COUNT(DISTINCT <id>)` on each side.
+
+`_visible_elements` carries `modelElementId`, so the honest number is available without a
+pipeline change.
+
+## Dashboard service logs never print
+
+`dashboard-logger.ts:35` hardcodes `CURRENT_LEVEL = 'SILENT'` in every build, so every
+`logger.info` / `logger.success` from the dashboard services is dropped, including
+`[📊 DYNAMIC-STATUS]` and the artefact loaders. `window.dashboardLog` only edits the exclusion
+list, not the level. The lines that do appear in prod are raw `console.log` / `console.table`.
+Do not plan a diagnosis around reading a dashboard log line — query the page's DuckDB instead.
+
+## The dashboard loads one federated model, chosen arbitrarily
+
+`dashboard-project-service.ts:164-175` takes the first folder whose name contains "federated",
+then `.find()`s the first model in the paginated response with that `parentModelFolderId`. No
+`isFederated` flag, no version or recency rule, no ordering guarantee from the API. Every figure
+on the page derives from that one file and the rest are invisible, with no UI indication. FAR01
+has two near-twin models in that folder (667,614 and 665,074 elements) so the impact is 0.4%
+there, but a project with two genuinely different federated models would show arbitrary numbers.

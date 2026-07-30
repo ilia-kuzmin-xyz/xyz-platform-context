@@ -151,8 +151,15 @@ source of orphans that we own.
 
 Weaker than Pattern 1 (no single mechanism), but it recurs often enough to be worth a reflex.
 
-Seen on PLT-2874 (element counts), PLT-2884 (progress % vs PowerBI), PLT-2917 (milestone status
-and dates), PLT-2931 (package percentage).
+Seen on PLT-2884 (progress % vs PowerBI), PLT-2917 (milestone status and dates), PLT-2931
+(package percentage).
+
+**PLT-2874 is the counterexample, and it was listed here for three weeks.** Two surfaces
+disagreed about an element count, the reflex said "upstream", and it was wrong: the data was
+fine and the dashboard was mislabelling a geometry-object count as an element count
+(`dashboard-element-stats.tsx:49`). Apply the reflex, but confirm it — establish *what unit*
+each surface is counting before concluding the frontend only renders. See the candidate pattern
+below.
 
 **The shape:** two surfaces disagree about a number, and the instinct is to look for a rendering
 bug. In every case so far the frontend performed no computation at all. Examples confirmed by
@@ -178,6 +185,15 @@ visible when they tried. That silence is what turned a lookup into a multi-day i
   `XYZ` then `EXPORT TO HOLOSITE` then `{3D}`, and renders nothing at all, with no error, if none
   matches (`viewer-service.ts:1052-1065`, `:945-946`). Promote to a pattern if a second IFC-sourced
   model does the same.
+- **Same word, different unit** (PLT-2874, and LVN1/Freshdesk 7514 pending confirmation). Two
+  surfaces both say "elements" and count different things. The editor counts distinct
+  `modelElementId` (`ModelDetailsPanel.tsx:222`); the dashboard counts `objectId`s, because
+  `coloredDbIds` is built for painting geometry and then reused as a statistic
+  (`dashboard-color-service.ts:679-698`). A federated file holds more objects than elements — on
+  FAR01, 9.24% more — so the two can never agree. **Diagnostic:** before diffing two counts, run
+  `COUNT(*)` against `COUNT(DISTINCT <id>)` on each side. If they differ on one side, that side
+  is counting a different unit and the comparison is meaningless until it is fixed. Promote to a
+  pattern if a second surface pair does the same.
 - **Source-data elevation errors presented as viewer bugs** (PLT-2649). 360 pins placed wrongly
   because one level's elevation was wrong in the source model; the transform was provably correct
   and the same fault reproduced in PowerBI.
