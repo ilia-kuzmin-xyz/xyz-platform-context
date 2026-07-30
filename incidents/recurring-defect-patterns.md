@@ -178,6 +178,70 @@ visible when they tried. That silence is what turned a lookup into a multi-day i
 
 ---
 
+## Pattern 3 — Check the dashboard's settings before you debug its data
+
+Promoted on a single occurrence, deliberately. This is not a defect mechanism, it is a triage
+checklist item, and the cost of skipping it is a full investigation. PLT-2941 took a day of
+querying and four wrong hypotheses before the answer turned out to be a dropdown.
+
+**Ask these before writing a single query.** They are cheap, and each one silently changes what
+the dashboard shows without saying so anywhere in the UI:
+
+| Setting | What it silently changes |
+|---|---|
+| **Progress weighting** (Budgeted labour units / Model element count) | Which categories exist in the filter panel at all |
+| **XYZ Tracked toggle** | Restricts everything to activities with ≥1 linked element |
+| **Date range / scrubber position** | Which elements are coloured and counted |
+| **An activity selected in the Gantt** | Switches the whole page to a different query path and data source |
+| **Calculation mode** (project / package / mix) | Same — different query, different table |
+
+### The one that has actually bitten us: progress weighting
+
+`getCategorySummaryV2API` builds the discipline/package **filter option list** from
+`category_groups` and ends with `AND ${weightColumn} > 0`
+(`progress-queries-v2-api.ts:577`). `weightColumn` follows the project's weighting, and the
+default is `PLANNED_LABOUR_HOURS` (`app/types/progress-weighting-types.ts:17-23`).
+
+**So by default, any discipline or package with no budgeted labour units vanishes from the filter
+panel, however many elements are linked to it.** On the PLT-2941 staging project that hid 2 of 3
+disciplines and 3 of 4 packages, including a pre-existing discipline carrying 162 activities.
+
+Selecting an activity switches the page to activity level
+(`dashboard-progress-service.ts:311-349`), where the weight is floored at 1
+(`progress-queries-v2-api.ts:970`), so the same category reappears. Same data, same setting,
+opposite outcome.
+
+### Recognition signature
+
+- A category is missing from the left panel but appears the moment you click an activity that
+  carries it.
+- Or: the panel lists implausibly few disciplines for the project.
+
+### Two-minute check, before anything else
+
+```sql
+-- Does the category exist in the parquet with a usable weight?
+SELECT CategoryName, TypeName, TotalLinkedElements, TotalPlannedLaborUnits
+FROM category_groups
+WHERE CategoryName = '<the missing one>'
+ORDER BY CalendarDate DESC LIMIT 5;
+```
+
+Zero in `TotalPlannedLaborUnits` plus labour-hours weighting is the whole answer. Then switch the
+weighting in the UI and watch it come back.
+
+**Resolution on PLT-2941 was to switch the method, no code change.** The frontend gap is still
+real — the panel hides categories with no explanation and no empty-state hint — but it was not
+worth a Blocker fix, which is exactly why it belongs here instead. Full analysis and the fix
+options if it recurs: `planning/PLT-2941-dashboard-filter-list-hides-zero-weight-categories.md`.
+
+**Generalise the reflex:** when a dashboard number or list looks wrong, the first question is not
+"what is wrong with the data" but "what is this surface configured to show". Two surfaces
+disagreeing is usually two different configurations, not two different truths. Compare with
+Pattern 2, which is the same instinct applied one layer down.
+
+---
+
 ## Candidate patterns (one occurrence, watch for a second)
 
 - **Viewable-name fallback vs on-device client** (PLT-2923). A model renders on the headset but
