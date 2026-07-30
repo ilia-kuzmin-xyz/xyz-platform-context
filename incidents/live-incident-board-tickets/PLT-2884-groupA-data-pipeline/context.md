@@ -8,7 +8,7 @@
 - **Assignee / Reporter:** Yash Patel (support)
 - **Project:** EQX-AT10x (ID `6808f6afae311c4f8409624f`) · **Software Area:** Dashboard
 - **Created:** 2026-07-09 · **Last updated:** 2026-07-20
-- Triage date: 2026-07-22
+- Triage date: 2026-07-22 · **Re-verified: 2026-07-30 (no change)** — see §9
 
 ---
 
@@ -186,3 +186,51 @@ depend on the customer, not on code.
     human/backend with file access.
 - ⚠️ **NEEDS HUMAN / support** — confirm with the customer whether the corrected
   XER has been re-uploaded (open item since 07-13; see recommended-action.md).
+
+---
+
+## 9. Re-verification 2026-07-30 — no change (light pass)
+
+Live ticket re-fetched. **Nothing has changed since the 07-22 triage run.**
+
+| Field | 07-22 run | 07-30 re-check |
+|---|---|---|
+| Status | With Customer | **With Customer** (unchanged) |
+| Priority | Critical | **Critical** (unchanged) |
+| Assignee | Yash Patel | **Yash Patel** (unchanged) |
+| `updated` | 2026-07-20T09:35 | **2026-07-20T09:35** (unchanged) |
+| Comment count | 10 | **10** (no new comments) |
+| Resolution | none | **none** |
+| Attachments | 5 | **5** (no new artifacts) |
+
+The last comment remains Yash's 07-20 09:23 Freshdesk status toggle
+(Closed → Waiting on customer) — **automation noise, not information**. The last
+comment carrying any actual content is still **Yash 07-13 10:56** ("still waiting
+for them to get back with outcome").
+
+**Silence duration (as of 2026-07-30):**
+- **20 days** since root cause was handed to the customer (Yash, 07-10 10:47).
+- **17 days** since the last substantive human update (Yash, 07-13 10:56).
+- **10 days** since *any* on-ticket event at all (the 07-20 Freshdesk toggle).
+
+**Root cause / hypothesis: unchanged, not re-derived.** §§1–7 stand as written —
+incomplete source XER (product-diagnosed by Mostafa 07-10, corroborated by the
+customer's own Power BI check), with the Old-DB-vs-New-DB direction explained by
+the Power BI (stale activities across schedule revisions) vs Platform V2 parquet
+(current `scheduleRevisionId` only) sourcing difference. **Confidence stays 8/10.**
+
+**What did change is posture, not diagnosis.** A Critical live incident that has
+gone 17 days without a substantive update, on a fix that is entirely
+customer-side and one action long, is no longer "parked" — it is stalled, and
+"With Customer" is now actively misreporting it as someone else's live workstream.
+The 07-20 Closed → Waiting-on-customer flip-flop with no accompanying comment is
+a mild signal that even the Freshdesk side is drifting rather than being chased.
+The 07-22 recommendation to *consider* With Customer → With Technical Support is
+therefore upgraded to a positive recommendation — see `recommended-action.md`.
+
+**Attachments — still NEEDS HUMAN, unchanged:** the 3 screenshots, the `.xlsx`
+data-breakdown, and `EQIX_AT10x-A11x_Rev_02_updated20260427.xer` (4.3 MB, served
+behind Atlassian auth) remain unparseable here. No new attachments this run, so no
+new gap. Note the XER filename encodes **Rev 02, dated 2026-04-27** — consistent
+with §3's "current schedule revision" framing, and a useful anchor when the
+corrected re-upload finally arrives (it should be a *later* revision).
