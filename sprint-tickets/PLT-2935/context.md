@@ -97,6 +97,19 @@ curve stop dead mid-chart), and the unfiltered category summary (feeds filter op
 - Prettier `printWidth` is 100 but is NOT wired into eslint, and master already carries 75
   over-long lines in `dashboard-progress-service.ts` — so long lines don't fail CI.
 
+## Testing on dev (XYZ Rewind) — two traps
+The project is prod-only, so it must be replayed onto dev with XYZ Rewind
+(Confluence: XSHW/2027552771; repo `XYZReality/xyz-rewind-chrome-extension`).
+- **The freeze does not fire in replay.** It is keyed on the URL project id, and replay
+  puts you on a *dev* project id. Rewind's automatic prod→dev path mapping rewrites the
+  API calls, not the route param the app reads. Verify by temporarily adding the dev
+  project id to `FROZEN_PLANNED_PROGRESS_BY_PROJECT` (local only, never commit).
+- **Replay serves a fixed snapshot**, so planned cannot advance in replay even without the
+  change — "refresh and watch it not move" proves nothing on dev. The real check is an A/B
+  against the constant (frozen planned should read LOWER than live, actual identical).
+- The "does not increase across refreshes" AC is only observable on prod once the live end
+  date has moved past the frozen date.
+
 ## Open assumption
 Frozen date = `2026-07-24` (when raised), one named constant. If it doesn't match the
 screenshotted figure it's a one-constant change.
