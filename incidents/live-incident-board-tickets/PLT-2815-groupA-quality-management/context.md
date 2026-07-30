@@ -138,3 +138,35 @@ recommended-action.md), not a code-testable fact.
   independently reproduced, so they are corroborative, not load-bearing. Do not guess their contents.
 - ⚠️ The Confluence page has one embedded flow/screenshot image (blob) I could not view; the full
   reference table itself is present as text, so nothing load-bearing is missing.
+
+---
+
+## 8. Re-verified 2026-07-30 (light pass) — still unchanged; now pure housekeeping
+
+**Live fetch confirms zero movement.** Status **With Customer**, priority Major, assignee Yash Patel,
+`updated = 2026-07-06T10:18:45+01:00`, `resolution = null`, `resolutiondate = null`. **13 comments,
+same 13 as on 07-13** — the newest is still comment **106553** ("Freshdesk #7126 status changed to:
+Closed", 2026-07-06). No new comments, no status change, no assignee change since. Third consecutive
+run (07-13 → 07-22 → 07-30) with no delta.
+
+**Staleness: 24 days** since the last Jira update (2026-07-06 → 2026-07-30); **~6 weeks (43 days)**
+since the ticket was created (2026-06-17); **37 days** since the last substantive engineering/product
+comment (Mostafa's "leave it as intended", 2026-06-23). The 07-13 drafted nudge does **not** appear to
+have been sent — there is no comment on the ticket after 07-06, so the "wait for the customer" clock
+has not actually been restarted by any outreach from us.
+
+**This is no longer an investigation — it is administrative housekeeping.** All six playbook questions
+are answered and closed (see §§1–3): observed value reproduced to the cent, expected value's authority
+identified (product-owned Confluence table), broken-vs-working pair diffed, mechanism read end-to-end
+in code, trigger established as latent-data-shape (no regression, no deploy), cohort bounded (any
+package-specific Cat3 undercut by a generic-fallback Cat4 — a data question, not an incident cohort).
+The product decision ("leave as intended") was taken on 2026-06-23 and never revisited. The
+customer-facing Freshdesk parent **#7126 is Closed** (twice: 07-03 and again 07-06). **Nothing is
+technically or commercially outstanding — the Jira is simply orphaned open behind a closed support
+ticket.** No further diagnostic work is warranted; re-running deeper analysis on future passes would be
+wasted effort. Diagnosis confidence stays **9/10**; nothing new to test.
+
+**Consequence for the recommended action:** after 24 days of silence, another soft nudge is the wrong
+instrument — it re-opens a settled conversation with the client to obtain a confirmation we do not
+actually need (the support ticket is already closed on the customer's side). `recommended-action.md`
+has been revised this run from "(c) nudge" to a direct **close-out** recommendation. See that file.

@@ -6,7 +6,8 @@
 - **Priority:** Major
 - **Project (site):** APLD — FAR01
 - **Reporter:** Yash Patel (coordinator/support) · **Assignee:** Darminder Atker (fullstack lead)
-- **Created:** 2026-07-09 · **Last updated:** 2026-07-13
+- **Created:** 2026-07-09 · **Jira `updated` field:** 2026-07-27 (a comment was added then — see below; last *visible* comment is still 07-15)
+- **Re-check history:** 07-13 (opened) → 07-22 (no change) → **07-28 (this check): still no deletion, but scope grew to 3 tickets and a follow-up nudge went missing — see `investigation-log.md` § 2026-07-28**
 - **Components / Labels:** none
 - **Attachments:** 2 × `.mp4` screen recordings + 2 inline blob images in comment 1 (all unreadable here — see NEEDS HUMAN)
 - **Domain slug chosen:** `progress-tracking` (deviates from the default `filter-system` — justified below)
@@ -106,10 +107,18 @@ The default `filter-system` (FLT) is the **dashboard's** central filter state (`
 
 ## Roster / ownership notes
 
-- **Darminder Atker** (assignee, fullstack lead) — correct owner for the FE robustness half.
-- **Ilia Kuzmin** (the operator, ilia.kuzmin@xyzreality.com) — already claimed the investigation on-ticket today ("I'm on it and investigating"); playbook "mechanism interrogator". His posted hypothesis matches the code.
-- **Yash Patel** (reporter/coordinator) — relaying client comms; asked for a status update on 2026-07-13.
-- If the confirmed cause is orphaned data, expect a hop to **BE/data** (Sergey / Sachin+Ali) for the link-integrity fix; the "why now / was a model deleted" question is theirs to answer.
+- **Darminder Atker** (assignee, fullstack lead) — correct owner for the FE robustness half. Reassigned to **Ilia Kuzmin** 2026-07-15 (investigation ownership), still current assignee as of 07-28.
+- **Ilia Kuzmin** (the operator, ilia.kuzmin@xyzreality.com) — claimed the investigation 07-13, confirmed root cause 07-14/15, and re-asked for delete-approval 07-27 (that comment is currently not visible on the ticket — see below).
+- **Yash Patel** (reporter/coordinator) — relaying client comms; last active 07-13.
+- **Pietro Desiato / Mostafa Kamel Hussien** — asked directly for delete-approval **07-14** (ticket), no reply. Ilia re-asked **07-27**; as of 07-28 still no reply on any of the 3 tickets below.
+- If the confirmed cause is orphaned data, expect a hop to **BE/data** (Sergey / Sachin+Ali) for the link-integrity fix; the "why now" pipeline question (BE, comment 107350/107356) is still unanswered too.
+
+## 2026-07-28 delta (third re-check) — see `investigation-log.md` § 2026-07-28 for full detail
+
+- **Deletion of the 418 links has NOT happened.** Still awaiting Pietro/Mostafa approval, asked 07-14, now **14 days silent**.
+- **A comment WAS added 07-27** (Ilia, reviving the ask) but is **no longer visible** on the ticket — only recoverable via `expand=changelog`, whose shape matches a since-deleted comment. Flag for a human to check with Ilia / Jira admin whether this was intentional.
+- **Scope grew:** the same root-cause family is now independently confirmed on **PLT-2909** (ATL08, ghost model-membership variant) and **PLT-2931** (ELN03, 193 dead links capping 5 Containment activities below 100%, approval asked 07-24). One approval gate (Pietro/Mostafa) now blocks all three.
+- No status/assignee change beyond the existing 07-15 reassignment. No FE-robustness ticket filed yet.
 
 ## Doc / knowledge-base refs
 - `xyz-platform-context/dashboard/viewer-and-model.md` — Dashboard disables selection (confirms the failing surface is ViewerPage, not Dashboard).

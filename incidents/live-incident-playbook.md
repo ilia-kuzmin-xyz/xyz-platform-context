@@ -8,6 +8,10 @@ below is what transfers.
 
 ---
 
+> **Companion documents.** This file covers *how to run* an incident. For *what incidents keep
+> turning out to be*, see `recurring-defect-patterns.md`. For safely executing a bulk data fix
+> once diagnosed, see `data-remediation-runbook.md`.
+
 ## The universal shape of a live incident
 
 Agendas differ — "user can't access", "colors render wrong and it worked

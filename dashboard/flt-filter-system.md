@@ -7,8 +7,8 @@ The central state hub that connects every service on the dashboard. All tabs rea
 ```
 DashboardFilters {
   dateRange       { startDate, endDate }   -- 'YYYY-MM-DD'; affects all tabs
-  discipline      string[]                 -- PRG calc mode + QLT category join
-  package         string[]                 -- PRG calc mode + QLT category join
+  discipline      string[]                 -- names; PRG calc mode + QLT category join
+  package         string[]                 -- activityCategoryIds (PLT-2821); PRG calc mode + QLT category join
   level           string[]                 -- floor; spatial → _visible_elements
   room            string[]                 -- spatial → _visible_elements
   status          string[]                 -- element install status → _visible_elements
@@ -89,3 +89,19 @@ These two dimensions are AND-combined. Spatial filters are hidden in the filter 
 When disciplines are deselected, any packages that no longer belong to a selected discipline are automatically pruned from the active `package[]` filter. This avoids a filter state that is internally inconsistent (package selected but its parent discipline is not).
 
 Single click on a discipline/package = select only that one. Shift / Alt / Ctrl + click = add to multi-selection.
+
+## Package identity — id-keyed (PLT-2821)
+
+Package display names are NOT unique (same name can exist under several disciplines), so `filters.package` holds `activityCategoryId`s, not names. Key pieces (all in `dashboard-filter-service.ts`):
+
+- `setCategoryMaps(disciplineToPackageIds, packageIdToPair)` — provides discipline→packageId[] (orphan pruning) and id→(discipline, package) name pair.
+  - **Progress projects:** called by `DashboardProgressService` after activity categories load.
+  - **Quality-only projects:** progress service never initializes, so `dashboard-filters.tsx` derives the maps from the issues' own `activityCategories` tags instead. Without this the panel silently stores names and the id-keyed issue SQL matches nothing — pitfall.
+- `resolvePackageId(discipline, name)` — panel options (name-based, discipline-scoped) → id.
+- `resolvePackageIdByName(name)` — fallback, answers only when the name is unambiguous across all disciplines.
+- `resolvePackagePairs(ids)` — id → unique (discipline, package) name pair, for consumers whose tables carry only names (`activity_categories_flat`: schedule SQL, viewer colouring). SQL matches on the pair: `(discipline = X AND package = Y)`.
+- Selected ids that resolve to no known pair match NOTHING everywhere (schedule `1=0`; viewer early-return) — never "no filter".
+
+UI: labels get a ` — <discipline>` suffix only when the name collides; unique names stay plain. Chips/search operate on labels via the shared filters' optional `getLabel` mapping.
+
+**Known limitation:** duplicates under the SAME discipline can't be told apart by pair-based consumers (schedule/viewer); id-keyed consumers (progress, quality, panel) handle them. Cross-discipline duplicates are fully handled. Discipline + dynamic category types are still name-keyed (see roadmap).

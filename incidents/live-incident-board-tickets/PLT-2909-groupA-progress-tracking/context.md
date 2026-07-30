@@ -12,6 +12,33 @@
 
 ---
 
+## ⚠️ Update — 2026-07-24: the ATL08 diagnostic recommended below WAS run, and confirmed the hypothesis
+
+**New comment, 2026-07-23 (Ilia Kuzmin), not part of the 07-22 pass this file otherwise reflects:**
+
+> Ran the diagnostic on ATL08 for CY-5200. The model **DistributionBoardsPanels_Bld1-V1 is a ghost**: metadata claims the 6 elements, geometry and its cloud list have none of them. Bld2 and the federated model are real, selection works fine, so it's purely a wrong model list.
+>
+> Same defect family as PLT-2882 but here it's **PC-EXCEL imports**, all 6 elements from one source file (`dd20b121`). Suspect the excel import wrote the same rows into several buildings' metadata.
+>
+> **@Ali Seyedof**: can you check why client-element-metas for that Bld1 model (`00156181-fca5-4a7c-acdf-a12ce924c252`) has elements it doesn't own?
+>
+> FE fix (hide models not in geometry) will be **tracked in PLT-2882**, not as a separate PLT-2909 fix.
+
+**What this settles, against the open questions this file raised below (§ "Same root cause?", § Confidence):**
+- **CONFIRMED on ATL08**, not just "same family, needs confirmation" — the `inParquet > 0 / inGeometry = 0` ghost-model pattern is exactly what `recommended-action.md`'s diagnostic step predicted, and it fired.
+- **New, more specific mechanism detail:** the stale-metadata source here is a **PC-EXCEL (spreadsheet) import**, not a Revit re-upload/re-version as in PLT-2882 — Ilia's hypothesis is that the **Excel import path wrote the same element rows into more than one building's `client-element-metas`**. This is a distinct trigger from PLT-2882's "re-uploaded model, content removed/redrawn" story, even though the downstream symptom (parquet claims elements geometry doesn't have) is identical. Confirms the §"independent verdict" caveat below was right to insist on ATL08-specific evidence rather than assuming PLT-2882's Revit findings transferred as-is.
+- **Ownership is now assigned and routed:** Ali Seyedof (api-v2, per the roster's Sachin+Ali api-v2 pairing) has an open, closed question — why does Bld1's `client-element-metas` claim elements it doesn't own. **Awaiting his answer; nothing internal blocks us further.**
+- **FE fix is explicitly folded into PLT-2882**, not tracked separately here — avoids duplicate FE tickets for what both sibling tickets agree is one "hide models the geometry can't back" change.
+
+**Revised confidence:**
+- **Same root-cause family as PLT-2882, confirmed on ATL08:** **9/10** (up from 7/10) — no longer inferred, directly diagnosed.
+- **Model-type nuance (PC-EXCEL vs Revit) affects the BE-side trigger, not the FE symptom:** **8/10** — code-consistent (§ Mechanism below already flagged Navisworks/PC-EXCEL as the open variable) and now named in the actual diagnostic output.
+- **Overall triage confidence: ~8/10** (up from 6/10) — mechanism, layer, and now the specific model/source-file are all confirmed; the only remaining unknown is Ali Seyedof's answer on *why* the Excel importer cross-wrote buildings, which is a BE implementation detail, not a diagnosis gap.
+
+**Recommended action now: internal status update only (@Ali Seyedof's question stands; no re-diagnosis needed) — see `recommended-action.md` §2026-07-24 update.**
+
+---
+
 ## One-line symptom
 
 In the **web viewer (ViewerPage)**, the UI that lists **which models contain the elements linked to a schedule activity** shows **too many models** — models that do **not** contain any element linked to the activity. Kyriakos: *"the elements exist only in one model … however several models appear."* Yash reproduced it on ATL08 / `CY-5200`.
@@ -122,3 +149,80 @@ Yash, comment 1: *"when I tried to generate session id it gave me an error."* Th
 - `xyz-platform-context/incidents/live-incident-playbook.md` — six-questions frame; "split signals into separate tracks"; "close on cause+trigger+cohort, not on works-now".
 </content>
 </invoke>
+
+---
+
+## ⚠️ 2026-07-28 — CROSS-WRITE PROVEN, and the scope is project-wide, not six elements
+
+Investigated from the ATL08 editor's `project_element_list` (columns `modelId`,
+`modelElementId`, `sourceFileElementId`). No BE access needed; this settles the hypothesis Ilia
+posted on 07-23 without waiting for Ali.
+
+### The proof
+
+Took one element claimed by 10 models and listed the claimants. **All ten rows carry the identical
+`sourceFileElementId` `358ee0bc-147c-463f-afab-c0fc246c9cb5-0076e41f`** — one row, from one source
+file. Of the ten models, **nine are `isFederated: false` siblings**, only one is the federation:
+
+| Model | Federated |
+|---|---|
+| `SWITCH - ATL8-260703` | **true** (legitimate) |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Lighting_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_ConduitsInternal_Bld1-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_ConduitsInternal_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_ConduitsUG_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Containments_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_DataDevices_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Security_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_BracketsAndSupports_Bld2-V1` | false |
+| `PC-EXCEL_SWITCH_ATL8_ELEC_Conduits Internal-V1_X` | false |
+
+These are mutually exclusive systems, and they span **both buildings**. A single element cannot be
+a light fitting, a security device, a bracket and a conduit, in Bld1 and Bld2 at once. A source
+file belongs to one model. **The PC-EXCEL import is writing its rows into other models' element
+lists.**
+
+### Scope
+
+- 128 models in the project, exactly one federation in this sample, so the **legitimate claimant
+  count is 2** (own model + federation).
+- Distribution across all 686,088 elements: 180,142 at 1 claimant, 139,106 at 2 (normal),
+  **366,840 at 3 or more (53% of the project)**, 96,184 at 5+, 27,671 at 10+, tail to 19.
+- The ghost model from the ticket (`00156181-…`, DistributionBoardsPanels_Bld1) claims 686 elements
+  of which **650 (95%) are also claimed by other models**.
+
+So this is not "6 elements on activity CY-5200". Over half of ATL08's element metadata carries at
+least one spurious model claim, which supports Kyriakos's original statement that it affects all of
+ATL05-08.
+
+### Trigger
+
+Eight of the nine spurious claimants were imported by the same author between **2026-07-06 and
+07-08**, a single batch of PC-EXCEL imports; the ticket was raised 07-16. The outlier
+(`Conduits Internal-V1_X`, note the malformed name with a space and `_X` suffix) was imported
+2026-04-03 by a different author, so the defect is not unique to that one batch.
+
+### Why this cannot be remediated the way PLT-2882 / PLT-2931 were
+
+Those were fixed by deleting bad **link rows** via api-v2, which we own and can script. Here the
+links are correct, the elements genuinely exist, and selection works. What is wrong is the
+**generated element-metadata artefact** for each model. That cannot be fixed by deleting links; it
+requires fixing the importer and regenerating the affected models' metadata. **Backend only.**
+
+### Revised severity
+
+Previously assessed as display-only and left at Medium. Still no evidence it moves progress
+(progress is computed from `activity_links`, which are unaffected), but "half the project's element
+metadata is wrong" is a data-integrity problem, and anything that counts or filters elements per
+model is potentially reading it. Worth re-checking the Medium priority with product.
+
+### Confidence
+
+- **Cross-write is real and is the PC-EXCEL import path: 9/10.** Identical sourceFileElementId
+  across nine non-federated sibling models of incompatible system types is not explicable any other
+  way.
+- **Scope figure (366,840 elements with a spurious claim): 8/10.** Rests on the legitimate baseline
+  being 2, verified on one sampled element. If some projects nest federations, the baseline could be
+  3 for parts of the model tree, which would reduce but not remotely eliminate the number.
+- **No progress impact: 7/10.** Reasoned from progress being computed off `activity_links`, not
+  independently measured.

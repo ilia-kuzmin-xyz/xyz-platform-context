@@ -208,3 +208,101 @@ that sync gap is the pipeline bug and the sharpest question for BE.
 Status: root cause explained end-to-end; 418 list verified and exported; deletion pending peer
 alignment; project-wide sweep pending harvest run or BE query; FE robustness fix still to be
 scheduled.
+
+## 2026-07-24 re-check — no new comments here since 07-15 (unchanged); cross-ticket update from sibling PLT-2909
+
+PLT-2882 itself is unchanged (still the most recent comment is David Webb's 07-15 pushback answer,
+already reflected above). But **sibling ticket PLT-2909 got its ATL08 diagnostic run on 2026-07-23**,
+confirming the same ghost-model-metadata mechanism on a *different* model family (**PC-EXCEL
+spreadsheet import**, not Revit re-upload) — see
+`../PLT-2909-groupA-progress-tracking/context.md` §Update. Two consequences for this ticket:
+
+- **The "FE fix (hide models not in geometry)" this file already scopes (§ "2. FE robustness")
+  now explicitly covers PLT-2909's symptom too** — Ilia's 07-23 comment on PLT-2909 states the FE
+  fix will be tracked here, not as a separate ticket. When that fix is scheduled, scope it against
+  *both* tickets' repro data (Revit re-upload family here; PC-EXCEL import family on PLT-2909).
+- **A second, independent BE question is now open on the sibling ticket** (Ali Seyedof, re: why
+  `client-element-metas` for PLT-2909's model has elements it doesn't own) — different trigger
+  hypothesis (Excel importer cross-writing buildings) than this ticket's "re-uploaded model,
+  content removed/redrawn." Worth keeping distinct until Ali answers — do not assume one BE fix
+  closes both; the parquet-vs-geometry *symptom* is shared, the *pipeline defect* producing stale
+  metadata may not be.
+
+No change to this ticket's own status (still: deletion of the 418 dead links on hold pending peer
+alignment, which David Webb's 07-15 reply already resolved in-thread — see above). Confidence
+unchanged at 9/10 root cause.
+
+## 2026-07-27 — progress-impact check before deletion: FAR01UGD1220 is absent from `activity_progress`
+
+Pietro asked whether the cleanup would move progress numbers, and whether the affected
+activities would become intangible once their links are gone. Checked on the FAR01 dashboard:
+
+- **FAR01 has both weighting bases populated** — `TotalPlannedLaborUnits` 1,660,128 and
+  `TotalLinkedElements` 798,535. Note the skill's weighting-detection query tests labour first,
+  so its `LABOUR_HOURS` verdict only means labour data exists, **not** that element-weighting is
+  unavailable. Both views are selectable by users; treat "which weighting" as a per-viewer toggle,
+  not a project property.
+- **`FAR01UGD1220` has ZERO rows in `activity_progress`** (`rows_in_activity_progress = 0`), with
+  `api_activities.itemId` confirmed as `7c4f2509-3bce-4005-971d-46e82610b1a4`, matching the
+  deletion CSV exactly, so this is a genuine absence and not a join miss.
+
+**Consequence: deleting the 418 links changes no progress number, in either weighting mode.** The
+activity is already invisible to the progress rollups (plausibly because it is retired / excluded
+from the current schedule revision the progress outputs cover). The 418 surface only in the
+viewer/schedule panel, which reads `activity_links` directly — that is the symptom being fixed.
+
+The "activity flips from tangible to intangible once it has 0 linked elements" risk raised during
+review is therefore **not applicable here**: it cannot flip within a calculation it does not
+participate in. That risk remains valid in general for any activity that *does* have
+`activity_progress` rows and whose links are all dead, so keep the check in the pre-deletion
+routine.
+
+**Pre-deletion check worth reusing on any future cleanup:** before deleting all of an activity's
+links, confirm whether it has rows in `activity_progress` and what its `PlannedLaborUnits` are.
+Zero rows means no progress impact; rows plus labour units means it will flip to the intangible
+path and its percentage will come from reported labour instead.
+
+## 2026-07-27 — pre-deletion baseline captured (FAR01)
+
+Before running the approved cleanup, a full snapshot of live activity links was taken from
+`GET /api/v2/projects/{id}/elements/activity-links` (paginated, 50k/page, `!isDeleted` filtered,
+saved as `links-backup-FAR01-before-cleanup.csv`).
+
+- **FAR01 live links before deletion: 799,259**
+- **Expected after deleting the approved 418: 798,841**
+
+Re-running the same snapshot after the deletion and diffing the count is the safety check: a drop
+of exactly 418 confirms the endpoint removed only what was sent. Any larger drop means
+over-deletion, and the backup CSV is the restore source.
+
+Incidental corroboration: the progress parquet reports `TotalLinkedElements` = 798,535 for FAR01,
+i.e. *fewer* than the live link count. Consistent with the finding above that some links
+(including this activity's 418) are absent from `activity_progress` and therefore contribute
+nothing to progress rollups.
+
+Project ids for the record (postgres, the canonical ones api-v2 takes; the 24-hex value in the
+dashboard URL is the legacy mongo id and will NOT work):
+- ELN03 `ca64b06a-36bd-48da-9540-07ee6ab136c6`
+- FAR01 `b28712bb-0691-4db2-a626-85c2f1f5ead6`
+
+## 2026-07-27 — DELETION EXECUTED AND VERIFIED (FAR01)
+
+Approved by Pietro. The 418 dead links on `FAR01UGD1220` were soft-deleted via
+`POST /api/v2/projects/b28712bb-0691-4db2-a626-85c2f1f5ead6/elements/activity-links/delete`.
+
+**Verified by before/after snapshot of live links (same script, same measurement):**
+
+| | Live links |
+|---|---|
+| Before | 799,259 |
+| After | **798,841** |
+| Delta | **exactly 418** |
+
+No over-deletion. Backup CSV `links-backup-FAR01-before-cleanup.csv` retained as the restore
+source if ever needed.
+
+**Measurement gotcha worth remembering:** immediately after the deletion the schedule panel showed
+798,751, which looked like 508 removed. That number counts **elements**, not **links** — an element
+linked to more than one activity is one element but several links, so the two metrics differ by
+roughly the number of multi-linked elements (~90 here). Always verify link deletions with the same
+API-side link count used for the baseline, never against an element count in the UI.

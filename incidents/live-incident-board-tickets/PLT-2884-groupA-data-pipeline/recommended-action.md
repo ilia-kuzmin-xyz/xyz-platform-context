@@ -1,16 +1,39 @@
 # PLT-2884 — Recommended action
 
-## Chosen: (c-style) Coordinator status-check → Yash, plus a proposed status move
+*Drafted 2026-07-22 · **updated 2026-07-30** (escalation posture raised — see
+"Change on 07-30" below). Diagnosis unchanged.*
+
+## Chosen: (c-style) Coordinator status-check → Yash, **and now a recommended status move** (was: proposed)
 
 Root cause is **already known and agreed** (bad/incomplete source XER, product-
 diagnosed by Mostafa on 07-10, corroborated by the customer's own Power BI
 finding). The fix is **customer-side** (re-export a complete XER in P6 and
-re-upload). The ticket has sat **9+ days** (since Ilia's 07-13 nudge) in "With
-Customer" with **no customer response** — Freshdesk was even flipped Closed →
-Waiting-on-customer on 07-20 with no new information. So the one useful move is a
-**coordinator nudge to Yash**: has the customer re-uploaded? If not, should this
-stop sitting passively in "With Customer" and move to **With Technical Support**
-so someone actively chases the client rather than waiting in silence?
+re-upload). The ticket has now sat **17 days** since the last substantive update
+(Yash, 07-13 10:56) and **20 days** since the fix was handed to the customer
+(07-10), in "With Customer" with **no customer response** — the only on-ticket
+event since is a bare Freshdesk Closed → Waiting-on-customer flip-flop on 07-20
+carrying no information. So the one useful move is a **coordinator nudge to
+Yash**: has the customer re-uploaded? And — no longer as an open question but as
+a recommendation — **move this off "With Customer" to "With Technical Support"**
+so someone actively chases the client instead of waiting in silence.
+
+### Change on 07-30 (why the posture moved)
+
+The 07-22 draft asked Yash to *consider* the status move. Nine further days of
+total silence on a **Critical** incident settle that question:
+
+- **"With Customer" is now misreporting the ticket.** It implies an active
+  client-side workstream. Nothing has come back in 17 days; there is no evidence
+  anyone is working it. The board reads this as parked when it is stalled.
+- **Nobody currently owns the next action.** The customer owes a re-upload but
+  has not been chased since 07-13. A status with no owner and no timer is how a
+  Critical quietly ages out.
+- **Playbook Phase 6 applies to the *stall*, not just to closure.** The
+  incident's remaining unknown ("did the corrected XER fix it?") is answerable in
+  one step and has simply not been driven.
+- **Do not close it instead.** The 07-20 Freshdesk Closed toggle (reversed a
+  minute later) hints at closure pressure. Closing on "we told them what to do"
+  is remission, not resolution — the reconciliation was never verified.
 
 **Owner:** **Yash Patel** (assignee / support coordinator; owns the client
 channel). One question, routed, answerable with a status.
@@ -35,18 +58,25 @@ channel). One question, routed, answerable with a status.
 
 ### Draft status-check comment (for Yash / coordinator to post — do NOT auto-post)
 
+*(Revised 07-30: durations updated; Q2 is now a recommendation rather than a
+question.)*
+
 > @Yash — PLT-2884 has been "With Customer" since 10 Jul with the fix already
 > identified (incomplete source XER — activities missing from the customer's own
 > schedule export; Mostafa diagnosed this and the customer's Power BI check found
-> the same). It's now 9+ days with no re-upload and no response.
+> the same). It's now **20 days** since we handed the fix over and **17 days**
+> since the last substantive update on the ticket, with no re-upload and no
+> response.
 >
-> Two quick things:
+> Two things:
 > 1. **Has the customer re-exported and re-uploaded a corrected XER yet?** If yes,
 >    we can verify the new numbers reconcile and close. If no —
-> 2. **Can we move this to With Technical Support and actively chase the client?**
->    It's Critical priority; sitting silently in "With Customer" for 9+ days on a
->    Critical isn't really "parked", it's stalled. A direct follow-up (or a short
->    Loom showing them the P6 re-export step) would unstick it.
+> 2. **I'd suggest we move this to With Technical Support and actively chase the
+>    client.** It's Critical priority; 17 days of silence in "With Customer" isn't
+>    "parked", it's stalled, and the status currently implies work is happening
+>    client-side when nothing has come back. A direct follow-up (or a short Loom
+>    showing them the P6 re-export step) should unstick it. Happy to be overruled
+>    if you know the client is actively on it.
 >
 > For the record — this is expected to be data-side, not a platform bug: the old
 > (Power BI) dashboard reads from a pipeline that keeps activities from earlier
@@ -73,9 +103,20 @@ fact; Q2 proposes the status transition with a one-line justification.)*
   family as PLT-2882. Worth a standalone ticket to Mostafa/product; **not** part of
   PLT-2884's resolution.
 - **Attachments remain NEEDS HUMAN** (screenshots, .xlsx, .xer) — see
-  `context.md §8`.
+  `context.md §8`. The XER on-ticket is `EQIX_AT10x-A11x_Rev_02_updated20260427.xer`;
+  a genuine corrected re-upload should be a **later revision than Rev 02** — a
+  cheap first check that the customer actually re-exported rather than re-sent.
+- **Board-scope consequence if the move happens (07-30):** `With Technical
+  Support` is on this routine's **exclusion** list (board `README.md` § Scope
+  rules). If PLT-2884 transitions, it **leaves this triage routine's scope** — so
+  the next run should re-tag the folder (`groupA` → `relocated`) and record the
+  reason, rather than silently dropping the ticket. Flagging deliberately: the
+  escalation is still the right call, but it must not become the mechanism by
+  which a Critical stops being watched.
 
-**Confidence in diagnosis: 8/10.** **Confidence in this being the right next step:
+**Confidence in diagnosis: 8/10** (unchanged 07-30 — not re-derived; nothing new
+arrived to test it against). **Confidence in this being the right next step:
 9/10** — cause is settled; the only lever left is chasing the customer, and the
-status question (With Customer vs With Technical Support) is the concrete decision
-to force.
+status decision (With Customer → With Technical Support) is the concrete call to
+force. The residual 1/10 is purely that Yash may have off-ticket knowledge that
+the client is actively working the re-export, which would justify leaving it be.
