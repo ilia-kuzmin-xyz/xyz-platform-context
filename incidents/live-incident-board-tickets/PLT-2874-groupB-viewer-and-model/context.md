@@ -185,3 +185,15 @@ WHERE statusCode IS NOT NULL;   -- apply same status filter as the tile
 - `distinct_source_elements > editor's 440K` → scope difference (unlinked-but-statused elements included) → definition decision.
 
 **Revised position:** "not a bug" was too strong. Correct statement: *the dashboard number was never a count of linked source elements, so equality with the editor is not the right expectation — but vector 2 (duplicate status rows) would be a genuine counting defect and is cheaply testable with the query above.* Recommended action file still stands: clarify + run the diff query before any dev work.
+
+---
+
+## Group move: 2026-07-30 — folder re-tagged groupA → groupB
+
+Board re-check (`project = PLT AND issuetype = "Live Incident"`, JQL filter) shows PLT-2874 is now
+**Dev In Progress** (was In Analysis on 07-13/07-22). The clarifying-question step in
+`recommended-action.md` evidently landed and the ticket progressed into the dev pipeline — folder
+tag renamed accordingly, per the README's group-rename convention. Per this run's scope
+(Group B action scenario still TBD, "skip those tickets"), no fresh deep-dive was done this run —
+this is a bookkeeping-only update. Next run: if this stays in Group B, do a light dev-readiness/
+fix-ownership check like the other Group B tickets rather than a full re-investigation.

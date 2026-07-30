@@ -160,3 +160,9 @@ The `Timeout waiting for element_base_data` (model-loader side, `use-model-loade
 3. On timeout/failure, surface a terminal error state and clear `setModelLoading(false)` (progress projects currently have no such path; quality-only does).
 
 Confidence: mechanism 9/10; that the LVN-BL1 instance is the hang (vs skip) variant — pending the one console line above — 5/10.
+
+---
+
+## Closed/moved since 07-13 (checked 2026-07-28)
+
+**Status: Done.** Actual root cause diverged from the 07-13 hang/Promise.all hypothesis above. Ilia Kuzmin identified the real bug same day (comment 2026-07-13 18:25): the dashboard didn't handle the edge case of **a project with linked elements but no applied statuses** — the Editor page falls back to computing colour visualization from links to scheduled activities in that case, but the Dashboard path simply failed (never handled it), producing the stuck spinner. Hotfix shipped same day. Gennaro Boccia verified fixed on Staging 26.3.2 (2026-07-15). Freshdesk #7399 cycled Awaiting release → Waiting on customer → Open → Closed (2026-07-17). No further comments since. Darminder was never engaged (Ilia self-resolved before any hand-off); the Sachin/Ali artefact-size question in `recommended-action.md` was moot. The timeout/watchdog gap documented above (no terminal state for a never-clearing progress-project spinner) is still real and unaddressed as a general resilience issue, but was NOT the trigger for this specific incident.

@@ -3,12 +3,135 @@
 - **Domain slug:** `progress-tracking` (justification in §7)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2917
 - **Type:** Live Incident · **Priority:** Major · **Status:** **Open**
-- **Assignee:** Ilia Kuzmin · **Reporter (Jira):** Yash Patel (support) · original client reporter: **Thomas**
+- **Assignee:** **Yash Patel** (was Ilia Kuzmin; auto-reassigned 2026-07-22 09:31 by Automation-for-Jira when Ilia moved it to With-Technical-Support) · **Reporter:** Yash Patel · original client reporter: **Thomas**
 - **Freshdesk:** Ticket 7420, status "Waiting on 3rd line" (i.e. back on us)
 - **Project link given:** `https://cloud.xyzreality.com/progress-dashboard/69a964b9380af76aed8faa97` · Software Area: Dashboard
-- **Created:** 2026-07-21 · **Attachments:** 1 screenshot (unreadable here — see §8 NEEDS HUMAN)
-- **Recurrence:** Pietro Desiato already "worked on" this once; the customer replied it is *still* not fixed. Treat the earlier fix with suspicion per the playbook (symptom did **not** even disappear).
-- Triage date: 2026-07-22
+- **Created:** 2026-07-21 · **Last updated:** 2026-07-27 · **Attachments:** 1 PNG + **1 XLSX (new 07-27)** — neither readable here, see §8
+- **Recurrence:** Pietro Desiato already "worked on" this once; the customer replied it is *still* not fixed. His change remains undocumented and **still unanswered as of 07-30**.
+- Triage dates: 2026-07-13 · 2026-07-22 · **2026-07-30 (this run — major scope change, see §0)**
+
+---
+
+## 0. RUN 2026-07-30 — WHAT CHANGED (read this first; it supersedes §2/§4 in part)
+
+Three things happened after the 07-22 triage. **The ticket's scope was formally redefined**, and a
+new decisive artifact arrived.
+
+### 0.1 Timeline of everything after 07-22 09:30
+
+| When | Who | What |
+|---|---|---|
+| 07-22 09:30 | **Ilia** (comment) | Posted 3 clarifying questions for Thomas: (1) *which* dashboard — the link is the **old PowerBI dashboard**, or the new `/projects/<id>/dashboard`? (2) re-attach the screenshots, one per project — **the inline images in the description are broken**; (3) per project, one example: activity ID + shown-vs-expected; and is it (a) milestone status/date display, (b) progress % in the schedule panel, or (c) 3D highlighting? |
+| 07-22 09:31 | Ilia → Automation | Status **Open → With Technical Support**; Automation auto-reassigned **Ilia → Yash** |
+| 07-22 09:33 | **Mostafa** (comment) | ⚠️ **SCOPE CHANGE.** *"it's a different issue. For activity **PMILE5030** in **ELN03**, he's done it to be **100% in the editor** but **Pietro is saying it's not coming up in the activity parquet file**. **Is that because it's a milestone?** This is for the **power bi dashboard for portfolio**."* |
+| 07-22 09:42 | **Yash** (comment) | Confirms it: *"the issue mentioned in Description above was looked into by Pietro. **This ticket is raised for the issue user is having as mentioned by Mostafa.**"* |
+| 07-23 15:54 | Yash | Status **With Technical Support → Open** — **with no comment and none of Ilia's 3 questions answered** |
+| **07-27 10:55** | **Yash** (comment + attachment) | Client update: *"Little update about ELN03. [screenshot] **All milestones are not updated.** Please have look when free."* — plus new attachment **`ELN03 Milestones Dashboard.xlsx`** (203 KB) |
+
+### 0.2 The four consequences
+
+1. **Ilia's Q1 is answered: the surface is the old PowerBI portfolio dashboard**, not our new
+   Milestone Performance widget. That retires the 07-22 run's `PortfolioDashboardPage` framing as
+   *the customer's surface* (§2 caveat resolved — it was the wrong surface). The FE findings in §3–§4
+   are still **true and still relevant**, because both surfaces read the same schedule/progress data
+   layer, and PLT-2763 (our widget) is now **In QA Testing** — it will inherit the same defect.
+2. **Ilia's Q2/Q3 were never relayed to Thomas.** Yash flipped the ticket back to Open on 07-23
+   without answering them. The description's three screenshots are **still lost** (§8).
+3. **The ticket now carries two signals again.** Yash scoped it (07-22) to Mostafa's PMILE5030 /
+   parquet question, but the 07-27 client update is the *original* ELN03 "all milestones should be
+   done" thread. Per the playbook this needs an explicit split — except that this run finds they are
+   **the same root cause** (§0.3), which is the useful finding.
+4. **Pietro's earlier undocumented fix is still unasked/unanswered** — 9 days later. Open loop.
+
+### 0.3 UPDATED ROOT-CAUSE HYPOTHESIS (code-verified, replaces the 07-22 "backend/data, unspecified")
+
+**Mostafa's question — "is that because it's a milestone?" — can be answered YES, with a precise
+mechanism, and the answer is stronger than "the parquet is missing a row".**
+
+**A milestone can never be driven to "done" from inside the platform, by design, because the
+platform has no write path to Actual Finish Date — and Actual Finish Date is what every
+milestone-completion view reads.**
+
+Verified end-to-end in `hc-frontend` (current `main`, this run):
+
+- **What the user did.** In the Gantt, the *Actual % Complete* cell is inline-editable **only when the
+  activity has no linked 3D elements**:
+  `scheduler-columns.tsx:150` → `isEditable = task.activityItem?.progressValid === true && !hasLinkedElements`,
+  same rule in `use-actual-progress-mutation.tsx:36-41` (`isActivityEditableForProgress`: not WBS,
+  `elements > 0` ⇒ false, requires `validForProgressCalculations === true`). A milestone like
+  PMILE5030 has **zero linked elements**, so the UI **invites** a manual 100%. Linked activities get
+  the read-only tooltip *"Values are driven via linked elements."* (`gantt-tooltip.tsx:18`).
+- **Where that 100% goes.** `useActualProgressMutation` →
+  `serviceProvider.Activity.updateActualProgress(projectId, dayjs().format('YYYY-MM-DD'), [{activityId, progress}])`
+  → **`POST /projects/{id}/activities/progress`** with body `{calendarDate, activitiesProgress}`
+  (`activity-api-service.ts:257-266`). On success the row is flagged `isUserProgress = true`
+  (`use-actual-progress-mutation.tsx:86-97`) and a success toast fires
+  (*"Actual % Complete updated to 100%"*).
+- **⚠️ Two things that write is NOT.** (i) It carries **`calendarDate = today`**, not the milestone's
+  real completion date — so a milestone finished months ago is stamped with the edit date.
+  (ii) **It does not touch `actualFinishDate`.** Exhaustive grep of the whole activity API surface
+  (`activity-api-service.ts`, all 40+ methods) shows `POST .../activities/progress` is the **only**
+  activity-progress write, and **no FE code path anywhere writes `actualStartDate` /
+  `actualFinishDate`** — every occurrence is a read
+  (`api-activities-loader.ts:100-101`, `dashboard-schedule-service.ts:474-475/506-507`,
+  `use-dashboard-schedule-data.tsx:201-202`). Actual dates enter the system **only** from the
+  uploaded P6/XER schedule (`schedule-parser.ts:159-170`, `getFirstValidDate(['act_end_date', …])`).
+- **What the milestone views read.** `actualDate` on the milestone row **is the Actual End Date**, and
+  *"Non-null ⇒ the milestone is complete"* (`portfolio-api.types.ts:131`); it is passed through raw
+  from **`reporting.vw_KeyMilestone`** (`:115-138`). Same for the PowerBI portfolio milestone view,
+  which reads the same reporting layer.
+
+⇒ **The loop is open by construction.** Set a milestone to 100% in the editor → a user-progress row
+lands in api-v2 dated *today* → **Actual Finish Date is still null** → `vw_KeyMilestone` /
+PowerBI / our widget all still say "not done". Pietro's own diagnosis — *"the Actual End Date should
+have a value but it doesn't"* — and Mostafa's — *"100% in the editor but not in the activity parquet"* —
+are **the same defect seen from two ends**. That unifies the 07-21 description thread (ELN03 "all
+milestones should be done") with the 07-22 redefined thread (PMILE5030) into **one root cause**.
+
+**Secondary, corroborating:** progress is **weight-averaged** by `TotalPlannedLaborUnits` (default) or
+`TotalLinkedElements` (`progress-queries-v2-api.ts:166-167/373-374/518-519/655-656`), and
+`dashboard/progress-tab.md:55` states zero-weight rows are *excluded from the denominator*. A
+milestone has zero duration, zero labour units and zero linked elements ⇒ **zero weight on every
+path**, which is the most likely reason it never materialises in the activity parquet at all. And the
+native SCH query `LEFT JOIN progress_delta … COALESCE(p.ActualProgress, 0) as ActualPercent`
+(`dashboard-schedule-service.ts:~455-490`) means an activity **absent from `activity_progress` renders
+as 0%**, not as blank — exactly the reported symptom.
+
+### 0.4 What this means for FAR01 and ELN04
+
+The 07-30 evidence speaks directly only to **ELN03 / PMILE5030**. The other two remain as diagnosed on
+07-22 (§4), *unconfirmed*, and are now **lower priority** because the ticket was formally rescoped:
+
+- **FAR01 (none showing)** — still either zero Key-Milestone rows, or a `projectId` join-miss silently
+  dropped at `portfolioMilestonesData.ts:53`. Note this is a **new-widget** symptom; if Thomas is on
+  PowerBI it may not even be the same surface. **Needs the screenshot he was asked for.**
+- **ELN04 (past = late, future = done)** — still "the view emits `status`/`actualDate` inconsistent
+  with the timeline". The §0.3 mechanism gives a plausible *specific* vector: an `actualDate` derived
+  from a **user-progress `calendarDate` = edit date** rather than a real finish date would place a
+  completed-looking marker in the future (`dueDate = actualDate ?? forecastDate ?? plannedDate`,
+  `portfolioMilestonesData.ts:83`). **Plausible, not verified.**
+
+### 0.5 Code re-verification (does the 07-22 FE finding still hold?)
+
+**Yes, unchanged.** Since the widget shipped (`83c5c11`, PLT-2763, 07-10) the only commits touching
+`PortfolioDashboardPage/` or `portfolioService/` are `da8877d` (PLT-2900 permissions scaffolding) and
+`9bfa0cd` (PLT-2628 status counts) — neither touches milestone logic. `milestoneStatus.ts` is still a
+pure `status`-string → label/colour switch with **no date input**; `portfolioMilestonesData.ts` still
+derives `dueDate` for position only and still uses `actualDate != null` for the KPI "complete".
+Sibling tickets PLT-2918 / PLT-2906 shipped nothing that touches this path.
+
+**Doc inaccuracy spotted:** `docs/dashboard/duckdb-tables/schedule-schemas.md:66` says `itemType` is
+e.g. `"Task" | "Milestone"`. In the actual code the value domain is **`Activity` | `WBS`**
+(`progress-queries-v2-api.regression.test.ts:445` filters `itemType = 'Activity'`;
+`use-actual-progress-mutation.tsx:38` and `useShowWBS.ts:23` branch on `'WBS'`/`'Activity'`).
+So **milestones are not distinguishable by `itemType` in our data** — they arrive as ordinary
+`Activity` rows with zero duration/labour/elements. Worth fixing in the doc, and it matters: any
+proposed "handle milestones specially" fix needs a real discriminator first.
+
+⚠️ **Latent product/UX defect found this run (independent of the data fix):** the Gantt lets a user
+type 100% on exactly the activities where it cannot possibly affect milestone completion (no linked
+elements ⇒ editable), and then shows a **green success toast**. The user is told the edit worked; the
+dashboard never changes. This is a genuine PLT-side item — see recommended-action.
 
 ---
 
@@ -186,10 +309,21 @@ a portfolio-dashboard home.
 
 ## 8. NEEDS HUMAN (unreadable media, undocumented prior fix, data I can't query)
 
-- ⚠️ **1 screenshot attachment** on PLT-2917 — binary media behind Atlassian auth, **not viewable
-  here**. Do not guess its contents. It is the fastest way to confirm (i) which surface Thomas is
-  on (Portfolio dashboard vs the `progress-dashboard/:id` report — §2 caveat), and (ii) exactly
-  which diamonds are miscoloured for ELN04.
+### 8a. Attachments / media — ⚠️ ALL FOUR ARE UNREADABLE BY THE AGENT (updated 2026-07-30)
+
+I attempted to fetch the attachment binaries and got **HTTP 403** from
+`api.atlassian.com/…/attachment/content/…` (Atlassian auth; the MCP tool exposes metadata only, not
+file bytes). **Nothing below has been read — the descriptions are inferred from surrounding text and
+from the image dimensions in the ADF payload. Ilia must open these and backfill this section.**
+
+| # | Artifact | Where | What it probably shows | Value |
+|---|---|---|---|---|
+| 1 | **`ELN03 Milestones Dashboard.xlsx`** (id 61396, 203 KB, added by Yash **2026-07-27 10:55**) | Jira attachment | Almost certainly the client's **export of ELN03's milestone list** — one row per milestone with planned / forecast / **actual** dates and a status or % column — the evidence behind *"All milestones are not updated."* 203 KB is far too big for a handful of rows, so it likely contains the **full ELN03 activity/milestone set**, possibly multi-sheet. | 🔴 **DECISIVE.** This is the single most load-bearing artifact on the ticket and it is brand new. If it contains an **Actual End Date column that is populated in the client's own source schedule** while our system shows null, that flips the diagnosis from "P6 never had the actual date" to "we dropped it on ingest" — a materially different fix. **Open this first.** |
+| 2 | `image-20260721-123812.png` (id 61115, 47 KB, **1533 × 223**) | Jira attachment, inside Yash's 07-21 comment | A **wide, very short strip** — a single table/grid row. Given the caption, near-certainly the **ELN03 "Dh4 Ready for energization"** row showing a value that is not 100%. | 🟡 Corroborative — the text already states the claim. |
+| 3 | Inline screenshot in the **07-27** comment (**1872 × 594**) | **Freshdesk-hosted** (`eucattachment.freshdesk.com`, JWT in URL) — **not** a Jira attachment | Landscape, dashboard-sized. Likely the **ELN03 milestone table or gantt** as Thomas currently sees it, with milestones showing not-updated. | 🟠 Important — it finally shows *which* surface Thomas is on (the unanswered Q1). **Requires Freshdesk access, not Jira.** |
+| 4 | **The 3 description screenshots** (FAR01 / ELN04 / ELN03) | Description body | **Genuinely broken in Jira** — they serialise as `UNKNOWN_MEDIA_attachment` with `url=null` and `id=null`; there are no matching attachment records. This is **not** an agent access limitation: nobody can see them, which is exactly what Ilia reported on-ticket on 07-22. | 🔴 **Lost.** Only re-attachment by Thomas recovers them. He was asked on 07-22 and **never answered** (ticket was flipped back to Open on 07-23 without a reply). These are the only evidence that ever existed for **FAR01** and **ELN04**. |
+
+### 8b. Other gaps
 - ⚠️ **Pietro's earlier fix is undocumented** — no ticket / PR / commit reference. **Ask him
   exactly what he changed** (code? a Key-Milestone re-mapping? stamping Actual End Dates? which
   projects?) *before* re-diagnosing, or we risk re-investigating something already ruled out and
@@ -204,6 +338,25 @@ a portfolio-dashboard home.
 - ⚠️ **Which portfolio / project ids** — confirm the tenant's default portfolio (what
   `usePortfolioId` resolves) actually contains FAR01/ELN03/ELN04, and whether the FAR01
   `projectId` in `vw_KeyMilestone` matches the `/dashboard` project id.
+
+---
+
+### 8c. The three live-only diagnostics that close the remaining gap (2026-07-30)
+
+None of these are answerable from code. Each needs env/DB access or a person.
+
+1. **`api_activities` row for PMILE5030 (ELN03).** Is `actualFinishDate` null? Is
+   `validForProgressCalculations` true? Is `plannedLaborUnits` 0? Is `linkedElementCount` 0?
+   → *Owner: Sachin / Ali (api-v2).* This single row confirms or kills §0.3 outright.
+2. **Does PMILE5030 appear in `activity_progress` / the reporting parquet at all**, and if so with
+   what `CalendarDate` and `ActualProgress`? Does the pipeline drop zero-weight activities, and does
+   it consume `isUserProgress` rows from `POST /activities/progress`?
+   → *Owner: David Webb (DPL / data-pipeline — he owns `DPL-1627`, the milestone-widget processing).*
+3. **Pietro's earlier undocumented fix** — code or data? which projects? still unanswered since 07-21.
+   → *Owner: Pietro.*
+
+Plus the unanswered process gap: **Ilia's 3 questions to Thomas (07-22) were never relayed** — Yash
+reopened the ticket on 07-23 without them. FAR01 and ELN04 cannot progress without those screenshots.
 
 ---
 
@@ -223,6 +376,22 @@ a portfolio-dashboard home.
 
 **Overall triage confidence: ~6/10.** Mechanism and layer are clear; the exact backend cause per
 project needs one data-payload step.
+
+### 9b. Confidence after the 2026-07-30 re-investigation (supersedes the above)
+
+| Claim | Conf. | Basis |
+|---|---|---|
+| FE is a faithful renderer; milestone done/late/complete are all backend-supplied; **code unchanged since 07-22** | **9/10** | Re-read every file; git log confirms no milestone commits since `83c5c11` |
+| **The platform has no write path to Actual Finish Date** — `POST /activities/progress` is the only activity-progress write and it does not touch `actualFinishDate`; actual dates enter only from the uploaded XER | **9/10** | Exhaustive grep of `activity-api-service.ts` + every `actualFinishDate` reference is a read (§0.3) |
+| Therefore **setting a milestone to 100% in the editor can never mark it complete** in `vw_KeyMilestone` / PowerBI / the widget — i.e. **Mostafa's "is it because it's a milestone?" = YES** | **8-9/10** | Follows from the above + `portfolio-api.types.ts:131` (*non-null `actualDate` ⇒ complete*). Residual risk: an api-v2 server-side rule could derive `actualFinishDate` from a 100% user-progress row — invisible to FE code. **Check #1 in §8c settles it.** |
+| Milestones are missing from the activity parquet because they are **zero-weight on every weighting path** | **6/10** | Strong circumstantial (weighting code + `progress-tab.md:55` + `COALESCE(…,0)` rendering 0%), but the parquet job is backend — **needs check #2** |
+| ELN03 description thread and the PMILE5030 thread are **one root cause, not two** | **8/10** | Both reduce to "Actual End Date never stamped"; matches Pietro's *and* Mostafa's independent observations |
+| FAR01 / ELN04 share this cause | **3/10** | Unverified; their only evidence (the description screenshots) is **lost** (§8a #4) |
+| This is **not** a frontend bug to fix on the PLT board | **8/10** | The customer-visible fix is in the schedule-ingest / reporting layer. The one genuine PLT-side item is the **UX defect in §0.5** (editable + success toast on an edit that cannot take effect) |
+
+**Overall triage confidence: ~8.5–9/10 on mechanism and on who should own it next** — up from 6/10.
+The last ~5–10% is **not obtainable from code**: it needs the xlsx opened (§8a #1) and the two
+backend row-checks (§8c #1–#2). Stated explicitly rather than guessed, per the brief.
 
 ---
 

@@ -14,8 +14,56 @@
 - **Components / Labels:** none
 - **Domain slug chosen:** `data-pipeline` (deviates-toward from the alternative `progress-tracking` — justified at the bottom)
 - **Linked follow-up tickets (created from this thread):**
-  - **PLT-2650** — feature work to handle links on model deletion (created by Rishi Bhugobaun, 2026-05-06)
-  - **UX-1109** — design for the "delete model with shared linked elements" warning modal (Jason Fingland)
+  - **PLT-2650** — feature work to handle links on model deletion (created by Rishi Bhugobaun, 2026-05-06) — **now Released** (see delta below)
+  - **UX-1109** — design for the "delete model with shared linked elements" warning modal (Jason Fingland) — **now Ready For QA** (see delta below)
+
+---
+
+## Delta since last check (2026-07-13 → 2026-07-28 recheck)
+
+**PLT-2385 itself: static.** Exactly one new comment since 07-13, from Yash Patel
+(2026-07-17): *"Ticket ID: 5603 - Freshdesk ticket status changed to: Waiting on
+customer."* This is a support-desk side-channel status echo (Freshdesk ↔ Jira
+sync), not dev/product movement — no bearing on the fix. **Status unchanged:
+Ready For Development.** No engineer has picked up code work on this ticket
+itself in the 2-week window.
+
+**PLT-2650 — RELEASED** (statusCategory `Done`/green), verified on **Staging
+26.2.5** by Gennaro Boccia (QA), 2026-06-08. Re-read in full: it's the "Shared
+Asset Impact Modal — FE", covering **two triggers** — (1) model deletion and (2)
+manual unlink from the linked-activities panel — each showing an impact modal
+(keep-links / remove-links choice, per-model activity breakdown, CSV export)
+when the affected elements are shared with other models. This is **broader**
+than this folder's prior read (which assumed deletion-only).
+**Critically, its own "Out of Scope" section explicitly excludes: "Upload path
+(BE-2): deferred pending reliable post-upload event delivery from BE."** The
+upload/re-version path — a new model version being uploaded and elements
+dropping out of it while old links persist — **is exactly DC10's trigger**
+(Rishi, 2026-01-28: *"If these elements were present in a previous model
+version… the link will have persisted"*). So even fully shipped, **PLT-2650 does
+not close this incident's root cause** — it confirms, in writing, the gap this
+folder flagged on 07-13 (gap #1: "a delete-time warning would not have prevented
+DC10"). No BE ticket for the upload-path fix ("BE-2") was found linked from
+PLT-2650 or PLT-2385.
+
+**UX-1109 — Ready For QA** (statusCategory `In Progress`/yellow), updated
+2026-07-23 (5 days before this recheck — genuinely recent movement). Comment
+thread itself shows nothing new since Jason's 2026-02-25 designs-added note;
+progress is visible only via status + updated timestamp. The ticket's own scope
+(re-read in full) is broader than "a warning modal" — it explicitly asks UX to
+consider model-type-based progress inclusion (e.g. QA excluded from progress by
+default) and reporting-transparency indicators, i.e. options that *would* address
+the shared-ID root cause rather than only the deletion trigger. Worth watching:
+if UX-1109's approved direction includes model-type progress exclusion, that
+would need a **new** BE/data-pipeline ticket to implement (distinct from
+PLT-2650, which is FE-only and deletion/unlink-scoped).
+
+**Net effect of the delta:** the forked work has shipped/progressed
+substantially, but neither fork closes the mechanism that caused DC10
+(re-versioned model, no explicit delete, stale link on shared Revit unique ID).
+The backend link-lifecycle fix this folder's root-cause section calls "primary"
+still has no visible ticket. Root-cause analysis from 07-13 **still holds
+unchanged** — this delta narrows, rather than alters, the diagnosis.
 
 ---
 
@@ -203,14 +251,18 @@ backing the warning modal (how many other models share these element IDs).
 
 ## Confidence
 
-**6 / 10.** The mechanism and root cause are well-established: diagnosed in-thread by
-the senior fullstack (Rishi) and the BE/data owner (David Webb), and independently
-corroborated in code (links keyed on `modelElementId` with no model-type field; shared
-IDs across models are a known, handled concept; the only prune fires on model-delete).
-Held below 7 because: (a) the actual fix is **backend/data-pipeline + a product-UX
-decision**, not something implementable or fully testable from this FE repo; (b) the
-fix scope was debated for ~3 months (Jan→May) and split into PLT-2650/UX-1109 whose
-delete-time-warning approach does **not** obviously cover this incident's shared-ID /
-re-version trigger; (c) the decisive PowerBI-export screenshot is unreadable here
-(mitigated by transcribed numbers); (d) cohort is under-quantified (lon1x2 mentioned,
-no ticket).
+**6 / 10 (unchanged by this recheck).** The mechanism and root cause are well-established:
+diagnosed in-thread by the senior fullstack (Rishi) and the BE/data owner (David Webb),
+and independently corroborated in code (links keyed on `modelElementId` with no
+model-type field; shared IDs across models are a known, handled concept; the only prune
+fires on model-delete). Held below 7 because: (a) the actual fix is **backend/data-pipeline
++ a product-UX decision**, not something implementable or fully testable from this FE
+repo; (b) the fix scope was debated for ~3 months (Jan→May) and split into
+PLT-2650/UX-1109 — **confirmed by this recheck (07-28):** PLT-2650 shipped (Released,
+verified Staging 26.2.5) but its own scope doc explicitly defers the "upload path" — the
+re-version trigger that actually caused DC10 — to an unticketed future BE piece; (c) the
+decisive PowerBI-export screenshot is unreadable here (mitigated by transcribed numbers);
+(d) cohort is under-quantified (lon1x2 mentioned, no ticket). Not raised above 6 despite
+UX-1109 nearing completion (Ready For QA, 07-23) because its broader "model-type progress
+exclusion" direction, if adopted, still needs a **new**, currently nonexistent BE ticket
+before it touches this incident.
