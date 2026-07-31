@@ -121,3 +121,34 @@ Room selection therefore uses `viewer.isolate(ids)` (ghosts the remainder) plus
 `fitToView`, while the status filter keeps its fragment-level hide. Resetting
 one path must clear the other — `viewer.isolate([])` before re-applying
 fragment visibility, and re-show all fragments before isolating.
+
+---
+
+## The composer invents identifiers, not just numbers
+
+A generated Room Readiness report labelled its viewer panel
+**`DH-B2-01 · capture 14/07/2026`**. No room in that project contains "DH" or
+"B2" — real names look like `L1-NORTH SUPPORT BATTERY 1245`. The model had
+written a plausible name in the style of the design mockup, as a literal.
+
+The existing "NEVER fabricate data" rule only spoke about synthetic curves and
+arrays — **numbers**. Names, ids, codes and dates fell straight through it. The
+rule now covers identifiers explicitly, and the template states what the viewer
+header must show.
+
+Two things make this the worst class of bug here:
+
+- **Nothing looks wrong.** A fabricated percentage might be implausible; a
+  fabricated room name is indistinguishable from a real one to anyone who
+  doesn't know the project's naming.
+- **Structural checks pass.** A ten-point layout adherence score gave that same
+  report 10/10.
+
+**Whenever a block cannot be honestly populated, say so in the prompt and tell
+the model to omit it.** Room Readiness does this for the Packages GC column and
+for Milestones — the mockup fakes both (its package percentages come from a hash
+of the room name, its milestone dates are string literals, GC is `actual` minus a
+pseudo-random offset), and porting them would have reproduced exactly this bug.
+
+**Verify identifiers against the source data, not against plausibility.** One
+query over the room list settled it in seconds.
