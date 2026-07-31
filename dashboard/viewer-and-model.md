@@ -198,6 +198,35 @@ An element is included in the query **only when `displayDate <= sliderEndDate`**
 
 ---
 
+## Objects vs elements: the two pages count different things
+
+`objectId` (Forge dbId) is a geometry object. `modelElementId` is an element. **One element can
+own many objects**, either because a Navisworks model has ungrouped geometry, or because the same
+element appears in several sub-models of a federation. On FAR01, 737,093 objects to 668,978
+elements, 9.24% more.
+
+| surface | counts | source |
+|---|---|---|
+| Dashboard, Elements box | distinct `modelElementId` from `_visible_elements` (was objects until PLT-2874) | `svf2-object-id-map` |
+| Dashboard, `Selected` | dbIds, still (`dashboard-statistics-service.ts:128`) | viewer selection |
+| Editor, Model details "Linked" | distinct `modelElementId`, one model, active schedule | `project-element-list` + element metadata |
+| Editor, schedule Elements column | sum of per-activity counts, **no dedup**, so an element repeats per link (`schedule-entity.ts:786-810`) | activity links |
+
+The colour pipeline must keep working in objects, since every object has to be painted. Only the
+reported figure is element-based.
+
+**The editor cannot see extra objects at all.** It builds `sourceFileElementId → dbId` as a Map
+(`model-mapping-service.ts:226`), so it holds one dbId per element by construction. That is why it
+never had the inflation, and also why the surplus Navisworks dbIds are unreachable there for
+selection and isolation.
+
+Even with the same model and the same unit the two pages will not match exactly: they read
+different artefacts. On FAR01 after PLT-2874, dashboard 609,643 against editor 606,524, 0.5%
+apart, of which 1,364 is `svf2-object-id-map` disagreeing with `project-element-list` for the same
+model version.
+
+---
+
 ## Camera state (ViewerPage)
 
 On geometry load, ViewerService captures: `position`, `target`, `pivot`, camera `up`, ortho/perspective mode, and FOV/zoom. `restoreCameraState()` replays these, preserving the view across model reloads and panel resizes.

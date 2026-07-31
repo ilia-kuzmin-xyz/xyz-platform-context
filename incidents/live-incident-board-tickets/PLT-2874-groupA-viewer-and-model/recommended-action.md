@@ -1,5 +1,56 @@
 # PLT-2874 — Recommended action
 
+> **2026-07-31: superseded. Resolved in diagnosis, fix in review.**
+>
+> Everything below is the 07-24 position and is kept because its reasoning held up. Its outcome
+> map called this correctly: *"A ≈ 628k and B ≈ 695k → gap is dbId expansion of a
+> non-deduplicated count → optional polish is to display `COUNT(DISTINCT modelElementId)` in the
+> overlay so it reconciles with the editor."* That is exactly what PR #2084 does. The one thing
+> it got wrong was the disposition, "working as designed / close as not-a-bug": showing an object
+> count under the label "Elements" is a defect, and once corrected the two surfaces agree to 0.5%.
+>
+> **Current position below.**
+
+## Current: ship PR #2084, close the incident, spin out the rest
+
+https://github.com/XYZReality/hc-frontend/pull/2084 on branch `PLT-2874`. Full mechanism,
+figures and verification in `investigation-log.md`.
+
+### Actions, in order
+
+1. **Post the resolution comment.** Draft in `drafts.md`, not posted.
+2. **Get #2084 deployed and verified.** Blocked on an image promotion, not on code. Test steps
+   are on the PR; step 3, that the total stays element-based after a filter change, matters most
+   because that was a real bug in the first cut.
+3. **Confirm LVN1** (Freshdesk 7514) with one query. Expect the fix to cover the dashboard number
+   there but **not** the schedule root row, which is a third unit again.
+4. **Close the incident** once #2084 is on prod.
+
+### Spun out, none blocking
+
+| Item | Why separate |
+|---|---|
+| Schedule Elements column sums per-activity counts with no dedup (`schedule-entity.ts:786-810`) | Third unit, own defect, is the extra number in the LVN1 report |
+| `Selected` in the viewer stats box is still a dbId count (`dashboard-statistics-service.ts:128`) | Product decision, raised by another dev, his call |
+| Dashboard picks an arbitrary model from the federated folder | Latent; FAR01's two are 2,540 elements apart so impact is 0.4% here. Draft ticket in `drafts.md` |
+| `svf2-object-id-map` vs `project-element-list` disagree by 1,364 for one model version | Backend question for Ali or Dave, one message not an investigation |
+| Extra Navisworks dbIds unreachable in the editor for selection and isolation | Consequence of the editor's one-dbId-per-element map, not this ticket |
+
+### Product decision taken
+
+Asked Pietro and Mostafa whether both pages should move to one shared source so the numbers match
+exactly. Recommendation given and accepted as the proposal: **not now.** 0.5% will not be noticed
+and does not affect progress figures. Log the source alignment as tech debt.
+
+### Doc gap from the 07-24 note, now closed
+
+`dashboard/pitfalls.md` has entries for the object-vs-element count, the silent dashboard logger,
+and the arbitrary federated model pick.
+
+---
+
+# Superseded 07-24 position
+
 ## Chosen: (a) Draft a clarifying question — establish the reference and pin the exact widgets before any dev work
 
 **Why (a), not the others:**
