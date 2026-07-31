@@ -127,20 +127,37 @@ Worth its own ticket.
   element list does not. Consistent with the divergence already in `dashboard/pitfalls.md`, and it
   means element counts cannot identify which model the dashboard loaded.
 
-## Outstanding
+## 2026-07-31 — chain closed from parquet to pixel, and the model identified
 
-One reading has not reconciled. `_visible_elements` measured 581,878 objects / 528,314 elements,
-but the console showed `Total: 675,147`. 528,314 is below the 628,000 linked, so that query ran
-with the scrubber short of the end or a filter applied. Re-run with the scrubber hard right and
-filters cleared:
+**The dashboard loads `20cff6cf-659f-4eb6-b0d5-ae181080afa1`**, the larger of FAR01's two
+federated models. Read off the Network tab rather than inferred: `_initializeModel` calls
+`getProjectModelDetail` for the chosen model only, which puts the id in the request path
+(`model-api-service.ts:52`, `GET /api/v2/projects/{projectId}/models/{modelId}`). No console JS
+needed, works on the current build.
 
-```sql
-SELECT COUNT(*) AS rows, COUNT(DISTINCT modelElementId) AS elements FROM _visible_elements;
-```
+That also quantifies the artefact divergence for a **single** model:
 
-`rows` should equal the on-screen Total. That closes the chain from parquet to pixel. The
-diagnosis does not depend on it, but the ticket comment should not quote exact figures until it
-lands.
+| source | distinct elements |
+|---|---|
+| `element_base_data` (from `svf2-object-id-map`) | 668,978 |
+| `project_element_list` for `20cff6cf` | 667,614 |
+| difference | **1,364** |
+
+**Reconciled reading, same session, full date range:**
+
+| | |
+|---|---|
+| On-screen Total | 669,978 |
+| `SELECT COUNT(*) FROM _visible_elements` | **669,978** |
+| `SELECT COUNT(DISTINCT modelElementId) FROM _visible_elements` | 609,643 |
+| excess objects | 60,335, 9.0% |
+
+Total equals the object count exactly, so nothing sits between the query and the pixel. 609,643
+is what the panel will read once the fix lands. The 9.0% here against 9.24% on
+`element_base_data` is two different subsets giving the same ratio, so the effect is a property
+of the model, not of one query.
+
+An earlier reading of 581,878 / 528,314 was taken with the scrubber short of the end. Ignore it.
 
 ## Tooling notes for the next person
 
