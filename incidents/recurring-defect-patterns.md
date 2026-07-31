@@ -197,3 +197,15 @@ visible when they tried. That silence is what turned a lookup into a multi-day i
 - **Source-data elevation errors presented as viewer bugs** (PLT-2649). 360 pins placed wrongly
   because one level's elevation was wrong in the source model; the transform was provably correct
   and the same fault reproduced in PowerBI.
+- **Surface-scoped visibility rule mistaken for missing data** (PLT-2945). One surface applies a
+  deliberate visibility filter that a comparison surface doesn't, and the customer diffs the two and
+  reports data loss. On PLT-2945 the Dashboard hides elements whose planned start date is later than
+  the date-range slider's end (`dashboard-progress-service.ts:1909-1924`, `dashboard-color-service.ts:488`
+  sets fragment visibility false) while the Editor/Web Viewer applies no such gate anywhere in the
+  codebase and renders the same elements yellow/Planned. Not a defect — the frontend does exactly what
+  it's specified to do — but the hide is silent, with no on-screen indication that N elements are
+  excluded, which is what generates the ticket. **Already has a sibling occurrence**, one layer up:
+  `planning/dashboard-progress-tab-explained.md` §8.4 documents the same confusion at the *project*
+  level ("future-dated projects show a blank/all-yellow model by default"). Two occurrences, arguably
+  enough to promote — recognition signature: *"visible in the Editor/Web Viewer but not the Dashboard,
+  no numeric discrepancy"* → check the date slider before anything else.

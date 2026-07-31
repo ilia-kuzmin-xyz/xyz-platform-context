@@ -43,6 +43,82 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-31 — 2 brand-new tickets deep-dived, 6 re-verified with zero delta, Group B still empty
+
+Board re-queried (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With Technical
+Support", "Ready For QA", "In Code Review", "READY FOR RELEASE", "Done", "Blocked", "Customer Release
+Check")`). 13 rows returned; 5 are `ARCHIVED (NOT RELEASED)` (PLT-1822/1787/1767/1456/457) — treated as
+out of scope, same as `Done`, not re-litigated. **8 tickets in scope, all Group A** (`Open`/`In
+Analysis`/`With Customer`) — no ticket in `Ready For Development`/`Dev In Progress` this run, so Group
+B stays empty, same as 07-22 and 07-30.
+
+**2 tickets are brand new** (created 07-30, after last run's board query) and got a full deep-dive —
+description, comments, domain docs, hc-frontend code, confidence score, drafted action. **6 tickets are
+carried over from 07-30 with a real re-fetch confirming zero new comments** — re-verified per the
+playbook's "light re-verify still needs a real fetch" rule, not rubber-stamped; their `context.md` /
+`recommended-action.md` are unchanged since the last run and are not repeated here.
+
+### Group A — new this run (2)
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| [PLT-2946](PLT-2946-groupA-progress-tracking/context.md) | progress-tracking | Open | Hutto2 Cable Trays: two symptoms, likely **two different mechanisms** — DH1/B1 undersstates (candidates: FE Gantt `MAX−MIN` window-delta bug found by comparing against a sibling path the repo already fixed; dead-link denominator inflation, Pattern 1's 4th project; count-vs-length unit mismatch) vs DH2/E3 overstates ("25% while nothing installed" — most likely an intangible/labour-based activity being read as a tangible install %, 2nd sighting of PLT-2917's mechanism). Zero technical investigation existed on-ticket before this run; a single DuckDB query (drafted) discriminates all candidates | (a) one internal diagnostic comment + ready-to-run SQL → Rishi Bhugobaun, cc Yash — **not** to the customer yet, no facts established | 5/10 (split; see context.md) |
+| [PLT-2945](PLT-2945-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | DUB7x "missing" elements: Rishi's own in-thread diagnosis (unanswered ask to Ilia/Mostafa) is **confirmed correct in code** — Dashboard hides elements whose planned start is after the date-slider's end (`dashboard-progress-service.ts:1909-1924`, fragments actually hidden not just uncoloured, `dashboard-color-service.ts:488`), Editor has no such gate anywhere. Working as intended, not a bug. His second claim (Roof vs Floor, different loaded geometry) is unverified and self-contradictory as worded — recommend dropping it from the customer reply | confirm mechanism to Rishi (with one wording correction: "hidden" not "uncoloured") + draft customer reply once he confirms the planned dates + recommend **Done**, no dev work | 8/10 |
+
+### Group A — carried over, re-verified, zero delta (6)
+
+No new comments found on any of these six since the 07-30 run (confirmed by live re-fetch, not by
+timestamp alone). Existing folders stand unchanged:
+
+| Ticket | Domain | Status | Last real activity |
+|---|---|---|---|
+| [PLT-2917](PLT-2917-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-27 (customer "little update" comment, already reflected) |
+| [PLT-2884](PLT-2884-groupA-data-pipeline/context.md) | data-pipeline | With Customer | 07-20 (Freshdesk → Waiting on customer) |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-16 (Mostafa "waiting on this since it was asked of me") |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk → Closed; 25 days stale now) |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash "thanks for the info", after Ilia's model/level/elevation hand-off) |
+| [PLT-2619](PLT-2619-groupA-other/context.md) | other | With Customer | 07-27 (Yash "can we update this to new dashboard") |
+
+### Cross-ticket notes (this run)
+
+- **New candidate pattern added to `recurring-defect-patterns.md`**: *"Surface-scoped visibility rule
+  mistaken for missing data"* (from PLT-2945), with a documented sibling occurrence already sitting in
+  `dashboard-progress-tab-explained.md` §8.4 (project-level version of the same confusion). Two
+  occurrences — a human may want to promote it to a numbered pattern next run.
+- **Pre-existing data-hygiene issue found, not fixed this run**: `PLT-2884` and `PLT-2909` each have
+  **two divergent, never-reconciled context folders** (`PLT-2884-groupA-data-pipeline` +
+  `PLT-2884-groupA-progress-tracking`; `PLT-2909-groupA-{data-pipeline,progress-tracking,viewer-and-model}`),
+  left over from the "consolidate 31 unmerged context branches into main" merge. Both PLT-2884 folders
+  contain substantive, non-duplicate analysis — this run treated `PLT-2884-groupA-data-pipeline` as
+  canonical (it matches the domain tag already used in the 07-30 run-log table) and left the
+  `-progress-tracking` folder untouched rather than silently merging or deleting it. **Needs a human
+  decision**: merge the two into one folder, or explicitly retire one as historical.
+- **Open question, not resolved this run**: PLT-2945's investigation surfaced a possibly-stale doc row
+  at `dashboard/viewer-and-model.md:10` ("Dashboard selection: DISABLED") — the model-loader path that
+  seems to back the current `/projects/:id/dashboard` route (`use-model-loader.tsx:28-52`) sets no
+  selection mode at all, but a separate, older path (`viewer-service.ts:167`) still does gate selection
+  behind an `_isDashboard` flag via the shared `viewer-y.tsx` component. Which path is actually live was
+  not established — left as an open question rather than editing the doc on unconfirmed evidence.
+- **PLT-2946 may be the 4th Pattern-1 sighting, or the 2nd sighting of PLT-2917's "faithful-renderer
+  of unlabelled intangible progress" mechanism, or an unrelated FE window-delta bug this repo already
+  fixed once elsewhere and missed on a sibling code path** — genuinely three live hypotheses, not
+  resolved by design (no one has opened the two screenshots or run the drafted query yet). Flagging so
+  next run doesn't re-derive this from scratch if it's still open.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian auth) — this run
+
+**PLT-2946** (2 screenshots, both full-window captures ~1900×900px — almost certainly show the date
+range and filter chips in frame, which is the single most load-bearing unknown in the diagnosis; attempts
+returned HTTP 503 on the attachment-content endpoint). **PLT-2945** (`Dashboard.png`, `Web Viewer.png` —
+needed to settle claim #2, the Roof-vs-Floor discrepancy; claim #1, the actual diagnosis, does not
+depend on them). No new attachments on the 6 carried-over tickets this run.
+
+No Jira writes were made this run (no comments, no transitions, no status changes) — every
+"recommended action" above is a draft in the ticket's `recommended-action.md` for a human to review
+and execute manually.
+
+---
+
 ## Run: 2026-07-30 — 6 Group A tickets re-verified, 1 moved to Group B, Group B otherwise empty
 
 Board re-queried (`project = PLT AND issuetype = "Live Incident" AND status NOT IN (...)`) against
