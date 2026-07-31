@@ -104,6 +104,87 @@ as previously documented (2619 has none at all on the Jira side; only Freshdesk 
 
 ---
 
+## Run: 2026-07-24 — 1 new ticket (missed initially, then corrected), 5 re-checked with 3 real updates, 1 escalation fired
+
+**Scope correction this run:** the run's own filtering pass initially (wrongly) treated Jira status
+**"With Customer" as excluded**, conflating it with the actually-excluded **"With Technical
+Support"** (no ticket currently holds that status). This folder's own scope rules above already
+settled this in a prior run ("With Customer = judgment call... treated as in-scope-but-parked") —
+corrected before writing anything, but flagging the near-miss: it would have silently dropped
+**PLT-2923**, created the day before this run, from Group A entirely.
+
+Board re-queried (`project = PLT AND issuetype = "Live Incident"`) and filtered per the corrected
+scope rules. Of the 7 in-scope Group A tickets, **6 already had folders from prior runs** (re-checked
+against fresh Jira data) and **1 is brand new**. Group B (PLT-2918, PLT-2874) is out of scope for
+this run's action-drafting per this run's own instructions — noted, not re-investigated.
+
+### Group A (7) — 1 new, 3 with real new findings, 2 unchanged, 1 escalation triggered
+
+| Ticket | Domain | Status | What changed this run | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| **PLT-2923** | viewer-and-model | With Customer (**new**, created 07-23) | IFC model loads on-device but not in web viewer. Ilia already asked exactly the right 3 questions same-day (source file, export origin, Revit check) | none — correctly waiting on customer, 1 day old | 3/10 (honest research-phase) |
+| PLT-2909 | progress-tracking | In Analysis | **ATL08 diagnostic (recommended 07-22) was actually run 07-23** — CONFIRMED ghost model, different trigger family (PC-EXCEL import, not Revit re-upload); routed question now sits with **Ali Seyedof** | none — await Ali's answer (1 day old, not yet stale) | 8/10 (**up from 6/10**) |
+| PLT-2649 | 360-captures | Open (⚠️ reverted from In Analysis) | **Missed entirely in the 07-22 run** (not touched). 4 real comments surfaced: Pietro answered the 06-30 ownership question (07-13), Jason Fingland gave product input (07-13), and **Ilia found the precise root cause** (07-16) — one named level (`f0f4d409`), wrong elevation 50.4 (should be 0). Yash's very next question ("which model?") has sat **unanswered 7 days** | **answer Yash's question** — the only missing fact is which model, not new analysis | 9/10 (**up from 8/10**) |
+| PLT-2858 | quality-management | In Analysis | No new comments; **the 07-22 run's own escalation trigger fired** — 8 days since Mostafa's last reply, 17 days since the customer's "we don't know how" | escalate to **Pietro directly** (named by both Darminder and the customer already) instead of a 3rd Mostafa nudge | 8/10 unchanged |
+| PLT-2917 | progress-tracking | Open | No unaddressed gap — real reply *was* posted 07-22 (3 questions to the customer, different from the drafted "ask Pietro" draft). A related PowerBI-export symptom Mostafa flagged (activity `PMILE5030`) was investigated: **hc-frontend does not own that pipeline**; ties back to the *same* Actual-End-Date mechanism already diagnosed, not a new bug | none — correctly waiting on the customer (Thomas) | 6/10 unchanged (corroborated) |
+| PLT-2906 | viewer-and-model | Open | No new comments — still stalled on **our own** unanalysed True-North screenshots, now ~4 days (was ~2) | unchanged: Ilia analyses the screenshots + runs the in-repo diagnostic | 6-7/10 unchanged |
+| PLT-2882 | progress-tracking | In Analysis | No new comments on the ticket itself; cross-referenced sibling PLT-2909's new finding (two distinct trigger hypotheses — Revit re-upload here vs Excel-import cross-write there — same downstream symptom) | none — deletion still on hold pending peer alignment (already resolved in-thread) | 9/10 unchanged |
+
+### 2026-07-28 session — outcomes
+
+Three tickets moved materially. Full detail in each folder's `investigation-log.md`.
+
+| Ticket | Outcome |
+|---|---|
+| **PLT-2931** (ELN03) | **RESOLVED.** 193 dead links deleted and verified (572,591 → 572,398), parquet refreshed, all five activities at 100%, Containment cleared 97% → 100%. |
+| **PLT-2882** (FAR01) | **Remediated.** 418 dead links deleted and verified (799,259 → 798,841). Activity has no `activity_progress` rows so no percentages moved, as predicted before approval. Root-cause and FE-guard follow-ups still open. |
+| **PLT-2909** (ATL08) | **Cross-write proven without backend help.** Nine non-federated sibling models of incompatible system types claim one identical `sourceFileElementId`. Scope is 366,840 elements (53% of the project), not the six in the ticket. Not remediable by link deletion — the generated metadata itself is wrong, so it is a backend fix. |
+| **PLT-2918** (AUS01) | **FE fix raised**, PR [#2078](https://github.com/XYZReality/hc-frontend/pull/2078) on branch `PLT-2918`. Sachin confirmed mappings are hard-deleted with no history, so the backend restore option is closed and the data recovery must be a re-apply from the client's export. Not started. |
+
+**Two new reference docs** came out of this session, both worth reading before the next incident of
+this family: `../recurring-defect-patterns.md` (what these keep turning out to be) and
+`../data-remediation-runbook.md` (how to execute a bulk data fix safely, including the traps that
+nearly caused wrong conclusions — elements vs links, mongo vs postgres ids, `isDeleted` history,
+parquet lag).
+
+---
+
+### Late addition (same day, operator-requested): PLT-2931 — third project hit by the stale-links family
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| **PLT-2931** | progress-tracking | Open (**new**, created 07-24) | ELN03 Containment package capped at 97%: dashboard Actual % = installed ÷ linked (backend-computed), and dead links inflate the denominator — **88/122 = 72.1% matches the shown 72% exactly**. Third project in the PLT-2882/PLT-2909 family; JUPSC21480 was PLT-2675's exemplar (May), so the earlier cleanup was partial or regressed | (a) 2 DuckDB queries + `__linkDiagnose` on ELN03 (existing branch, no new tooling), then same deletion-approval loop as PLT-2882's 418; **finally run the project-wide sweep** | 8-9/10 |
+
+- **PLT-2931 ↔ PLT-2882 ↔ PLT-2909:** three projects (FAR01, ATL08, ELN03), three surfaces
+  (select-does-nothing, wrong model list, % capped below 100), one family. The un-run cohort sweep
+  from PLT-2882's log is now the single highest-leverage open item on this board.
+
+### Cross-ticket notes (this run)
+
+- **Pattern across this run: "the ball is on our side and we haven't noticed."** Three of seven
+  Group A tickets (PLT-2906, PLT-2649, and — until this run — PLT-2909's diagnostic) share the
+  same failure shape: the customer or a teammate supplied exactly what was asked for, and it then
+  sat unactioned for days because no one closed the loop. Per the playbook's "evidence requests
+  without owners sat idle all day" anti-pattern — worth naming as a recurring team habit to watch
+  for, not just three isolated stalls.
+- **PLT-2909 ↔ PLT-2882:** now confirmed same defect *family* (stale element-metadata parquet vs
+  re-versioned/re-imported geometry) but **two distinct trigger mechanisms** — Revit re-upload
+  (PLT-2882) vs Excel/PC-EXCEL import cross-writing buildings (PLT-2909). Keep the BE questions
+  (David Webb's thread vs Ali Seyedof's) separate until each is answered; don't assume one fix
+  closes both.
+- **PLT-2858 escalation:** this is the second consecutive run flagging the same stall on the same
+  owner (Mostafa). The escalation candidate named in the 07-22 pass ("loop Pietro directly") is
+  now the active recommendation, not a contingency.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian auth) — this run
+
+**PLT-2923** (1 screenshot — would show the exact web-viewer failure mode before the source file
+even arrives). All other Group A tickets' attachments were already flagged in prior runs and
+remain unviewed (True-North screenshots on PLT-2906 are the most decisive still-unread artifact
+across the whole board, now ~4 days stale on our side).
+
+---
+
 ## Run: 2026-07-22 — 7 fresh/updated Group A tickets, Group B currently empty
 
 Board re-queried (`project = PLT AND issuetype = "Live Incident"`) and filtered per the

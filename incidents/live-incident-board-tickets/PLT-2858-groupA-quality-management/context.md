@@ -75,12 +75,23 @@ Read chronologically; the analysis is well advanced. Established facts and decis
   details"* — ⚠️ **also missed by prior runs, and still UNANSWERED by Darminder (16 days).** This is
   a direct, closed question to the assignee that `context.md §2a` already answers in full.
 - 107532 (07-16, **Ilia**): follow-up nudge — *"have you got any updates on this?"*
+<<<<<<< HEAD
+- 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* ← **latest message
+  (2026-07-22 re-check: still the last comment, 6 days stalled; 2026-07-24 re-check: still the last
+  comment, now 8 days stalled / 17 days since the customer's "we don't know how").** Ambiguous phrasing,
+  but reads as Mostafa himself still blocked/pending on someone else — i.e. "leave it with me" (07-13)
+  did not convert into an answer, and the ownership question from `recommended-action.md` Q1 (who
+  configures zones + is there a how-to) remains unresolved. Freshdesk #7286 is still Open.
+  **2026-07-24: escalation trigger fired — see `recommended-action.md` for the revised routing
+  (Pietro direct, not a third Mostafa nudge).**
+=======
 - 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* ← **still the latest
   message (2026-07-30 re-verify: 14 days stalled).** Read together with 107320, the most likely
   reading is now **not** "Mostafa is sitting on it": Mostafa asked Darminder a blocking clarification
   on 07-14 and never got an answer, so "waiting on this since it was asked of me" plausibly means
   *he* is waiting. **The stall may be on Darminder, not Mostafa** — which the 07-22 run's "stalled on
   the SAME owner" framing got wrong. Freshdesk #7286 is still Open.
+>>>>>>> origin/main
 
 **Net thread state (revised 2026-07-30):** Root cause (empty Location = no named zones configured on ML9)
 is established and agreed by dev (Darminder) and product (Mostafa) — that part is unchanged. What is
