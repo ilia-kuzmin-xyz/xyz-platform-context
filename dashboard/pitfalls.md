@@ -123,7 +123,25 @@ then `.find()`s the first model in the paginated response with that `parentModel
 on the page derives from that one file and the rest are invisible, with no UI indication. FAR01
 has two near-twin models in that folder (667,614 and 665,074 elements) so the impact is 0.4%
 there, but a project with two genuinely different federated models would show arbitrary numbers.
-<<<<<<< HEAD
+
+## The dashboard filter panel hides categories with zero weight (PLT-2941)
+
+`getCategorySummaryV2API` builds the discipline/package **option list** from the `category_groups`
+parquet and ends with `AND ${weightColumn} > 0` (`progress-queries-v2-api.ts:577`). `weightColumn`
+follows the project's progress weighting, and the default is `PLANNED_LABOUR_HOURS`
+(`app/types/progress-weighting-types.ts:17-23`). So by default **any discipline or package with no
+budgeted labour units disappears from the filter panel**, however many elements are linked to it.
+
+Selecting an activity switches the page to activity level (`dashboard-progress-service.ts:311-349`),
+where the weight is floored at 1 (`progress-queries-v2-api.ts:970`,
+`GREATEST(COALESCE(pw.Weight, a.<col>, 0), 1)`), so the same category reappears. Same data, same
+weighting, opposite outcome.
+
+Symptom to recognise: a category is missing from the left panel but shows up the moment you click
+an activity that carries it. Check `TotalPlannedLaborUnits` in `category_groups` before suspecting
+a stale parquet — on the staging repro the parquet was complete on all 1,489 dates.
+
+Full analysis: `planning/PLT-2941-dashboard-filter-list-hides-zero-weight-categories.md`.
 
 ## The schedule Elements column counts links, not elements
 
@@ -140,5 +158,3 @@ activity.
 
 Same trap as PLT-2882, where the schedule showed 798,751 and the API 798,841 for identical data.
 PLT-2874 did not fix this one.
-=======
->>>>>>> origin/main
