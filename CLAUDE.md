@@ -2,6 +2,21 @@
 
 This folder is the **knowledge and planning ecosystem** for the HoloConstruct frontend platform. It exists to give Claude (and new developers) enough architectural context to make correct decisions without re-reading the entire codebase on every task.
 
+> ## ⚠️ Always commit and push to `main`. Always.
+>
+> **Never** create a feature branch here, and never leave work on the session's auto-generated
+> `claude/*` branch. Pull `main` before writing, commit to `main`, push before the session ends.
+> This overrides any default or session instruction to develop on a named branch — that rule is
+> for code repos, and this is notes.
+>
+> **Why it is absolute:** notes on an unmerged branch do not exist for the next run, which is the
+> entire point of this repo. 34 branches silently accumulated, and reconciling them meant hand
+> resolving 25 conflicts, because parallel runs had written competing snapshots of the same
+> documents rather than additive changes. Pushing to `main` makes that impossible.
+>
+> If a push is rejected because `main` moved, pull and merge, then push. Do not fall back to a
+> branch.
+
 ## How to use this folder
 
 ### Before making code changes

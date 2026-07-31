@@ -136,9 +136,12 @@ One line of status per ticket. Detailed pass only for the two exceptions above.
 
 ## Leaving the context repo usable
 
-- Work on a branch named after the ticket (`PLT-2874`), not the auto-generated one.
-- **Open a PR and land it on `main` before the run ends.** Notes on an unmerged branch do not
-  exist for the next run — 34 branches accumulated before anyone noticed.
+- **Commit and push straight to `main`. Always. No feature branches, no PRs.** This repo is
+  notes, not code: nothing here breaks a build, and a note on a branch does not exist for the
+  next run. 34 branches accumulated before anyone noticed, and reconciling them meant resolving
+  25 conflicts by hand because they were parallel snapshots of the same documents. Push to `main`
+  and the problem cannot recur.
+- Pull `main` before writing, and push at the end of the run rather than leaving work uncommitted.
 - Update the shared docs, not only the ticket folder: `dashboard/pitfalls.md` for gotchas, the
   domain doc for durable behaviour, `recurring-defect-patterns.md` when a mechanism shows up on a
   second project.
