@@ -118,7 +118,11 @@
     const worldArea = aabbArea(corners);
     const tightness = rect && worldArea > 0 ? rect.area / worldArea : 1;
     const folded = rotZ === null ? null : fold(rotZ);
-    const guardPasses = folded !== null && Math.abs(folded) < 5 * (Math.PI / 180);
+    // Both thresholds, so one run tells you what the shipped build does AND what
+    // PR #2069 changes. Reporting only one was misleading: the script hardcoded 5°,
+    // so against a build carrying the fix it still printed wouldPatch=true.
+    const passes5 = folded !== null && Math.abs(folded) < 5 * (Math.PI / 180);
+    const passesHalf = folded !== null && Math.abs(folded) < 0.5 * (Math.PI / 180);
     return {
       isModelsZero: idx === 0,
       name: (data.loadOptions && (data.loadOptions.modelNameOverride || data.loadOptions.bubbleNode?.name?.())) || m.label?.() || data.urn || `model#${idx}`,
@@ -127,17 +131,40 @@
       foldedDeg: folded === null ? 'n/a' : deg(folded).toFixed(4),
       tightness: tightness.toFixed(4),
       rectAngleDeg: rect ? deg(rect.angle).toFixed(4) : 'n/a',
-      wouldPatch: guardPasses && tightness < 0.9,
+      patchOld5deg: passes5 && tightness < 0.9,
+      patchNew05deg: passesHalf && tightness < 0.9,
     };
   });
   console.table(rows);
+  console.log(`PLT-2906: ${rows.length} visible model(s).`);
   const first = rows[0];
   if (first) {
     console.log(
-      `PLT-2906 verdict: models[0] = "${first.name}" — wouldPatch=${first.wouldPatch}` +
-      (first.wouldPatch
-        ? `; theta applied to ALL models would be ${first.rectAngleDeg}° (Revit says ±2.29°; a mismatch here IS the bug)`
-        : '; patch would NOT fire — box uses stock refPointTransform orientation'),
+      `models[0] = "${first.name}" — it alone decides the gate AND the angle for every model ` +
+      `(section-tool-orientation.ts:93,104). old(5°)=${first.patchOld5deg}, new(0.5°)=${first.patchNew05deg}`,
+    );
+    if (first.patchNew05deg) {
+      console.log(
+        `⚠ Patch STILL fires with the fix. theta ${first.rectAngleDeg}° would be applied to ALL models ` +
+        `(Revit says ±2.29°). Check whether models[0] is the georeferenced Navis model — if it is not, ` +
+        `load order is defeating the guard and the threshold is not the problem.`,
+      );
+    } else if (first.patchOld5deg) {
+      console.log(
+        `✔ The fix changes the outcome here: patch fired before, is skipped now. Box falls back to the ` +
+        `world-AABB path, so expect a residual tilt of about the folded angle (${first.foldedDeg}°), not zero.`,
+      );
+    } else {
+      console.log(
+        `Patch would not fire under either threshold, so this session is not reproducing the reported state. ` +
+        `Check model visibility and that the section box has not been activated yet.`,
+      );
+    }
+  }
+  if (rows.length > 1) {
+    console.warn(
+      `More than one visible model. The dev sketch deferred de-models[0] on the assumption FAR01 loads a ` +
+      `single Navis model. That assumption does not hold here — record which model is index 0.`,
     );
   }
 })();
