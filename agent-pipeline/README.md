@@ -13,6 +13,7 @@ POST /api/chat  →  SSE stream  →  artifact_skeleton (TSX)  +  artifact_data_
 | PHS | Pipeline Phases | [phases.md](phases.md) |
 | MOD | Modes & Intents | [modes-and-intents.md](modes-and-intents.md) |
 | DAT | Data Contracts (SSE, request, payloads) | [data-contracts.md](data-contracts.md) |
+| TPL | Named report templates (fixed layouts) | [report-templates.md](report-templates.md) |
 | CCH | Caching | [caching.md](caching.md) |
 | — | Pitfalls | [pitfalls.md](pitfalls.md) |
 
@@ -42,6 +43,10 @@ Model hardcoded in `agents/config.py` as `claude-fable-5` (was `claude-opus-4-7`
 | `agents/profiler.py` | Phase 0b: parallel data probes (counts + samples) |
 | `agents/clarifier.py` | Phase 0c: survey questions for FRESH turns (+ "3D viewer" module option) |
 | `agents/viewer_intent_classifier.py` | Phase 0b½: NONE / DISPLAY / INTERACTIVE (pure, keyword-based) |
+| `agents/rooms_readiness.py` | Phase 0c½: room↔element rollup (readiness, planned, 360, packages) |
+| `agents/room_types.py` | Room type from room name — LLM writes a ruleset, Python applies it |
+| `agents/room_packages.py` | activityId→package name, for the per-room Packages table |
+| `agents/report_templates.py` | Named templates: fixed-layout prompt fragments, active one only |
 | `agents/viewer_mapper.py` | Phase 0d: parquet download + element→dbId JOIN; `to_wire_format()` |
 | `agents/viewer_config_builder.py` | Phase 0d: deterministic colour config (field + palette) |
 | `agents/viewer_palettes.py` | `INSTALLATION_STATUS_PALETTE` — exact status→colour keys |

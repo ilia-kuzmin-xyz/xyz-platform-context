@@ -7,6 +7,7 @@
 [0b] Profiler           ~2–3 s   parallel MCP probes → counts + samples per domain
 [0b½] Viewer Intent     ~0 s     pure keyword classify → NONE / DISPLAY / INTERACTIVE
 [0c] Clarifier          ~2 s     optional survey for FRESH turns (stream pauses for user)
+[0c½] Rooms Readiness   ~60 s    Room Readiness template only: room↔element rollup → `rooms` domain
 [0d] Viewer Mapper      ~30–60 s INTERACTIVE only: parquet JOIN → viewer_mapping + viewer_config
       ↓ phases 1 + 2 run IN PARALLEL via asyncio.Queue
 [1]  Artifact Composer  ~30–55 s Claude streams TSX → artifact_skeleton SSE event
@@ -70,6 +71,24 @@ Optional. Fires on `FRESH` turns when the composer would benefit from more conte
 Emits `clarifier_questions` SSE event with `{questions, original_message}`. **Stream ends here** — the `done` event carries `reason: "awaiting_clarifications"`. The frontend shows the questions; the user answers; the frontend re-sends the original message with `clarifier_answers` in the body. The next request skips the clarifier (`skip_clarifier=true`).
 
 ---
+
+## Phase 0c½ — Rooms Readiness (`rooms_readiness.py`, `room_types.py`, `room_packages.py`)
+
+Runs **only** when `active_template == "room_readiness"` (see
+[report-templates.md](report-templates.md)) — it downloads ~60MB of parquet, so
+it must never run speculatively. T2-cached for 2h.
+
+Joins room↔element↔status↔activity into a per-room rollup: readiness %, planned
+%, variance, 360 capture age, per-package breakdown. Emits
+`artifact_data_partial(domain="rooms")`.
+
+**It runs BEFORE Phase 0d on purpose.** Its room→element index is traded for
+dbIds while the viewer wire format is built, which is what lets clicking a room
+isolate it in the model. Both phases are sequential and pre-compose, so the
+order costs nothing.
+
+Failure downgrades the template (`active_template = None`) rather than failing
+the request.
 
 ## Phase 0d — Viewer Mapper (`viewer_mapper.py` + `viewer_config_builder.py`)
 

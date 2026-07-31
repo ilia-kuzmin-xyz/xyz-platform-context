@@ -55,6 +55,7 @@ xyz-platform-context/
     phases.md            ← PHS: 0a resolve / 0b profile / 0c clarifier / 1+2 compose+hydrate
     modes-and-intents.md ← MOD: mode field, intent types, EDIT/HYDRATE routing
     data-contracts.md    ← DAT: SSE events, request body, profile + domain payloads
+    report-templates.md  ← TPL: named templates (fixed layouts), activation, roadmap
     caching.md           ← CCH: T1/T2/T3 tiers + frontend cache
     pitfalls.md          ← Known gotchas
     planning/            ← pipeline-specific design docs + feature plans
