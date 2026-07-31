@@ -123,6 +123,7 @@ then `.find()`s the first model in the paginated response with that `parentModel
 on the page derives from that one file and the rest are invisible, with no UI indication. FAR01
 has two near-twin models in that folder (667,614 and 665,074 elements) so the impact is 0.4%
 there, but a project with two genuinely different federated models would show arbitrary numbers.
+<<<<<<< HEAD
 
 ## The schedule Elements column counts links, not elements
 
@@ -139,3 +140,5 @@ activity.
 
 Same trap as PLT-2882, where the schedule showed 798,751 and the API 798,841 for identical data.
 PLT-2874 did not fix this one.
+=======
+>>>>>>> origin/main

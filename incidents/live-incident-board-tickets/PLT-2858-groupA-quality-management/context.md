@@ -59,7 +59,23 @@ Read chronologically; the analysis is well advanced. Established facts and decis
   they could learn to set up the location properly.
 - 107208 (07-13, **Mostafa**): *"leave it with me."* — Mostafa (PO) took ownership of the
   workflow/education follow-through.
+- 107317 (07-14, **Yash relaying the customer, Mikel**) — ⚠️ **MISSED by the 07-13 and 07-22 runs;
+  first recorded 2026-07-30.** The customer has moved off "teach us how" and proposed a **product
+  decision with two options**: *"As far as I understood, it is not possible to connect the rooms to
+  the different models. If it is possible to have a **drop-down list with all the different Location
+  to select** on the QA, that would be great. In case it is not possible, it would be ideal to
+  **remove the Location part on the QA**, to not create confusion and not appear as we have missing
+  details on the Dashboard."* (screenshot `image-20260714-113920.png` attached — see §5.)
+  → This materially reframes the ticket: the customer is **not** going to configure zones, and is
+  asking for either (i) a manual Location selector — i.e. exactly the field Darminder said is
+  auto-derived-by-design (106248) — or (ii) hiding the field. Both are **FE/product changes**, not
+  config/education. The "hand them a how-to" plan in the drafted action is no longer what the
+  customer is asking for.
+- 107320 (07-14, **Mostafa → Darminder**): *"what is the difference between location and location
+  details"* — ⚠️ **also missed by prior runs, and still UNANSWERED by Darminder (16 days).** This is
+  a direct, closed question to the assignee that `context.md §2a` already answers in full.
 - 107532 (07-16, **Ilia**): follow-up nudge — *"have you got any updates on this?"*
+<<<<<<< HEAD
 - 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* ← **latest message
   (2026-07-22 re-check: still the last comment, 6 days stalled; 2026-07-24 re-check: still the last
   comment, now 8 days stalled / 17 days since the customer's "we don't know how").** Ambiguous phrasing,
@@ -68,12 +84,23 @@ Read chronologically; the analysis is well advanced. Established facts and decis
   configures zones + is there a how-to) remains unresolved. Freshdesk #7286 is still Open.
   **2026-07-24: escalation trigger fired — see `recommended-action.md` for the revised routing
   (Pietro direct, not a third Mostafa nudge).**
+=======
+- 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* ← **still the latest
+  message (2026-07-30 re-verify: 14 days stalled).** Read together with 107320, the most likely
+  reading is now **not** "Mostafa is sitting on it": Mostafa asked Darminder a blocking clarification
+  on 07-14 and never got an answer, so "waiting on this since it was asked of me" plausibly means
+  *he* is waiting. **The stall may be on Darminder, not Mostafa** — which the 07-22 run's "stalled on
+  the SAME owner" framing got wrong. Freshdesk #7286 is still Open.
+>>>>>>> origin/main
 
-**Net thread state:** Root cause (empty Location = no named zones configured on ML9) is established and
-agreed by dev (Darminder) and product (Mostafa). What is unresolved is **non-engineering**: (1) *who* sets
-up named zones and *how* (self-serve? BIM team? internal?), because the customer doesn't know how; and
-(2) whether to build the "surface Phase on the detail panel" enhancement. As of today the ownership of (1)
-sits with **Mostafa** ("leave it with me"); (2) is still an open go/no-go for Darminder.
+**Net thread state (revised 2026-07-30):** Root cause (empty Location = no named zones configured on ML9)
+is established and agreed by dev (Darminder) and product (Mostafa) — that part is unchanged. What is
+unresolved has **shifted** since the customer's 07-14 reply (107317): it is no longer only "who configures
+zones and how", because the customer has said they won't/can't and has asked for a **product change
+instead** — either a selectable Location drop-down or removal of the Location field from the QA form and
+dashboard. Open items now: (1) product decision on the customer's two options (drop-down vs remove) —
+**Mostafa/Pietro**; (2) Darminder's unanswered 107320 (location vs location details) — **Darminder**,
+16 days open, answerable in one line from §2a; (3) the "surface Phase" go/no-go — still open.
 
 **Ruled out / not in play:** No claim of a regression, no deploy trigger, no crash. Nobody has alleged the
 computation is wrong — only that it is empty and that the entry field is missing.
@@ -182,6 +209,11 @@ configured) is stated verbatim in text by Darminder — but for completeness:
 - ⚠️ **NEEDS HUMAN:** `image-20260701-114131.png` (Darminder, 07-01, attached to comment 106251) —
   inaccessible. Per its caption it is Darminder's screenshot evidencing that rooms/zones are not set up on
   ML9; contents not independently verified.
+- ⚠️ **NEEDS HUMAN:** `image-20260714-113920.png` (Yash, 07-14, attached to comment 107317) — **new,
+  first noted 2026-07-30**; attachment content endpoint returns **HTTP 403** to this agent. Per the
+  customer's caption it shows the Dashboard surface where the empty Location "appear[s] as we have
+  missing details". Moderately load-bearing: it is the customer's own evidence for the "remove the
+  Location part" request. Do not guess contents.
 - ⚠️ **NEEDS HUMAN:** inline `blob:` images in the description and in comment 106245 — placeholder refs,
   not fetchable.
 
@@ -195,3 +227,44 @@ configured) is stated verbatim in text by Darminder — but for completeness:
   Worth a KB entry once the workflow is settled.
 - Naming drift (also flagged on PLT-2815): `CLAUDE.md` layout lists `qlt-quality.md`; the actual file is
   `dashboard/quality-tab.md`.
+
+---
+
+## 7. Re-verified 2026-07-30 (light pass → escalated to partial re-investigation)
+
+**Live fetch:** `getJiraIssue` PLT-2858, 26 comments, `updated = 2026-07-16T14:44:34+01:00`.
+Status **In Analysis**, priority **Critical**, assignee **Darminder Atker** — all unchanged.
+
+**No new activity since 07-16 — confirmed.** But the pass was upgraded from "light re-verify" because
+the live fetch surfaced **two 07-14 comments that both prior runs (07-13, 07-22) never recorded**:
+`107317` (customer's drop-down-or-remove request) and `107320` (Mostafa's unanswered question to
+Darminder). Both are now written into §1. The 07-13 run predates them; the 07-22 run should have
+caught them and did not — treat the 07-22 summary line for this ticket as **incomplete, not wrong**.
+
+**Stall durations as of 2026-07-30:**
+| Clock | Since | Days |
+|---|---|---|
+| No comment of any kind on the ticket | 107533, 07-16 | **14** |
+| Mostafa's 107320 unanswered by Darminder | 07-14 | **16** |
+| Customer's drop-down-or-remove request unanswered | 107317, 07-14 | **16** |
+| Mostafa's "leave it with me" un-converted | 107208, 07-13 | **17** |
+| Customer's "we don't know how" | 106728, 07-07 | **23** |
+
+Critical-priority ticket, customer-facing Freshdesk #7286 still Open, three separate threads of
+silence. The 07-22 run's "consider looping Pietro if no answer soon" threshold is **crossed**.
+
+**Hypothesis changes (root cause itself unchanged — still the zones-never-configured product/process
+gap, 8/10, not re-derived):**
+1. **Ownership of the stall is re-attributed.** Prior runs read this as "stalled on Mostafa". With
+   107320 visible, the more likely reading is a **two-way deadlock**: Mostafa is waiting on Darminder's
+   clarification, Darminder is waiting on product direction, and nobody has said so out loud. This is
+   the playbook's *"open question without an addressee floats unanswered"* anti-pattern, twice over.
+2. **The ask has changed shape.** The drafted action's Q1 ("who owns zone setup + is there a how-to")
+   is now **partly moot** — the customer pre-empted it on 07-14 by saying they can't do it and asking
+   for a UI change instead. The live decision is now *drop-down vs remove the field*, which is a
+   product call with FE work behind either branch.
+3. **§2c is now on the critical path, not a side-finding.** If product picks the drop-down branch, the
+   GUID-not-label gap (`issue-details.tsx:139`) must be fixed in the same change, and a *writable*
+   `issueLocationId` path would be genuinely new FE+BE work (the field is read-only by design today).
+   If product picks "remove", §2c dies with it. Worth stating so the decision is costed correctly.
+4. Cohort question (§3 Q6) is **unchanged and still open** — every project without configured zones.

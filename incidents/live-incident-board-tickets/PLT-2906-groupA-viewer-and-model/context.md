@@ -141,3 +141,18 @@ The entire mechanism lives in the ViewerPage 3D-viewer section tool (`components
 - **Ilia Kuzmin** (ilia.kuzmin@xyzreality.com) — investigation lead; playbook "mechanism interrogator." His True-North hypothesis is directionally right; the code refinement (refPointTransform + patch, not DB field) is above. **The next move is his** (analyse the 07-20 data + run the snippet).
 - **Yash Patel** (reporter/coordinator) — owns the client channel; relayed the True-North data. Nothing further needed *from* him or the client right now.
 - Likely next hops once confirmed: **product/UX** (if patch is working-as-designed → axis-aligned toggle / opt-out) and/or the **section-tool owner** (if patch mis-fires → threshold fix, PLT-2756 sibling). Release/ops for the 07-14 rollout correlation.
+
+---
+
+## Closed/moved since 07-22 (checked 2026-07-28)
+
+**Status now: "In Code Review"** (was "Open" at 07-22 triage) — this is why the ticket dropped out of the current in-scope JQL (which excludes `In Code Review`).
+
+**Yes — Ilia did analyse the screenshots, and it did NOT just get parked.** Comment 2026-07-24 14:57 (Ilia):
+> "thanks for the screenshots. I think the customer doesn't need to change anything in revit. The True North angles (FAR01 272.29, FAR02 177.71) are correct and intentional. The bug is on our side: the section box logic treats such a small angle (2.3 degrees) as 'no rotation' and replaces the correct orientation with its own estimate, which on FAR01 is about 18 degrees off... It also explains why only some projects are affected: projects with True North = 0 are fine."
+
+This confirms this triage's H1/mechanism read almost exactly: `shouldApplyOrientationPatch`'s `|existingRotZ| < 5°` fold is mis-triggering on FAR01/FAR02's small-but-real True North angles (2.3° folded), then substituting the patch's own footprint-fitted rotation instead of leaving the correct near-zero rotation alone — a genuine **bug** (mis-fire), not working-as-designed. Yash acknowledged same day ("Thanks for looking into this. It makes sense now.", 07-24 15:35).
+
+Status then moved straight from Open → **In Code Review** (last Jira update 2026-07-24 16:14; no intermediate "Ready For Development" comment visible, and no comment describing the actual code fix/PR — the status transition itself is the only evidence a fix was written). No further comments after 07-24.
+
+**Verdict: genuinely resolved on the "our side" question — Ilia did his follow-through, root cause confirmed and matches this doc's hypothesis, and a fix appears to have been coded (status = In Code Review, not just relabelled to a support/waiting status).** The one gap: no comment states what the fix actually does (threshold tune vs. exclude-condition vs. something else) or links a PR — can't confirm from Jira alone whether the fix addresses the general `tightness`/`existingRotZ` threshold class (protecting future PLT-2756-style regressions) or is a narrow FAR01/FAR02 patch. Worth a quick PR-diff check before assuming full closure of the mechanism, not just this instance.

@@ -1,6 +1,40 @@
 # PLT-2882 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — draft the next reply (internal status update, one owner, one closed evidence step)
+## 2026-07-28 UPDATE (third re-check) — supersedes the "one step to confirm" framing below
+
+The evidence step is long done (see `investigation-log.md`). The blocker is now purely
+**approval**, asked 07-14, still unanswered 14 days later. Ilia re-asked 07-27, but that
+comment is no longer visible on the ticket (see `context.md` § 2026-07-28 delta) — so from a
+fresh read of the ticket it looks like *nobody* has chased it since 07-14, which likely
+explains the silence. Two same-family tickets (PLT-2909, PLT-2931) are blocked on the same
+gate. **Escalation is now warranted** — original text below (§ "Draft — internal reply") is
+the 07-14 message, already superseded; use this instead:
+
+### New chosen action: (a) escalation nudge, direct to Pietro + Mostafa, cc Yash + Darminder
+
+Not (d) Blocked in the Jira-status sense (nothing external stops us — it's an internal
+decision sitting with two named people), but functionally identical to blocked, hence the
+push. Post as a **new top-level comment** (don't rely on 07-27's, which isn't visible):
+
+> @Pietro Desiato @Mostafa Kamel Hussien — chasing this again, it's been 14 days since the
+> first ask (14 Jul) with no reply on any of three tickets now sharing the same root cause and
+> the same approval gate:
+> - **PLT-2882** (FAR01) — 418 dead links, activity `FAR01UGD1220`, asked 14 Jul.
+> - **PLT-2931** (ELN03) — 193 dead links across 5 Containment activities, asked 24 Jul, holds
+>   the package below 100% on the dashboard.
+> - **PLT-2909** (ATL08) — same defect, FE-list variant; fix tracked under this ticket.
+>
+> Ask: approve a soft-delete of the 418 (PLT-2882) + 193 (PLT-2931) dead `activity_links` rows.
+> Reversible (link history preserved), source parquets untouched, read-only until approved.
+> If there's a reason to hold, say so — three live incidents and a customer-visible dashboard
+> number are sitting on this.
+>
+> Separately: I found my 27 Jul follow-up comment on this ticket isn't showing up for me
+> anymore — flagging in case it needs recovering, but posting fresh here either way.
+
+## Original 07-14 chosen action (for reference — already executed/superseded, keep for history)
+
+### Chosen action: (a) — draft the next reply (internal status update, one owner, one closed evidence step)
 
 Post an internal status update that (1) answers Yash's 2026-07-13 "any update?", (2) states the code-verified mechanism and the orphaned-links hypothesis in one place, and (3) names the **single closed data step** that will confirm or kill it. Keep **Ilia Kuzmin** as owner (he claimed the investigation on-ticket today); loop **Darminder** for the FE-robustness half.
 

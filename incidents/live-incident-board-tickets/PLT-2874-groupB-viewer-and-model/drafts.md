@@ -4,6 +4,7 @@ Nothing here has been sent. Review and post manually.
 
 ---
 
+<<<<<<< HEAD:incidents/live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/drafts.md
 ## Draft 1 — comment for PLT-2874 (updated 07-31 with reconciled figures)
 
 > The two numbers count different things, and the data is fine.
@@ -21,6 +22,25 @@ Nothing here has been sent. Review and post manually.
 > a small frontend change with no pipeline work.
 >
 > PR is up. The same fix should cover the LVN1 report on the linked Freshdesk ticket.
+=======
+## Draft 1 — comment for PLT-2874
+
+> Found it. The two numbers count different things.
+>
+> The editor counts elements. The dashboard counts geometry objects. On the FAR01 federated model
+> there are 9.24% more objects than elements, because the same element appears in more than one
+> sub-model of the federation and each copy is a separate object in the viewer.
+>
+> Measured on prod today: 737,093 objects against 668,978 distinct elements, so 68,115 extra.
+> Apply that to the 628,000 the editor reported and you get 686,000, against the 695,000 on the
+> dashboard. The rest is three weeks of edits.
+>
+> Colouring every object is correct, the viewer has to paint all of them. The bug is that the
+> dashboard prints that count under the label "Elements". The data needed for the right number is
+> already there, so this is a small frontend fix and no pipeline change.
+>
+> Same fix should cover the LVN1 report.
+>>>>>>> origin/main:incidents/live-incident-board-tickets/PLT-2874-groupB-viewer-and-model/drafts.md
 
 ---
 

@@ -53,12 +53,102 @@ curl.exe http://localhost:8000/api/chat --data "@body.json" -H "Content-Type: ap
 
 **Fix**: Reduce component complexity (fewer widgets, shorter prompt). Edit `agents/artifact_composer.py` to tighten the layout constraint.
 
-## 6. MCP auth expires mid-stream
+## 6. MCP domains randomly stuck "pending" (auth context rejected)
 
-**Symptom**: Hydrator silently returns empty data; log shows 401 from MCP tool call.
+**Symptom**: A *random* subset of domains never delivers — tiles stuck on "pending"
+while others show data. The stuck set changes per run (one run: schedule ready /
+issues pending; next run: the reverse). Logs show `invalid_auth_context_id`.
 
-**Cause**: The MCP session token expired during a long Phase 2 hydration run.
+**Root cause (as of Jul 2026)**: NOT expiry, and NOT "one context per account".
+The MCP server supports concurrent contexts. The failure is almost certainly
+**multiple MCP replicas (k8s) with in-memory, pod-local contexts and no
+shared/sticky store**: our single `auth_context_id` lives on one pod, but the
+profiler fires ~10 concurrent calls that round-robin across pods, so only the
+fraction hitting the context-holding pod succeed (~1/N).
 
-**Behaviour**: `mcp_client.py` catches 401 and re-runs `xyz_login` (30-second retry cooldown). The affected domain hydrator retries. If cooldown fires too often (heavy parallel load), hydrations for that domain fail and `artifact_data_complete` will list it in `failed`.
+**Behaviour**: `mcp_client.py` catches `invalid_auth_context_id`, re-logs in
+(lock + compare-and-swap so only one login fires, not N) and retries, bounded by
+`_MAX_AUTH_ATTEMPTS`. Each retry is another ~1/N roll, so it helps only
+probabilistically until the server fix lands.
 
-**Detection**: Check `failed` field in `artifact_data_complete` event, or look for `401` in pipeline logs.
+**The real fix is server-side** (BE owns): sticky sessions / shared context store
+across replicas, or a single instance. See
+[incidents/mcp-auth-context-investigation.md](../incidents/mcp-auth-context-investigation.md)
+for the full investigation, measurements, and the open question to BE.
+
+**Detection**: `invalid_auth_context_id` in pipeline logs; `failed`/missing
+domains in `artifact_data_complete`.
+
+---
+
+## A prescriptive template silently suppresses interactivity
+
+Giving the composer an exact block-and-grid spec makes it draw exactly those
+blocks and stop. The first Room Readiness template specified five panels, a
+grid and colours, and produced **18k chars with 3 onClicks** — status filter,
+type filter, clear. Clicking a room did nothing. Free-form reports from the
+same model were 26–34k with far richer UI, because nothing told it to stop
+inventing.
+
+Adding an explicit `### Interaction` section (selection state, what a click
+does to each block, hover, empty states) took the same prompt and data to
+**24k chars and 11 onClicks**. Structural constraint costs improvisation, so
+any template must pay for behaviour separately.
+
+**Do not measure a template by structural checks alone.** A ten-point layout
+adherence score passed 10/10 on the version with no interactivity in it.
+
+## Never name a component prop the composer can't actually use
+
+The template first told the composer to pass `selectedDbIds` to `<ForgeViewer>`
+so a room would isolate. That prop did not exist — the real signature is
+`{urn, projectId, height, filterStatus, selectedRoomId}`. React drops unknown
+props silently, so the generated report would have looked correct, scored
+correct, and done nothing.
+
+Check `ForgeViewerStatic.ts` for the current signature before writing viewer
+instructions into any prompt, and state the allowed props explicitly so the
+model doesn't invent more.
+
+## Isolating a room must ghost, not hide
+
+Rooms hold a **median of 18** tracked elements (min 1, max ~6,900). The status
+filter hides non-matching fragments outright, which is right for a status with
+hundreds of thousands of elements and catastrophic for a room: the user sees a
+near-empty canvas with no spatial reference.
+
+Room selection therefore uses `viewer.isolate(ids)` (ghosts the remainder) plus
+`fitToView`, while the status filter keeps its fragment-level hide. Resetting
+one path must clear the other — `viewer.isolate([])` before re-applying
+fragment visibility, and re-show all fragments before isolating.
+
+---
+
+## The composer invents identifiers, not just numbers
+
+A generated Room Readiness report labelled its viewer panel
+**`DH-B2-01 · capture 14/07/2026`**. No room in that project contains "DH" or
+"B2" — real names look like `L1-NORTH SUPPORT BATTERY 1245`. The model had
+written a plausible name in the style of the design mockup, as a literal.
+
+The existing "NEVER fabricate data" rule only spoke about synthetic curves and
+arrays — **numbers**. Names, ids, codes and dates fell straight through it. The
+rule now covers identifiers explicitly, and the template states what the viewer
+header must show.
+
+Two things make this the worst class of bug here:
+
+- **Nothing looks wrong.** A fabricated percentage might be implausible; a
+  fabricated room name is indistinguishable from a real one to anyone who
+  doesn't know the project's naming.
+- **Structural checks pass.** A ten-point layout adherence score gave that same
+  report 10/10.
+
+**Whenever a block cannot be honestly populated, say so in the prompt and tell
+the model to omit it.** Room Readiness does this for the Packages GC column and
+for Milestones — the mockup fakes both (its package percentages come from a hash
+of the room name, its milestone dates are string literals, GC is `actual` minus a
+pseudo-random offset), and porting them would have reproduced exactly this bug.
+
+**Verify identifiers against the source data, not against plausibility.** One
+query over the room list settled it in seconds.

@@ -47,7 +47,54 @@ the thread itself already pointed at. Draft below updated accordingly — @Pietr
 
 ---
 
+<<<<<<< HEAD
 ## Draft message for the thread (Darminder or Yash to post; **@Pietro primary as of 07-24**, cc @Mostafa)
+=======
+## ⚠️ 2026-07-30 re-verify — ESCALATE, and the draft below is now PARTLY SUPERSEDED
+
+**Two changes to the posture. Read both before posting anything.**
+
+### 1. Escalation: "consider looping Pietro" → **do it now**
+No comment on the ticket for **14 days** (last: 107533, 07-16). On a **Critical** live incident with
+Freshdesk #7286 still Open, against a customer who has been waiting since 07-07. The 07-22 threshold is
+crossed and re-nudging Mostafa a third time is not a plan. **Address the next message to Pietro directly**
+(named as the workflow/product authority by Darminder in 107109 *and* by the customer in 106728), with
+Mostafa and Darminder kept on it — not as a bypass, but because two prior nudges to Mostafa alone produced
+one non-answer.
+
+### 2. The stall is probably NOT where we said it was — and the customer's ask has changed
+The 07-30 fetch surfaced **two 07-14 comments both earlier runs missed** (now in `context.md §1`):
+- **107320 — Mostafa asked Darminder: *"what is the difference between location and location details"*.
+  Never answered. 16 days.** This likely *is* what "waiting on this since it was asked of me" refers to.
+  So this is plausibly a **two-way deadlock**, not Mostafa sitting on a decision — and the single
+  cheapest unblocking move on the whole ticket is Darminder answering it, which `context.md §2a` does in
+  two lines. **Do this first; it may unstick the thread without any escalation at all.**
+- **107317 — the customer (Mikel) already moved past "teach us how".** They said connecting rooms to the
+  models isn't possible for them and asked for either **(i) a drop-down of Locations to select on the QA**,
+  or **(ii) removing the Location field** so it stops reading as missing data on the dashboard.
+  → **Q1 of the draft below ("who owns zone setup + is there a how-to") is largely moot.** Asking it now
+  would read as not having read their 07-14 reply — 16 days late. Replace it with the real decision.
+
+### Revised next step (supersedes the draft's Q1; Q2/Q3 and the side-finding still stand)
+1. **Darminder** — answer 107320 in one line (Location = auto-derived zone, read-only; Location Detail =
+   free-text, user-entered, `context.md §2a`). Unblocks Mostafa.
+2. **Pietro + Mostafa** — decide between the customer's own two options: **drop-down** (new FE selector +
+   a writable `issueLocationId` path — the field is read-only *by design* today, so this is real FE+BE
+   work, and `§2c`'s GUID-not-label fix becomes mandatory in the same change) vs **remove/hide Location**
+   (cheap, kills the dashboard "missing details" complaint, loses the feature). A third option worth
+   naming: keep it, but hide the row when no zones are configured.
+3. **Yash** — the customer has had no reply for 16 days on a request they put in writing. They need an
+   acknowledgement now, independent of the decision.
+
+**Do NOT re-send the draft below verbatim** — it asks the customer-side question they already answered.
+
+**Revised confidence: 8/10 diagnosis (unchanged); ~7/10 that this is the right next step** — the routing
+and escalation are well-evidenced; which of the two product options is correct is Pietro's call, not ours.
+
+---
+
+## Draft message for the thread (Darminder or Yash to post; @Mostafa, @Pietro)
+>>>>>>> origin/main
 
 > @Pietro — looping you directly since Mikel asked for you by name (106728) and Darminder named you as the
 > workflow authority (107109). Mostafa's had this since 07-13 ("leave it with me") without a resolution, so

@@ -11,6 +11,7 @@ AI chat interface at `/canvas` and `/canvas/:mongoProjectId`. Users ask natural-
 | ASK | Ask Mode | [ask-mode.md](ask-mode.md) |
 | PDC | Project Data Cache (frontend) | [project-data-cache.md](project-data-cache.md) |
 | UX | Layout & Interaction Map | [canvas-ux.md](canvas-ux.md) |
+| VIS | 3D Viewer Colour Visualisation | [viewer-colouring.md](viewer-colouring.md) |
 | — | Pitfalls | [pitfalls.md](pitfalls.md) |
 
 ## Architecture at a glance

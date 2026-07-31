@@ -1,5 +1,6 @@
 # PLT-2917 — recommended action (DRAFT ONLY — execute nothing)
 
+<<<<<<< HEAD
 ## ⚠️ 2026-07-24 re-check — this action is superseded; a different reply was already posted
 
 The draft below (from the 07-22 pass) was never posted verbatim. What actually went out on
@@ -21,6 +22,113 @@ just not yet due.
 ## Action as originally drafted 2026-07-22 (kept for the record; resume from here once the customer replies)
 
 ### Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
+=======
+> **Run 2026-07-30 — this supersedes the 07-22 draft below.** The ticket was rescoped on 07-22 by
+> Mostafa/Yash and got a decisive new artifact on 07-27. The 07-22 draft (ask Pietro + pull the
+> `/milestones` payload) targeted the wrong surface and is now only partly right — keep it for
+> history, don't post it.
+
+---
+
+## RUN 2026-07-30 — chosen action: **(a) resolve through clarification**, then spawn the fix elsewhere
+
+**Post one internal comment that answers Mostafa's question with the code-verified mechanism, and
+route the two remaining checks to the two people who own them.** Keep PLT-2917 **Open**.
+
+**Ball goes to: Ilia** (post the comment) → then **David Webb** (parquet) and **Sachin/Ali** (api-v2
+row), with a product call for **Pietro/Mostafa**. Not the customer.
+
+### Why this routing
+
+- **Not Ready For Development.** There is no PLT/frontend fix that solves the customer's complaint.
+  The FE renders milestone completion from `actualDate` (Actual End Date), and **nothing in the
+  platform ever writes Actual End Date** — it only arrives from the uploaded P6/XER schedule
+  (context §0.3). A dev picking this up on the PLT board would build on the wrong layer. The real
+  fix is schedule-ingest / reporting (**DPL**) ± a product decision.
+- **Not With Technical Support.** We already asked Thomas 3 questions on 07-22; they were never
+  relayed and the ticket was flipped back to Open on 07-23. Asking again *before* we've stated what
+  we now know would burn the client's patience on a ticket that has already recurred once. The one
+  client-facing ask (re-attach the FAR01/ELN04 screenshots) rides along at the end of the comment,
+  via Yash — it is **not** the primary move.
+- **Not Blocked.** Nothing external blocks us; both open checks are in-house single-row lookups.
+
+### Draft comment (author: Ilia; @ Mostafa, @ Pietro, @ Yash, @ David Webb, @ Sachin)
+
+> @Mostafa — answering your question directly: **yes, it's because it's a milestone**, but the reason
+> is a step earlier than the parquet.
+>
+> **Mechanism (verified in code):** a milestone has no linked elements, so the Gantt lets you type
+> Actual % Complete by hand. That edit does exactly one thing — `POST /projects/{id}/activities/progress`
+> with `calendarDate = today`. It **does not write Actual Finish Date**. There is no code path anywhere
+> in the platform that writes `actualFinishDate` — it only ever comes in from the uploaded P6/XER
+> schedule (`act_end_date`).
+>
+> Milestone completion is read from **Actual End Date** (`vw_KeyMilestone.actualDate`, non-null ⇒
+> complete) — on the PowerBI portfolio dashboard and on the new milestone widget alike. So:
+> **set a milestone to 100% in the editor → Actual End Date is still null → it stays "not done"
+> everywhere.** That's the same thing Pietro saw from the other end ("the Actual End Date should have
+> a value but it doesn't"). PMILE5030 and Thomas's "all ELN03 milestones should be done" are **one
+> root cause, not two**.
+>
+> Separately, a milestone is zero-duration / zero labour units / zero linked elements, i.e. zero
+> weight on every progress-weighting path — most likely why it's absent from the activity parquet
+> altogether. Where it's absent, we render it as **0%**, not blank.
+>
+> **@David Webb — one question:** does the activity-progress parquet job drop zero-weight activities
+> (0 labour units, 0 linked elements), and does it consume `isUserProgress` rows from
+> `POST /activities/progress` at all? That's the difference between "PMILE5030's row is missing" and
+> "it's there but ignored".
+>
+> **@Sachin — one row please:** `api_activities` for **PMILE5030 / ELN03** — `actualFinishDate`,
+> `validForProgressCalculations`, `plannedLaborUnits`, `linkedElementCount`. If api-v2 derives an
+> actualFinishDate from a 100% user-progress row, that kills my theory in one line.
+>
+> **@Pietro — still outstanding from 07-21:** what did your earlier fix change — code, or a data
+> action (Key-Milestone re-mapping / stamping Actual End Dates), and on which projects? Nine days
+> open; without it I can't tell whether the recurrence is "didn't cover FAR01/ELN04" or "reverted".
+>
+> **Product call for @Pietro / @Mostafa:** should a milestone be completable from inside the platform
+> at all? Right now the Gantt *invites* it (the cell is editable precisely because there are no
+> linked elements) and shows a green "Actual % Complete updated to 100%" toast — for an edit that
+> cannot move any milestone view. Either we wire user progress through to a real Actual Finish, or we
+> stop offering the edit on milestones. I'll raise the UX half separately.
+>
+> **@Yash — scoping, so this doesn't loop again:** this ticket is now **ELN03 / PMILE5030** per your
+> 07-22 note. **FAR01 (none showing)** and **ELN04 (past late / future done)** from the original
+> description are *not* covered — their screenshots are broken in the description and were never
+> re-sent. When you next reply to Thomas, please ask for those two re-attached, one per project.
+> Also: I've got `ELN03 Milestones Dashboard.xlsx` from 07-27 — if that export has Actual End Dates
+> filled in on his side, that changes the diagnosis and I want to know before we go further.
+
+### Status / assignee recommendation
+
+- **Keep status `Open`.** It is genuinely on us. Don't re-flip to With Technical Support — that's what
+  produced the 07-22→07-23 no-op loop.
+- **Reassign Yash → Ilia.** Yash only holds it because Automation-for-Jira auto-reassigned on the
+  07-22 With-Technical-Support flip. The open work is engineering's.
+- **Spawn, don't retitle:** a **DPL** ticket for the ingest/parquet half once David answers, and a
+  small **PLT** ticket for the UX half (don't offer an inline % edit that can't take effect / don't
+  toast success). Neither belongs on this incident.
+
+### Do this before posting (5 minutes, Ilia)
+
+**Open `ELN03 Milestones Dashboard.xlsx`** (attachment 61396, 07-27). If the client's own export shows
+Actual End Dates **populated** for those milestones, then P6 *does* have them and we dropped them on
+ingest — which inverts the ask to David from "why is the row missing" to "why did we drop the date".
+I could not open it (403 behind Atlassian auth — see context §8a). It is the one artifact that could
+change the comment above.
+
+**Confidence in the diagnosis: 8.5–9/10** (mechanism verified in code end-to-end; residual risk is a
+server-side api-v2 rule I can't see). **Confidence this is the right next step: 9/10** — it answers the
+question that was actually asked, unifies two threads into one root cause, puts one closed question on
+each owner, and stops a backend/data defect being queued as frontend work.
+
+---
+
+## RUN 2026-07-22 — original draft (HISTORICAL — do not post; superseded above)
+
+## Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
+>>>>>>> origin/main
 renderer; done/late/complete all come from the backend `vw_KeyMilestone` / Actual End Date),
 (2) asks **Pietro** the one closed question that unblocks everything — *what did your earlier fix
 touch?* — and (3) names the single backend data step that confirms the cause per project.

@@ -1,5 +1,6 @@
 # PLT-2649 — recommended action (DRAFT ONLY — execute nothing)
 
+<<<<<<< HEAD
 ## ⚠️ 2026-07-24 re-check — supersedes the action below; answer Yash's question first
 
 The situation has moved past "re-route to Pietro" (that already happened, 07-13 — see `context.md` §Update). Root cause is now a **named level + a named wrong value** (level `f0f4d409`, elevation 50.4 → should be 0), stated by Ilia on 07-16. Yash then asked, on **07-17**, the one fact needed to act on it — *"which model?"* — and it has sat unanswered **7 days**.
@@ -21,40 +22,94 @@ The situation has moved past "re-route to Pietro" (that already happened, 07-13 
 ## Action as originally drafted 2026-07-13 (superseded, kept for the record)
 
 ### Chosen action: (a) — draft the next reply (internal, one owner)
+=======
+## Group A verdict: **stay With Customer.** Ball is with the customer (via Yash).
+>>>>>>> origin/main
 
-Re-route the stalled ownership question to **Pietro Desiato** (product owner) with a crisp restatement of the confirmed root cause plus **one** closed, answerable decision question. This is the smallest move that unblocks a ticket that has sat unanswered since 2026-06-30.
+Root cause is confirmed and specific, the remedy is a one-value fix in the source
+model, and it was handed to the client on 07-24. Six days of silence is young.
+**Do not transition this ticket.** The one thing worth doing is confirming the
+hand-off actually carried the detail — and pinning the acceptance criterion now,
+so nobody re-diagnoses this when the corrected model lands.
+
+## Chosen action: (a) — one message to Yash: verify the hand-off, set the check
 
 **This happened** — Pietro replied 07-13 (§Update in `context.md`), so the routing below is historical context, not a live instruction.
 
 ## Why this and not the others
 
-- **Not (b) Ready For Development.** There is **no frontend fix to make.** The pin transform is provably correct — Quality pins use the identical `transformPushPinsToViewer` path and render right on the same PA12 model (`context.md` § Mechanism). The symptom reproduces in legacy PowerBI, which shares none of this code. Sending it to Dev implies a code defect that the evidence rules out; it would bounce back. (The one code-adjacent nuance — non-deterministic `FIRST(zMeters)` in `dashboard-360-service.ts:541-543` — is an *amplifier* that only matters if XYZ later chooses to remediate on our side; it is not a fix for the root cause.)
-- **Not (c) With Technical Support / client question.** The customer has **already answered** (2026-06-05: "same on the old one… problem with the room data in the Revit models") and effectively handed it back. Going to the client again *before* we have internally decided whether **we** remap the coordinates or **they** re-upload would just re-loop the ticket. A client ask becomes correct only *after* the internal decision below.
-- **Not (d) Blocked.** It is stalled, but the blocker is an **internal question that was asked once and never owned** — not an external dependency we are legitimately waiting on. "Blocked" would entrench the stall; a routed, closed question is the move the playbook prescribes for exactly this ("assign the 'what changed / who owns' question an owner; do not let it drop").
+- **Not Ready For Development.** There is **no frontend fix**. Re-verified against
+  current code this run: the FE reads `zMeters` exactly as the API delivers it and
+  never applies a level elevation itself (`dashboard-360-service.ts:544-546`;
+  `elevation` appears only in filter metadata at `:365,419`). The transform is shared
+  with the Quality pins, which are correct on the same model
+  (`DashboardIssueService` and `DashboardImageService` both extend
+  `DashboardPinpointBaseService`). Sending this to Dev would bounce.
+- **Not With Technical Support.** Nothing left to clarify from the customer — we told
+  *them* what to change, not the reverse.
+- **Not Blocked.** It is waiting on a legitimate external dependency (the client's
+  project-delivery team correcting and re-uploading a model), which is exactly what
+  "With Customer" means. Blocked would misreport it and hide it from the chase list.
+- **Not another nudge to Pietro.** His 07-13 question was overtaken — Ilia self-served
+  the diagnosis on 07-16/07-24. Re-pinging him on the old thread would re-open a
+  settled question.
 
-## Draft — internal reply (owner: Pietro Desiato, product; cc Ilia Kuzmin)
+## Draft — message to Yash Patel (coordinator; cc Ilia Kuzmin)
 
-Playbook style: root cause stated once, one owner, one closed decision question, explicit scoping.
+Playbook style: one owner, one closed question, explicit scoping.
 
-> @Pietro Desiato — reviving PLT-2649 (PA12 360 pins too high). Analysis is settled on cause; we're stalled on one decision.
+> @Yash Patel — PLT-2649 (PA12 360 pins), just checking the 07-24 hand-off landed
+> with the detail intact.
 >
-> **Confirmed:** this is a **capture-coordinate data problem, not a dashboard bug.** Same misplacement shows in PowerBI, and Quality pins (identical viewer transform) are correct on the same PA12 model — so no code change fixes it. A subset of captures carry a wrong elevation, consistent with your "old project base point" read.
+> **One question:** did the Freshdesk #6622 message to the client actually name
+> **the model (`PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24_detached`), the level
+> ("DC - 0G - FFL") and the target elevation (50.4 m → ~0)?** If it went out as a
+> general "please check the room data in your model", it will come back unfixed —
+> project delivery needs the exact value to change.
 >
-> **One decision to unblock:** for the affected PA12 captures, do we (a) ask the client to **re-upload** them against the current model base point, or (b) **remap** the stale-base-point captures on our side? If (b), who owns that data task and can you point me to them?
+> **Scoping, so nobody re-opens this:** cause is settled — that one level sits 50.4 m
+> above datum while the rest of the DC building is at 5.3 / 10.6 / 15.9, so the 101
+> rooms on it (~1870 captures) float. Nothing to fix on our side, and **no 360
+> captures need re-taking or re-uploading** — the model re-upload carries the
+> correction through rooms → capture points → pins.
 >
-> Scoping: `[NEW DASHBOARD]` in the title is a red herring — the defect is upstream of both dashboards.
+> **When the corrected model lands**, ping me and I'll verify before we close:
+> "DC - 0G - FFL" reads ~0 in `project-levels`, pins sit in-room across a sample of
+> the 101 rooms, and PowerBI agrees.
+>
+> No ETA from them yet — worth asking for one; it's been Major since 06 May.
 
-## Prerequisite evidence to attach (whoever picks it up — small, do first)
+## Also worth doing (small, separate — do not attach to this incident)
 
-To move the split estimate ("~60/40") from eyeball to fact and to confirm the trigger before choosing (a) vs (b) — playbook Phase 6 (cause ✔ / **trigger** / **cohort**):
+1. **Split off the editor side-thread.** Pietro's 07-13 "adjust the pin position from
+   the 360 editor" idea and Jason's counter-proposal (a system-side pass flagging
+   captures that no longer match their level, rather than user-movable pins) are a
+   **product feature discussion, not this incident's fix** — and they currently live
+   only in these comments, so they die when PLT-2649 closes. **DIGP-1420 "Model / 360
+   Capture Auto-Align"** (Backlog, created 07-19) looks like the right home; worth
+   confirming with Pietro/Jason rather than assuming. *Jason's version is the more
+   valuable one: it would have caught this defect automatically.*
+2. **Cross-project sweep** — this is an unaligned-linked-file federation defect, not a
+   PA12 quirk. One query over `project-levels` for levels whose elevation is a gross
+   outlier against their building's series would find any other project with the same
+   latent problem, before it becomes the next ticket. (Playbook: *cohort — the reported
+   project is a sample, not the population.*)
 
-1. **Cohort:** query `captures_360.zMeters` for PA12 against `project-levels.elevation` / `project-rooms` per `modelRoomId`; list capture/room IDs whose Z deviates beyond a floor-height threshold. Gives the exact count and which rooms.
-2. **Trigger:** correlate the bad captures' upload dates (`insertedOn`) against PA12's federated-model version / base-point change history — does "inherited the old pbp" hold, and dated when?
+## On close
 
-These make the client ask (if we land on option a) specific ("re-upload these N captures") instead of "re-upload everything".
-
-## Follow-through the human should own (not executed here)
-
-- After the (a)/(b) decision, reassign off **Masum Ahmed** (support, off-roster) to the named data owner or to product.
-- If option (a): Yash relays a **specific** re-upload request to the client (which captures, why) via Freshdesk #6622 — not before.
-- Post-close: add a `dashboard/pitfalls.md` entry (360 pin Z = capture source coordinate; stale-base-point captures mis-place; `FIRST(zMeters)` is non-deterministic per room) and fix the `360-tab.md:47-53` note (pins use the capture's own coords, not a room-elevation lookup).
+- Add a `dashboard/pitfalls.md` entry — still absent as of this run: *360 pin Z is
+  derived from the hosting room's level elevation upstream and stored in
+  `captures_360.zMeters`; the FE applies no elevation of its own, so a wrong level in
+  the source federation floats every pin on that level and no FE change can correct
+  it. Quality pins are unaffected because issue coordinates are recorded per-issue,
+  not derived from the level — so "Quality fine, 360 wrong" points at the model, not
+  the viewer.*
+- Amend `dashboard/360-tab.md:47-49` to state **both** layers (FE reads the capture's
+  own `xMeters/yMeters/zMeters`; those are derived upstream from `modelRoomId` → level).
+- Record the trigger explicitly when closing: **not a regression** — the model is V1
+  from 2025-12-04 and was always wrong; the new dashboard changed visibility, not
+  behaviour. Worth one line so the "why now" question is closed rather than dropped.
+- Unrelated code nit, do not bundle: `FIRST(c.zMeters)` has no `ORDER BY` within its
+  `GROUP BY` (`dashboard-360-service.ts:546,554`) so a room's pin takes an arbitrary
+  capture's Z. Irrelevant to this incident (all captures in an affected room share the
+  same bad elevation), but still non-deterministic.

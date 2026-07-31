@@ -43,6 +43,67 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-07-30 — 6 Group A tickets re-verified, 1 moved to Group B, Group B otherwise empty
+
+Board re-queried (`project = PLT AND issuetype = "Live Incident" AND status NOT IN (...)`) against
+the same scope rules. **Same 7 tickets in scope as 07-22 — no brand-new tickets arrived.** Every
+ticket already had a folder from a prior run; this was a full re-verification pass, calibrated by
+staleness (deep re-investigation where the Jira `updated` timestamp moved past 07-22; light
+re-verify otherwise — one of the "light" tickets, PLT-2858, still surfaced a real miss from the
+prior run, so light passes are not a rubber stamp).
+
+### Group A (6)
+
+| Ticket | Domain | Status | One-line finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| PLT-2917 | progress-tracking | Open | **Rescoped 07-22** by Mostafa/Yash from FAR01/ELN04/ELN03 to ELN03/`PMILE5030` specifically. Root cause now unified: a milestone has no linked elements, so the Gantt lets you type 100%, but that only `POST`s progress with today's date — **nothing in the platform ever writes Actual Finish Date** (it only arrives via XER), and Actual End Date is exactly what the milestone widget/PowerBI read for "complete". Mostafa's "is it because it's a milestone?" and Pietro's "Actual End Date is missing" are one root cause, not two | (a) one internal comment answering Mostafa directly, routing one closed question each to David Webb (parquet), Sachin (one `api_activities` row), Pietro (still-outstanding: what did his undocumented fix touch?); keep **Open**, reassign Yash→Ilia; spawn DPL + small UX tickets rather than retitling this one | 8.5-9/10 |
+| PLT-2858 | quality-management | In Analysis | **Prior run's read was incomplete** — two 07-14 comments were missed: Mostafa asked Darminder a question that's sat unanswered 16 days (likely *why* Mostafa looked stalled — it's a two-way deadlock, not one-sided), and the customer already moved past "teach us how" to asking for a Location dropdown or field removal, mooting the old draft question | (1) Darminder answers Mostafa's 07-14 question — cheapest unblock; (2) escalate directly to **Pietro** now (14 days silent on a Critical, threshold crossed); (3) Yash acknowledges the customer (unanswered 16 days) | 8/10 diag, 7/10 next step |
+| PLT-2884 | data-pipeline | With Customer | Confirmed unchanged (root cause: incomplete source XER + PowerBI/Platform sourcing difference, stands). Silence recounted: 20 days since fix handed to customer, 17 since last substantive human update | escalation posture **upgraded from "consider" to a positive recommendation**: move With Customer → With Technical Support and actively chase the re-upload (flagged: that status is on this routine's exclusion list, so the folder must be re-tagged `relocated` once it moves) | 9/10 next step |
+| PLT-2815 | quality-management | With Customer | Confirmed unchanged, third consecutive no-delta run. Root cause (reference-data artifact, "as intended") was already 9/10; the underlying Freshdesk ticket has been closed since 07-06 and the JIRA ticket is just sitting open with no one closing it — 24 days stale, the 07-13 "nudge" was in fact never sent | drafted action changed from "(c) nudge" to a **direct close-out**: closing comment (reproduces the €684 vs €843.60 figures, cites the product-owned reference table and Mostafa's decision, cites the closed Freshdesk parent) + recommended `With Customer → Done` transition, as-designed/not-a-bug resolution | 9/10 diag, 8/10 next step |
+| PLT-2649 | 360-captures | With Customer | **Root cause now fully pinned** (was 8/10 "wrong Revit elevations, direction TBD" on 07-13): one linked-model level (`"DC - 0G - FFL"`) in the PA12 federation sits at +50.4m instead of ~0, floating all 360 pins in 101 rooms (~1870 captures). Ilia self-served the full model+level ID on 07-24 after Pietro deflected to a feature idea on 07-13. FE transform re-verified unchanged/correct — no FE fix possible or needed | **stay With Customer** — one message to Yash verifying the 07-24 Freshdesk hand-off actually named the model/level/target elevation (a vague hand-off would come back unfixed); pre-agreed close-out check once the corrected model lands | 9/10 root cause |
+| PLT-2619 | other | With Customer | **89 days stale, finally moved** — Yash's 07-27 comment ("can we update this to new dashboard") flips the open action onto **us**, and a same-day board sweep found the likely successor, **PLT-2935** (opened 2h31m later by Ilia, targeting a demo project already on the new dashboard) — i.e. the migration this ticket asks for may already be done under a different ticket | one reply to Yash: is the PLT-2935 project the same "Mission Critical Dashboard"? Same → close PLT-2619 into PLT-2935 + close Freshdesk #6492; different → get the project id. Either way: this isn't a live incident (no defect/repro) — recommend taking it off the board | 9/10 classification, 7.5/10 "already superseded" |
+
+### Moved to Group B this run
+
+- **PLT-2874** (was `groupA-viewer-and-model`) — status advanced Open/In Analysis → **Dev In Progress**
+  since 07-22; the clarifying-question step drafted in its `recommended-action.md` evidently landed.
+  Folder tag renamed to `groupB` per the rename convention. **Bookkeeping only** — per this run's
+  scope (Group B action scenario still TBD, "skip those tickets" per the standing instruction), no
+  fresh deep-dive was done. Next run: light dev-readiness/fix-ownership check, same as the other
+  Group B tickets, rather than a full re-investigation.
+
+### Cross-ticket notes (this run)
+
+- **Process note — light re-verify passes still need a real fetch, not a rubber stamp.** PLT-2858 was
+  flagged "light" because its `updated` timestamp predated 07-22, but the live fetch surfaced two
+  comments (07-14) that both the 07-13 and 07-22 runs had missed. Staleness-by-timestamp is a good
+  *prioritization* signal, not a substitute for actually reading the thread.
+- **Two tickets converged on the same shape as PLT-2917 from earlier runs**: "the frontend is a
+  faithful renderer of a backend value that was never populated/joined" — now confirmed on milestones
+  (PLT-2917, Actual End Date), model counts (PLT-2874, historical), and progress % (PLT-2884,
+  historical). Worth the named `pitfalls.md` pattern flagged in the 07-22 run once one of these lands
+  a shipped fix.
+- **PLT-2619 and PLT-2935 should be looked at together** by whoever picks up the reply — closing
+  PLT-2619 without first getting an answer on PLT-2935's open questions would just move the same
+  ambiguity to a different ticket number.
+- **Escalation posture shifted upward across the board this run**: three tickets (PLT-2884, PLT-2858,
+  PLT-2815) moved from "consider escalating" to "recommend escalating/closing now" purely because of
+  elapsed silence (17-24 days) crossing thresholds the prior runs had already flagged as approaching.
+  None of these are new diagnoses — they're the same findings with the "wait and see" runway used up.
+
+### ⚠️ Attachments needing human (unviewable behind Atlassian auth) — this run
+
+**PLT-2917** (4 items — description's 3 images are broken in Jira for everyone, never re-sent;
+decisive one is `ELN03 Milestones Dashboard.xlsx` from 07-27, 403 for the agent — if the client's own
+export shows Actual End Dates populated, the diagnosis inverts from "never written" to "dropped on
+ingest"). **PLT-2649** (2 PNGs — now corroborative only, the decisive numbers are in the ticket text;
+Freshdesk #6622's actual message content is invisible here and is the real gap — did the hand-off
+name the model/level/elevation?). **PLT-2858** (new attachment `image-20260714-113920.png` returns
+HTTP 403). **PLT-2884**, **PLT-2815**, **PLT-2619** — no new attachments this run; prior gaps stand
+as previously documented (2619 has none at all on the Jira side; only Freshdesk #6492 is opaque).
+
+---
+
 ## Run: 2026-07-24 — 1 new ticket (missed initially, then corrected), 5 re-checked with 3 real updates, 1 escalation fired
 
 **Scope correction this run:** the run's own filtering pass initially (wrongly) treated Jira status
