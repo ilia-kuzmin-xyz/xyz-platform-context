@@ -374,6 +374,34 @@ discovery time).
 | Yash | numbered inventory, one status per item | coordination checkpoints |
 | Ilia | routed mechanism question with 1 sentence of context + explicit "separate from X" scoping | eliminating theory-classes, splitting signals |
 
+### Decision requests to product (added from PLT-2874, 2026-07-31)
+
+A different genre from incident chat. You are not gathering evidence, you are asking
+someone non-technical to choose. The shape that worked:
+
+1. **One sentence of context with the ticket link.** They may not remember it.
+2. **Cause in plain language, no file names.** "The dashboard was counting geometry
+   objects and the editor counts elements" lands. "svf2-object-id-map" does not.
+3. **What you already fixed, as before and after, rounded.** "Around 60,000, now about
+   3,000, so roughly 9% down to 0.5%." Rounded numbers read as a summary; exact ones
+   read as a report and invite arithmetic.
+4. **Why it is not perfect, and whose problem that is.** Say "not something we can fix
+   on the FE" explicitly, or they will assume you can.
+5. **The question, in one sentence, with its cost.** "Decent chunk of work and mostly
+   sits with BE."
+6. **Your recommendation, not an open question.** A bare "should we do the big thing?"
+   with no steer tends to get no reply. Give the answer you would give and let them
+   overrule it.
+7. **One line inviting disagreement.** Closes it without requiring a reply.
+
+**Tone.** Prose, not structure. No headings, no bold labels, no bullet scaffolding for
+something this short — it reads as a status report and people skim past it. Short
+sentences. Plain verbs. "My take is", "I'd suggest", "shout if". Avoid long dashes.
+Name jargon once and gloss it immediately, or leave it out.
+
+**Length.** If a product decision needs more than about six short paragraphs, the
+decision is not ready to be asked yet.
+
 ### Question bank (the ones that actually moved this incident)
 - "Give me the email of **one user who is broken right now**."
 - "Which endpoint, which HTTP status, which timestamp?"

@@ -2,9 +2,13 @@
 
 ## 2026-07-24 (later) — RCA confirmed live; action = post RCA + move to Ready For Development
 
+<<<<<<< HEAD
+The ticket is **stalled on our own side**: the customer answered Ilia's True-North question on **2026-07-20** and no one has responded or analysed it — ~2 days as of the 07-22 pass, **now ~4 days as of this 07-24 re-check** (no new comments in between; still fully actionable, nothing new needed from the customer). The highest-leverage move is **not** another routing transition — it is for **Ilia to close his own open loop**: read the two True-North screenshots, run the shipped DevTools diagnostic against FAR01/FAR02, and post the finding. Everything needed is already in our hands (model file shared 07-16; screenshots delivered 07-20; the debug snippet is in the repo).
+=======
 Diagnostic run on FAR01 confirmed all three legs (see context.md §07-24): folded TN
 −2.2914° < 5° guard; tightness 0.8806 < 0.9 → patch fires; estimated angle −20.46°
 vs correct −2.29° → ~18° error applied to the whole `Navis` federated model.
+>>>>>>> origin/main
 
 **Action:** post the RCA comment below on PLT-2906, link PLT-2651/2756/2771 as the
 prior recurrences, and move the ticket to **Ready For Development**.

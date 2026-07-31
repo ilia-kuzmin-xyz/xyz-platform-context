@@ -123,3 +123,22 @@ then `.find()`s the first model in the paginated response with that `parentModel
 on the page derives from that one file and the rest are invisible, with no UI indication. FAR01
 has two near-twin models in that folder (667,614 and 665,074 elements) so the impact is 0.4%
 there, but a project with two genuinely different federated models would show arbitrary numbers.
+<<<<<<< HEAD
+
+## The schedule Elements column counts links, not elements
+
+`scheduler-columns.tsx:180` renders `calculatedElementsSum`, computed by
+`_calculateElementsSumRecursive` (`schedule-entity.ts:786-810`) as a plain sum of per-activity
+counts down the activity tree with **no deduplication**. An element linked to three activities is
+counted three times, so the root row is closer to a link count than an element count.
+
+This is the third distinct unit across the product, alongside the dashboard's geometry-object
+count and the editor Model details panel's distinct-element count. On LVN1 (Freshdesk 7514) all
+three appear at once: 61,303 distinct elements, 81,826 from this rollup, 71,965 objects on the
+dashboard. The 20,523 gap between the two editor figures is elements linked to more than one
+activity.
+
+Same trap as PLT-2882, where the schedule showed 798,751 and the API 798,841 for identical data.
+PLT-2874 did not fix this one.
+=======
+>>>>>>> origin/main

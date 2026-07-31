@@ -127,6 +127,125 @@ Worth its own ticket.
   element list does not. Consistent with the divergence already in `dashboard/pitfalls.md`, and it
   means element counts cannot identify which model the dashboard loaded.
 
+<<<<<<< HEAD:incidents/live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/investigation-log.md
+## 2026-07-31 — chain closed from parquet to pixel, and the model identified
+
+**The dashboard loads `20cff6cf-659f-4eb6-b0d5-ae181080afa1`**, the larger of FAR01's two
+federated models. Read off the Network tab rather than inferred: `_initializeModel` calls
+`getProjectModelDetail` for the chosen model only, which puts the id in the request path
+(`model-api-service.ts:52`, `GET /api/v2/projects/{projectId}/models/{modelId}`). No console JS
+needed, works on the current build.
+
+That also quantifies the artefact divergence for a **single** model:
+
+| source | distinct elements |
+|---|---|
+| `element_base_data` (from `svf2-object-id-map`) | 668,978 |
+| `project_element_list` for `20cff6cf` | 667,614 |
+| difference | **1,364** |
+
+**Reconciled reading, same session, full date range:**
+
+| | |
+|---|---|
+| On-screen Total | 669,978 |
+| `SELECT COUNT(*) FROM _visible_elements` | **669,978** |
+| `SELECT COUNT(DISTINCT modelElementId) FROM _visible_elements` | 609,643 |
+| excess objects | 60,335, 9.0% |
+
+Total equals the object count exactly, so nothing sits between the query and the pixel. 609,643
+is what the panel will read once the fix lands. The 9.0% here against 9.24% on
+`element_base_data` is two different subsets giving the same ratio, so the effect is a property
+of the model, not of one query.
+
+An earlier reading of 581,878 / 528,314 was taken with the scrubber short of the end. Ignore it.
+
+## 2026-07-31 — how the editor counts, and the third unit
+
+### The editor is metadata-driven, not geometry-driven
+
+Got this backwards twice before checking. `applyMappings` takes the element set from the
+model's metadata and resolves dbIds **for those elements** (`model-mapping-service.ts:44-50`), so
+the editor starts from the element list and matches it against loaded geometry. Two halves,
+joined on `sourceFileElementId`:
+
+- **sourceFileElementId → dbId**, computed in the browser from the loaded model
+  (`getExternalIdMappingWithCache`, `:226`). A `Map<externalId, dbId>`, so **one dbId per element
+  by construction**.
+- **sourceFileElementId → modelElementId**, from the per-model element metadata parquet
+  (`model-entity.ts:279`).
+
+Consequences: the editor never had the inflation, because it cannot physically hold more than one
+dbId per element. It also means **the extra Navisworks dbIds are invisible to it** for selection,
+isolation and colouring, which is a separate defect from this ticket. The editor never reads
+`svf2-object-id-map`.
+
+Verified 1:1 for this model, so the two pages key on equivalent ids:
+
+```sql
+SELECT COUNT(DISTINCT sourceFileElementId), COUNT(DISTINCT modelElementId)
+FROM project_element_list WHERE modelId = '20cff6cf-…';
+-- 667,614 / 667,614
+```
+
+### Cross-check against the editor
+
+Loading `20cff6cf` alone in the editor and applying the **Linked** filter gives **606,524**,
+against the dashboard's 609,643. **3,119 apart, 0.5%**, down from ~9%.
+
+The residual is not fixable in the frontend and breaks down as:
+
+| cause | size |
+|---|---|
+| `svf2-object-id-map` vs `project-element-list` for the same model version | 1,364 |
+| editor skips elements with no loaded geometry, dashboard requires a dated activity in the current schedule | the rest |
+
+Decision: not worth chasing. Raised with product as a "should both pages share one source"
+question; recommendation was to log it as tech debt rather than do it now.
+
+### A third unit: the schedule Elements column
+
+LVN1 (Freshdesk 7514) reports **three** numbers, not two. The extra one is the schedule root row,
+and it is a third unit again.
+
+`scheduler-columns.tsx:180` renders `calculatedElementsSum`, which is
+`_calculateElementsSumRecursive` (`schedule-entity.ts:786-810`): a plain sum of per-activity
+counts down the tree, **no dedup**. An element linked to three activities is counted three times,
+so this is closer to a link count than an element count.
+
+| surface | LVN1 screenshot | unit |
+|---|---|---|
+| Editor, Model details | 61,303 | distinct elements, one model, active schedule |
+| Editor, schedule root | 81,826 | sum of per-activity counts, elements repeated per link |
+| Dashboard viewer | 71,965 | geometry objects |
+
+The 20,523 between the two editor numbers is elements linked to more than one activity. Same
+trap as PLT-2882, where the schedule showed 798,751 and the API 798,841 for identical data.
+
+**PR #2084 does not fix this one.** A rollup that double-counts shared elements is arguably its
+own defect and needs its own ticket.
+
+## Fix: PR #2084
+
+Branch `PLT-2874`, https://github.com/XYZReality/hc-frontend/pull/2084.
+
+`getElementsWithDynamicStatus` returns `modelElementId` (already in `_visible_elements`, just not
+read back), `countDistinctElements` + tests, and both colour paths report distinct elements while
+`coloredDbIds` still drives painting and fragment visibility.
+
+Two things worth knowing if you pick this up:
+
+- The **filter-change path was missed in the first cut**. `reApplyColors` still reported
+  `coloredDbIds.length`, so the total reverted to the object count after any scrub or filter.
+  Both call sites are now covered; test step 3 on the PR exists for exactly this.
+- The **runtime-mapping path** also dropped `modelElementId` on read-back, so the number's unit
+  depended on the `USE_VIEWERPAGE_ID_MAPPING` flag. Fixed.
+
+A `window.dashboardModelInfo()` debug handle was built and then **removed** before review. The
+Network tab already answers which model is loaded (`GET /api/v2/projects/{id}/models/{modelId}`
+is issued only for the chosen one), and it did not belong in a fix PR. It is in the branch
+history if it is ever wanted as its own change.
+=======
 ## Outstanding
 
 One reading has not reconciled. `_visible_elements` measured 581,878 objects / 528,314 elements,
@@ -141,6 +260,7 @@ SELECT COUNT(*) AS rows, COUNT(DISTINCT modelElementId) AS elements FROM _visibl
 `rows` should equal the on-screen Total. That closes the chain from parquet to pixel. The
 diagnosis does not depend on it, but the ticket comment should not quote exact figures until it
 lands.
+>>>>>>> origin/main:incidents/live-incident-board-tickets/PLT-2874-groupB-viewer-and-model/investigation-log.md
 
 ## Tooling notes for the next person
 

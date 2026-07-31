@@ -4,6 +4,25 @@ Nothing here has been sent. Review and post manually.
 
 ---
 
+<<<<<<< HEAD:incidents/live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/drafts.md
+## Draft 1 — comment for PLT-2874 (updated 07-31 with reconciled figures)
+
+> The two numbers count different things, and the data is fine.
+>
+> The editor counts elements. The dashboard counts geometry objects. One element can own many
+> objects, either because an NWD has ungrouped geometry, or because the same element sits in
+> several sub-models of the federation. Each copy is its own object in the viewer.
+>
+> Measured on FAR01 today, full date range: the dashboard is painting 669,978 objects, which are
+> 609,643 distinct elements. So the panel is reading about 9% high, and that is the whole of the
+> reported gap.
+>
+> Colouring every object is right, the viewer has to paint all of them. The bug is that the count
+> is then shown under the label "Elements". The correct number is already in the data, so this is
+> a small frontend change with no pipeline work.
+>
+> PR is up. The same fix should cover the LVN1 report on the linked Freshdesk ticket.
+=======
 ## Draft 1 — comment for PLT-2874
 
 > Found it. The two numbers count different things.
@@ -21,6 +40,7 @@ Nothing here has been sent. Review and post manually.
 > already there, so this is a small frontend fix and no pipeline change.
 >
 > Same fix should cover the LVN1 report.
+>>>>>>> origin/main:incidents/live-incident-board-tickets/PLT-2874-groupB-viewer-and-model/drafts.md
 
 ---
 

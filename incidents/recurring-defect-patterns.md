@@ -178,6 +178,124 @@ visible when they tried. That silence is what turned a lookup into a multi-day i
 
 ---
 
+## Pattern 3 — Check the dashboard's settings before you debug its data
+
+Promoted on a single occurrence, deliberately. This is not a defect mechanism, it is a triage
+checklist item, and the cost of skipping it is a full investigation. PLT-2941 took a day of
+querying and four wrong hypotheses before the answer turned out to be a dropdown.
+
+**Ask these before writing a single query.** They are cheap, and each one silently changes what
+the dashboard shows without saying so anywhere in the UI:
+
+| Setting | What it silently changes |
+|---|---|
+| **Progress weighting** (Budgeted labour units / Model element count) | Which categories exist in the filter panel at all |
+| **XYZ Tracked toggle** | Restricts everything to activities with ≥1 linked element |
+| **Date range / scrubber position** | Which elements are coloured and counted |
+| **An activity selected in the Gantt** | Switches the whole page to a different query path and data source |
+| **Calculation mode** (project / package / mix) | Same — different query, different table |
+
+### The one that has actually bitten us: progress weighting
+
+`getCategorySummaryV2API` builds the discipline/package **filter option list** from
+`category_groups` and ends with `AND ${weightColumn} > 0`
+(`progress-queries-v2-api.ts:577`). `weightColumn` follows the project's weighting, and the
+default is `PLANNED_LABOUR_HOURS` (`app/types/progress-weighting-types.ts:17-23`).
+
+**So by default, any discipline or package with no budgeted labour units vanishes from the filter
+panel, however many elements are linked to it.** On the PLT-2941 staging project that hid 2 of 3
+disciplines and 3 of 4 packages, including a pre-existing discipline carrying 162 activities.
+
+Selecting an activity switches the page to activity level
+(`dashboard-progress-service.ts:311-349`), where the weight is floored at 1
+(`progress-queries-v2-api.ts:970`), so the same category reappears. Same data, same setting,
+opposite outcome.
+
+### Recognition signature
+
+- A category is missing from the left panel but appears the moment you click an activity that
+  carries it.
+- Or: the panel lists implausibly few disciplines for the project.
+
+### Two-minute check, before anything else
+
+```sql
+-- Does the category exist in the parquet with a usable weight?
+SELECT CategoryName, TypeName, TotalLinkedElements, TotalPlannedLaborUnits
+FROM category_groups
+WHERE CategoryName = '<the missing one>'
+ORDER BY CalendarDate DESC LIMIT 5;
+```
+
+Zero in `TotalPlannedLaborUnits` plus labour-hours weighting is the whole answer. Then switch the
+weighting in the UI and watch it come back.
+
+**Resolution on PLT-2941 was to switch the method, no code change.** The frontend gap is still
+real — the panel hides categories with no explanation and no empty-state hint — but it was not
+worth a Blocker fix, which is exactly why it belongs here instead. Full analysis and the fix
+options if it recurs: `planning/PLT-2941-dashboard-filter-list-hides-zero-weight-categories.md`.
+
+**Generalise the reflex:** when a dashboard number or list looks wrong, the first question is not
+"what is wrong with the data" but "what is this surface configured to show". Two surfaces
+disagreeing is usually two different configurations, not two different truths. Compare with
+Pattern 2, which is the same instinct applied one layer down.
+
+---
+
+## Pattern 4 — Two surfaces disagree about a number (and the method that resolves it)
+
+The most common report we get, and the one most often mis-triaged. PLT-2874 is the worked
+example: the editor said ~628,000 linked elements, the dashboard said ~695,000, and it ran for
+three weeks classified as a data problem before turning out to be a labelling one.
+
+**The resolution turned out to be layered, and every layer has to be separated:**
+
+| Layer | On PLT-2874 |
+|---|---|
+| Different **unit** | Dashboard counted geometry objects, editor counted elements. ~9%, the whole complaint. |
+| Different **source artefact** | `svf2-object-id-map` vs `project-element-list`. 1,364 elements for the same model version. |
+| Different **scope** | Editor drops elements with no loaded geometry; dashboard needs a dated activity in the current schedule. |
+
+Only the first was fixable in the frontend. Reporting all three as one number is what made it
+look unresolvable.
+
+### The method
+
+1. **Pin each number to a query before comparing anything.** If your query is off by even a
+   little, you do not understand that surface yet and any diff built on it is worthless. Both
+   PLT-2874 numbers were eventually reproduced exactly, which is what made the conclusion safe.
+2. **Check the unit before the value.** `COUNT(*)` against `COUNT(DISTINCT <id>)` on each side.
+   If they differ on one side, that side is counting a different unit and nothing else matters
+   until it is fixed. This is a two-minute check and it was the whole answer here.
+3. **Name the source artefact behind each surface.** Two artefacts generated by different
+   pipeline steps will disagree, and that disagreement is not a bug in either consumer.
+4. **Quantify each layer separately.** "9% unit, 0.2% artefact, the rest scope" is actionable.
+   "3,119 out" is not.
+5. **Stop when the residual is explained in kind, not to the unit.** Chasing the last 0.5%
+   across 600,000 ids in two DuckDB instances that cannot join is hours of work with a known
+   answer.
+
+### The habit that made it fast
+
+Every hypothesis was stated as a **prediction testable in one query**, then killed by the query.
+Four died this way in an afternoon: the pigeonhole bound against geometry count, the PLT-2909
+cross-write shape, the `HAVING SUM(delta) != 0` clause, and the arbitrary federated-model pick.
+None survived, and none cost more than one round trip. Being wrong quickly and in public beats
+being careful and slow — but only if the prediction is specific enough to fail.
+
+The counter-habit to avoid: three separate reproduction procedures on PLT-2918 were stated
+confidently from source reading alone, without a falsifiable prediction attached. All three
+failed and cost days. See that ticket's log.
+
+### Recognition signature
+
+- Two surfaces both say "elements", "activities", "issues" and give different totals.
+- The gap is a stable *percentage* rather than a fixed count, which points at a unit.
+- One surface changes its answer when you click something, which points at a different query
+  path (see Pattern 3).
+
+---
+
 ## Candidate patterns (one occurrence, watch for a second)
 
 - **Viewable-name fallback vs on-device client** (PLT-2923). A model renders on the headset but
@@ -185,15 +303,6 @@ visible when they tried. That silence is what turned a lookup into a multi-day i
   `XYZ` then `EXPORT TO HOLOSITE` then `{3D}`, and renders nothing at all, with no error, if none
   matches (`viewer-service.ts:1052-1065`, `:945-946`). Promote to a pattern if a second IFC-sourced
   model does the same.
-- **Same word, different unit** (PLT-2874, and LVN1/Freshdesk 7514 pending confirmation). Two
-  surfaces both say "elements" and count different things. The editor counts distinct
-  `modelElementId` (`ModelDetailsPanel.tsx:222`); the dashboard counts `objectId`s, because
-  `coloredDbIds` is built for painting geometry and then reused as a statistic
-  (`dashboard-color-service.ts:679-698`). A federated file holds more objects than elements — on
-  FAR01, 9.24% more — so the two can never agree. **Diagnostic:** before diffing two counts, run
-  `COUNT(*)` against `COUNT(DISTINCT <id>)` on each side. If they differ on one side, that side
-  is counting a different unit and the comparison is meaningless until it is fixed. Promote to a
-  pattern if a second surface pair does the same.
 - **Source-data elevation errors presented as viewer bugs** (PLT-2649). 360 pins placed wrongly
   because one level's elevation was wrong in the source model; the transform was provably correct
   and the same fault reproduced in PowerBI.
