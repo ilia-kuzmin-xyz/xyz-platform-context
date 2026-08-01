@@ -113,3 +113,22 @@ The project is prod-only, so it must be replayed onto dev with XYZ Rewind
 ## Open assumption
 Frozen date = `2026-07-24` (when raised), one named constant. If it doesn't match the
 screenshotted figure it's a one-constant change.
+
+---
+
+## Run log — 2026-08-01
+
+- Jira: **In Code Review**. PR #2080 still **draft**. No review threads opened (0 comments from humans/Copilot).
+- CI: `build` red **only** on the repo-wide Trivy CVE (`brace-expansion 5.0.7`, CVE-2026-14257) read
+  out of `package-lock.json` on master — not this diff. Maven build + Sonar quality gate both green.
+- Checkpoint 3: merged `origin/master` (`28e03c3`) in — branch was 3 behind. Clean auto-merge.
+  Master's PLT-2874 also touched `dashboard-progress-service.ts`, but only inside
+  `getElementsWithDynamicStatus` (~L1725+, element/objectId counting). The frozen-planned code sits
+  in the planned-query path (~L973–1258). **Disjoint regions, no semantic interaction** — verified
+  both sides survived the merge by grep.
+- No code change needed this run. Frozen date still `2026-07-24`, still unconfirmed against Mostafa's
+  screenshot (see Open assumption above).
+
+## Next run
+- Blocker to clear is **not in this PR**: #2072 (lockfile bump) must land on master for CI to go green.
+- Once green, PR is ready to come out of draft — needs Ilia's call on the frozen-date constant first.

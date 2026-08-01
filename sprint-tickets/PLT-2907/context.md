@@ -53,3 +53,26 @@ confirmed → seed a sane orbit pivot on load in the quality-only branch.
 Check Jira for a reply to comment 107518. If answered → validate against the 3 outcomes above,
 move to dev status, branch `PLT-2907` off hc-frontend master, seed pivot on load. If still
 unanswered → leave as-is, no new comment.
+
+---
+
+## Run log — 2026-08-01
+
+**The BLOCKED-on-human-input section above is stale.** The questions were answered and the fix landed:
+Jira is now **In Code Review**, PR #2057 open (not draft).
+
+Shipped: orbit pivot anchored to the model centre on `GEOMETRY_LOADED` in
+`use-model-loaded-events.ts`, plus `use-model-loaded-events.pivot.test.ts`. Initial-pivot only — the
+pinpoint services keep owning the pivot while a pin is selected.
+
+Review threads: 1 from Copilot, **resolved with a disagreement** (not a code change) — it argued
+`_clearPivotLock()` on pin-deselect undoes the model-centre lock. Answered: the reported jump is
+specifically *rotate as the very first interaction* from the freshly-loaded camera; after a
+select→deselect the camera is already framed on the model so Forge's auto-pivot hit-test lands on
+visible geometry, `wheelSetsPivot: true` still re-plants the pivot on any zoom, and re-applying the
+anchor inside `_clearPivotLock()` would couple the shared pinpoint service to this default and fight
+the re-locking it owns. **0 open threads** — but this one is a judgement call, so if the jump is ever
+seen again *after a deselect* in the field, revisit here first.
+
+- CI: red only on the repo-wide Trivy `brace-expansion` CVE. Sonar green.
+- Checkpoint 3: merged `origin/master` (`28e03c3`) in — was 1 behind. Clean, no overlap.

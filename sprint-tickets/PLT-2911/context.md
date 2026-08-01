@@ -46,3 +46,22 @@ All in `GeneralTabEdit.tsx` (+ new test). No new deps / API / components.
 
 ## Next run
 - If CI/build is green and PR approved, nothing more. If reviewers want auto-uncheck on weighting change or a different message tone, adjust in `GeneralTabEdit.tsx`.
+
+---
+
+## Run log — 2026-08-01
+
+- Jira: **In Code Review**. PR #2071, reviewers requested (TomMasdinXYZ, DarminderA, rishib-xyz, SergiuszXYZ).
+- Copilot raised 2 review threads on 2026-07-30, **both already addressed and resolved**:
+  1. submit-time guard ran even with the `Portfolio-Dashboard` flag off (a legacy portfolio-on +
+     element-count project would have had *all* edits blocked with no way to clear the conflict)
+     → guard gated behind `isPortfolioDashboardEnabled` in `df96d85`.
+  2. submit guard + conflict badge untested → test added covering badge render, blocked save, and
+     `mutateAsync` never called.
+- **0 open review threads.**
+- CI: red only on the repo-wide Trivy `brace-expansion` CVE (master's lockfile). Sonar green.
+- Checkpoint 3: merged `origin/master` (`28e03c3`) in — was 1 behind. Clean, no overlap
+  (master touched dashboard viewer/progress files; this PR touches `GeneralTabEdit.*` only).
+
+## Next run
+- Nothing to do until reviewers respond or #2072 lands. Do not re-address the two resolved Copilot threads.
