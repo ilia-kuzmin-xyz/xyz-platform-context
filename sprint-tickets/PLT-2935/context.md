@@ -110,6 +110,18 @@ The project is prod-only, so it must be replayed onto dev with XYZ Rewind
 - The "does not increase across refreshes" AC is only observable on prod once the live end
   date has moved past the frozen date.
 
+## Review feedback handled (2026-08-01)
+Copilot flagged a REAL bug on `_buildFrozenPlannedFilters` — worth remembering:
+- The planned queries are a **delta** (`planned@endDate − planned@startDate`) in BOTH
+  `getProjectProgressV2API` and `getProjectProgressByActivity`. Capping only `endDate`
+  inverted the range whenever the selected window STARTED after the frozen date (any
+  recent month), and since planned is cumulative that returned a **negative** planned.
+- Fix: `clampFrozenPlannedStartDate(startDate, frozenEndDate)` (commit `c070379`).
+  Worst case start == end → 0 planned for a window entirely after the freeze, which is
+  the correct reading. Full-range behaviour unchanged.
+- Modelled against a cumulative curve: window 2026-11-01→11-30 gave −25 before, 0 after;
+  full range 35 both. Thread replied to and resolved.
+
 ## Open assumption
 Frozen date = `2026-07-24` (when raised), one named constant. If it doesn't match the
 screenshotted figure it's a one-constant change.
