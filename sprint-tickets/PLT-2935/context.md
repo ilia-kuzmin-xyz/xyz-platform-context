@@ -1,9 +1,9 @@
 # PLT-2935 — [Dashboard] Freeze planned progress % for sales project `69e232b2c222e55fa039eab2`
 
 **Type:** Task · **Priority:** Minor · No parent epic.
-**Jira status (as of 2026-07-30 run):** **In Code Review** — implemented.
+**Jira status (as of 2026-08-01 run):** **In Code Review** — implemented, PR ready for review.
 **PR:** XYZReality/hc-frontend#2080 (draft), branch `PLT-2935` off master `7e243fe`.
-**Local decision:** IMPLEMENTED via date-cap. Awaiting CI + review.
+**Local decision:** IMPLEMENTED via date-cap. PR #2080 out of draft. Build+test job PASSED in CI (job 90817359858 on d186f79) — the new spec does run and pass. The only red check is the repo-wide Trivy brace-expansion CVE (hotfix PR #2072 open, not ours to duplicate). Master merged in by Ilia (10a99ac).
 
 ## What the ticket asks
 Sales/demo project. The **planned progress %** keeps creeping up; Mostafa wants it fixed
