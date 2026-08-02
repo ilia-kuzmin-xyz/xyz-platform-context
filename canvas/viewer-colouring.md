@@ -47,6 +47,38 @@ Full mapping = ~1.4M elements × {dbId, modelElementId (36-char guid), installat
 
 ~8MB (~94% smaller). `to_wire_format()` in `agents/viewer_mapper.py`. FE consumes `statusDbIds`; keeps the legacy flat `elements` array as a fallback.
 
+## Room isolation
+
+`<ForgeViewer selectedRoomId={roomId} />` shows only that room's elements.
+Props are exactly `urn, projectId, height, filterStatus, selectedRoomId` —
+nothing else; React drops unknown props silently, so an invented one fails
+invisibly.
+
+The data is `roomDbIds` in the mapping (room_id → dbIds), built server-side by
+trading the rooms rollup's room→element index for dbIds, so no GUID reaches the
+browser. It is **opt-in**: the endpoint only returns it for `?rooms=1`, and both
+FE call sites decide by testing the saved TSX for `selectedRoomId`. Forgetting
+that flag is silent — isolation just never happens.
+
+Room and status filters **intersect** rather than replace, so picking a room
+inside an active filter still shows only that status.
+
+Two behaviours that are not obvious:
+
+- **Ghosting is toggled with the selection.** The status filter runs with
+  `setGhosting(false)` and hides non-matching fragments outright. A room holds a
+  median of 18 tracked elements, so the same treatment leaves an apparently
+  empty canvas — room selection uses `viewer.isolate()` with ghosting on to keep
+  the building as context, plus `fitToView` on the selection.
+- **A deterministic home camera** is computed from the bounding box after load
+  and restored on deselect. `AggregatedView` otherwise returns whatever view the
+  document carried, which on a federated model is often edge-on or inside the
+  geometry.
+
+Scale to expect: 502 rooms, 93.7% of room-mapped elements resolve to a dbId,
+median 18 per room, 218 of 502 with ≤5. The 3D answers *"where in the building
+is this room's tracked work"*, not *"here is the room"*.
+
 ## Restore (session persistence)
 
 The multi-MB mapping is **deliberately NOT persisted**. `PersistedDashboard` stores only the small `viewerConfig` + `viewerProjectId` (postgres id). On restore the mapping is refetched from `GET /api/viewer-mapping/:projectId` (2h server cache; the endpoint bundles a colour config too, so restore works even for dashboards saved without a config).

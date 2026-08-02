@@ -38,6 +38,32 @@ No tab bar. The chat IS the dashboard switcher:
 
 All three paths share the same SSE handlers in `useCanvas.ts`. `runHydrate(domains, threadId, handlers)` is the single entry point for the last two cases.
 
+## Domains, and what is NOT one
+
+`ALL_HYDRATION_DOMAINS = ['issues','schedule','progress','media','viewer','rooms']`.
+
+Two entries are special:
+- **`viewer`** has no hydrator — it rides in the profile and is cached/persisted
+  from there so a restore can serve the model urn.
+- **`rooms`** is produced by a pre-compose pipeline phase (Room Readiness
+  template only), not a hydrator. Storage is its only source on restore.
+
+`project` and `capabilities` are **profile keys, not domains**. A dashboard's
+`domainsRead` must never list them: `completeHydration()` only marks a dashboard
+ready when every entry appears in the set of domains that actually delivered, so
+listing a non-domain leaves it permanently unhydrated. Artefact code should read
+`data.viewer.urn` rather than `data.capabilities.viewer` for the same reason.
+
+**Domains delivered before the artifact exists** (pre-compose phases land before
+`artifact_pending`) are buffered in `earlyDomainsRef` and drained by
+`artifact_skeleton`. Without that they are cached and persisted but never reach
+`props.data`, and the blocks render empty.
+
+**Storage can satisfy every domain but never the profile.** Returning early on a
+full storage hit drops `capabilities` and the viewer urn, so the short-circuit
+requires a profile in hand; `mode: 'hydrate'` emits `data_profile` before it
+looks at the requested domains, making that fallback cheap.
+
 ## Profile stubs — the separation rule
 
 Phase 0b profile (`data_profile` SSE event) contains keys for every domain — lightweight stubs (counts, sample rows, no full arrays). These are NOT hydrated data.
