@@ -74,6 +74,11 @@ has **not** touched `package.json` / `package-lock.json` since the branch point 
 was no stale-lockfile revert risk and no conflict — the diff vs master is still exactly the 3 lockfile
 lines. A comment was left on #2072 naming the four PRs it blocks.
 
+**Result: the re-run went green.** `Build & Test [PR Check]` run 30738294608 on `529d1160` completed
+`success` — the first time this branch has had a passing PR Check against current master, and direct
+proof that the 5.0.8 bump clears the finding. #2072 now needs nothing but an approval; once it is on
+master the other four should go green on their next run without any change to their diffs.
+
 ### Checkpoint 3 — up to date with master
 
 All four feature branches are `behind=0` vs `origin/master` (`28e03c3`) — they were brought up to date
