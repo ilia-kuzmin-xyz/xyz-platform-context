@@ -33,6 +33,21 @@ checkpoints 1–3 again.
 So the PRs are not waiting on the routine — they are waiting on **human review**. None of the four
 has an approval yet; each still lists 3–4 requested reviewers.
 
+**#2054 was worse off than the thread list suggested.** Review *threads* were all resolved, but the
+PR still carries a standing **`CHANGES_REQUESTED`** review from **DarminderA** (2026-07-24, the
+context-menu clash screenshot). The fix landed the same day (`5e623d349`, explained in a comment
+tagging them), but the review verdict was never re-requested — so GitHub kept the PR blocked and the
+PR dropped out of Darminder's review queue. That is why `mergeable_state` would stay `blocked` even
+after the Trivy fix lands.
+
+**Action taken:** re-requested `DarminderA` as reviewer on #2054, which is the mechanism that puts an
+addressed `CHANGES_REQUESTED` PR back in the reviewer's queue. No extra comment was posted — the
+24 July one already explains the fix and how to verify it.
+
+**Lesson for future runs:** `get_review_comments` resolved-flags are *not* sufficient for checkpoint 1.
+Also call `get_reviews` and look for a `CHANGES_REQUESTED` state that no later review supersedes —
+resolving the individual threads does not clear it.
+
 ### Checkpoint 2 — the cross-cutting blocker (unchanged, now acted on)
 
 Every PR's `build` check is red on the **same repo-wide Trivy finding**, verified again from the job
