@@ -104,6 +104,32 @@ on the URL id and that source did not move.
 `git merge` proves nothing on its own. Grep the branch's changed files for (a) modules the commit
 deleted and (b) exported symbols whose signature it changed.
 
+#### Post-merge CI — verified, merges are safe
+
+CI re-ran on all five new heads and every result was inspected (not inferred):
+
+- **#2072 (`092839f`) is fully green** on both workflows — the master merge did not disturb it.
+- **All four feature branches: `Build & Run Tests` = success** (`BUILD SUCCESSFUL`, 8/8 dashboard
+  progress regression tests passing), `Execute SonarQube Scan` = success, `Dependency check` =
+  success. The **only** failing step is step 13 `Vulnerability scanner`, with the **only** finding
+  being `brace-expansion CVE-2026-14257`. Zero hits across all four full logs for
+  `Cannot find module`, `error TS`, `TS2xxx`, `Test suite failed`, or `isUserProjectAdminSelector`.
+
+So the PLT-2899 merge is confirmed harmless on all four branches, and the Trivy blocker is unchanged.
+
+**Two CI facts worth not re-deriving:**
+
+- **`PR Check` and `Multibranch` run *different* scanners.** `PR Check` step 13 "Vulnerability
+  scanner" is a Trivy **filesystem** scan of `package-lock.json` — this is the one that fails.
+  `Multibranch` runs a Trivy **Docker image** scan, which passes. A green Multibranch therefore says
+  nothing about the lockfile finding; don't read it as "Trivy is fine".
+- **A `.trivyignore` exists** at repo root (16 entries: CVE-2024-45801, CVE-2024-47875, CVE-2024-34750,
+  CVE-2024-50379, CVE-2024-56337, CVE-2016-1000027, CVE-2024-38816, CVE-2024-38819, CVE-2025-24813,
+  CVE-2025-48734, CVE-2025-48988, CVE-2026-22029, GHSA-8prw-h6rh-mh72, CVE-2026-45447, CVE-2026-54512,
+  CVE-2026-54513). These are printed in every log and are **ignore entries, not findings** — do not
+  mistake them for new CVEs. It is also a *possible* second unblock lever, but suppressing a HIGH
+  CVE is strictly worse than #2072's one-line bump, which is already proven green. Not pursued.
+
 ### Standing environment note
 
 `npm ci` cannot complete in the scheduled-run container (401 from `npm.pkg.github.com` for the
