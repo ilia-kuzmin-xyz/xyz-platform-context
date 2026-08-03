@@ -4,14 +4,14 @@ Local, resumable context for PLT sprint tickets being worked by the scheduled ro
 One sub-folder per ticket (`PLT-XXXX/`). Each run reads its ticket's `context.md` to
 recover where it stopped, so domain context isn't re-derived every time.
 
-## Last triage — 2026-08-02
+## Last triage — 2026-08-03
 
 JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()`
 
 Only tickets that are NOT blocked / Dev In Progress / In Code Review are eligible for kick-off.
 
-Sprint composition is **unchanged from 2026-08-01** — same five tickets, same statuses, and `master`
-is still on `28e03c3` (no merges landed in 24h).
+Sprint composition is **unchanged for the third consecutive run** — same five tickets, same
+statuses. What *did* change: `master` moved `28e03c3 → ca87f65`.
 
 | Ticket | Summary | Status | PR | Eligible? |
 |--------|---------|--------|----|-----------|
@@ -21,79 +21,104 @@ is still on `28e03c3` (no merges landed in 24h).
 | PLT-2447 | Select Activity panel UX issues | In Code Review | #2054 | ❌ |
 | PLT-1770 | Project-level Custom Permissions | Dev In Progress | none | ❌ — blocked on 22 open questions (D-1…D-14, BE-1…BE-8), unanswered since 2026-07-29 |
 
-**Net: 0 eligible tickets for the second run running. No development kicked off** — the run was
+**Net: 0 eligible tickets for the third run running. No development kicked off** — the run was
 checkpoints 1–3 again.
 
 ### Checkpoint 1 — review feedback
 
-**Zero open review threads across all four PRs.** Every thread (2 on #2054, 2 on #2071, 1 each on
-#2057 and #2080) is `is_resolved: true` with a reply already posted. Nothing new arrived since
-2026-08-01; the only new activity was SonarCloud's quality-gate bot (passed on all four).
+**Zero open review threads across all four PRs, and nothing new since 2026-08-02.** Every thread
+(2 on #2054, 2 on #2071, 1 each on #2057 and #2080) is `is_resolved: true` with a reply posted.
+No human has commented on any PR since the routine's own 2026-08-02 escalation comment on #2072.
 
-So the PRs are not waiting on the routine — they are waiting on **human review**. None of the four
-has an approval yet; each still lists 3–4 requested reviewers.
+Per the lesson recorded last run, `get_reviews` was checked as well as the thread list:
 
-**#2054 was worse off than the thread list suggested.** Review *threads* were all resolved, but the
-PR still carries a standing **`CHANGES_REQUESTED`** review from **DarminderA** (2026-07-24, the
-context-menu clash screenshot). The fix landed the same day (`5e623d349`, explained in a comment
-tagging them), but the review verdict was never re-requested — so GitHub kept the PR blocked and the
-PR dropped out of Darminder's review queue. That is why `mergeable_state` would stay `blocked` even
-after the Trivy fix lands.
+- **#2054** still carries DarminderA's `CHANGES_REQUESTED` (2026-07-24, commit `749e3f94`), not
+  superseded by any later review. The fix landed the same day and `DarminderA` was re-requested as
+  reviewer on 2026-08-02, which is the correct mechanism. Nothing further to do — it is waiting on
+  the human, not on us. **Do not re-request again**; repeat pings are noise.
+- #2057, #2071, #2080 have no `CHANGES_REQUESTED` — only `COMMENTED` reviews from the review bot
+  and the replies to them.
 
-**Action taken:** re-requested `DarminderA` as reviewer on #2054, which is the mechanism that puts an
-addressed `CHANGES_REQUESTED` PR back in the reviewer's queue. No extra comment was posted — the
-24 July one already explains the fix and how to verify it.
+None of the four PRs has an approval yet; each still lists 3–4 requested reviewers.
 
-**Lesson for future runs:** `get_review_comments` resolved-flags are *not* sufficient for checkpoint 1.
-Also call `get_reviews` and look for a `CHANGES_REQUESTED` state that no later review supersedes —
-resolving the individual threads does not clear it.
+### Checkpoint 2 — the cross-cutting blocker (unchanged, 9 days old)
 
-### Checkpoint 2 — the cross-cutting blocker (unchanged, now acted on)
-
-Every PR's `build` check is red on the **same repo-wide Trivy finding**, verified again from the job
-log on run 30690869325 — still exactly one finding, no new CVEs have accumulated:
+Verified again from the job logs — all four PRs fail on **only** the Trivy step, with exactly one
+finding, no new CVEs accumulated:
 
 ```
 package-lock.json (npm)   Total: 1 (HIGH: 1, CRITICAL: 0)
 brace-expansion  CVE-2026-14257  HIGH  installed 5.0.7  fixed 5.0.8
 ```
 
-The `Build & Test [Multibranch]` job **passes** on all four heads — so the code itself is fine and
-only the vulnerability-scanner step fails.
+`Build & Test [Multibranch]` (push event) **passes** on all four heads; only `Build & Test
+[PR Check]` is red, and only at the `scan` step. So no PR has a code problem.
 
-**PR #2072** (`fix/trivy-brace-expansion`) is still the single fix. Progress since last run: it is
-**no longer draft** (reviewers requested 2026-08-01). Still unmerged.
+`master` at `ca87f65` **still carries `brace-expansion` 5.0.7** — the bump has not landed.
 
-Searched for a duplicate hotfix before doing anything — `is:pr is:open brace-expansion in:title,body`
-returns only #2072 and #2071 (the latter just mentions it in prose). No duplicate exists, so per
-checkpoint 2 none was raised.
+**PR #2072** (`fix/trivy-brace-expansion`) remains the single fix, and is proven: its PR Check went
+green on 2026-08-02, which is direct evidence the 5.0.8 bump clears the finding. Searched again for
+a duplicate hotfix (`is:pr is:open brace-expansion OR trivy OR CVE-2026-14257 in:title,body`) —
+returns only #2072 and #2071 (prose mention). **No duplicate raised**, per checkpoint 2.
 
-**Action taken this run:** #2072 was 7 commits behind master, and its last CI run was 2026-07-25
-against a stale master. Merged `origin/master` in and pushed (`529d1160`). Checked first that master
-has **not** touched `package.json` / `package-lock.json` since the branch point (`e1ab02d`), so there
-was no stale-lockfile revert risk and no conflict — the diff vs master is still exactly the 3 lockfile
-lines. A comment was left on #2072 naming the four PRs it blocks.
+An escalation comment naming the four blocked PRs was already left on #2072 on 2026-08-02 and has
+had no reply. **Not repeated this run** — a second identical nag adds nothing.
 
-**Result: the re-run went green.** `Build & Test [PR Check]` run 30738294608 on `529d1160` completed
-`success` — the first time this branch has had a passing PR Check against current master, and direct
-proof that the 5.0.8 bump clears the finding. #2072 now needs nothing but an approval; once it is on
-master the other four should go green on their next run without any change to their diffs.
+### Checkpoint 3 — up to date with master (action taken)
 
-### Checkpoint 3 — up to date with master
+`master` advanced to `ca87f65` — **PLT-2899, "Remove defaultProject as an active-project source"**
+(#2076). All five branches were 1 behind. Merged `origin/master` into each and pushed:
 
-All four feature branches are `behind=0` vs `origin/master` (`28e03c3`) — they were brought up to date
-on 2026-08-01 and master has not moved since. Nothing to do.
+| Branch | old head | new head |
+|--------|----------|----------|
+| PLT-2447 | `d968b35` | `9bab76f` |
+| PLT-2907 | `1aac98e` | `bc3474d` |
+| PLT-2911 | `b33f263` | `218e711` |
+| PLT-2935 | `c070379` | `1165cfe` |
+| fix/trivy-brace-expansion | `529d116` | `092839f` |
+
+All five merged **cleanly, no conflicts**, and each branch's diff vs master is byte-identical to
+what its PR description claims (#2072 is still exactly the 3 lockfile lines).
+
+#### Why this merge needed checking beyond "git says clean"
+
+PLT-2899 is a **7,486-line deletion** commit. A clean textual merge is not sufficient evidence here,
+because two classes of breakage don't produce conflicts:
+
+1. **Deleted modules.** It removed `ProjectSelect/`, `GoBackDashboard/`, `CreateTestData/`,
+   `CdeConnectionErrorModal/`, `DownloadListPage/`, and both `BIM360Project*SelectPage/` trees. A
+   branch file importing any of them would merge clean and fail at build. Grepped every
+   branch-changed file for all six names — **no references**, all five branches safe.
+2. **`isUserProjectAdminSelector` changed shape.** It went from a selector to a **selector factory**:
+   `useSelector(isUserProjectAdminSelector)` → `useSelector(isUserProjectAdminSelector(projectId))`.
+   It no longer reads `account.defaultProject.id`; the caller supplies the project id. A stale call
+   site merges clean and breaks at compile time. Grepped every branch-changed file — **no branch uses
+   it**; master's only remaining call site (`useDevicesQuery.ts`) was updated in the same commit.
+
+Also confirmed **PLT-2935 is unaffected** by the `defaultProject` removal specifically: its
+`mongoProjectId` comes from the route param (`params?.project_id`,
+`dashboard-project-service.ts:73`), not from `defaultProject` or `store/selectors`. The freeze keys
+on the URL id and that source did not move.
+
+**Reusable rule for future runs:** after any large deletion commit lands on master, a clean
+`git merge` proves nothing on its own. Grep the branch's changed files for (a) modules the commit
+deleted and (b) exported symbols whose signature it changed.
 
 ### Standing environment note
 
-`npm ci` cannot complete in the scheduled-run container (401 from `npm.pkg.github.com` for the private
-`@xyzreality/dhtmlx-gantt`), so there is no `node_modules` and jest/tsc cannot run locally. CI is the
-only verifier.
+`npm ci` cannot complete in the scheduled-run container (401 from `npm.pkg.github.com` for the
+private `@xyzreality/dhtmlx-gantt`), so there is no `node_modules` and jest/tsc cannot run locally.
+CI is the only verifier. This is why the two greps above matter — a local typecheck would have
+caught both classes of breakage instantly, and we cannot run one.
 
-### Open item worth a human decision
+### Open items needing a human
 
-PLT-1770's 22 blocking questions live **only in `sprint-tickets/PLT-1770/context.md`** — they were
-never posted as a Jira comment. The ticket itself has a single comment (Darminder, 2026-07-24) and no
-record of the clarifications. Since PLT-1770 sits in *Dev In Progress* it is out of the kick-off set,
-so the routine did not transition it or comment; but nobody other than Ilia can currently see what is
-blocking it.
+1. **#2072 needs one approval.** It is the whole critical path: four PRs are red solely because of
+   it, it is proven green, and it has sat since 2026-07-25. Nothing else the routine can do.
+2. **#2054 needs DarminderA to re-review** and clear the standing `CHANGES_REQUESTED`.
+3. **PLT-1770's 22 blocking questions still live only in `sprint-tickets/PLT-1770/context.md`** —
+   never posted to Jira. The ticket has one comment (Darminder, 2026-07-24) and no record of the
+   clarifications. It sits in *Dev In Progress*, so it is outside the kick-off set and the routine
+   has deliberately not transitioned it or commented — three runs now. Nobody but Ilia can see what
+   is blocking the only ticket actually assigned for development. **This needs an explicit decision:
+   post them to Jira, or accept that they stay local.**
