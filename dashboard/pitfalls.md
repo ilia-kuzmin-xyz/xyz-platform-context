@@ -158,3 +158,29 @@ activity.
 
 Same trap as PLT-2882, where the schedule showed 798,751 and the API 798,841 for identical data.
 PLT-2874 did not fix this one.
+
+## The ElementState rule infers "is linked" from date presence, and the parity test hides it
+
+There are two implementations of the ElementState rule: `calculateInstallationStatus`
+(TS, `installation-status-utils.ts`) and `buildInstallationStatusCaseSql`
+(SQL, `dashboard-progress/utils/installation-status-sql.ts`). They disagree on one input.
+
+The TS rule branches on `scheduleId` — "linked to an activity at all" — so a linked element with
+no activity dates returns **Planned**. The SQL rule has no linked flag; its Planned branch is
+`WHEN startDate IS NOT NULL OR endDate IS NOT NULL` (`installation-status-sql.ts:63`), so the same
+element falls to `ELSE NULL` = **Not Planned**. Yellow vs grey, and it also drops out of a Planned
+status filter.
+
+This is reachable, not theoretical: `schedule-service.tsx` `syncActivityDates()` ends with
+`.filter(row => row.startDate || row.endDate)`, so an activity carrying no dates never gets a row
+in `schedule_activity_dates`, and `getElementStateCodes`'s `linked` CTE LEFT JOINs it to NULL.
+
+`installation-status-rule-parity.test.ts` cannot catch this. It generates rows with
+`scheduleId: startDate || endDate ? 'act1' : ''` and states the assumption in its scope note
+("Links carry dates, so scheduleId presence ⇔ a date is present"). The axiom is baked into the
+fixture, so the one divergent branch is unreachable by construction. It is also single-row, so it
+does not cover multi-activity aggregation either — the SQL takes `MIN(startDate)`/`MAX(endDate)`
+across *all* of an element's activities, where the old viewer used `activities[0]` only.
+
+Raised on #2081 (PLT-2743). Before trusting that parity test as a drift guard, check whether the
+case you care about is expressible in its fixture.
