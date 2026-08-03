@@ -43,6 +43,74 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-03 — repo hygiene pass + 3 tickets with real movement, 3 confirmed unchanged
+
+**Board re-queried** with the corrected scope rule (`With Customer` in-scope, per this file's own
+settled rule above — a first pass this run mistakenly excluded it, matching the same near-miss the
+07-24 run flagged; corrected before writing anything). **6 tickets in scope**, same set as 07-30
+minus PLT-2884 (now **Done**) plus PLT-2909 (back in scope — see hygiene note below on why it had
+dropped out of the run log without actually leaving the board).
+
+### Repo hygiene (done this run, before any triage)
+
+Two structural problems, both from the branch-merge history this file's CLAUDE.md warns about:
+
+1. **A second, stale `live-incident-board-tickets/` existed at the repo root** (outside `incidents/`),
+   last touched by the same commit that merged 31 branches into main (`862d276`, 07-30) and never
+   updated since — a single-file-per-ticket structure superseded entirely by this folder. **Removed.**
+   If a future run finds ticket folders directly under `xyz-platform-context/live-incident-board-tickets/`
+   again, that's this same mistake recurring — the canonical location is `incidents/live-incident-board-tickets/`.
+2. **PLT-2909 had three duplicate folders** (`-progress-tracking`, `-data-pipeline`,
+   `-viewer-and-model`) — three different runs independently triaged it and none of the merges
+   deduplicated them. Two were stale early-stage passes (07-16/07-17) with no content not already
+   superseded in the third; one (`-data-pipeline`) had literal corrupted tool-call fragments baked
+   into its file content, indicating a bad write during a prior merge. **Consolidated into
+   `PLT-2909-groupA-progress-tracking`** (kept for the deliberate sibling-sort pairing with
+   PLT-2882 that a prior run's cross-ticket note already explains), the other two deleted. This is
+   very likely why PLT-2909 silently dropped out of the 07-30 run's table despite still being
+   Open/In-Analysis the whole time — worth checking whether other duplicated tickets (**PLT-2884**
+   and **PLT-2892** each still have 2 folders per a folder listing this run didn't have budget to
+   fully resolve) have caused the same silent-drop failure mode. **Flagging for a dedicated
+   cleanup pass**, not fixed this run.
+3. **PLT-2917 and PLT-2858's `context.md`/`recommended-action.md` still had unresolved git
+   merge-conflict markers** (`<<<<<<<`/`=======`/`>>>>>>>`) baked into the committed file content
+   — readable by a human skimming, but a landmine for any tool that greps/diffs these files
+   expecting clean markdown. **Resolved** (kept the later/more-complete side in both cases; the
+   earlier side's unique content was already recapped in the later side, so nothing was lost).
+
+### Tickets with real movement this run
+
+| Ticket | Domain | Status | What changed | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| **PLT-2917** | progress-tracking | Open | **Materially resolved on the mechanism.** Pietro + Rishi worked out and are implementing the actual fix in-thread on 07-31 (a missing PBI-side join onto `xyz."ActivityProgress"`/`vw_CurrentUserDefinedProgress"`) — independently of, but consistent with, this file's own Actual-Finish-Date-never-written diagnosis. The 07-30 draft's two routed BE questions are now moot; superseded. Two new open items: what "the remaining task with Darminder's designs" is (unspecified, guess = the already-flagged UX defect, unconfirmed), and whether to drop the `Editor-Progress` feature flag | replace the 07-30 draft with 2 targeted questions (confirm PBI fix against client's own xlsx; what's the remaining task) — see `recommended-action.md` §08-03 | 8/10 mechanism, 4/10 on the guessed remaining-task |
+| **PLT-2858** | quality-management | In Analysis | **No diagnostic change — but the stall got worse and a cost assumption was wrong.** Fourth unanswered nudge (Yash, 07-31); 18-21 days of silence across three separate threads; two prior runs' "escalate to Pietro" recommendation still hasn't been posted. Also: the customer's "dropdown" option was mis-costed as "real FE+BE work" — it's actually ~10-15 lines of FE (the API/form plumbing already exists), so the product decision is cheaper than previously scoped on both branches | same escalation as 07-24/07-30, now flagged as urgent-to-actually-post rather than urgent-to-draft | 8/10 diag. (unchanged); this is now a "just post it" situation |
+| **PLT-2909** | progress-tracking | Open | Ali engaged with the file + a corrected element sample (07-28); Yash's follow-up ("move this to DPL?") to Ali has sat unanswered **3 days** — not yet stale enough to escalate, first genuinely new development is the folder consolidation above, not the ticket itself | none yet — 3 days is not stale; revisit past ~1 week per this ticket's own established pattern | 9/10 root cause (unchanged) |
+
+### Tickets confirmed unchanged (verified via live `updated` timestamp match, not a rubber stamp — each timestamp matches exactly what the 07-30 pass already recorded as the last activity)
+
+- **PLT-2815** (quality-management, With Customer) — `updated` still 07-06; 28 days stale; 07-30's "recommend direct close-out" stands, still not executed.
+- **PLT-2649** (360-captures, With Customer) — `updated` still 07-24; root cause fully pinned per 07-30; still waiting on Yash confirming the Freshdesk hand-off named the model/level/elevation.
+- **PLT-2619** (other, With Customer) — `updated` still 07-27; still waiting on the PLT-2619/PLT-2935 duplicate-project question.
+
+### Group B
+
+Empty this run (same as 07-30) — no ticket currently sits in `Ready For Development` / `Dev In Progress`. **PLT-2874** advanced further, Dev In Progress → **Ready For QA**, now out of scope entirely (not just out of Group B).
+
+### Cross-ticket notes
+
+- **The pattern flagged 07-30 continues: analysis is not the bottleneck on this board, posting is.**
+  PLT-2858's escalation has been "recommended" three runs running without being executed once.
+  PLT-2917's case shows the opposite of that failure mode working correctly elsewhere in the org —
+  Pietro/Mostafa/Rishi solved a hard problem over Jira comments in about 3 hours once they actually
+  engaged with it (07-31 13:54 → 16:49). The difference is not analysis quality, it's whether the
+  thread gets a reply at all.
+- **Duplicate ticket folders are a live risk, not just a historical one.** This run found and fixed
+  one 3-way duplication (PLT-2909) that appears to have caused a ticket to silently vanish from a
+  run's own tracking table despite remaining open the whole time. At least two more (PLT-2884,
+  PLT-2892) are known to exist unresolved.
+
+---
+
 ## Run: 2026-07-30 — 6 Group A tickets re-verified, 1 moved to Group B, Group B otherwise empty
 
 Board re-queried (`project = PLT AND issuetype = "Live Incident" AND status NOT IN (...)`) against

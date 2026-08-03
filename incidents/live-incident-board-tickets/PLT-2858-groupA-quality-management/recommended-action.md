@@ -47,9 +47,20 @@ the thread itself already pointed at. Draft below updated accordingly — @Pietr
 
 ---
 
-<<<<<<< HEAD
-## Draft message for the thread (Darminder or Yash to post; **@Pietro primary as of 07-24**, cc @Mostafa)
-=======
+## ⚠️ 2026-08-03 re-check — ESCALATION STILL NOT EXECUTED; this is now the top-priority action on the board
+
+Nothing has changed operationally since 07-30 except a fourth unanswered nudge (108643, 07-31).
+**The escalation this file has now recommended twice (07-24, 07-30) has not been posted.** That is
+the actual finding this run: the analysis is not the blocker, the *posting* is. See
+`context.md` §7b for updated stall durations (18-21 days across the different threads) and a
+correction to the FE effort estimate below (the dropdown option is smaller than previously scoped
+— ~10-15 lines, not "real FE+BE work").
+
+**Nothing in the draft message below needs to change in substance.** What changes is urgency: post
+it now, to Pietro directly, cc Mostafa and Darminder — not as a fifth nudge to Mostafa alone.
+
+---
+
 ## ⚠️ 2026-07-30 re-verify — ESCALATE, and the draft below is now PARTLY SUPERSEDED
 
 **Two changes to the posture. Read both before posting anything.**
@@ -94,7 +105,6 @@ and escalation are well-evidenced; which of the two product options is correct i
 ---
 
 ## Draft message for the thread (Darminder or Yash to post; @Mostafa, @Pietro)
->>>>>>> origin/main
 
 > @Pietro — looping you directly since Mikel asked for you by name (106728) and Darminder named you as the
 > workflow authority (107109). Mostafa's had this since 07-13 ("leave it with me") without a resolution, so

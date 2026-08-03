@@ -1,34 +1,43 @@
 # PLT-2917 — recommended action (DRAFT ONLY — execute nothing)
 
-<<<<<<< HEAD
-## ⚠️ 2026-07-24 re-check — this action is superseded; a different reply was already posted
+## ⚠️ 2026-08-03 re-check — the 07-30 draft below is now SUPERSEDED; do not post it
 
-The draft below (from the 07-22 pass) was never posted verbatim. What actually went out on
-2026-07-22 was **Ilia asking Thomas three clarifying questions directly** (which dashboard,
-re-attach screenshots per project, one concrete example per project) — see `context.md` §Update.
-Mostafa then flagged a related-but-distinct symptom in reply (activity `PMILE5030` missing from
-the legacy PowerBI activity-parquet export), which this run's investigation ties back to the
-**same** Actual-End-Date-not-stamped mechanism diagnosed below (`context.md` §Update — "raises
-rather than lowers confidence").
+Pietro and Rishi solved the load-bearing question in-thread on 07-31 without needing either of
+the two routed asks below (David Webb on parquet zero-weight rows; Sachin/Ali on the
+`api_activities` row) — see `context.md` §0.6. Pietro is already implementing a PBI-side join fix
+and confirmed "ok we got it working." **Posting the comment drafted below now would ask two
+people to re-derive something a third person already solved from a different angle** — don't.
 
-**Current recommended action: none — wait.** The ticket is correctly in a customer-wait state
-(Thomas hasn't answered Ilia's 07-22 questions yet). Nothing internal is gating progress right
-now. **Re-check when Thomas replies**, and at that point the plan below (pull the `/milestones`
-payload for FAR01/ELN03/ELN04) is still the right next internal step — it wasn't invalidated,
-just not yet due.
+### Revised recommended action: one clarifying comment, not a mechanism explainer
+
+The mechanism no longer needs explaining — Pietro/Rishi got there first. What's left is genuinely
+open and is ours to ask:
+
+1. **To Pietro:** once the PBI update ships, can you confirm against the client's own
+   `ELN03 Milestones Dashboard.xlsx` (07-27/07-31 attachments) that ELN03/PMILE5030 now shows
+   correctly? That's the actual close-out check, not a code fix.
+2. **To Mostafa:** what specifically is "the remaining task" you flagged (07-31 17:07) that
+   Darminder already has designs for? Our own §0.5 finding (Gantt lets you edit % on milestones
+   that can never move the dashboard, then shows a success toast) is a plausible match — but it's
+   a guess. Ask directly rather than assume and build the wrong thing.
+3. **To Pietro/Mostafa/Darminder:** the feature-flag question Pietro raised 07-31 (remove
+   `Editor-Progress` gating since users are already using it) is still open — worth a direct
+   answer so it doesn't silently drop.
+4. **Status:** keep `Open`. Reassign Yash → Ilia is still the right call (per the 07-30 draft's
+   reasoning) now that the remaining work is two product/design questions, not engineering
+   investigation on our side.
+5. **Not yet closeable:** FAR01/ELN04 are untouched by Pietro's fix and still need Thomas's
+   re-attached screenshots (§8a #4) — don't let this ticket close on the ELN03 win alone.
+
+**Confidence this is the right next step: 8/10** — it replaces an overtaken mechanism-explainer
+with the two questions that are actually still open, and flags the one thing (FAR01/ELN04) that
+would otherwise get silently swept into a close-out it doesn't belong in.
 
 ---
 
-## Action as originally drafted 2026-07-22 (kept for the record; resume from here once the customer replies)
+## Prior drafts (HISTORICAL — do not post; superseded above)
 
-### Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
-=======
-> **Run 2026-07-30 — this supersedes the 07-22 draft below.** The ticket was rescoped on 07-22 by
-> Mostafa/Yash and got a decisive new artifact on 07-27. The 07-22 draft (ask Pietro + pull the
-> `/milestones` payload) targeted the wrong surface and is now only partly right — keep it for
-> history, don't post it.
-
----
+### Draft as of 2026-07-30 (superseded 08-03 — Pietro/Rishi solved the routed questions below)
 
 ## RUN 2026-07-30 — chosen action: **(a) resolve through clarification**, then spawn the fix elsewhere
 
@@ -128,7 +137,6 @@ each owner, and stops a backend/data defect being queued as frontend work.
 ## RUN 2026-07-22 — original draft (HISTORICAL — do not post; superseded above)
 
 ## Chosen action: (a) — internal reply that (1) states the code-verified mechanism (FE is a
->>>>>>> origin/main
 renderer; done/late/complete all come from the backend `vw_KeyMilestone` / Actual End Date),
 (2) asks **Pietro** the one closed question that unblocks everything — *what did your earlier fix
 touch?* — and (3) names the single backend data step that confirms the cause per project.

@@ -2,20 +2,12 @@
 
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2649
 - **Issue type:** Live Incident ("To track live incidents on site.")
-<<<<<<< HEAD
-- **Status:** **Open** (⚠️ reverted/re-set from "In Analysis" as of the 2026-07-24 re-check — status label moved backwards even though the thread has since made its most concrete progress yet, see §Update below). Freshdesk #6622, last set to "Waiting on 3rd line" (2026-06-19) — i.e. back on us.
-- **Priority:** Major
-- **Project (site):** PA12
-- **Reporter:** Masum Ahmed · **Assignee (current):** **Yash Patel** (reassigned off Masum Ahmed since the 2026-07-13 doc — the roster-fit issue flagged then is resolved)
-- **Created:** 2026-05-06 · **Last updated:** 2026-07-17 (see §Update — new comments the 07-13 pass never saw)
-=======
 - **Status:** **With Customer** (category: In Progress / yellow) — moved 2026-07-24 13:55.
   Freshdesk #6622 set to **"Waiting on customer"** 2026-07-24.
 - **Priority:** Major
 - **Project (site):** PA12
 - **Reporter:** Masum Ahmed · **Assignee: Yash Patel** (⚠️ *changed since the 07-13 run — was Masum Ahmed*)
-- **Created:** 2026-05-06 · **Last updated:** 2026-07-24 13:56
->>>>>>> origin/main
+- **Created:** 2026-05-06 · **Last updated:** 2026-07-24 13:56 (2026-08-03 re-check: still 07-24, unchanged)
 - **Components / Labels:** none
 - **Attachments:** 2 PNG screenshots (see NEEDS HUMAN) + 1 broken inline blob in the description
 - **Domain slug:** `360-captures`

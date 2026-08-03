@@ -75,23 +75,13 @@ Read chronologically; the analysis is well advanced. Established facts and decis
   details"* — ⚠️ **also missed by prior runs, and still UNANSWERED by Darminder (16 days).** This is
   a direct, closed question to the assignee that `context.md §2a` already answers in full.
 - 107532 (07-16, **Ilia**): follow-up nudge — *"have you got any updates on this?"*
-<<<<<<< HEAD
-- 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* ← **latest message
-  (2026-07-22 re-check: still the last comment, 6 days stalled; 2026-07-24 re-check: still the last
-  comment, now 8 days stalled / 17 days since the customer's "we don't know how").** Ambiguous phrasing,
-  but reads as Mostafa himself still blocked/pending on someone else — i.e. "leave it with me" (07-13)
-  did not convert into an answer, and the ownership question from `recommended-action.md` Q1 (who
-  configures zones + is there a how-to) remains unresolved. Freshdesk #7286 is still Open.
-  **2026-07-24: escalation trigger fired — see `recommended-action.md` for the revised routing
-  (Pietro direct, not a third Mostafa nudge).**
-=======
-- 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* ← **still the latest
-  message (2026-07-30 re-verify: 14 days stalled).** Read together with 107320, the most likely
-  reading is now **not** "Mostafa is sitting on it": Mostafa asked Darminder a blocking clarification
-  on 07-14 and never got an answer, so "waiting on this since it was asked of me" plausibly means
-  *he* is waiting. **The stall may be on Darminder, not Mostafa** — which the 07-22 run's "stalled on
-  the SAME owner" framing got wrong. Freshdesk #7286 is still Open.
->>>>>>> origin/main
+- 107533 (07-16, **Mostafa**): *"waiting on this since it was asked of me."* Read together with
+  107320, the most likely reading is **not** "Mostafa is sitting on it": Mostafa asked Darminder a
+  blocking clarification on 07-14 and never got an answer, so "waiting on this since it was asked
+  of me" plausibly means *he* is waiting. **The stall may be on Darminder, not Mostafa** — the
+  07-22 run's "stalled on the SAME owner" framing got this wrong.
+- 108643 (07-31, **Yash**): *"any update on this?"* — a fourth nudge, into the same silence. **No
+  reply of any kind as of 2026-08-03.** See §7b below.
 
 **Net thread state (revised 2026-07-30):** Root cause (empty Location = no named zones configured on ML9)
 is established and agreed by dev (Darminder) and product (Mostafa) — that part is unchanged. What is
@@ -268,3 +258,56 @@ gap, 8/10, not re-derived):**
    `issueLocationId` path would be genuinely new FE+BE work (the field is read-only by design today).
    If product picks "remove", §2c dies with it. Worth stating so the decision is costed correctly.
 4. Cohort question (§3 Q6) is **unchanged and still open** — every project without configured zones.
+
+---
+
+## 7b. Re-verified 2026-08-03 — fourth nudge, still zero reply; effort estimate for the dropdown corrected
+
+**Live fetch:** `getJiraIssue` PLT-2858, 27 comments, `updated = 2026-07-31T13:27:32+01:00`. Status
+**In Analysis**, priority **Critical**, assignee **Darminder Atker** — all unchanged. One new
+comment since 07-30: Yash's 108643 (07-31, "any update on this?" — logged in §1 above).
+
+**Stall durations as of 2026-08-03:**
+| Clock | Since | Days |
+|---|---|---|
+| Fourth consecutive nudge with zero substantive reply | 108643, 07-31 | **3** |
+| No *substantive* (non-nudge) comment of any kind | 107533, 07-16 | **18** |
+| Mostafa's 107320 unanswered by Darminder | 07-14 | **20** |
+| Customer's drop-down-or-remove request unanswered | 107317, 07-14 | **20** |
+| Mostafa's "leave it with me" un-converted | 107208, 07-13 | **21** |
+| Escalate-to-Pietro recommended (07-24 run) but never executed | 07-24 | **10** |
+| Escalate-to-Pietro recommended a second time (07-30 run) but never executed | 07-30 | **4** |
+
+This is now the single stalest, most-repeatedly-escalated-on-paper-but-never-in-Jira open loop on
+the whole board. Two separate prior runs (07-24, 07-30) drafted "loop Pietro directly" and it has
+not happened — the recommendation itself is not the bottleneck, posting it is.
+
+**Correction to the recommended action's cost framing (this run, hc-frontend research):** the
+prior `recommended-action.md` costs the customer's "drop-down" option as "real FE+BE work" because
+the zone `Location` field is read-only by design. That's true for the *zone* field, but the
+customer's actual ask can be served more cheaply than assumed:
+
+- `useIssueParameters.ts` already fetches `issueLocations: {issueLocationId, location}[]`
+  (`issue-api-service.types.ts:176-179`) — already the exact `{id, label}` shape a dropdown needs —
+  and `issue-form.tsx:56` already has it in scope.
+- Form-state plumbing for `locationId` already exists end-to-end: `use-issue-form.ts:43,135`
+  (field), `:402-406` (conditional required-rule), `format-issues.ts:146` (submit mapping already
+  writes `issueLocationId`). Two near-identical `FormSelect` blocks already exist for Stage/Outcome
+  (`issue-form.tsx:556-578`) as a direct template.
+- **Estimate: ~10–15 lines, no backend change needed for the control itself.** This is a small FE
+  change, not "real FE+BE work" as previously scoped.
+- **Caveat that keeps this from being a silver bullet for ML9 specifically:** if `issueLocations`
+  is sourced from the same zone hierarchy that's empty for ML9 (unconfirmed — BE, api-v2), the
+  dropdown would ship with an empty list for this customer until zones exist, i.e. the FE control is
+  cheap but may not unblock *this* customer without the BE prerequisite. **This is now the one
+  question that actually needs asking of product/BE** — replacing "should the BIM team configure
+  zones" (which the customer already declined) with "is `issueLocations` populated independently of
+  the 3D zone hierarchy, or from the same source."
+- **Removing the Location field** (the customer's other option) remains trivially small — delete
+  one `<Detail>` line in `issue-details.tsx:139`.
+
+**Net effect on the decision Mostafa/Pietro need to make:** both of the customer's options are now
+known to be *cheap* on the FE side. The decision is no longer "pick the affordable one" — it's a
+straight product call (show a maybe-empty dropdown vs. remove the field vs. hide-when-empty), and
+the one remaining unknown (does `issueLocations` need zones too) should be asked alongside it, not
+instead of it.

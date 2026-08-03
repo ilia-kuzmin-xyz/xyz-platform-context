@@ -6,30 +6,9 @@
 - **Assignee:** **Yash Patel** (was Ilia Kuzmin; auto-reassigned 2026-07-22 09:31 by Automation-for-Jira when Ilia moved it to With-Technical-Support) · **Reporter:** Yash Patel · original client reporter: **Thomas**
 - **Freshdesk:** Ticket 7420, status "Waiting on 3rd line" (i.e. back on us)
 - **Project link given:** `https://cloud.xyzreality.com/progress-dashboard/69a964b9380af76aed8faa97` · Software Area: Dashboard
-<<<<<<< HEAD
-- **Created:** 2026-07-21 · **Attachments:** 1 screenshot (unreadable here — see §8 NEEDS HUMAN)
-- **Recurrence:** Pietro Desiato already "worked on" this once; the customer replied it is *still* not fixed. Treat the earlier fix with suspicion per the playbook (symptom did **not** even disappear).
-- Triage date: 2026-07-22 · **Re-checked 2026-07-24 — see §Update, new comments landed same-day as the 07-22 triage and were not yet folded in**
-
----
-
-## ⚠️ Update — 2026-07-24: the actual reply posted differs from the draft, and a new clarification narrows the mechanism further
-
-Three comments exist on the ticket, all timestamped 2026-07-22, that this file's body (below) does not yet account for:
-
-1. **Ilia (07-22 09:30)** posted **three clarifying questions to Thomas** (via Yash) — which dashboard (old PowerBI-link vs new `/projects/<id>/dashboard`), re-attach the broken screenshots per project, and one concrete example per project in the "activity ID + shown vs expected" format. **This is a different question than the one `recommended-action.md` drafted** ("what did Pietro's earlier fix touch?") — the real reply asked the customer, not Pietro. Net: **this ticket is currently, correctly, in a With-Customer-shaped wait state** (even though its Jira status still reads "Open"), and no further action is needed from us until Thomas/Pietro answer.
-2. **Mostafa (07-22 09:33) — new information, not previously captured:** *"it's a different issue. For activity **PMILE5030** in ELN03, he's done it to be 100% in the editor but Pietro is saying it's **not coming up in the activity parquet file**. Is that because it's a milestone? This is for the **power bi dashboard for portfolio**."* This is Mostafa clarifying that at least the ELN03 complaint is specifically about a milestone activity missing from the **PowerBI portfolio activity-parquet export** — a different (older) surface than the `PortfolioDashboardPage`/Milestone-widget mechanism this file diagnoses below.
-3. **Yash (07-22 09:42)** apologizes for conflating the two — confirms this ticket now covers **both** the original Milestone-widget symptom (FAR01/ELN04/ELN03, §1-§4 below) **and** Mostafa's PMILE5030/PowerBI-export variant.
-
-**Investigated (2026-07-24, hc-frontend + xyz-platform-context):** hc-frontend does **not** generate the activity parquet PowerBI reads — that pipeline is backend ("Progress Outputs" service → Azure Blob → consumed by the browser; `dashboard/data-pipeline.md:9-26`), and the native Dashboard is documented as **replacing** PowerBI, i.e. a separate surface (`dashboard/README.md:5`). No milestone-exclusion logic of any kind exists in this repo (checked the two activity-parquet schema docs under `docs/dashboard/api/` — neither has an `IsMilestone`/milestone-exclusion column). **So Mostafa's question ("is that because it's a milestone?") most likely resolves to the exact same mechanism already diagnosed below, not a separate export bug:** PMILE5030 is probably missing/wrong in the PowerBI activity parquet for the identical reason ELN03's other milestones look wrong in the native widget — **the schedule activity's Actual End Date was never stamped, even though the element is 100% installed** (§4 ELN03, and `portfolio-api.types.ts:123-146`, `reporting.vw_KeyMilestone`). Both the old PowerBI export and the new Milestone widget most likely read the same underlying schedule/Actual-End-Date source; a stamping gap there would explain both surfaces at once. This **raises** rather than lowers confidence in the existing diagnosis — it is corroboration from a second, independent surface (PowerBI export) rather than a competing hypothesis.
-
-**Revised understanding:** this is not "milestones are excluded from the parquet because they're milestones" — no such rule exists in code anywhere we own. It is one more instance of "Actual End Date not stamped despite the work being 100% done," now confirmed to affect at least two surfaces (native Milestone widget + legacy PowerBI activity parquet) for the same activity family. **No action needed from us right now** — we are correctly waiting on Thomas's answers to Ilia's three questions (07-22). Revisit once the customer replies.
-
----
-=======
-- **Created:** 2026-07-21 · **Last updated:** 2026-07-27 · **Attachments:** 1 PNG + **1 XLSX (new 07-27)** — neither readable here, see §8
-- **Recurrence:** Pietro Desiato already "worked on" this once; the customer replied it is *still* not fixed. His change remains undocumented and **still unanswered as of 07-30**.
-- Triage dates: 2026-07-13 · 2026-07-22 · **2026-07-30 (this run — major scope change, see §0)**
+- **Created:** 2026-07-21 · **Last updated:** 2026-07-31 · **Attachments:** 1 PNG + 1 XLSX (07-27) + 1 PNG (07-31) — none readable here, see §8
+- **Recurrence:** Pietro Desiato already "worked on" this once early on; the customer replied it was *still* not fixed. That earlier fix stayed undocumented for 9 days — **resolved by the 07-31 developments below (§0.6): Pietro has since found and fixed the actual gap.**
+- Triage dates: 2026-07-13 · 2026-07-22 · 2026-07-30 · **2026-08-03 (this run — see §0.6, materially changes the picture)**
 
 ---
 
@@ -153,7 +132,40 @@ proposed "handle milestones specially" fix needs a real discriminator first.
 type 100% on exactly the activities where it cannot possibly affect milestone completion (no linked
 elements ⇒ editable), and then shows a **green success toast**. The user is told the edit worked; the
 dashboard never changes. This is a genuine PLT-side item — see recommended-action.
->>>>>>> origin/main
+
+---
+
+## 0.6 RUN 2026-08-03 — Pietro found and fixed the actual gap; two decisions now sit with product
+
+**New comments since 07-30, all same day (07-31), none yet reflected in any prior pass:**
+
+| When | Who | What |
+|---|---|---|
+| 07-31 13:33 | Yash | "any updates on this?" |
+| 07-31 13:34 | Yash | relays a further client file (another copy of the ELN03 milestones spreadsheet) |
+| 07-31 13:54 | **Pietro** | *"For clarification, this is not showing correctly on the **PowerBI Portfolio Dashboard**, it's not the progress dashboard."* Then asks Mostafa if it's about how actual start/end date are calculated. |
+| 07-31 14:00 | Mostafa | restates the real question: *"why are these milestones not showing up in the progress parquet if we entered in the progress on the editor"* |
+| 07-31 14:09 | Pietro | asks **Rishi Bhugobaun** how these values are retrieved |
+| 07-31 14:43 | **Rishi** | **Answers the mechanism directly, independently of this file's §0.3 code trace and matching it almost exactly:** the parquet holds only *calculated* progress; a user override is saved separately in `xyz."ActivityProgress"`; the API merges parquet + DB values at request time and flags overridden rows `isUserProgress: true`. **For the PowerBI Portfolio dashboard specifically, the fix is to join on `xyz."vw_CurrentUserDefinedProgress"` or `xyz."ActivityProgress"`** to pull in the user-defined %. This is the PBI-side join that was missing — confirms this file's diagnosis (Actual Finish Date never written) from one level up: the *symptom* Rishi is fixing is "user overrides never reach PBI", which is the parquet-side face of the same "no write path to Actual Finish Date" defect, now with a concrete backend remedy that does not require writing `actualFinishDate` at all — it surfaces the *existing* override table to PBI instead. |
+| 07-31 16:33 | Pietro | checked the table for APLD projects — came back **empty** (screenshot) |
+| 07-31 16:49 | **Pietro** | *"ok we got it working - will update and test the PBI to integrate the user values"* — the fix is in hand, not yet shipped |
+| 07-31 16:49 | Pietro | asks Mostafa/Darminder: **"should we remove the feature flag for user progress since users are using it?"** — this is the `Editor-Progress` flag (`constants.ts:866,887`, default `false`) gating the whole manual-override Gantt path (research this run, hc-frontend) |
+| 07-31 17:07 | Mostafa | *"there's one remaining task which needs to be done, which Darminder already has the designs for [image]"* — **unspecified**; no PR, ticket, or Figma link found anywhere in hc-frontend as of this run (confirmed via git log + repo-wide search) |
+
+### What this changes
+
+1. **The 07-30 draft's two open asks (David Webb on parquet zero-weight rows, Sachin/Ali on the `api_activities` row) are now moot for the PBI-side fix.** Rishi answered the load-bearing question directly and named the exact join (`vw_CurrentUserDefinedProgress` / `ActivityProgress`) without needing either lookup. Pietro is already implementing it. **Do not post the 07-30 draft comment as-is** — it would ask two people to chase something a third person just solved from a different angle.
+2. **Two decisions are now open, both product/Mostafa+Darminder+Pietro's, neither ours to make:**
+   - Remove the `Editor-Progress` feature flag (make manual milestone-progress override generally available, since "users are using it")? — Pietro asked, unanswered as of 08-03.
+   - What is "the remaining task" with Darminder's existing designs? Given the §0.5 latent UX finding this file already flagged (Gantt invites a 100% edit on milestones that shows a success toast but can never move the dashboard), **this is very plausibly that same UX fix** — but it is not confirmed, and could equally be a different, unrelated design. **Needs one clarifying question**, not an assumption.
+3. **This ticket is close to resolved on the customer-facing complaint** (ELN03/PMILE5030 thread) once Pietro's PBI update ships and is verified against the client's own xlsx export. FAR01/ELN04 remain unconfirmed and still need the screenshots Thomas never re-sent (§8a #4) — that part of the original description is untouched by this fix and should not be assumed closed alongside it.
+4. **Assignee is still Yash** (auto-reassigned 07-22, never reverted per the 07-30 recommendation to reassign back to Ilia) — worth revisiting now that the mechanism is externally solved and what's left is two product/design questions, not engineering investigation.
+
+### Revised confidence
+
+- **PBI-side fix is real, mechanism-matched, and in progress (not yet shipped/verified): 8/10** — Rishi's answer independently corroborates this file's own §0.3 diagnosis via the parquet-merge mechanism, and Pietro confirmed "got it working," but no comment yet says the PBI report was actually republished or that the client re-checked ELN03.
+- **"Remaining task w/ Darminder's designs" = the §0.5 UX fix: 4/10** — plausible, unconfirmed, needs one direct question rather than being carried forward as an assumption.
+- **FAR01/ELN04 unaffected by this fix: 7/10** — those symptoms were never mechanistically tied to the user-override/PBI-join gap Rishi/Pietro just addressed; they still need their own screenshots.
 
 ---
 

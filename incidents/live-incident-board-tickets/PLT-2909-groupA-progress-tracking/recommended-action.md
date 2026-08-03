@@ -1,29 +1,37 @@
 # PLT-2909 — recommended action (DRAFT ONLY — execute nothing)
 
-<<<<<<< HEAD
-## ⚠️ 2026-07-24 update — the diagnostic below WAS run (07-23); action now is to wait on Ali Seyedof
+## ⚠️ 2026-08-03 update — Ali engaged and answered with data, then a routing question stalled 3 days
 
-Ilia ran exactly the diagnostic this file recommends, on 2026-07-23, and it confirmed the
-ghost-model hypothesis on ATL08/`CY-5200` (model `DistributionBoardsPanels_Bld1-V1`, PC-EXCEL
-import, source file `dd20b121`) — see `context.md` §Update. He already posted the routed question
-to **Ali Seyedof** (client-element-metas ownership for that model) and stated the FE fix will be
-tracked under **PLT-2882**, not here.
+Since the 07-28 action below was drafted, the ticket moved forward materially (all captured in
+`context.md`'s 07-28 "CROSS-WRITE PROVEN" section and `investigation-log.md`):
 
-**Nothing further to draft right now** — the one open item is Ali Seyedof's answer, which is his
-to give, not ours to chase yet (posted 07-23, one day old as of this re-check; not yet
-stale enough to warrant a nudge — revisit if it sits past ~1 week, per the pattern on PLT-2649/
-PLT-2858 in this same run). The merge-or-fork decision below is now **resolved as "merge into
-PLT-2882"** for the FE fix; the only remaining fork is the BE root-cause ticket for the Excel
-importer, which is Ali's to scope once he answers.
+- Ali asked for the exact Revit file (07-28 14:05); Yash supplied it same day; Ilia verified it was
+  the right model (07-28 14:45).
+- Ilia caught and fixed his own mistake before it reached Ali — a first-draft element sample didn't
+  actually belong to the Bld1 model in question — and posted the corrected CSV of ~650 cross-claimed
+  elements (07-28 15:32), scoped to the model Ali is actually examining.
+- **07-31 13:51, Yash: "do you want me to move this to DPL?"** — addressed to Ali. **Unanswered as
+  of 2026-08-03 (3 days).** This is the only open item on the ticket right now.
+
+**Recommended action now: nothing to draft — this is purely a nudge-timing call, not a re-diagnosis.**
+3 days is not yet stale enough to escalate past Ali (contrast PLT-2858's 18+ days). If it passes a
+week without a reply, a one-line nudge is the right next move, same pattern as the 07-24 pass on
+this same ticket. Yash's question itself ("move to DPL?") is reasonable and doesn't need a redirect
+— DPL is plausibly the right home for backend metadata-generation work if Ali confirms the CSV
+findings, but that's Ali's call once he's looked, not ours to pre-empt.
+
+**One thing worth flagging to Ilia directly (not a Jira action):** the CSV handed to Ali on 07-28
+already proves the cross-write **without needing his local Revit conversion at all** — the
+`sourceFileElementId` identity match across mutually-exclusive-system models is conclusive on its
+own (`investigation-log.md`, "the alternative hypothesis" section already anticipates this: either
+Ali finds a genuine pipeline mismatch, or the .rvt files themselves share element identity
+upstream of any importer bug). Worth pre-empting that "conversion is faithful, no mismatch" reply
+by re-stating plainly that BOTH outcomes still point at the same fix (the metadata is wrong either
+way; only *whose* bug it is changes) — so Ali's answer doesn't accidentally read as "nothing to fix."
 
 ---
 
-## Action as originally drafted (executed 2026-07-23 — kept for the record)
-
-### Chosen action: (a) — reuse PLT-2882's existing diagnostic against `CY-5200` on ATL08, then post one internal status update
-=======
 ## RE-CHECK 2026-07-28 — action superseded, new action drafted below
->>>>>>> origin/main
 
 The 07-22 recommended action was **"run PLT-2882's `__linkDiagnose('CY-5200')` on ATL08."**
 That step is **DONE** — Ilia ran it himself and posted results on-ticket 2026-07-23 (see
