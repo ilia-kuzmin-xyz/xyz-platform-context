@@ -866,3 +866,103 @@ this card's open actions menu.
    commits, against Ilia's standing instruction that commits go out under his name. Fixed with
    `git filter-branch --env-filter` over `origin/master..HEAD` plus a force-with-lease. **Set
    `git config user.name/user.email` at the start of a session in this repo**, not at the end.
+
+## 2026-08-04 (evening) — PLT-2926 and PLT-2927 folded into PLT-1770; the click-through bug
+
+### The bug that made three separate complaints into one
+
+Ilia tested and reported, in escalating order: the list is not interactive, nothing is editable,
+the create button "only works from a random cursor position", and the layout looks arbitrary.
+The first three were **one defect**:
+
+`TeamSliders.tsx` computes its **own local** `isSliderOpen`, separate from the one in
+`useTeamState.ts`, and it gates `pointerEvents` on the absolutely-positioned overlay container
+that every drawer renders inside. The two custom-permissions drawers were added to
+`useTeamState`'s copy and **not** to `TeamSliders`' copy, so the container stayed
+`pointer-events: none` and the entire feature was unclickable while looking perfectly normal.
+
+**If you add a drawer to `TeamSliders.tsx`, add it to that boolean.** It is the single highest-cost
+mistake available in this file. Fixed with a comment saying so.
+
+### Do not trust the export's fixed pixel widths
+
+The Figma export is a **624px dialog with a 560px content column**. So `560` (search field, name
+field) and `272 + 16 + 272 = 560` (footer buttons) all line up *in that dialog*. Ported literally
+into the Team tab's drawer — which is far wider — they produced five different right edges (754,
+617, 603, 755, 874). The rule that reproduces the design's *intent* is: everything spans the
+drawer's width inside its 32px gutter. Buttons share the row via a flex slot.
+
+Related: `Save` came out **136px** against Cancel's 272 because the MUI `Tooltip`'s required
+`<span>` wrapper collapsed to the label width. Both buttons now sit in an identical `ButtonSlot`.
+
+### What is now live, and the reason the split held
+
+| Action | State | Why |
+|---|---|---|
+| list / search / empty state | live | `ms/iam/api/project-roles` |
+| **remove** (was PLT-2927) | **live** | `DELETE roles/{id}` needs no ordinal level |
+| **rename** (was PLT-2926) | **live** | `PUT roles/{id}` echoing the role back, only `name` replaced |
+| set levels (create or edit) | blocked | BE-1 / PAPI-3717 |
+
+The insight that unblocked two thirds of the feature: **only the level mapping is blocked, not
+"writes"**. Renaming sends the role back exactly as it arrived with `name` swapped, so the
+authority tree is echoed rather than rebuilt — the code cannot invent or drop an authority. That
+is a categorically different risk from `toRolePayload`, which would have to *construct* authorities
+from a guessed level model and would succeed at writing a malformed role.
+
+Edit mode therefore shows the level bars **read-only with a notice**, because `fromRole` still
+can't resolve a stored role's authorities back to levels. Movable bars there would invite edits
+that get silently discarded — worse than admitting the gap.
+
+`CreatePermissionForm` is now `PermissionForm` with `mode: 'create' | 'edit'`; the two differ in
+exactly three conditions (validity rule, IAM block, bars disabled) and nothing else.
+
+### Verification: the harness is the actual lesson from today
+
+Three rounds of "looks broken" happened because the components were never rendered. `npm ci` can't
+complete in the agent environment (401 on the private `@xyzreality/dhtmlx-gantt`), so there is no
+dev server — but there **is** a headless Chromium at `/opt/pw-browsers/chromium`, and that is
+enough:
+
+1. scratch-install `react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled
+   esbuild playwright jest ts-jest @types/jest` into a temp dir with a real `package.json`
+   (install them in **one** `npm install`, or a later install prunes the earlier packages);
+2. `ln -sfn <scratch>/node_modules /home/user/hc-frontend/node_modules` so files under the repo
+   resolve their imports;
+3. `esbuild harness.tsx --bundle --alias:cp=<component dir> --alias:app=<webapp/app>`;
+4. drive it with Playwright — screenshots for layout, `elementFromPoint` for hit-testing,
+   `getBoundingClientRect` for alignment assertions.
+
+**The harness must reproduce the real composition, not just the component.** The click-through bug
+was invisible until the harness included the `pointer-events`-gated overlay wrapper. A component
+rendered in isolation passed every check.
+
+Bugs this found that review and typechecking had both missed:
+- the permission bar rendering **completely invisible** (1px `border` with `box-sizing: border-box`
+  sits *inside* the box that the design's second, borderless pass paints over, erasing every
+  outline; the export puts the ring at `inset: -1px`, so use `outline`, which is drawn outward and
+  takes no space);
+- a **fast click never committing** on the bar — `pointerup` was added in a `useEffect`, and React
+  scheduled that effect after `pointerdown`, so a quick release fired before the listener existed.
+  Pointer capture attached synchronously in the handler fixes it and also retargets events when
+  the pointer leaves the element;
+- Quality (leaf module) rendering its details unconditionally with a hidden chevron;
+- 40% opacity on the accent yellow reading as muddy olive for disabled Save / disabled Edit;
+- `Custom` sharing Admin's yellow, making the two chips indistinguishable;
+- the menu arrow being a solid triangle the same colour as the card behind it;
+- a `filter: drop-shadow` on the card creating a stacking context that would let the next card
+  paint over an open menu.
+
+Also: **widen the throwaway tsconfig to the whole feature folder, not just the leaf directory.**
+Restricting it to `CustomPermissions/**` missed a broken JSX fragment in `TeamSliders.tsx` that
+would have failed the build; including all of `TeamTab/**` caught it immediately.
+
+### Still open, and now escalated in the PR
+
+1. **Team Management has no `View only` rung**, so nudging the PROJECT MANAGEMENT header one step
+   immediately shows `Custom` with one feature left at No access. Correct per config, looks like a
+   bug. Either the ladder gains a rung or roll-up stops counting a *clamped* feature as
+   disagreement. **Design decision.**
+2. D-1 grant hierarchy (privilege escalation) — still blocks assigning permissions to people.
+3. Schedule ladder contradiction between the module sheet and the details sheet.
+4. Editor/Admin chip colours are ours, not decoded.
