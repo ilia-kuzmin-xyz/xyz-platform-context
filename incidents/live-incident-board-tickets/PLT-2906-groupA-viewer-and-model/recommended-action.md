@@ -1,14 +1,85 @@
 # PLT-2906 — recommended action (DRAFT ONLY — execute nothing)
 
-## 2026-07-24 (later) — RCA confirmed live; action = post RCA + move to Ready For Development
+## 2026-08-04 — CURRENT. Diagnosis is done. The action is delivery, not analysis.
 
-<<<<<<< HEAD
-The ticket is **stalled on our own side**: the customer answered Ilia's True-North question on **2026-07-20** and no one has responded or analysed it — ~2 days as of the 07-22 pass, **now ~4 days as of this 07-24 re-check** (no new comments in between; still fully actionable, nothing new needed from the customer). The highest-leverage move is **not** another routing transition — it is for **Ilia to close his own open loop**: read the two True-North screenshots, run the shipped DevTools diagnostic against FAR01/FAR02, and post the finding. Everything needed is already in our hands (model file shared 07-16; screenshots delivered 07-20; the debug snippet is in the repo).
-=======
+**Nothing below this section is live any more.** Root cause is confirmed, the fix is written and
+CI-green, and the customer has already been told it ships in 26.3.4. See `context.md` §2026-08-04
+for the evidence. What is actually open:
+
+> PR [#2069](https://github.com/XYZReality/hc-frontend/pull/2069) has been open **11 days** with
+> **zero human review approvals** (`mergeable_state: blocked`), while Freshdesk #7424 has been
+> **closed** on the strength of "it's been resolved, going into 26.3.4" (Ilia → Yash, 07-31).
+> `master` still carries the 5° threshold. If 26.3.4 cuts as-is, the release ships without the fix
+> and the incident reopens on a customer who was already told it was done.
+
+**No customer-facing message is needed or wanted right now.** The client has the right answer
+already ("cause on our side, nothing to change in Revit, fix coming in a release"). Sending
+anything else before the merge lands only re-promises what we haven't shipped.
+
+### Recommended action (a) — one internal comment on PLT-2906, to a named reviewer
+
+Chosen because it is the single cheapest thing that moves the ticket, and because it is a
+**"just approve it"** situation rather than a "needs more analysis" one — the same failure shape
+this board keeps hitting (PLT-2858's escalation was recommended three runs running and never
+posted). Keep status **Open**; do not transition anything.
+
+> @Darminder Atker — PR #2069 (the section-box True-North fix for this ticket) has been open since
+> 24 Jul with CI green and no review yet. **Can you approve or request changes on it this week —
+> and if it should be someone else, who?** The fix is Fix-Version 26.3.4 and Freshdesk #7424 is
+> already closed on the basis that it ships there, so an unreviewed PR is currently the only thing
+> between the customer and a reopened incident.
+
+*One question, answerable with a name or a date. Tag Darminder (FE owner / original assignee); Tom
+Masdin, Rishi Bhugobaun and Sergiusz were also requested on 07-24 and any one approval unblocks.*
+
+### Recommended action (b) — one separate message to whoever owns the 26.3.4 cut
+
+Deliberately a **second message, not a second question in the first** — different owner, different
+answer, and the playbook's one-question-per-message rule applies.
+
+> **Has 26.3.4 been cut yet, and does it include PR #2069?** If it is already cut without it,
+> PLT-2906 needs its Fix Version moved and Yash needs to know before the customer does — Freshdesk
+> #7424 was closed on 03 Aug on the basis that the fix ships in 26.3.4.
+
+*Answerable with a value: a version number or yes/no. Route to the release owner (unknown from
+here — Rishi is the named mechanism owner and the likely first hop).*
+
+### What each answer unlocks
+
+- **Approval lands** → merge, then one short comment to Yash confirming the actual release, and
+  the ticket closes on cause + trigger + cohort (not on "looks fine now" — that is how PLT-2771
+  recurred into this ticket).
+- **Reviewer declines / has concerns** → the two hazards the PR itself defers become the agenda:
+  `getVisibleModels()[0]` load-order dependence, and the compound-footprint min-area-rect estimate
+  being unreliable on multi-building sites. Both are feature-level, not FAR-specific.
+- **26.3.4 already cut without it** → correct the 07-31 message and reopen Freshdesk #7424
+  *proactively*. Do not let the customer discover it.
+
+### Explicitly NOT recommended
+
+- **Not** Ready For Development — the code exists; that transition would be theatre.
+- **Not** Done — it was auto-Done on 08-03 by the Freshdesk close and Yash correctly reverted it.
+  It cannot close until the fix is actually in a shipped release.
+- **Not** another RCA comment — the RCA is posted (07-24 14:57) and acknowledged (07-24 15:35).
+  Note for the record: a **longer** RCA draft that *did* link PR #2069 was posted and then deleted
+  at 07-24 14:55 (visible in the changelog), and the shorter replacement omits the PR link. That
+  omission is probably why the 07-28 pass could not tell what the fix did.
+
+---
+
+## 2026-07-24 (later) — RCA confirmed live; action = post RCA + move to Ready For Development (superseded 08-04)
+
 Diagnostic run on FAR01 confirmed all three legs (see context.md §07-24): folded TN
 −2.2914° < 5° guard; tightness 0.8806 < 0.9 → patch fires; estimated angle −20.46°
 vs correct −2.29° → ~18° error applied to the whole `Navis` federated model.
->>>>>>> origin/main
+
+> **Merge-conflict resolved 2026-08-04.** This section carried live
+> `<<<<<<<`/`=======`/`>>>>>>>` markers in committed content — the same landmine class the
+> 08-03 run fixed on PLT-2917/PLT-2858 and missed here (PLT-2906 was out of that run's
+> scope; see context.md §2026-08-04). The discarded `HEAD` side was the pre-RCA
+> "stalled ~4 days on our own side" framing, which the RCA above supersedes and which is
+> preserved verbatim in the §"2026-07-24 refresh" and §"2026-07-17 refresh" sections
+> below. Nothing unique was lost.
 
 **Action:** post the RCA comment below on PLT-2906, link PLT-2651/2756/2771 as the
 prior recurrences, and move the ticket to **Ready For Development**.

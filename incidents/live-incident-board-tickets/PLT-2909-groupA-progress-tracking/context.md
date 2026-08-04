@@ -226,3 +226,7 @@ model is potentially reading it. Worth re-checking the Medium priority with prod
   3 for parts of the model tree, which would reduce but not remotely eliminate the number.
 - **No progress impact: 7/10.** Reasoned from progress being computed off `activity_links`, not
   independently measured.
+
+## Re-verified 2026-08-04 (light pass, this run)
+
+Live JQL fetch of the board: `updated` for this ticket is still `2026-07-31T13:51:53+01:00` — bit-for-bit identical to what the 08-03 run already captured as unchanged. Since a Jira comment or status change always bumps `updated`, this confirms zero new activity in the 24h between runs without needing a full re-read. Carrying forward the 08-03 finding as-is; no new investigation performed.

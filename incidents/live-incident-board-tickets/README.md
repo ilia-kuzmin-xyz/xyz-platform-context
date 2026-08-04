@@ -43,6 +43,126 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-04 — 1 brand-new ticket, PLT-2906 recovered (+2 corrections to prior runs), 2 with real movement, 4 confirmed unchanged, second duplicate-folder cleanup
+
+**Board re-queried.** **8 tickets in scope**: same 6 as 08-03 (PLT-2917, PLT-2909, PLT-2858,
+PLT-2815, PLT-2649, PLT-2619) **plus PLT-2906** (recovered — see below) **plus PLT-3010** (new,
+created 08-03 17:06, after the 08-03 run's own commit). Group B empty again — nothing sits in
+Ready For Development / Dev In Progress. Four tickets had a Jira `updated` timestamp that had
+moved *after* the 08-03 run's own commit (08-03 07:13 UTC / 08:13 BST) — PLT-2917, PLT-2619,
+PLT-2906, plus new-ticket PLT-3010 — and got a full fresh pass; the other four (PLT-2909, PLT-2858,
+PLT-2815, PLT-2649) had `updated` bit-for-bit unchanged since the 08-03 run's own live check, so
+were carried forward with a one-line confirmation rather than a full re-read.
+
+**PLT-2906** (flagged because it vanished from the 07-30 and 08-03 tables). Full detail in
+`PLT-2906-groupA-viewer-and-model/context.md` §2026-08-04. Three things other runs need:
+
+| Ticket | Domain | Status | Finding | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| **PLT-2906** | viewer-and-model | **Open** (back in scope 08-03 16:26) | **Not stalled — resolved on the mechanism and stuck on delivery.** Root cause **CONFIRMED** 07-24 by Ilia's live FAR01 diagnostic: TN 272.2914° folds to 2.29°, under the 5° "no rotation" dead-band, so the guard meant to defer to Revit shared coordinates didn't fire; tightness 0.8806 (< 0.9) let the patch run and overwrite the correct transform with a −20.46° footprint estimate — ~18° wrong across the whole federated model. Fix written: **PR [#2069](https://github.com/XYZReality/hc-frontend/pull/2069)** (5° → 0.5°, plus `compose` instead of `makeRotationZ` to stop wiping shared-coordinate translation/scale, plus pinned FAR01/FAR02 tests). ⚠️ **PR open 11 days, CI green, zero human approvals, `master` still unfixed — while Freshdesk #7424 was closed 08-03 on "it ships in 26.3.4"** | (a) one comment to Darminder: approve #2069 or name who should; (b) separate message to the release owner: is 26.3.4 cut, and is #2069 in it. No customer message needed | 9/10 root cause · 8/10 fix completeness · 4/10 on the 07-14 trigger (**down** from 6/10) |
+
+### ⚠️ Two corrections to earlier runs in this file
+
+1. **PLT-2906's disappearance was *not* the PLT-2909 silent-drop bug — and it was not a scope
+   error either.** The ticket sat in **In Code Review** from 07-24 14:53 to 08-03 16:21, which
+   this file's own scope rules exclude. Both the 07-30 and the 08-03 runs were **correct** to leave
+   it out. **The failure is that neither run said so.** The exit was recorded only inside the
+   ticket folder by an out-of-band 07-28 session, on a branch that did not reach `main` until
+   07-31 — so the 07-30 run could not read it and the 08-03 run did not look. A Major incident with
+   a customer promise attached went 10 days unexamined, and re-entered scope on 08-03 without
+   anyone noticing. **Rule worth adopting: every run table gets an explicit "left scope this run"
+   row naming the status that removed the ticket, and each run re-queries once without the status
+   filter to catch returnees.**
+2. **The 08-03 run's stated cause for PLT-2909's 07-30 drop is wrong.** Its two duplicate folders
+   (`-data-pipeline`, `-viewer-and-model`) were **created by `862d276`, the 07-30 run's own
+   consolidation commit** — at 07-30 run start `main` held exactly one PLT-2909 folder. The stale
+   root-level `live-incident-board-tickets/` the 08-03 run removed was also created by `862d276`.
+   Duplicate folders are a real hygiene problem but they are a *product* of that run, not a cause
+   of anything before it. **Whatever dropped PLT-2909 from the 07-30 table is still unexplained —
+   re-check it (start with its status history), and don't assume PLT-2884/PLT-2892's duplicate
+   folders caused drops either.**
+
+### Process note
+
+The 07-30 run's opening claim, *"Same 7 tickets in scope as 07-22 — no brand-new tickets arrived,"*
+is contradicted by the 07-22 table in this same file: the two sets overlap on only three tickets,
+and PLT-2923 and PLT-2931 (both created before 07-30, both introduced in the 07-24 section that
+`main` did not yet have) are absent from it. Continuity claims between runs are worth checking
+against the previous table rather than asserted.
+
+---
+
+### Repo hygiene (second pass — the 08-03 run's own flagged cleanup debt)
+
+The 08-03 run explicitly deferred two known duplicate-folder cases (PLT-2884, PLT-2892) citing
+budget. Both resolved this run:
+
+- **PLT-2892**: `-groupA-viewer-and-model` was a stale pre-resolution snapshot (still described the
+  ticket as "freshly triaged, no analysis yet") superseded by its own `-resolved-viewer-and-model`
+  sibling, which already contains the full arc through the shipped fix. **Deleted the stale one.**
+- **PLT-2884**: the two folders (`-data-pipeline`, `-progress-tracking`) were **not** simple
+  duplicates — they were two independent investigations from different runs that reached
+  **different root-cause theories** on the same ticket (one accepted "customer's XER is bad" at
+  face value; the other raised a specific, falsifiable competing hypothesis — Pattern A,
+  intangible-activity `ActualProgress = 0` on the Platform side — that the other never addressed).
+  Checking Jira to resolve which was consolidated into a discovery: **the ticket closed 2026-07-31
+  via a bare Freshdesk auto-sync, with no human comment verifying anything and neither hypothesis
+  ever tested.** Consolidated into one folder (`PLT-2884-relocated-data-pipeline/`, retagged
+  `relocated` since the ticket is Done and out of scope), with the unresolved-hypothesis finding
+  recorded in §10 for if the pattern recurs.
+
+### PLT-3010 — new ticket (progress-tracking)
+
+**EQX-AT11x figures discrepancy, created 08-03 17:06, assigned Rishi.** Client-reported Plan
+11.42%/Actual 10.05% vs platform tile 10.15%/10.48% — the decisive fact is the **two legs disagree
+in opposite directions** (Plan lower, Actual higher on the platform side), which flips SPI from
+0.88 to 1.03 and rules out any shared-denominator/date-snapping/staleness mechanism, since those
+would move both legs the same way. Sibling of PLT-2884 (same combined AT10-11x XER) but **not**
+the same Pattern-A shape — there Platform read lower, here it reads higher on one leg only.
+Confidence 5/10 (deliberately not rounded up — mechanism is well-scoped, single named cause is
+not). Draft action: ask Rishi for the Baseline % value, which settles the larger of the two gaps
+in one number.
+
+### Tickets with real movement
+
+| Ticket | Domain | Status | What changed | Drafted action | Conf. |
+|---|---|---|---|---|---|
+| **PLT-2917** | progress-tracking | Open | Darminder answered the "remaining task" question (08-03): it's **PLT-2524**, a data-freshness tooltip ticket — **not** the previously-guessed UX defect, so that defect is now known to be un-raised and unowned. PLT-2524 itself is Blocked/unassigned, blocked by another Backlog ticket — a second stall. Mechanism sharpened: Rishi's PBI fix covers the *percentage*, but milestone done/late status reads Actual End Date, which nothing in the FE ever writes — two fixes' worth of scope, only one confirmed in hand. PBI ship status still unconfirmed (Pietro's "ok we got it working" is 4 days old, no verification since) | 4 short one-question drafts: Pietro (did it ship / does it touch milestones), Mostafa (flag re-scoped, with recommendation), Darminder (is UX-1114 a real blocker) | 8/10 |
+| **PLT-2619** | dashboard-migration (renamed from `other` this run) | With Customer | Pietro reassigned Masum→Yash (08-03, his first action since raising it 04-23); Freshdesk flipped Awaiting-release→Waiting-on-customer, **inverting** the prior close-out plan — Yash now has a live client question out whose content we can't see; PLT-2935 linkage firmed up via PR #2080 (confirms a demo project is already on the native `/projects/:id/dashboard` route), but **#2080 itself has been green with zero human reviews for 5 days** | ask Mostafa (named requester on PLT-2935) the project's name; separate review nudge on #2080 | 7/10 (down from 7.5 — Yash going *outward* to the customer is a counter-signal to "already superseded") |
+
+### Cross-ticket notes
+
+- **PLT-2906 turned out not to be a silent-drop bug — it's a silent-*exclusion* documentation gap.**
+  Unlike PLT-2909 (genuinely dropped while in-scope), PLT-2906 was correctly out of scope (In Code
+  Review, 07-24→08-03) both times it was "missing." The real failure was that no run said so, so a
+  Major incident with a customer promise attached went unwatched for 10 days without anyone
+  noticing it had left the board's exclusion filter rather than the board itself. See the two
+  corrections above — the fix is an explicit "left scope this run, because X" line, not just a
+  fresh JQL query (PLT-2909's actual drop cause is still unexplained).
+- **PLT-2884's unresolved-hypothesis closure is a live risk, not just history.** If any EQX-family
+  or other intangible-heavy-schedule project raises a "new dashboard % lower than old, but the
+  activity's Editor-Progress matches" symptom, check the Pattern-A signature (0 linked elements,
+  planned labor hours, 0 actual) before accepting "bad customer XER" — that exact framing shipped
+  unverified once already.
+- **A stalled-PR pattern is emerging across unrelated tickets**: PR #2080 (PLT-2619/PLT-2935
+  family) green 5 days with zero reviews. Not yet a named pattern, but worth watching whether
+  review latency — not diagnosis — becomes this board's actual bottleneck the way posting-latency
+  was flagged on 08-03.
+
+### ⚠️ Attachments needing human — this run
+
+**PLT-2917** (both xlsx exports and both Darminder design PNGs — still HTTP 403, unread — the
+design PNGs are the one artifact that could confirm/deny the milestone-UX-defect guess directly).
+**PLT-2906** (all media still 403; the decisive unread one is Ilia's 07-31 "confirmation"
+screenshot on the Freshdesk close-out — it would distinguish "tests pass" from "verified deployed
+to the customer's model," which is exactly the gap behind the PR #2069 / 26.3.4 risk below).
+**PLT-3010** (all 5 attachments 403; the 37KB dashboard PNG is the single highest-value item — it
+would settle weighting basis, active filters, date-slider range, and Baseline % simultaneously).
+No new attachments on the four unchanged tickets this run (prior gaps stand as previously
+documented).
+
+---
+
 ## Run: 2026-08-03 — repo hygiene pass + 3 tickets with real movement, 3 confirmed unchanged
 
 **Board re-queried** with the corrected scope rule (`With Customer` in-scope, per this file's own

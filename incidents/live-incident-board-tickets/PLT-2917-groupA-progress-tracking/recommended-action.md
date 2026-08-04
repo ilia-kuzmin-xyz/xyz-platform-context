@@ -1,5 +1,108 @@
 # PLT-2917 — recommended action (DRAFT ONLY — execute nothing)
 
+## ⚠️ 2026-08-04 — CURRENT DRAFT. Everything below this section is history; do not post any of it.
+
+**These are drafts for a human to read, edit and post. Nothing here has been sent, and no Jira
+write of any kind was made on this pass — the ticket was read only.**
+
+The 08-03 draft is **partly overtaken**. Two of its four asks are now dead, and one of its stated
+facts was wrong:
+
+- Its ask #2 (*"what is the remaining task Darminder has designs for?"*) — **answered.** Darminder
+  replied on 08-03 15:10: it is **PLT-2524**. Don't ask again.
+- Its ask #4 (*"reassign Yash → Ilia"*) — **already done, before that draft was written.** Yash
+  reassigned it to Ilia on **07-31 13:33** (via Bailey Cotnoir, 3 seconds apart). The draft's claim
+  that Yash still held it was incorrect. Drop the ask.
+- Its ask #1 (confirm the PBI fix) and #3 (the feature-flag decision) **still stand, unanswered.**
+- And PLT-2524 turns out **not** to be the UX defect we guessed at 4/10 — it is a *"when was this
+  last calculated"* freshness indicator. So that guess is closed, and the UX defect we found is
+  still nobody's.
+
+### What is actually open, and who owns each piece
+
+Four things, three of them one question each to one person. In playbook form: one question per
+message, one owner, phrased to be answerable with a value.
+
+**1 · To Pietro — the close-out question, and the highest-value one.** Four days of silence on the
+customer-facing fix, on a ticket whose *first* fix went undocumented for nine days and came back
+from the customer still broken. This is the failure mode to prevent, not a nicety.
+
+> Pietro — did the PBI update to pull in the user-entered progress go live, and does ELN03 /
+> PMILE5030 show the 100% now? Just want a yes or no and a date so I can tell Thomas something
+> concrete.
+
+**2 · To Pietro — the scoping question, asked as a question because I can't see the PBI side.** Our
+read is that joining the user-defined progress fixes the *percentage*, but not the milestone
+diamonds: completion on the milestone views comes from Actual End Date, which nothing in the
+platform writes. If that's right, Thomas's original three complaints (FAR01 showing none, ELN04
+past-late/future-done, ELN03 all-should-be-done) are still open even once your fix lands. Send this
+separately from #1 so the yes/no answer doesn't get lost.
+
+> Pietro — separate from the % fix: does your change touch what the milestone markers read, or only
+> the progress percentage? Asking because milestone done/late comes off Actual End Date, and I don't
+> think anything writes that — if so, FAR01 and ELN04 are still broken after this ships.
+
+**3 · To Mostafa — the feature-flag decision, still unanswered since 07-31.** Darminder's 08-03
+reply answered the other question and this one dropped. Worth knowing that "remove the flag" is
+bigger than the Gantt cell: it also turns on the activity-properties progress block and part of the
+edit-schedule form. Give him the recommendation rather than an open question, per the playbook.
+
+> Mostafa — Pietro's flag question from Friday is still open. Removing the `Editor-Progress` flag
+> switches on three things, not one: the % columns in the Gantt, the progress block in activity
+> properties, and part of the edit-schedule form. My take is yes, turn it on, since people are
+> already relying on it — but not until the PBI side is confirmed working, otherwise users keep
+> entering numbers that don't show up anywhere. Shout if you'd rather do it the other way round.
+
+**4 · To Darminder — the thing that's quietly stuck.** He named PLT-2524 as the remaining task, but
+PLT-2524 is `Blocked`, has **no assignee**, and its blocker **UX-1114 is sitting in Backlog at
+Medium** — while PLT-2524 itself is Critical and its parent epic is already Done. Nothing has moved
+on it since 23 July. Mostafa says the designs are finished, so the blocker may just be stale.
+
+> Darminder — PLT-2524 is still Blocked by UX-1114, and UX-1114 is in the backlog. Mostafa says the
+> designs are done, so is UX-1114 still a real blocker, or can PLT-2524 be unblocked and picked up?
+> It also has no assignee.
+
+### Two things not to do
+
+- **Don't close PLT-2917 on the ELN03 percentage win.** It carries two fixes' worth of scope and
+  only one is in hand — see context §0.7.5. FAR01 and ELN04 have *no evidence at all*: their only
+  screenshots are the three broken images in the description, which are broken for everyone and
+  were never re-sent despite being asked for on 07-22. If the % fix verifies, split FAR01/ELN04 onto
+  their own track rather than letting them close alongside.
+- **Don't re-ask Thomas the 07-22 questions yet.** He's owed an answer first. Once Pietro confirms
+  #1, the reply to Thomas can carry the fix *and* the screenshot request together — one round trip
+  instead of two. Asking again before we've told him anything is what burned the 07-22 → 07-23 loop.
+
+### One item that needs raising, and currently isn't anywhere
+
+The UX defect from context §0.5 — the Gantt lets you type 100% on exactly the activities where it
+cannot move any milestone view (no linked elements ⇒ the cell is editable), then shows a green
+*"Actual % Complete updated to 100%"* toast — is **not** PLT-2524, and no ticket covers it. We had
+assumed Mostafa meant this; he didn't. It needs a small PLT ticket of its own, or it will resurface
+as the next customer report. Related and cheap: the Gantt's Actual Progress column header promises
+*"Progress updates every 15 minutes"* as a hardcoded string
+(`gantt-tooltip.tsx:19-20`) with nothing verifying it — which is roughly what PLT-2524 is meant to
+replace with a real timestamp, and the plumbing already exists one surface over at
+`progress-panel.tsx:288`.
+
+### Status and assignee
+
+**Keep `Open`. Leave it with Ilia** (already correct since 07-31 — no change needed). Don't flip to
+With Technical Support; that's what produced the 07-22 → 07-23 no-op. Worth a human adding a proper
+Jira link from PLT-2917 to PLT-2524 — right now PLT-2524 exists only as URL text inside a comment,
+so `issuelinks` on PLT-2917 is empty and the dependency is invisible to any JQL.
+
+**Confidence this is the right next step: 7.5/10.** It drops the two asks that are now dead, keeps
+the two that are genuinely unanswered, and adds the one nobody has noticed (PLT-2524 is stalled
+behind a backlog blocker with no owner). Not higher because questions #1 and #2 may both be answered
+already in a Teams thread or the PBI workspace, where I cannot see — in which case messages 1 and 2
+collapse into one short nudge. Ask #2 is deliberately phrased as a question rather than a finding,
+because the PBI half of that claim is inferred at 6/10, not verified.
+
+---
+
+## Prior drafts (HISTORICAL — do not post; all superseded by the 2026-08-04 section above)
+
 ## ⚠️ 2026-08-03 re-check — the 07-30 draft below is now SUPERSEDED; do not post it
 
 Pietro and Rishi solved the load-bearing question in-thread on 07-31 without needing either of
@@ -34,8 +137,6 @@ with the two questions that are actually still open, and flags the one thing (FA
 would otherwise get silently swept into a close-out it doesn't belong in.
 
 ---
-
-## Prior drafts (HISTORICAL — do not post; superseded above)
 
 ### Draft as of 2026-07-30 (superseded 08-03 — Pietro/Rishi solved the routed questions below)
 

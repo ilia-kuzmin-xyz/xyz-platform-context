@@ -159,28 +159,88 @@ activity.
 Same trap as PLT-2882, where the schedule showed 798,751 and the API 798,841 for identical data.
 PLT-2874 did not fix this one.
 
-## The ElementState rule infers "is linked" from date presence, and the parity test hides it
+## "Is linked" must not be inferred from schedule-date presence
 
-There are two implementations of the ElementState rule: `calculateInstallationStatus`
-(TS, `installation-status-utils.ts`) and `buildInstallationStatusCaseSql`
-(SQL, `dashboard-progress/utils/installation-status-sql.ts`). They disagree on one input.
+`buildInstallationStatusCaseSql` (`dashboard-progress/utils/installation-status-sql.ts:63`) reaches
+Planned via `WHEN startDate IS NOT NULL OR endDate IS NOT NULL` — it has no linkage input, so date
+presence stands in for "linked to an activity". That proxy breaks for a linked element whose
+activity carries no dates: it falls to `ELSE NULL` = **Not Planned** (grey) instead of Planned
+(yellow), and drops out of a Planned status filter.
 
-The TS rule branches on `scheduleId` — "linked to an activity at all" — so a linked element with
-no activity dates returns **Planned**. The SQL rule has no linked flag; its Planned branch is
-`WHEN startDate IS NOT NULL OR endDate IS NOT NULL` (`installation-status-sql.ts:63`), so the same
-element falls to `ELSE NULL` = **Not Planned**. Yellow vs grey, and it also drops out of a Planned
-status filter.
+The case is reachable, not theoretical. `schedule-service.tsx` `syncActivityDates()` ends with
+`.filter(row => row.startDate || row.endDate)`, so a dateless activity never gets a row in
+`schedule_activity_dates`, and the `linked` CTE LEFT JOINs it to NULL.
 
-This is reachable, not theoretical: `schedule-service.tsx` `syncActivityDates()` ends with
-`.filter(row => row.startDate || row.endDate)`, so an activity carrying no dates never gets a row
-in `schedule_activity_dates`, and `getElementStateCodes`'s `linked` CTE LEFT JOINs it to NULL.
+**Viewer: fixed** (#2081, PLT-2743). `getElementStateCodes` now writes its CASE inline and derives
+Planned from `linked.modelElementId IS NOT NULL` off the FULL OUTER JOIN, so linkage is read
+directly. It no longer uses the shared builder — the builder's four-column-expression interface is
+exactly what put linkage out of reach.
 
-`installation-status-rule-parity.test.ts` cannot catch this. It generates rows with
-`scheduleId: startDate || endDate ? 'act1' : ''` and states the assumption in its scope note
-("Links carry dates, so scheduleId presence ⇔ a date is present"). The axiom is baked into the
-fixture, so the one divergent branch is unreachable by construction. It is also single-row, so it
-does not cover multi-activity aggregation either — the SQL takes `MIN(startDate)`/`MAX(endDate)`
-across *all* of an element's activities, where the old viewer used `activities[0]` only.
+**Dashboard: still on the old proxy, and this is a confirmed bug against spec.** It keeps using
+`buildInstallationStatusCaseSql`. Two authoritative sources say linkage is the discriminator:
 
-Raised on #2081 (PLT-2743). Before trusting that parity test as a drift guard, check whether the
-case you care about is expressible in its fixture.
+- *Element Status Definition* (XKB1 `1794080772`, Darminder, Jun 2026) — "**Not Planned/No linked
+  activity** (Grey)".
+- *Dashboard — Progress Tab Explained* (XSHW `2276556802`) §2 — step 5 "Not installed, but it **is
+  linked to the schedule**? → Planned"; step 6 "**Not linked to any schedule activity at all** → no
+  colour".
+
+The builder's own docstring also says `ELSE NULL` means "not linked to any schedule", so linkage was
+always the intent — date presence is an implementation shortcut that silently diverges from it.
+
+Dashboard blast radius (`progress-queries.ts:762`): `element_with_schedule` takes
+`MIN(ac.StartDate)`/`MAX(ac.FinishDate)` over `activity_links → activity_calendar`, so dates go NULL
+both when the activity is undated **and** when it is absent from `activity_calendar` (e.g. links to a
+superseded schedule revision) — the second is likely the more common trigger. `status_counts` then
+filters `WHERE dynamicStatusCode IS NOT NULL`, and the status-filter query
+(`dashboard-progress-service.ts:1981`) filters `AND status_code IS NOT NULL`, so affected elements are
+uncoloured, absent from status counts, and unselectable by a status filter.
+
+**Not affected:** Actual%/Planned%/Variance/SPI come from pre-computed progress parquets, not from
+these status codes (same page §4, §7). This bug does not skew the percentages.
+
+Note the two surfaces read different date sources — the viewer projects `schedule_activity_dates` from
+the loaded schedule, the dashboard reads the `activity_calendar` parquet — which is why #2081 fixed
+only the viewer and deferred unification.
+
+### The parity test that missed it (deleted, and why)
+
+`installation-status-rule-parity.test.ts` compared the TS rule against the SQL rule and passed
+throughout. It generated rows with `scheduleId: startDate || endDate ? 'act1' : ''` and stated the
+assumption in its scope note ("Links carry dates, so scheduleId presence ⇔ a date is present"),
+so the one divergent input was excluded by construction. It was also single-row, so multi-activity
+aggregation was uncovered.
+
+Both it and `calculateInstallationStatus` are now deleted, replaced by
+`duckdb-element-store.element-state-table.test.ts` — an exhaustive branch table run through the real
+`getElementStateCodes`, asserting literal expected states. General lesson: **two implementations
+compared against each other cannot catch a misreading they share.** Assert against expected values,
+not against a sibling implementation.
+
+Related behaviour worth knowing: before the schedule projection exists, linked elements now derive
+**Planned**, not Not Planned — so a transient yellow on load, correcting once the schedule lands.
+And the derive takes `MIN(startDate)`/`MAX(endDate)` across *all* of an element's links (widest
+window, matching the dashboard aggregate); the pre-#2081 viewer used `activities[0]` off an
+unordered map.
+
+### The fix independently re-verified (2026-08-04), and the one thing to check if it ever regresses
+
+The #2081 rule was re-run outside the repo's test suite — the same 60-row branch table replayed
+against a standalone DuckDB, 60/60 matching the documented rule. Worth knowing *how* it can break,
+because the fix rests on one non-obvious SQL detail:
+
+```sql
+FROM status FULL OUTER JOIN linked USING (modelElementId)
+...
+WHEN linked.modelElementId IS NOT NULL THEN 0   -- Planned
+```
+
+`USING` merges the join column, so the **unqualified** `modelElementId` is the coalesced value —
+non-null on every row. Linkage is read only because the **qualified** `linked.modelElementId` still
+resolves to the right-hand side's own value, which stays NULL for an unmatched (unlinked) row.
+Verified directly: 6 qualified-NULL rows for exactly the 6 unlinked fixtures.
+
+If a future edit drops the `linked.` qualifier, or swaps `USING` for an `ON` + `COALESCE` of the two
+ids, **every element carrying a status row derives Planned** — the whole model paints yellow. The
+branch table catches it (the 4 unlinked-and-not-installed rows fail), so that test is load-bearing,
+not decorative. Do not "simplify" it away.
