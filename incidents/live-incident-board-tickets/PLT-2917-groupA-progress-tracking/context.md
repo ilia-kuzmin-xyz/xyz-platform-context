@@ -1,14 +1,15 @@
-# PLT-2917 — "Progress Dashboard" (milestones wrong) — triage context
+# PLT-2917 — "Portfolio Progress Dashboard" (milestones wrong) — triage context
 
 - **Domain slug:** `progress-tracking` (justification in §7)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2917
 - **Type:** Live Incident · **Priority:** Major · **Status:** **Open**
-- **Assignee:** **Yash Patel** (was Ilia Kuzmin; auto-reassigned 2026-07-22 09:31 by Automation-for-Jira when Ilia moved it to With-Technical-Support) · **Reporter:** Yash Patel · original client reporter: **Thomas**
+- **Summary field:** renamed **2026-07-31 13:57** by Yash, `Progress Dashboard` → **`Portfolio Progress Dashboard`** (changelog, verified 08-04). Small but useful: the surface ambiguity Ilia raised on 07-22 is now settled *in the ticket title itself*.
+- **Assignee:** **Ilia Kuzmin** — ⚠️ **corrected 2026-08-04.** Prior runs recorded "Yash". Changelog shows Yash reassigned **Yash → Bailey Cotnoir at 07-31 13:33:34**, then **Bailey → Ilia at 07-31 13:33:37** (3 seconds later, same author). So it has been Ilia since 07-31, *before* the 08-03 run wrote "assignee is still Yash" — that statement in §0.6 was wrong. · **Reporter:** Yash Patel · original client reporter: **Thomas**
 - **Freshdesk:** Ticket 7420, status "Waiting on 3rd line" (i.e. back on us)
 - **Project link given:** `https://cloud.xyzreality.com/progress-dashboard/69a964b9380af76aed8faa97` · Software Area: Dashboard
-- **Created:** 2026-07-21 · **Last updated:** 2026-07-31 · **Attachments:** 1 PNG + 1 XLSX (07-27) + 1 PNG (07-31) — none readable here, see §8
-- **Recurrence:** Pietro Desiato already "worked on" this once early on; the customer replied it was *still* not fixed. That earlier fix stayed undocumented for 9 days — **resolved by the 07-31 developments below (§0.6): Pietro has since found and fixed the actual gap.**
-- Triage dates: 2026-07-13 · 2026-07-22 · 2026-07-30 · **2026-08-03 (this run — see §0.6, materially changes the picture)**
+- **Created:** 2026-07-21 · **Last updated:** 2026-08-03T15:10:58+0100 · **Comments:** 17 · **Attachments:** 4 (PNG 07-21, XLSX 07-27, XLSX 07-31, PNG 07-31) — **still none readable here; re-confirmed HTTP 403 on 08-04, see §8a**
+- **Recurrence:** Pietro Desiato already "worked on" this once early on; the customer replied it was *still* not fixed. That earlier fix stayed undocumented for 9 days — **partly resolved by the 07-31 developments (§0.6): Pietro found and says he fixed the PBI-side gap. As of 08-04 that fix is still unconfirmed as shipped (§0.7).**
+- Triage dates: 2026-07-13 · 2026-07-22 · 2026-07-30 · 2026-08-03 (§0.6) · **2026-08-04 (this run — delta pass; see §0.7. Falsifies one §0.6 guess and corrects two §0.6 facts.)**
 
 ---
 
@@ -166,6 +167,235 @@ dashboard never changes. This is a genuine PLT-side item — see recommended-act
 - **PBI-side fix is real, mechanism-matched, and in progress (not yet shipped/verified): 8/10** — Rishi's answer independently corroborates this file's own §0.3 diagnosis via the parquet-merge mechanism, and Pietro confirmed "got it working," but no comment yet says the PBI report was actually republished or that the client re-checked ELN03.
 - **"Remaining task w/ Darminder's designs" = the §0.5 UX fix: 4/10** — plausible, unconfirmed, needs one direct question rather than being carried forward as an assumption.
 - **FAR01/ELN04 unaffected by this fix: 7/10** — those symptoms were never mechanistically tied to the user-override/PBI-join gap Rishi/Pietro just addressed; they still need their own screenshots.
+
+---
+
+## 2026-08-04 — RUN (delta pass): the "remaining task" is named (PLT-2524) and it is **not** what §0.6 guessed; two §0.6 facts corrected; the PBI fix is still unconfirmed 4 days on
+
+Trigger for this pass: Jira `updated` moved to **2026-08-03T15:10:58+0100**, which is *after* the
+08-03 run's own commit (07:13 UTC / 08:13 BST). One thing happened in that window.
+
+### 0.7.1 What is actually new on the ticket (VERIFIED — read the live issue myself)
+
+**Exactly one new comment since the 08-03 snapshot.** Comment total is now 17; this is the only
+one dated after 07-31.
+
+| When | Who | What |
+|---|---|---|
+| **2026-08-03 15:10:58** | **Darminder Atker** | Replying to Mostafa + Pietro: *"Yes it is [https://xyzreality.atlassian.net/browse/PLT-2524](https://xyzreality.atlassian.net/browse/PLT-2524)"* |
+
+That is the answer to the §0.6 open item *"what is 'the remaining task' Darminder has designs for?"*.
+It is **PLT-2524**, and it resolves that question outright.
+
+**No other movement.** No new attachments (last is Pietro's 07-31 16:34 empty-table PNG). No status
+change (still `Open`). No priority change (still `Major`). `resolution` is still null. Nothing from
+Thomas, Mostafa, Yash or Pietro. `issuelinks` on PLT-2917 is **empty** — PLT-2524 is referenced only
+as *URL text inside a comment body*, so the connection is invisible to any link-based or JQL
+`issueLinkType` query. Worth a human adding a real "relates to" link.
+
+### 0.7.2 What PLT-2524 actually is — this **falsifies** the §0.6 guess
+
+§0.6 rated at **4/10** the guess that "the remaining task" = the §0.5 latent UX defect (Gantt invites
+a 100% edit on milestones, shows a green success toast, dashboard never moves). **That guess is
+wrong.** Read PLT-2524 directly:
+
+- **PLT-2524** — *"Configure for planned and actual progress to track when parquet last updated on"*
+- Type **Task** · Priority **Critical** · Status **Blocked** · **Assignee: none** · Created
+  2026-03-20 · Last updated 2026-07-23 (i.e. **nothing has moved on it since**, including after
+  Darminder pointed at it on 08-03)
+- Parent epic **PLT-1792** *"[PLT] View % Planned and % Complete"* — status **Done**. So the epic is
+  closed while this child sits Blocked; the child is the leftover.
+- **Blocked by → UX-1114** *"UX/UI: Last Updated Indicator for Planned & Actual % Complete"* —
+  status **Backlog**, priority **Medium**.
+- Description (verbatim sense): *for work on Planned % complete and Actual % complete we need
+  something to notify when the parquet was last updated or updated at all for these values*; needs
+  coordinating **with the DPL team** and *"most likely an update on API side to notify frontend of an
+  update"*. Two named scenarios: **(a)** the user uploads a new schedule and the values have not been
+  calculated yet; **(b)** the user is in an editor session, the values *have* been recalculated, and
+  the user is not aware.
+- Mostafa, on PLT-2524, **2026-07-21 14:30**: *"I have spoken with @Jason Fingland and we have
+  attached the proposed design, which will sit as a **tool tip for actual progress calculation**"* —
+  this is the "designs already exist" claim, and it is real (two PNGs attached, 2026-03-20 and
+  2026-07-23).
+
+**So the remaining task is a data-freshness / "last updated" indicator on the planned & actual %
+figures — not a fix to the milestone-edit UX.** The two are adjacent but different: PLT-2524 closes
+the *"has my number been picked up yet?"* information gap; the §0.5 defect is the *"my number can
+never reach Actual Finish Date"* write-path gap. **Shipping PLT-2524 would not make a milestone show
+as complete.** §0.5 therefore remains an open, unraised, un-owned item — it was not what Mostafa
+meant, and nobody is holding it.
+
+⚠️ **PLT-2524 is currently unstartable**, which is the thing a human most needs to see here: it is
+`Blocked`, it has **no assignee**, and its blocker **UX-1114 sits in `Backlog` at `Medium`**. Mostafa
+describes it as the one remaining task on a Critical-priority item whose designs are done; Jira says
+nobody owns it and its blocker is not scheduled. That is a stall, not progress.
+
+### 0.7.3 Did the PBI join fix ship? — **no evidence either way, and it is now 4 days quiet**
+
+VERIFIED (as an absence): the last word on the fix is still Pietro at **07-31 16:49** — *"ok we got
+it working - will update and test the PBI to integrate the user values"*. Since then, **nothing**:
+no comment saying the PBI report was republished, no verification against the client's own
+`ELN03 Milestones Dashboard.xlsx`, no word from Thomas, and no status change. The customer-facing
+complaint has had **no on-ticket close-out for four calendar days**.
+
+Caveat on that claim: PBI work happens outside both Jira and `hc-frontend` (Power BI workspace,
+Teams). Absence of a Jira comment is **not** evidence the fix didn't ship — only that it was not
+recorded. Given this ticket's own history (Pietro's *first* fix went undocumented for 9 days and the
+customer had to report the recurrence), an unrecorded second fix is the specific failure mode to
+guard against. **This is the highest-value question on the ticket right now.**
+
+### 0.7.4 The `Editor-Progress` flag question is **still unanswered**
+
+Pietro asked Mostafa **and** Darminder on 07-31 16:49 whether to remove the user-progress feature
+flag "since users are using it". Darminder's 08-03 reply answers **only** the remaining-task
+question. The flag decision has had no response from anyone. It is still live and still Mostafa's.
+
+Code state re-verified this run (`hc-frontend`, HEAD `9c14b90`, which contains `origin/master`
+`28e03c3` plus two commits; no diff on any path below between HEAD and `origin/master`):
+
+- `Editor-Progress` is still **default `false`** — `config/constants.ts:887` (`{ name: 'Editor-Progress', value: false }`), union member at `:866`.
+- It gates **three** sites, so "remove the flag" is broader than the Gantt cell alone:
+  1. `viewer-x/components/blocks/activity-properties/activity-progress.tsx:118` — early-returns the whole activity-progress block when off.
+  2. `gantt-x/scheduler/scheduler-columns/scheduler-columns.tsx:12` — `showPercentageColumns`; gates the % columns (`:126`).
+  3. `gantt-x/edit-schedule/blocks/edit-form/edit-form.tsx:65` — combined with `activeSchedule?.hasAnyActualProgress`.
+
+That is the concrete answer to "what does removing the flag turn on for everyone": the activity
+properties progress block, the Gantt % columns, and part of the edit-schedule form.
+
+### 0.7.5 Does the §0.3 / §0.6 mechanism diagnosis still hold? — yes on code, but §0.6 **conflated two fixes into one**
+
+All the load-bearing FE facts re-verified **first-hand this run** (not carried over):
+
+| Claim | Evidence read this run |
+|---|---|
+| Milestone status → colour is a pure string switch, **no date input** | `PortfolioDashboardPage/utils/milestoneStatus.ts:14-30`, re-read in full; `MISSED → "Late"`, default → grey "Unknown" |
+| Status + dates are passed through raw from **`reporting.vw_KeyMilestone`** | `services/portfolioService/portfolio-api.types.ts:125` (comment names the view), `:139` *"Non-null ⇒ the milestone is complete"* on `actualDate` |
+| Unmatched milestones are **silently dropped** (the FAR01 vector) | `portfolioMilestonesData.ts:53` `if (!project) continue` |
+| Marker position only | `portfolioMilestonesData.ts:83` `dueDate = actualDate ?? forecastDate ?? plannedDate` |
+| KPI "on-time" = `actualDate != null`, **not** `status === 'COMPLETE'` | `portfolioMilestonesData.ts:118`; also `:138` for due-in-30 |
+| **Nothing in the FE writes `actualFinishDate`** | exhaustive grep: 13 hits, every one a type declaration, a read, or a test fixture (`dashboard-schedule-service.ts:475,507`; `api-activities-loader.ts:101,124`; `use-dashboard-schedule-data.tsx:202`; `types.ts:20,46,85`; `test-duckdb-harness.ts`) |
+| The only activity-progress write is unchanged | `activity-api-service.ts:262` `POST /projects/${projectId}/activities/progress` |
+| The editable rule is unchanged | `gantt-x/…/scheduler-columns.tsx:149-150` — `hasLinkedElements = task.elements \|\| task.calculatedElementsSum > 0`; `isEditable = task.activityItem?.progressValid === true && !hasLinkedElements` |
+| `isActivityEditableForProgress` unchanged | `use-actual-progress-mutation.tsx` — not-WBS, `elements > 0` ⇒ false, requires `progressValid === true` |
+| **No code moved on this path** | `git log` on `portfolioMilestonesData.ts`, `milestoneStatus.ts`, `usePortfolioId.ts` → newest is still `83c5c11` (PLT-2763, 07-10); on `use-actual-progress-mutation.tsx` → `97ca212` (07-08) |
+
+Six commits landed since 07-30 (`9f3536e`, `7e243fe`, `8d8db2d`, `28e03c3`, `ca87f65`, `9c14b90`).
+I checked the two that could plausibly touch this surface — **`ca87f65`** (PLT-2899, removes
+`defaultProject` as an active-project source; touches `ProgressDashboardHeader.tsx`, `urlUtils.ts`)
+and **`8d8db2d`** (PLT-2764, routes V1 projects to the legacy progress dashboard; `PortfolioPage.tsx`,
+`dashboard-no-model.tsx`, `dashboard-project-provider.tsx`). **Neither touches
+`portfolioMilestonesData.ts` / `milestoneStatus.ts` / `usePortfolioId.ts` / the progress mutation.**
+Citation fix: §0.3 and §3 cite `portfolio-api.types.ts:131` for *"non-null ⇒ complete"*; the actual
+line is **`:139`** (and the `vw_KeyMilestone` mention is `:125`). Content is right, line drifted.
+
+**The sharpening — and it matters for how this ticket gets closed.** §0.3 unified all the symptoms
+under one root cause ("no write path to Actual Finish Date"), and §0.6 then treated Rishi's PBI join
+as *the* fix for that root cause. Those are **two different columns on two different surfaces**:
+
+- Rishi's remedy joins `xyz."vw_CurrentUserDefinedProgress"` / `xyz."ActivityProgress"` to surface the
+  user-defined **percentage** into PBI. That addresses *"Dh4 Ready for energization = 100% → not
+  showing 100%"* and Mostafa's *"why isn't it in the progress parquet"* — the **% symptom**.
+- Milestone **done/late/complete** is read from **Actual End Date** (`vw_KeyMilestone.actualDate`,
+  `portfolio-api.types.ts:139`), and the join writes no `actualFinishDate`. So the original
+  description's three symptoms — FAR01 none showing, ELN04 past-late/future-done, ELN03 *"all
+  milestones should be done"* — are **status/date** symptoms that the % join does **not** touch.
+
+⇒ **This ticket contains two fixes' worth of scope and only one is in hand.** The realistic risk is
+that the ELN03 % win gets read as "PLT-2917 fixed" and the milestone-status half closes silently with
+it. §0.6 item 3 gestured at this for FAR01/ELN04; stating it as a **column-level** distinction is
+firmer and is the thing to hold the line on at close-out.
+
+**Confidence split on that:** VERIFIED on the FE side (the reads above). **INFERRED on the PBI side —
+I cannot see the Power BI report, `vw_KeyMilestone`, or `vw_CurrentUserDefinedProgress`.** It remains
+possible that Pietro's change also altered the milestone visuals, or that `vw_KeyMilestone` derives
+`actualDate` from progress server-side. Do not assert this to Pietro as fact; ask.
+
+### 0.7.6 Defect-family match (`recurring-defect-patterns.md`)
+
+This is a **second clean instance of Pattern 4**, specifically its *"different source artefact"*
+layer: the FE schedule surface reads **parquet merged with `xyz."ActivityProgress"` at request
+time**, while PowerBI reads **parquet only**. Two consumers, two artefacts, guaranteed disagreement
+that is a bug in neither renderer. Rishi's 07-31 answer is a textbook *"name the source artefact
+behind each surface"* (method step 3). It also re-confirms **Pattern 2** (FE is a faithful renderer).
+Worth promoting into `recurring-defect-patterns.md` Pattern 4 as a worked second example — the
+PLT-2874 entry there is currently the only one. *(Not edited this run; noting only.)*
+
+**Doc gap (unchanged, now better specified):** no file under `dashboard/` mentions `isUserProgress`,
+`xyz."ActivityProgress"`, `vw_CurrentUserDefinedProgress`, or the `Editor-Progress` flag — grep
+returns zero across all 13 files. `dashboard/progress-tab.md` documents the parquet path and the
+`calculatedOn` timestamp (`:11`) but not the user-override merge that this whole incident turns on.
+(Also: `CLAUDE.md`'s directory layout calls this file `dashboard/prg-progress.md`; on disk it is
+`dashboard/progress-tab.md`.)
+
+### 0.7.7 New code finding — PLT-2524 is partly precedented, and the Gantt tooltip it targets is a **static string**
+
+Since PLT-2524 is now a named, live dependency of this incident, I read the FE state around it:
+
+- A **"Last updated: …"** indicator **already exists**, but only on the in-viewer progress panel:
+  `dashboard-panels/progress-panel.tsx:288` renders `` `Last updated: ${formatCalculatedOn(calculatedOn)}` ``.
+  It is fed from the V2 progress-outputs API (`progress-outputs-api-service.ts:12`, *"ISO timestamp
+  when calculation was performed"*), resolved as the most recent of the project-level and
+  category-groups outputs (`progress-outputs-v2-loader.ts:80-82`), and exposed as
+  `calculatedOn$` (`dashboard-progress-service.ts:1357-1358`). Documented at `progress-tab.md:11`.
+- The **Gantt's Actual Progress column header** — the surface Mostafa's design targets ("a tool tip
+  for actual progress calculation") — instead carries a **hardcoded, non-dynamic** tooltip:
+  `gantt-x/scheduler/gantt-tooltip.tsx:19-20`
+  `gantt_grid_head_actualProgress: 'Progress updates every 15 minutes. \nValues may be slightly delayed.'`
+  There is no timestamp and no `Tooltip`/`title` anywhere in `scheduler-columns.tsx` (grep: zero hits).
+
+⇒ **INFERRED (not confirmed — the design PNGs are 403):** PLT-2524 is about replacing that static
+*"updates every 15 minutes"* string with a real last-calculated timestamp on the % columns. The
+`calculatedOn` plumbing already exists one surface over, so the FE half is likely small; the
+description's own words put the hard part on **DPL + API** ("notify frontend of an update"), which is
+consistent with why it is `Blocked`. Useful either way: it tells whoever picks up PLT-2524 that a
+working pattern exists at `progress-panel.tsx:288`, and it tells us the current Gantt tooltip is a
+**promise the system does not verify** — a mild sibling of the §0.5 defect (the user is told progress
+refreshes every 15 minutes; nothing shows whether it did).
+
+### 0.7.8 Confidence read — 2026-08-04 (per-claim, not rounded up)
+
+| Claim | Conf. | Basis / what would change it |
+|---|---|---|
+| The "remaining task" is **PLT-2524** | **10/10** | Darminder named it, answering that exact question, unambiguously |
+| PLT-2524 is a **last-updated / data-freshness indicator**, *not* the §0.5 milestone-edit UX defect ⇒ **§0.6's 4/10 guess is falsified** | **9/10** | Read PLT-2524's description, its Mostafa comment, its parent epic and its blocker myself. The −1 is the two attached design PNGs, **unread (403)** — small chance the design covers more than the text implies |
+| PLT-2524 is **unstartable right now** (Blocked, unassigned, blocker UX-1114 in Backlog/Medium) | **8/10** | Read all four fields directly. Discounted because Jira status hygiene often lags reality — someone may be working it untracked |
+| Assignee has been **Ilia since 07-31 13:33**; §0.6's "still Yash" is wrong | **10/10** | Changelog, two entries 3 seconds apart |
+| Summary renamed to "Portfolio Progress Dashboard" on 07-31 | **10/10** | Changelog |
+| **No on-ticket evidence the PBI fix shipped or was verified** | **8/10** | Verified as an absence across all 17 comments. Not 9–10: PBI work is invisible to Jira and `hc-frontend`, so this is "unrecorded", not "not done" |
+| The `Editor-Progress` flag decision is **still unanswered** | **9/10** | Darminder's reply addresses only the other question; no other comment exists. Could have been settled verbally |
+| `hc-frontend` milestone/progress-write path **unchanged**; FE writes no `actualFinishDate` | **9/10** | Re-read the files, exhaustive grep, `git log` per path, HEAD vs `origin/master` diff empty on these paths |
+| Removing `Editor-Progress` exposes **3 surfaces**, not just the Gantt cell | **9/10** | All three gate sites read this run |
+| **The PBI %-join does not fix the milestone-status symptoms** (FAR01 / ELN04 / "all should be done") — different column, different view | **6/10** | FE half verified (`:139`, and nothing writes `actualFinishDate`). PBI half **inferred** — cannot see the report, `vw_KeyMilestone`, or whether it derives `actualDate` from progress. **Must be asked, not asserted** |
+| FAR01 / ELN04 still have **no evidence at all** | **9/10** | Their only evidence was the 3 broken description images; never re-sent, still `url=null` |
+
+**Overall for this pass: ~8/10.** High on *what changed* (one comment, fully read; two prior facts
+corrected against the changelog; PLT-2524 read end-to-end) and on the FE code state. The soft ~2
+points are all the same shape: **everything decisive now lives outside Jira and outside
+`hc-frontend`** — the Power BI report, the two 403 spreadsheets, the 403 design PNGs, and the
+DB views. This pass could not reduce that, and no future code-reading pass can either.
+
+### 0.7.9 What remains unverified after this pass (explicit)
+
+1. **Whether the PBI join fix actually shipped**, and whether ELN03/PMILE5030 now shows the
+   user-entered %. Only Pietro can say. *Highest value.*
+2. **Whether the milestone-status symptoms survive that fix** (§0.7.5). Needs the PBI report or a
+   `vw_KeyMilestone` read for FAR01/ELN03/ELN04 — I have no DB or env access.
+3. **The two `ELN03 Milestones Dashboard.xlsx` attachments (61396, 61764).** Re-attempted 08-04:
+   **HTTP 403** from `api.atlassian.com/…/attachment/content/…` (94-byte error body) on both. **Not
+   read — no claim is made about their contents.** Both are **exactly 203,335 bytes**, so 61764
+   (07-31, *"File from user"*) is *almost certainly the same export re-sent* rather than new evidence
+   — **INFERRED from byte-size identity only.**
+4. **The PLT-2524 design PNGs (54220, 61260).** Re-attempted 08-04: **HTTP 403**. Not read. What the
+   agreed tooltip design actually specifies is unknown.
+5. **The 07-27 inline screenshot** — still Freshdesk-hosted (`eucattachment.freshdesk.com`), not a
+   Jira attachment. Needs Freshdesk access. Unchanged from §8a.
+6. **The 3 description screenshots (FAR01/ELN04/ELN03)** — still broken for everyone (`url=null`,
+   `id=null`). Never re-sent. FAR01 and ELN04 still cannot progress.
+7. **`Editor-Progress` flag decision** — unanswered by anyone.
+8. **§0.5's latent UX defect** — now known *not* to be PLT-2524, so it is **un-raised and un-owned**.
+   No PLT ticket exists for it (searched `hc-frontend` and this repo).
+9. **Pietro's original undocumented fix (07-21)** — still never explained. Lowest value now that the
+   mechanism is understood from other angles, but formally still open since §6.
 
 ---
 
@@ -343,7 +573,13 @@ a portfolio-dashboard home.
 
 ## 8. NEEDS HUMAN (unreadable media, undocumented prior fix, data I can't query)
 
-### 8a. Attachments / media — ⚠️ ALL FOUR ARE UNREADABLE BY THE AGENT (updated 2026-07-30)
+### 8a. Attachments / media — ⚠️ ALL UNREADABLE BY THE AGENT (updated 2026-07-30; re-checked 2026-08-04)
+
+> **2026-08-04 re-check:** still **HTTP 403** on the attachment-content endpoint for the ELN03 xlsx
+> (61396) *and* for PLT-2524's design PNG (61260). Nothing below has been read, and neither have
+> PLT-2524's two design images. Add to the table below: **attachment 61764** —
+> `ELN03 Milestones Dashboard (2e5d118c-…).xlsx`, 07-31 13:34, **byte-identical in size to 61396
+> (203,335 B)**, so most likely the same export re-sent, not new evidence (inferred from size alone).
 
 I attempted to fetch the attachment binaries and got **HTTP 403** from
 `api.atlassian.com/…/attachment/content/…` (Atlassian auth; the MCP tool exposes metadata only, not
