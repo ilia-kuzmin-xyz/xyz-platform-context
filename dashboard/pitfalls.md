@@ -176,9 +176,32 @@ Planned from `linked.modelElementId IS NOT NULL` off the FULL OUTER JOIN, so lin
 directly. It no longer uses the shared builder — the builder's four-column-expression interface is
 exactly what put linkage out of reach.
 
-**Dashboard: still on the old proxy.** It keeps using `buildInstallationStatusCaseSql`, so the two
-surfaces can still disagree on this input — the viewer is now the correct side. Unifying them was
-deferred because the surfaces read different tables. Assume nothing about agreement here.
+**Dashboard: still on the old proxy, and this is a confirmed bug against spec.** It keeps using
+`buildInstallationStatusCaseSql`. Two authoritative sources say linkage is the discriminator:
+
+- *Element Status Definition* (XKB1 `1794080772`, Darminder, Jun 2026) — "**Not Planned/No linked
+  activity** (Grey)".
+- *Dashboard — Progress Tab Explained* (XSHW `2276556802`) §2 — step 5 "Not installed, but it **is
+  linked to the schedule**? → Planned"; step 6 "**Not linked to any schedule activity at all** → no
+  colour".
+
+The builder's own docstring also says `ELSE NULL` means "not linked to any schedule", so linkage was
+always the intent — date presence is an implementation shortcut that silently diverges from it.
+
+Dashboard blast radius (`progress-queries.ts:762`): `element_with_schedule` takes
+`MIN(ac.StartDate)`/`MAX(ac.FinishDate)` over `activity_links → activity_calendar`, so dates go NULL
+both when the activity is undated **and** when it is absent from `activity_calendar` (e.g. links to a
+superseded schedule revision) — the second is likely the more common trigger. `status_counts` then
+filters `WHERE dynamicStatusCode IS NOT NULL`, and the status-filter query
+(`dashboard-progress-service.ts:1981`) filters `AND status_code IS NOT NULL`, so affected elements are
+uncoloured, absent from status counts, and unselectable by a status filter.
+
+**Not affected:** Actual%/Planned%/Variance/SPI come from pre-computed progress parquets, not from
+these status codes (same page §4, §7). This bug does not skew the percentages.
+
+Note the two surfaces read different date sources — the viewer projects `schedule_activity_dates` from
+the loaded schedule, the dashboard reads the `activity_calendar` parquet — which is why #2081 fixed
+only the viewer and deferred unification.
 
 ### The parity test that missed it (deleted, and why)
 
