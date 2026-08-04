@@ -631,3 +631,68 @@ Steps 1–3 are independent of the commissioning question; step 4 is where the r
 4. Then: `git checkout -B PLT-1770 origin/master`, `touch .claude/commissioning-active` if commissioning is in scope,
    build on `Slider.tsx` + `TeamAccordionSection.tsx` + `mapRoleTreeDataToApiPayload`/`findCheckedKeys` + `RoleService`.
    Keep PR draft. Flag to PLT-2926/2927 that they branch off this one.
+
+---
+
+## Implementation status (updated 2026-08-04)
+
+### Slice 1 has LANDED as a draft PR — do not rebuild it
+
+**#2087 — "PLT-1770: Custom permission slider primitives and IAM adapter seam"**, branch `PLT-1770`,
+draft, **CI green on both PR Check and Multibranch**. 10 files, ~1069 added lines, 28 unit tests.
+Head is `60e5611` (was `da65cad` — amended on 2026-08-04 purely to correct the commit author from
+`Claude` to Ilia; tree unchanged).
+
+What it contains — this is step 1 of the "Recommended split" above:
+
+| File | Role |
+|---|---|
+| `permission-levels.ts` | level ladder, badge mapping, node snapping, clamping |
+| `permission-modules.config.ts` | 3 modules, features, per-feature ladders, detail bullets |
+| `permission-state.ts` | roll-up → `Custom`, push-down w/ clamping, minimum-grant, role equivalence |
+| `permission-adapter.ts` | **the single IAM seam — intentionally throws** |
+| `components/PermissionSlider.tsx` | stepped slider + badge |
+| `components/PermissionDetails.tsx` | ✓/✗ details accordion |
+| `components/PermissionModuleSection.tsx` | module accordion, header ↔ children wiring |
+
+**Why `permission-adapter.ts` throws instead of mapping.** The UI models access as an *ordered
+ladder per feature* (No access < View only < Editor < Admin); IAM models permissions as an
+*unordered tree* (authority category → subcategory → authority) with **no rank on any node**, and
+the seeded subcategory names are *features*, not levels. So a slider position cannot be turned into
+authorities until the level representation is decided (backlogged as **PAPI-3717**, whose scope is
+portfolio-invitation assignment and which *assumes* role creation already works).
+
+⚠️ **The sharp bit, worth re-reading before anyone "finishes" the adapter:** `ms/iam/api/roles` CRUD
+**already works today** (`RolePage.tsx` uses it). A speculative payload would **not fail safely** —
+it would *succeed*, writing malformed roles into real IAM. Hence the throw. That file is the only
+one that needs to change once the level model is settled.
+
+Also deliberately omitted, and why: Quality's `Assigned Issues only` / `Limit to Issue Type` (IAM has
+no field to persist either — rendering them would silently drop the user's choice), and the
+commissioning modules (flag-gated, out of scope).
+
+Two items in `permission-modules.config.ts` are **provisional and marked in-file**: the per-feature
+ladders (the module sheet shows Schedule at Admin, the details sheet doesn't offer it — one is wrong)
+and each bullet's `minLevel`. Bullet *text* is verbatim.
+
+### Slices 2–4 NOT started — held deliberately
+
+Slices 2 (list + empty state + search, wired to `RoleService`) and 3 (create form + validation +
+discard guard + toast) are, per the split above, independent of the commissioning question and
+technically buildable. They have **not** been started, for two reasons:
+
+1. The 22 open questions at the top of this file are **still unanswered** (since 2026-07-29), and
+   still **not posted to Jira** — PLT-1770 has exactly one comment (Darminder, 2026-07-24). Building
+   more UI on an undecided level model risks throwaway work.
+2. PLT-1770 sits in **`Dev In Progress`**, which is outside the kick-off set the scheduled routine
+   is authorised to take on.
+
+Slice 4 (wiring into the two dropdowns) remains gated on blocker 10 — the invite role-hierarchy
+conflict, the one with the privilege-escalation dimension.
+
+### Next run: what actually needs to happen
+
+1. **Get a decision on posting the 22 questions to Jira.** Escalated by push notification
+   2026-08-04. Until then they remain visible only in this file.
+2. Nothing else on PLT-1770 is unblocked. #2087 needs a reviewer, not more code — and it is draft
+   on purpose.
