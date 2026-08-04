@@ -717,3 +717,152 @@ conflict, the one with the privilege-escalation dimension.
    2026-08-04. Until then they remain visible only in this file.
 2. Nothing else on PLT-1770 is unblocked. #2087 needs a reviewer, not more code — and it is draft
    on purpose.
+
+---
+
+## 2026-08-04 (later) — the design is now decoded from the Figma Make export, not screenshots
+
+Supersedes nothing above; this **adds** the precise geometry that the screenshot-based spec earlier
+in this file could only approximate. Where a number here disagrees with an earlier paragraph, this
+section wins — it came from the exported React/Tailwind source, not from reading pixels.
+
+### Where the export came from
+
+Ilia pushed `Implement Template Styles/` (a Figma Make React + Vite + Tailwind v4 app) onto the
+`PLT-1770` branch as commit `a082feb`, purely as a reference. Three screens:
+
+| Export file | Screen |
+|---|---|
+| `src/App.tsx` | the **list** (hand-written; also the only source for the kebab context menu) |
+| `src/imports/CustomPermissionModal-1/index.tsx` | **create** (3,320 lines, 326 functions) |
+| `src/imports/CustomPermissionModal/index.tsx` | **edit** (1,156 lines) |
+
+The folder was **removed again** on the branch once transcribed (commit "Drop the temporary Figma
+Make export"). It stays recoverable from that branch's history. Its values now live in
+`CustomPermissions/design-tokens.ts`.
+
+### The single most important finding: the bar is a three-pass paint
+
+The design's "Permission Bar V3" is **not** expressible with MUI's `Slider`. It stacks three layers:
+
+1. `BarBG outline` — an 8px track (`left:7 right:8 top:4`, bg `#1f1f1f`) with a 1px border, plus
+   16px circles at each node, also 1px-bordered.
+2. `BarBG top` — **the same two shapes again, with no borders at all**, painted over layer 1. This
+   is what erases the border segments where a node overlaps the track, so the whole assembly reads
+   as one continuous silhouette rather than circles crossing a pill.
+3. `Bar drag` — the 4px gradient fill (`#003b1b → #00ea6c`), 10px gradient dots at every node **up
+   to and including the current one**, and a 24px `#e9e9e1` handle with an 18px `chevron-expand`
+   glyph in `#007536`. Node hit targets are 32px.
+
+MUI's `rail`/`track`/`mark` model cannot produce layer 2, which is why the first attempt looked
+wrong no matter how the marks were styled. **If a future ticket touches this bar, do not try to put
+it back on MUI's Slider.** It is now `components/PermissionBar.tsx`.
+
+Two size variants: **module** bars are 22px tall with `#4f4f4f` outlines; **feature** bars are 16px
+with `#303030`. Everything else is identical.
+
+At `No access` (index 0) the first node **still shows its gradient dot** and the fill bar is fully
+transparent — confirmed against the Quality module, which is the export's only `No access` state.
+
+### Colours and metrics (all now in `design-tokens.ts`)
+
+| Token | Value | Used for |
+|---|---|---|
+| panel | `#1a1a1a` | drawer background; also the Save button's *label* colour |
+| module body | `#141414` | behind the feature rows |
+| module header / list card | `#1f1f1f` | header strip, list card, node fill |
+| border | `#303030` | every divider, feature-bar outline, empty meter track |
+| strong node outline | `#4f4f4f` | module-bar nodes and track only |
+| text / muted | `#e9e9e1` / `#8c8c8c` | primary / labels, placeholders, details accordion |
+| input | `#000000` | search field and the name field |
+| gradient | `#003b1b → #00ea6c` | bar fill, node dots, card meters |
+| handle chevron | `#007536` | the glyph inside the 24px handle |
+| accent | `#ffde14` | Save, and the highlighted `Edit` menu item |
+| granted / denied | `#00ea6c` / `#fd3d39` | detail ✓ and ✗, and the required-field asterisk |
+| tracking | `0.45px` | **every** string in the modal |
+
+Structural numbers worth keeping: module card radius 8 with a 1px border; header `p:16` and `gap:8`
+between the chevron holder (`py:4`, to line a 16px chevron up with a 24px title) and the content
+column (`gap:16`); expanded body `pt:16 pb:8 gap:8` with an inset shadow
+`inset 0 4px 16px rgba(0,0,0,0.4)`; each feature row `px:24 pb:8` with a bottom hairline except the
+last, its own `TopSection` at `p:16 gap:16`, and its details block at `pt:8 px:16 pb:16`.
+
+### Typography, which the screenshots got wrong
+
+- **Module** title: Roboto **Medium (500)**, 16/24, uppercase. Earlier implementation used 700.
+- **Feature** title: Roboto **Bold (700)**, 16/**22**.
+- Details accordion ("Show details"): Roboto Bold, 16/22, `#8c8c8c`, 16px chevron, `gap:8`.
+- Detail bullet text: Roboto Regular 16/24, `#8c8c8c`, with a 24px icon and only `gap:4`.
+- Level chip: Roboto **SemiBold** 14/**12**, `padding:6`.
+
+### The level chip cannot reuse the shared `Badge`
+
+The design's badge is **radius 2** with a **0.2px** hairline border and a **4px** highlight bar; the
+app's shared `Badge` is radius 4 with a 0.5px border and a thicker bar. Matching it in the shared
+component would have moved every other badge in the app, so PLT-1770 ships a local
+`PermissionLevelBadge`. **Do not "fix" this by pointing it back at the shared Badge.**
+
+Colour mapping: `No access` → `#303030`, `View only` → `#dbdbdb`. **The export contains no other
+state** — every module and feature in it is at one of those two — so Editor and Admin colours are
+*ours*, reusing the app's accent ramp (`#2ef0ff`, `#ffde14`). Worth confirming with design; it is
+not a decoded fact.
+
+### The whole title row is the expand control
+
+`function Accordion()` in the export is a `<button>` wrapping the entire title-plus-badge row, not
+just the chevron. Fixed. (Leaf modules — Quality — get a `div` instead, and an invisible chevron so
+their header still aligns with the modules above and below.)
+
+### Kebab and context menu (from `App.tsx`, the only place they appear)
+
+Kebab is **always visible**: 16px vertical-dots icon `#e9e9e1` on a black `padding:4` box, radius 4,
+1px `#303030` border. The menu opens **to the left** of it (`right:28 top:-6`), not below —
+`w:161`, bg `#1f1f1f`, radius 4, 1px border, shadow `0 4px 10px rgba(0,0,0,0.4)`, `padding:4`, with
+a 12×20 arrow pointing back at the button. `Edit` is a **highlighted** row (bg `#ffde14`, text
+`#1a1a1a`); a hairline divider; then `Remove` (text `#e9e9e1`, hover `#2a2a2a`). Both rows are
+12/14 Regular with `padding:5px 16px`.
+
+Now built, with both items rendered **disabled** — the actions themselves are PLT-2926 (edit) and
+PLT-2927 (remove). Wiring two props is all those tickets need on the list side.
+
+### Create-form shell
+
+Body `px:32 py:24` with `gap:32` between blocks — name field (max 560, bg black, radius 6, 1px
+border, `px:16 py:9`, label Roboto Bold 16/24 `#8c8c8c` with a `#fd3d39` asterisk), hairline
+divider, then the three module cards. Footer: border-top `#303030`, `p:32`, `justify-end`,
+`gap:16`, two **fixed 272×40** buttons — Cancel (bg `#1a1a1a`, 1px border, text `#e9e9e1`) and Save
+(bg `#ffde14`, text `#1a1a1a`), both SemiBold 16/24.
+
+**MUI `Button` is not used for these.** `color='secondary'` resolves to `palette.secondary.main`
+(a dark asphalt grey) which is invisible on these panels — that was the cause of the "there's no
+custom permissions button at all" report earlier the same day. `components/FormButtons.tsx` is
+plain styled `<button>`s.
+
+### List shell
+
+Search field is **centred at a fixed 560px** above the divider (not stretched, and not inside the
+scroll area), 42px tall, bg black, radius 6. Scroll area `p:32` with `gap:24` between cards and a
+trailing 16px spacer. Footer `px:32 py:16`, `justify-end`, one auto-width button (min 56, max 200,
+40px tall, SemiBold 16/24).
+
+The card itself: bg `#1f1f1f`, radius 8, **`box-shadow`** `0 4px 5px rgba(0,0,0,0.24)` and
+asymmetric padding `8px 8px 11px 16px`. The export uses a `drop-shadow` *filter* here — **don't
+copy that**: a filter creates a stacking context, which lets the next card in the list paint over
+this card's open actions menu.
+
+### Pitfalls hit while building this, for the next run
+
+1. **`min-release-age=7` did not block `brace-expansion@5.0.9`.** #2088 went fully green on 04 Aug
+   despite the version being 5 days old. The earlier prediction in that PR's body ("CI may fail to
+   install until ~06 Aug") was wrong. It is mergeable now and unblocks Trivy for every open PR.
+2. **`npm ci` cannot complete in the agent environment** — 401 from `npm.pkg.github.com` for the
+   private `@xyzreality/dhtmlx-gantt`. Workaround that *does* work, and is worth reusing: install
+   `react @types/react @mui/material @mui/icons-material @emotion/react @emotion/styled typescript`
+   into a scratch dir, symlink it in as `hc-frontend/node_modules`, and run `tsc` against a
+   throwaway tsconfig that includes only the folder under test. That gives a **real** typecheck of
+   MUI props, not just syntax. Same trick with `jest ts-jest @types/jest` runs the pure-logic tests.
+   Remember `types: ['jest']` in the inline ts-jest tsconfig or every `describe`/`expect` errors.
+3. **Commits on `PLT-1770` were authored as `Claude <noreply@anthropic.com>`** for the first nine
+   commits, against Ilia's standing instruction that commits go out under his name. Fixed with
+   `git filter-branch --env-filter` over `origin/master..HEAD` plus a force-with-lease. **Set
+   `git config user.name/user.email` at the start of a session in this repo**, not at the end.
