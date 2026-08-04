@@ -77,3 +77,70 @@ extra comment was posted. A reviewer may still ask for it to be split.
 ## Next run
 - Consider raising the "Select Elements" multi-model bug as its own ticket — it is the unfinished third
   issue and the ticket cannot close without it.
+
+---
+
+## Run log — 2026-08-03 (second pass — Darminder's new finding, FIXED)
+
+**The ticket's "outstanding half" is now closed.** Darminder reported (relayed by Ilia, not posted to
+Jira/GitHub) that in the Linked elements panel, "Select element(s)" on **any model group / layer row**
+selects nothing. Investigated → **real bug, not expected behaviour** → fixed in `07dd766` on PR #2054.
+
+### Root cause
+
+Container rows carry no selectable geometry of their own:
+- model root: `__getModelStructure.ts:155-183` → `elementId: null`, `dbId = model.getRootId()`
+  (root node owns **no fragments**, so selecting it highlights nothing)
+- group/layer: `createTreeNode` → real `dbId`, `elementId` null (only real elements map to elementIds)
+
+`useElementSelection.selectElements` was a flat filter — `nodes.filter(n => n.data.dbId)` — with no
+descent, so a container contributed only its own useless dbId. `useContextMenu` additionally gated the
+item on `some(n => n.data.elementId)`, which **greyed it out** for every container.
+
+⚠️ **This PR had already fixed the same bug on the *highlight* path** (`addItemDbIds` recurses,
+excludes the container's own dbId) and left the *selection* path untouched — so a folder row would
+ghost-isolate its children but not select them. **Lesson: when a row-resolution rule is fixed in one
+path, grep for every other path that resolves rows.** There were three (highlight, context-menu
+select, activity-menu select).
+
+### What shipped
+
+1. **new `hooks/collectSelectableDbIds.ts`** — the descendant rules extracted out of
+   `useGhostedHighlight` into one shared collector, now used by highlight + both selection paths.
+   Single source of truth for "what does this row resolve to".
+2. `useElementSelection.selectElements` — collector + **one** `setAggregateSelection`.
+3. `useContextMenu` — `hasSelectableElements` (collector-based) gates "Select element(s)";
+   separate `hasLinkedElements` (elementId) still gates unlink.
+4. `useActivityMenu.showSelectedIn3D` — **also fixed the ticket's original issue #2**: it grouped by
+   model and called selection once per model, and each call *replaced* the previous aggregate
+   selection, so multi-model selections collapsed to whichever model was last. Now one call.
+5. Removed now-dead `selectElementsByIds`, incl. its `models[0] // Fallback to first model` branch.
+6. 26 unit tests total on the panel (8 new collector, 5 new selection, 4 new menu-availability).
+
+### Deliberate non-changes (defend these in review)
+
+- **Unlink stays non-recursive**, still gated on a real `elementId` — destructive, a container row must
+  not unlink everything beneath it.
+- **Selecting a container selects its *linked* descendants, not the whole model.** The tree is already
+  pruned to linked elements (`pruneTreeByDbIds`), so children present == the linked set. Deliberately
+  differs from Model Layers' `_selectWholeModel`, which also isolates + `fitToView` — this panel must
+  not move the camera, which is bug #1 of this very ticket.
+- **`selectAllElements` keeps `visibleNodes`.** Looked like it needed the full tree, but each visible
+  row's `data` carries its whole subtree and the collector descends into it — so a collapsed group now
+  contributes its children, while an active search still narrows to what's on screen. Using
+  `treeApi.root.children` would have ignored filtering *and* leaned on an unverifiable API
+  (no `node_modules` locally to typecheck against).
+
+### Established platform rule (worth reusing)
+
+Container rows resolve to descendants — this is how Model Layers has always behaved:
+`model-browser-service.ts:327-330` ("Only expand to descendants for container nodes (no element ID)")
+plus `_selectWholeModel` for model roots. Any new tree surface should follow it.
+
+### Status
+
+- Branch rebased onto `3dddb9d`; **#2072 landed on master**, so the repo-wide Trivy red should clear.
+- PR description rewritten to cover all four defects + test steps 11-16. Comment left for Darminder.
+- Darminder's standing `CHANGES_REQUESTED` (24 Jul) is still open — he was re-requested 02 Aug and is
+  mentioned on the new comment. **Do not re-request again.**
+- Still carries the unrelated `7b7c4d3` portfolio-gating commit; a reviewer may ask for a split.
