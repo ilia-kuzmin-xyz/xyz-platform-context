@@ -159,28 +159,43 @@ activity.
 Same trap as PLT-2882, where the schedule showed 798,751 and the API 798,841 for identical data.
 PLT-2874 did not fix this one.
 
-## The ElementState rule infers "is linked" from date presence, and the parity test hides it
+## "Is linked" must not be inferred from schedule-date presence
 
-There are two implementations of the ElementState rule: `calculateInstallationStatus`
-(TS, `installation-status-utils.ts`) and `buildInstallationStatusCaseSql`
-(SQL, `dashboard-progress/utils/installation-status-sql.ts`). They disagree on one input.
+`buildInstallationStatusCaseSql` (`dashboard-progress/utils/installation-status-sql.ts:63`) reaches
+Planned via `WHEN startDate IS NOT NULL OR endDate IS NOT NULL` — it has no linkage input, so date
+presence stands in for "linked to an activity". That proxy breaks for a linked element whose
+activity carries no dates: it falls to `ELSE NULL` = **Not Planned** (grey) instead of Planned
+(yellow), and drops out of a Planned status filter.
 
-The TS rule branches on `scheduleId` — "linked to an activity at all" — so a linked element with
-no activity dates returns **Planned**. The SQL rule has no linked flag; its Planned branch is
-`WHEN startDate IS NOT NULL OR endDate IS NOT NULL` (`installation-status-sql.ts:63`), so the same
-element falls to `ELSE NULL` = **Not Planned**. Yellow vs grey, and it also drops out of a Planned
-status filter.
+The case is reachable, not theoretical. `schedule-service.tsx` `syncActivityDates()` ends with
+`.filter(row => row.startDate || row.endDate)`, so a dateless activity never gets a row in
+`schedule_activity_dates`, and the `linked` CTE LEFT JOINs it to NULL.
 
-This is reachable, not theoretical: `schedule-service.tsx` `syncActivityDates()` ends with
-`.filter(row => row.startDate || row.endDate)`, so an activity carrying no dates never gets a row
-in `schedule_activity_dates`, and `getElementStateCodes`'s `linked` CTE LEFT JOINs it to NULL.
+**Viewer: fixed** (#2081, PLT-2743). `getElementStateCodes` now writes its CASE inline and derives
+Planned from `linked.modelElementId IS NOT NULL` off the FULL OUTER JOIN, so linkage is read
+directly. It no longer uses the shared builder — the builder's four-column-expression interface is
+exactly what put linkage out of reach.
 
-`installation-status-rule-parity.test.ts` cannot catch this. It generates rows with
-`scheduleId: startDate || endDate ? 'act1' : ''` and states the assumption in its scope note
-("Links carry dates, so scheduleId presence ⇔ a date is present"). The axiom is baked into the
-fixture, so the one divergent branch is unreachable by construction. It is also single-row, so it
-does not cover multi-activity aggregation either — the SQL takes `MIN(startDate)`/`MAX(endDate)`
-across *all* of an element's activities, where the old viewer used `activities[0]` only.
+**Dashboard: still on the old proxy.** It keeps using `buildInstallationStatusCaseSql`, so the two
+surfaces can still disagree on this input — the viewer is now the correct side. Unifying them was
+deferred because the surfaces read different tables. Assume nothing about agreement here.
 
-Raised on #2081 (PLT-2743). Before trusting that parity test as a drift guard, check whether the
-case you care about is expressible in its fixture.
+### The parity test that missed it (deleted, and why)
+
+`installation-status-rule-parity.test.ts` compared the TS rule against the SQL rule and passed
+throughout. It generated rows with `scheduleId: startDate || endDate ? 'act1' : ''` and stated the
+assumption in its scope note ("Links carry dates, so scheduleId presence ⇔ a date is present"),
+so the one divergent input was excluded by construction. It was also single-row, so multi-activity
+aggregation was uncovered.
+
+Both it and `calculateInstallationStatus` are now deleted, replaced by
+`duckdb-element-store.element-state-table.test.ts` — an exhaustive branch table run through the real
+`getElementStateCodes`, asserting literal expected states. General lesson: **two implementations
+compared against each other cannot catch a misreading they share.** Assert against expected values,
+not against a sibling implementation.
+
+Related behaviour worth knowing: before the schedule projection exists, linked elements now derive
+**Planned**, not Not Planned — so a transient yellow on load, correcting once the schedule lands.
+And the derive takes `MIN(startDate)`/`MAX(endDate)` across *all* of an element's links (widest
+window, matching the dashboard aggregate); the pre-#2081 viewer used `activities[0]` off an
+unordered map.
