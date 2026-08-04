@@ -140,3 +140,35 @@ signatures matter (see the PLT-2899 lesson, two runs back: a clean `git merge` p
 5. **Should slice 2 of PLT-1770 be built?** `context.md` says slices 2–3 are independent of the
    commissioning question and buildable. The routine has held off: building more UI on top of an
    undecided level model risks throwaway work, and PLT-1770 is outside the kick-off set anyway.
+
+---
+
+## Addendum — 2026-08-04, later: brace-expansion round 2 (CVE-2026-69152)
+
+**The Trivy blocker came back the same day, against the version that fixed the last one.**
+
+- #2072 bumped `brace-expansion` 5.0.7 → **5.0.8** for CVE-2026-14257 (merged 03 Aug, master `9c14b90`).
+- Overnight the Trivy DB picked up **CVE-2026-69152**, a *new* advisory published against **5.0.8
+  itself** (fixed in 1.1.18 / 2.1.4 / 3.0.6 / **5.0.9**). So the earlier bump does not cover it and
+  `.trivyignore` has no entry for it.
+- Every branch's `PR Check` went red from **04 Aug 07:42Z**. `PLT-2447` was green at `3dddb9d`
+  (03 Aug 17:15) and red from `07dd766` onward — which looks exactly like a self-inflicted break.
+- **PR #2088** (`fix/trivy-brace-expansion-5.0.9`, draft) is the fix, same 3-line surgical shape as
+  #2072, and its own PR Check is **green**. No duplicate raised.
+
+⚠️ **Diagnostic trap — do not repeat.** "My commits are the first red ones on this branch" is *not*
+evidence that the commits caused it, when the scanner reads a DB that changes without any commit.
+Before blaming a diff, check three things, all cheap:
+
+1. **Which step failed.** Here `Build & Run Tests` was **success** and only step 13
+   `Vulnerability scanner` failed — so no test or type error existed at all.
+2. **Does the diff even touch the implicated file?** `git diff --stat origin/master...<branch> --
+   package-lock.json` was empty.
+3. **Did other branches go red in the same window?** `PLT-1770` started failing ~50 min *before* the
+   first suspect commit.
+
+Also note `[Multibranch]` has **no Trivy filesystem step**, so "Multibranch green, PR Check red" is the
+signature of a scanner-only failure, not a code failure. That pairing alone nearly identifies it.
+
+**Standing expectation:** this dependency has now produced two HIGH advisories in ten days. Expect a
+third. The recurring cost is that every open PR goes red at once and each run re-derives the cause.
