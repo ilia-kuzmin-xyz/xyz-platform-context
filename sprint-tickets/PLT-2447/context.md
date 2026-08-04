@@ -144,3 +144,44 @@ plus `_selectWholeModel` for model roots. Any new tree surface should follow it.
 - Darminder's standing `CHANGES_REQUESTED` (24 Jul) is still open — he was re-requested 02 Aug and is
   mentioned on the new comment. **Do not re-request again.**
 - Still carries the unrelated `7b7c4d3` portfolio-gating commit; a reviewer may ask for a split.
+
+### Correction — there were THREE "Select element(s)" call sites, not two (2026-08-04)
+
+The first fix (`07dd766`) targeted the tree's **right-click** context menu. Ilia retested and it still
+did nothing, because **the menu actually being clicked is a different one**: the **3-dot button on the
+right of each row**, implemented separately in `components/linked-node.tsx` with its own private copy
+of the selection code:
+
+```ts
+const selection = [{ model, ids: [item.dbId], ... }]
+viewer.setAggregateSelection(selection)
+```
+
+Own dbId only → `getRootId()` for a model root → nothing highlights. Fixed in `a1b00ea`; **Ilia has
+since confirmed it works**.
+
+**Call sites that resolve a tree row to dbIds in this panel — all four now share
+`hooks/collectSelectableDbIds.ts`:**
+
+| Where | Surface |
+|---|---|
+| `useGhostedHighlight` | ghost/isolate on row click |
+| `components/linked-node.tsx` | **row's own 3-dot menu** ← the reported one |
+| `useContextMenu` → `useElementSelection` | tree right-click menu |
+| `useActivityMenu.showSelectedIn3D` | panel header 3-dot menu |
+
+⚠️ **Process lesson, the expensive one.** The first fix was *itself* about paths having drifted apart,
+and it still missed a path — because the search stopped at the first plausible root cause instead of
+grepping for every implementation of the action. "on the right hand side" in the report meant *the
+right of the row*, not the right-hand panel; the wording was read too fast and the code was not swept.
+**Before claiming a UI action is fixed, grep the feature folder for every place that action is
+implemented** — duplicated inline handlers in row renderers are easy to miss, since they never import
+the hook you are reading.
+
+`selectElements` now returns the selections it built, so `linked-node` can `fitToView` exactly what was
+selected instead of rebuilding it. Row menu is gated on the collector, so a row that resolves to
+nothing no longer offers a dead action.
+
+**Temporary browser diagnostics** were added in `3a77ec0` and **reverted in `4de963c`** once confirmed —
+tree byte-identical to `a1b00ea`, no `console.*` left on the selection path. (The pattern worked well:
+a clearly-labelled temp commit with a stated revert command, rather than logging left in the diff.)
