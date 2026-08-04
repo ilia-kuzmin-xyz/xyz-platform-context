@@ -1,163 +1,48 @@
 # PLT-2923 — "QA STRUCTUAL FAB MODEL NOT LOADING ON WEB VIEWER" — triage context
 
-<<<<<<< HEAD
-- **Domain slug:** `viewer-and-model`
-- **Jira:** https://xyzreality.atlassian.net/browse/PLT-2923
-- **Type:** Live Incident · **Priority:** Major · **Status:** **With Customer** (in-scope per this
-  folder's scope rules — "With Customer" ≠ the excluded "With Technical Support")
-- **Assignee/Reporter (Jira):** Yash Patel (support) · **Investigation lead:** Ilia Kuzmin
-- **Project:** WI1 · **Software Area:** Web Viewer
-- **Created:** 2026-07-23 — **the newest ticket on the board this run.** Missed in this run's
-  first pass because "With Customer" was initially (wrongly) treated as excluded — corrected
-  against this folder's own README scope rules, which explicitly carve it in-scope. See the run's
-  README entry for the correction note.
-- **Attachments:** 1 screenshot (unreadable here — see NEEDS HUMAN)
-- **Freshdesk:** #7494, currently "Waiting on customer"
-=======
+> ⚠️ **This file was reconciled on 2026-08-04** from two parallel triage write-ups whose git
+> conflict markers had been committed into the content. Both sides' unique findings were kept; the
+> richer write-up forms the base and the later 07-24 mechanism lead is preserved as its own section.
+> Any remaining disagreement between the two is flagged inline.
+
+- **Domain slug:** `viewer-and-model` — rationale below (*not* `quality-management`)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2923
 - **Issue type:** Live Incident ("To track live incidents on site.") · Software Area (report form): **Web Viewer** · "Is The Device Still Usable?: Not Usable"
-- **Status:** **With Customer** (category: In Progress / yellow) — status set 2026-07-23 16:33 (+0100). Group A, parked with the client.
+- **Status:** **With Customer** (category: In Progress / yellow) — status set 2026-07-23 16:33 (+0100). Group A, parked with the client. In-scope per this folder's scope rules — "With Customer" ≠ the excluded "With Technical Support".
 - **Priority:** Major
-- **Project (site):** **WI1** (model name says **WI11**)
-- **Reporter / Assignee:** Yash Patel (both) — coordinator/support per roster. No dev assignee.
-- **Created:** 2026-07-23 14:50 · **Last updated:** 2026-07-23 16:33 → **6 days with no movement** as of 2026-07-29.
+- **Project (site):** **WI1** (model name says **WI11**) · **Software Area:** Web Viewer
+- **Reporter / Assignee:** Yash Patel (both) — coordinator/support per roster. No dev assignee. · **Investigation lead:** Ilia Kuzmin
+- **Created:** 2026-07-23 14:50 · **Last updated:** 2026-07-23 16:33 → **6 days with no movement** as of 2026-07-29. **The newest ticket on the board this run.**
+- **Scope correction (from the parallel run):** this ticket was **missed in that run's first pass**
+  because "With Customer" was initially (wrongly) treated as excluded — corrected against this
+  folder's own README scope rules, which explicitly carve it in-scope. See the run's README entry
+  for the correction note.
 - **Components / Labels / issue links:** none
+- **Attachments:** 1 screenshot (unreadable here — see § Attachments / NEEDS HUMAN)
 - **Freshdesk:** #7494 — status walked Waiting-on-customer → Open → **Waiting on customer** (last, 15:38 on 07-23)
 - **Model in question:** `QA-WI11-SFI-ZZ-ZZ-M3-S-000001_STRUCTURAL FAB MODEL.ifc-V19`
   (source file name ends **`.ifc`**; `-V19` is the platform's version suffix ⇒ 19 versions exist)
 - **Our own repro session id (Yash):** `platform-web-63303495-4a12-4a9e-bcd0-70ae28a348f3`
-- **Domain slug chosen:** `viewer-and-model` (rationale below — *not* `quality-management`)
->>>>>>> origin/main
 
 ---
 
 ## One-line symptom
 
-<<<<<<< HEAD
-The model **`QA-WI11-SFI-ZZ-ZZ-M3-S-000001_STRUCTURAL FAB MODEL.ifc-V19`** (an **IFC**-derived
-model, project WI1) does **not load in the web viewer** (browser). The customer reports the same
-model **loads fine on-device** ("in the field when using the atom helmet" — the on-site AR
-headset / "holosite" client, a separate product surface not in this repo). Yash reproduced the
-web-viewer failure independently (session `platform-web-63303495-4a12-4a9e-bcd0-70ae28a348f3`).
-
-**This is a genuinely useful broken-vs-working pair (playbook Q3):** same model, same underlying
-translated geometry presumably, one client renders it and one doesn't. That strongly points at
-something **specific to the web viewer's Forge-derivative loading path** (or to how that
-derivative was produced for this specific IFC file) rather than the source model being wholesale
-corrupt — a wholesale-corrupt model would more plausibly fail everywhere.
-
----
-
-## Comment timeline (verbatim, chronological)
-
-1. **Yash (07-23 14:53):** relays the report, confirms he reproduced the load failure himself on
-   web viewer, and states he's **"asked user to upload model file."**
-2. **Yash (07-23 14:53):** Freshdesk → "Waiting on customer."
-3. **Ilia (07-23 15:13):** *"Thanks, Yash. Yes, the source model would be helpful. Can we also ask
-   the customer where they exported it from? Also, does the model look fine in Revit?"* — three
-   good, closed, playbook-style questions: (a) get the source file, (b) export origin/tool, (c)
-   sanity-check in the authoring tool.
-4. **Yash (07-23 15:18 / 15:38):** Freshdesk flips Open → Waiting on customer again (routine status
-   churn, not new information).
-
-**No comments after 07-23 15:38.** The ticket is one day old and already in the *correct* state:
-we've asked the right questions and are waiting on the customer to answer them. **This is not a
-stall** (contrast PLT-2906/PLT-2649 in this same run, where our own analysis is the open loop) —
-the very next fact needed (the source IFC file) can only come from the client.
-
----
-
-## Mechanism (code-verified, 2026-07-24) — a concrete, testable lead
-
-hc-frontend does **not** run any IFC→SVF/SVF2 translation itself, and has **no translation-status
-polling anywhere** (`getManifest`/`translationStatus`/`derivativeStatus` — zero matches). The web
-viewer only **consumes a pre-existing Forge derivative by URN**; translation happens upstream
-(ACC/backend), out of this repo.
-
-- Load entry point: `_loadAggregatedDocument`, `viewer-x/components/services/viewer-service.ts:1030-1076`
-  → `Autodesk.Viewing.Document.load('urn:' + urn, ...)`.
-- **The decisive detail: viewable selection is by NAME, with a fallback chain**
-  (`viewer-service.ts:1052-1065`): `'Navis'` → `'XYZ'` → **`'EXPORT TO HOLOSITE'`** → `'{3D}'` →
-  `viewables[0]`. This directly matches the symptom's shape: **holosite (the on-device client)
-  most plausibly consumes the `EXPORT TO HOLOSITE` named viewable**, while the web viewer walks the
-  *same* fallback list looking for a bubble by name. **If this IFC derivative's manifest carries
-  only an `EXPORT TO HOLOSITE`-named viewable and no `Navis`/`XYZ`/`{3D}` bubble the web path
-  actually renders from** (or that viewable's own geometry is empty/incomplete for the web
-  consumer), the two clients would diverge exactly as reported: on-device works (reads the bubble
-  meant for it), browser doesn't (no matching earlier-priority bubble, or an empty one).
-- **If no bubble matches at all: silent no-op.** `_loadModel` (`:939-1024`) does `if (!bubble)
-  return null` at `:945-946` — **no toast, no error, nothing surfaces to the user.** This would look
-  exactly like "does not load" with no explicit error, which is consistent with the ticket
-  containing no quoted error message from the customer (only a screenshot, unread — see NEEDS
-  HUMAN).
-- **No IFC-specific branch exists anywhere in the load path.** `model.fileType` is captured
-  (`:1046-1047`) but never used to alter loading logic — IFC gets no special handling, good or bad.
-- **Error surfacing, if any does fire:** only a `'Fragment list'` substring match produces a
-  specific toast ("Model not loaded - no geometry found..."); anything else re-throws to a generic
-  `"Failed to load the Editor"` boundary (`viewer-error.tsx:16`). **The FE cannot currently
-  distinguish "translation still processing" from "translation failed" from "incomplete
-  derivative"** — all three would look the same or silent to the user.
-
-**This reframes Ilia's three customer-side questions as still exactly right, but adds a concrete,
-checkable hypothesis that doesn't require the source file at all:** once the model's Forge
-manifest/viewables are inspectable (dev/BE access, not customer-side), check whether an
-`EXPORT TO HOLOSITE` viewable exists **without** a matching `Navis`/`XYZ`/`{3D}` one, or whether the
-web-priority viewable's geometry is empty. That would confirm mechanism (b) below without waiting
-on the customer at all — worth doing in parallel with the customer ask, not instead of it.
-
-No IFC precedent exists elsewhere on this board or in `dashboard/pitfalls.md` /
-`viewer-and-model.md` (checked) — closest prior incident is PLT-2892 ("model syncing forever"),
-a different symptom shape (never-completes vs never-starts) and not IFC-attributed.
-
----
-
-## Playbook six-questions status
-
-1. **Observed & reproducible?** ✅ Yes — Yash reproduced the web-viewer failure himself
-   (session id given). Not yet reproduced *in our hands* against the actual source file, though —
-   that's what's being requested.
-2. **Expected, on whose authority?** The model loading successfully **on-device (holosite/atom
-   helmet)** is the reference — a same-model, same-day, cross-client working comparison, not
-   folklore.
-3. **Smallest broken-vs-working pair?** ✅ Already handed to us: same model, web viewer (broken) vs
-   on-device viewer (works). **Mechanism section above names the likely diff:** the viewable-name
-   fallback chain (`Navis`/`XYZ`/`EXPORT TO HOLOSITE`/`{3D}`) may resolve to a different, and for
-   the web path empty or missing, bubble than the one holosite reads.
-4. **Mechanism?** ✅ Code-verified lead above (viewable-name fallback + silent-null-bubble path);
-   **not yet confirmed against this specific model's actual manifest** — that requires either the
-   source file (Ilia's ask) or direct Forge-manifest inspection (dev/BE, doesn't need the customer
-   at all — see the parallel check above). Two live hypotheses, not yet distinguished: (a) the
-   source IFC export is malformed in a way that produces an incomplete/wrong-named-viewable
-   derivative; (b) the web-viewer's fallback-by-name logic is itself brittle for whatever viewable
-   names *this* IFC pipeline actually emits (a gap that could affect other IFC-sourced models too).
-5. **Why now (trigger)?** Not established — no claim of "it used to load." Treat as a first
-   encounter with this specific file, not a regression, until told otherwise.
-6. **Cohort?** Unknown — single model reported so far. **Now a sharper question given the
-   mechanism finding:** do other IFC-sourced models (this or other projects) also lack a
-   `Navis`/`XYZ`/`{3D}`-named viewable and only carry `EXPORT TO HOLOSITE`? That would make this a
-   systemic IFC-pipeline gap, not a one-off bad export — worth a manifest-name audit across a few
-   other IFC models once one is confirmed, independent of whether *this* customer's file turns out
-   malformed.
-
----
-
-## Bug vs feature-gap
-
-Unknown / too early to call. Two live hypotheses, both consistent with the facts so far and not
-yet distinguished:
-- **(a) Source file defect** — the IFC export itself has a structural issue that Revit or the
-  on-device parser tolerates but the web-viewer's translation pipeline does not.
-- **(b) Web-viewer translation/derivative bug or gap** — something specific to how this repo's
-  ViewerPage loads/expects a Forge-style derivative fails for this file even though the source is
-  fine, in a way the on-device client's separate pipeline doesn't hit.
-
-Ilia's three questions are exactly the ones that would distinguish these — no premature call made
-here.
-=======
 In the **web viewer (ViewerPage)** for project **WI1**, the model
-`QA-WI11-SFI-ZZ-ZZ-M3-S-000001_STRUCTURAL FAB MODEL.ifc-V19` **does not load**, while the
-**same model loads fine on the Atom helmet in the field (HoloSite)**. **Reproduced internally by
-Yash Patel** on his own machine — so we own a live repro and a session log.
+`QA-WI11-SFI-ZZ-ZZ-M3-S-000001_STRUCTURAL FAB MODEL.ifc-V19` (an **IFC**-derived model) **does not
+load**, while the **same model loads fine on the Atom helmet in the field (HoloSite** — the on-site
+AR headset client, a separate product surface not in this repo**)**. **Reproduced internally by
+Yash Patel** on his own machine (session `platform-web-63303495-4a12-4a9e-bcd0-70ae28a348f3`) — so
+we own a live repro and a session log.
+
+> ⚠️ Two parallel runs disagreed here: the HEAD-side run read the web-vs-helmet pair as a **strong**
+> broken-vs-working pair (playbook Q3) that "strongly points at something specific to the web
+> viewer's Forge-derivative loading path … rather than the source model being wholesale corrupt";
+> the origin/main-side run read the same pair as the **weak, cross-platform** diff and argued
+> "'loads on the helmet' does **not** establish that the web viewer ever could load it" (different
+> consumers, different asset pipelines). Unresolved — needs a human. The two readings point at
+> different next actions (chase the derivative vs. accept IFC-unsupported-by-design), so this is the
+> substantive disagreement on the ticket.
 
 ---
 
@@ -176,16 +61,27 @@ Yash Patel** on his own machine — so we own a live repro and a session log.
    platform-web-63303495-4a12-4a9e-bcd0-70ae28a348f3**". "have asked user to upload model file."
 2. **Yash, 14:53** — Freshdesk #7494 → *Waiting on customer*.
 3. **Ilia Kuzmin, 15:13** — "Thanks, Yash. Yes, the **source model** would be helpful. Can we also ask
-   the customer **where they exported it from**? Also, **does the model look fine in Revit**?"
+   the customer **where they exported it from**? Also, **does the model look fine in Revit**?" —
+   three good, closed, playbook-style questions: (a) get the source file, (b) export origin/tool,
+   (c) sanity-check in the authoring tool.
 4. **Yash, 15:18** — Freshdesk #7494 → *Open*.
 5. **Yash, 15:38** — Freshdesk #7494 → *Waiting on customer*.
 
-**Nothing since.** Three open questions to the customer (source file / export origin / Revit check),
-zero answers in 6 days, on a Major incident.
+**Nothing since 07-23 15:38.** Three open questions to the customer (source file / export origin /
+Revit check), zero answers, on a Major incident.
 
 **No "it worked before" claim anywhere** — neither the customer nor Yash asserts a regression. That
 materially shapes playbook Q5 (below): there is no dated trigger to hunt, and "never supported on
 web" is fully consistent with the report as written.
+
+> ⚠️ Two parallel runs disagreed here on whether the ticket state is healthy. HEAD side (written
+> 07-24, one day after creation): *"The ticket is one day old and already in the correct state — we've
+> asked the right questions and are waiting on the customer. **This is not a stall** (contrast
+> PLT-2906/PLT-2649 in this same run, where our own analysis is the open loop) — the very next fact
+> needed (the source IFC file) can only come from the client."* origin/main side (written ~07-29):
+> *"zero answers in 6 days … the ticket is parked on the customer while the decisive evidence sits in
+> our own log store"* — i.e. the repro is being under-used and the customer is not the blocker.
+> Unresolved — needs a human. (Part of the gap is simply the six days between the two write-ups.)
 
 ---
 
@@ -219,14 +115,16 @@ web" is fully consistent with the report as written.
 one project fails to load in the web viewer; Yash reproduced it himself the same day and captured a
 session id. This is the strong position the July playbook asks for (a currently-broken instance in
 our own hands), and it is being under-used — the ticket is parked on the customer while the decisive
-evidence sits in our own log store.
+evidence sits in our own log store. Not yet reproduced *against the actual source file*, though —
+that's what's being requested.
 
 **2. Expected behaviour, on whose authority?** The reference given is **the Atom helmet /
-HoloSite**: same model, loads there. That is a real reference, but a **weak** one for this
-comparison — the helmet and the web viewer are different consumers with different asset pipelines;
-the web viewer additionally requires a Forge/APS derivative **plus** an external-ID ⇄ dbId mapping
-that only exists for Revit and Navisworks sources (see Mechanism). "Loads on the helmet" therefore
-does **not** establish that the web viewer ever could load it.
+HoloSite**: same model, loads there — a same-model, same-day, cross-client comparison, not folklore.
+But it is a **weak** reference for this comparison — the helmet and the web viewer are different
+consumers with different asset pipelines; the web viewer additionally requires a Forge/APS derivative
+**plus** an external-ID ⇄ dbId mapping that only exists for Revit and Navisworks sources (see
+Mechanism). "Loads on the helmet" therefore does **not** establish that the web viewer ever could
+load it. (See the flagged disagreement under § One-line symptom.)
 
 **3. Smallest broken-vs-working pair.** Given: this model (broken, web) vs this model (works,
 helmet) — a *cross-platform* pair, which is the weaker diff. The pair that would actually diagnose it
@@ -238,10 +136,11 @@ from the repro he already has.
 section. Short form: **the web viewer supports exactly three source formats — `rvt`, `nwd`, `nwc`.
 There is no IFC support anywhere in the frontend.** A model whose Forge manifest reports any other
 `inputFileType` throws inside the mapping step; and a model whose element metadata does not match
-gets every unmatched node hidden.
+gets every unmatched node hidden. **Not yet confirmed against this specific model's actual manifest.**
 
 **5. Why now? (trigger)** **No regression is claimed** — no "it worked last week", no date, no
-deploy correlation to chase. If variant A holds, "why now" is answered by *"it never worked on web;
+deploy correlation to chase. Treat as a first encounter with this specific file, not a regression,
+until told otherwise. If variant A holds, "why now" is answered by *"it never worked on web;
 the customer only just tried"*, and the real question becomes **when/how an `.ifc` entered a project
 at all** (19 versions deep). Note the web upload path could not have accepted it: the uploader
 whitelist is `['.rvt', '.nwd', '.nwc']` (`model-upload/model-upload.constants.ts:1`,
@@ -252,6 +151,24 @@ enforced by `validateFileType`, `model-upload-validation.ts:20-23`) → so it ar
 rvt/nwd/nwc** is in the same shape. A single question settles the local blast radius — do the *other*
 WI1 models load in the web viewer? If WI11's fabrication models are habitually published as IFC, this
 is a whole-package gap, not one model.
+
+### Additive from the parallel run (HEAD side) — the viewable-name reading of Q3/Q4/Q6
+
+The HEAD-side run answered the same questions through its own mechanism lead (see § Mechanism
+(code-verified, 2026-07-24) below), and these framings are unique to it:
+
+- **Q3 (pair):** the named diff between the two clients is the **viewable-name fallback chain**
+  (`Navis`/`XYZ`/`EXPORT TO HOLOSITE`/`{3D}`), which may resolve to a different — and for the web
+  path empty or missing — bubble than the one holosite reads.
+- **Q4 (mechanism):** two live hypotheses, not yet distinguished: **(a)** the source IFC export is
+  malformed in a way that produces an incomplete/wrong-named-viewable derivative; **(b)** the web
+  viewer's fallback-by-name logic is itself brittle for whatever viewable names *this* IFC pipeline
+  actually emits (a gap that could affect other IFC-sourced models too).
+- **Q6 (cohort), sharper form:** do other IFC-sourced models (this or other projects) also lack a
+  `Navis`/`XYZ`/`{3D}`-named viewable and only carry `EXPORT TO HOLOSITE`? That would make this a
+  systemic IFC-pipeline gap, not a one-off bad export — worth a manifest-name audit across a few
+  other IFC models once one is confirmed, independent of whether *this* customer's file turns out
+  malformed.
 
 ---
 
@@ -342,6 +259,90 @@ be reuploaded?"*; fixed and verified on 26.2.1.1, customer workaround = **re-exp
 That incident is variant **B**'s exact shape (mapping inputs missing ⇒ model appears empty/invisible)
 and is the reason variant B cannot be dismissed here on the code alone.
 
+> ⚠️ Two parallel runs disagreed here on prior art: the HEAD-side run recorded *"No IFC precedent
+> exists elsewhere on this board or in `dashboard/pitfalls.md` / `viewer-and-model.md` (checked) —
+> closest prior incident is PLT-2892 ('model syncing forever'), a different symptom shape
+> (never-completes vs never-starts) and not IFC-attributed."* The origin/main-side run instead names
+> **PLT-2574** as the relevant precedent (same *layer*, not same *format*). These are reconcilable —
+> PLT-2574 is not IFC-attributed either — but the two runs picked different nearest neighbours, so a
+> human should confirm which precedent to cite in any customer-facing or planning write-up.
+
+---
+
+## Mechanism (code-verified, 2026-07-24) — a concrete, testable lead
+
+*Grafted in from the parallel (HEAD-side) write-up. It carries a **later date (07-24)** than the
+undated mechanism section above and is kept whole because its central finding — viewable selection
+by name, with a fallback chain — is not covered there beyond step 1's "Silent path #1".*
+
+hc-frontend does **not** run any IFC→SVF/SVF2 translation itself, and has **no translation-status
+polling anywhere** (`getManifest`/`translationStatus`/`derivativeStatus` — zero matches). The web
+viewer only **consumes a pre-existing Forge derivative by URN**; translation happens upstream
+(ACC/backend), out of this repo.
+
+- Load entry point: `_loadAggregatedDocument`, `viewer-x/components/services/viewer-service.ts:1030-1076`
+  → `Autodesk.Viewing.Document.load('urn:' + urn, ...)`.
+- **The decisive detail: viewable selection is by NAME, with a fallback chain**
+  (`viewer-service.ts:1052-1065`): `'Navis'` → `'XYZ'` → **`'EXPORT TO HOLOSITE'`** → `'{3D}'` →
+  `viewables[0]`. This directly matches the symptom's shape: **holosite (the on-device client)
+  most plausibly consumes the `EXPORT TO HOLOSITE` named viewable**, while the web viewer walks the
+  *same* fallback list looking for a bubble by name. **If this IFC derivative's manifest carries
+  only an `EXPORT TO HOLOSITE`-named viewable and no `Navis`/`XYZ`/`{3D}` bubble the web path
+  actually renders from** (or that viewable's own geometry is empty/incomplete for the web
+  consumer), the two clients would diverge exactly as reported: on-device works (reads the bubble
+  meant for it), browser doesn't (no matching earlier-priority bubble, or an empty one).
+- **If no bubble matches at all: silent no-op.** `_loadModel` (`:939-1024`) does `if (!bubble)
+  return null` at `:945-946` — **no toast, no error, nothing surfaces to the user.** This would look
+  exactly like "does not load" with no explicit error, which is consistent with the ticket
+  containing no quoted error message from the customer (only a screenshot, unread — see NEEDS
+  HUMAN).
+- **No IFC-specific branch exists anywhere in the load path.** `model.fileType` is captured
+  (`:1046-1047`) but never used to alter loading logic — IFC gets no special handling, good or bad.
+- **Error surfacing, if any does fire:** only a `'Fragment list'` substring match produces a
+  specific toast ("Model not loaded - no geometry found..."); anything else re-throws to a generic
+  `"Failed to load the Editor"` boundary (`viewer-error.tsx:16`). **The FE cannot currently
+  distinguish "translation still processing" from "translation failed" from "incomplete
+  derivative"** — all three would look the same or silent to the user.
+
+**This reframes Ilia's three customer-side questions as still exactly right, but adds a concrete,
+checkable hypothesis that doesn't require the source file at all:** once the model's Forge
+manifest/viewables are inspectable (dev/BE access, not customer-side), check whether an
+`EXPORT TO HOLOSITE` viewable exists **without** a matching `Navis`/`XYZ`/`{3D}` one, or whether the
+web-priority viewable's geometry is empty. That would confirm hypothesis (b) without waiting
+on the customer at all — worth doing in parallel with the customer ask, not instead of it.
+
+> ✅ **RESOLVED 2026-08-04 — both runs were right, about two different code paths.** Re-grepped
+> against `hc-frontend` @ `28e03c3`. The apparent contradiction is a *same-field, different-path*
+> trap, and the resolution matters because it changes what "not loading" can mean:
+>
+> **Path 1 — geometry load / render (HEAD's claim is correct here).** In the `Document.load`
+> callback, `model.fileType` is assigned at `viewer-service.ts:1047`
+> (`= inputFileType?.inputFileType`, read off the Forge manifest) and then **never consulted**: the
+> very next statements pick the viewable by *name* (`:1050-1057`, the `Navis` → `XYZ` →
+> `EXPORT TO HOLOSITE` → `{3D}` fallback chain). So `fileType` does **not** gate whether a model
+> renders. An IFC-sourced model renders or silently fails purely on viewable-name matching — which
+> is exactly this 07-24 section's lead, and it stands.
+>
+> **Path 2 — element mapping (linking / colouring) (origin/main's claim is correct here).**
+> `model-mapping-service.ts` *does* branch on `fileType`, via `isRevitModel` (`:313`, `=== 'rvt'`)
+> and `isNavisworksModel` (`:322-323`, `nwd`/`nwc`). Anything else is excluded twice over: the bulk
+> loop pre-checks and **skips** with `console.warn('Skipping model with unsupported file type:', …)`
+> (`:213-217`, `continue`), and `getExternalIdMappingWithCache` **throws**
+> `Unsupported or unknown model file type: <fileType>` (`:296`) when neither matches.
+>
+> **Two corrections to the origin/main framing, from the same grep:** (a) the throw at `:296` is
+> **caught** one level up — `:220-223` wraps the call in `try/catch`, `log.error`s, and `continue`s —
+> so it degrades silently per-model rather than surfacing an error to the user; and (b) in the bulk
+> path the `:213-217` pre-check means `:296` is *not even reached*. So "IFC throws" is true of the
+> function but the user-visible outcome is a **silent skip**, not a thrown error.
+>
+> **Net effect on the variants:** these are complementary, not rival. An IFC model can plausibly
+> **render fine yet have no linking/colouring at all** (Path 1 passes, Path 2 skips it), or fail to
+> render for an unrelated viewable-name reason. That combination is worth checking explicitly on WI1
+> before assuming variant A, and it makes the log line in the decision table below more diagnostic
+> than previously thought: if the console shows the `Skipping model with unsupported file type: ifc`
+> **warn** (not the `_loadModel` error), Path 2 is the story and geometry is not the problem.
+
 ---
 
 ## Which variant is it? — the one line that decides
@@ -353,7 +354,7 @@ Both variants are already written to Yash's uploaded session log for
 |---|---|
 | `[ViewerService] Error in _loadModel:` with `errorMessage: "Unsupported or unknown model file type: ifc"` (`viewer-service.ts:1009` + `model-mapping-service.ts:296`) | **Variant A** — IFC genuinely unsupported. Product/roadmap answer (PLT-353) + an FE honesty fix. No customer input needed. |
 | `[ModelMappingService] applyMappings started {sourceElementIdCount: 0}` / `applyMappings completed {mappedDbIdCount: 0}` (`model-mapping-service.ts:36-39, 60`), and/or `Failed to load element metadata for <modelId>` (`model-entity.ts:293`) | **Variant B** — format *is* rvt/nwd/nwc (name is cosmetic) but element metas/ID-map are missing ⇒ all nodes hidden. Same family as PLT-2574; likely a data/ingest fix + possible re-upload. |
-| `Error loading document: <code> - <msg>` (`viewer-service.ts:1072`) or no viewable found (`:1066`) | **Neither** — the APS derivative itself is missing/failed for this URN; hop to the ingest/DPL side. |
+| `Error loading document: <code> - <msg>` (`viewer-service.ts:1072`) or no viewable found (`:1066`) | **Neither** — the APS derivative itself is missing/failed for this URN; hop to the ingest/DPL side. This row is also where the 07-24 viewable-name-fallback lead lands. |
 
 The three are mutually exclusive and all three are one grep away in a log we already own.
 
@@ -386,42 +387,22 @@ and the mechanism is the **Forge external-ID mapping / source-format support** �
   model with zero metadata matches renders as an empty scene with no diagnostic.
 
 Either way, **the "silent failure" half is ours to fix regardless of what the customer replies.**
->>>>>>> origin/main
+
+**The parallel run's earlier framing of the same question** (kept because it is *not* the same split):
+it called the call "unknown / too early", with **(a) source-file defect** — the IFC export has a
+structural issue Revit or the on-device parser tolerates but the web-viewer's translation pipeline
+does not — versus **(b) web-viewer translation/derivative bug or gap** — something specific to how
+this repo's ViewerPage loads/expects a Forge-style derivative fails for this file even though the
+source is fine. Note (a)/(b) is **not** the same axis as variant A/B above: A/B split on *which FE
+code path fails*, whereas (a)/(b) split on *whose artefact is at fault*. Ilia's three questions are
+the ones that would distinguish (a) from (b).
 
 ---
 
 ## Confidence (per xyz-platform-context CLAUDE.md scale)
 
-<<<<<<< HEAD
-- **That this is a genuine broken-vs-working pair worth investigating (not user error):** 8/10 —
-  Yash independently reproduced the web-viewer failure; on-device success is stated by the
-  customer, not yet independently confirmed by us, but is a specific, checkable claim.
-- **Root cause / which hypothesis (a) source-file-malformed vs (b) web-viewer viewable-fallback
-  gap:** 4/10 (up from a bare guess) — the viewable-name fallback chain and silent-null-bubble path
-  are real, code-verified mechanisms that fit the symptom shape precisely, but **not yet confirmed
-  against this model's actual manifest**; still needs either the source file or a direct
-  Forge-manifest check.
-- **Overall triage confidence: ~4/10** — mechanism now has a concrete, testable lead (up from pure
-  research-phase), but final attribution is still environment-dependent (needs the file or manifest
-  access), matching CLAUDE.md's "3–4… needs human to reproduce/test; implementation direction
-  uncertain" band honestly.
+**From the origin/main-side write-up (~07-29):**
 
----
-
-## NEEDS HUMAN
-
-- ⚠️ **1 screenshot attachment** (`Screenshot 2026-07-23 072317...png`) — unreadable here (binary,
-  Atlassian auth). Would show the exact failure mode (blank viewer? spinner stuck? explicit error
-  toast?) — decisive for narrowing hypothesis (a) vs (b) before the source file even arrives.
-- ⚠️ **The source IFC file itself** — requested from the customer (Ilia, 07-23); this is the
-  correctly-identified next artifact, not something this pass can substitute for.
-- ⚠️ **Export origin + Revit sanity-check** — Ilia's other two questions, also customer-side.
-- ⚠️ **Forge manifest inspection for THIS model** (needs dev/BE access, does NOT need the customer)
-  — check whether the translated derivative has a `Navis`/`XYZ`/`{3D}`-named viewable at all, or
-  only `EXPORT TO HOLOSITE` (see §Mechanism above). This could confirm/kill hypothesis (b) in
-  parallel with waiting on the customer's file — it's the one step in this ticket that doesn't
-  require the customer.
-=======
 - **Mechanism family — the web viewer supports only `rvt`/`nwd`/`nwc`, and both the throw path and
   the hide-everything path exist as described: 9/10.** Read directly from source with file:line;
   corroborated by the product's own error copy and the uploader whitelist.
@@ -435,7 +416,28 @@ Either way, **the "silent failure" half is ours to fix regardless of what the cu
 - **Overall triage confidence: 7/10.** Not the ~95% asked for, and the gap is precisely nameable:
   **one grep of a log we already have.**
 
+**From the HEAD-side write-up (07-24):**
+
+- **That this is a genuine broken-vs-working pair worth investigating (not user error):** 8/10 —
+  Yash independently reproduced the web-viewer failure; on-device success is stated by the
+  customer, not yet independently confirmed by us, but is a specific, checkable claim.
+- **Root cause / which hypothesis (a) source-file-malformed vs (b) web-viewer viewable-fallback
+  gap:** 4/10 (up from a bare guess) — the viewable-name fallback chain and silent-null-bubble path
+  are real, code-verified mechanisms that fit the symptom shape precisely, but **not yet confirmed
+  against this model's actual manifest**; still needs either the source file or a direct
+  Forge-manifest check.
+- **Overall triage confidence: ~4/10** — mechanism now has a concrete, testable lead (up from pure
+  research-phase), but final attribution is still environment-dependent (needs the file or manifest
+  access), matching CLAUDE.md's "3–4… needs human to reproduce/test; implementation direction
+  uncertain" band honestly.
+
+> ⚠️ Two parallel runs disagreed here: **overall triage confidence 7/10 (origin/main) vs ~4/10
+> (HEAD)**. Both numbers are preserved verbatim above. The gap follows directly from the flagged
+> mechanism disagreement — the 7/10 assumes IFC-unsupported-by-design is established in code, the
+> 4/10 assumes attribution is still open pending the manifest. Unresolved — needs a human.
+
 ### What is missing for ~95%
+
 1. The `Error in _loadModel` / `applyMappings` lines from session
    `platform-web-63303495-4a12-4a9e-bcd0-70ae28a348f3` (blob log store — needs support/dev access).
    Equivalently: the Forge manifest `inputFileType` for that model's URN.
@@ -444,35 +446,50 @@ Either way, **the "silent failure" half is ours to fix regardless of what the cu
 3. Whether **other** WI1 models load in the web viewer (cohort + the same-surface broken/working pair).
 4. Answers to Ilia's 07-23 questions (source file, export origin, Revit check) — **nice to have, not
    blocking** once (1) is in hand.
->>>>>>> origin/main
+
+---
+
+## NEEDS HUMAN
+
+*Merged from both write-ups; see § Attachments for the full detail on the binary artifacts.*
+
+- ⚠️ **Session-log grep** for `platform-web-63303495-4a12-4a9e-bcd0-70ae28a348f3` (blob log store,
+  support/dev access) — the single decisive step; see § Which variant is it?. Does **not** need the
+  customer.
+- ⚠️ **Forge manifest inspection for THIS model** (dev/BE access, does **not** need the customer) —
+  two things to read off it: (i) the manifest's `inputFileType` (settles variant A vs B); (ii)
+  whether the derivative has a `Navis`/`XYZ`/`{3D}`-named viewable at all, or only
+  `EXPORT TO HOLOSITE` (settles the 07-24 fallback-chain hypothesis (b)). Both can run in parallel
+  with waiting on the customer's file.
+- ⚠️ **1 screenshot attachment** (`Screenshot 2026-07-23 072317…png`, attachment id 61262) —
+  unreadable here (binary, Atlassian auth). Would show the exact failure mode (blank viewer? spinner
+  stuck? explicit error toast?) — decisive for narrowing variant A vs B / hypothesis (a) vs (b)
+  before the source file even arrives.
+- ⚠️ **Freshdesk #7494** (`support.xyzreality.com/helpdesk/tickets/7494`) and attachment
+  `103334611867` — not reachable from here.
+- ⚠️ **The source IFC file itself** — requested from the customer (Ilia, 07-23); the
+  correctly-identified next customer-side artifact, not something this pass can substitute for.
+- ⚠️ **Export origin + Revit sanity-check** — Ilia's other two questions, also customer-side.
+- ⚠️ **Cohort check** — do the other WI1 models load in the web viewer? (Yash can produce this from
+  the repro he already has.)
+- ✅ **The `model.fileType` code fact is RESOLVED** (2026-08-04, re-grepped against `hc-frontend`
+  @ `28e03c3`) — both runs were right about different code paths; see the resolution box in the
+  07-24 mechanism section. No human arbitration needed on that one.
+- ⚠️ **Arbitrate the four remaining flagged disagreements above** — the strength of the
+  web-vs-helmet pair, the ticket-is-stalled-or-not read, the nearest prior art (PLT-2892 vs
+  PLT-2574), and the 7/10-vs-4/10 confidence. All four are judgement calls, not checkable facts,
+  which is why they were left standing rather than picked.
 
 ---
 
 ## Roster / ownership notes
 
-<<<<<<< HEAD
-- **Yash Patel** — coordinator, reproduced the failure, correctly requested the source file.
-- **Ilia Kuzmin** — asked the three decisive follow-up questions same-day; correct playbook style
-  (closed, one-message-per-question, routed).
-- No BE/product involvement yet — appropriately, since this hasn't been narrowed past "waiting on
-  the source file."
-
-## Doc / KB refs
-
-- `xyz-platform-context/dashboard/viewer-and-model.md` — general ViewerPage/model-loading context;
-  no existing IFC-specific section noted (to be added once mechanism is known).
-- Sibling ticket **PLT-2909** (this same run) — established that different model-authoring
-  origins (Revit vs Navisworks/Excel-import) take different mapper code paths
-  (`revit-model-mapper.ts` vs `navisworks-model-mapper.ts`) with different available artefacts —
-  relevant precedent for "check the model's authoring origin before assuming one mapper's
-  behaviour applies," which is exactly what Ilia's Revit-sanity-check question is probing.
-- `incidents/live-incident-playbook.md` — six-questions frame; this ticket is a clean example of
-  Phase 1 ("facts before theories") being followed correctly from message one.
-=======
 - **Yash Patel** (reporter, assignee, coordinator) — owns the client channel and Freshdesk #7494;
-  also owns the internal repro. Currently the only person on the ticket.
-- **Ilia Kuzmin** — already engaged 07-23 (mechanism interrogator); the session-log check is his
-  natural next move and needs nobody else.
+  also owns the internal repro, and correctly requested the source file. Currently the only person
+  on the ticket.
+- **Ilia Kuzmin** — already engaged 07-23 (mechanism interrogator); asked the three decisive
+  follow-up questions same-day in correct playbook style (closed, one-message-per-question, routed).
+  The session-log check is his natural next move and needs nobody else.
 - **Darminder Atker** (fullstack lead) — owner of the FE half either way; he personally diagnosed
   PLT-2574's external-mapping regression, so he is the right reviewer for the variant A/B call.
 - **Mostafa / Pietro** (product owners) — own the *answer to the customer* if variant A holds: IFC on
@@ -482,17 +499,28 @@ Either way, **the "silent failure" half is ours to fix regardless of what the cu
   extension referenced in PLT-2574.
 - **Gennaro / Radu** (QA) — a 10-minute check ("does any IFC-sourced model load in the web viewer on
   staging?") would confirm the general rule independently of WI1.
+- **No BE/product involvement yet** — which the HEAD-side run judged appropriate at 07-24, since the
+  ticket had not been narrowed past "waiting on the source file". (The origin/main-side run's routing
+  above supersedes that once the session log is read.)
 
 ## Doc / knowledge-base refs
 
 - `dashboard/viewer-and-model.md:99-118` — the three-ID mapping chain; explicitly *"External ID
-  (sourceFileElementId) — **Revit GUID or Navisworks element ID**"*. **Gap: no doc anywhere states
-  which source formats are supported**, or that unsupported ones fail silently. Worth adding.
+  (sourceFileElementId) — **Revit GUID or Navisworks element ID**"*. General ViewerPage/model-loading
+  context lives in this file. **Gap: no doc anywhere states which source formats are supported**, or
+  that unsupported ones fail silently, and there is no IFC-specific section. Worth adding once the
+  mechanism is settled.
 - `dashboard/pitfalls.md` — no entry for unsupported source formats / hide-all-on-empty-metadata.
   Add one when this closes.
 - `incidents/live-incident-board-tickets/PLT-2385-groupB-data-pipeline/context.md:113,135` — "QA" vs
   "PC" is client naming, no code concept (basis for the domain slug).
 - `incidents/live-incident-board-tickets/PLT-2892-groupA-viewer-and-model/context.md` — the *other*
   model-load failure shape (never-clearing spinner, dashboard). **Different mechanism — do not merge.**
-- `incidents/live-incident-playbook.md` — tone/pattern for the drafted reply.
->>>>>>> origin/main
+- Sibling ticket **PLT-2909** (same run) — established that different model-authoring origins
+  (Revit vs Navisworks/Excel-import) take different mapper code paths (`revit-model-mapper.ts` vs
+  `navisworks-model-mapper.ts`) with different available artefacts — relevant precedent for "check
+  the model's authoring origin before assuming one mapper's behaviour applies," which is exactly what
+  Ilia's Revit-sanity-check question is probing.
+- `incidents/live-incident-playbook.md` — six-questions frame, and tone/pattern for the drafted
+  reply. This ticket is a clean example of Phase 1 ("facts before theories") being followed from
+  message one.
