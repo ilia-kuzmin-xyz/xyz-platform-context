@@ -16,6 +16,10 @@ This folder is the **knowledge and planning ecosystem** for the HoloConstruct fr
 >
 > If a push is rejected because `main` moved, pull and merge, then push. Do not fall back to a
 > branch.
+>
+> **Full policy, rationale and end-of-session checklist: [`.claude/CLAUDE.md`](.claude/CLAUDE.md).**
+> It also covers the other half of the problem — write **additively and dated**, never as a wholesale
+> rewrite, because two snapshot rewrites of one file cannot be merged, only hand-arbitrated.
 
 ## How to use this folder
 

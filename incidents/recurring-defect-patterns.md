@@ -303,6 +303,27 @@ failed and cost days. See that ticket's log.
   `XYZ` then `EXPORT TO HOLOSITE` then `{3D}`, and renders nothing at all, with no error, if none
   matches (`viewer-service.ts:1052-1065`, `:945-946`). Promote to a pattern if a second IFC-sourced
   model does the same.
+- **Same word, different unit** (PLT-2874, and LVN1/Freshdesk 7514 pending confirmation). Two
+  surfaces both say "elements" and count different things. The editor counts distinct
+  `modelElementId` (`ModelDetailsPanel.tsx:222`); the dashboard counts `objectId`s, because
+  `coloredDbIds` is built for painting geometry and then reused as a statistic
+  (`dashboard-color-service.ts:679-698`). A federated file holds more objects than elements — on
+  FAR01, 9.24% more — so the two can never agree. **Diagnostic:** before diffing two counts, run
+  `COUNT(*)` against `COUNT(DISTINCT <id>)` on each side. If they differ on one side, that side
+  is counting a different unit and the comparison is meaningless until it is fixed. Promote to a
+  pattern if a second surface pair does the same.
 - **Source-data elevation errors presented as viewer bugs** (PLT-2649). 360 pins placed wrongly
   because one level's elevation was wrong in the source model; the transform was provably correct
   and the same fault reproduced in PowerBI.
+- **Surface-scoped visibility rule mistaken for missing data** (PLT-2945). One surface applies a
+  deliberate visibility filter that a comparison surface doesn't, and the customer diffs the two and
+  reports data loss. On PLT-2945 the Dashboard hides elements whose planned start date is later than
+  the date-range slider's end (`dashboard-progress-service.ts:1909-1924`, `dashboard-color-service.ts:488`
+  sets fragment visibility false) while the Editor/Web Viewer applies no such gate anywhere in the
+  codebase and renders the same elements yellow/Planned. Not a defect — the frontend does exactly what
+  it's specified to do — but the hide is silent, with no on-screen indication that N elements are
+  excluded, which is what generates the ticket. **Already has a sibling occurrence**, one layer up:
+  `planning/dashboard-progress-tab-explained.md` §8.4 documents the same confusion at the *project*
+  level ("future-dated projects show a blank/all-yellow model by default"). Two occurrences, arguably
+  enough to promote — recognition signature: *"visible in the Editor/Web Viewer but not the Dashboard,
+  no numeric discrepancy"* → check the date slider before anything else.

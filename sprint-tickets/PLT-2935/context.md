@@ -1,9 +1,12 @@
 # PLT-2935 — [Dashboard] Freeze planned progress % for sales project `69e232b2c222e55fa039eab2`
 
 **Type:** Task · **Priority:** Minor · No parent epic.
-**Jira status (as of 2026-07-30 run):** **In Code Review** — implemented.
-**PR:** XYZReality/hc-frontend#2080 (draft), branch `PLT-2935` off master `7e243fe`.
-**Local decision:** IMPLEMENTED via date-cap. Awaiting CI + review.
+**Jira status (as of 2026-08-01, later pass):** **In Code Review** — implemented, PR ready for review.
+**PR:** XYZReality/hc-frontend#2080 — **out of draft** as of 2026-08-01, branch `PLT-2935` off master `7e243fe`.
+**Local decision:** IMPLEMENTED via date-cap. Build+test job PASSED in CI (job 90817359858 on `d186f79`)
+— the new spec does run and pass. Only red check is the repo-wide Trivy brace-expansion CVE (hotfix
+PR #2072 open, not ours to duplicate). Master merged in by Ilia (`10a99ac`).
+One review round handled — see § Review feedback handled (2026-08-01).
 
 ## What the ticket asks
 Sales/demo project. The **planned progress %** keeps creeping up; Mostafa wants it fixed
@@ -110,13 +113,25 @@ The project is prod-only, so it must be replayed onto dev with XYZ Rewind
 - The "does not increase across refreshes" AC is only observable on prod once the live end
   date has moved past the frozen date.
 
+## Review feedback handled (2026-08-01)
+Copilot flagged a REAL bug on `_buildFrozenPlannedFilters` — worth remembering:
+- The planned queries are a **delta** (`planned@endDate − planned@startDate`) in BOTH
+  `getProjectProgressV2API` and `getProjectProgressByActivity`. Capping only `endDate`
+  inverted the range whenever the selected window STARTED after the frozen date (any
+  recent month), and since planned is cumulative that returned a **negative** planned.
+- Fix: `clampFrozenPlannedStartDate(startDate, frozenEndDate)` (commit `c070379`).
+  Worst case start == end → 0 planned for a window entirely after the freeze, which is
+  the correct reading. Full-range behaviour unchanged.
+- Modelled against a cumulative curve: window 2026-11-01→11-30 gave −25 before, 0 after;
+  full range 35 both. Thread replied to and resolved.
+
 ## Open assumption
 Frozen date = `2026-07-24` (when raised), one named constant. If it doesn't match the
 screenshotted figure it's a one-constant change.
 
 ---
 
-## Run log — 2026-08-01
+## Run log — 2026-08-01 (earlier in the day; superseded by the header + review section above)
 
 - Jira: **In Code Review**. PR #2080 still **draft**. No review threads opened (0 comments from humans/Copilot).
 - CI: `build` red **only** on the repo-wide Trivy CVE (`brace-expansion 5.0.7`, CVE-2026-14257) read
@@ -131,4 +146,6 @@ screenshotted figure it's a one-constant change.
 
 ## Next run
 - Blocker to clear is **not in this PR**: #2072 (lockfile bump) must land on master for CI to go green.
-- Once green, PR is ready to come out of draft — needs Ilia's call on the frozen-date constant first.
+- ~~Once green, PR is ready to come out of draft~~ — **done later on 2026-08-01**: PR is out of draft,
+  build+test green, one Copilot review round handled. Remaining open item is unchanged and is Ilia's
+  call: **confirm the frozen-date constant `2026-07-24`** against Mostafa's screenshot.

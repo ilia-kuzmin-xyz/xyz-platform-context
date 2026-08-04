@@ -32,6 +32,27 @@ Sent to Ilia as tables on 2026-07-29. Detail for each lives in the sections belo
 
 ### Backend / API
 
+> **⚠️ BE WORK IS NOT DONE — it is in the backlog. Sergey (2026-08-03): the IAM side is still planned, tracked as
+> [PAPI-3717](https://xyzreality.atlassian.net/browse/PAPI-3717) "[IAM] Custom permissions for Portfolio invitations"**
+> (assignee Sergey.Kuderskiy · status **Backlog** · epic PAPI-3602 *Portfolio Permissions*, which is Dev In Progress ·
+> no due date, no fixVersion, no issue links).
+>
+> **Read the scope carefully — PAPI-3717 does NOT cover most of the questions below.** Its entire AC is:
+> 1. *"IAM allows creation of custom roles (already implemented, verify this)"*
+> 2. *"portfolio invitation endpoint allows assigning custom roles to users"*
+>
+> So it (a) **assumes** custom-role creation already works — consistent with what I found in `RolePage.tsx` — and
+> (b) only adds **portfolio-invitation** assignment. It says nothing about ordinal levels, the Quality extras, or
+> server-side grant-hierarchy enforcement. Therefore **BE-1, BE-2, BE-3, BE-4, BE-6 and BE-8 are still unowned** —
+> they need either adding to PAPI-3717's scope or their own tickets.
+>
+> **One thing it DOES settle: the portfolio scope is intentional, not a copy slip.** PAPI-3717 is portfolio-scoped,
+> which matches two design details I'd flagged as suspicious — the `UPDATE PERMISSION?` copy saying *"15 users in
+> your portfolio"*, and the Team Management bullet *"create custom permissions (available when invited at the
+> Portfolio level only)"*. **BE-5 is effectively answered: custom permissions are a Portfolio-level concept**, even
+> though PLT-1770 is titled "[Project Level]". That tension should be raised — the FE ticket and the BE ticket
+> disagree about scope.
+
 | # | Question | Why it matters | P | Detail |
 |---|---|---|---|---|
 | BE-1 | iam models an **unordered authority tree** — no ordinal level. Does BE add levels, or does FE own a `feature→level→authority-codes` table? | **Shapes the whole feature**; FE mapping can't represent arbitrary sets that `RolePage` already produces | P1 | § API/BE |
