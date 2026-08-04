@@ -127,7 +127,6 @@ Worth its own ticket.
   element list does not. Consistent with the divergence already in `dashboard/pitfalls.md`, and it
   means element counts cannot identify which model the dashboard loaded.
 
-<<<<<<< HEAD:incidents/live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/investigation-log.md
 ## 2026-07-31 — chain closed from parquet to pixel, and the model identified
 
 **The dashboard loads `20cff6cf-659f-4eb6-b0d5-ae181080afa1`**, the larger of FAR01's two
@@ -245,22 +244,22 @@ A `window.dashboardModelInfo()` debug handle was built and then **removed** befo
 Network tab already answers which model is loaded (`GET /api/v2/projects/{id}/models/{modelId}`
 is issued only for the chosen one), and it did not belong in a fix PR. It is in the branch
 history if it is ever wanted as its own change.
-=======
-## Outstanding
 
-One reading has not reconciled. `_visible_elements` measured 581,878 objects / 528,314 elements,
-but the console showed `Total: 675,147`. 528,314 is below the 628,000 linked, so that query ran
-with the scrubber short of the end or a filter applied. Re-run with the scrubber hard right and
-filters cleared:
+### Previously-outstanding reading — now CLOSED (resolved 2026-08-04 branch-reconciliation pass)
 
-```sql
-SELECT COUNT(*) AS rows, COUNT(DISTINCT modelElementId) AS elements FROM _visible_elements;
-```
+A parallel copy of this log carried an **Outstanding** section that this 07-31 entry supersedes.
+Recording it so the question is visibly answered rather than silently dropped:
 
-`rows` should equal the on-screen Total. That closes the chain from parquet to pixel. The
-diagnosis does not depend on it, but the ticket comment should not quote exact figures until it
-lands.
->>>>>>> origin/main:incidents/live-incident-board-tickets/PLT-2874-groupB-viewer-and-model/investigation-log.md
+> *Was:* `_visible_elements` measured 581,878 objects / 528,314 elements while the console showed
+> `Total: 675,147`. Since 528,314 is below the 628,000 linked, that query had run with the scrubber
+> short of the end or a filter applied. The re-run asked for was
+> `SELECT COUNT(*) AS rows, COUNT(DISTINCT modelElementId) AS elements FROM _visible_elements;`
+> with the scrubber hard right and filters cleared, and the caveat was: *don't quote exact figures
+> in the ticket comment until it lands.*
+
+**It landed.** The 07-31 measurement above (**669,978 objects / 609,643 distinct elements** on model
+`20cff6cf`, full date range) is that reconciled reading, so the figure-quoting caveat is lifted and
+the posted draft may use those numbers. The chain from parquet to pixel is closed.
 
 ## Tooling notes for the next person
 
