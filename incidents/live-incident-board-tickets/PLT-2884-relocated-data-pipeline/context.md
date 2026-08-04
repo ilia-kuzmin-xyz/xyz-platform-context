@@ -2,13 +2,51 @@
 
 - **Domain slug:** data-pipeline (justification in §7)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2884
-- **Type:** Live Incident · **Priority:** Critical · **Status:** With Customer
-  (Group-A-in-scope-but-parked per this board's convention — ball is with the
-  client)
+- **Type:** Live Incident · **Priority:** Critical · **Status:** Done — closed 2026-07-31
+  (folder retagged `groupA` → `relocated`; out of this routine's scope, kept as
+  historical context per the folder-rename convention)
 - **Assignee / Reporter:** Yash Patel (support)
 - **Project:** EQX-AT10x (ID `6808f6afae311c4f8409624f`) · **Software Area:** Dashboard
-- **Created:** 2026-07-09 · **Last updated:** 2026-07-20
-- Triage date: 2026-07-22 · **Re-verified: 2026-07-30 (no change)** — see §9
+- **Created:** 2026-07-09 · **Last updated:** 2026-07-31
+- Triage date: 2026-07-22 · Re-verified: 2026-07-30 (no change) · **Closed, unverified: 2026-08-04 — see §10**
+
+## 10. Closed 2026-07-31 without on-ticket verification (found 2026-08-04, repo-hygiene pass)
+
+**This section consolidates a second duplicate folder** (`PLT-2884-groupA-progress-tracking/`,
+an independent parallel investigation from 2026-07-20 that reached a materially different
+conclusion — folded in below, then deleted) **and records how the ticket actually closed.**
+
+**How it closed (verified via live Jira fetch, 2026-08-04):** the last *substantive* Jira comment
+is Yash's 2026-07-13 "have asked customer to reupload... still waiting." Every comment after that
+is a bare Freshdesk status-sync line (Closed → Waiting on customer → Closed again on 07-20, then
+**Closed for good on 07-31**) — mechanical Freshdesk↔Jira sync, not a human confirming anything.
+**Nobody ever posted that the customer re-uploaded, that a corrected XER arrived, or that the
+numbers reconciled.** The recommended escalation from both duplicate folders below (nudge Yash,
+consider With Customer → With Technical Support) was never posted either — the ticket just aged
+out via the Freshdesk auto-close, 18 days after the last real human update.
+
+**Why this matters — the competing root-cause hypothesis was never tested.** The
+`-progress-tracking` duplicate (2026-07-20 investigation, independent of this file's) did not
+accept "it's the customer's bad XER" (Mostafa's 07-10 read) at face value. It raised a specific,
+falsifiable competing hypothesis: **Pattern A** — an intangible activity (no linked elements,
+`PlannedLaborUnits > 0`) computing `ActualProgress = 0` on the Platform side, a documented bug
+class (per the `dashboard-progress-comparison` skill) that reproduces this *exact* symptom,
+direction, and magnitude **even with a valid XER**. Both duplicate folders independently drafted
+the same cheap, decisive check: pull activity `EL1031000` ("Install Temp Power") and see whether
+(a) it exists in the customer's XER and (b) on the Platform it shows `LinkedElements = 0,
+PlannedLaborUnits > 0, ActualProgress = 0`. **That check was never run.** The ticket closed on the
+XER-is-bad framing by default (silence + auto-close), not because the alternative was ruled out.
+
+**Consequence, since this is now Done and out of this routine's scope:** no action to draft here —
+nothing to post to a closed ticket. But if another EQX-family (or any intangible-heavy-schedule)
+project raises a similar "new dashboard % lower than old, activity has Editor-Progress but not
+Platform-Progress" symptom, check for the `EL1031000` signature (0 linked elements, planned labor
+hours, 0 actual) *before* assuming a bad customer export — this exact class closed unverified once
+already. Worth adding to `../recurring-defect-patterns.md` if it recurs.
+
+**Confidence:** that the ticket closed without verification — 10/10 (read directly off the comment
+timeline). That Pattern A specifically (vs. a genuinely bad XER) was the true cause — unresolved,
+and now unresolvable without reopening; the two hypotheses were never distinguished on this ticket.
 
 ---
 

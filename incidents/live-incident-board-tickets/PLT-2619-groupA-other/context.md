@@ -5,8 +5,9 @@
 - **Status:** With Customer (category: In Progress / yellow) — **status unchanged since 2026-04-29**
   (`statuscategorychangedate = 2026-04-29T13:17`), despite the 27 Jul comment
 - **Priority:** Medium · **Project:** PLT (XYZ SW Platform : Platform)
-- **Reporter & Assignee:** Masum Ahmed (unchanged)
-- **Created:** 2026-04-23 · **Last updated:** 2026-07-27T11:04 (comment only)
+- **Reporter:** Masum Ahmed · **Assignee: Yash Patel** (reassigned off Masum by Pietro Desiato
+  2026-08-03T14:55 — see § 2026-08-04)
+- **Created:** 2026-04-23 · **Last updated:** 2026-08-03T15:13 (Freshdesk mirror comment)
 - **Components / Labels / Attachments / Issue links / Remote links:** **none** (all empty — verified
   `attachment: []`, `issuelinks: []`, `getJiraIssueRemoteIssueLinks → []`)
 - **External ref:** Freshdesk ticket #6492 (mentioned only inside the mirror comments; there is
@@ -202,6 +203,191 @@ settles all three.
 - ⚠️ Whether a *second*, still-PowerBI demo exists (the "Smith Johns" / "Mission Critical Datacentre"
   variants seen in PBD) — if so, PLT-2619 is not fully superseded.
 
+## RUN 2026-08-04 — the 89-day stall broke twice on 08-03, both times sideways
+
+The 08-03 pass recorded `updated` as still 07-27 and left the ticket in "confirmed unchanged"
+(`README.md:93`). That pass ran at ~07:13 UTC. **Two things then happened the same afternoon**, both
+after it, and neither is what the prior draft was waiting for.
+
+### VERIFIED — the 08-03 timeline (read from the changelog + comment list, not inferred)
+
+| Time (BST) | Actor | Event | Source |
+|---|---|---|---|
+| 14:55:02 | **Pietro Desiato** | **Assignee: Masum Ahmed → Yash Patel** | changelog id `1522065` |
+| 15:13:28 | **Yash Patel** | comment: "Ticket ID: 6492 - Freshdesk ticket status changed to : **Waiting on customer**" | comment id `108742` |
+| 17:15–17:32 | CI | PR #2080 (PLT-2935) rechecked — **both `build` jobs + SonarCloud all green** | PR check-runs |
+
+**Two independent things, 18 minutes apart, then the sibling ticket's PR going green two hours later.**
+
+### VERIFIED — what did *not* change (this is most of the story)
+
+- **Status: still `With Customer`. `statuscategorychangedate` still `2026-04-29T13:17:46`** — the
+  ticket has *never* been transitioned since April. **97 days in one status.**
+- **Still `Live Incident`.** Type untouched. Priority Medium. Reporter still Masum Ahmed.
+- **`issuelinks: []`, `attachment: []`, `labels: []`, `components: []`, `resolution: null`** — all
+  re-verified empty. Still **no Jira link to PLT-2935** despite the two being worked in tandem.
+- **Nobody answered Yash's 07-27 question to Ilia.** 6 comments total; the new 6th is a Freshdesk
+  *status mirror*, not a reply. The internal question is **8 days** unanswered.
+- **Pietro did not answer his own 04-27 question** ("which dashboard should we relink?") — he
+  reassigned the ticket instead. That question is now **99 days** open.
+
+### What the two events actually mean
+
+1. **Pietro's reassignment closes one prior recommendation — someone else did it.** The 07-30 draft's
+   follow-through item "reassign off Masum Ahmed (off-roster support agent)" is **done**, by Pietro,
+   on 08-03. Note the shape: Pietro re-engaged with the ticket for the first time since he created it
+   on 04-23, and what he did was **route it, not answer it**. The one fact only he had (which
+   dashboard) is still missing.
+2. **The Freshdesk flip inverts the 07-30 "the ball is on us" finding — and kills part of the prior
+   draft.** #6492 went "Awaiting release" (29 Apr) → **"Waiting on customer"**. Yash has an **open
+   question out to the client right now**. Two consequences:
+   - **The prior draft's "close Freshdesk #6492" instruction is now actively wrong.** Closing a
+     ticket that is mid-question to the client would cut the thread. **Do not do it this week.**
+   - For the first time since April, `With Customer` is *arguably accurate* — but **accidentally**:
+     the Jira status was never set, it just happens to have caught up with reality. Do not read this
+     as the workflow working.
+3. **⚠️ The content of Yash's client message is invisible from here.** A status mirror tells us a
+   question was asked, not what was asked. This is the new central unknown, and it is **not
+   answerable from Jira** — it lives in Freshdesk #6492.
+
+### PLT-2935 — moved materially, and now carries the strongest evidence yet
+
+**Status: Analysis In Progress → `In Code Review`** (`statuscategorychangedate 2026-07-30T09:19`).
+New comment 07-30 08:48 (id `108491`): Ilia closes out his own three 28-Jul questions. This retires
+the prior context's "PLT-2935 is itself blocked on three open questions" gap — **it isn't any more.**
+
+Substantive change of approach recorded there: **the freeze is no longer a hardcoded percentage.**
+Planned % is not a stored number a refresh overwrites — it is recomputed per query as a delta
+resolved at a *moving* end date, so the fix pins **the date** instead. Scope settled as planned
+everywhere-but-not-actual; variance/SPI follow automatically.
+
+**New actor identified: `Mostafa` is the original requester of the freeze** ("got Mostafa's original
+ask — *'i want to freeze it in this state'*"). He was previously only a name in DIGP-814's dependency
+list. **This matters: he is the first person we can name who was looking at project
+`69e232b2c222e55fa039eab2` on screen** — i.e. the first real owner for the identity question, which
+until now had no owner but Ilia's own lookup.
+
+### ⭐ VERIFIED: a sales/demo project **is** live on the native dashboard on prod
+
+Found PR **#2080** — *"PLT-2935: Freeze planned progress for sales dashboard project"*
+(https://github.com/XYZReality/hc-frontend/pull/2080), open, **not** draft, `+306/−4` over 4 files,
+head `PLT-2935` @ `c50bccd`, base `master` @ `9c14b90`. Its own testing section states:
+
+> "`69e232b2c222e55fa039eab2` only exists on **prod**" · "On **cloud.xyzreality.com**, open
+> `/projects/69e232b2c222e55fa039eab2/dashboard`"
+
+That route is the **native** dashboard (`/projects/:id/dashboard`) — **not** the legacy PowerBI route
+`/progress-dashboard/:id` (`app/routes.tsx:88-95`, `constants.ts:13`). So the 07-30 inference is now
+**verified**: a sales/demo project really is running on the new dashboard on prod, and the work being
+done to it is cosmetic demo-polish, not a migration.
+
+**What is still NOT verified — and it is the same one thing:** that this project is the asset the
+client calls *"Mission Critical Dashboard"*. **The project name appears nowhere.** PLT-2935's
+description still says verbatim *"project name is not known yet"*; the 07-30 comment doesn't name it;
+PR #2080 doesn't name it. The link is still circumstantial.
+
+### PR #2080 is green and waiting on a human — this is the real live blocker now
+
+- **Reviews: `copilot-pull-request-reviewer[bot]` (08-01) and Ilia's own reply (08-01). Zero human
+  reviews.** Requested reviewers: `TomMasdinXYZ`, `DarminderA`, `rishib-xyz`, `SergiuszXYZ`.
+- **CI is fully green as of 08-03 17:32** — the Trivy/`brace-expansion` failure that reddened every
+  open PR is **cleared**: #2080's base is `9c14b90`, which *is* the `#2072` lockfile bump.
+- **`mergeable_state: "blocked"`** with CI green ⇒ blocked on **missing human approval**, nothing
+  technical. **5 days, four named reviewers, no review.**
+
+So the family's blocker has migrated again: April = "awaiting a release"; 07-27 = "awaiting Ilia";
+now = **awaiting a code review and a client reply**. PLT-2619 itself has never been the blocker.
+
+### Code re-verification (static reading only — this env cannot build hc-frontend)
+
+The mechanism described in PLT-2935's 07-30 comment is real in the code:
+
+- `WHERE CalendarDate <= '${endDate}' ORDER BY CalendarDate DESC LIMIT 1` —
+  `…/dashboard-progress/utils/progress-queries-v2-api.ts:141-142, 201-202, 410-411, 724-725, 993-994`
+- the today-cap it mirrors — `refDate = MIN(currentDate, calEndDate)` —
+  `…/dashboard-progress/dashboard-progress-service.ts:1771, 2131, 2570`; `utils/progress-queries.ts:750-751`
+- `maxPlannedProgress$` — `dashboard-progress-service.ts:131, 1093, 1154, 1333` (unchanged)
+
+📌 **Path correction for this file's own doc refs:** the service lives at
+`src/main/webapp/app/pages/organisation/ViewerPage/components/services/dashboard-progress/` —
+**not** `src/main/webapp/app/services/dashboard-progress/` as the 07-30 doc-refs implied. That path
+does not exist.
+
+**The freeze is not on `master`.** Local checkout `claude/vigilant-franklin-2122zp` @ `9c14b90`
+(= master, 08-03): `grep -rn 69e232b2c222e55fa039eab2 src/` → **nothing**;
+`utils/frozen-planned-progress.ts` → **does not exist**. It exists only on the unmerged PR branch.
+(One local `frozen` hit — `progress-queries-v2-api.regression.test.ts:543` — is a *test-fixture*
+frozen refDate, unrelated to this feature. Checked so a future run doesn't misread it as the freeze.)
+
+### Classification — REAFFIRMED and strengthened; recommendation re-sequenced
+
+**Still not a live incident.** Nothing this run weakens that; the 08-03 activity *strengthens* it:
+**103 days end-to-end and the only two things that have ever happened to this ticket are a
+reassignment and support-tool status mirrors.** No defect, no repro, no error, no worked-before /
+broken-now, no attachment, no code ever written against it. That is the signature of a **service
+request**, not an incident — while the one piece of genuine engineering in this family sits on a
+correctly-typed **Task** with a green PR.
+
+**But the off-board action must now be sequenced, not just executed.** #6492 is mid-question to the
+client. Taking the ticket off the board *this week* risks dropping a live client thread. Reaffirm the
+classification; hold the bookkeeping until the client replies.
+
+### Domain tag — `other` is now demonstrably wrong
+
+Recommend renaming the folder `PLT-2619-groupA-other` → **`PLT-2619-groupA-dashboard-migration`**
+(**not done here — flagged for the human**). The ask is precisely a PowerBI→native demo-asset
+migration. Deliberately **not** `data-pipeline` or `progress-tracking`: those mechanics
+(`CalendarDate`, parquet, planned/SPI) belong to **PLT-2935**, not to this ticket, which has no code
+component at all. Caveat: if this closes into PLT-2935, **archive the folder rather than rename it.**
+
+### Staleness (recomputed)
+
+| Clock | Days |
+|---|---|
+| Created 04-23 → today | **103** |
+| In `With Customer`, never transitioned (since 04-29) | **97** |
+| Pietro's 04-27 question unanswered | **99** |
+| Yash's 07-27 question to Ilia unanswered | **8** |
+| PR #2080 open, green, zero human reviews | **5** |
+
+### Confidence — 2026-08-04 (not rounded up)
+
+- **The 08-03 factual delta** (reassignment + Freshdesk flip + PR green, and *nothing else*):
+  **9.5/10** — read directly from changelog, comment list and PR API.
+- **Classification (mis-filed service request, not a live incident): 9.5/10** — unchanged, now with
+  103 days and zero engineering activity behind it.
+- **"A sales/demo project is already live on the native dashboard on prod": 9/10** — *up* from
+  inference to verified, on PR #2080's own prod URL and route shape.
+- **"PLT-2619 is superseded by PLT-2935 / same asset": 7/10 — deliberately DOWN from 07-30's 7.5.**
+  Not a typo and not rounded. The *linkage* evidence improved, but a **counter-signal** appeared:
+  on 08-03 Yash went **outward to the customer** rather than closing the loop internally. If the
+  migration were known-done, the natural move was to tell the client it's done and close — going to
+  the client with a *question* is weakly more consistent with the target dashboard still being an
+  open question. Better evidence on one leg, worse on the other ⇒ net slightly lower.
+- **"The open action is now on the customer, not us": 6/10** — the Freshdesk status says so, but the
+  *content* of Yash's client message is invisible from here. A status mirror is not proof of what was
+  asked, or of whom.
+
+### Unresolved items — 2026-08-04
+
+1. **What did Yash ask the client on Freshdesk #6492 on 08-03?** New this run and now the central
+   unknown; it determines whether this ticket is closing or reopening. **Not answerable from Jira or
+   from this environment.**
+2. **What is the project *name* behind `69e232b2c222e55fa039eab2`?** Still unnamed in every source
+   (PLT-2935 description, its 07-30 comment, PR #2080). Still the single fork the whole
+   recommendation turns on. **Now has a candidate owner: Mostafa.**
+3. **Is that project the same asset as "Mission Critical Dashboard"?** Follows from (2). Unproven.
+4. **PR #2080 has four requested reviewers and zero human reviews after 5 days**, CI green,
+   `mergeable_state: blocked` on approval alone. Nothing to diagnose — it needs a person.
+5. **PLT-2619 ↔ PLT-2935 still have no Jira issue link**, so neither ticket shows the other. Cheap
+   fix, invisible to every future sweep until someone does it.
+6. **Jira status still never transitioned** (97 days). Now *accidentally* accurate, which makes it
+   less likely anyone notices it was never actually set.
+7. **Whether a second, still-PowerBI demo exists** ("Smith Johns" / "Mission Critical Datacentre"
+   variants in PBD) — carried forward unchanged from 07-30, still unchecked.
+8. **PR #2080's frozen-date assumption** (`2026-07-24`) is unconfirmed against whatever Mostafa
+   actually screenshotted. Flagged in the PR as a one-constant change; nobody has confirmed it.
+
 ## Doc refs
 
 - `xyz-platform-context/dashboard/README.md:4-5, 27-30` — native Dashboard Page as PowerBI replacement
@@ -210,6 +396,13 @@ settles all three.
   PowerBI config fetch (`getProjectDashboardInfo`)
 - `hc-frontend/src/main/webapp/app/routes.tsx:88-95`, `app/config/constants.ts:13` — legacy
   `/progress-dashboard/:id` route
-- `hc-frontend/…/services/dashboard-progress/dashboard-progress-service.ts:131, 1333` —
-  `maxPlannedProgress$` (PLT-2935 target)
+- `hc-frontend/src/main/webapp/app/pages/organisation/ViewerPage/components/services/dashboard-progress/dashboard-progress-service.ts:131, 1333`
+  — `maxPlannedProgress$` (PLT-2935 target). ⚠️ Corrected 08-04: the shorter
+  `app/services/dashboard-progress/…` path used above in the 07-30 notes **does not exist**.
+- `…/services/dashboard-progress/utils/progress-queries-v2-api.ts:141-142, 201-202, 410-411` —
+  `WHERE CalendarDate <= endDate ORDER BY CalendarDate DESC LIMIT 1` (the mechanism PLT-2935 pins)
+- `…/services/dashboard-progress/dashboard-progress-service.ts:1771, 2131, 2570` — existing
+  `refDate = MIN(currentDate, calEndDate)` today-cap that PR #2080 mirrors
+- **PR #2080** https://github.com/XYZReality/hc-frontend/pull/2080 — PLT-2935 implementation; its
+  testing section is the source for "the demo project is on the native dashboard on prod"
 - `xyz-platform-context/incidents/live-incident-playbook.md` — tone/routing for the draft

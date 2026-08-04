@@ -1,5 +1,79 @@
 # PLT-2619 — recommended action (DRAFT ONLY — execute nothing)
 
+> ## Revised 2026-08-04 — read this before using the 07-30 draft below
+>
+> **These are DRAFTS for human review. Nothing here has been sent, posted or executed, and no write
+> action was taken against Jira.**
+>
+> The 07-30 draft is **partly superseded**, for two reasons found this run:
+>
+> 1. **Do NOT close Freshdesk #6492.** On 08-03 at 15:13 Yash moved it to **"Waiting on customer"** —
+>    he has a live question out to the client. The 07-30 draft told us to close it. Closing it now
+>    would cut off a client thread mid-conversation.
+> 2. **Do NOT send the 07-30 message to Yash.** It asked him the project-identity question. He is
+>    already mid-thread with the client on exactly this, and we cannot see what he asked. Asking him
+>    now crosses his own conversation and risks him relaying our guess to the customer as fact.
+>
+> Also already done, by someone else: the 07-30 follow-through item *"reassign off Masum Ahmed"* —
+> **Pietro did it on 08-03 at 14:55** (Masum → Yash). Don't re-raise it.
+>
+> ### Chosen action for 2026-08-04: ask Mostafa for the project name. One message, one question.
+>
+> **Owner: Ilia Kuzmin. Addressee: Mostafa. Post on PLT-2935, not on PLT-2619.**
+>
+> Mostafa is newly identified this run as the person who originally asked for the freeze — the first
+> named person we know was looking at project `69e232b2c222e55fa039eab2` on screen. The question is
+> answerable with a single value, it does not touch Yash's client thread, and it fills a gap
+> PLT-2935's own description admits (*"project name is not known yet"*).
+>
+> > Mostafa — the planned-% freeze you asked for is on project `69e232b2c222e55fa039eab2`, which is
+> > the id from the URL rather than a name. What is that project actually called? I need the name to
+> > check whether it's the same dashboard as a separate client request we have open (PLT-2619,
+> > "Mission Critical Dashboard"), so we don't end up doing the same demo twice.
+>
+> **Why this and not the alternatives:**
+> - **Not asking Yash** — see (2) above. He needs nothing from us; he's waiting on the customer.
+> - **Not messaging the client** — we would be a third party arriving in a thread Yash already owns.
+> - **Not closing PLT-2619 yet** — it hangs on the identity question, still unproven (7/10, and
+>   deliberately *lowered* from 07-30, see `context.md` § Confidence).
+> - **Not off-boarding it this week** — the classification call is unchanged and correct (this is not
+>   a live incident), but the bookkeeping should wait until the client replies on #6492. Reclassifying
+>   a ticket that is genuinely mid-client-question is how threads get dropped.
+>
+> ### Second, separate message — different question, different owner, so not blended in
+>
+> **Owner: Ilia Kuzmin. Addressee: the four requested reviewers on PR #2080.**
+>
+> This is now the family's only real blocker: PR #2080 is **green on all checks** since 08-03 17:32
+> (the repo-wide Trivy failure cleared when #2072 landed), `mergeable_state: blocked` on **missing
+> human approval alone**, and after 5 days it has reviews from a bot and from its own author only.
+>
+> > PR #2080 (PLT-2935 planned-% freeze) has been green since Monday evening — the red Trivy build was
+> > the repo-wide `brace-expansion` issue and #2072 cleared it. It's blocked only on an approval. Can
+> > one of you take it? It's +306/−4 across 4 files, and the logic worth a second pair of eyes is the
+> > date cap being `MIN(frozenDate, endDate)` rather than a replacement.
+>
+> ### What NOT to do this week
+>
+> - Do not close or reclassify Freshdesk #6492.
+> - Do not close PLT-2619 until the project name is confirmed.
+> - Do not take PLT-2619 off the incident board until the client replies — then do it.
+>
+> ### Cheap fixes nobody has done (safe to do at any point)
+>
+> - **Link PLT-2619 ↔ PLT-2935 in Jira.** They have been worked in tandem for 8 days and neither
+>   shows the other (`issuelinks: []` on both). Every future sweep re-derives this by hand.
+> - **Transition PLT-2619 out of, and deliberately back into, its real status.** It has never been
+>   transitioned since 29 Apr (97 days). It is *accidentally* accurate right now, which makes it less
+>   likely anyone notices it was never actually set.
+> - **Rename this folder** `…-groupA-other` → `…-groupA-dashboard-migration` (or archive it, if the
+>   ticket closes into PLT-2935). `other` is a placeholder and is now demonstrably wrong.
+>
+> ---
+>
+> The 07-30 draft is retained below for history. **Its message text is superseded; its "why not the
+> others" reasoning still holds.**
+
 **Revised 2026-07-30.** Supersedes the 07-13 draft ("nudge Pietro"). Pietro is no longer the right
 hop: Yash's 27 Jul comment named **Ilia** as the actionee, and PLT-2935 suggests the work is already
 done elsewhere.

@@ -170,3 +170,7 @@ wasted effort. Diagnosis confidence stays **9/10**; nothing new to test.
 instrument — it re-opens a settled conversation with the client to obtain a confirmation we do not
 actually need (the support ticket is already closed on the customer's side). `recommended-action.md`
 has been revised this run from "(c) nudge" to a direct **close-out** recommendation. See that file.
+
+## Re-verified 2026-08-04 (light pass, this run)
+
+Live JQL fetch of the board: `updated` for this ticket is still `2026-07-06T10:18:45+01:00` — bit-for-bit identical to what the 08-03 run already captured as unchanged. Since a Jira comment or status change always bumps `updated`, this confirms zero new activity in the 24h between runs without needing a full re-read. Carrying forward the 08-03 finding as-is; no new investigation performed.
