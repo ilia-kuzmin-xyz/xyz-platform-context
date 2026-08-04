@@ -222,3 +222,25 @@ Related behaviour worth knowing: before the schedule projection exists, linked e
 And the derive takes `MIN(startDate)`/`MAX(endDate)` across *all* of an element's links (widest
 window, matching the dashboard aggregate); the pre-#2081 viewer used `activities[0]` off an
 unordered map.
+
+### The fix independently re-verified (2026-08-04), and the one thing to check if it ever regresses
+
+The #2081 rule was re-run outside the repo's test suite — the same 60-row branch table replayed
+against a standalone DuckDB, 60/60 matching the documented rule. Worth knowing *how* it can break,
+because the fix rests on one non-obvious SQL detail:
+
+```sql
+FROM status FULL OUTER JOIN linked USING (modelElementId)
+...
+WHEN linked.modelElementId IS NOT NULL THEN 0   -- Planned
+```
+
+`USING` merges the join column, so the **unqualified** `modelElementId` is the coalesced value —
+non-null on every row. Linkage is read only because the **qualified** `linked.modelElementId` still
+resolves to the right-hand side's own value, which stays NULL for an unmatched (unlinked) row.
+Verified directly: 6 qualified-NULL rows for exactly the 6 unlinked fixtures.
+
+If a future edit drops the `linked.` qualifier, or swaps `USING` for an `ON` + `COALESCE` of the two
+ids, **every element carrying a status row derives Planned** — the whole model paints yellow. The
+branch table catches it (the 4 unlinked-and-not-installed rows fail), so that test is load-bearing,
+not decorative. Do not "simplify" it away.
