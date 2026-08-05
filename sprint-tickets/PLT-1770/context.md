@@ -1326,3 +1326,44 @@ Schedule), NA/E/A (Team Management). Schedule's sheet contradiction still the on
   footer probes to the button's own `SliderActions`, or the probe grabs the wrong one.
 - Fail-with-bug verification via `git stash` → bundle → run → `stash pop` → run works well and
   caught two probe bugs.
+
+---
+
+## 2026-08-05 (afternoon) — BE feedback lands: BE-1 reframed, BE-2/BE-3 answered, new BE-9 risk
+
+### BE-1 was overstated — the levels ARE expressible today
+
+Ilia's BE developer pushed back on "no rank on any node", and he's right in the way that matters.
+The authority codes are **verb-graded** (`config/constants.ts`, 179 codes): `ProjectView/Edit/Delete`,
+`ModelView/Create/Edit/Delete`, `DeviceList/View/Create/Edit/Delete/Reset`, `ScheduleView/Edit/
+Create/Delete`, `IssueView/Edit/Create/Delete/AddComment`, `ProjectPersonView/Invite/Edit/Remove`…
+A ladder rung = a **cumulative set**: View only ≈ `*View/*List`; Editor ≈ + `*Edit/*Create/*Upload`;
+Admin ≈ + `*Delete/*Remove/*Manage`. `IAuthority` even carries an `order` field. "No rank field"
+stays true; "levels can't be represented" was wrong. What's missing is only the **dictionary** —
+no stored definition of which code-set = which rung. FE-owned table (adapter option b) is now
+clearly implementable; the localStorage store becomes just the migration bridge.
+
+Per-feature status (full detail in `PLT-1770-permission-level-mapping.xlsx`, shared with Ilia):
+**7 green** (codes verified: Project Details, Devices, Models, Coordinates, Team Management,
+Schedule, Quality), **2 yellow** (candidates to confirm: QR codes → `Marker*`?, 360 Captures →
+`Image*`+`Video*`?), **3 orange** (nothing in FE constants: Integrations, On-site progress, Cost —
+need the BE tree dump), **1 red** (Quality extras). Note: `ModelDelete`/`CoordinateDelete`/
+`ScheduleDelete` exist though those ladders top at Editor — `ScheduleDelete` quietly supports the
+module sheet's Admin rung in the Figma contradiction.
+
+### BE developer's answers (verbatim substance, 05 Aug)
+
+- Treat CustomPermissions as **ordinary custom roles** (analogy: PortfolioAdmin/Editor/Viewer). ✓ matches our build.
+- Authority scoping layers, exhaustively: **system → tenant → portfolio → project**. No finer grain exists.
+- **BE-2/BE-3 answered**: `Assigned Issues Only` and `Limit to Issue Type` are architecturally
+  unrepresentable at the authority level — authorities can't reference an issue type or an
+  assignee. Not "missing fields"; needs a new mechanism. Our decision not to render them stands.
+
+### NEW — BE-9 (P1): some API checks are by ROLE NAME, not authority
+
+His example: deleting an issue assigned to someone else checks for the **`project_admin` role**,
+not an authority. Consequence: a custom role holding `IssueDelete` may still be refused wherever
+endpoints check names — a custom permission can behave **below its configured level** even after
+the dictionary lands. Needed: an inventory of name-based checks and their migration to
+authority-based checks (PAPI-3717 scope or a sibling ticket). This is now the biggest correctness
+risk for the whole feature, ahead of the dictionary itself.
