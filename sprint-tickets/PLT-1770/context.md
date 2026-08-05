@@ -966,3 +966,114 @@ would have failed the build; including all of `TeamTab/**` caught it immediately
 2. D-1 grant hierarchy (privilege escalation) — still blocks assigning permissions to people.
 3. Schedule ladder contradiction between the module sheet and the details sheet.
 4. Editor/Admin chip colours are ours, not decoded.
+
+---
+
+## 2026-08-05 — local level store lands: the feature is complete end to end; branch at `c8fa7bf`
+
+Three commits since the 08-04 (evening) entry, one of them an architecture change. This section is
+the current truth; where it contradicts "Save cannot persist" statements above, those are
+superseded — the constraint moved, it didn't disappear (see the store section).
+
+### 1. Viewport hijack (`746500c`) — opening the Team tab landed on the create form
+
+Two combined mistakes: the three custom-permission sliders passed children **unguarded** (a `key`
+remounts but never unmounts, so both forms stayed live inside closed drawers translated 100% off to
+the right), and the edit form's name field had `autoFocus` — so the browser focused an input inside
+an off-screen drawer at mount and scrolled it into view, dragging the drawer over the tab. Measured:
+scrollY 4589, tab content at y=-4545.
+
+Fixes: children gated on `open` **exactly like every other slider in TeamSliders.tsx** (this is the
+second TeamSliders convention violated with the same "looks fine, behaves broken" signature — the
+first was `isSliderOpen`), and autoFocus removed permanently (the drawer animates on a transform;
+focusing mid-transition scrolls regardless).
+
+**Process lesson, recorded because it cost a full round-trip with Ilia:** the symptom had already
+appeared in my own harness — the page loaded scrolled to the edit form and a 9/9 click test went
+0/9. I diagnosed the autoFocus correctly and then *patched the test to scroll first* instead of
+asking why a closed form scrolled anything. When a test needs a workaround, the workaround is
+usually the bug. Regression guard now asserts: drawers closed ⇒ scrollY 0, focus on body, no form
+in the DOM — and it was verified to fail 4/5 with the bug reinstated.
+
+### 2. Local level store (`66f37b2`) — Ilia's explicit direction, and the new architecture
+
+Verbatim instruction: *"create a local temporary storage where we keep permission changes in case
+if some stuff is missing on BE side… everything must work as completed thing."* The read-only
+banner is gone. The split:
+
+| Data | Lives where | Why |
+|---|---|---|
+| existence, id, name, deletion | **IAM** (`ms/iam/api/roles`) | works today; create POSTs, rename PUTs, remove DELETEs |
+| per-feature levels | **`localStorage`**, key `hc:custom-permission-levels:v1`, shape `{project → roleId → PermissionSelection}` | authority tree has no rank; PAPI-3717 undecided |
+
+- `permission-adapter.ts` is now implemented: `toRolePayload` sends name + PROJECT_BASED + project
+  id and **deliberately no authority arrays** (an empty role, not a corrupt one — still nothing in
+  the diff can invent or drop an authority); `fromRole` reads name from BE, levels from the store.
+  `canResolveLevels = true`; new flag `levelsAreLocalOnly = true` — flip when PAPI-3717 lands.
+- Migration path when BE catches up: `readProjectLevels(projectId)` → PUT each role with real
+  authorities → `clearProject`. One place to change.
+- **Stated consequences** (tell anyone testing): levels are per-browser — another user or machine
+  sees defaults; a role created here grants nothing in IAM until levels can be translated. It IS
+  real and assignable as a role.
+- Store reads are all-defensive (corrupt JSON / array / primitive / revoked storage / throwing
+  getItem / quota ⇒ defaults, never throw) — 18 tests pin those paths, plus: deleted role id reused
+  ⇒ must NOT inherit old levels (`removeLevels` after the DELETE confirms).
+- Everything downstream got real: `useCustomPermissions` returns `{role, selection, summaries}`
+  (levels attached in a useMemo, not the query fn, so mutations re-read them); card meters fill
+  from real rollups; edit shows the permission's own levels; `useSavePermission` writes name to BE
+  (PUT skipped when unchanged) + levels to store atomically-enough (failed rename fails the save).
+
+### 3. Hover + edit-expansion (`c8fa7bf`)
+
+- Cards had **no hover state**; Ilia flagged they should match "cards across the platform with the
+  blue shaded border". Convention found in `PortfolioDashboardPage/.../ProjectCard.styled.ts`:
+  `secondaryGlow` **#2EF0FF** 1px border + lighter fill + deeper shadow, with
+  `border: 1px solid transparent` by default so hover never shifts layout. Applied only when the
+  card is openable, mirrored on `:focus-within`.
+- "Modules not expandable in edit" report: expansion **was already working** at `c8fa7bf` —
+  measured 3 expandable rows, bars 3→10 on expand, aria-disabled=false. What Ilia hit was the
+  pre-`66f37b2` build where edit passed `disabled` to every bar (rows opened, nothing movable).
+  Checked the exported edit mockup (recovered from branch history): modules ARE drawn collapsed
+  there, so collapsed-by-default matches design.
+- Harness self-bugs found (third occurrence of the pattern): fixtures cast `as never` hid the
+  list's shape change; a fixture passing no `onEdit` made cards non-interactive so the hover rule
+  never emitted. **Fixtures must mirror TeamSliders' real wiring, not the minimum that renders.**
+
+### 4. PR / CI state as of this entry
+
+- **#2087** now titled "PLT-1770 + PLT-2926 + PLT-2927" — edit and remove are folded in; those two
+  tickets have no list-side work left (assign-side, if any, remains).
+- CI on `c8fa7bf`: **Build & Run Tests passed (5m18s)** — the real toolchain compiled and tested
+  everything including the store. Only red step: Trivy (`brace-expansion` CVE-2026-69152,
+  repo-wide, not this diff). One JDK-setup flake traced to the runner *pool*
+  (`XYZ-Prod-MongoDB-Backups` label — setup-java died in 1s, everything skipped); rerun fixed it.
+  If it recurs on that label it's an infra ticket, not a branch problem.
+- **#2088** (brace-expansion 5.0.9): **approved by rishib-xyz 2026-08-05**, mergeable_state clean,
+  all checks green — but still **draft**. Needs undraft + merge; Ilia hasn't said go. Once merged,
+  Trivy goes green on every open PR. (min-release-age concern is moot — CI installs it fine, and
+  the version clears the 7-day buffer 08-06 anyway.)
+
+### 5. Figma MCP — connector state and the master frame URL (record for the next session)
+
+- The design's source frame: **`Web-Portal-2024`, file `TNEj04ZJ9IkZzmxdldiLjh`, node
+  `17213-217579`** (the "Implement this design from Figma" prompt's target; the Figma Make export
+  we built from was generated off it).
+- Connector status in the 08-04/05 session: `installState: connected` (account-level OAuth fine)
+  but `enabledInChat: false` — the per-chat toggle never reached the running session, so the tools
+  (`get_design_context`, `get_screenshot`, `get_variable_defs`, …) were never callable. Plain
+  fetch of the file URL is 403 (auth required).
+- **Next session with Figma enabled**: pull that node and extract the **Editor and Admin chip
+  colours** — the only two values in the implementation that are ours rather than decoded (export
+  never draws those states; currently glow `#2ef0ff` / accent `#ffde14`). Then diff renders
+  against `get_screenshot` of the source frame.
+
+### 6. Open items (unchanged, still with Ilia)
+
+1. Team Management has no `View only` rung ⇒ first nudge of PROJECT MANAGEMENT shows `Custom` with
+   one row left behind. Ladder gains a rung, or roll-up stops counting a clamped feature as
+   disagreement. Design decision.
+2. D-1: can a non-Admin create/hold a permission containing Admin-level features (privilege
+   escalation)? Blocks assign wiring.
+3. Schedule ladder contradiction (module sheet: Admin; details sheet: no Admin).
+4. BE-side effect of deleting a role people hold — needs a real-environment test; the remove modal
+   lists affected people but can't verify what IAM does to them.
