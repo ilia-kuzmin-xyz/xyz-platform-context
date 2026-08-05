@@ -1147,3 +1147,75 @@ One of them is wrong in the source, so this stays a design decision, not a readi
   merged? not clear of what's the scope"* — unanswered. The answer material is the "What works" table
   (list/search/empty state, remove, rename live; levels stored locally per-browser until PAPI-3717)
   plus the local-store consequences paragraph above.
+
+---
+
+## 2026-08-05 (later still) — code diffed against the Figma flows; 7 gaps closed on `claude/plt-1770-context-design-4cf8hg`
+
+Ilia asked for a full code-vs-Figma comparison with fixes ("ensure we 100% aligned, review
+yourself skeptically, prefer legacy components"). Commit `d0f09e2` on
+**`claude/plt-1770-context-design-4cf8hg`** (same ancestry as `PLT-1770` @ `c8fa7bf` — needs a
+fast-forward or merge into the PR branch, not done without permission). Verified by rebuilding the
+browser harness around the REAL TeamTab + TeamProvider (services stubbed, redux/theme providers
+added) — 20/20 interaction assertions, plus the 50 unit tests and a scoped tsc pass.
+
+### What was out of line, now fixed
+
+1. **Discard guard only covered Cancel.** Design guards the back-chevron (create f7). Guard
+   lifted from `PermissionForm` into `TeamSliders` (forms report dirty via `onDirtyChange`,
+   never prompt themselves); Cancel + back-chevron + header × all route through it. × falls
+   through to `handleModalClose` when clean — unchanged behaviour there.
+2. **No `UPDATE PERMISSION?` on edit save.** New `UpdatePermissionModal` (platform `Modal`
+   pattern): Save stages the payload, Confirm update mutates, Back keeps the form. Uses the
+   theme's **`containedWarning` #FE9526** — the design's orange third semantic already existed
+   in the palette (no local colour). Count via `project-role-users`; countless fallback copy if
+   that read fails (never blocks the save). 0-holders copy is ours (design never draws it).
+3. **Edit footer had no `🗑 Remove`** (design edit f03 / remove f02). Added, compact-left;
+   opens the same remove modal as the kebab.
+4. **Remove modal didn't match**: static title, wrong copy, yellow button. Now: title
+   interpolates the name (CSS-uppercased, stored value untouched), variant A (unassigned,
+   short portfolio-wide copy, no list) vs variant B (count + "N affected team members" +
+   initials/name rows, scrolling), `Back` + red **`containedError` #FD3D39** `Remove permission`.
+   **The staged reassignment menus (`Set permissions`/`Move to`/`Remove` per member, bulk
+   `Set all as`) are deliberately NOT built** — there is no endpoint to change a member's role
+   from here (`handleUserSave` in `useTeamState` is still a `setTimeout` mock), so the menus
+   would stage dispositions nothing can commit. Also still gated on D-1. Documented in-file.
+5. **No success toasts.** All three added through the existing `useToastService`:
+   `New custom permission created` / `Permission updated` / `` `${name} permission removed` ``.
+6. **Advisory said "View only"; design says "Viewer".** Now design-verbatim via a local
+   `ADVISORY_ROLE_LABEL` map (D-13 still needs a human pick; the map is one line to flip).
+7. **REAL BUG the harness caught: rename-only saves were impossible.** Edit-mode Save required
+   `hasAnyGrant`, but any permission whose levels aren't in this browser's local store loads
+   all-No-access → Save never enabled. The grant rule is only evidenced for create (this file
+   said so on 07-29); edit now requires name + change only. Regression assertion in the harness.
+
+### Confirmed already-aligned (no change)
+
+Bar three-pass paint & variants, per-feature ladders, clamping, mean-of-children roll-up,
+continuous card meters, Save enablement (create), kebab menu (left, arrow, yellow Edit,
+Escape), card hover (ProjectCard tokens), search field, list footer button, keyboard support,
+drawer stacking. Search count-gate (≥4) kept as documented approximation of the overflow rule.
+`Search Permissions` casing kept — the design itself is inconsistent across frames.
+
+### Harness lessons (additive to the 08-04 recipe)
+
+- Render the REAL `TeamProvider` + `TeamTab`; stub only `serviceProvider` (its accessors are
+  **getter-only — use `Object.defineProperty`**, assignment silently fails), plus esbuild
+  aliases for `app/hooks/useProjectRole` and `app/helpers/usePermission` (redux) and a minimal
+  `createStore(() => ({authentication:{}, global:{}}))` — the invite slider mounts eagerly and
+  calls `useDispatch`.
+- Needs BOTH theme providers (MUI `theme` from `app/styles/mui/theme` — **named** export — and
+  styled-components with `app/styles/theme` default) or styled components crash on `grey700`.
+- Serve the page via `page.route('http://harness.local/')` fulfill — `page.setContent` gives an
+  origin where `localStorage` throws. Polyfill `crypto.randomUUID` (non-secure origin) and
+  `window.process`.
+- `.gitignore` has `node_modules/` with a trailing slash — a **symlinked** node_modules shows
+  up as untracked; delete the symlink before committing.
+
+### Still open for Ilia (unchanged list, one addition)
+
+1–4 as in the 08-05 entry (Team Management rung / D-1 / Schedule ladder / BE delete side-effect);
+plus: the remove modal's reassignment menus need a member-role-update endpoint before they can
+exist honestly — worth deciding whether that lands with PAPI-3717 or separately. And #2087's PR
+body still describes the pre-store state; needs a refresh (rename/levels both save now, and this
+commit adds the guard/confirm/variants).
