@@ -94,3 +94,18 @@ weighting to LINKED_ELEMENT_COUNT; `PortfolioSummaryDto` has **no member project
 
 Known gap (stated in PR): frontend-only guard — a racing edit from another browser can still create
 inconsistency; server-side enforcement would be a backend ticket.
+
+### Self-review addendum (same day) — found and fixed before human review
+
+Adversarial pass after pushing `cc6511b` caught one real bug + two limitations:
+
+1. **Tenant scoping (fixed, `d1c83cf`).** `getUserAssignedProjects` spans every tenant the user is
+   assigned to; portfolios are per-tenant. Unfiltered, a portfolio-enabled project in another tenant
+   joined the comparison set → wrong block/allow. Now filtered by `project.mongoTenantId`; rows with
+   unknown tenant are KEPT (over-blocking safe, dropping a member not).
+2. **Members invisible to the editing user can't be compared** — lookup sees only the user's own
+   assigned projects. Documented in PR; real fix is server-side.
+3. **Mid-click radio race** — weighting read at click time; submit guard re-validates with final
+   form values, so nothing inconsistent persists. Documented.
+
+PR "Known limitations" section added; test steps gained the multi-tenant check (step 8).
