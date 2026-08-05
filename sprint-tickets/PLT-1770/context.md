@@ -1469,3 +1469,60 @@ Ilia exercised create on the branch and hit two bugs, both fixed:
 Verified: 68 unit tests (was 67), 29 browser assertions, TeamTab typecheck noise-only.
 Note for anyone re-verifying: the scratch `node_modules` symlink into the repo does not
 survive environment recycling — re-link `scratchpad/tc/node_modules` before running jest.
+
+---
+
+## 2026-08-05 (late) — kebab has THREE states, 24px search gap; and a parallel run landed real IAM persistence
+
+### ⚠️ Read this first: another session pushed 4 commits to `PLT-1770` while this one worked
+
+`e22af62`, `f36e954`, `a578d82`, `630e1c9` appeared on `origin/PLT-1770` on top of `6e41806`.
+The second push from this session was rejected (non-fast-forward). **Resolved by MERGING, never
+force-pushing** — merge commit `e9e3b8d`, clean, no conflicts. What they changed:
+
+- **`e22af62` levels persist as real IAM authorities for the 7 confirmed features.** This
+  **supersedes the whole "levels are localStorage-only" story** in the 08-05 entries above and
+  the browser-only/BE-gap list given to Ilia. New files `permission-authority-map.ts(+.test)`;
+  `canResolveLevels = true`, `levelsAreLocalOnly = false`. Unmapped features are ignored on
+  write so editing can never drop a grant the FE doesn't model.
+- **`f36e954`** IAM has no `PUT /api/roles/{id}` — PUT goes to the collection root with the id
+  in the payload. `Roles.update(payload)` is now **single-arg**.
+- **`a578d82`** whole feature behind feature flag **`CustomPermissions`, default OFF**
+  (`config/constants.ts`); entry button, data hook and the drawers are all gated.
+- **`630e1c9`** role create was 400ing — `type` is `@NotNull`; also the mid-save tooltip is
+  suppressed now.
+
+### This session's two fixes (Ilia, from hands-on testing)
+
+1. **No gap under the header.** The design puts **24px** between the title block (ends y=72) and
+   the search field (starts y=96), mirroring the 24px below it. The field lives OUTSIDE
+   `SliderContent` (so it doesn't scroll with the cards), which is exactly how it missed the
+   padding every other drawer gets for free. Added `pt='24px'`; measured 24.0px.
+2. **The kebab has THREE states, we shipped one.** Pixel-sampled the hover frame
+   (`17272-32792`) — a resting card's top-right is 94% plain card background, i.e. **no kebab
+   at all**:
+   | state | appearance |
+   |---|---|
+   | at rest | absent |
+   | card hovered | bare dots, **no box/border**, `#8c8c8c` |
+   | menu open | `#e9e9e1` dots on `#000` box, `#303030` border |
+   **The "kebab is always visible" note in the 08-03 entry was wrong** — it came from the Figma
+   Make export's `App.tsx`, which drew the button unconditionally. Design frames win.
+   Revealed by `opacity` (not `display`) + `:focus-within` so it stays in the tab order.
+
+### Harness maintenance the merge forced (do these or every suite dies)
+
+- **Set the flag cookie** before the bundle runs, else the feature never mounts:
+  `document.cookie = 'feature-flags=' + encodeURIComponent(JSON.stringify([{name:'CustomPermissions',value:true}])) + ';path=/'`
+  via `page.addInitScript`.
+- Stub **`serviceProvider.Authorities.getAllAuthoritiesData()` → `{ authorities: [] }`** (note
+  the wrapper object — the code reads `data.authorities`), plus **`Roles.get(id)`** and the
+  now **single-arg `Roles.update(payload)`**.
+- **jest: use `testEnvironment: 'jsdom'` and the repo's mappers.** Under a bare `node` env the
+  new suite's `jest.requireActual('app/config/constants')` fails with a **completely blank
+  error message** — an hour-burner. Config that works is at
+  `scratchpad/jest.cp.jsdom.cjs` (jsdom + `identity-obj-proxy` + logService mock + `app/*`
+  alias). All **68 tests pass** there; the "1 failed" under the old scratch config was the
+  harness, not the branch.
+
+Green at `e9e3b8d`: run1 20, run2 12, run3 27 assertions, 68 unit tests, scoped tsc clean.
