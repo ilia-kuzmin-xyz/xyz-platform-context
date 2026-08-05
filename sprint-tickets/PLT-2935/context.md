@@ -1,8 +1,8 @@
 # PLT-2935 — [Dashboard] Freeze planned progress % for sales project `69e232b2c222e55fa039eab2`
 
 **Type:** Task · **Priority:** Minor · No parent epic.
-**Jira status (as of 2026-08-01 run):** **In Code Review** — implemented, PR ready for review.
-**PR:** XYZReality/hc-frontend#2080 (draft), branch `PLT-2935` off master `7e243fe`.
+**Jira status (as of 2026-08-05 run):** **In QA Testing** — MERGED. Reassigned to Gennaro Boccia for QA.
+**PR:** XYZReality/hc-frontend#2080 — **MERGED** (squash) 2026-08-05. Approved by rishib-xyz.
 **Local decision:** IMPLEMENTED via date-cap. PR #2080 out of draft. Build+test job PASSED in CI (job 90817359858 on d186f79) — the new spec does run and pass. The only red check is the repo-wide Trivy brace-expansion CVE (hotfix PR #2072 open, not ours to duplicate). Master merged in by Ilia (10a99ac).
 
 ## What the ticket asks
@@ -122,6 +122,13 @@ Copilot flagged a REAL bug on `_buildFrozenPlannedFilters` — worth remembering
 - Modelled against a cumulative curve: window 2026-11-01→11-30 gave −25 before, 0 after;
   full range 35 both. Thread replied to and resolved.
 
-## Open assumption
+## DONE — outcome
+Merged via squash, so `d186f79`/`c070379` are not ancestors of master; the change is on
+master as a single commit. Verified present: the `69e232b2c222e55fa039eab2` → `2026-07-24`
+map entry and `clampFrozenPlannedStartDate`. Both build+test jobs went green before merge
+(jobs 90817359858 and 91345228329). Trivy stayed red throughout on the repo-wide
+brace-expansion CVE — NOT merge-blocking, and master now carries 5.0.8 (PR #2072 landed).
+
+## Open assumption — NOW MERGED UNVERIFIED
 Frozen date = `2026-07-24` (when raised), one named constant. If it doesn't match the
 screenshotted figure it's a one-constant change.
