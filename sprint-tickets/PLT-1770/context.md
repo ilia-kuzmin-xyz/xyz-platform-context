@@ -1392,3 +1392,28 @@ never arrived; asked him to resend.
 Note for the next run: Ilia is now testing hands-on in a real environment and reporting bugs
 from screenshots — expect more point fixes. run1 (20) + run2 (12) + run3 (19) + 50 unit tests
 all green at `6e41806`; PLT-1770 (#2087) fast-forwarded.
+
+## 2026-08-05 (evening) — the dictionary is implemented: levels are REAL for the 7 green features (`e22af62`)
+
+`permission-authority-map.ts` is the spreadsheet made executable. Project Details, Devices,
+Models, Coordinates, Team Management, Schedule and Quality write cumulative authority codes on
+create/save and derive their levels from the role's codes on read. QR/360/Integrations/On-site
+progress/Cost stay on the local store behind `isFeatureLive` — confirming a family with BE is one
+map entry. Payloads reference authorities **by id** (per `mapRoleTreeDataToApiPayload`), so the
+adapter resolves codes through `getAllAuthoritiesData()` cached 10 min in the query cache.
+
+Load-bearing rules, all tested (66 unit tests now):
+1. **No-drop echo**: codes outside the mapped families and the category/subcategory arrays ride
+   through every save untouched. 2. **Never write from a list entry** — saves GET the role fresh
+   (list responses may omit `authorities`; writing from one would wipe grants). 3. **Floor
+   semantics** on read: highest fully-contained rung; loose fits under-represent, never overstate.
+   `ModelDelete`/`CoordinateDelete`/`ScheduleDelete` are declared *unassigned family codes*: never
+   granted, never stripped, mark the fit inexact. 4. Roles with no authorities (pre-mapping) read
+   from the store and migrate to real codes on first save.
+
+Test-first paid off immediately: on a ladder with no Admin increment, Admin's cumulative set
+equals Editor's, and containment promoted Models to a rung its ladder doesn't offer — caught by
+the new tests before it ever rendered. Rungs a ladder doesn't define are skipped now.
+
+Still deliberately open: the splits are the sheet's proposal (BE blessing pending), BE-9
+(role-name checks) unchanged, and `useRenamePermission` was removed (save subsumed it).
