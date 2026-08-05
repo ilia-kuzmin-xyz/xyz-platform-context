@@ -1077,3 +1077,73 @@ banner is gone. The split:
 3. Schedule ladder contradiction (module sheet: Admin; details sheet: no Admin).
 4. BE-side effect of deleting a role people hold — needs a real-environment test; the remove modal
    lists affected people but can't verify what IAM does to them.
+
+---
+
+## 2026-08-05 (later) — Figma MCP live: all 9 ticket nodes read directly; two open items closed
+
+The Figma connector worked in this session (contrast §5 of the entry above — `enabledInChat` finally
+reached the session). All nine node links Ilia supplied were pulled as rendered screenshots, the four
+flow strips at full width and sliced per frame. Everything below came from the live file
+`TNEj04ZJ9IkZzmxdldiLjh`, not from exports or hand-me-down screenshots.
+
+### Node map (records what each link actually is)
+
+| Node | Content |
+|---|---|
+| `17199-188298` | **PERMISSION SLIDERS** spec sheet (anatomy, drag/snap/left-bias/click) |
+| `17199-187974` | **PERMISSION MODULES** spec sheet (push-down, roll-up→Custom, continuous header position) |
+| `17199-188297` | **QUALITY MODULE** spec sheet — previously unidentified; Assigned Issues only + Limit to Issue Type (search, `Show all (15)`, count badge + `× Clear`, checkbox-pulls-slider-to-View-only rule, both tooltips verbatim) |
+| `17319-53444` | **PERMISSION SLIDERS DETAILS** sheet (per-feature ladders + ✓/✗ bullets at every level) |
+| `17199-186693` | Section "Create custom permission" — **10 in-situ frames** (Create 1–10) incl. the master frame `17213-217579` (= Create 4) |
+| `17199-186694` | **Edit flow** — 6 frames |
+| `17199-186695` | **Remove flow** — 10 frames |
+| `17199-186696` | **Assign flow** — 4 frames |
+| `19465-132943` | **INVITE TO PROJECT** single frame — dropdown = Admin/Editor/✓View only, divider, customs; caption "invite experience is otherwise exactly the same as outlined here" |
+
+The "❌ STILL MISSING" items in the *Design assets* section above are now covered — the container
+flow was read at full size, frame by frame. **Supersedes that note.**
+
+### ✅ Open item 4 CLOSED — Editor/Admin chip colours are decoded now, and ours were right
+
+`get_variable_defs` on the details sheet returns the file's own tokens where the Editor/Admin chips
+render: **`Secondary/Glow` = `#2ef0ff`** (Editor) and **`Primary/500` = `#ffde14`** (Admin), alongside
+`Grey/100 #dbdbdb` (View only) and `Grey/700 #303030` (No access). The implementation's "provisional"
+choice in `PermissionLevelBadge` matches the design system exactly — nothing to change, stop flagging it.
+
+### ✅ D-12 largely ANSWERED — the back-chevron IS discard-guarded
+
+Create flow frame 7's caption, verbatim: *"The user clicked the **back arrow** to leave the Custom
+Permission screen without saving changes"* → `DISCARD CHANGES?` appears. So the design guards the
+back-chevron, not just Cancel. The current implementation's known gap ("the drawer's × and
+back-chevron aren't discard-guarded" — PR #2087 test notes) is therefore a **real deviation from
+design**, not an open question. Only the `×` close remains unconfirmed (never shown in any frame).
+
+### Open item 3 (Schedule ladder) — contradiction confirmed live, still unresolved
+
+Both sheets still disagree in today's file: the sliders sheet's anatomy example renders **Schedule at
+`Admin` on a 4-node bar**; the details sheet gives Schedule only 3 frames topping out at **Editor**.
+One of them is wrong in the source, so this stays a design decision, not a reading error.
+
+### Smaller confirmations from the strips (nothing contradicts the doc above)
+
+- Create 2 caption: the Custom Permissions page animates in "with the **same animation as other
+  nested pages** (Integrations example)".
+- Create 4 vs 5 frames re-verify the Save rule: name + all-No-access ⇒ dim; one grant ⇒ bright.
+- Remove 6 caption confirms `Set all as → View only` writes **every** row's disposition; Remove 8–9
+  show per-row staged dispositions (`Remove` red + greyed row, `Editor` cyan) exactly as documented.
+- Remove 10: after removal the list has 3 cards and **no search field** — more evidence for
+  overflow-gated (not count-gated) search.
+- Assign 4: post-assign badge = **`Safety Officer` on purple** — name shown, purple = custom tier.
+- `Move to ▸` appears in both the remove modal and the Team tab menus and its submenu is **still
+  never opened** in any frame — D-10 stands.
+
+### Session state notes
+
+- PR **#2087** head `c8fa7bf` = `origin/PLT-1770` = this session's `claude/plt-1770-context-design-4cf8hg`.
+  The PR body still describes the pre-`66f37b2` state ("create never persists", read-only edit bars) —
+  it needs a refresh now the local level store landed; the §"2026-08-05" entry above is the truth.
+- New Jira comment on PLT-1770 (Pietro Desiato, 2026-08-05): *"what's possible once this ticket is
+  merged? not clear of what's the scope"* — unanswered. The answer material is the "What works" table
+  (list/search/empty state, remove, rename live; levels stored locally per-browser until PAPI-3717)
+  plus the local-store consequences paragraph above.
