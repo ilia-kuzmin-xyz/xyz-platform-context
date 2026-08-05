@@ -43,6 +43,74 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-05 — 1 brand-new ticket (PLT-3018), 2 left scope (1 advanced, 1 resolved), 6 confirmed unchanged
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
+Technical Support", "Ready For QA", "In Code Review", "READY FOR RELEASE", "Done", "Blocked",
+"ARCHIVED (NOT RELEASED)") ORDER BY created DESC`). **7 tickets in scope**, all Group A (Open/In
+Analysis/With Customer) — Group B empty again, same as every prior run. Set = the 08-04 run's 8
+minus **PLT-2906** (→ Ready For QA) and **PLT-3010** (→ Done) plus **PLT-3018** (new, created
+08-05 05:57, same day as this run).
+
+**Left scope this run, per the 08-04 run's own adopted rule** — naming why, not just dropping them:
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-2906** | Ready For QA (was In Code Review) | PR #2069 merged — the 08-04 run's "11 days open, zero approvals" risk resolved itself. Kept `groupA` folder tag per the PLT-2874 precedent (advanced past scope but not yet Done); full detail in `PLT-2906-groupA-viewer-and-model/context.md` §"Left scope 2026-08-05". |
+| **PLT-3010** | Done | Resolved as a **project weighting-basis mismatch** (element vs labour), not a data/calculation bug — second occurrence of `recurring-defect-patterns.md` Pattern 3 ("check settings before data"), first time that pattern has manifested as a headline-%-level disagreement rather than a hidden filter category. Folder renamed to `PLT-3010-resolved-progress-tracking`. |
+
+### PLT-3018 — new this run (quality-management)
+
+**"Unable to edit the severity of the QA report," LVN project, assigned Rishi Bhugobaun.** Customer
+can edit Severity on coworkers' QA issues but not her own — an inverted-looking symptom that reads
+like an ownership bug. **Exhaustive grep of the QA issue form found no ownership/role-based gate
+anywhere in the frontend** (9/10 confidence on that negative claim) — so the `!==`/`===` inversion
+theory Yash's own comment half-suggested is dead. Leading hypothesis instead: Severity only renders
+when the issue's Type resolves to exactly `Quality` (`issue-form.tsx:423`); "her issues" and
+"coworkers' issues" may simply be two different Type populations by habit, which would produce this
+exact symptom with **zero code bug**. 5/10 on that mechanism specifically, deliberately not rounded
+up — nothing confirmed yet against a real LVN issue. Full findings, alternates (status-gated
+all-fields-disabled; empty per-project severity list) and the drafted routing comment to Rishi:
+`PLT-3018-groupA-quality-management/context.md` + `recommended-action.md`. **This is a new
+defect-shape candidate** (field absent due to a conditional render vs an actual permission) — not
+yet in `recurring-defect-patterns.md`, single occurrence, not promoted.
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included — not a
+rubber stamp: comment counts checked, not just the `updated` timestamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-2917](PLT-2917-groupA-progress-tracking/context.md) | progress-tracking | Open | 08-03 (Darminder confirmed PLT-2524) | 17 comments, unchanged |
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 5 days unanswered**, approaching the ~1-week revisit threshold |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **4 consecutive runs** on a Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **30 days stale**, direct close-out still unposted across **5 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash thanked Ilia) | 16 comments, unchanged; genuinely with the customer's project-delivery team, not a stall on us |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged |
+
+### Cross-ticket notes
+
+- **The "recommended but never posted" pattern is now on two tickets, not one.** PLT-2858's
+  escalate-to-Pietro has stood unposted across 07-24/07-30/08-03/08-04 (four runs); PLT-2815's
+  direct close-out has stood unposted across 07-30/07-31/08-03/08-04/08-05 (five runs, though this
+  run only re-confirms rather than re-drafts). Per the 08-03 run's own diagnosis, analysis is not
+  this board's bottleneck — posting is. Both drafts already exist verbatim in each ticket's
+  `recommended-action.md`; nothing further needs drafting, only sending.
+- **PLT-3018 is the second ticket in a row (after PLT-2858) whose customer-reported symptom turned
+  out, on code inspection, to have no code defect behind it** — worth watching whether "QA form
+  field editability" is becoming a recognizable shape (config/Type-gating mistaken for a bug) the
+  way progress-% mismatches already are (Patterns 2-4).
+
+### ⚠️ Attachments needing human — this run
+
+**PLT-3018** (1 video + 3 screenshots, all unopened — the video is the single highest-value item on
+the whole board right now: it would very likely settle the entire ticket by showing the Type and
+Status on both the broken and working issues, which is exactly what the drafted Jira comment asks
+for). No new attachments on the six unchanged tickets this run; prior gaps stand as previously
+documented. PLT-2906's decisive unread artifact (the 07-31 "resolved" screenshot) is now lower
+priority since the ticket independently reached Ready For QA.
+
+---
+
 ## Run: 2026-08-04 — 1 brand-new ticket, PLT-2906 recovered (+2 corrections to prior runs), 2 with real movement, 4 confirmed unchanged, second duplicate-folder cleanup
 
 **Board re-queried.** **8 tickets in scope**: same 6 as 08-03 (PLT-2917, PLT-2909, PLT-2858,
