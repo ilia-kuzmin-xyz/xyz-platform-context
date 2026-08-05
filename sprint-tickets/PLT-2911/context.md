@@ -65,3 +65,32 @@ All in `GeneralTabEdit.tsx` (+ new test). No new deps / API / components.
 
 ## Next run
 - Nothing to do until reviewers respond or #2072 lands. Do not re-address the two resolved Copilot threads.
+
+## Run log — 2026-08-05: requirement changed by PM (Pietro), PR reworked
+
+Pietro's Jira comment (2026-08-05, ticket also renamed) supersedes the original AC: the check is
+**consistency with the portfolio's current members**, not a fixed Labour-Hours rule. Empty
+portfolio → anything joins (first project sets the basis); all-element-count portfolio accepts an
+element-count project; only a mismatch blocks. Per Ilia: no reply to Pietro on Jira.
+
+**Reworked in `cc6511b` on PR #2071** (title + description updated):
+
+- `portfolio-weighting-guard.ts` (new, pure): `getPortfolioWeightingConflict(candidate, members[])
+  → message | null`. Mixed-weighting legacy portfolio blocks everything with a dedicated message.
+- `usePortfolioWeightings.ts` (new): members' distinct weightings derived from the `['projects']`
+  list (has `isPortfolioEnabled`, NOT weighting) + per-member `projectQueryOptions` details
+  (HAS weighting, cached 5 min). Cached under `['portfolio-weightings', id]`; invalidated in
+  `useUpdateProjectMutation.onSuccess`. **Excludes the edited project** — so a sole member can
+  change weighting freely; a member with peers is compared against peers.
+- Eager fetch only when flag on && already portfolio-enabled; checkbox path awaits
+  `ensurePortfolioWeightings()` on demand (zero requests for non-portfolio projects).
+- Lookup failure → **block** with retryable "couldn't verify" toast (consistency over convenience).
+- Unticking never guarded.
+- `useProjectsQuery` now exports shared `projectsQueryOptions` (fetchQuery hits the same cache).
+
+Data-shape facts worth keeping: `user-projects` list (`TransformedProject`) has `isPortfolioEnabled`
++ `postgresProjectId` but **no weighting**; details via `projectQueryOptions` default missing
+weighting to LINKED_ELEMENT_COUNT; `PortfolioSummaryDto` has **no member projects at all**.
+
+Known gap (stated in PR): frontend-only guard — a racing edit from another browser can still create
+inconsistency; server-side enforcement would be a backend ticket.
