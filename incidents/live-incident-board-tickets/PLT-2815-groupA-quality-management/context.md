@@ -174,3 +174,10 @@ has been revised this run from "(c) nudge" to a direct **close-out** recommendat
 ## Re-verified 2026-08-04 (light pass, this run)
 
 Live JQL fetch of the board: `updated` for this ticket is still `2026-07-06T10:18:45+01:00` — bit-for-bit identical to what the 08-03 run already captured as unchanged. Since a Jira comment or status change always bumps `updated`, this confirms zero new activity in the 24h between runs without needing a full re-read. Carrying forward the 08-03 finding as-is; no new investigation performed.
+
+## Re-verified 2026-08-05 (light pass, this run)
+
+Live JQL fetch: `updated` still `2026-07-06T10:18:45+01:00`, comment count unchanged at 13. **30 days**
+stale now. The direct close-out recommended since 07-30 (five consecutive runs) still has not been
+posted — this is the same "recommended but not executed" pattern flagged on PLT-2858, now on two of
+the seven in-scope tickets.

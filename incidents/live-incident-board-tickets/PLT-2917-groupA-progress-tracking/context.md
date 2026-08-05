@@ -676,3 +676,9 @@ backend row-checks (§8c #1–#2). Stated explicitly rather than guessed, per th
 - Sibling triage `PLT-2882` / `PLT-2874` — precedent that "count/status wrong on screen" often
   resolves to a backend/data source, not FE; same investigate-the-payload-first discipline applies.
 - `incidents/live-incident-playbook.md` — six-questions frame + message craft used above.
+
+## Re-verified 2026-08-05 (light pass, this run)
+
+Live JQL fetch of the board: `updated` still `2026-08-03T15:10:58+01:00` — bit-for-bit identical to
+the 08-04 run's own last-known value (Darminder confirming PLT-2524 is the remaining task). Comment
+count unchanged at 17. No new activity in the 48h since; carrying forward as-is, no re-investigation.

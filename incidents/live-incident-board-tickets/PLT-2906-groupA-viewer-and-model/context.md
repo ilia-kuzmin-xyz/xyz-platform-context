@@ -390,3 +390,23 @@ release is already cut is **UNVERIFIED** — and it is the first thing to check.
    behaviour anywhere in that file.
 7. **Routine-level:** apply the "left scope this run" rule from §"Why it left the run tables", and
    re-check what actually dropped PLT-2909 from the 07-30 table.
+
+## Left scope 2026-08-05 — moved In Code Review → Ready For QA
+
+Live JQL fetch (`project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, unfiltered)
+shows status changed to **Ready For QA** (assignee now Gennaro Boccia, QA), `updated`
+`2026-08-04T09:27:11+01:00`. This answers two of this file's own open questions from the 08-04 run:
+
+- **PR #2069 did get approved and merged** — the ticket cannot reach Ready For QA otherwise. The
+  "11 days open, zero human approvals" risk flagged 08-04 is resolved; exact approval timestamp not
+  checked (not available via the issue fields fetched this run).
+- Freshdesk #7424 shows one more status flap in-between (`Closed` at 08-03T16:21, then
+  `Waiting on customer` at 08-03T16:25) — five seconds apart, almost certainly an automation
+  artefact rather than a human re-opening it, but worth a human eyeballing if the customer asks
+  about it.
+
+**Still open, not answered by this fetch:** whether 26.3.4 is cut and whether it contains #2069;
+whether QA (Gennaro) is testing against the fix or just the original repro; the 07-31 "resolved"
+screenshot is still unopened (403). Folder tag left as `groupA` per the PLT-2874 precedent (advanced
+past Group A but not yet Done) — revisit when it reaches Done, at which point rename to
+`resolved-viewer-and-model` per the PLT-2892 convention.

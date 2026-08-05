@@ -406,3 +406,10 @@ component at all. Caveat: if this closes into PLT-2935, **archive the folder rat
 - **PR #2080** https://github.com/XYZReality/hc-frontend/pull/2080 — PLT-2935 implementation; its
   testing section is the source for "the demo project is on the native dashboard on prod"
 - `xyz-platform-context/incidents/live-incident-playbook.md` — tone/routing for the draft
+
+## Re-verified 2026-08-05 (light pass, this run)
+
+Live JQL fetch: `updated` still `2026-08-03T15:13:28+01:00`, comment count unchanged at 6. No new
+activity since the 08-04 run's own coverage of the Freshdesk Waiting-on-customer flip; Yash's live
+client question (content not visible here) is still open, and PR #2080 status was not re-checked
+this run (light pass, no `updated` movement to justify it).

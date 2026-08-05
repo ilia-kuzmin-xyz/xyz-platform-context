@@ -361,3 +361,10 @@ re-upload (no capture re-upload, no re-shooting).
 ## Re-verified 2026-08-04 (light pass, this run)
 
 Live JQL fetch of the board: `updated` for this ticket is still `2026-07-24T13:56:22+01:00` — bit-for-bit identical to what the 08-03 run already captured as unchanged. Since a Jira comment or status change always bumps `updated`, this confirms zero new activity in the 24h between runs without needing a full re-read. Carrying forward the 08-03 finding as-is; no new investigation performed.
+
+## Re-verified 2026-08-05 (light pass, this run)
+
+Live JQL fetch: `updated` still `2026-07-24T13:56:22+01:00`, comment count unchanged at 16. Still
+waiting on project delivery to correct level `f0f4d409`'s elevation (50.4 → 0) in the source Revit
+model and re-upload — this is genuinely with the customer's side, not a stall on ours, so no draft
+action this run.

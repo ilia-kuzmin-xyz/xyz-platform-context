@@ -315,3 +315,12 @@ instead of it.
 ## Re-verified 2026-08-04 (light pass, this run)
 
 Live JQL fetch of the board: `updated` for this ticket is still `2026-07-31T13:27:32+01:00` — bit-for-bit identical to what the 08-03 run already captured as unchanged. Since a Jira comment or status change always bumps `updated`, this confirms zero new activity in the 24h between runs without needing a full re-read. Carrying forward the 08-03 finding as-is; no new investigation performed.
+
+## Re-verified 2026-08-05 (light pass, this run)
+
+Live JQL fetch: `updated` still `2026-07-31T13:27:32+01:00`, comment count unchanged at 27. Mostafa's
+07-14 question to Darminder and Yash's fourth nudge (07-31) both remain unanswered — the stall is now
+**35 days** from the customer's original "we don't know how" (06-16 equivalent per prior runs' count)
+and **5 days** since the last nudge specifically. The escalate-to-Pietro recommendation has stood,
+unposted, across four consecutive runs (07-24, 07-30, 08-03, 08-04) on a Critical-priority ticket —
+see the "needing human now" note in this run's top-level summary.

@@ -240,6 +240,23 @@ options if it recurs: `planning/PLT-2941-dashboard-filter-list-hides-zero-weight
 disagreeing is usually two different configurations, not two different truths. Compare with
 Pattern 2, which is the same instinct applied one layer down.
 
+### 2026-08-05 addition — second occurrence, a different manifestation of the same setting
+
+**PLT-3010** (EQX-AT11x, resolved 08-04): platform dashboard Plan 10.15%/Actual 10.48% vs the
+customer's own Power BI Plan 11.42%/Actual 10.05%. Ranked hypothesis list (scope mismatch,
+stale XER revision, data-date mismatch, weighting basis) took most of a day; the answer was
+**AT11x was configured on element weighting while Power BI computes on labour weighting** — the
+same setting named in this pattern's table above, but here it changes the *headline progress
+percentage itself*, not which categories appear in a filter panel. Resolution was identical in
+kind to PLT-2941: a project-settings change (Pietro: "users change it from project settings"),
+no code fix. Full arc in
+`live-incident-board-tickets/PLT-3010-resolved-progress-tracking/context.md`.
+
+**Refined recognition signature, now that there are two:** any "our number disagrees with a
+comparison source" ticket should check progress weighting **before** checking which activities/
+categories are in scope — cheaper than a scope diff, and this pattern now has two independent
+occurrences (filter-list visibility, headline %) from the same one setting.
+
 ---
 
 ## Pattern 4 — Two surfaces disagree about a number (and the method that resolves it)

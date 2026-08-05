@@ -190,3 +190,30 @@ Not rounded up. This is a first pass with zero data access on a one-day-old tick
 - Skill `dashboard-progress-comparison` — Platform vs PBI architecture, per-activity tangible/intangible Actual, Known Bug Patterns A-I, the 3-level comparison workflow and its export queries.
 - `incidents/live-incident-playbook.md` — Q1-Q6 frame, message craft, question bank.
 - Code, all verified this pass: `progress-queries-v2-api.ts:124-152` (project delta), `:193-263` (package weighted delta, `:218`/`:235` zero-weight), `:129/:139/:148` (baseline column); `dashboard-progress-service.ts:244-301` (default range, `:299-301` end capped at today); `use-progress-metrics.ts:24-25` (variance, SPI); `format-overview-data.tsx:21-23`, `:50-86` (tile fields); `app/types/progress-weighting-types.ts:17-23` (default weighting).
+
+## RESOLVED 2026-08-04 — root cause was weighting basis, not a data or calculation bug
+
+Full arc happened after this file's last entry, on `main` before this run started (08-04 comments,
+read live this run since the ticket left scope). **Two separate findings, worth keeping apart:**
+
+1. **Part 1 (fixed 2 Aug, before this file's analysis above was even written):** four activities
+   (`DF999040/50/60/70`, Rammed Aggregate Piers Bldg 11) had been moved from the AT10x group to
+   AT11x without their hours moving too — 2,719.75 hours restored, matching the Power BI weight
+   change exactly. Unrelated to the hypothesis set above; Valeria confirmed this leg fixed.
+2. **Part 2 (the actual remaining gap this file investigated):** Ilia found it 08-04 — **AT11x was
+   configured on element weighting, Power BI computes on labour weighting.** Not a bug on either
+   side; a per-project setting. Pietro confirmed users change this from project settings. Customer
+   confirmed AT11x should match AT10x (labour), Freshdesk closed 08-04T14:12.
+3. **This file's hypothesis set (scope/filter mismatch, weighting basis as hypothesis #3, data-date
+   mismatch) correctly flagged weighting basis as a live candidate** (§ hypothesis list references
+   "Weight 45% / RW Weight 605,302.46... worth confirming this weight basis matches") — worth noting
+   for calibration: the reasoning that produced a 5/10 triage confidence had already named the right
+   mechanism as one of several candidates, it just wasn't yet isolated as *the* answer.
+4. **Not verified this run:** the attachments (all 403 throughout this ticket's life) were never
+   opened by any run; the resolution came from Ilia/Pietro/Yash's live back-and-forth, not from the
+   screenshots or XERs this file spent most of its analysis on. Worth remembering next time a ticket
+   like this arrives — a project-settings mismatch is now a named candidate to check early (see
+   `recurring-defect-patterns.md`), before the deep dashboard-vs-PowerBI query work this file did.
+
+**Folder renamed** `PLT-3010-groupA-progress-tracking` → `PLT-3010-resolved-progress-tracking` per
+the PLT-2892 convention (ticket is Done, kept as historical context, not re-litigated).
