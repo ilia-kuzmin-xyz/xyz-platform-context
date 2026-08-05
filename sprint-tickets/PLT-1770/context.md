@@ -1219,3 +1219,62 @@ plus: the remove modal's reassignment menus need a member-role-update endpoint b
 exist honestly — worth deciding whether that lands with PAPI-3717 or separately. And #2087's PR
 body still describes the pre-store state; needs a refresh (rename/levels both save now, and this
 commit adds the guard/confirm/variants).
+
+---
+
+## 2026-08-05 (evening) — assign flow lands: custom permissions are assignable from the Team tab and the invite panel; branch at `e650e50`
+
+Ilia asked "can we now assign a user a certain role permission apart from admin/editor/viewer,
+same as Figma?" Answer was no — slice 4 was still held. Now built, on
+`claude/plt-1770-context-design-4cf8hg` and fast-forwarded to `PLT-1770` (#2087).
+
+### The discovery that unblocked it: assignment endpoints already exist
+
+- **`serviceProvider.Projects.updateProjectContact({contactId, projectId, companyType, roleId})`**
+  → `PUT ms/iam/api/contacts/{id}/projects/{id}?companyType=&roleId=` — the Team tab's own
+  `Set permission ▸` submenu (which already existed with the three built-ins!) uses it, with
+  optimistic update + rollback + toasts. `roleId` is a plain string; customs send their uuid.
+- The invite payload (`sendInvitationToUser`) likewise carries `roleId` verbatim.
+- **`ms/iam/api/user-roles` (UserRoleService, full CRUD)** also exists — the admin pages swap
+  roles via delete+create `IUserRole{user, role, project, company}`. Not needed here, but it's
+  the bulk-reassignment building block the remove modal's staged editor would want.
+- **D-10 SOLVED by reading the existing menu:** `Move to ▸` in the design = *move member to
+  another company*. TeamContent already has exactly that submenu (feature-flagged off:
+  `canMoveUsersBetweenCompanies = false`, "disabled until backend implementation").
+
+### What was added (7 files, commit `e650e50`)
+
+1. `Set permission ▸`: built-ins fixed block + ✓ on current, divider, customs by name; search
+   appears at ≥8 customs and filters only customs (design's overflow rule). Assign = same PUT.
+2. Member badge: role code ∉ built-ins ⇒ shared `Badge` **`aconite`** variant (the platform
+   already had the exact purple #9754F0) with the permission's NAME. Detection on the CODE —
+   **found bug: the old name-pattern fallback made a custom permission named "BIM Editor"
+   wear the Editor badge.** `userRoleName` now survives `transformContactsToCompanies`.
+3. Invite dropdown: customs under a `Divider`, value = role id; `InvitationFormData.permission`
+   widened to string; invite payload projectName falls back to `roles[0]` for custom ids.
+   Footer button relabelled **"Invite to project"** (was "Invite people"; design says the former).
+4. **Interim D-1 rule, documented in-code:** assigning/inviting with a custom permission is
+   **Admin-only** (`useProjectRole(projectId).isAdmin`). An Admin can already grant Admin, so
+   nothing escalates. One flag to widen when the real hierarchy rule is decided.
+
+### Honest limits (told to Ilia, keep repeating)
+
+- **BE acceptance of a custom role uuid on those endpoints is unverified** — payload shape is
+  identical to built-ins; a rejection surfaces as the existing rollback + error toast. Needs one
+  real-environment test (add to the Sergey/PAPI-3717 conversation).
+- Assignment grants the IAM **role**; per-feature levels stay in the local store until
+  PAPI-3717 — the assignee's actual capabilities don't change yet.
+- Company-bulk "All members" submenu keeps built-ins only (not in the design frames).
+
+### Verification
+
+Second browser harness (`harness2.tsx`) renders the REAL `TeamContent` (member list, kebabs,
+all drawers) with services stubbed — **12/12**: badge colours by computed style (aconite for
+custom, yellow for Admin), submenu contents + checkmarks, PUT payload `{contactId c-2, roleId
+r-bim}`, toast copy, optimistic badge flip, invite dropdown exact option order + divider.
+Drawer-flow harness still **20/20**; unit tests 50/50; scoped tsc clean (the `memberHelpers`
+`.at()` hit is the scratch config's ES2020 lib — repo lib is esnext).
+Harness additions: stub `Accounts.listProjectAuthorities` (returns authority names like
+'ProjectPersonInvite') + store `{authentication:{isAuthenticated:true}}`, else
+`useHasProjectAuthorities` renders every menu hidden. MUI `Divider` inside a `Select` counts
+as a `role="option"` — filter empty text when asserting option lists.
