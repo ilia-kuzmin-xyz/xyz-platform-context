@@ -1367,3 +1367,28 @@ endpoints check names — a custom permission can behave **below its configured 
 the dictionary lands. Needed: an inventory of name-based checks and their migration to
 authority-based checks (PAPI-3717 scope or a sibling ticket). This is now the biggest correctness
 risk for the whole feature, ahead of the dictionary itself.
+
+---
+
+## 2026-08-05 (late night) — gradient continuity + chevron click target; branch at `6e41806`
+
+Two bugs from Ilia, both verified fixed in the harness (run3 now 19 assertions):
+
+1. **Gradient restarts.** The bar fill, every 10px node dot, AND the card mini-meters each
+   painted the full `#003b1b→#00ea6c` gradient into their own box — so every dot ran
+   dark-to-bright inside itself. The design's ramp is ONE continuous line: fill now sizes the
+   gradient image to the full track (`backgroundSize: (maxIndex/position)*100%`) clipped at
+   the handle; dots are solid `gradientColorAt(index/maxIndex)` (new helper in
+   design-tokens.ts); meters same backgroundSize rule. Verified ramp at Admin on 4 rungs:
+   rgb(0,59,27) / (0,117,54) / (0,176,81) / (0,234,108).
+2. **Chevron didn't toggle.** The expand arrow was a SIBLING of the title-row button, so
+   clicking the arrow itself did nothing (any module, incl. leaf Quality). Now its own
+   `aria-hidden tabIndex=-1` button toggling the same state — title row stays the canonical
+   accessible control.
+
+Ilia's message ended mid-sentence ("…doesn't expand/collapse, also") — a possible third bug
+never arrived; asked him to resend.
+
+Note for the next run: Ilia is now testing hands-on in a real environment and reporting bugs
+from screenshots — expect more point fixes. run1 (20) + run2 (12) + run3 (19) + 50 unit tests
+all green at `6e41806`; PLT-1770 (#2087) fast-forwarded.
