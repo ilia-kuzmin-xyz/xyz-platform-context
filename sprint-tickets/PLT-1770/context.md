@@ -1447,3 +1447,25 @@ built-in Editor and a custom Editor-level permission can grant different things.
   users; and the BE-9 role-name-check inventory is called out explicitly as a "watch out".
 - Mostly a BE/seed-data task — FE reads levels back via floor semantics, so remapped roles render
   with no FE change.
+
+## 2026-08-05 (night) — live-test round 2: create 400 + stray "Saving…" (`630e1c9`)
+
+Ilia exercised create on the branch and hit two bugs, both fixed:
+
+- **POST /ms/iam/api/roles 400 `type NotNull`** — the role entity has TWO fields typed
+  `AuthorityMainCategory` and they mean different things: **`type` is the role's scope kind**
+  (required, NotNull on BE), while **`authorityMainCategory` is the blanket-grant marker** —
+  `mapRoleTreeDataToApiPayload` sets it only when the ENTIRE category tree is checked, null
+  otherwise. The adapter had them backwards: it omitted `type` (hence the 400) and defaulted
+  `authorityMainCategory` to PROJECT_BASED — which, had the write succeeded, could have
+  blanket-granted the whole category to every custom permission. Now: `type` =
+  existing ?? PROJECT_BASED; `authorityMainCategory` = existing ?? null. Pinned by a payload
+  test (create sends type + null marker; edit echoes both).
+- **"Saving…" tooltip mid-save** — the disabled-reason tooltip fired while the mutation was
+  pending, popping a label at the cursor. Platform convention (UserEditFormActions,
+  GeneralTab.tsx) is `LoadingButton`-style: spinner inside the Save button, no text. The
+  form already had the in-button spinner; the pending branch of the tooltip is just gone.
+
+Verified: 68 unit tests (was 67), 29 browser assertions, TeamTab typecheck noise-only.
+Note for anyone re-verifying: the scratch `node_modules` symlink into the repo does not
+survive environment recycling — re-link `scratchpad/tc/node_modules` before running jest.
