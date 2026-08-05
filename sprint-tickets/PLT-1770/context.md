@@ -1417,3 +1417,18 @@ the new tests before it ever rendered. Rungs a ladder doesn't define are skipped
 
 Still deliberately open: the splits are the sheet's proposal (BE blessing pending), BE-9
 (role-name checks) unchanged, and `useRenamePermission` was removed (save subsumed it).
+
+## 2026-08-05 (late) — 405 fix + the whole feature behind the `CustomPermissions` flag
+
+- **PUT convention pitfall** (`f36e954`): IAM has **no `PUT /api/roles/{id}`** — it 405s. Writes go
+  to the **collection root** with the id in the body (`Roles.update(entity)`, one arg —
+  `RolePage.tsx:217` is the precedent). GET/DELETE do use `/{id}`. Ilia hit this live; anyone adding
+  ms/iam writes should assume JHipster-style collection-root PUTs.
+- **Feature flag** (`a578d82`): new `CustomPermissions` flag in `config/constants.ts`, Commissioning
+  convention, ships **false**. Off = master-identical Team tab: entry button not rendered, the
+  `useCustomPermissions` query disabled (single data choke point — member menu items, invite
+  dropdown options and custom badges all degrade off the empty list), drawers/modals unmounted, no
+  eager fetches anywhere. A test pins the default to false. Enable locally via the `feature-flags`
+  cookie: `{"name":"CustomPermissions","value":true}`.
+- Branch tip: `a578d82`. 67 unit tests, 29 browser assertions, typecheck clean. CI green everywhere
+  but Trivy (#2088 still draft/approved).
