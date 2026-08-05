@@ -1432,3 +1432,18 @@ Still deliberately open: the splits are the sheet's proposal (BE blessing pendin
   cookie: `{"name":"CustomPermissions","value":true}`.
 - Branch tip: `a578d82`. 67 unit tests, 29 browser assertions, typecheck clean. CI green everywhere
   but Trivy (#2088 still draft/approved).
+
+## 2026-08-05 (eve) — follow-up ticket PLT-3022: remap built-in roles
+
+Pietro asked for a follow-up to remap the existing built-in roles (Editor, Viewer, Advisory,
+Admin) once 1770 lands — their seeded authority sets predate the level→code dictionary, so a
+built-in Editor and a custom Editor-level permission can grant different things.
+
+- Created **PLT-3022** "[Project Level] Remap existing built-in roles (Editor, Viewer, etc.) to
+  the Custom Permissions authority mapping", linked **is blocked by PLT-1770** (Blocks link).
+- Scope in the ticket: audit built-in roles vs `permission-authority-map.ts` / the xlsx sheet;
+  update BE seeds + migration for provisioned envs; fold in the unassigned codes
+  (ModelDelete/CoordinateDelete/ScheduleDelete); no-behaviour-change verification for existing
+  users; and the BE-9 role-name-check inventory is called out explicitly as a "watch out".
+- Mostly a BE/seed-data task — FE reads levels back via floor semantics, so remapped roles render
+  with no FE change.
