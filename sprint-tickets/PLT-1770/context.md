@@ -1278,3 +1278,51 @@ Harness additions: stub `Accounts.listProjectAuthorities` (returns authority nam
 'ProjectPersonInvite') + store `{authentication:{isAuthenticated:true}}`, else
 `useHasProjectAuthorities` renders every menu hidden. MUI `Divider` inside a `Select` counts
 as a `role="option"` — filter empty text when asserting option lists.
+
+---
+
+## 2026-08-05 (night) — the truncation bug was a flex-shrink squeeze; three style deviations fixed; branch at `26a8cd7`
+
+Ilia reported (with screenshot): expanding a module truncates it — 2 of 4 PROGRESS features
+visible, no scrollbar anywhere. Plus style deviations vs two design frames he linked.
+
+### The truncation mechanism (worth remembering — it will bite again)
+
+`PermissionModuleSection`'s card needs `overflow: hidden` for its rounded corners. In CSS,
+**`overflow` ≠ `visible` drops a flex item's automatic minimum size (`min-height: auto`) to 0** —
+so inside the drawer's fixed-height flex column, expanding a module made the layout *shrink the
+card* to fit instead of overflowing the scroll container. The card clipped its own children;
+total content always "fit", so `overflow-y: auto` never engaged → no scrollbar. The list view
+never suffered because its cards have no `overflow: hidden` (min-size = content → container
+scrolls). **Fix: `flexShrink: 0` on every direct child of the form's column.** Regression test
+at a 700px viewport fails 4 checks with the fix reverted.
+
+### Style fixes (frames `17272-32792` hover, `17270-30082` edit panel)
+
+1. **Footer buttons**: the flexing slots stretched Cancel/Save to ~700px each in the wide
+   drawer. `ButtonSlot` now capped at the design's 272px, pair right-aligned (marginLeft:auto
+   on Cancel's slot; Remove keeps marginRight:auto). This **revises the 08-04 "share the row
+   equally" decision** — right, but only inside a 624px dialog.
+2. **Card hover**: design's hover border samples `#2f9097` = secondaryGlow at ~60% opacity, and
+   the fill lightens to `#303030`. Tokens updated (`hoverBorder: rgba(46,240,255,0.6)`,
+   `hoverBg: #303030`). **Supersedes the ProjectCard-match hover from `c8fa7bf`** — Ilia's
+   original instruction said match the platform cards, his new instruction says match the Figma
+   frame; Figma won.
+3. **Actions menu**: Edit was painted yellow permanently — the export frame we transcribed
+   happened to have the cursor on Edit. The linked hover frame shows Remove yellow instead ⇒
+   yellow is the HOVER state. Both rows plain now, accent+inverted text on hover.
+
+### Segment-count audit — config is correct, no change
+
+All 12 ladders verified against the details sheet: 4 rungs (Project Details, QR codes, Cost,
+Quality), NO_EDITOR (Integrations, Devices), NO_ADMIN (Models, Coordinates, On-site, 360,
+Schedule), NA/E/A (Team Management). Schedule's sheet contradiction still the one open item.
+
+### Harness notes (additive)
+
+- Accessible names ignore CSS `text-transform`: locate the module row with `/progress/i`, not
+  `PROGRESS`; DOM probes must match `'Progress'`.
+- The eagerly-mounted invite drawer contributes its own `Cancel` button to the DOM — scope
+  footer probes to the button's own `SliderActions`, or the probe grabs the wrong one.
+- Fail-with-bug verification via `git stash` → bundle → run → `stash pop` → run works well and
+  caught two probe bugs.
