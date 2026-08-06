@@ -1751,3 +1751,20 @@ Green at `e941e83`: 66 browser assertions (20 + 12 + 34), **72 unit tests**, sco
   RemovePermissionModal rewrite (shared Modal + LoadingButton) kept my email fallback.
 - Copilot threads: replied to each (with Claude Code attribution footer, per the
   don't-mislead-reviewers position) and resolved all three.
+
+## 2026-08-06 (post-#2088) — master merged in; jest→vitest migration handled (`1830cf2`)
+
+- **#2088 merged by Ilia** → master carries brace-expansion 5.0.9. Merged master into
+  PLT-1770 (`b2feaac`): Trivy should finally go green on this PR.
+- **Master migrated tests to vitest while we were in flight** (jest.conf.js gone,
+  `npm run test` = vitest over `src/**/*.test.{ts,tsx}`, jsdom env, MSW setup files,
+  `globals: true`). Our tests would have BROKEN CI: `jest.requireActual` doesn't exist
+  under vitest → replaced with plain static imports (nothing mocks those modules), and the
+  window stubs now override ONLY `localStorage` instead of replacing the whole window
+  (jsdom's window carries state the MSW setup hooks rely on). 72/72 still green under the
+  scratchpad jest harness; real vitest verdict comes from CI — watch the next
+  Build & Run Tests run on `1830cf2`.
+- New repo convention (merged CLAUDE.md): prefer MSW network mocks over vi.mock of the
+  service layer; `add-msw-mocks` skill exists. Our hooks' future tests should follow that.
+- PR #2087 description: Automated section now shows the vitest command; CI section updated;
+  reviewers requested (Tom, Darminder, Rishi, Sergiusz).
