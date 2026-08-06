@@ -1830,3 +1830,31 @@ PLT-1770 (`e42510b`, clean, no conflicts; also brings React.lazy migration PLT-2
 commissioning-tests migration PLT-3017 — none touch TeamTab). 73 unit tests green post-merge.
 All historic CI blockers now cleared: Trivy (5.0.9 in branch), webpack jest errors (08aaeab),
 our tests vitest-compatible (1830cf2). e42510b should be the PR's first fully green run.
+
+## 2026-08-06 (Rishi round 2 verified) — `9979848` + `7d051b8`, FIRST FULLY GREEN CI
+
+Rishi asked for (a) the 403 global modal → toast, (b) sonar smells. Parallel session did the
+work; I verified it end-to-end rather than trusting it:
+
+- **`skipGlobalErrorHandler` is real** (`axios-interceptor.ts:75`, type at
+  `axios-interceptor.types.ts:4`) and every feature request now passes `SKIP_GLOBAL_ERROR`
+  from the new `CustomPermissions/request-config.ts`. Error toasts added to all three
+  mutations; `7d051b8` restores the logging the global handler used to do (opting out of the
+  handler also opted out of its diagnostics — good catch by that session).
+- **Shared-service signature changes are safe**: `ApiBaseService.getAll/create/update/delete`
+  gained an OPTIONAL trailing `config?` — purely additive, `get()` already had one. Same for
+  roleService/projectService/authorityService. No caller breaks.
+- **Deliberate design call worth remembering**: they did NOT add `ms/iam/api/roles` to
+  `errorMessageIgnoreMatchedEndpoints` (the one-line fix) because RolePage/RoleListPage share
+  those endpoints and swallow errors silently — the global modal is their ONLY failure signal.
+  Per-request scoping keeps them working. Correct call.
+- Verified: 73 unit tests, 31 browser assertions, TeamTab typecheck clean. The two TS2347 in
+  projectService.ts are PRE-EXISTING (reproduced on a clean master worktree) — scratch-harness
+  lib-type noise, not ours.
+- **CI: both `build` checks + SonarCloud all SUCCESS** — first fully green run on this PR.
+  (The `99798489c` failure was infra: GitHub "Failed to resolve action download info /
+  Service Unavailable" before checkout, on the flaky XYZ-Prod-MongoDB-Backups runner pool.)
+- **Open with Rishi**: two sonar smells deliberately left — `handleCreateCompanyForUser(member)`
+  ignores its param (name implies it should pre-fill from the member = unfinished wiring) and
+  `handleCreateCompanyClick` destructured-unused in TeamSliders:48. Asked him to confirm intent
+  before deleting, since removing them hides the signal.
