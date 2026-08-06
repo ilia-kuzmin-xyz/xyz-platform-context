@@ -1730,3 +1730,24 @@ reasoning the BE authorises it and the account payload's per-project role is emp
 tenant-level admins — sound, and D-1 stays open as a BE-enforcement question.
 
 Green at `e941e83`: 66 browser assertions (20 + 12 + 34), **72 unit tests**, scoped tsc clean.
+
+## 2026-08-06 (later) — menu tailoring, comment sweep, Copilot round (`30da7a9`…`00129f4`)
+
+- **`30da7a9`** — Set-permission submenu: custom section capped at ~7 rows with internal
+  scroll (built-ins/divider/search stay put); search field compacted — the theme's InputBase
+  styles the INNER input's font/padding directly, so sizes must be pinned on `& input`, not
+  the wrapper. Ellipsis on long names; "No permissions match" note.
+- **`342123b`** — comment sweep per Ilia (no dev-narration in shipped code): constants.ts
+  flag comment removed (other flags carry none), stale permission-levels-store header
+  rewritten (predated the dictionary; referenced a nonexistent migrateToBackend), ticket
+  archaeology out of map/adapter headers, "an earlier version…" asides trimmed across the
+  feature. Kept: constraint comments (type/blanket marker, collection-root PUT, isSliderOpen
+  trap, no-autoFocus trap, InputBase inner-input trap). Same commit: all 3 Copilot findings
+  fixed (Escape passes through the menu search; assign menu + invite dropdown skip roles
+  without an id — no more `?? ''` fallback).
+- **`00129f4` merge** — parallel session corrected `hoverBorder` to full-strength #2ef0ff at
+  0.5px (the earlier 60%-opacity reading was anti-aliasing of a half-pixel line — "reproduce
+  the width, not the blend"); conflict resolved keeping their values. Their
+  RemovePermissionModal rewrite (shared Modal + LoadingButton) kept my email fallback.
+- Copilot threads: replied to each (with Claude Code attribution footer, per the
+  don't-mislead-reviewers position) and resolved all three.
