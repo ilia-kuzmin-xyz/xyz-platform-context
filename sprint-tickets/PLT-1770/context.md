@@ -1659,3 +1659,74 @@ will happen and never reach for `--force`.
   families, custom-role uuid acceptance on the contacts PUT, deleted-held-role semantics,
   and splits blessing. Linked Relates ↔ PLT-1770; referenced from PR #2087's Known gaps /
   Related tickets. PLT-3022 and PAPI-3717 cross-referenced in the ticket body.
+
+---
+
+## 2026-08-05 (deep design pass) — measured geometry beats screenshots; modals moved onto the platform shell; branch at `e941e83`
+
+Ilia: *"challenge yourself… take 30 min non-stop to ensure we're aligned with design, walk through
+again and again."* Method changed from eyeballing screenshots to **numeric diffing**: pull
+`get_design_context` (React+Tailwind reference with every layer's real geometry) for a frame,
+then measure the same elements' computed styles in the browser harness and diff. Far higher
+signal than screenshots — it produced 12 fixes in three rounds. **Use this method first from now
+on.** (`get_design_context` needs the `figma-design-to-code` skill loaded first; read it from
+`skill://figma/figma-design-to-code/SKILL.md` when no plugin is installed. Big frames blow the
+context limit — the edit panel came back 166k chars; extract with a regex over
+`(className, data-name)` pairs instead of reading it.)
+
+### Corrected TWICE — both times because I trusted a render/export over the spec
+
+1. **Card hover border**: the design says `border-[0.5px] border-[#2ef0ff]` — **full-strength
+   glow at half a pixel**. The 08-05 pass sampled the Figma PNG as `#2f9097` and reproduced it
+   as `1px rgba(46,240,255,0.6)`; that blend is simply what a 0.5px line looks like
+   anti-aliased. **Lesson: sample geometry from the spec, not from a rasterised render.**
+   (Chrome rounds 0.5px up to 1 device pixel at dpr 1 and draws a true hairline at dpr 2, so
+   `getComputedStyle` reports `1px` — assert the colour and that width is *unchanged* between
+   rest and hover, not the literal 0.5.)
+2. **Form footer buttons are `w-[150px]`** each. Earlier readings said 272 (from the Figma Make
+   export) and then flex-to-fill (which stretched them to ~700px in this drawer). **The Make
+   export has now been wrong three times — kebab visibility, these widths, ladders. The live
+   file is the only source of truth.**
+
+### Everything else found in this pass
+
+| Element | Design | Was | Now |
+|---|---|---|---|
+| hovered card meters | outline `#4f4f4f`, label `#bebebe` | unchanged from rest | brighten with the card |
+| list footer button | `max-w-200 min-w-56 h-40 p-8` | uncapped, 42px tall, `p 8px 16px` | matches |
+| search field inner pad | 16px | MUI's 14px | 16px |
+| details area gap | 16px | 8px | 16px |
+| Remove trash icon | 24px | 18px | 24px |
+| modal shell | p32 / gap24 / r8 / actions gap16 | 3 hand-rolled `Box` shells | **platform `Modal`** |
+| modal body type | Body = 16/24 | `body2` (14px) | `body1` |
+| modal buttons | min-h 40, Button/Large 16/24 | `OUTLINED_SECONDARY_SX` forced h32 | `size='large'` |
+
+**Verified-correct, no change needed** (worth not re-checking): bar track `left 7 / right 8 /
+top 4 / h 8`, node 16px `#1f1f1f` on `#4f4f4f`, dot 10px, handle 24px `#e9e9e1`, hit target
+32px, module header `p16 gap16 bg #1f1f1f`, badge `r2 / 0.2px hairline`, name field
+`px16 py9 r6`, card `pt8 pr8 pb11 pl16 r8 gap8`, card pitch 24, trailing spacer 16.
+
+### The reuse win Ilia keeps asking for
+
+`TeamContent` in this very tab already uses the platform's shared
+`Modal / ModalTitle / ModalContent / ModalActions`; my three modals had hand-rolled the same
+shell. Swapped them over: −39 net lines, and the shared shell already *is* the design spec.
+`containedSecondary` in the theme is **exactly** the design's Back button
+(`#1A1A1A` + grey700 border + `#E9E9E1`) — the local `OUTLINED_SECONDARY_SX` override was only
+ever needed for `variant='outlined'`, and is now confined to the Team-tab entry button.
+Theme scale == Figma tokens: `h2`=26/32=Header 2, `h3`=20/27=Header 3, `body1`=16/24=Body,
+`body3`=12/14=Body 3. **Use the variants, don't hand-set sizes.**
+One conscious deviation: `ModalTitle` renders `h2` (26px) where these frames specify Header 3
+(20px). Kept the platform default so the three modals match the tab's sibling
+remove-member modal. Flag to design if they want 20px — it's a platform-wide change.
+
+### Second parallel-run collision, resolved by merge again
+
+`30da7a9` ("cap the Set permission custom list and compact its search field") landed mid-pass;
+merged as `e941e83` with **one conflict** in `RemovePermissionModal` — their email fallback for
+pending invitees (a real fix: `fullName` is typed non-optional but is empty for invitees) vs my
+theme variant. Kept **both**. Their run also removed my Admin-only gate on assigning customs,
+reasoning the BE authorises it and the account payload's per-project role is empty for
+tenant-level admins — sound, and D-1 stays open as a BE-enforcement question.
+
+Green at `e941e83`: 66 browser assertions (20 + 12 + 34), **72 unit tests**, scoped tsc clean.
