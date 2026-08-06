@@ -1768,3 +1768,15 @@ Green at `e941e83`: 66 browser assertions (20 + 12 + 34), **72 unit tests**, sco
   service layer; `add-msw-mocks` skill exists. Our hooks' future tests should follow that.
 - PR #2087 description: Automated section now shows the vitest command; CI section updated;
   reviewers requested (Tom, Darminder, Rishi, Sergiusz).
+
+## 2026-08-06 (CI triage) — build red is MASTER's, not ours
+
+The `build` failure on `1830cf2` is 12× `TS2708: Cannot use namespace 'jest'` in
+`ViewerPage/services/categories/category-mapping-service.save.test.ts` (PLT-2918's test) —
+webpack type-checks test files (`tsconfig.json` excludes only node_modules), the vitest
+migration removed jest types, and that file was never converted. **Master's own
+Build & Test & Deploy fails identically on every commit since PLT-3016** (baced44); last
+green master was 3d3f96e. Our branch carries the file byte-identical (blob 943b158, verified
+`git rev-parse origin/master:F HEAD:F`). Noted once on PR #2087; next step is merging master
+in when it recovers (a master run for PLT-2835 was in progress at time of writing). Do NOT
+convert the file on our branch — out of scope, and it would conflict with master's own fix.
