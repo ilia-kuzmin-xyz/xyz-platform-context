@@ -1801,3 +1801,13 @@ Rishi (changes_requested) found 5 issues; 4 fixed, 1 → BE:
 
 73 unit tests, 31 browser assertions, typecheck clean at `cd26d77`. Replied to the review
 with the summary; build check still red from master's unconverted jest test (PLT-3016).
+
+## 2026-08-06 (403 repro widened)
+
+Ilia reproduced the project-admin 403 on **GET /api/roles/{id}** too (not just POST) — so the
+whole `ms/iam/api/roles` CRUD family is gated beyond project-admin, while `project-roles`
+(the list) is readable. FE consequence: for a project-admin, the list renders but create
+fails at POST and **edit fails at the fresh GET** the save path does first. PAPI-3738 point 5
+widened to ask which authority gates the family (GET-by-id/POST/PUT/DELETE); once named, the
+FE gates the entry button on the same condition. Tenant admins unaffected (Ilia's creates
+201'd all along).
