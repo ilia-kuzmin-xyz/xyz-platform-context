@@ -1811,3 +1811,13 @@ fails at POST and **edit fails at the fresh GET** the save path does first. PAPI
 widened to ask which authority gates the family (GET-by-id/POST/PUT/DELETE); once named, the
 FE gates the entry button on the same condition. Tenant admins unaffected (Ilia's creates
 201'd all along).
+
+## 2026-08-06 (tooltip reuse) — `220315a`
+
+Per Ilia: the disabled-Save tooltip now reuses the SHARED settings tooltip
+(`app/pages/organisation/ViewerPage/components/common/tooltip`) instead of one-off slotProps
+styling. That's the component ModelsTab, PortfolioSettings General/Team and ProjectCard use
+(light #E9E9E1 bubble, arrow, 12px). `DarkTooltip` (app/components) exists too but is
+dashboard-widgets only. Harness note: the tooltip barrel pulls `react-bootstrap-icons`
+(absent in the scratch install) — stubbed via esbuild alias `stubs/react-bootstrap-icons.js`.
+73 unit / 31 browser assertions green at `220315a`.
