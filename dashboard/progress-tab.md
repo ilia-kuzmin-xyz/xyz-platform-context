@@ -93,3 +93,74 @@ PRG has a hermetic golden-master test suite that catches silent numerical regres
 - Run locally: `npm run fixtures:download` then `npm run jest:regression`
 - CI: runs on every PR (`pr-check.yaml`) and daily (`regression-check.yaml`)
 - Re-baseline after intentional changes: `UPDATE_BASELINE=1 npm run jest:regression`
+
+---
+
+## 2026-08-06 — User (manually entered) progress and how PRG treats it
+
+Answering "does the dashboard consider user progress, and is it in the parquet files?" Verified in
+code on `origin/master`, not inferred from docs.
+
+### What "user progress" is
+
+Manually typed **Actual % Complete** on a Gantt activity in the editor — not derived from element
+statuses.
+
+- Write path: `useActualProgressMutation` → `Activity.updateActualProgress()` →
+  `POST /projects/{id}/activities/progress` → platform-api `saveActivitiesProgress()` →
+  `CALL xyz."usp_InsertActivitiesProgress"($1,$2,$3,$4)`, stamped with `calendarDate` and
+  `getLoggedInUsername()`.
+- **Only allowed on activities with NO linked elements.** `isActivityEditableForProgress`
+  (`ViewerPage/services/progress/use-actual-progress-mutation.tsx`) requires: not `WBS`,
+  `activity.elements === 0`, and `activityItem.progressValid === true`. The Gantt's
+  "show user progress only" filter mirrors it: `isUserProgress === true && elements === 0`
+  (`gantt-x/bar/hooks/useShowUserProgressOnly.ts`).
+- `progressValid` is the API's `ValidForProgressCalculations`; `isUserProgress` is derived BE-side
+  from `IsUserDefinedProgress` (`platform-api schedules.service.ts:379-404`). The API also returns
+  `actualProgress`.
+
+**Invariant worth remembering: user progress and linked-element progress are mutually exclusive per
+activity.** An activity is either element-driven or hand-entered, never both.
+
+### How PRG treats it — depends on the mode, and it is NOT uniform
+
+| Mode | Element-less activity (i.e. any user progress) | Where |
+|---|---|---|
+| **project / package** (default overview) | Category rows are filtered by `AND ${weightColumn} > 0` — zero-weight rows dropped | `progress-queries-v2-api.ts:218,235` |
+| **activity** (activities selected in SCH) | **Included** — `GREATEST(weight, 1)` so activities with 0 linked elements / 0 labour hours "still participate with equal weight (1)… matches Gantt behavior" | `progress-queries-v2-api.ts:675-677` |
+
+So under **Model element count** weighting a hand-progressed activity carries no element weight,
+whereas under **Budgeted labour units** it carries weight whenever it has planned labour units.
+Note the project/package weight filter applies to the **category** row, not the activity — a category
+mixing element-linked and element-less activities still has `TotalLinkedElements > 0` and is kept, so
+how the individual element-less activity is weighted *inside* that pre-aggregated category value is
+the pipeline's business, not the FE's.
+
+### XYZ Tracked excludes user progress entirely
+
+`XYZ Tracked = the activity has ≥1 linked 3D element (BE definition)` — the activity-mode query
+restricts to `linkedElementCount > 0` (`progress-queries-v2-api.ts:665-672`). Since user progress only
+exists where `elements === 0`, **turning XYZ Tracked on removes all of it.** This is consistent with
+the toggle's purpose: physically surveyed vs self-reported.
+
+### The dashboard cannot distinguish it
+
+- **Zero references to `isUserProgress` anywhere in `services/dashboard-progress/`.** PRG consumes
+  whatever the pipeline already aggregated.
+- The parquet schemas carry only aggregated actual columns — `AvgActualProgress`,
+  `LaborWeightedActualProgress`, `LinkedElementCountWeightedActualProgress` — and **no
+  user/manual/self-reported flag** (`docs/dashboard/duckdb-tables/progress-schemas.md`). So the
+  dashboard cannot split hand-entered from element-derived progress even if asked to.
+
+### ⚠️ The one genuinely open question — needs the data team
+
+**Whether the parquet-building job folds `ActivityProgress` rows into those `*ActualProgress`
+columns cannot be answered from these four repos.** `GET /:projectId/progress-outputs` is gated on
+`DATA_PIPELINE_ROLE` and only serves URLs for **pre-computed** artefacts
+(`platform-api projects.routes.ts:1328`); the job that computes them lives outside hc-frontend,
+platform-api, hc-iam and this notes repo.
+
+Circumstantial evidence that it **is** included: the `ActivityProgress` table is keyed by
+`calendarDate` exactly like the daily progress snapshots, and edits are gated on the BE's own
+`ValidForProgressCalculations` flag — which would be pointless if the value never reached a
+calculation. **Confirm with Sergey / the data-pipeline owner before quoting this as certain.**
