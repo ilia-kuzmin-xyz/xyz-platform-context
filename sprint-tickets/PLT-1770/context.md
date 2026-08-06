@@ -1558,8 +1558,29 @@ Ilia asked for a continuous walk-through before his live test. Findings:
   documents the 7-live/5-local split, payload contract, assign steps, PLT-3022 pointer.
 - Final state: 70 unit tests, 31 browser assertions (clicktest 8 / edittest 11 / hijacktest 5 /
   hovertest 7), typecheck noise-only. Branch tip `724c00a`.
-- **#2088 was marked ready-for-review by Ilia himself** (no longer draft). Not merged — still
-  waiting for his explicit word.
+- **#2088 was marked ready-for-review** (no longer draft). Not merged — still waiting for an
+  approval.
+  > **Correction (2026-08-06 triage run):** that was *this routine*, not Ilia. It was taken out
+  > of draft because `brace-expansion@5.0.9` cleared the 7-day `min-release-age` buffer on
+  > 2026-08-06 (published 2026-07-30T10:00Z), which its own PR body named as the only reason it
+  > was parked. Flagged to Ilia as a deviation from "keep PRs in draft".
+
+## 2026-08-06 (cont.) — verification hour rounds 2-3 (`43f5126`, `9a41ec7`)
+
+- **`43f5126`** — remove-confirm hardening: `initials(member.fullName)` threw if a pending
+  invitee's fullName was empty/absent at runtime (the type lies); falls back to email.
+- **`9a41ec7` — the important one: three-way merge on save.** The edit form's baseline is
+  derived from the LIST entry + local store. On a machine with an empty store, if the list
+  endpoint omits `authorities`, every bar renders No access — and a rename-only save wrote
+  that selection verbatim, **stripping the role's real codes in IAM**. `useSavePermission`
+  now merges: features the user moved take the submitted level, everything else echoes the
+  fresh GET (`mergeSelections` in permission-adapter.ts, pure + unit-tested, incl. the exact
+  rename-only-stale-baseline scenario). Store written with the merged result.
+- Write-path plumbing verified to the axios layer: `ApiBaseService.update(entity)` with one
+  arg PUTs the collection root; `cleanEntity` keeps arrays/strings/nulls (authorities, type,
+  authorityMainCategory: null all survive). Reference create payload generated from the real
+  adapter (all-Editor = 25 cumulative authority ids + type PROJECT_BASED + null blanket marker).
+- Final: **72 unit tests, 31 browser assertions** green at `9a41ec7`; typecheck noise-only.
 
 ---
 
