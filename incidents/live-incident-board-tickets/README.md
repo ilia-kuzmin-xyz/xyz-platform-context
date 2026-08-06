@@ -43,6 +43,95 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-06 — 1 brand-new ticket (PLT-3023), 1 left Group A (PLT-2917 → Dev In Progress), 1 resolved-on-inspection (PLT-3018), 5 confirmed unchanged
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
+Technical Support", "Ready For QA", "In Code Review", "READY FOR RELEASE", "Done", "Blocked",
+"ARCHIVED (NOT RELEASED)") ORDER BY created DESC`). **8 tickets in scope**, 7 Group A + 1 Group B.
+Set = the 08-05 run's 7 minus **PLT-2917** (→ Dev In Progress, now Group B) plus **PLT-3023** (new,
+created 08-06 06:30, same morning as this run).
+
+**Left Group A this run**, naming why per the standing rule:
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-2917** | Dev In Progress (was Open) | Pietro committed "will be completed this week" (08-05); folder retagged groupA→groupB per the PLT-2874 precedent, bookkeeping note only, no fresh deep-dive — full detail in `PLT-2917-groupB-progress-tracking/context.md` §"2026-08-06 — left Group A scope." |
+
+### PLT-3023 — new this run (360-captures)
+
+**"Issues with 360 Photo Custom Capture Points in XYZ App, Dashboard and web viewer," LVN - BL1-2,
+Major, assigned Rishi Bhugobaun.** Client used the mobile app's new "Add New Custom Capture Points"
+feature; Web Viewer, Dashboard and mobile app now all disagree — Building 1's 10 external captures
+collapsed into a single point in the Web Viewer and don't appear at all in the Dashboard; Building
+2's points show 2-3 photos grouped per point and the Dashboard/Viewer positions disagree.
+**Exhaustive code search found no "custom capture point" concept anywhere in hc-frontend** — the new
+mobile flow writes into the exact same data model as the old room-based flow, and every surface
+groups photos into a point purely by matching `roomCapturePointId`, with zero spatial-proximity logic
+anywhere in the pipeline (9/10 confidence on that negative claim). Leading hypothesis for the
+10-into-1 collapse: those ten capture records share one `roomCapturePointId` (or are all null),
+almost certainly written by the new mobile flow — a single DB lookup on Building 1's captures settles
+it. Secondary hypothesis for Building 2's Viewer-vs-Dashboard position mismatch: the two surfaces
+break timestamp ties differently when picking a point's "representative" photo (Dashboard has a
+deterministic secondary sort key; Web Viewer's plain-JS sort does not) — falsifiable by checking for
+near-simultaneous `imageTakenOn` values with differing coordinates. A confirmed, unrelated asymmetry:
+Web Viewer supports incremental capture refresh, Dashboard always does a full fetch, and the
+in-memory sync clock resets on every reload (`LastSyncService`'s persistence methods are dead code) —
+plausible but unconfirmed explanation for Building 1's Viewer-missing points, falsifiable with one
+hard reload. No frontend mechanism was found for Building 1's points being fully absent from
+Dashboard — flagged as likely backend/indexing, not guessed at further. Full findings, ranked
+hypotheses and the drafted internal comment: `PLT-3023-groupA-360-captures/context.md` +
+`recommended-action.md`. **New pattern candidate** (shared-key grouping with no spatial fallback,
+colliding under a new high-volume creation flow) — not yet in `recurring-defect-patterns.md`, single
+occurrence, not promoted.
+
+### PLT-3018 — resolved on inspection, ball now with customer
+
+Rishi independently watched the video attachment (08-05, after this ticket's first-pass `context.md`
+was already drafted) and confirmed the leading hypothesis exactly: Maritza's first issue was `Design`
+type, not `Quality` — Severity only renders for `Quality`-type issues, by design, not a bug. Status
+moved Open → With Customer the same day. The drafted internal comment in `recommended-action.md` was
+never needed and is now marked superseded; current recommended action is **none — correctly waiting
+on the customer**. Second ticket in a row on this board (after PLT-2858) whose reported symptom
+turned out to have no code defect behind it on inspection.
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts checked
+against what the 08-05 run recorded — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 6 days unanswered** |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **5 consecutive runs** on a Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **31 days stale**, direct close-out still unposted across **6 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash thanked Ilia) | 16 comments, unchanged; genuinely with the customer's project-delivery team, not a stall on us |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged |
+
+### Cross-ticket notes
+
+- **Two tickets in a row (PLT-2858 family, now PLT-3018) whose customer-reported symptom resolves to
+  "as designed" on inspection, not a code defect.** PLT-3018 is the second sighting of "QA/issue-form
+  field editability mistaken for a bug" after PLT-2858 and PLT-3018-in-the-08-05-run's own note —
+  worth promoting to a named shape in `recurring-defect-patterns.md` if a third sighting lands.
+- **The "recommended but never posted" pattern is now five runs deep on PLT-2858 and six on
+  PLT-2815** (07-24/07-30/08-03/08-04/08-05/08-06 and 07-30/07-31/08-03/08-04/08-05/08-06
+  respectively) — both drafts already exist verbatim in each ticket's `recommended-action.md`;
+  nothing further needs drafting, only sending. Per the 08-03 run's own diagnosis, analysis is not
+  this board's bottleneck — posting is, and that has now held true for three additional runs.
+- **PLT-3023 is a genuinely new incident shape for this board**: not a data/elevation error (PLT-2649)
+  and not a config/type-gating non-bug (PLT-2858, PLT-3018) — a shared grouping key colliding under a
+  new high-volume mobile creation flow, with a secondary tie-break asymmetry between Viewer and
+  Dashboard layered on top. Worth watching whether "new mobile capture flow ships data the FE grouping
+  contract wasn't written for" recurs as other new capture features ship.
+
+### ⚠️ Attachments needing human — this run
+
+**PLT-3023** (6 items — 2 mobile app, 2 web viewer, 2 dashboard, all unopened — corroborative given
+the description is already detailed, but worth a look before the DB lookup in case a screenshot shows
+a duplicate/label directly). No new attachments on the five unchanged tickets this run (prior gaps
+stand as previously documented). PLT-3018's video is now lower priority since Rishi already resolved
+the mechanism from it independently.
+
+---
+
 ## Run: 2026-08-05 — 1 brand-new ticket (PLT-3018), 2 left scope (1 advanced, 1 resolved), 6 confirmed unchanged
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
