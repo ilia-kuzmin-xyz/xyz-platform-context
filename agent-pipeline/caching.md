@@ -73,3 +73,39 @@ runHydrate / hydrators
 ## Invalidation
 
 `POST /api/cache/invalidate { project_id, keys? }` — clears T1 + T2 for the project (or specific keys only). Use after write operations (issue created, etc.) so the next turn picks up fresh data.
+
+---
+
+## 2026-08-05 — measured slow path, disk tier added
+
+Instrumented a live template request end to end against `mcp-dev.holosite.dev`
+(`scripts/bench_phases.py` + an SSE timeline bench). Where the 10–20 minutes
+actually went, and what changed:
+
+| cost | measured | fix | after |
+|---|---|---|---|
+| Clarifier | 16.3s | was on the frontier model; `ANTHROPIC_CLARIFIER_MODEL=haiku` | 5.8s |
+| Progress hydration | 67s | MCP downloaded the parquet and re-serialised rows as JSON; now read directly (httpx+pyarrow) + disk-cached | 0.9s |
+| Schedule payload | 13.7MB | the flat `activities.all` duplicated the four buckets | 6.9MB |
+| Activities fetch | 90–98s | ONE un-paginated MCP call (~25k rows); cannot parallelise client-side | disk-keyed by **revision id** — cold once per revision |
+| Cold profile | 118s | probes are parallel (= slowest probe); per-probe timing added; profile spilled to disk (900s) | 0.2s on restart |
+| First request after reload | +35.5s | startup awaited a 221-project pre-warm; now a background task | ~0s |
+| Rooms parquets | ~60s single-stream | disk cache by URL path + 4-way ranged chunks | local read when warm |
+| T2 TTLs | 60–120s | session-scale 300–600s (UI keeps its cache-off toggle) | — |
+
+**New: `agents/disk_cache.py`.** Blob bytes keyed by URL *path* (the SAS token
+rotates in the query; the path identifies content — changes on re-translation).
+JSON spill for profile / room rollup / activities-per-revision. Atomic writes,
+fail-open. Lives in `.cache/` (gitignored); disable with `PIPELINE_DISK_CACHE=off`.
+
+**What stays slow and why:** any truly cold heavyweight MCP fetch (activities,
+captures, photos at scale) is bounded by the MCP server itself — single calls
+measured 90s+ remotely for payloads that took 1–3s on a local server. That is
+the "faster MCP schema" backlog item; everything client-side now avoids paying
+it more than once.
+
+**Bench gotcha that cost an hour:** `uvicorn --reload` watches the whole repo
+tree — any `.py` edit kills in-flight SSE requests, so a bench dies silently
+mid-run, and a dangling SSE client then pins the OLD worker so the reload
+never completes (server appears hung; health 000). Kill benches before
+editing, edit in batches, bench after.
