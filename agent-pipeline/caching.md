@@ -109,3 +109,41 @@ tree — any `.py` edit kills in-flight SSE requests, so a bench dies silently
 mid-run, and a dangling SSE client then pins the OLD worker so the reload
 never completes (server appears hung; health 000). Kill benches before
 editing, edit in batches, bench after.
+
+---
+
+## 2026-08-06 — media-family spills + composer imports the pattern library
+
+Second optimisation pass, same live setup (mcp-dev). Two changes:
+
+**1. The media family joins the disk tier.** `fetch_photos`,
+`fetch_360captures` (600s TTL), and `fetch_rooms_json` / `fetch_levels_json`
+(600s, keyed per project + URL-path hash — the artefact path is stable but its
+content changes on model updates, so no TTL-less blob store) now spill like
+issues/activities. Measured on a warm process: media hydration 102.5s → 1.9s;
+a full 4-domain delivery (progress + 11.4MB issues + 6.9MB schedule + media)
+lands in **under 2 seconds**, so a report's data is fully populated the moment
+its TSX arrives.
+
+**2. Generated artifacts import chrome instead of re-typing it.** The §7/§10
+pattern library (18 components: HeroPanel, KpiCard, ChartPanel, IssueTable,
+FloorplanSVG, …) ships pre-built in the Sandpack VFS as `/xyz-ui.tsx`
+(hc-frontend `XyzUiStatic.ts`, injected unconditionally like ForgeViewer).
+The composer prompt carries prop contracts only:
+
+| metric | before | after |
+|---|---|---|
+| ARTIFACT_SYSTEM_PROMPT | 69,977 ch | 45,378 ch |
+| bespoke TSX output | 24,352 ch | 16,413 ch |
+| bespoke compose wall | 281.8s | 221.8s |
+| helper variety used (same question) | 7 types | 10 types |
+
+Quality gate (esbuild compile against the injected module + structural
+checks: imports ./xyz-ui, no re-typed helpers, hover state, reads
+props.data): all pass. Chrome is now byte-identical across reports instead
+of model-copied. Old inline-helper artifacts still render (they never import
+the module); EDIT mode is instructed to migrate them to imports.
+
+Deliberately NOT touched: the composer's thinking phase (~155-180s
+pre-stream on Fable) — decision is to cut MCP loading/arranging, not
+Claude's report generation.

@@ -202,3 +202,18 @@ issues for a 32,272-issue project. The composer sizes layouts from that
 number. Hydration corrects `total` at delivery, but anything decided at
 profile time (scale stamps, "trivial/rich" buckets) is working from the
 capped figure until the server returns real totals.
+
+---
+
+## 2026-08-06 — `skip_clarifier` also skips the template fast path
+
+Template matching (`clarifier_io["template"]` → serve fixed artefact) lives
+INSIDE the clarifier branch in `server.py`. A request carrying
+`skip_clarifier: true` (or `clarifier_answers`) never enters that branch, so
+even a question that names a template ("which rooms are ready for handover")
+goes to a full bespoke compose (~4 min) instead of the instant template.
+
+In the product flow this is near-unreachable — the survey (and thus its Skip
+button) is only shown when no template matched. But it bites anyone
+**benching or scripting** the API: pass an unmodified prompt to measure the
+template path; `skip_clarifier` measures the bespoke path.
