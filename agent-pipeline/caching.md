@@ -147,3 +147,9 @@ the module); EDIT mode is instructed to migrate them to imports.
 Deliberately NOT touched: the composer's thinking phase (~155-180s
 pre-stream on Fable) — decision is to cut MCP loading/arranging, not
 Claude's report generation.
+
+**Addendum (same day):** the schedule *revisions list* (1.4KB of metadata,
+~12s per fresh process on mcp-dev) was the last uncached call on the
+report-reload path — now spilled (600s). Measured `mode:'hydrate'` (report
+reload, all four domains incl. 11.4MB issues): **1.7s end to end** warm;
+a TTL-expired domain re-pays its single mcp-dev fetch and re-spills.
