@@ -195,3 +195,10 @@ What remains shipped: the FULL paginated fetch is disk-spilled (correct
 Lesson worth keeping: **"the server returned more than I asked for" is not
 evidence it returned everything.** Completeness needs `totalElements` or a
 second source — and mcp-dev provides neither.
+
+Also affected: **profile counts**. Without `totalElements`, `count_only`
+falls back to `len(rows returned)`, so on mcp-dev the profile reports 7,534
+issues for a 32,272-issue project. The composer sizes layouts from that
+number. Hydration corrects `total` at delivery, but anything decided at
+profile time (scale stamps, "trivial/rich" buckets) is working from the
+capped figure until the server returns real totals.
