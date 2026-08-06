@@ -1526,3 +1526,37 @@ force-pushing** — merge commit `e9e3b8d`, clean, no conflicts. What they chang
   harness, not the branch.
 
 Green at `e9e3b8d`: run1 20, run2 12, run3 27 assertions, 68 unit tests, scoped tsc clean.
+
+## 2026-08-06 — pre-test verification hour (`724c00a`)
+
+Ilia asked for a continuous walk-through before his live test. Findings:
+
+- **New guard: reserved names** (`724c00a`). A custom permission named exactly
+  'Admin'/'Editor'/'View only' would slip through both name-based filters — excluded from the
+  custom list (`useCustomPermissions`) and included as a duplicate built-in (`useProjectRoles`,
+  which keeps roles BY THESE DISPLAY NAMES — the endpoint really does return built-ins named
+  that way). Form now refuses them case-insensitively; rule lives in `permission-state.ts`
+  (`isReservedPermissionName`), pinned by unit + browser tests.
+- **Assign flow audited end-to-end (code level)**: member menu and invite dropdown send the
+  custom role's uuid through the SAME `roleId` param built-ins use — and the built-ins' "codes"
+  (`editor_role` etc.) ARE their seeded IAM ids, so the shape is right. Endpoint:
+  `PUT ms/iam/api/contacts/{contactId}/projects/{projectId}?companyType=&roleId=`. Read-back:
+  contacts return `userRoleCode`/`userRoleName`; badge detection is by ID (`isCustomRoleCode`),
+  never name. **Live-BE acceptance of a custom uuid in roleId remains the one unverifiable
+  thing** — first thing to watch in Ilia's test.
+- **Known cosmetic edge, left as-is (master behaviour)**: `transformContactsData.getUserRole`
+  pattern-matches `userRoleName` as fallback — a custom role named '…admin…' makes
+  `member.role` = ADMIN for FE affordances (badge unaffected). Pre-existing code; noted, not
+  changed.
+- Error surfacing verified: create → form inline, save → UpdatePermissionModal, delete →
+  RemovePermissionModal all render mutation errors. `closeEditForm` clears `pendingSave`
+  (no stale UPDATE modal). `isSliderOpen` lists all three drawers. Flag gate is exactly 3
+  call sites (entry button, query `enabled`, drawers/modals).
+- **PR #2087 body rewritten** — was still describing the pre-dictionary state (levels
+  unsavable, edit read-only, empty meters). Now leads with the flag-enable cookie snippet
+  (`document.cookie = 'feature-flags=' + encodeURIComponent(JSON.stringify([{name:'CustomPermissions',value:true}])) + ';path=/'`),
+  documents the 7-live/5-local split, payload contract, assign steps, PLT-3022 pointer.
+- Final state: 70 unit tests, 31 browser assertions (clicktest 8 / edittest 11 / hijacktest 5 /
+  hovertest 7), typecheck noise-only. Branch tip `724c00a`.
+- **#2088 was marked ready-for-review by Ilia himself** (no longer draft). Not merged — still
+  waiting for his explicit word.
