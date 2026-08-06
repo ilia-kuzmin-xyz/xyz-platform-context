@@ -179,3 +179,19 @@ pre-hydrates the domain instead of the same megabytes being fetched twice.
 `totalElements`. Until then a truly cold profile costs one full download per
 probed domain, whatever the client does. The local MCP binary honours
 pagination correctly, which is why none of this was visible before the switch.
+
+### 2026-08-06 correction — the probe-stash mitigation was WRONG and is reverted
+
+The entry above says the oversized probe responses are stashed into T2. **Do
+not do this.** The oversized responses are big but not complete: measured
+7,534 rows returned for a project holding **32,272 issues** — mcp-dev ignores
+`size` but still caps the response. The stash shipped a quarter of the
+dataset with healthy-looking counts. Caught only because the hydrated payload
+size changed between runs (11.4MB → 2.7MB) and a full re-fetch was compared.
+
+What remains shipped: the FULL paginated fetch is disk-spilled (correct
+32,272 rows), which gives the same repeat-speed benefit honestly.
+
+Lesson worth keeping: **"the server returned more than I asked for" is not
+evidence it returned everything.** Completeness needs `totalElements` or a
+second source — and mcp-dev provides neither.
