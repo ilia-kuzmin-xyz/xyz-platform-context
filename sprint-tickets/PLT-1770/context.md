@@ -1821,3 +1821,12 @@ styling. That's the component ModelsTab, PortfolioSettings General/Team and Proj
 dashboard-widgets only. Harness note: the tooltip barrel pulls `react-bootstrap-icons`
 (absent in the scratch install) — stubbed via esbuild alias `stubs/react-bootstrap-icons.js`.
 73 unit / 31 browser assertions green at `220315a`.
+
+## 2026-08-06 (base recovered) — master merged, expecting first all-green run (`e42510b`)
+
+Master fixed its vitest fallout in `08aaeab` (PLT-3016 follow-up #2103: converted
+category-mapping-service.save.test.ts) — 4 consecutive green master runs since. Merged into
+PLT-1770 (`e42510b`, clean, no conflicts; also brings React.lazy migration PLT-2507 and
+commissioning-tests migration PLT-3017 — none touch TeamTab). 73 unit tests green post-merge.
+All historic CI blockers now cleared: Trivy (5.0.9 in branch), webpack jest errors (08aaeab),
+our tests vitest-compatible (1830cf2). e42510b should be the PR's first fully green run.
