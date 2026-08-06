@@ -152,3 +152,30 @@ pseudo-random offset), and porting them would have reproduced exactly this bug.
 
 **Verify identifiers against the source data, not against plausibility.** One
 query over the room list settled it in seconds.
+
+---
+
+## 2026-08-05 — mcp-dev ignores pagination (server-side bug, measured)
+
+`https://mcp-dev.holosite.dev/mcp` ignores `size` and `page` and omits
+`totalElements`. Measured directly:
+
+```
+xyz_get_projects_project_id_issues  size=1   → 7,534 rows, 12.4MB, 30.8s
+xyz_get_projects_project_id_issues  size=100 → 7,534 rows, 12.4MB, 36.0s
+```
+
+Consequences before mitigation:
+- every "cheap" size=1 availability probe downloaded its entire dataset —
+  the profiler's probes measured **132–151s each** (locally: 2–3s);
+- client-side page parallelism can never engage (no `totalElements`);
+- `_call_tool_paginated` only worked by accident (page 0 returns everything).
+
+Client-side mitigation (shipped): `count_only` detects the oversized response
+and stashes the full payload into T2 (`ProjectDataKey` put), so the probe
+pre-hydrates the domain instead of the same megabytes being fetched twice.
+
+**The real fix is server-side** — mcp-dev must honour `size`/`page` and return
+`totalElements`. Until then a truly cold profile costs one full download per
+probed domain, whatever the client does. The local MCP binary honours
+pagination correctly, which is why none of this was visible before the switch.
