@@ -1780,3 +1780,24 @@ green master was 3d3f96e. Our branch carries the file byte-identical (blob 943b1
 `git rev-parse origin/master:F HEAD:F`). Noted once on PR #2087; next step is merging master
 in when it recovers (a master run for PLT-2835 was in progress at time of writing). Do NOT
 convert the file on our branch — out of scope, and it would conflict with master's own fix.
+
+## 2026-08-06 (review round — Rishi) — `cd26d77`
+
+Rishi (changes_requested) found 5 issues; 4 fixed, 1 → BE:
+
+- **Clamp-aware roll-up** (the big one — was open question D-1-adjacent #1): header reads
+  rung R when every child equals `clampToAvailable(R, ladder)` — clamping counts as
+  agreement, rungs tried ascending. Fixes "PM can't reach View only, handle stuck past the
+  dot reading Custom". Regression test pins it (`treats a clamped child as agreement`).
+- **Tooltip chrome**: global theme (`styles/mui/theme.ts` MuiTooltip) sets transparent bg +
+  minWidth 400 + no padding, expecting SELF-STYLED tooltip content — a bare string title
+  renders as loose floating text. Fixed via slotProps on the form's tooltip. PITFALL for
+  any future Tooltip in this app.
+- **Profile role mismatch**: UserDetailsSlider showed pattern-matched built-in `role`;
+  now shows userRoleName when isCustomRoleCode, same as the badge.
+- **Hide details toggle** knocked back to textMuted (CP_TEXT re-brightened it).
+- **403 on POST /api/roles as project admin** → PAPI-3738 point 5: BE to name the authority
+  gating role create/update so FE can gate the entry button on the same condition.
+
+73 unit tests, 31 browser assertions, typecheck clean at `cd26d77`. Replied to the review
+with the summary; build check still red from master's unconverted jest test (PLT-3016).
