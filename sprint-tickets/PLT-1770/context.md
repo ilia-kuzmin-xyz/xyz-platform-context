@@ -1643,3 +1643,19 @@ session) and rejected the push. Resolved by **merging** (`7549247`), re-running 
 merge (70 pass, up from 68), then pushing. Also merged `origin/master` (`b440537`) in — the branch
 was 12 behind. This is the second consecutive run where a parallel session pushed mid-run; assume it
 will happen and never reach for `--force`.
+## 2026-08-06 (live test) — assign-menu gate bug + PAPI-3738
+
+- **`0563deb` — custom permissions invisible in assign menus for tenant-level admins.**
+  Live-repro by Ilia: drawer full of roles, Set-permission menu showing built-ins only.
+  Cause: the custom block was gated on `useProjectRole(projectId).isAdmin`, which reads the
+  ACCOUNT payload's per-project roles entry (`account.roles.find(r => r.projectId === id)?.id`)
+  — empty for tenant-level admins. The built-in menu items were never FE-gated (BE authorises
+  the change), so customs now render whenever any exist, same audience. D-1 stays open as a
+  BE-enforcement question. Also confirmed from his network dump: create works end-to-end
+  (role "ABN" present in `project-roles` with codes + project), and the project carries ~60
+  legacy custom roles that now all appear (correct per filter, but crowded — search exists).
+- **PAPI-3738** created (Domain field "API 1" required in PAPI; Task, Backlog) — Quality
+  extras representation (Assigned Issues Only / Limit to Issue Type), the 5 missing authority
+  families, custom-role uuid acceptance on the contacts PUT, deleted-held-role semantics,
+  and splits blessing. Linked Relates ↔ PLT-1770; referenced from PR #2087's Known gaps /
+  Related tickets. PLT-3022 and PAPI-3717 cross-referenced in the ticket body.
