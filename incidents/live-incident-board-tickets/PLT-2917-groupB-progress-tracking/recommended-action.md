@@ -350,3 +350,13 @@ Each outcome names the exact backend field to fix; none points at frontend code.
 needs the payload). **Confidence in this being the right next step: 8/10** — asking Pietro what he
 changed + one internal data read is the lowest-cost move that both avoids re-diagnosing a recurrence
 and pins the defect to a field, before any dev effort is spent on the wrong layer.
+
+## 2026-08-06 — bookkeeping note (Group B now, action scenario TBD)
+
+Status moved **Open → Dev In Progress** since 08-05; this ticket is now in scope of the standing
+"Group B: skip, populate later" instruction. The drafted action above is **not superseded** — Pietro
+said "will be completed this week" (08-05) without confirming it addresses the milestone-status gap
+specifically (vs. only the progress-% join he and Rishi worked out 07-31) — but per this run's scope,
+no fresh action is drafted. If a human is reading this: the open question from the diagnosis above
+(does the shipped fix touch `vw_KeyMilestone`/Actual-End-Date, or only the progress-% override join)
+is still unanswered and worth asking Pietro directly before assuming this closes clean.

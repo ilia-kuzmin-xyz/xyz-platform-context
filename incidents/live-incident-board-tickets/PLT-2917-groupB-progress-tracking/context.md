@@ -682,3 +682,21 @@ backend row-checks (§8c #1–#2). Stated explicitly rather than guessed, per th
 Live JQL fetch of the board: `updated` still `2026-08-03T15:10:58+01:00` — bit-for-bit identical to
 the 08-04 run's own last-known value (Darminder confirming PLT-2524 is the remaining task). Comment
 count unchanged at 17. No new activity in the 48h since; carrying forward as-is, no re-investigation.
+
+## 2026-08-06 — left Group A scope (Open → Dev In Progress), folder retagged groupA→groupB
+
+Live JQL fetch: **status moved to `Dev In Progress`** since the 08-05 run (was `Open`) — this ticket
+now falls under the standing "Group B: skip, populate later" instruction, so this is a bookkeeping
+note only, no fresh deep-dive, per the PLT-2874 precedent (07-30 run). Folder renamed
+`PLT-2917-groupA-progress-tracking` → `PLT-2917-groupB-progress-tracking`.
+
+3 new comments since the 08-05 snapshot (20 total, up from 17):
+- **108937** (Yash, 08-05 11:30) — nudge to Pietro, flagged **high priority for Project Delivery**.
+- **108938** (Pietro, 08-05 11:31) — "will be completed this week." No date/scope specifics.
+- **108943** (Yash, 08-05 11:53) — heads-up that these dashboards are used by **senior individuals
+  on the client side** — a stakes-escalation note, not a diagnostic one.
+
+None of this changes the mechanism (§9b above still stands, 8.5-9/10) — it's a delivery-commitment
+signal, not new evidence. Next run, if still Group B: a light dev-readiness/fix-ownership check
+(did "this week" ship, does it cover the milestone-status gap or only the progress-% join) rather
+than a full re-investigation.

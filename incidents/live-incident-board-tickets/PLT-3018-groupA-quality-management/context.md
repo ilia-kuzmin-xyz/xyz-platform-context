@@ -136,3 +136,24 @@ in `recommended-action.md` unnecessary.
 - If the answer comes back "Type: Quality, Status: Open" on her broken issue, all three hypotheses
   above are dead and this resets to a backend/account-specific question — see
   `recommended-action.md` for the next step in that case.
+
+## 9. 2026-08-06 — H1 CONFIRMED by Rishi directly, status now With Customer
+
+Live JQL fetch: **status moved `Open` → `With Customer`**. Two new comments since this file was
+written, both same day (08-05, after this context was drafted):
+
+- **108925** (Rishi, 08-05 09:07) — watched the video himself and confirmed **H1 exactly**: "from the
+  video it appears the first issue they tried was a `Design` issue, not a `Quality` issue. Severity
+  only appears on `Quality` issues... the second issue does show the severity field and they are able
+  to select it." This is the code-predicted mechanism (§5 H1), confirmed against the real video
+  without needing our drafted question sent — Rishi independently reached the same read the code
+  investigation did. Also asks: "Can we check the user is aware of this?"
+- **108927** (Yash, 08-05 09:59) — Freshdesk flipped to "Waiting on customer," matching the Jira
+  status move.
+
+**No code bug.** This is the second ticket in a row on this board (after PLT-2858) whose
+customer-reported symptom resolves to "as designed, not a defect" on inspection — worth watching as
+a recurring shape (see cross-ticket note in this run's README entry).
+
+**Confidence update: H1 now 9/10** (confirmed against the real artifact by a human who watched it,
+not just code-predicted) — up from 5/10.

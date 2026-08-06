@@ -53,3 +53,16 @@ anything up. **Whoever can open Jira attachments should watch it before posting 
   field-editability rules (Type-gating, status-gating, per-project severity config). Worth a short
   addition to `dashboard/quality-tab.md` or a new file once this resolves, so the next "field X is
   missing/uneditable" ticket doesn't start from zero.
+
+## 2026-08-06 — superseded: Rishi already resolved this, ball is with the customer
+
+**The drafted comment above was never needed and should not be sent.** Rishi watched the attachments
+himself (08-05, comment 108925) and independently confirmed H1: her first issue was `Design` type,
+not `Quality`; Severity only renders for `Quality`. He asked Yash to check the customer is aware.
+Freshdesk/Jira both moved to **With Customer** the same day.
+
+**Current recommended action: none — correctly waiting on the customer.** No further internal
+comment or code fix needed. If the customer confirms (or doesn't reply), the closing move is a
+direct close-out comment in the PLT-2815 style ("as designed, Severity only applies to Quality-type
+issues, confirmed against your two examples") once she acknowledges — not a new investigation.
+Doc-gap note above still stands as a follow-up, independent of this ticket's closure.
