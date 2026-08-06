@@ -1560,3 +1560,65 @@ Ilia asked for a continuous walk-through before his live test. Findings:
   hovertest 7), typecheck noise-only. Branch tip `724c00a`.
 - **#2088 was marked ready-for-review by Ilia himself** (no longer draft). Not merged — still
   waiting for his explicit word.
+
+---
+
+## 2026-08-06 — PR body was materially stale; and jest/tsc CAN run in the scheduled container
+
+### ⭐ Supersedes the standing "CI is the only verifier" note
+
+The README's environment note says `npm ci` cannot complete in the scheduled-run container (401 from
+`npm.pkg.github.com` for the private `@xyzreality/dhtmlx-gantt`) and therefore **CI is the only
+verifier**. That is now **out of date** — the private package is the *only* blocker, and it can be
+stripped. Recipe, ~55s, reusable for any hc-frontend run:
+
+```bash
+SP=<scratchpad>/tc && mkdir -p $SP && cd $SP
+cp /home/user/hc-frontend/package{.json,-lock.json} .
+# delete every @xyzreality/* key from package.json deps/devDeps AND from
+# package-lock.json's "packages" map + the root package entry's dep lists
+python3 - <<'PY'   # (see PLT-2911 run for the exact script)
+PY
+npm install --prefer-offline --no-audit --no-fund --ignore-scripts --legacy-peer-deps
+cd /home/user/hc-frontend && rm -rf node_modules && ln -s $SP/node_modules node_modules
+npx jest --config jest.conf.js --testPathPattern CustomPermissions --maxWorkers=2
+```
+
+Three gotchas, all of which cost time here:
+
+1. **`--legacy-peer-deps` is required.** Without it npm ERESOLVEs on `@types/react@18.0.18` vs the
+   MUI peer ranges. Nothing to do with the private package.
+2. **`.gitignore` has `node_modules/` with a trailing slash, which does NOT match a symlink.** The
+   linked `node_modules` shows up as `?? node_modules` in `git status`. **Never `git add -A` in this
+   repo while the link exists** — stage changed files explicitly.
+3. **Two `tsc --noEmit` errors are environmental artifacts of the strip, not real:** the
+   `Cannot find module '@xyzreality/dhtmlx-gantt'` ones, plus a *downstream* consequence in
+   `gantt-x/.../mapping-columns.tsx(69,7)` (`'name' does not exist in type 'MappingColumn'`, because
+   `MappingColumn` derives from the missing gantt types). Verified by running `tsc` on **plain
+   `origin/master`** with the same install and getting the identical error. Do that check before
+   blaming a branch.
+
+With this, **70 CustomPermissions unit tests were run and passed locally** on the merged branch —
+not inferred from CI.
+
+### The PR description had drifted badly and was misleading reviewers
+
+#2087's body still described the pre-`e22af62` world: *"Create never persists"*, *"level changes on
+an existing permission can't be saved"*, *"Edit's level bars are not this permission's stored
+values"*, *"Card meters are empty outlines"*, and a whole "Why levels can't be saved" section. All of
+that was superseded days ago by `e22af62` (real authority mapping), `a578d82` (feature flag),
+`e650e50` (assign flow) and `724c00a` (built-in name refusal). A reviewer opening the PR was being
+told the feature doesn't work when it does — the worst possible state for a PR awaiting review.
+
+Rewritten on 06 Aug with an explicit **"this description was rewritten"** banner at the top so anyone
+who read the old one knows to re-read. Title also gained `assign`. **Lesson for long-lived PRs
+touched by parallel runs: the body is part of the deliverable and goes stale silently.** Re-read it
+against the branch whenever a run touches the PR.
+
+### Merge, not force-push — again
+
+`origin/PLT-1770` moved *during* this run (`724c00a`, built-in role names refused, from a parallel
+session) and rejected the push. Resolved by **merging** (`7549247`), re-running the suite after the
+merge (70 pass, up from 68), then pushing. Also merged `origin/master` (`b440537`) in — the branch
+was 12 behind. This is the second consecutive run where a parallel session pushed mid-run; assume it
+will happen and never reach for `--force`.

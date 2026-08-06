@@ -109,3 +109,94 @@ Adversarial pass after pushing `cc6511b` caught one real bug + two limitations:
    form values, so nothing inconsistent persists. Documented.
 
 PR "Known limitations" section added; test steps gained the multi-tenant check (step 8).
+
+---
+
+## Run log — 2026-08-06: Darminder's "can't turn it on at all" was `Promise.all` (fixed, `2accb3b`)
+
+**Darminder left a second `CHANGES_REQUESTED` on #2071 (2026-08-05 15:51, commit `fc37f36`):**
+*"Thanks for making that change. I am now finding no matter the option I select I am unable to
+turn on Portfolio Dashboard for project"* — with a video.
+
+### The deduction that pinned it without needing the video
+
+Under the members-consistency rule, if the other portfolio members share **one** distinct
+weighting W, then exactly one of the two radio options (namely W) **must** be allowed. So
+"blocked no matter which option I select" is only possible in two states:
+
+1. `portfolioWeightings.length > 1` → the mixed-portfolio hard block, or
+2. `ensurePortfolioWeightings()` **rejected** → `PORTFOLIO_WEIGHTING_CHECK_FAILED`.
+
+That narrowing is pure logic on the guard's own truth table — worth redoing rather than guessing
+from a screen recording next time.
+
+### Root cause (state 2), and why it was permanent
+
+`usePortfolioWeightings` fanned the member-details reads out with **`Promise.all`**. And
+`projectQueryOptions.queryFn` (`PortfolioPage/hooks/useProjectQuery.ts:19`) **throws on any HTTP
+error**. So a single unreadable member rejected the whole lookup:
+
+- a portfolio can legitimately contain a project the editing user is **not a member of** → the
+  details endpoint 403s;
+- or a member row's `postgresProjectId` no longer resolves → 404.
+
+One such member ⇒ every enable attempt blocked, for **either** weighting, and the message says
+*"Please try again"* — which for that state can never succeed. Indistinguishable from "the feature
+is broken", which is exactly how it was reported.
+
+**Fix:** `Promise.allSettled`, decide on the members that could be read. The safety argument is
+what makes this sound rather than just lenient: **acting on the readable subset cannot introduce a
+NEW inconsistency** — if an unreadable member's weighting differed from the readable ones, the
+portfolio is *already* mixed, and blocking the candidate would not make it consistent. A portfolio
+where **no** member could be read still rejects, so it is never mistaken for an empty portfolio
+(which accepts anything).
+
+Mirrors the established pattern in `services/modelService/element-types-service.ts:116`
+("Only the healthy artefact contributes; 404 is silenced via allSettled") — reuse, not invention.
+
+### ⚠️ The stale-cache commit `7a48281` did NOT fix this
+
+The previous run pushed `7a48281` ("must read fresh membership, not a 5-minute cache") 25 min after
+Darminder's report, hypothesising he had emptied the portfolio and hit a warm cache. That is a real
+robustness improvement but **addresses neither state 1 nor state 2**, and it wouldn't survive a page
+reload anyway — Darminder tested repeatedly. Do not treat that commit as the answer to this review.
+
+### Still open, and it is a product question not a bug
+
+If Darminder was in **state 1** (genuinely mixed portfolio), the guard is behaving as written and
+the result is a **dead end**: a portfolio that already contains mixed weightings blocks every new
+project, and the only escape is aligning the other projects — which the user may not have access to
+do. That rule is Pietro's (2026-08-05 reframing), so it was **not** changed unilaterally. Asked
+Darminder on the PR which of the three messages he saw, since they discriminate the states exactly.
+
+### Verification — tests actually ran locally this time (see PLT-1770 log for the recipe)
+
+- 3 suites / **17 tests** green (`usePortfolioWeightings`, `portfolio-weighting-guard`, `GeneralTabEdit`).
+- The new regression test **fails against `Promise.all`** and passes with `allSettled` — confirmed by
+  reverting only the source file and re-running. A test that passes both ways proves nothing.
+- `tsc --noEmit` clean for both changed files.
+
+### Also this run — a parallel session left `portfolio-weighting-guard.test.ts` on the old signature
+
+Three sessions pushed to `PLT-2911` during this run (`bb56c59`, `fe82300`, `2a9b45d` — naming the
+conflicting projects in messages, a checking state while the guard runs, spinner sizing). Those
+commits changed `getPortfolioWeightingConflict`'s second argument from `ProgressWeightingType[]` to
+**`PortfolioMemberWeighting[]`** (`{ name, weighting }`) so a blocked user can see *which* project
+holds the portfolio to a different weighting.
+
+The production call sites were all updated consistently. **`portfolio-weighting-guard.test.ts` was
+not** — it still passed bare enum values, so it failed three ways: labels rendered as `"undefined"`,
+the matching-weighting case reported a conflict, and the mixed case fell through to the mismatch
+branch. `tsc` flagged it at six sites too. Fixed in `ffb2079`, and extended to cover what the new
+shape is *for*: both offenders named in the mixed case, and the `MAX_NAMED_PROJECTS = 5` cap with
+`"N more"`.
+
+**Two lessons, both cheap:**
+1. **A signature change is not done until its test file compiles.** `tsc --noEmit` catches this in
+   seconds and would have caught it before the push.
+2. **Re-run the suite on `origin/<branch>` after pulling a parallel session's work**, not just on
+   your own commits. This break existed only on the *combined* head — neither session's own change
+   was wrong in isolation. Running tests locally (recipe in the PLT-1770 log) is what surfaced it;
+   inferring from "my diff is fine" would have shipped it to CI.
+
+Final state: `2488648`, **19 tests green** across the three portfolio-weighting suites, tsc clean.
