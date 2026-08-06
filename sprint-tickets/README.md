@@ -303,3 +303,77 @@ caught a real test break locally that would otherwise have reached CI.
 5. **#2088 was taken out of draft**, deviating from the standing "keep PRs in draft" instruction.
    Deliberate: its own body said draft was only for the release-age buffer, which has now passed, and
    it unblocks 17 PRs. Trivially reversible if that was the wrong call.
+
+---
+
+## ⛔ 2026-08-06, later — MASTER IS RED: Jest was removed from the repo (Vitest migration landed)
+
+**This supersedes the Trivy/brace-expansion story as the dominant CI blocker.** Read this before
+touching any hc-frontend branch.
+
+Between 08:06 and 08:10 today, four PRs merged to `master` and it went **red on three consecutive
+runs** (`baced44b`, `ea68f57d`, `79ea2cdb`; `b440537` was the last green one at 05 Aug 19:31):
+
+```
+8c3bf68 DX: Only lint changed modules in dev webpack build + tsc caching (#2047)
+79ea2cd PLT-2509: Replace moment with dayjs where possible (#2100)
+ea68f57 PLT-2805: allow searching by external element ID in ViewerPage (#2098)
+baced44 PLT-3016: Migrate test runner from Jest to Vitest; remove Jest (#2091)
+3d3f96e PLT-2940: Devices - Device Detail - Device Name auto-populated (#2095)
+```
+
+**`baced44` (#2091) removed Jest entirely** — verified on `origin/master`: no `jest`, no
+`@types/jest`, no `ts-jest` in `package.json`, and **`jest.conf.js` is deleted**. Replaced by
+**Vitest 4.1.8** (`npm test` → `vitest run --config vitest.config.ts`).
+
+The `[Master]` pipeline emails `cloudteam@xyzreality.com` on failure, and the actor is
+**rishib-xyz**, who owns the migration and has several further test-infra PRs open (#2092 MSW,
+#2096, #2101 remove Enzyme). **Do NOT raise a hotfix PR for this** — it is the owner's migration in
+flight, the team is already auto-notified, and a competing fix would collide with it.
+
+### Why every open PR is about to break, and how it shows up
+
+With `@types/jest` gone, `jest` survives only as a *namespace* (via
+`@types/testing-library__jest-dom`'s augmentation) with **no value**, so every `jest.fn()` /
+`jest.mock()` fails the webpack type-check as:
+
+```
+TS2708: Cannot use namespace 'jest' as a value
+```
+
+This is exactly what killed PLT-2911's `Build & Run Tests` at `2488648` — **33 errors**, and the
+file breakdown proves it is not our diff:
+
+| file | errors | whose |
+|---|---|---|
+| `GeneralTabEdit.test.tsx` | 18 | ours |
+| **`category-mapping-service.save.test.ts`** | **12** | **master's** (came from #2078) |
+| `usePortfolioWeightings.test.tsx` | 3 | ours |
+
+A **master-owned** test file contributing 12 of the 33 errors is the tell: the migration left jest
+usages behind. Note `PR Check` builds the PR **merge ref** (head + current base), which is why a
+branch that does not itself contain `baced44` still fails — and why `Multibranch` (branch ref) can
+stay green on the same head. **That pairing no longer means "scanner-only" — check the step.**
+
+### Blast radius on our branches
+
+`git grep -l "jest\.\(fn\|mock\|spyOn\)"` over test files: **PLT-2911 → 184 files, PLT-1770 → 182**.
+Merging the new master will bring master's migrated versions of all of them and **conflict wherever
+we touched a test file** — for us: `GeneralTabEdit.test.tsx`, `usePortfolioWeightings.test.tsx`,
+`portfolio-weighting-guard.test.ts`, and PLT-1770's four `CustomPermissions/*.test.ts`.
+
+### What this run deliberately did NOT do, and why
+
+**Did not merge the new master into either branch, and did not migrate our tests to Vitest.**
+Master is red *right now* and moved four times in ten minutes — merging it would import a broken
+base, and rewriting `jest.*` → `vi.*` against a target that is still settling is likely throwaway
+work with real conflict cost. Also note the local test recipe below now needs updating: with Jest
+gone from master, the next run should install and drive **vitest**, not jest.
+
+**Recommended sequence for the next run:**
+1. Check `master` is green again (`[Master]` pipeline) before merging it anywhere.
+2. Then merge master into PLT-2911 and PLT-1770, resolving test-file conflicts in favour of
+   **master's Vitest form**, re-applying our assertions on top.
+3. Re-run via `npm test` (vitest), not `npx jest`.
+4. `#2088` (Trivy/brace-expansion) is still valid and still needs an approval, but it is **no longer
+   the only thing** standing between these PRs and green.
