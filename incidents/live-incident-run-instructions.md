@@ -37,6 +37,11 @@ Take only tickets **not** in: "With Technical Support", "With QA", "In Code Revi
 **"With Customer" is in scope.** Do not confuse it with "With Technical Support" — a previous run
 did, and nearly dropped a ticket entirely.
 
+**"In QA" is a distinct status from "Ready For QA"** (seen for the first time 2026-08-07, on
+PLT-3023). Both mean the same thing for our purposes — the ticket has moved past dev into QA/release
+and is out of scope — so exclude both. If another QA-adjacent status name shows up, exclude it too;
+the intent is "anyone but us owns it right now," not an exact string match.
+
 ---
 
 ## Grouping

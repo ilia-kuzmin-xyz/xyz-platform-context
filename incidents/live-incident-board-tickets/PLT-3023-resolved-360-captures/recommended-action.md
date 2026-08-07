@@ -1,6 +1,13 @@
 # PLT-3023 — recommended action (DRAFT ONLY — execute nothing)
 
-## Chosen action: (a) — one internal diagnostic comment to Rishi (already assignee), not to the customer yet
+## 2026-08-07 — SUPERSEDED: do not send the draft below
+
+Ticket moved to **In QA** on 08-06; Rishi has already identified the fix as **PLT-2794**, pending
+release scheduling. Our diagnostic question below is no longer needed — see `context.md`
+"2026-08-07" section. **No action recommended this run.** Leaving the original draft in place below
+for the record, per the repo's "mark superseded, don't delete" rule.
+
+## Chosen action (superseded, 2026-08-06): (a) — one internal diagnostic comment to Rishi (already assignee), not to the customer yet
 
 No facts are established yet beyond the client's own description — no root cause, so nothing should
 go to Lucas. The single highest-leverage move is the DB/API lookup that settles H1 (§5 of

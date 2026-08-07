@@ -157,3 +157,21 @@ a recurring shape (see cross-ticket note in this run's README entry).
 
 **Confidence update: H1 now 9/10** (confirmed against the real artifact by a human who watched it,
 not just code-predicted) — up from 5/10.
+
+## 2026-08-07 — status flipped back to Open, no new human content; conclusion unchanged
+
+Live JQL fetch: Jira status now shows **Open** again (was **With Customer** as of the 08-06 note
+above). The only new comment (109076, Yash, 08-06 14:46) is a bare Freshdesk auto-sync line —
+"Freshdesk ticket status changed to: Open" — with **no accompanying reply from Maritza or anyone
+else**. Comment count unchanged from the 08-06 run (5 comments, same content) aside from this one
+sync line.
+
+This looks like Freshdesk-side sync noise rather than a real reopen: the sibling ticket PLT-3024
+(opened the same window) shows the identical Freshdesk automation flipping Open↔Waiting-on-customer
+four times in five minutes with zero human input attached to any of the flips — the same pattern,
+just a single flip here. Treating this as noise, not a signal that Maritza disputed Rishi's
+Design-vs-Quality explanation.
+
+**No action taken, no re-investigation done** — H1 stands confirmed (9/10), conclusion unchanged
+("as designed, not a defect"). If a future run finds a *substantive* reply from Maritza (not just a
+bare status-sync comment) that reopens the question, re-open the investigation from here.

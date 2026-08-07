@@ -194,3 +194,26 @@ different `roomCapturePointId` label than expected).
 **Overall triage confidence: ~6/10 on mechanism family (shared-key grouping is real and well
 understood), ~3/10 on which specific record-level defect produced this specific ticket** — the
 single DB lookup in §5 H1 would move this to 8-9/10 in one step.
+
+## 2026-08-07 — moved to In QA, fix already tracked as PLT-2794; our H1-H4 lookup no longer needed
+
+Live JQL fetch: status moved **Open → In QA** the same day this context was first drafted (08-06,
+16:56). One new comment (109048, Rishi, 08-06 08:48, i.e. actually *before* the status move — the
+09-06 06:35/08:48 comments were already same-day, this run just re-fetched and confirmed no further
+customer content since): **"this will be resolved by PLT-2794, just awaiting information as to when
+this can be released."**
+
+Rishi already knew the fix location — he didn't need our H1 DB-lookup draft or the code findings
+above to route this; PLT-2794 apparently already covers the mechanism (whatever it is — that ticket
+is outside this board's scope, not opened this run). Our §4/§5 findings stand as a documented
+*independent* mechanism analysis (still useful if PLT-2794 turns out to be a different or partial
+fix and this regresses), but the drafted comment in `recommended-action.md` is now **superseded —
+do not send it**. Nothing further needed from this board; ball is with release scheduling.
+
+**`In QA` is a distinct Jira status from `Ready For QA`** — not previously seen on this board.
+Added to the exclusion list in `incidents/live-incident-run-instructions.md` for future runs (same
+treatment as `Ready For QA`: with QA/release, out of our scope).
+
+Folder tag changed `groupA` → `resolved` (fix identified and owned elsewhere, ticket no longer needs
+evaluation from us) — same convention as `PLT-2892-resolved-viewer-and-model` /
+`PLT-3010-resolved-progress-tracking`.
