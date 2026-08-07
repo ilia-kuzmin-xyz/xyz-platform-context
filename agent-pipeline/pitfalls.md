@@ -217,3 +217,57 @@ In the product flow this is near-unreachable — the survey (and thus its Skip
 button) is only shown when no template matched. But it bites anyone
 **benching or scripting** the API: pass an unmodified prompt to measure the
 template path; `skip_clarifier` measures the bespoke path.
+
+---
+
+## 2026-08-07 correction — mcp-dev's pagination is NOT broken; we called it wrong
+
+The 2026-08-05 entry above says mcp-dev "ignores `size` and `page`" and
+concludes its pagination is a server bug. **The `page` half is wrong**, and
+the conclusion drawn from it was wrong. The tool schema was never read; the
+claim was inferred from payload sizes alone.
+
+`xyz_get_projects_project_id_issues` accepts exactly six parameters:
+
+| parameter | what it does |
+|---|---|
+| `projectId`, `auth_context_id` | required identity |
+| `size` | **genuinely ignored** — asked 500, got 7,534 |
+| `simple` | drops `fileReferences` + `activityCategories` |
+| `lastFetchedIndexId` | **cursor pagination — works** |
+| `lastSyncDateTime` | **delta sync** — only issues modified since; rows carry `isDeleted` |
+
+There is no `page` parameter at all. The endpoint paginates by cursor, the
+response envelope carries `{lastFetchedIndexId, recordCount}`, and
+`_call_tool_paginated` already detects and walks it — which is why the full
+32,272-issue fetch has been correct all along. It was never "working by
+accident".
+
+What IS true, narrowly: each batch caps at ~7,500 rows / ~12MB whatever `size`
+says, and no grand total is returned, so the cursor hops must run
+**sequentially** — each hop's starting point is only revealed by the previous
+response. A full issues fetch is 9 sequential calls.
+
+Measured live on project 1a03eaf1 (32,272 issues):
+
+```
+full cursor walk, current call     128.1s   32,272 rows   60.3MB   9 calls
+full cursor walk, simple=true       91.5s   32,272 rows   43.2MB   9 calls
+lastSyncDateTime = 1 day ago         6.3s        0 rows    0.0MB
+lastSyncDateTime = 7 days ago        1.7s        0 rows    0.0MB
+lastSyncDateTime = 90 days ago      21.1s    7,510 rows   10.2MB
+```
+
+Two capabilities we have never used, both free:
+
+- **`simple: true`** — 28% fewer bytes, 29% less wall time, and the dropped
+  `fileReferences` (attachment metadata: filename, MD5, byte size, blob URL)
+  is read by no artifact we generate.
+- **`lastSyncDateTime`** — the real answer to cold-cache cost. A 2026-08-07
+  request refetched all 60MB because the disk spill's 300s TTL had expired
+  overnight, yet **zero issues had changed since the previous day**. The delta
+  call proves that in under 7 seconds.
+
+**Lesson: read the tool schema before characterising a server as broken.**
+`client.get_tools()` exposes every parameter and its description; one call
+would have surfaced `simple`, the cursor, and delta sync on day one.
