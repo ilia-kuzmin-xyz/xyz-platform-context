@@ -1888,3 +1888,35 @@ Sequence that worked this run: strip `@xyzreality/*` from `package.json` →
 `npm install --legacy-peer-deps --no-audit --no-fund` (~1 min, 2215 packages) →
 **`git checkout package.json package-lock.json`** before committing anything. `node_modules/` stayed
 out of `git status` this time, but the "never `git add -A`" rule stands.
+
+## 2026-08-07 — Rishi round 3: duplicate error + permission wording (`e6d9848`)
+
+Rishi: "the error shows twice" (toast AND inline) + "cloud errors have a message about
+permissions too, might be good to improve this".
+
+- **Duplicate**: all three writes reported through BOTH the toast and an inline message.
+  Toast is now the sole surface for create/save/remove; inline copies AND their props
+  removed (PermissionForm.saveError, Update/RemovePermissionModal.error). The LIST keeps
+  its inline message — it's a query, no toast covers it. Removing UpdatePermissionModal's
+  render also orphaned its `CP` import; deleted (would have been a fresh lint smell).
+- **403 wording**: new `failureMessage(cause, notAllowed, generic)`. 403 is a ROUTINE
+  outcome here (IAM roles API is itself permissioned — project admin can have the authority
+  that shows the panel but not the one that writes roles), and "Please try again" is
+  actively wrong for it. Wording borrowed from `shared/auth/NotAuthorised` so the two match.
+- **Design note**: helper deliberately NOT in `request-config.ts` — that module imports
+  logService, which drags in axios + rxjs + file APIs. A component wanting a string
+  shouldn't pull the logging stack. Discovered because the test suite couldn't even load it.
+- Reads status defensively (`(cause as {response?:{status?:number}})?.response?.status`)
+  rather than `axios.isAxiosError` — react-query types the rejection `unknown`, and the
+  interceptor reaches the same shape the same way (`get(err,'response.data')`).
+- **Harness**: scratch node_modules now needs `tslib` (installed --no-save) for anything
+  importing logService.
+- 76 unit tests (73 + 3 new), 31 browser assertions, typecheck clean.
+
+### CI: NEW repo-wide Trivy finding (not ours)
+`js-yaml 4.3.0` → GHSA-5p4m-2wfm-xmqj (CVE-2026-59870) HIGH, fixed 4.3.1. Byte-identical on
+master; our PR doesn't touch package-lock. Same shape as the brace-expansion/#2088 case —
+needs a master-side bump. Flagged on the PR.
+**False alarm worth remembering**: our lockfile looked like it deleted 384 lines vs master —
+that was a STALE local `origin/master` ref; the deletions were master's own PLT-3026
+(7 unused deps). Always `git fetch origin master` before believing a lockfile diff.
