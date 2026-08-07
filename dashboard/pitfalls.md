@@ -124,6 +124,12 @@ on the page derives from that one file and the rest are invisible, with no UI in
 has two near-twin models in that folder (667,614 and 665,074 elements) so the impact is 0.4%
 there, but a project with two genuinely different federated models would show arbitrary numbers.
 
+**2026-08-07 — this is now Pattern 5's leading real-world case (PLT-3024, ML9):** a model with
+real linked elements, confirmed visible in the Web Viewer, absent from the Dashboard. Leading
+hypothesis: the model simply isn't inside the folder named "federated". Unconfirmed against ML9's
+actual model tree — see `incidents/recurring-defect-patterns.md` Pattern 5 and
+`incidents/live-incident-board-tickets/PLT-3024-groupA-viewer-and-model/context.md`.
+
 ## The dashboard filter panel hides categories with zero weight (PLT-2941)
 
 `getCategorySummaryV2API` builds the discipline/package **option list** from the `category_groups`
@@ -195,6 +201,15 @@ superseded schedule revision) — the second is likely the more common trigger. 
 filters `WHERE dynamicStatusCode IS NOT NULL`, and the status-filter query
 (`dashboard-progress-service.ts:1981`) filters `AND status_code IS NOT NULL`, so affected elements are
 uncoloured, absent from status counts, and unselectable by a status filter.
+
+**2026-08-07 — candidate live occurrence (PLT-3024, unconfirmed on the actual project data):** a
+customer on ML9 reported models with real linked elements missing entirely from the Dashboard
+(fine in the Web Viewer). The superseded-schedule-revision trigger above is one of the ranked
+hypotheses — a model's activities linking to a revision that's no longer `isCurrent` in
+`api_activities` would produce exactly this per-model blank. Not confirmed against ML9's actual
+schedule-revision history; see
+`incidents/live-incident-board-tickets/PLT-3024-groupA-viewer-and-model/context.md` §H2a for the
+falsifiable check.
 
 **Not affected:** Actual%/Planned%/Variance/SPI come from pre-computed progress parquets, not from
 these status codes (same page §4, §7). This bug does not skew the percentages.

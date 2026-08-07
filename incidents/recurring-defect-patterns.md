@@ -313,6 +313,46 @@ failed and cost days. See that ticket's log.
 
 ---
 
+## Pattern 5 — Surface-scoped visibility rule mistaken for missing data (2026-08-07, promoted from candidate)
+
+**Confirmed on three occurrences now** (was a two-occurrence candidate as of the PLT-2945 run;
+PLT-3024 is the third and first at *model* granularity rather than *element* granularity — same
+shape, different gate). One surface applies a deliberate scoping/visibility rule that a comparison
+surface doesn't, the customer diffs the two, and reports the discrepancy as data loss.
+
+| Ticket | Project | Gate | Comparison surface with no gate |
+|---|---|---|---|
+| `dashboard-progress-tab-explained.md` §8.4 | (docs, pre-dates board) | Future-dated projects show blank/all-yellow by default | — (documented product FAQ) |
+| PLT-2945 | DUB7x | Dashboard hides elements whose planned start is later than the date-range slider's end (`dashboard-progress-service.ts:1909-1924`), fragment hidden via `dashboard-color-service.ts:488` | Editor/Web Viewer has no equivalent hide anywhere in the codebase (exhaustive `setVisibility(` grep — two call sites total, both Dashboard/Canvas) |
+| PLT-3024 | ML9 | **Model-level, not element-level:** the Dashboard loads exactly one model — the first model in the first folder whose name contains "federated" (`dashboard-project-service.ts:143-205`) — and builds `element_base_data` from that one model's `svf2_object_id_map` only (`dashboard-progress-service.ts:2548-2559`); everything outside it is absent, not merely uncoloured | Web Viewer loads whatever the user has activated, which is typically a much larger set (`viewer-y.tsx:290-294`) |
+
+### Mechanism
+
+The Dashboard is deliberately narrower than the Editor/Web Viewer on more than one axis — by time
+(date-range slider), and by model membership (federated-folder-only). Both narrowings are correct,
+specified behaviour, not bugs. But neither narrowing surfaces on screen: there is no "N elements
+hidden by date filter" or "this model isn't in your federation" indicator anywhere in the Dashboard
+UI. The silence is what generates the ticket, not the gate itself.
+
+### Recognition signature
+
+*"Visible in the Editor/Web Viewer but not the Dashboard, with no numeric discrepancy on the
+overlapping elements that ARE shown."* Before investigating as a defect, check in order:
+1. The date-range slider (Pattern 5 / PLT-2945) — does the missing thing have a future planned
+   start relative to the slider's end?
+2. Federated-model membership (Pattern 5 / PLT-3024) — is the missing model actually inside the
+   folder named "federated" in the Editor's model tree? The Dashboard cannot show a model that
+   isn't.
+3. Progress-weighting / zero-activity filters (Pattern 3) if the missing thing is a discipline or
+   package rather than a model or element.
+
+**Product observation, both occurrences:** the fix that would prevent recurrence is a UI indicator
+("N elements/models hidden by current filters"), not a code change to the gates themselves, which
+are working as specified. Worth a standing low-priority UX ticket independent of any single
+incident.
+
+---
+
 ## Candidate patterns (one occurrence, watch for a second)
 
 - **Viewable-name fallback vs on-device client** (PLT-2923). A model renders on the headset but
@@ -332,15 +372,3 @@ failed and cost days. See that ticket's log.
 - **Source-data elevation errors presented as viewer bugs** (PLT-2649). 360 pins placed wrongly
   because one level's elevation was wrong in the source model; the transform was provably correct
   and the same fault reproduced in PowerBI.
-- **Surface-scoped visibility rule mistaken for missing data** (PLT-2945). One surface applies a
-  deliberate visibility filter that a comparison surface doesn't, and the customer diffs the two and
-  reports data loss. On PLT-2945 the Dashboard hides elements whose planned start date is later than
-  the date-range slider's end (`dashboard-progress-service.ts:1909-1924`, `dashboard-color-service.ts:488`
-  sets fragment visibility false) while the Editor/Web Viewer applies no such gate anywhere in the
-  codebase and renders the same elements yellow/Planned. Not a defect — the frontend does exactly what
-  it's specified to do — but the hide is silent, with no on-screen indication that N elements are
-  excluded, which is what generates the ticket. **Already has a sibling occurrence**, one layer up:
-  `planning/dashboard-progress-tab-explained.md` §8.4 documents the same confusion at the *project*
-  level ("future-dated projects show a blank/all-yellow model by default"). Two occurrences, arguably
-  enough to promote — recognition signature: *"visible in the Editor/Web Viewer but not the Dashboard,
-  no numeric discrepancy"* → check the date slider before anything else.

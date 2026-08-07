@@ -19,7 +19,9 @@ live-incident-board-tickets/
 ```
 
 - **`<group>` tag:** `groupA` (evaluate/clarify — Open/In Analysis/With Customer),
-  `groupB` (in dev pipeline — Ready For Development/Dev In Progress), or
+  `groupB` (in dev pipeline — Ready For Development/Dev In Progress),
+  `resolved` (fix identified/owned elsewhere — e.g. moved to In QA behind a named fix ticket, or
+  root-caused to "as designed" — still trackable but no longer needs our evaluation), or
   `relocated` (moved off the PLT board — historical).
 - **`<domain>` tag:** `filter-system`, `viewer-and-model`, `quality-management`,
   `360-captures`, `progress-tracking`, `data-pipeline`, `access-permissions`, `other`.
@@ -31,7 +33,7 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 - **Included:** board tickets in `Open`, `In Analysis`, `With Customer` (→ Group A);
   `Ready For Development`, `Dev In Progress` (→ Group B).
-- **Excluded:** `With Technical Support`, `Ready For QA`, `In Code Review`,
+- **Excluded:** `With Technical Support`, `Ready For QA`, `In QA`, `In Code Review`,
   release/`Done`/`Archived`, `Blocked`.
 - **`With Customer` = judgment call.** Not in the exclusion list, so treated as
   in-scope-but-parked (ball with the client).
@@ -40,6 +42,97 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
   are short (dev-readiness note + fix ownership), not full drafted actions.
 - Actions are **drafted only** — a human reviews `recommended-action.md` and
   executes any Jira comment / transition manually.
+
+---
+
+## Run: 2026-08-07 — 1 brand-new ticket deep-dived (PLT-3024), 1 left scope to QA (PLT-3023), 1 status-noise correction (PLT-3018), 5 confirmed unchanged, Pattern 5 promoted
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
+Technical Support", "Ready For QA", "In QA", "In Code Review", "READY FOR RELEASE", "Done",
+"Blocked", "ARCHIVED (NOT RELEASED)") ORDER BY created DESC`). **8 tickets in scope**, 7 Group A + 1
+Group B. Set = the 08-06 run's 8 minus **PLT-3023** (→ In QA, out of scope) plus **PLT-3024** (new,
+created 08-06 08:17, same day as the previous run but missed by it — created after that run's JQL
+snapshot). `In QA` added to the JQL exclusion list and to `live-incident-run-instructions.md` this
+run (first sighting, distinct status from `Ready For QA`, same treatment).
+
+### PLT-3024 — new this run (viewer-and-model)
+
+**"Dashboards not showing models for some disciplines," ML9, Major, unassigned to an engineer yet.**
+Customer verifying the new Non-PowerBI Dashboard found models with real, Web-Viewer-confirmed linked
+elements missing from **both** dashboards (new and old/PowerBI). Rishi's reply already named the
+right lead — "confirm these models are in the Federated model?" — unanswered since 08-06 09:16.
+**Verified in code:** the Dashboard renders exactly one model (the first one inside a folder named
+"federated," `dashboard-project-service.ts:143-205`), and every element-level figure derives from
+that single file — this is a hard structural gate, not a heuristic, and independently corroborated
+by two `dashboard/pitfalls.md` entries that pre-date this ticket. **What could kill Rishi's theory:**
+the old dashboard is a bare PowerBI embed with zero frontend logic, so if it's genuinely missing the
+same models, no hc-frontend mechanism explains that half. Second-ranked hypothesis if the models ARE
+in the federation: links to a superseded schedule revision resolve to no dates and get hidden — an
+**already-documented, still-unfixed** gap (Viewer side was fixed via #2081/PLT-2743, Dashboard was
+not). A separate side detail in the same customer comment ("disciplines/packages missing a couple of
+days ago") has one plausible dated trigger, **PLT-2918** (a destructive category-mapping save bug,
+fixed 08-05 evening, confirmed to have deleted ~2k mappings on a different project) — unconfirmed on
+ML9. Full findings, ranked hypotheses (H1-H4) and the drafted internal comment (answers Rishi's own
+question with code evidence + flags the PowerBI caveat):
+`PLT-3024-groupA-viewer-and-model/context.md` + `recommended-action.md`. **Recurring-defect pattern
+promoted this run**: "Surface-scoped visibility rule mistaken for missing data" moves from a
+two-occurrence candidate (PLT-2945 + a docs-only FAQ entry) to **Pattern 5**, PLT-3024 being the
+third occurrence and the first at model granularity rather than element granularity — see
+`incidents/recurring-defect-patterns.md`.
+
+### Left scope this run, naming why per the standing rule
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-3023** | In QA (was Open) | Rishi identified the fix as already tracked in **PLT-2794**, pending release — our drafted diagnostic comment is superseded, nothing further needed from this board. Folder tag `groupA` → `resolved`. Full note: `PLT-3023-resolved-360-captures/context.md` "2026-08-07." |
+
+### PLT-3018 — status-noise correction, no re-investigation
+
+Jira status flipped `With Customer` → `Open` (08-06 14:46), but the only new comment is a bare
+Freshdesk auto-sync line with **no human content** — same automation pattern seen firing four times
+in five minutes on PLT-3024 the same morning. Treated as sync noise, not a real reopen by Maritza.
+**H1 stands confirmed** (Design-vs-Quality issue type, not a defect); no action taken. Full note:
+`PLT-3018-groupA-quality-management/context.md` "2026-08-07."
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts checked
+against what the 08-06 run recorded — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 7 days unanswered** |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **7 consecutive runs** (07-24 through today) on a Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **32 days stale**, direct close-out still unposted across **7 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash thanked Ilia) | 16 comments, unchanged; genuinely with the customer's project-delivery team, not a stall on us |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged |
+
+### Group B — one line
+
+- **PLT-2917** (progress-tracking, Dev In Progress) — unchanged since 08-05 (Pietro: "will be
+  completed this week"; Yash flagged the client audience as senior). No new comments this run.
+
+### Cross-ticket notes
+
+- **Freshdesk auto-sync noise is now a recognised artefact of this board, not a one-off.** Both
+  PLT-3024 (four Open↔Waiting-on-customer flips in 5 minutes) and PLT-3018 (one flip) this run
+  produced bare "Freshdesk ticket status changed to: X" comments with no human content. Treat these
+  as noise unless accompanied by an actual reply — do not count them as "new activity" when judging
+  staleness.
+- **The "recommended but never posted" pattern is now seven runs deep on both PLT-2858 and
+  PLT-2815** (07-24/07-30/08-03/08-04/08-05/08-06/08-07) — both drafts already exist verbatim in
+  each ticket's `recommended-action.md`; nothing further needs drafting, only sending. This is the
+  fourth additional run confirming the 08-03 run's own diagnosis: analysis is not this board's
+  bottleneck, posting is.
+- **Pattern 5 promotion (see PLT-3024 above)** is the first defect-pattern promotion since Pattern 4
+  — worth a glance at `recurring-defect-patterns.md` next time a "visible on one surface, not the
+  other" ticket lands; the recognition signature now covers model-level and element-level gates.
+
+### ⚠️ Attachments needing human — this run
+
+**PLT-3024** (3 items — new dashboard, old dashboard, Web Viewer linked-models screenshots, all
+unopened). The Web Viewer screenshot in particular may already show the missing model's
+folder/name, which would answer the open federation question without waiting on the customer —
+worth opening before anything else on this ticket. No new attachments on PLT-3018/PLT-3023 beyond
+what prior runs already flagged.
 
 ---
 
