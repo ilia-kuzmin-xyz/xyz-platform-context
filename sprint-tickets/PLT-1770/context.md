@@ -1934,3 +1934,30 @@ reports `Total: 1`, i.e. that is the sole remaining blocker.
 
 Not merged: awaiting Ilia's explicit go-ahead (and realistically the js-yaml bump first,
 since the branch cannot go green without it).
+
+## 2026-08-07 — ✅ MERGED (`30143ca` on master)
+
+PR #2087 was **squash-merged** as `30143ca` "PLT-1770 + PLT-2926 + PLT-2927: Custom
+permissions — list, create, assign, rename, remove". Note: squash, so none of the branch
+commits (e6d9848 etc.) are ancestors of master — don't look for them by SHA.
+
+Verified what actually landed on master:
+- 31 files under `TeamTab/CustomPermissions/`, incl. the final round-3 work
+  (`failure-message.ts` + its test present; `saveError` gone from PermissionForm = the
+  single-error-surface fix is in).
+- **`{ name: 'CustomPermissions', value: false }`** — flag shipped OFF, so this is dark on
+  master. Nothing is user-visible until someone flips it. Enable per-browser with the
+  `feature-flags` cookie (see earlier entries).
+
+**Three tickets close out of this and are now the live thread:**
+1. **PAPI-3738** (BE, Backlog) — Quality extras representation, the 5 missing authority
+   families, custom-role acceptance on the contacts PUT, deleted-role semantics, the
+   level→code blessing, and who may use `/api/roles` (the 403 Rishi hit). Until the 5
+   families land, those features' levels are localStorage-only.
+2. **PLT-3022** — remap the built-in roles to the same level→code mapping. It was
+   "blocked by PLT-1770"; **that block is now cleared.**
+3. Repo-wide **`js-yaml 4.3.0`** advisory (GHSA-5p4m-2wfm-xmqj) was still red at merge
+   time — merged anyway, so it remains an open CI-hygiene item for the repo, not for us.
+
+Sprint-ticket work for PLT-1770 is DONE. Next run: nothing to do here unless the flag is
+being enabled or PLT-3022 is picked up.
