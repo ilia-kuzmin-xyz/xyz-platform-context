@@ -479,3 +479,48 @@ in `git status` this run — but the "never `git add -A`" rule still stands.
    in the sprint (canvas cold-load caching + published reports as dashboard tabs) and it carries
    **three unanswered product questions** in its own description (who can publish, per-user vs
    shared tabs, tab-count cap). Worth answering before it becomes eligible.
+
+### ⛔ LATE IN THE RUN — a NEW repo-wide Trivy blocker appeared: `js-yaml` (PR #2109 raised)
+
+**This supersedes "CI green on both PRs" above.** Merging current `master` into both branches turned
+both red — and it is **master's problem, not ours**:
+
+```
+js-yaml  GHSA-5p4m-2wfm-xmqj  HIGH  fixed
+installed 4.3.0  →  fixed in 4.3.1, 3.15.1
+JS-YAML: Quadratic CPU consumption in !!omap resolution — CVE-2026-59870
+```
+
+**Scanner-only, verified per this file's own rule — check *which step* failed, don't assume.** On
+`bccd37c` the job steps were: step 6 `Build & Run Tests` **success**, step 9 Dashboard Progress
+Regression **success**, step 11 SonarQube **success**, step 12 Dependency check **success**, and
+**only step 13 `Vulnerability scanner` failed**. So the merge itself is sound; the tests really do
+pass on both merged trees.
+
+**Raised #2109** (draft) after confirming **no equivalent PR already existed** (searched open PRs for
+js-yaml / trivy / CVE / bump — none). Facts worth not re-deriving:
+
+- **`js-yaml` is NOT a direct dependency** — it is pinned by the **`overrides`** block in
+  `package.json`. An earlier grep of `package.json` made it *look* direct; it is line 320 of the
+  overrides object. Fix = raise the override floor `^4.3.0 → ^4.3.1`.
+- **Exactly one `js-yaml` entry** exists in the whole lockfile (single hoisted copy), so a one-entry
+  edit is the complete fix — no nested copies.
+- 4.3.1 changes **neither its deps** (`argparse ^2.0.1`) **nor its `bin`**; integrity hash was
+  **verified against the npm registry directly**, not trusted from install output.
+- **Do NOT regenerate the lockfile with `npm install --package-lock-only`** — the local npm strips
+  `libc` fields from ~30 optional platform packages, producing ~34 lines of unrelated churn. The
+  entry was hand-edited to 3 lines instead. Net diff: **4 lines, 2 files.**
+- **Did not bump to `latest` (5.2.3)** — major version, and this is a minimal unblock.
+
+⏳ **#2109 is in draft for exactly one reason: `.npmrc` `min-release-age=7`.** js-yaml 4.3.1 was
+published **2026-07-31T17:39Z**, so `npm ci` refuses it until **~2026-08-07T17:39Z** — later the same
+day this was raised. **This is the second time this exact buffer has gated a Trivy hotfix** (#2088 /
+brace-expansion was the first). **Next run: check the clock, re-run #2109's checks, and if green take
+it out of draft.** No code change should be needed.
+
+Both #2071 and #2087 were told on-thread that the red is not their diff, so a reviewer doesn't stall
+on it — this matters especially for #2071, where a human is being asked to re-approve.
+
+**Pattern worth naming for future runs:** a *new* HIGH advisory against a transitively-pinned package
+lands on master roughly weekly, and `min-release-age=7` guarantees a ~7-day window where the fix is
+known but uninstallable. Expect it; raise the draft PR immediately so only the un-drafting is left.
