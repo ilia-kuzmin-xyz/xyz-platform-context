@@ -200,3 +200,48 @@ shape is *for*: both offenders named in the mixed case, and the `MAX_NAMED_PROJE
    inferring from "my diff is fine" would have shipped it to CI.
 
 Final state: `2488648`, **19 tests green** across the three portfolio-weighting suites, tsc clean.
+
+## 2026-08-07 — APPROVED by Darminder, then dismissed by our own gap fix
+
+**Darminder approved #2071 on 2026-08-06 21:30 (`d33a39e`)** — *"Thanks for making those changes.
+Approved!"*. Both prior `CHANGES_REQUESTED` rounds are cleared; the `Promise.allSettled` diagnosis
+was right. The open product question from the last entry (mixed-weighting portfolio dead end) was
+never raised by him, so it stays a latent design question, not a blocker on this PR.
+
+**Jira has moved on:** PLT-2911 is now **Ready For QA, reassigned to Gennaro Boccia**, so it no
+longer appears in the sprint JQL. The PR is still open and still ours.
+
+### The "big gap in project settings" — diagnosed, and it was pre-existing
+
+His approval carried one note: *"there is now a big gap in the UI for project settings, it is in DEV
+as well"*. A parallel session pushed `9f9f3a2` two minutes later; this run **verified it instead of
+trusting it**:
+
+- Two back-to-back `<ModalDivider width='inherit' marginLeft='0' />` sat between the Country field
+  and the Timezone section in `GeneralTabEdit.tsx`.
+- `ModalDivider` (`ViewerPage/components/common/modal/modal.styles.tsx:65`) is a **zero-height div
+  whose only paint is `border-bottom`** — no height, no margin of its own.
+- Its parent `Details` (`GeneralTab.styled.tsx:58`) is `display:flex; flex-direction:column;
+  **gap:24px**`.
+- ⇒ the duplicate was **not** a second visible line, it was **an extra 24px of flex gap**. That is
+  the whole explanation for "big gap" rather than "double border", and it is why it looked like a
+  layout bug rather than a stray rule.
+- **Pre-existing on master** — both dividers are at `origin/master` lines **332/334**, verified by
+  reading the blob, which matches his "it is in DEV as well". Not caused by this PR.
+
+He explicitly said *"if its a quick change would be good to get in"*, so keeping the 2-line fix on
+this branch is sanctioned, not scope creep.
+
+### ⚠️ Lesson: fixing a reviewer's drive-by note costs you their approval
+
+`9f9f3a2` landed **after** the approval, so GitHub auto-dismissed it (review state `DISMISSED`) and
+**nobody is notified**. The PR then looks unreviewed while actually being approved-and-superseded.
+If a reviewer approves *with* a minor note, either batch the fix into a follow-up PR or expect to ask
+for a re-click — and always ask explicitly, because the dismissal is silent.
+
+### Checkpoint 3 — master merged, re-verified
+
+2 commits behind (`5cb9f8b`). Checked the 7 npm deps removed by `d9e8515` against this branch first:
+**zero imports**, so safe. Merged clean → `bccd37c`; **22 tests / 4 files green** on the merged tree
+(GeneralTabEdit, portfolio-weighting-guard, usePortfolioWeightings), run under **vitest**, not jest.
+CI green (`build` + SonarCloud).

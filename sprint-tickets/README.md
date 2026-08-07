@@ -377,3 +377,105 @@ gone from master, the next run should install and drive **vitest**, not jest.
 3. Re-run via `npm test` (vitest), not `npx jest`.
 4. `#2088` (Trivy/brace-expansion) is still valid and still needs an approval, but it is **no longer
    the only thing** standing between these PRs and green.
+
+---
+
+## 2026-08-07 — 0 eligible again (6th run); the gap Darminder flagged was real and pre-existing
+
+JQL returned **only two tickets** this run — the sprint has shrunk:
+
+| Ticket | Summary | Status | PR | Eligible? |
+|--------|---------|--------|----|-----------|
+| PLT-1770 | [Project Level] Create Custom Permissions | In Code Review | #2087 | ❌ |
+| PLT-3025 | Infinite Canvas: cold load time + published reports as dashboard tabs | Dev In Progress | — | ❌ |
+
+**PLT-2911 has left the sprint query** — it is now **Ready For QA, reassigned to Gennaro Boccia**
+(same trajectory PLT-2447 took). Its PR **#2071 is still open and still ours**, so the routine
+continues to own it under the harness's "PRs you created" rule even though the Jira ticket has moved
+on. Do not read its absence from the JQL as "finished".
+
+**Net: 0 eligible tickets for the sixth consecutive run. No development kicked off** — checkpoints
+1–3 only.
+
+### Checkpoint 1 — Darminder APPROVED #2071, and our own push dismissed it
+
+The headline the last entry could not have known: **DarminderA approved #2071 on 2026-08-06 21:30**
+(commit `d33a39e`) — *"Thanks for making those changes. Approved!"*. That clears the two standing
+`CHANGES_REQUESTED` rounds; the `Promise.allSettled` fix was the right diagnosis after all.
+
+His one caveat: *"there is now a big gap in the UI for project settings — it is in DEV as well. If
+its a quick change would be good to get in otherwise can do in another ticket."*
+
+**A parallel session had already pushed a fix (`9f9f3a2`) two minutes later. This run verified it
+rather than trusting it, and it is correct:**
+
+- `ModalDivider` (`ViewerPage/components/common/modal/modal.styles.tsx:65`) is a **zero-height
+  `div` whose only paint is `border-bottom`**.
+- The column it sits in — `Details` in `GeneralTab.styled.tsx:58` — is
+  `display:flex; flex-direction:column; **gap: 24px**`.
+- So the duplicated divider was **not** drawing a second line; it was adding an entire extra **24px
+  of flex gap** between Country and Timezone. That is why it read as a big empty band rather than a
+  double border. Fix = delete one (2-line diff).
+- **Confirmed pre-existing**, exactly as Darminder said: both dividers are on `origin/master` at
+  lines **332 and 334**. Nothing in PLT-2911 caused it — checked by reading master's blob, not by
+  inferring from the commit message.
+
+⚠️ **The gap-fix push auto-dismissed the approval** (review state is now `DISMISSED`). This is a
+trap worth remembering: *fixing the reviewer's own drive-by note costs you their approval*, and
+nobody is notified. Replied on the PR explaining the root cause and asking for a re-click.
+
+| PR | Open threads | Reviews |
+|----|--------------|---------|
+| #2071 | 0 (2 resolved) | Darminder **APPROVED → dismissed by `9f9f3a2`**; needs a re-click |
+| #2087 | 0 (3 resolved) | rishib-xyz `CHANGES_REQUESTED` standing — all 5 points replied to, awaiting re-review |
+
+**No new human feedback on #2087 since 2026-08-06 16:05.** Both of Rishi's rounds are answered
+(4 fixed + PAPI-3738 for the 403; then 403→toast + sonar). Deliberately did **not** ping him again.
+
+### Checkpoint 2 — CI green on both PRs, no blockers left
+
+`#2071`: `build` **success**, SonarCloud **success**. `#2087`: 2× `build` **success**, SonarCloud
+**success**. Every historic blocker is now gone from the repo — Trivy/brace-expansion merged to
+master as `b8fbaf0` (#2088 landed, so the "needs one approval" open item from 08-06 is **closed**),
+and master's vitest fallout was fixed in `08aaeab`. **No hotfix PR was needed or raised.**
+
+### Checkpoint 3 — both branches were 2 commits behind; merged, re-verified, pushed
+
+`origin/master` had moved to `5cb9f8b` (PLT-3029 webpack type-only re-exports, PLT-3026 removing 7
+npm deps). Neither branch was up to date.
+
+**Checked the risk before merging, not after:** `d9e8515` deletes `@mui/x-tree-view`,
+`jszip-utils`, `jwt-decode`, `lottie-react`, `react-stomp`, `react-tabs`, `react-tooltip`. Grepped
+both branches for imports of all seven — **zero hits on either**, so the removal is safe for us.
+
+Merged into both, no conflicts, and **ran the suites on the merged trees** (the standing
+"don't trust a clean merge" rule):
+
+- PLT-1770 → `295f8de` — **73 tests / 4 files green** (the four CustomPermissions suites)
+- PLT-2911 → `bccd37c` — **22 tests / 4 files green** (GeneralTabEdit + weighting-guard + hooks)
+
+### Local test harness — recipe still works, and it is now vitest
+
+The PLT-1770 recipe holds with one change: **drive `npx vitest run --config vitest.config.ts`, not
+jest** (master removed jest in `baced44`). Strip `@xyzreality/*` from `package.json`, then
+`npm install --legacy-peer-deps` (~1 min, 2215 packages), then **`git checkout package.json
+package-lock.json`** to restore before committing. `node_modules/` is gitignored and did not appear
+in `git status` this run — but the "never `git add -A`" rule still stands.
+
+### Open items needing a human
+
+1. **#2071 needs Darminder to re-click approve.** He already approved; our gap fix dismissed it.
+   This is the single cheapest action available and the PR is otherwise green with 0 open threads.
+2. **#2087 needs Rishi's re-review** — his `CHANGES_REQUESTED` is standing, but every point has been
+   answered and CI is green. Also awaiting his call on the two deliberately-kept sonar smells
+   (`handleCreateCompanyForUser(member)` ignoring its param, `handleCreateCompanyClick` unused).
+3. **PAPI-3738 point 5 still open with BE** — which authority gates the `ms/iam/api/roles` CRUD
+   family. Until named, a project admin sees the create button and gets a 403 (now a toast, not the
+   global modal).
+4. **Attribution-footer conflict, unchanged.** Harness mandates a Claude footer on every PR comment;
+   the standing user instruction is to keep Claude out of them. Harness wins for newly posted
+   content, so this run's #2071 comment carries it. Still needs a decision.
+5. **PLT-3025 is Dev In Progress with no PR and no local context folder.** It is the largest ticket
+   in the sprint (canvas cold-load caching + published reports as dashboard tabs) and it carries
+   **three unanswered product questions** in its own description (who can publish, per-user vs
+   shared tabs, tab-count cap). Worth answering before it becomes eligible.

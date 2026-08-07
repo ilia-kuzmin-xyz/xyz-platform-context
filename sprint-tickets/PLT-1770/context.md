@@ -1858,3 +1858,33 @@ work; I verified it end-to-end rather than trusting it:
   ignores its param (name implies it should pre-fill from the member = unfinished wiring) and
   `handleCreateCompanyClick` destructured-unused in TeamSliders:48. Asked him to confirm intent
   before deleting, since removing them hides the signal.
+
+## 2026-08-07 — quiet run: no new feedback, master merged, still awaiting Rishi
+
+**No new human comments or reviews on #2087 since 2026-08-06 16:05.** All three review threads are
+resolved; Rishi's `CHANGES_REQUESTED` is still standing but every one of his points (both rounds) has
+been answered. **Deliberately did not ping him again** — the PR is green and the ball is his.
+
+Still open with him: the two sonar smells left in on purpose
+(`handleCreateCompanyForUser(member)` ignoring its param, `handleCreateCompanyClick` unused) —
+awaiting his call on intent before deleting, since removing them hides the signal.
+
+Still open with BE: **PAPI-3738 point 5** — which authority gates the `ms/iam/api/roles` CRUD family
+(GET-by-id / POST / PUT / DELETE). Until named, a project admin sees the create button and gets a
+403, now surfaced as a toast rather than the app-wide modal.
+
+### Checkpoint 3 — master merged, re-verified → `295f8de`
+
+2 commits behind (`5cb9f8b`: PLT-3029 webpack type-only re-exports, PLT-3026 removing 7 npm deps).
+**Checked the dependency removal against this branch before merging** — none of
+`@mui/x-tree-view`, `jszip-utils`, `jwt-decode`, `lottie-react`, `react-stomp`, `react-tabs`,
+`react-tooltip` is imported here. Merged clean; **73 tests / 4 files green** on the merged tree.
+
+### Local harness update — the recipe is now vitest
+
+The recipe above still works, with one substitution: run
+`npx vitest run --config vitest.config.ts <path>`, **not jest** (master removed jest in `baced44`).
+Sequence that worked this run: strip `@xyzreality/*` from `package.json` →
+`npm install --legacy-peer-deps --no-audit --no-fund` (~1 min, 2215 packages) →
+**`git checkout package.json package-lock.json`** before committing anything. `node_modules/` stayed
+out of `git status` this time, but the "never `git add -A`" rule stands.
