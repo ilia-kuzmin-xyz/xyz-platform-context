@@ -1920,3 +1920,17 @@ needs a master-side bump. Flagged on the PR.
 **False alarm worth remembering**: our lockfile looked like it deleted 384 lines vs master —
 that was a STALE local `origin/master` ref; the deletions were master's own PLT-3026
 (7 unused deps). Always `git fetch origin master` before believing a lockfile diff.
+
+## 2026-08-07 — APPROVED by Rishi
+
+Rishi's review flipped changes_requested → **approved** ("LGMT, thanks for the changes!")
+after the round-3 fixes (`e6d9848`: single error surface + 403 wording). All five findings
+from his first round and both from his second are closed.
+
+**State: PR #2087 is code-complete and approved.** The only red is the repo-wide
+`js-yaml 4.3.0` advisory (GHSA-5p4m-2wfm-xmqj) — identical on master, not touched by this
+diff, needs a master-side bump to 4.3.1 exactly like brace-expansion/#2088. Trivy now
+reports `Total: 1`, i.e. that is the sole remaining blocker.
+
+Not merged: awaiting Ilia's explicit go-ahead (and realistically the js-yaml bump first,
+since the branch cannot go green without it).
