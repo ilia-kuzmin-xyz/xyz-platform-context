@@ -524,3 +524,39 @@ on it — this matters especially for #2071, where a human is being asked to re-
 **Pattern worth naming for future runs:** a *new* HIGH advisory against a transitively-pinned package
 lands on master roughly weekly, and `min-release-age=7` guarantees a ~7-day window where the fix is
 known but uninstallable. Expect it; raise the draft PR immediately so only the un-drafting is left.
+
+### ✅ CORRECTION, same run — `min-release-age` does NOT gate `npm ci`. #2109 is green and out of draft.
+
+**The entry immediately above is wrong on its central claim, and CI disproved it within twenty
+minutes. Read this before repeating that reasoning.**
+
+I claimed #2109 had to sit in draft until ~2026-08-07T17:39Z because `.npmrc` sets
+`min-release-age=7` and js-yaml 4.3.1 was published 2026-07-31. **That is not how it works:**
+
+- `min-release-age` constrains **version *resolution*** — i.e. `npm install`, when npm is choosing
+  which version satisfies a range.
+- **CI runs `npm ci`**, which installs **exactly what the lockfile pins** and does not re-resolve.
+  The buffer therefore never applies to it.
+- **Proof, not inference:** on #2109's very first run, with 4.3.1 already in the lockfile, step 6
+  `Build & Run Tests` **succeeded** (07:58:27 → 08:05:18), then step 13 `Vulnerability scanner`
+  **passed too**. Whole `PR Check` green, hours before the supposed buffer expiry.
+
+**#2109 is green, approved by rishib-xyz, and has been taken out of draft.** It only needs merging;
+once merged it clears the scanner red on every open PR.
+
+⚠️ **This also casts doubt on the 2026-08-06 account of #2088** (brace-expansion), which asserted the
+same mechanism — *"it now clears `.npmrc`'s min-release-age=7, the only reason it was parked"*. That
+explanation rests on the assumption just disproven. #2088 did go green after waiting, but **"it went
+green later" is not evidence that the buffer was what held it** — a re-run, a master merge or a
+Trivy DB refresh explains it equally well. Treat the #2088 rationale as **unverified**, not as
+established fact.
+
+**And disregard the "expect this weekly / ~7-day uninstallable window" pattern I wrote above** — it
+was generalised from the same wrong premise. The real, much simpler pattern is: a new HIGH advisory
+against a pinned transitive package lands on master periodically, and the fix is a lockfile bump that
+**can be applied and verified immediately**. There is no waiting period to plan around.
+
+**Standing lesson for this repo's notes:** the previous run wrote the min-release-age claim, this run
+repeated it as received wisdom and built a "pattern" on top, and it took a live CI run to catch it.
+Prefer *"this is what the run showed"* over *"this is how it works"* whenever a mechanism has not been
+tested directly.
