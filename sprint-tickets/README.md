@@ -560,3 +560,115 @@ against a pinned transitive package lands on master periodically, and the fix is
 repeated it as received wisdom and built a "pattern" on top, and it took a live CI run to catch it.
 Prefer *"this is what the run showed"* over *"this is how it works"* whenever a mechanism has not been
 tested directly.
+
+---
+
+## 2026-08-08 — the drought broke: 6 eligible tickets, all sent to Analysis, 0 kicked off
+
+**First run in seven with eligible work.** The board turned over completely: every ticket the
+previous six runs tracked (PLT-1770, PLT-2911, PLT-2935, PLT-2907, PLT-2447) has left the sprint
+query, and **their PRs #2071, #2087 and #2088 are all merged** — `origin/master` is now `4ad83a7`
+and carries PLT-1770's custom permissions as `30143ca`. The routine's PR-ownership backlog is
+effectively discharged.
+
+JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()` → **7 tickets**.
+
+| Ticket | Summary | Status in | Eligible? | Action |
+|--------|---------|-----------|-----------|--------|
+| PLT-2992 | Task library — create new Task | Open | ✅ | → Analysis In Progress + comment |
+| PLT-2993 | Task library — create new folder | Open | ✅ | → Analysis In Progress + comment |
+| PLT-2994 | Task library — drag and drop | Open | ✅ | → Analysis In Progress + comment |
+| PLT-3000 | Type Library — Asset Types | Open | ✅ | → Analysis In Progress + comment |
+| PLT-3002 | Type Library — System Types | Open | ✅ | → Analysis In Progress + comment |
+| PLT-2963 | Infinite Canvas — speed up generation | Open | ✅ | → Analysis In Progress + comment |
+| PLT-3025 | Infinite Canvas — cold load + dashboard tabs | Dev In Progress | ❌ | — |
+
+**All six eligible tickets went to `Analysis In Progress` with a clarification comment. Zero
+development kicked off.** Not caution for its own sake — each one has a named, evidenced blocker,
+and two of them would have produced throwaway work. Per-ticket detail is in the folders; the
+domain facts they share are in **`sprint-tickets/_shared-commissioning-domain.md`** (written once,
+so the next run doesn't re-derive them five times).
+
+### Grouping
+
+Two domains, as the stored prompt asks:
+
+- **A · Commissioning / Project Settings** — PLT-2992, 2993, 2994, 3000, 3002.
+  Note these are **Commissioning**, which hc-frontend's root `CLAUDE.md` puts *out of scope by
+  default*. Working them requires `touch .claude/commissioning-active` (branch names must be
+  `PLT-XXXX`, so the branch-name trigger can never fire for them).
+- **B · Infinite Canvas / agent pipeline** — PLT-2963 (and PLT-3025, ineligible).
+
+### The two findings worth the run on their own
+
+1. **PLT-3000 appears already shipped.** *"List all the Asset types, showing the number of assets
+   assigned and tasks against a type"* is exactly what the existing **Asset Types** tab does —
+   `AssetsTab` → `AssetListContent` with `initialView='assetTypes'`, whose group table already
+   carries name + asset count + **Tasks** count via `useReadinessTaskCountsByType`. A developer
+   working from the description alone would rebuild a shipped table. The residual ask looks like an
+   **IA restructure** ("Type library" parent with Assets/Systems children) — nothing named "Type
+   library" exists in the codebase.
+
+2. **PLT-2963 duplicates PLT-3025 almost line for line** — same baselines, same faster-MCP-schema
+   ask, same pre-warm ask, the same `schedules_schedule_revision_id → request_failed` note
+   verbatim, and the same acceptance criterion **including the unfilled `<target>` placeholder**.
+   PLT-3025 is already Dev In Progress. Suggested on-ticket: PLT-2963 keeps the *viewer/first-paint*
+   half, PLT-3025 keeps the *caching* half — they are independent and touch different code.
+
+### The structural blocker behind the whole Task library trio
+
+Folders in the Task library are **derived, not authored**: `groupChecklistsByType()` buckets each
+checklist under the asset type(s) it's linked to, with a synthetic `__unassigned__` bucket.
+PLT-2993 wants user-created folders; PLT-2994 wants to drag into them; PLT-2992's "+ Create new"
+menu contains *New Folder*. **All three wait on one product decision** — do user folders replace
+the asset-type grouping or coexist with it. Answering PLT-2993 unblocks the other two.
+
+Also new-to-the-model and unanswered: PLT-2992's **Task type** enum (Checklist / Functional
+Performance Test / Integrated System Test) has no field on `IChecklistDefinition`, and PLT-3002's
+**System type** has no data source at all (an asset carries one flat `system: string`).
+
+### ⚠️ A wrong claim I posted and corrected within the run
+
+On PLT-2994 I first wrote that *"the repo has no drag-and-drop library"* and that the ticket would
+have to bring one in. **False.** `@dnd-kit/core` ^6.3.1 is a direct dependency and is already used
+for a folder tree with DnD (`viewer-x/.../model-tree/hooks/use-drag-and-drop.tsx`) and inside the
+Project Settings modal itself (`AttributeTab/EditableAttributeList.tsx`). The Jira comment was
+**edited in place** to say so. Cause: grepping for the words `drag`/`dnd`/`sortable` in a truncated
+listing instead of grepping `package.json` for the package name. In the spirit of the 08-07 lesson
+— *prefer "this is what the run showed" over "this is how it works"* — the check is cheap, so do it
+before asserting an absence.
+
+### Checkpoints 1–3 — one PR left, and it is clean
+
+Open PRs in hc-frontend: **#2109 (ours)**, #2110 and #2111 (rishib-xyz), #1664 (piedukexyz, Jan,
+not ours). Only #2109 is the routine's.
+
+**#2109 `fix: bump js-yaml to 4.3.1`** — `mergeable_state: clean`, out of draft, base `4ad83a7`
+= current master (so checkpoint 3 is a no-op), **all three checks green** (2× `build`, SonarCloud),
+**zero open review threads**, approved by rishib-xyz. Nothing technical remains. **It needs one
+click to merge**; the routine did not merge it, since merging to master is not something to do
+unprompted.
+
+No CI hotfix PR was needed or raised this run.
+
+### Standing limitation, now hitting every ticket in the batch
+
+Five of the six tickets carry their real specification in **Jira media blobs and `claude.ai/design`
+prototypes that the runner cannot fetch**. Descriptions alone were enough to *triage* (the code
+comparison did the work), but they will not be enough to *build* pixel-accurate UI. If these
+tickets are meant to be delivered by this routine, the designs need to reach it some other way —
+exported PNGs attached to the ticket would do.
+
+### Open items needing a human
+
+1. **PLT-2993's folder-model question** — one decision unblocks three tickets (2992, 2993, 2994).
+2. **PLT-3000: is it just the IA restructure?** If yes it is the cheapest ticket on the board and
+   can start immediately. If no, say what's missing from the shipped table.
+3. **PLT-3002 needs a data model** for System types before any UI can be written.
+4. **PLT-2963 vs PLT-3025 duplication** — close one, or split them on the viewer/caching line.
+5. **`<target>` is unfilled** in the acceptance criteria of both canvas tickets.
+6. **#2109 needs merging.** Green, approved, clean, 4-line diff.
+7. **Attribution-footer conflict, unchanged from 08-04.** The harness mandates a Claude footer on
+   every GitHub comment and PR body; the standing user instruction is to keep Claude out of them.
+   No GitHub comments were posted this run, so nothing new carries it — but the conflict is still
+   undecided. (Jira is not affected: the stored prompt *asks* for Claude to be named there.)
