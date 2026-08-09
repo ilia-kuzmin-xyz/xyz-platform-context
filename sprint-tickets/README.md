@@ -672,3 +672,65 @@ exported PNGs attached to the ticket would do.
    every GitHub comment and PR body; the standing user instruction is to keep Claude out of them.
    No GitHub comments were posted this run, so nothing new carries it — but the conflict is still
    undecided. (Jira is not affected: the stored prompt *asks* for Claude to be named there.)
+
+---
+
+## 2026-08-09 (Sunday) — no-op run: nothing moved, and the silence is a weekend
+
+**Deliberately a short entry, because almost nothing changed.** Recording it so the next run can
+tell "nobody answered" apart from "nobody ran".
+
+JQL unchanged. Sprint composition **identical to 08-08**: PLT-2992, 2993, 2994, 3000, 3002, 2963 all
+still `Analysis In Progress`; PLT-3025 still `Dev In Progress` (ineligible).
+
+**Every one of the six clarification comments posted on 08-08 still has exactly one comment on the
+ticket — mine. Zero replies, zero status changes.**
+
+### The reading that matters: this is a weekend, not a stall
+
+08-08 was a **Saturday**, 08-09 is a **Sunday**. The six questions have been live for ~24h, all of
+it weekend. **Do not escalate on this, and do not re-post the questions** — a second identical nudge
+a day later is noise, and it would land on people who are simply not at work. The first working day
+these can be answered is **Monday 2026-08-10**; if they are still unanswered by the run *after*
+that, then it is a genuine stall and worth escalating.
+
+**No Jira comments were posted this run**, on purpose.
+
+### 0 tickets kicked off — same six blockers, re-checked not re-assumed
+
+Each was re-examined against the possibility of starting anyway. All five holds still hold:
+
+- **PLT-3000** is the tempting one — 8–9/10 confidence *if* the ask is only the IA restructure. But
+  it would mean renaming/absorbing a **shipped** flag-gated tab with the design prototype
+  unreachable. Silence over a weekend is not confirmation. Held.
+- **PLT-2963** would collide with **PLT-3025, which is actively Dev In Progress** — starting the
+  overlapping half is the one action here that could damage someone else's work in flight. Held.
+- **PLT-2992 / 2993 / 2994** still pivot on the single folder-model decision (2993 is the keystone);
+  guessing wrong throws away the work *and* breaks `useReadinessTaskCountsByType` on the Assets tab.
+- **PLT-3002** still has no data model for System types. Unbuildable, not merely unclear.
+
+### Checkpoints 1–3 — all clean, all no-ops
+
+`origin/master` is **still `4ad83a7`** (unmoved since 08-08), so checkpoint 3 is a no-op by
+definition — nothing to merge in.
+
+**#2109 `fix: bump js-yaml to 4.3.1`** is the routine's only PR and is unchanged: `state: open`,
+`mergeable_state: clean`, **not merged**, out of draft, base = current master, all 3 checks green
+(2× `build`, SonarCloud), **0 open review threads**, approved. Checkpoint 1 clean (no new feedback),
+checkpoint 2 clean (no failing build anywhere).
+
+⚠️ **It has now been sitting green and mergeable for two days.** It is not just ours: until it
+merges, the Trivy `Vulnerability scanner` red persists on **every open PR in the repo**, including
+rishib-xyz's #2110 and #2111. One click, 4-line diff. The routine does not merge to master
+unprompted — this needs a human.
+
+### Open items for a human (unchanged from 08-08 — reproduced so this entry stands alone)
+
+1. **PLT-2993's folder model** — one decision unblocks three tickets (2992, 2993, 2994).
+2. **PLT-3000: is it only the IA restructure?** If yes, cheapest ticket on the board, starts at once.
+3. **PLT-3002 needs a System-type data model** before any UI exists to write.
+4. **PLT-2963 vs PLT-3025 duplication** — close one, or split on the viewer/caching line.
+5. **`<target>` unfilled** in the acceptance criteria of both canvas tickets.
+6. **#2109 needs merging.**
+7. **Attribution-footer conflict still undecided** (harness mandates a Claude footer on GitHub posts;
+   standing user instruction is to keep Claude out of them). No GitHub posts were made this run.
