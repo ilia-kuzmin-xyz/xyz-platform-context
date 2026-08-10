@@ -271,3 +271,70 @@ Two capabilities we have never used, both free:
 **Lesson: read the tool schema before characterising a server as broken.**
 `client.get_tools()` exposes every parameter and its description; one call
 would have surfaced `simple`, the cursor, and delta sync on day one.
+
+---
+
+## 2026-08-07 — there IS a completeness signal: `lastFetchedIndexId == -1`
+
+An earlier entry claims *"Completeness needs `totalElements` or a second source
+— and mcp-dev provides neither."* **Wrong.** The cursor doubles as an
+end-of-data sentinel: the server returns `lastFetchedIndexId: -1` once there is
+nothing left. Verified by walking two endpoints to exhaustion:
+
+```
+PHOTOS               page1 2,474 rows  cursor=2413
+                     page2 1,474 rows  cursor=3413
+                     page3   474 rows  cursor=14894
+                     page4     0 rows  cursor=-1   -> 4,422 total, 20.4s
+ROOM CAPTURE POINTS  page1   547 rows  cursor=138159
+                     page2     0 rows  cursor=-1   ->   547 total,  2.9s
+```
+
+So **one call is enough to know whether a count is complete**: if the first
+response comes back with `lastFetchedIndexId != -1`, more rows exist and
+`recordCount` is a floor, not a total.
+
+`count_only` ignores this and reports `len(items)` as `total`. That is the
+whole reason the profile claims 7,534 issues for a 32,272-issue project, and
+2,474 photos when there are 4,422. The fix is client-side and free: check the
+sentinel, and either walk or label the number a lower bound.
+
+### `size` is ignored on every heavy endpoint (asked for 1 row)
+
+```
+photos        →   2,474 rows   3.5MB   12.7s
+360captures   →   7,364 rows   9.7MB   12.9s
+activities    → 109,952 rows  25.5MB   45.2s
+issues        →   7,534 rows  12.4MB   33.7s
+room_capture_points → 547 rows 0.2MB    1.6s   (complete — small enough)
+```
+
+### The metadata the pipeline actually needs is already cheap
+
+```
+schedules list (carries revision_id)  1.3s
+model artefacts (rooms/levels URLs)   1.5s
+project record                        1.4s
+issues_parameters (taxonomies)        1.7s
+activities_categories                 2.4s
+```
+
+Every irreplaceable thing phase 0b produces — the schedule revision id, the
+artefact URLs, the taxonomies — costs ~2s. The 147s is spent entirely on
+counts, and the counts are wrong.
+
+**Contention note:** measured alone these count calls take 12–45s; inside the
+real profile, where six probes fire concurrently at the same server, the same
+calls measured 132–151s. Firing them in parallel makes each one slower —
+parallelism is not helping here.
+
+### Tool-surface census (107 tools, read in full)
+
+- **No counts/summary endpoint exists.** The only `dashboard` tool is
+  portfolio-scoped.
+- **`fields` projection exists on 2 tools only** — `activities_activity_id_links`
+  and `activities_categories`. Not on any heavy domain endpoint.
+- **`simple`: 2 tools** (issues, issues_issue_id).
+- **`lastSyncDateTime`: 8 tools**, including photos and 360captures — delta sync
+  measured 1.3s / 1.4s returning 0 rows when nothing changed.
+- **`size` + `lastFetchedIndexId`: 23 tools** — the cursor is the house standard.
