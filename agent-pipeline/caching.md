@@ -153,3 +153,31 @@ Claude's report generation.
 report-reload path — now spilled (600s). Measured `mode:'hydrate'` (report
 reload, all four domains incl. 11.4MB issues): **1.7s end to end** warm;
 a TTL-expired domain re-pays its single mcp-dev fetch and re-spills.
+
+---
+
+## 2026-08-10 — snapshot + delta sync replaces TTL refetches
+
+The heavy list endpoints support `lastSyncDateTime` (rows modified since a
+timestamp, deletions flagged `isDeleted`). The cache design is now inverted:
+instead of re-downloading a domain whenever its TTL expires — and serving
+stale data in between — the disk holds ONE deduplicated snapshot per domain
+(`{"synced_at": epoch, "rows": [...]}`), and every read past T2 asks the
+server "what changed since?", merging by id. Weekly full re-baseline as a
+valve; failed deltas re-baseline immediately; issues add `simple: true`.
+
+| domain | old cold fetch | new cold | warm delta | rows |
+|---|---|---|---|---|
+| issues | 92–128s / 60.3MB | **41.9s / 10.1MB** | **2.4s** | 7,534 |
+| photos | ~20s / 6.2MB | 18.8s / 3.5MB | 1.8s | 2,475 |
+| 360captures | 30–46s / 41.6MB | **29.0s / 9.7MB** | **2.5s** | 7,364 |
+
+Disk for the three domains: 108MB → 23.3MB. Counts recorded by
+`remember_count` are exact entity counts. Freshness *improved*: after any T2
+miss the data is seconds behind the server, where the TTL design served up
+to 5–10-minute-old data and then paid a full refetch.
+
+Why the payloads shrank ~4x: see the 2026-08-10 pitfalls entry — the cursor
+walk had been concatenating overlapping pages, so every fetched byte and
+every count was ~4.3x inflated. The dedup fix is in `_call_tool_paginated`
+itself; the snapshot layer keeps it that way.
