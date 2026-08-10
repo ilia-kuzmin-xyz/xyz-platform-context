@@ -181,3 +181,12 @@ Live JQL fetch: `updated` still `2026-07-06T10:18:45+01:00`, comment count uncha
 stale now. The direct close-out recommended since 07-30 (five consecutive runs) still has not been
 posted — this is the same "recommended but not executed" pattern flagged on PLT-2858, now on two of
 the seven in-scope tickets.
+
+## Re-verified 2026-08-10 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-06T10:18:45+01:00`, comment count unchanged at 13, status still
+`With Customer`, resolution still `null`. **35 days stale.** The close-out recommendation has now
+stood unposted across eight consecutive runs (07-30 through today). Nothing left to diagnose — this
+is purely a "someone needs to click transition and paste the drafted comment" item. Included in this
+run's "needing human now" list alongside PLT-2858, though at lower urgency (Medium-ish administrative
+cleanup, not a live customer wait).

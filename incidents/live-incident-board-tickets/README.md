@@ -45,6 +45,77 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-10 — 6 tickets in scope (all Group A, Group B empty), 1 real update (PLT-2619/PLT-2935 blocker cleared), 5 confirmed unchanged, 1 corruption fix
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND statusCategory != Done`,
+then filtered against the standing exclusion list). **6 tickets in scope, all Group A** (`Open` /
+`In Analysis` / `With Customer`) — Group B empty. Set = the 08-07 run's 7 minus **PLT-3018** (→
+`With Technical Support`, out of scope) and **PLT-3023** (→ `READY FOR RELEASE`, out of scope) and
+**PLT-2917** (→ `Customer Release Check` via `Ready For QA`, out of scope — Group B is genuinely
+empty this run, not just unobserved). No brand-new tickets since 08-07.
+
+### ⭐ PLT-2619 — the one real update this run
+
+PR #2080 (PLT-2935, the sales-demo planned-% freeze) — flagged unresolved across every run from
+08-04 through 08-07 as "green, zero human reviews" — **merged 2026-08-05T19:31:49Z** (Rishi
+approved, Ilia merged). PLT-2935 itself is now `Ready For QA`, reassigned to Gennaro. Checked
+directly against the GitHub API this run rather than carried forward. This clears the family's only
+concrete engineering blocker; the one open item left in the whole PLT-2619/PLT-2935 family is the
+still-unanswered identity question to Mostafa (is `69e232b2c222e55fa039eab2` the same asset as
+"Mission Critical Dashboard"), unchanged since 08-04. Full detail:
+`PLT-2619-groupA-dashboard-migration/context.md` §2026-08-10; `recommended-action.md` updated to
+drop the now-moot PR-review nudge.
+
+### Repo hygiene (small, this run)
+
+`PLT-2909-groupA-progress-tracking/context.md` had two stray literal `</content>`/`</invoke>` lines
+baked into it (tool-call fragments from a past bad merge, per the same class of corruption the
+08-03 run found and partially cleaned elsewhere in this file's history) — removed; no content was
+touched.
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts
+checked against what the 08-07 run recorded — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3024](PLT-3024-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | 08-06 (Rishi's federation question) | 8 comments, unchanged; question now **4 days** unanswered; internal draft (code answer to Rishi) still unposted |
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 10 days unanswered — crosses this ticket's own ~1-week revisit threshold**; nudge drafted this run |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **8 consecutive runs** on the board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **35 days stale**, direct close-out still unposted across **8 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash thanked Ilia) | 16 comments, unchanged; genuinely with the customer's project-delivery team, not a stall on us |
+
+### Cross-ticket notes
+
+- **The "recommended but never posted" pattern is now eight runs deep on both PLT-2858 and
+  PLT-2815.** Both drafts already exist verbatim in each ticket's `recommended-action.md`; nothing
+  further needs drafting, only sending. This is the most consistent finding across the whole
+  routine's history — analysis has not been this board's bottleneck since at least 08-03.
+- **PLT-2909 has now crossed the revisit threshold its own history set** (see table above) — first
+  ticket this run where the light-pass finding itself changes the recommended action (confirm →
+  nudge), not just the staleness count.
+- **Review latency, flagged as an emerging pattern on 08-04, resolved itself on this one instance**
+  (PR #2080) within a day of that flag — worth noting as a data point against generalizing it into
+  a named pattern yet.
+
+### ⚠️ Attachments needing human — this run
+
+No new attachments on any of the 6 in-scope tickets. Prior gaps stand exactly as previously
+documented (PLT-3024's 3 screenshots, PLT-2858's 4 images, PLT-2815's 2 images + inline blobs,
+PLT-2649's 2 images, PLT-2909's 2 images — see each ticket's own §NEEDS HUMAN, not re-listed here).
+
+### Needing a human now
+
+1. **PLT-2858** — post the escalate-to-Pietro comment (drafted, unchanged, 8 runs unposted). Top
+   priority: Critical priority, 27 days of customer silence on a decision only Pietro/Mostafa can
+   make.
+2. **PLT-2909** — post the one-line nudge to Ali (drafted this run, 10 days unanswered).
+3. **PLT-2619** — post the identity question to Mostafa (drafted, unchanged since 08-04, now the
+   only open item in the family since the PR cleared).
+4. **PLT-2815** — execute the close-out (drafted, unchanged, 8 runs unposted). Lowest urgency of the
+   four — administrative, not a live customer wait.
+
+---
+
 ## Run: 2026-08-07 — 1 brand-new ticket deep-dived (PLT-3024), 1 left scope to QA (PLT-3023), 1 status-noise correction (PLT-3018), 5 confirmed unchanged, Pattern 5 promoted
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With

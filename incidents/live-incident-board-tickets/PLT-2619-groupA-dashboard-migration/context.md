@@ -413,3 +413,39 @@ Live JQL fetch: `updated` still `2026-08-03T15:13:28+01:00`, comment count uncha
 activity since the 08-04 run's own coverage of the Freshdesk Waiting-on-customer flip; Yash's live
 client question (content not visible here) is still open, and PR #2080 status was not re-checked
 this run (light pass, no `updated` movement to justify it).
+
+## ⭐ Re-verified 2026-08-10 — the family's one real blocker cleared; the identity question is now the only thing left
+
+**PLT-2619 itself: unchanged.** Live fetch: `updated` still `2026-08-03T15:13:28+01:00`, comment
+count still 6, status still `With Customer`. No new Jira activity on this ticket in a week.
+
+**PR #2080 (the thing every run since 08-04 flagged as "green, zero human reviews, blocked on
+approval alone"): resolved.** Checked directly against GitHub, not carried forward:
+- **Rishi Bhugobaun approved it 2026-08-05T16:32:59Z** ("LGTM"), and **Ilia merged it
+  2026-08-05T19:31:49Z** into `master` @ `9c14b90`. `merged: true`, `state: closed`.
+- **PLT-2935 moved accordingly**: status is now **`Ready For QA`** (was `In Code Review` as of
+  08-04), reassigned **Ilia Kuzmin → Gennaro Boccia** (QA), `updated = 2026-08-06T13:14:25+01:00`.
+  No new substantive comments — the 07-30 comment (108491, Ilia closing his own three questions,
+  switching the freeze from a hardcoded percentage to a date-cap) is still the latest content;
+  the status/assignee changes are what moved.
+
+**What this settles:** the planned-% freeze for the sales/demo project `69e232b2c222e55fa039eab2` is
+now code-complete and in QA — not merely "on a green PR" as every run from 08-04 through 08-07
+recorded it. The family's only concrete engineering work is essentially done. **This does not by
+itself resolve PLT-2619** — the single fact the whole ticket has hinged on since 07-30 (is
+`69e232b2c222e55fa039eab2` the same asset the client calls "Mission Critical Dashboard"?) is still
+unnamed anywhere in Jira, and Mostafa — identified 08-04 as the first named person who was looking at
+that project on screen — has still never been asked the drafted one-line question in
+`recommended-action.md`. That question is now the only open item in the entire family.
+
+**Also unchanged and still worth carrying:** the content of Yash's 08-03 message to the client on
+Freshdesk #6492 is still invisible from here; whether it's the same demo asset or a different one
+still determines whether PLT-2619 closes into PLT-2935 or reopens as separate work.
+
+### Confidence — 2026-08-10
+
+- **PR #2080 merged, PLT-2935 in QA:** 10/10 — read directly from the GitHub API, not inferred.
+- **"The engineering work in this family is functionally done, only the identity question and QA
+  sign-off remain":** 8.5/10 — up from 08-04's 6/10-ish framing (which still treated the PR as an
+  open risk).
+- Everything else carried forward unchanged from 08-04 (see that section above).

@@ -368,3 +368,8 @@ Live JQL fetch: `updated` still `2026-07-24T13:56:22+01:00`, comment count uncha
 waiting on project delivery to correct level `f0f4d409`'s elevation (50.4 → 0) in the source Revit
 model and re-upload — this is genuinely with the customer's side, not a stall on ours, so no draft
 action this run.
+
+## Re-verified 2026-08-10 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-24T13:56:22+01:00`, comment count unchanged at 16, status still
+`With Customer`. 17 days since hand-off, no reply yet. Still correctly parked — no action needed.

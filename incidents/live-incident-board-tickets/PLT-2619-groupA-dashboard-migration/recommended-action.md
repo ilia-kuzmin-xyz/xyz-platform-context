@@ -1,5 +1,22 @@
 # PLT-2619 — recommended action (DRAFT ONLY — execute nothing)
 
+> ## Revised 2026-08-10 — the PR nudge below is done; only the Mostafa question remains
+>
+> PR #2080 merged 2026-08-05 (Rishi approved, Ilia merged) and PLT-2935 is now `Ready For QA` —
+> confirmed directly against GitHub this run, see `context.md` §2026-08-10. **The "ask the four
+> reviewers to take PR #2080" message below (the 08-04 draft's second message) is no longer
+> needed — do not send it.** The Mostafa question is unaffected and is now the only open item in
+> the whole family:
+>
+> > Mostafa — the planned-% freeze you asked for is on project `69e232b2c222e55fa039eab2`, which is
+> > the id from the URL rather than a name. What is that project actually called? I need the name to
+> > check whether it's the same dashboard as a separate client request we have open (PLT-2619,
+> > "Mission Critical Dashboard"), so we don't end up doing the same demo twice.
+>
+> Still don't send anything to Yash or the client — he has his own open question out on Freshdesk
+> #6492 and its content is invisible from here (see `context.md`). Still don't close PLT-2619 until
+> the identity question is answered.
+
 > ## Revised 2026-08-04 — read this before using the 07-30 draft below
 >
 > **These are DRAFTS for human review. Nothing here has been sent, posted or executed, and no write

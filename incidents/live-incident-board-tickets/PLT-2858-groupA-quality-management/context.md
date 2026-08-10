@@ -324,3 +324,13 @@ Live JQL fetch: `updated` still `2026-07-31T13:27:32+01:00`, comment count uncha
 and **5 days** since the last nudge specifically. The escalate-to-Pietro recommendation has stood,
 unposted, across four consecutive runs (07-24, 07-30, 08-03, 08-04) on a Critical-priority ticket —
 see the "needing human now" note in this run's top-level summary.
+
+## Re-verified 2026-08-10 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-31T13:27:32+01:00`, comment count unchanged at 27, status still
+`In Analysis`, priority still `Critical`. Zero movement across three more runs (08-06, 08-07, and
+this one). **The escalate-to-Pietro draft has now stood unposted across eight consecutive runs**
+(07-24 / 07-30 / 08-03 / 08-04 / 08-05 / 08-06 / 08-07 / 08-10) on the board's only Critical-priority
+open item, and Mostafa's 107320 question to Darminder is now **27 days** unanswered. This is the
+single stalest loop on the board and the top item for the "needing human now" section this run — see
+`recommended-action.md` (draft unchanged; nothing new to add to the diagnosis, only urgency).

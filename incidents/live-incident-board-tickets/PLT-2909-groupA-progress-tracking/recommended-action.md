@@ -1,5 +1,21 @@
 # PLT-2909 — recommended action (DRAFT ONLY — execute nothing)
 
+## ⚠️ 2026-08-10 update — 10 days unanswered, the wait-threshold has now passed; nudge
+
+Nothing new to diagnose. Ali Seyedof still hasn't answered Yash's 07-31 "do you want me to move
+this to DPL?" — 10 days now, past the ~1-week revisit point this ticket's own history used on
+08-05/06/07 without escalating. Draft nudge (owner: Yash, addressee: Ali, cc Ilia):
+
+> @Ali Seyedof — following up on my 07-31 question: do you want this moved to DPL, or should we keep
+> tracking the metadata cross-write here? No pressure on the fix itself, just need to know where it
+> lives so we're not duplicating tracking.
+
+Why a nudge and not more: the mechanism is settled (9/10, PC-EXCEL importer cross-writing element
+rows into sibling buildings' metadata, confirmed project-wide on ATL08); the FE mitigation already
+rides on PLT-2882; the only open item is a routing question, not a diagnosis gap.
+
+---
+
 ## ⚠️ 2026-08-03 update — Ali engaged and answered with data, then a routing question stalled 3 days
 
 Since the 07-28 action below was drafted, the ticket moved forward materially (all captured in

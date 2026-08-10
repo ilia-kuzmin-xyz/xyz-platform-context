@@ -147,8 +147,8 @@ Yash, comment 1: *"when I tried to generate session id it gave me an error."* Th
 - **Sibling `PLT-2882-groupA-progress-tracking/`** — `context.md` (mechanism, 3-narrowing-sets), `investigation-log.md` (CONFIRMED root cause, `__linkDiagnose` tool, parquet-vs-geometry data, Revit-vs-Navisworks mapper note, 418-list). **PLT-2909 builds directly on it.**
 - `xyz-platform-context/dashboard/viewer-and-model.md` — confirms linking/selection is ViewerPage-only (Dashboard disables selection).
 - `xyz-platform-context/incidents/live-incident-playbook.md` — six-questions frame; "split signals into separate tracks"; "close on cause+trigger+cohort, not on works-now".
-</content>
-</invoke>
+
+*(Editorial note, 2026-08-10: removed two stray literal `</content>`/`</invoke>` lines that had been baked into this file by a prior merge — tool-call fragments, not content. Nothing else on this file was touched.)*
 
 ---
 
@@ -237,3 +237,12 @@ Live JQL fetch: `updated` still `2026-07-31T13:51:53+01:00`, comment count uncha
 "do you want me to move this to DPL?" to Ali Seyedof is now **5 days unanswered** (asked 07-31). Not
 yet at the ~1-week revisit threshold this ticket's own history uses, but close — worth a nudge on the
 next run if Ali still hasn't replied.
+
+## Re-verified 2026-08-10 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-31T13:51:53+01:00`, comment count unchanged at 11 (Jira status
+field shows `Open`, matching the current board sweep). **Yash's "do you want me to move this to
+DPL?" to Ali Seyedof is now 10 days unanswered** — this crosses the ~1-week revisit threshold this
+ticket's own history flagged on 08-05/08-06/08-07 without anyone acting on it. No re-diagnosis
+performed; the mechanism (PC-EXCEL cross-write, confirmed) is unchanged. **Recommending a nudge now**
+— see `recommended-action.md`.

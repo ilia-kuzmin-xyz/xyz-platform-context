@@ -210,3 +210,14 @@ customer.
   the code does; choosing between H1/H2/H4 needs ML9 data unavailable from this repo, and the
   single most load-bearing fact on the ticket (same absence on PowerBI) currently points away from
   every pure-frontend mechanism found.
+
+## 9. Re-verified 2026-08-10 (light pass, this run)
+
+Live fetch: 8 comments (unchanged), `updated = 2026-08-07T13:41:13+01:00`, status still `With
+Customer`. Nothing beyond the four Freshdesk auto-sync flips already recorded — no human reply.
+Rishi's 08-06 federation question is now **4 days unanswered**. The internal draft in
+`recommended-action.md` (code-side answer to Rishi's own question) still hasn't been posted. Also
+confirmed this run: **PLT-2918 is merged** (the destructive category-mapping save bug — best
+available lead for the "packages/disciplines missing a couple of days ago" side detail) — its own
+ticket is now `Ready For QA`, consistent with the fix landing 08-05 as this file already recorded.
+Still nothing ML9-specific to confirm it. No re-diagnosis performed; nothing material changed.
