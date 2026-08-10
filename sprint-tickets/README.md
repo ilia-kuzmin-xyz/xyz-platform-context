@@ -734,3 +734,76 @@ unprompted — this needs a human.
 6. **#2109 needs merging.**
 7. **Attribution-footer conflict still undecided** (harness mandates a Claude footer on GitHub posts;
    standing user instruction is to keep Claude out of them). No GitHub posts were made this run.
+
+---
+
+## 2026-08-10 (Monday) — still 0 replies, but the run bought something: PLT-2963's FE half is now code-traced
+
+JQL unchanged. **Sprint composition identical to 08-08 and 08-09** — PLT-2992, 2993, 2994, 3000,
+3002, 2963 all `Analysis In Progress`; PLT-3025 still `Dev In Progress` (ineligible).
+
+**All six clarification comments from 08-08 still have exactly one comment each — mine. Zero
+replies, zero status changes, third run running.** Verified per ticket via `fields:["comment"]`,
+not inferred from `updated` timestamps.
+
+Today is the **first working day** since the questions were posted (08-08 Sat, 08-09 Sun). Run
+fired 07:40 UTC — i.e. 08:40 BST, as people arrive. Per the 08-09 note, that makes today the
+earliest point a stall could even be diagnosed, so this run escalated **to Ilia by notification**
+rather than re-posting on the tickets. **No nudge comments were posted** — a second identical ask
+a day later is noise.
+
+### 0 tickets kicked off — blockers re-checked against code, not inherited
+
+The holds from 08-08/08-09 all still stand and are unchanged. What changed is **PLT-2963**, where
+this run stopped comparing descriptions and read the actual code. Full write-up with line numbers
+in `PLT-2963/context.md` (2026-08-10 entry). Headline:
+
+- The *"nothing else on screen for ~55s"* symptom is **`ArtifactPanel.tsx:407`** — while
+  `viewerMapping` is null, the **entire dashboard** is replaced by the `ViewerLoading` skeleton,
+  not just the viewer block.
+- The mapping is **deliberately not persisted** with the session and is refetched on restore
+  (`useCanvas.ts:2082-2099`), because — per the comment there — it is **"~8MB"**.
+- **That rationale is stale.** Both canvas tickets say the mapping is now **2.46MB (was 9.37MB)**.
+- Therefore, of the three fixes the ticket floats, **"persist the mapping with the session" is the
+  only one that fits the existing invariants** ("mount Sandpack exactly once"; the mapping is a
+  static JSON import that Sandpack won't re-run on `updateFile`, documented at
+  `ArtifactPanel.tsx:395-406`). *"Mount the viewer separately"* would need two Sandpack instances;
+  *"pre-warm on project open"* is a mitigation that leaves the gate in place.
+- Confidence on the **FE/viewer half** accordingly moves **7/10 → 9/10**, still gated on the
+  duplication answer plus one small storage question (mapping is per-*project*, sessions are
+  per-*user*).
+
+This was posted to PLT-2963 as an **additive technical note** (not a re-ask) — it narrows what
+product has to decide and reduces the chance of an answer that can't be built.
+
+### Checkpoints 1–3 — all clean, all no-ops (third run running)
+
+`origin/master` **still `4ad83a7`**, unmoved since 08-08 → checkpoint 3 is a no-op by definition.
+
+Open PRs in hc-frontend: **#2109 (ours)**, #2110 + #2111 (rishib-xyz), #1664 (piedukexyz, Jan).
+
+**#2109 `fix: bump js-yaml to 4.3.1`** — unchanged since 2026-08-07T17:20Z: `state: open`,
+`mergeable_state: clean`, **not merged**, out of draft, base = current master, **all 3 checks
+green** (2× `build`, SonarCloud), **APPROVED by rishib-xyz**, no `CHANGES_REQUESTED`, Copilot's
+review generated **0 comments**. Checkpoint 1 clean (no new feedback anywhere), checkpoint 2 clean
+(no failing build anywhere). **0 open review threads across all our PRs.**
+
+⚠️ **#2109 has now been green, approved and mergeable for 3 days.** Until it merges the Trivy
+`Vulnerability scanner` red persists on **every open PR in the repo**, including rishib-xyz's #2110
+and #2111. 4-line diff, one click. The routine does not merge to master unprompted.
+
+### Open items for a human (unchanged + one new)
+
+1. **PLT-2993's folder model** — one decision unblocks three tickets (2992, 2993, 2994).
+2. **PLT-3000: is it only the IA restructure?** If yes, cheapest ticket on the board, starts at once.
+3. **PLT-3002 needs a System-type data model** before any UI exists to write.
+4. **PLT-2963 vs PLT-3025 duplication** — close one, or split on the viewer/caching line. Now
+   backed by code: the two halves touch different files and layers.
+5. **`<target>` unfilled** in the acceptance criteria of both canvas tickets.
+6. **#2109 needs merging.**
+7. 🆕 **PLT-2963 storage question:** persist the 2.46MB mapping **per-session** (simplest, but N
+   users on a project each carry a copy) or **per-project** alongside the hydration records? One
+   line unblocks the implementation.
+8. **Attribution-footer conflict still undecided** (harness mandates a Claude footer on GitHub
+   posts; standing user instruction is to keep Claude out of them). No GitHub posts were made this
+   run, so nothing new carries it.
