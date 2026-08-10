@@ -807,3 +807,70 @@ and #2111. 4-line diff, one click. The routine does not merge to master unprompt
 8. **Attribution-footer conflict still undecided** (harness mandates a Claude footer on GitHub
    posts; standing user instruction is to keep Claude out of them). No GitHub posts were made this
    run, so nothing new carries it.
+
+---
+
+## 🎉 2026-08-07, end of run — ALL THREE PRs MERGED. Both sprint tickets are done.
+
+**Everything above describing #2071 and #2087 as open and awaiting review is now historical.**
+Do not chase them; do not push to `PLT-2911` or `PLT-1770` again.
+
+| PR | Ticket | Merged as | Jira now |
+|----|--------|-----------|----------|
+| #2071 | PLT-2911 | `5657efc` | **Ready For QA**, Gennaro Boccia |
+| #2087 | PLT-1770 (+PLT-2926, PLT-2927) | `30143ca` | **Ready For QA**, Gennaro Boccia |
+| #2109 | (CI hotfix, js-yaml CVE) | `71fb6ef` | n/a |
+
+All three merged within ~3 hours of this run starting. **Both Jira transitions were done by a human**
+— the routine did not need to move either ticket.
+
+### What actually unblocked them
+
+The sequence matters, because it is the template for the next stuck PR:
+
+1. #2071 had a **dismissed approval** nobody could see (our own gap fix invalidated Darminder's
+   approve). Asking for the re-click explicitly is what moved it.
+2. Both PRs then went **red on a CVE that was master's, not theirs** — diagnosed as scanner-only by
+   reading the step list, hotfixed repo-wide in #2109, and **said so on both threads** so neither
+   reviewer stalled on a red check that wasn't their diff.
+3. #2109 was approved and merged within ~40 minutes of being raised.
+
+### ⚠️ Trap hit at the very end — do not repeat it
+
+After #2109 merged, the obvious next move was "merge the new master into both branches so they go
+green." **That was wrong, and git caught it:** merging master into `PLT-1770` produced content
+conflicts in five `CustomPermissions/*` files — *our own new files*. The reason is that **#2087 had
+already been squash-merged to master**, so master and the branch held the same code with unrelated
+history.
+
+**A content conflict in a file only your branch created is a strong signal your PR already merged.**
+The merge was aborted and the local `PLT-2911` master-merge reset — **nothing was pushed to either
+branch.** Per the harness rule, a merged PR is finished: never stack new commits on its history.
+
+Verified the work really landed rather than trusting the "merged" label: master's
+`GeneralTabEdit.tsx` now has **one** `ModalDivider` where it had two (the gap fix), and master
+carries the full `CustomPermissions/` tree. The only remaining branch↔master differences are files
+**master deleted** in #2105's dead-code sweep (`SliderHeader.tsx`, `useUserList.ts`,
+`useUserSelection.ts`, `NewDisciplineForm.tsx`) — expected, not our work going missing.
+
+### Carried forward — still open, now on the merged code
+
+These did **not** disappear when the PRs merged:
+
+1. **PAPI-3738 point 5** — which authority gates the `ms/iam/api/roles` CRUD family. Until BE names
+   it, a project admin sees the create button and gets a 403 (now a toast, not the global modal).
+   This is live on master behind the `CustomPermissions` flag (default **off**).
+2. **Two sonar smells** Rishi never ruled on — `handleCreateCompanyForUser(member)` ignoring its
+   param, and the unused `handleCreateCompanyClick`. Both merged as-is.
+3. **Custom permission levels are still per-browser** (localStorage), because IAM has no rank on its
+   authority nodes. `readProjectLevels()` is the migration input and `levelsAreLocalOnly` is the flag
+   to flip once PAPI-3717 lands. **This is the single biggest known gap in what shipped.**
+4. **The mixed-weighting dead end** (PLT-2911): a portfolio that already contains mixed weightings
+   blocks every new project, escapable only by aligning projects the user may not be able to touch.
+   Pietro's rule as written; never raised by QA. Worth watching now it is in QA's hands.
+
+### Next run: the sprint is empty of actionable work
+
+With both tickets at Ready For QA, the only ticket left is **PLT-3025** (Dev In Progress, no PR) —
+see `PLT-3025/context.md` for its framing, traps and the three unanswered product questions. Expect
+the next JQL to return little; check for newly-assigned tickets rather than assuming the same set.
