@@ -338,3 +338,66 @@ parallelism is not helping here.
 - **`lastSyncDateTime`: 8 tools**, including photos and 360captures — delta sync
   measured 1.3s / 1.4s returning 0 rows when nothing changed.
 - **`size` + `lastFetchedIndexId`: 23 tools** — the cursor is the house standard.
+
+---
+
+## 2026-08-10 — the cursor pages OVERLAP; "32,272 issues" was the artifact, not the truth
+
+This corrects three earlier entries at once, including two of their
+"corrections". Measured live with per-page dedup tracking:
+
+```
+ISSUES (simple=true)                     PHOTOS
+page 1: 7,534 rows  NEW ids 7,534        page 1: 2,475 rows  NEW 2,475
+page 2: 6,534 rows  NEW ids     0        page 2: 1,475 rows  NEW     0
+page 3: 5,534 rows  NEW ids     0        page 3:   475 rows  NEW     0
+...each page 1,000 fewer, zero new...    page 4:     0 rows  cursor -1
+page 9:     0 rows  cursor -1
+concatenated: 32,272 — UNIQUE: 7,534     concatenated: 4,425 — UNIQUE: 2,475
+```
+
+**Page 1 contains the ENTIRE dataset.** Every subsequent cursor call re-serves
+everything after a cursor that advances ~1,000 rows per hop; all duplicates
+are byte-identical. `lastFetchedIndexId` on this server is a resume-point for
+sync, not a page boundary.
+
+What that invalidates:
+
+- *2026-08-05 / 08-06 / 08-07 entries*: the project holds **7,534 issues**,
+  not 32,272. The original profile number was right; the "corrected truth"
+  was overlapping pages concatenated — and then "verified" against a second
+  run of the same broken walk. There is no ~7.5k response cap: one call
+  returned all 7,534 issues (and the activities endpoint returned 109,952
+  rows in one response).
+- *2026-08-07 sentinel entry*: "first response cursor != -1 ⇒ more rows
+  exist" is FALSE — issues page 1 carried a live cursor while already holding
+  everything. The only reliable end-of-data signals are a page that
+  contributes **zero new rows**, or the empty page with cursor -1 after it.
+- **Every count downstream was ~4.3x inflated in shipped reports**: issue
+  totals and severity breakdowns, capture counts, per-room 360 coverage in
+  the room-readiness rollup. Payloads carried the same 4.3x in dead weight
+  (issues 60.3MB for a 10MB dataset). Stale spills and count sidecars were
+  purged; snapshots rebuilt deduplicated.
+
+Client fixes shipped (`_call_tool_paginated` + `data_cache`):
+
+1. The cursor walk dedupes rows by content and STOPS the first time a page
+   contributes nothing new (2 calls instead of 9).
+2. Issues/photos/360captures moved to **snapshot + delta sync**: one full
+   baseline on disk, then `lastSyncDateTime` deltas merged by id with
+   `isDeleted` honoured, 120s clock-skew margin, weekly full re-baseline.
+   Issues send `simple: true` (drops fileReferences + activityCategories).
+
+Measured after the fix (same project):
+
+```
+                cold baseline          warm delta (no changes)
+issues          41.9s  7,534 rows      2.4s
+photos          18.8s  2,475 rows      1.8s
+360captures     29.0s  7,364 rows      2.5s
+disk footprint  23.3MB (was 108MB)
+```
+
+Lesson: **row counts from a paginated walk are not evidence until the ids are
+deduplicated.** "The second run returned the same number" is worthless when
+both runs share the bug.
