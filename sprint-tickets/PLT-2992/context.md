@@ -28,3 +28,42 @@ Integrated System Test. Save → task lands in the Task library list **without a
 ## Confidence
 **4/10** as written — high once (1) and (4) are answered; the builder work is already done.
 Answer **PLT-2993 first**, it gates the menu.
+
+---
+
+## 2026-08-11 — blocker (4) is GONE; this is now one answer from being built
+
+**Status unchanged (`Analysis In Progress`), but the shape of the hold changed completely.**
+
+### What resolved
+Blocker (4) was *"the + Create new split menu is shared with PLT-2993"*. PLT-2993 shipped in
+**PR #2116** and the menu exists: `TaskLibraryTab.tsx:273` — *"+ Create new opens a small menu
+(New task / New folder)"*, `data-testid='tasks-tab-create-menu'`. Combined with what was already
+there (builder-in-modal, full palette incl. inputField + signature, save-to-root), **every part of
+this ticket except `taskType` is now built.**
+
+### ⚠️ Correction that makes the remaining part bigger
+The 08-08 entry inherited the claim that commissioning is localStorage-backed. **It is not, and was
+not then.** `checklist-library-service.ts` reads `task_template` / `task_item` through
+`commissioningDataClient` — verified at `4ad83a7`, the very commit the old comment cited.
+
+Consequence: `taskType` is **a column on `task_template` + a backfill of existing rows**, not a
+client-side field. `IChecklistDefinition` today is
+`{ id, name, description, items, version, folderId, createdAt }` — confirmed on the PLT-2994 branch.
+
+### The one thing that blocks it
+Not the enum values (those are in the ticket) but **the migration semantics**:
+1. Behaviour-bearing or label-only in v1?
+2. **What do existing definitions backfill to, and is the column nullable or required-on-save?**
+
+(2) is the hard stop — a guess writes wrong data into live dev rows across every project. This is
+the reason the 08-11 run shipped no code despite the ticket being otherwise ready.
+
+3. Separately: FacilityGrid importer reads `CHECKLIST TYPE` and discards it
+   (`ChecklistImport.utils.ts`). Mapping needs someone who's seen real FacilityGrid values; can
+   follow as its own slice.
+
+Posted as comment **109343**.
+
+## Confidence — updated
+**8/10** (was 4) the moment (1) and (2) are answered. The work itself is small and well understood.

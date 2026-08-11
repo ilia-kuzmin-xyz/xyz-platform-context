@@ -34,3 +34,25 @@ flat "Asset Types" tab. Nothing named "Type library" exists in the codebase (gre
 ## Confidence
 **5/10** overall — but **8–9/10 if the answer to (1) is "yes, just the IA"**, since the table is
 reused as-is. Cheapest ticket in the batch to unblock.
+
+---
+
+## 2026-08-11 — PR #2115 exists (opened by the 08-10 afternoon run, unrecorded until now)
+
+**[#2115](https://github.com/XYZReality/hc-frontend/pull/2115) — draft, green, base `master`.**
+Jira moved to `Dev In Progress` by Ilia at 08-10 11:00 UTC, *after* the PR appeared.
+
+- Replaces the flat **Asset Types** tab with a **Types** tab + *Asset types / System types*
+  segmented control. System types = empty state, deliberately left as PLT-3002's landing spot.
+- Drill-in replaces the whole tab body **including** the segmented control (modal drill-in rule).
+- **Real bug fixed:** the list counted types *from assets*, so a catalogue type with nothing
+  assigned never appeared. `countByField` now takes catalogue names and lists them at zero —
+  264 catalogue rows on dev, so not hypothetical.
+- 19 files, +482/−347. `tsc --noEmit` clean, 42 suites / 694 tests pass.
+
+**Checkpoints:** 0 review threads · 3/3 checks green · master `9617872` is an ancestor. Four
+reviewers requested (TomMasdinXYZ, DarminderA, rishib-xyz, SergiuszXYZ), **none has responded**.
+
+⚠️ **Scope flag raised in the PR body, still unticketed:** §2's create/rename/delete and all of
+§3–§6 (type detail, edit mode, review-and-save sheet, post-save effects) are the bulk of the
+feature and no ticket covers them. Raise before Types is assumed nearly done.

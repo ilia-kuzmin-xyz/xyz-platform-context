@@ -874,3 +874,103 @@ These did **not** disappear when the PRs merged:
 With both tickets at Ready For QA, the only ticket left is **PLT-3025** (Dev In Progress, no PR) —
 see `PLT-3025/context.md` for its framing, traps and the three unanswered product questions. Expect
 the next JQL to return little; check for newly-assigned tickets rather than assuming the same set.
+
+---
+
+## 2026-08-11 — the drought is over: 3 PRs exist. And I corrected a wrong fact I'd published on 3 tickets.
+
+**The single most important thing for the next run: the 08-10 *morning* entry above is not the
+whole of 08-10.** A later run that same day built and PR'd three tickets and **never wrote it
+down here**. This run discovered them on GitHub, not in these notes. If you read only the
+08-10 entry you will conclude, wrongly, that nothing has been built.
+
+| Ticket | PR | Base | State |
+|--------|----|------|-------|
+| PLT-3000 | [#2115](https://github.com/XYZReality/hc-frontend/pull/2115) | `master` | draft, green |
+| PLT-2993 | [#2116](https://github.com/XYZReality/hc-frontend/pull/2116) | `master` | draft, green |
+| PLT-2994 | [#2117](https://github.com/XYZReality/hc-frontend/pull/2117) | **`PLT-2993`** (stacked) | draft, green |
+
+All three were created 2026-08-10 10:54–10:55 UTC as `ilia-kuzmin-xyz`. **Ilia then moved all
+three Jira tickets `Analysis In Progress → Dev In Progress` himself at 11:00 UTC** — five minutes
+after the PRs appeared, i.e. the transition *followed* the PRs. Confirmed from the changelog, not
+inferred. So "Dev In Progress" here means "a PR exists", not "a human is typing".
+
+### ⚠️ The correction — I published a wrong fact on PLT-2992, PLT-2993 and PLT-3002
+
+On 08-08 all three clarification comments asserted commissioning was **"localStorage-only,
+per-browser, no REST backend"**. On PLT-2993 it carried real argumentative weight:
+
+> *"folders created by one person won't be visible to anyone else on the project — if that's not
+> acceptable, it's a BE dependency, not a FE one."*
+
+**That was false when it was written.** Verified against the tree at `4ad83a7` — the exact commit
+those comments cite — `checklist-library-service.ts` was already importing `commissioningDataClient`
+and reading `task_template` / `task_item`. `assetRegisterService` likewise. The Supabase client
+landed in `ec30214` (PLT-2936), well before.
+
+**Commissioning is Supabase-backed and has been for some time.** Tables in play: `asset`,
+`asset_type`, `task_template`, `task_item`, `task_folder`. Corrections posted to all three tickets
+this run.
+
+**Why this cost something:** it invented a BE dependency that did not exist, on a ticket whose
+whole question was whether folders should be shared. Anyone reading PLT-2993 could reasonably have
+parked it on that basis. **Do not repeat the pattern — check the service file before asserting
+where data lives.** The old "localStorage MVP" line is stale across `_shared-commissioning-domain.md`
+and several ticket contexts; treat any occurrence of it as suspect.
+
+### Checkpoints 1–3 — all clean, verified per PR
+
+- **CP1 (feedback):** #2115 → 0 threads. #2117 → 0 threads. #2116 → 3 Copilot threads, **all
+  resolved and replied** by the 08-10 run (two disagreed-with and defended: the `create()`/`update()`
+  name-trim; one accepted and fixed: optimistic cache append so the new folder row renders before
+  the refetch). `get_reviews` checked too — **no `CHANGES_REQUESTED` anywhere**, only Copilot
+  `COMMENTED` plus our replies. **0 open threads across all three PRs.**
+- **CP2 (CI):** 9/9 checks green (2× `build` + SonarCloud per PR). Sonar quality gate passed,
+  0 new issues.
+- **CP3 (freshness):** `origin/master` is now **`9617872`** (moved `4ad83a7 → 5cb9f8b → 9617872`;
+  head is PLT-3035, Supabase env from the platform profile). `git merge-base --is-ancestor` says
+  9617872 is an ancestor of **all three** branches. Nothing to merge, no conflicts.
+
+**No human has reviewed any of the three yet** — 4 reviewers requested on #2115, none responded.
+Nothing has touched them since 2026-08-10 17:33 UTC.
+
+### 0 new tickets kicked off — and this time it is one answer away, not five
+
+Eligible (not blocked / Dev In Progress / Code Review): **PLT-2992, PLT-3002, PLT-2963**, all
+`Analysis In Progress`. **Still zero replies to any clarification, fourth run running.**
+
+**PLT-2992 is the one that moved.** Its blocker (4) — *"the + Create new split menu is shared with
+PLT-2993, can't build until the folder model is settled"* — **is now resolved**: #2116 shipped the
+menu (`TaskLibraryTab.tsx:273`, `data-testid='tasks-tab-create-menu'`, New task / New folder). The
+builder, palette and root-save were already there. **Everything this ticket describes is built
+except `taskType`.**
+
+But `taskType` got *harder*, not easier, once the localStorage error was corrected: it is a **new
+column on `task_template` plus a backfill of every existing row**, not a client field. So the
+blocking question is now specifically *"what do existing definitions backfill to, and is the column
+required?"* — guessing writes wrong data into live dev rows across every project. **That is the
+line I would not cross, and it is why this run shipped no code.** Confidence: **8/10 the moment
+that one line is answered.**
+
+**PLT-3002** gained a landing spot — #2115's Types tab has an Asset types / System types segmented
+control, System types deliberately rendering an empty state so this ticket fills it rather than
+restructuring the tab twice. IA question answered. **Core blocker unchanged and still fatal:** no
+`System` entity, no system↔task link, flat `system: string` on the asset. **2/10.**
+
+**PLT-2963** — untouched this run, no change since the 08-10 code trace. Still held on the
+PLT-3025 duplication + the unfilled `<target>` + the per-user-vs-per-project storage question.
+
+### Open items for a human
+
+1. 🔴 **PLT-2992: two lines unblock a nearly-finished ticket** — is `taskType` behaviour-bearing or
+   a label in v1, and what do existing rows backfill to?
+2. 🔴 **Three green draft PRs have had no human review since Monday.** #2115 requested four
+   reviewers and got none. Nothing technical is in the way of any of them.
+3. **PLT-3002 needs a System data model** before its empty state can be filled.
+4. **PLT-2963 vs PLT-3025 duplication** — still unanswered since 08-08.
+5. **`<target>` still unfilled** in both canvas tickets' acceptance criteria.
+6. **PLT-3000's own PR flags unticketed scope:** §2 create/rename/delete and all of §3–§6 (type
+   detail, edit mode, review-and-save) are not covered by any ticket and are the bulk of the
+   feature. Worth raising before Types is assumed nearly done.
+7. **Runs must write their work down here.** The 08-10 afternoon run did not, and this run spent
+   its opening minutes rediscovering three PRs from GitHub.

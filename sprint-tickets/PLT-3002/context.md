@@ -27,3 +27,32 @@ of any kind.
 ## Confidence
 **2/10.** Cannot be implemented without a data model. Also note: whatever is decided, the store
 would be another **localStorage, per-browser** one until a commissioning BE exists.
+
+---
+
+## 2026-08-11 — the UI shell now exists; the data model still doesn't
+
+### What resolved
+**The IA question (my point 4) is answered.** PLT-3000's PR **#2115** replaced the "Asset Types"
+tab with a **Types** tab carrying an *Asset types / System types* segmented control. System types
+renders an **empty state on purpose**, so this ticket fills it rather than restructuring the tab a
+second time. The tab is `Types`; drill-in replaces the whole tab body including the control.
+
+### ⚠️ Correction
+The 08-08 entry said commissioning is localStorage-backed and "we'd be inventing the store as
+well". **Wrong.** Commissioning is on real tables via `commissioningApi` — `asset`, `asset_type`,
+`task_template`, `task_item`, `task_folder`. A `system` / `system_type` table would follow an
+existing pattern rather than being invented. This *helps* the ticket, but doesn't unblock it.
+
+### Unchanged and still fatal
+No `System` entity. No "System type" concept. Asset carries a flat `system: string`
+(`asset-register-service.types.ts`). Nothing links a task to a system —
+`readinessTaskService` links tasks to **asset types** only. Questions 1–3 (first-class entity vs
+rename · where systems come from · how a task attaches) all decide the table shape; guessing means
+a migration to undo.
+
+Posted as comment **109344**.
+
+## Confidence — unchanged
+**2/10.** The UI shell is no longer part of the work, which shrinks the ticket, but the blocker was
+never the UI.

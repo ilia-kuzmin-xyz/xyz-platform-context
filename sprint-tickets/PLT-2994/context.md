@@ -28,3 +28,18 @@ words "drag"/"dnd".**
 
 ## Confidence
 **3/10** while PLT-2993 is open; **7–8/10** afterwards, since the DnD pattern is already in-house.
+
+---
+
+## 2026-08-11 — PR #2117 exists, stacked on PLT-2993
+
+**[#2117](https://github.com/XYZReality/hc-frontend/pull/2117) — draft, green.**
+⚠️ **Base is `PLT-2993-task-library-folders`, not `master`** — #2116 must be reviewed and merged
+first. Do not retarget it at master while #2116 is open.
+
+Drag-and-drop of tasks into folders, on top of the real folder model from #2116
+(`ChecklistLibrary.moveToFolder` + the `useTaskFolders` move mutation). Uses `@dnd-kit/core`,
+already a dependency and already the house pattern (viewer model-tree, `EditableAttributeList`).
+
+**Checkpoints:** 0 review threads · 3/3 checks green · master `9617872` is an ancestor of the
+branch. No human review yet.
