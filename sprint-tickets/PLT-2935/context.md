@@ -186,3 +186,10 @@ Location category-mapping Save bug, web viewer, PR #2078). Every detail of the r
 project `69e232b2c222e55fa039eab2`, dashboard page, planned progress frozen — is **PLT-2935**, whose
 title carries that exact project id. Both are `Ready For QA` and both assigned to Gennaro, which is
 the likely source of the mix-up. Instructions went on PLT-2935.
+
+**Correction, same day:** comment **109352 was deleted by Ilia** shortly after posting — too long /
+over-engineered. The ticket is back to 0 comments. A ~330-word rewrite (same substance, no tables,
+no pipeline explanation) is drafted and awaiting his go-ahead; nothing is on the ticket right now.
+The two parts worth keeping in any rewrite are the **slider comparison** (the only way QA can tell
+a working freeze from a broken one on a fixed replay snapshot) and the **URL-keying heads-up**
+(otherwise they file a false bug).
