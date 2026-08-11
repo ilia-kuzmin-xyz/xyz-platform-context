@@ -45,6 +45,96 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-11 — 1 brand-new ticket deep-dived (PLT-3033), 6 confirmed unchanged, Group B still empty
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
+Technical Support", "Ready For QA", "In QA", "In Code Review", "READY FOR RELEASE", "Done", "Blocked",
+"ARCHIVED (NOT RELEASED)", "Customer Release Check") ORDER BY created DESC`). **7 tickets in scope,
+all Group A** (`Open`/`In Analysis`/`With Customer`) — Group B empty, same as every run to date. Set
+= the 08-10 run's 6 (PLT-3024, PLT-2909, PLT-2858, PLT-2815, PLT-2649, PLT-2619) **plus PLT-3033**
+(new, created 08-10 11:29 — same day as the 08-10 run but apparently after its own JQL snapshot, same
+missed-by-a-few-hours shape as PLT-3024 on 08-06/08-07).
+
+### PLT-3033 — new this run (data-pipeline)
+
+**"Extra Parent WBS on Webviewer and inflation of unmapped activity count," WI1 B11, Major, assigned
+Darminder Atker.** Customer re-uploaded a 2nd-Aug schedule and now sees (a) an extra parent WBS node
+in the Web Viewer tree not present in the source XER, and (b) the "unmapped activities" warning count
+jump from <1000 to >2,500, disproportionate to the "only a few hundred" real changes they made.
+**Two separate WBS/schedule code paths exist in hc-frontend**: a client-side XER preview parser with a
+real, untested bug — on a missing parent reference it silently promotes the orphan row to root
+(`schedule-parser.ts:246-262`) and has **no `proj_id` scoping anywhere**, so a multi-project XER
+export would merge every project's rows into one tree — but that parser's output has **no callers
+into persistence** (`updateScheduleInDb` is dead code for the real upload flow), so it is an
+architectural analog, not a proven culprit. The actual render path (`scheduler-service/utils.ts`)
+is a faithful renderer with no synthesis logic (`recurring-defect-patterns.md` Pattern 2). The
+"unmapped activity count" is a category-mapping concept (not model-linking), and WBS rows are
+explicitly excluded from it (`schedule-entity.ts:322-324`) — so the two symptoms aren't directly
+causal through the count formula, but a single upstream cause (multi-project merge, or parent-loss
+breaking existing activities' mapping-identity match) could still produce both. **The real XER
+ingest is backend-side, outside this repo** — this repo cannot go further without either the actual
+XER file or the backend ingest code, and the investigation says so explicitly rather than guessing.
+Confidence 4/10 overall (lower than most tickets on this board, specifically because the mechanism
+sits outside this repository's reach, not from a shallow pass). **Attachments are broken for
+everyone, not just this agent** — the assignee (Darminder) already confirmed in-thread that the
+description's three images never loaded for him either; this needs a re-send, not different
+credentials. Drafted action: ask the customer to re-attach the images **and** send the XER file they
+offered but nobody took up — the file settles the leading hypothesis in one query. Full findings:
+`PLT-3033-groupA-data-pipeline/context.md` + `recommended-action.md`.
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment`/`updated` checked against
+what the 08-10 run recorded — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3024](PLT-3024-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-06 (Rishi's federation question) | 10 comments (2 new, both confirmed Freshdesk auto-sync noise, no human reply); question now **5 days** unanswered |
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 11 days unanswered** |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **9 consecutive runs** on the board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **36 days stale**, direct close-out still unposted across **9 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash thanked Ilia) | 16 comments, unchanged; genuinely with the customer's project-delivery team, not a stall on us |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged; identity question to Mostafa still the only open item in the family |
+
+### Cross-ticket notes
+
+- **PLT-3024's "Freshdesk noise" pattern recurred exactly, on the same day PLT-3033 was created** —
+  both tickets got a same-morning `Waiting on customer` → `Open` flip-pair from the automation with
+  zero human content, right around 08-10 11:29-11:34. Reinforces the existing rule: treat these as
+  noise, not as new activity, when judging staleness.
+- **The "recommended but never posted" pattern is now nine runs deep on both PLT-2858 and PLT-2815.**
+  Both drafts already exist verbatim in each ticket's `recommended-action.md`; nothing further needs
+  drafting, only sending. Consistent with every run since 08-03: analysis is not this board's
+  bottleneck, posting is.
+- **PLT-3033 is a genuinely new incident shape for this board** — the first ticket whose root-cause
+  investigation is structurally blocked by the mechanism living entirely outside this repository (no
+  Java backend code for XER ingest exists in hc-frontend). Worth watching whether other
+  schedule-re-upload tickets hit the same repo-boundary wall; if so, it may be worth a standing note
+  in `recurring-defect-patterns.md` that schedule-ingest incidents need backend involvement earlier
+  than most other domains on this board.
+
+### ⚠️ Attachments needing human — this run
+
+**PLT-3033** — a different failure mode from every prior ticket's "403/unreadable" gap: the three
+description images never actually uploaded to Jira (`attachment: []`, broken `blob:` placeholders),
+confirmed unreadable by the human assignee too, not just this agent. Needs a re-send, not different
+credentials. The customer's offered-but-unclaimed XER file is the higher-value ask — see
+`recommended-action.md`. No new attachments on the 6 carried-over tickets this run; prior gaps stand
+exactly as previously documented.
+
+### Needing a human now
+
+1. **PLT-2858** — post the escalate-to-Pietro comment (drafted, unchanged, 9 runs unposted). Top
+   priority: Critical priority, 28 days of customer silence on a decision only Pietro/Mostafa can
+   make.
+2. **PLT-2909** — post the one-line nudge to Ali (drafted 08-10, now 11 days unanswered).
+3. **PLT-2619** — post the identity question to Mostafa (drafted, unchanged since 08-04, the only
+   open item left in the family since the PR cleared).
+4. **PLT-2815** — execute the close-out (drafted, unchanged, 9 runs unposted). Lowest urgency —
+   administrative, not a live customer wait.
+5. **PLT-3033** — new this run: get Matthew to re-send the broken images and, more importantly, the
+   XER file he offered; drafted message in `recommended-action.md`.
+
+---
+
 ## Run: 2026-08-10 — 6 tickets in scope (all Group A, Group B empty), 1 real update (PLT-2619/PLT-2935 blocker cleared), 5 confirmed unchanged, 1 corruption fix
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND statusCategory != Done`,
