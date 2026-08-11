@@ -334,3 +334,11 @@ this one). **The escalate-to-Pietro draft has now stood unposted across eight co
 open item, and Mostafa's 107320 question to Darminder is now **27 days** unanswered. This is the
 single stalest loop on the board and the top item for the "needing human now" section this run — see
 `recommended-action.md` (draft unchanged; nothing new to add to the diagnosis, only urgency).
+
+## Re-verified 2026-08-11 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-31T13:27:32+01:00`, comment count unchanged at 27, status still
+`In Analysis`, priority still `Critical`. **The escalate-to-Pietro draft has now stood unposted
+across nine consecutive runs** (07-24 through today); Mostafa's 107320 question to Darminder is now
+**28 days** unanswered. No re-diagnosis performed — nothing left to investigate, only to post.
+Remains top of the "needing human now" list.

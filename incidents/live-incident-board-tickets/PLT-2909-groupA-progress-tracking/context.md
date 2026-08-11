@@ -246,3 +246,10 @@ DPL?" to Ali Seyedof is now 10 days unanswered** — this crosses the ~1-week re
 ticket's own history flagged on 08-05/08-06/08-07 without anyone acting on it. No re-diagnosis
 performed; the mechanism (PC-EXCEL cross-write, confirmed) is unchanged. **Recommending a nudge now**
 — see `recommended-action.md`.
+
+## Re-verified 2026-08-11 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-31T13:51:53+01:00` — bit-for-bit identical, confirming zero new
+Jira activity since 08-10 (any comment or field change bumps `updated`). **Yash's question to Ali is
+now 11 days unanswered.** No re-diagnosis performed. The drafted nudge in `recommended-action.md`
+(08-10) still hasn't been posted.

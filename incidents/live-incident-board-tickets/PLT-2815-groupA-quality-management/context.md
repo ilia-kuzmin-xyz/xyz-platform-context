@@ -190,3 +190,9 @@ stood unposted across eight consecutive runs (07-30 through today). Nothing left
 is purely a "someone needs to click transition and paste the drafted comment" item. Included in this
 run's "needing human now" list alongside PLT-2858, though at lower urgency (Medium-ish administrative
 cleanup, not a live customer wait).
+
+## Re-verified 2026-08-11 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-06T10:18:45+01:00`, comment count unchanged at 13. **36 days
+stale.** Close-out recommendation unposted across nine consecutive runs. No re-diagnosis performed —
+nothing left to diagnose, only to execute.

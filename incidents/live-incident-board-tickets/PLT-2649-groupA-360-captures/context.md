@@ -373,3 +373,9 @@ action this run.
 
 Live fetch: `updated` still `2026-07-24T13:56:22+01:00`, comment count unchanged at 16, status still
 `With Customer`. 17 days since hand-off, no reply yet. Still correctly parked — no action needed.
+
+## Re-verified 2026-08-11 (light pass, this run)
+
+Live fetch: `updated` still `2026-07-24T13:56:22+01:00`, comment count unchanged at 16. 18 days since
+hand-off, still no customer reply. Genuinely with the customer's project-delivery team — no action
+needed.

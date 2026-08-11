@@ -221,3 +221,15 @@ confirmed this run: **PLT-2918 is merged** (the destructive category-mapping sav
 available lead for the "packages/disciplines missing a couple of days ago" side detail) — its own
 ticket is now `Ready For QA`, consistent with the fix landing 08-05 as this file already recorded.
 Still nothing ML9-specific to confirm it. No re-diagnosis performed; nothing material changed.
+
+## 10. Re-verified 2026-08-11 (light pass, this run)
+
+Live fetch: 10 comments total (2 new since the 08-10 pass), `updated = 2026-08-10T11:34:14+01:00`.
+**Both new comments are Freshdesk auto-sync noise** (`109259` Waiting-on-customer, `109260` Open,
+both timestamped 2026-08-10T11:34, one second apart) — the same bare-flip pattern this file already
+documents four times over on 08-06/08-07, not a human reply. Status in the live board sweep reads
+`Open` right now purely because of where that flip-pair landed; not a real reopen. **No human
+content since Rishi's 08-06 09:16 federation question — now 5 days unanswered.** No re-diagnosis
+performed; nothing material changed. The internal draft answering Rishi's own question
+(`recommended-action.md`) still hasn't been posted — now the second-longest-unposted draft on the
+board after PLT-2858's escalation.

@@ -449,3 +449,11 @@ still determines whether PLT-2619 closes into PLT-2935 or reopens as separate wo
   sign-off remain":** 8.5/10 — up from 08-04's 6/10-ish framing (which still treated the PR as an
   open risk).
 - Everything else carried forward unchanged from 08-04 (see that section above).
+
+## Re-verified 2026-08-11 (light pass, this run)
+
+Live fetch: `updated` still `2026-08-03T15:13:28+01:00`, comment count still 6, status still `With
+Customer`. No new Jira activity on this ticket. The identity question to Mostafa (is
+`69e232b2c222e55fa039eab2` "Mission Critical Dashboard"?) is still the only open item in the family
+and is still unposted — carried forward unchanged from 08-04/08-10. PLT-2935's QA status not
+re-checked this run (light pass, no `updated` movement on PLT-2619 to justify the extra lookup).
