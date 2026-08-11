@@ -149,3 +149,40 @@ screenshotted figure it's a one-constant change.
 - ~~Once green, PR is ready to come out of draft~~ — **done later on 2026-08-01**: PR is out of draft,
   build+test green, one Copilot review round handled. Remaining open item is unchanged and is Ilia's
   call: **confirm the frozen-date constant `2026-07-24`** against Mostafa's screenshot.
+
+---
+
+## 2026-08-11 — QA test instructions posted (comment 109352)
+
+PR #2080 merged 2026-08-05. Ticket is `Ready For QA`, assigned to Gennaro Boccia; instructions
+written for **Gennaro + Radu Vulpe**.
+
+**The observable that makes this testable without dev tools** (derived from the implementation, not
+from the ticket): the fix pins the date the planned series resolves at to **`2026-07-24`**, so —
+
+> Planned % with the slider at today **must equal** Planned % with the end date dragged to
+> 24 Jul 2026. If the freeze is off, the today figure is higher.
+
+That single comparison is the pass/fail. Everything else in the instruction is setup.
+
+### ⚠️ The trap QA will hit, called out in the comment
+The freeze is keyed on the **Mongo project id in the URL** (`FROZEN_PLANNED_PROGRESS_BY_PROJECT`
+in `frozen-planned-progress.ts`), *not* the Postgres UUID. On a Rewind replay the tester sits on a
+**staging** project id and Rewind rewrites **API calls, not the route param** — so the freeze
+silently never fires and looks like a bug.
+
+Two routes offered, in order: (1) navigate staging to `/projects/69e232b2c222e55fa039eab2/dashboard`
+with the replay session active — the app reads the id off the URL, so the freeze should fire;
+(2) fall back to a local `yarn start` with the staging id temporarily added to the map.
+**Route (1) is untested — it's the obvious quick win but nobody has confirmed staging will load a
+project id that doesn't exist there.** If QA reports it doesn't load, that's expected, not a defect.
+
+Also flagged as expected-not-bugs: the trend chart's planned line is deliberately **not** frozen,
+and variance/SPI drift favourably over time as actual climbs against fixed planned.
+
+### Ticket-number note
+This work was requested against **PLT-2918**, which is a different ticket entirely (AUS01 WBS
+Location category-mapping Save bug, web viewer, PR #2078). Every detail of the requested test —
+project `69e232b2c222e55fa039eab2`, dashboard page, planned progress frozen — is **PLT-2935**, whose
+title carries that exact project id. Both are `Ready For QA` and both assigned to Gennaro, which is
+the likely source of the mix-up. Instructions went on PLT-2935.
