@@ -163,3 +163,79 @@ existing Unassigned bucket was reused. The code has since grown the dedicated co
 `system` and `system_type` exist on **neither** database. DDL + RLS + rationale:
 `hc-frontend/docs/commissioning/system-types-schema.md`. Same tables the Systems
 stack needs — create once, for both.
+
+---
+
+## 2026-08-12 (end of run) — #2138 state, and the blocker to clear first
+
+**#2116 + #2117 were combined into #2138** (`PLT-2993/PLT-2994`, base `master`).
+**#2115 + #2134 → #2136** (`PLT-3000/PLT-3002`). #2135 (PLT-2992) unchanged.
+
+### CI on #2138 — converging, not green
+| sha | failures | passing |
+|---|---|---|
+| `73e5b26` | 13 | 4048 |
+| `ad34d2e` | 6 | 4076 |
+| `fb0902c` | **5** | 4077 |
+
+Every fix so far was a **confirmed** root cause, all one theme: PLT-2993's tests were
+written when the task detail **replaced** the list. After merging master's PLT-2914
+restyle it is an absolutely-positioned **overlay that covers** it, so everything behind
+stays mounted. Three symptoms:
+1. `queryByTestId('tasks-tab-action-bar'/'tasks-tab-search')).not.toBeInTheDocument()`
+   — still present. Rewritten to assert covering.
+2. `getByText(<task name>)` — name is on screen **twice**, throws
+   `getMultipleElementsFoundError`. Scope with `within(detail)`.
+3. testid drift: `tasks-tab-search-clear` → master's `tasks-search-clear` (11 refs).
+
+Plus one **genuine logic bug** caught by a new test: `groupChecklistsByFolder` only
+dropped folders emptied by the SEARCH term, never by the task-KIND filter, though its
+own comment claimed "not while filtering". The kind filter arrived from master
+separately and was never wired in. Fixed by broadening to any active narrowing while
+keeping empty folders visible when nothing filters (or a new folder vanishes before it
+can be named).
+
+### The 5 that remain — do NOT guess at these
+One is `TaskLibraryTab.test.tsx` "lists checklists newest-first": `items[0]` passes,
+`items[1]` fails, meaning either a 3rd element matches `/^task-item-/` or only one
+rendered. Undiagnosable from the CI log.
+
+**A strong suspect for some of the rest is `task-folder-service.test.ts`, written blind
+in this run.** If `InMemoryCommissioningClient` ignores `order` in `select`, the
+creation-order assertion fails; if `update` returns no rows, the rename assertions fail.
+Check that file first — it may be self-inflicted, not merge fallout.
+
+Sonar also went **0 → 6 new issues** on `fb0902c` (gate still passes). Unreviewed; the
+new test files are the likely source.
+
+### ⛔ The blocker that made all of this slow
+`npm ci` fails in the routine's environment: **401 on `@xyzreality/dhtmlx-gantt`** from
+`npm.pkg.github.com` — the session token has no `read:packages`. So **not one test can
+be run locally** and every verification costs a ~5-minute CI round trip. Two bugs
+(`ViewerTextField` crash, the ugly rename field) reached the branch and were found by
+Ilia running the app, not by any check available here.
+
+**Fix this before the next implementation run**: provide an `NPM_TOKEN` with
+`read:packages`. It is worth more than any amount of extra static checking.
+
+### Static checks that DO help (keep using them)
+- unused-import scan, and — added this run — the **reverse** check: every
+  `<Capitalised>` JSX element resolves to an import or local definition. The reverse one
+  is what catches the `StyledMenu` / `ViewerTextField` class of merge breakage; the
+  unused-import direction cannot see it.
+
+### Drag-and-drop — the real fix is a port, not patches
+Both reference implementations use **`@dnd-kit/core`, already a dependency**:
+- `EditableAttributeList.tsx` (Attributes tab) — `useDraggable`/`useDroppable`,
+  `PointerSensor` with `activationConstraint {distance:3, tolerance:5}`, custom
+  collision detection falling back to a `root-dropzone` on near-misses, 20px
+  anti-flicker threshold.
+- `model-tree/hooks/use-drag-and-drop.tsx` — same sensors plus `KeyboardSensor`, and
+  **spring-loaded folders** (1200ms hover opens them).
+
+The task library uses **native HTML5 DnD**, which is why manual testing reported
+"~85% fine, sometimes hard to drop". Copilot independently found one piece (the
+"Move to top level" zone cleared its highlight on any `dragleave`, strobing as the
+pointer crossed its own icon/label — now guarded). The rest is inherent to HTML5 DnD.
+**Porting to `@dnd-kit` is the fix**, and would also supply the missing keyboard route.
+Awaiting Ilia's go-ahead as its own PR.
