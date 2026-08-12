@@ -69,6 +69,13 @@ xyz-platform-context/
     project-data-cache.md ← PDC: frontend T2 cache (5 min, per-project)
     pitfalls.md          ← Known gotchas
     planning/            ← canvas-specific design docs + DONE archives
+  commissioning/         ← Commissioning domain (flag-gated MVP)
+    README.md            ← domain overview, code map, current state + blockers
+    data-layer.md        ← Supabase/PostgREST bridge: envs, RLS, table census
+    pitfalls.md          ← Known gotchas
+    design-legacy.md     ← design-token reuse plan
+    review-and-plan.md   ← historical: the 2 Jul 2026 senior review
+    planning/            ← in-flight schema/feature plans
   agent-pipeline/        ← Agent Pipeline domain (backend, XYZ_AgentPipeline/)
     README.md            ← overview, file map, how to run
     phases.md            ← PHS: 0a resolve / 0b profile / 0c clarifier / 1+2 compose+hydrate

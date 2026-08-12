@@ -19,6 +19,7 @@ Aimed at **developers joining the project** and **AI copilots** that need archit
 | Dashboard Page | [dashboard/](dashboard/) | In-browser analytics + 3D viewer replacing PowerBI |
 | Canvas Page | [canvas/](canvas/) | AI chat interface — natural-language → streaming TSX dashboards |
 | Agent Pipeline | [agent-pipeline/](agent-pipeline/) | FastAPI backend for the Canvas: phases, SSE, MCP tools, caching |
+| Commissioning | [commissioning/](commissioning/) | Flag-gated MVP: asset register, checklists, 3D linking, handover readiness — on a temporary Supabase bridge |
 
 > Add new domains as folders here. Each domain gets a `README.md` and topic files.
 
