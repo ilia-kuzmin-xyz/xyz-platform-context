@@ -45,6 +45,108 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-12 — 1 brand-new ticket deep-dived (PLT-3040), 1 left scope (PLT-3033 → With Technical Support), 6 confirmed unchanged, new candidate defect pattern
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
+Technical Support", "In QA", "Done", "READY FOR RELEASE", "Customer Release Check", "Blocked",
+"ARCHIVED (NOT RELEASED)") ORDER BY created DESC`). **7 tickets in scope, all Group A**
+(`Open`/`In Analysis`/`With Customer`) — Group B empty, same as every run to date. Set = the 08-11
+run's 7 minus **PLT-3033** (→ With Technical Support, out of scope) plus **PLT-3040** (new, created
+08-11 19:22, same evening as the 08-11 run but after its own JQL snapshot — same missed-by-a-few-
+hours shape as PLT-3033 on 08-10 and PLT-3024 on 08-06/08-07).
+
+### PLT-3040 — new this run (progress-tracking)
+
+**"UG electrical displayed more than once in dashboard," CH08-Minooka, Major, assigned Darminder
+Atker, reported same evening by Yash, zero human comments yet.** Customer reports a package "UG
+electrical" listed twice — once under discipline CSA, once under Electrical — with "nothing mapped"
+under the Electrical branch. **Verified this is not corrupt data on its own**: the package-id
+resolver's own regression test uses this exact CSA/Electrical/"UG Electrical" shape as its fixture
+(`dashboard-filter-service.resolver.test.ts:9-18`) — packages are keyed by id precisely because
+names repeat, a design decided by PLT-2821. The real defect is that the *empty* branch is displayed
+at all: the progress panel matches each category to its parquet row by id **or by bare
+`CategoryName`, unscoped by discipline** (`use-progress-panel-data.tsx:253-259`); a package with
+nothing mapped has no parquet row (`progress-queries-v2-api.ts:577`, zero-weight rows dropped at
+`:601-606`), so it falls through the name fallback and renders wearing **CSA's own numbers** instead
+of disappearing. An independent, structurally identical leak exists one layer over in the filter
+panel via a flat, discipline-agnostic `mappedPackages` name set (`dashboard-filter-utils.ts:57,86`).
+Both are the unfinished half of PLT-2821, which converted selection to ids but left the data joins
+matching on names. Falsifiable in one look at the (currently unrecoverable) screenshot: H1 predicts
+the two rows show identical planned/actual/variance figures. A documented alternate mechanism,
+PLT-2918-style destructive category-mapping save (H4, 3/10), would mean the Electrical package once
+had real mappings and lost them — re-map, don't delete, if so. **The discriminating check needs no
+customer input at all**: count Package categories named "UG electrical" on CH08 and their mapping
+counts via the Data Mapping panel — this can run in parallel with chasing the image, not gated on
+it. Confidence 6/10 the mechanism above is what's actually happening (8/10 the defect itself is
+real, whichever ticket it's found on). New candidate defect pattern promoted to
+`recurring-defect-patterns.md` (single occurrence — see below). Full findings, five ranked
+hypotheses, and the drafted internal comment (mechanism + the one check, addressed to Darminder,
+plus a secondary re-send ask to the customer via Yash):
+`PLT-3040-groupA-progress-tracking/context.md` + `recommended-action.md`.
+
+### PLT-3033 — left scope this run, naming why per the standing rule
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-3033** | With Technical Support (was Open) | Transitioned 08-11 15:22, no new Jira comment attached — the 08-11 run's own drafted ask (re-send the broken images and, more importantly, the XER file) was apparently acted on outside Jira (Freshdesk/direct contact), or the transition was made in anticipation of asking. Either way this now reads as the drafted action having landed, not as a stall. No re-investigation needed; folder left as `-groupA-` per the PLT-2874/PLT-2906 precedent (transitioned out mid-flight, not resolved). |
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts and
+`updated` timestamps checked byte-for-byte against what the 08-11 run recorded — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3024](PLT-3024-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-06 (Rishi's federation question) | 10 comments, unchanged; question now **6 days** unanswered |
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 12 days unanswered** |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **10 consecutive runs** on the board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **37 days stale**, direct close-out still unposted across **10 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash thanked Ilia) | 16 comments, unchanged; genuinely with the customer's project-delivery team, not a stall on us |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged; identity question to Mostafa still the only open item in the family |
+
+### Cross-ticket notes
+
+- **PLT-3040 is the third ticket in a row on this board (after PLT-3033, and PLT-3024 before it) to
+  arrive with a broken, never-uploaded `blob:` description image** — `attachment: []` live via the
+  API, not a permissions gap. This is now a recognisable intake defect (Jira/Freshdesk media
+  upload), independent of any one incident's content, and worth flagging upstream if it keeps
+  recurring — every new ticket on this board for the past week has needed a re-send.
+- **PLT-3040's mechanism is a genuine, if partial, counterexample to Pattern 2** ("the frontend is a
+  faithful renderer") — like PLT-2874, the FE here actively synthesises a displayed row (borrowing a
+  sibling's parquet data) rather than just passing through an upstream number. Worth remembering
+  that Pattern 2 is a reflex to check, not a rule to assume.
+- **The "recommended but never posted" pattern is now ten runs deep on both PLT-2858 and PLT-2815.**
+  Both drafts already exist verbatim in each ticket's `recommended-action.md`; nothing further needs
+  drafting, only sending. Consistent with every run since 08-03: analysis is not this board's
+  bottleneck, posting is.
+- **PLT-3033 leaving scope without a visible Jira comment is a soft positive signal, not a gap to
+  chase.** The 08-11 run's drafted ask evidently reached the customer through some channel (Freshdesk
+  or direct), since the ticket moved to exactly the state that ask targeted. Nothing to do here
+  unless it reopens without the XER file having actually been provided.
+
+### ⚠️ Attachments needing human — this run
+
+**PLT-3040** — same never-uploaded `blob:` failure mode as PLT-3033: the single description image
+never finished reaching Jira (`attachment: []`, confirmed live). It would settle which of two
+candidate surfaces (progress breakdown vs filter panel) the customer is looking at and whether the
+two "UG electrical" rows show identical numbers — the single cheapest confirmation on the ticket,
+but not the blocking one, since the category-mapping check needs no image at all. No new attachments
+on the six carried-over tickets this run; prior gaps stand exactly as previously documented.
+
+### Needing a human now
+
+1. **PLT-2858** — post the escalate-to-Pietro comment (drafted, unchanged, 10 runs unposted). Top
+   priority: Critical priority, 29 days of customer silence on a decision only Pietro/Mostafa can
+   make.
+2. **PLT-2909** — post the one-line nudge to Ali (drafted 08-10, now 12 days unanswered).
+3. **PLT-2619** — post the identity question to Mostafa (drafted, unchanged since 08-04, the only
+   open item left in the family since the PR cleared).
+4. **PLT-2815** — execute the close-out (drafted, unchanged, 10 runs unposted). Lowest urgency —
+   administrative, not a live customer wait.
+5. **PLT-3040** — new this run: get Darminder to run the CH08 category-mapping check (no customer
+   input needed), and separately have Yash ask the customer to re-send the broken screenshot; both
+   drafted in `recommended-action.md`.
+
+---
+
 ## Run: 2026-08-11 — 1 brand-new ticket deep-dived (PLT-3033), 6 confirmed unchanged, Group B still empty
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With

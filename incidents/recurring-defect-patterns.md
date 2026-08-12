@@ -372,3 +372,19 @@ incident.
 - **Source-data elevation errors presented as viewer bugs** (PLT-2649). 360 pins placed wrongly
   because one level's elevation was wrong in the source model; the transform was provably correct
   and the same fault reproduced in PowerBI.
+- **Name-based fallback join across an id-keyed hierarchy, 2026-08-12** (PLT-3040, CH08-Minooka).
+  Two Package categories sharing a display name under different disciplines is a supported, tested
+  shape (PLT-2821 keyed selection by `activityCategoryId` precisely because names repeat), but the
+  progress panel's parquet-to-category join still falls back from id to bare `CategoryName` when no
+  id match is found (`use-progress-panel-data.tsx:253-259`), unscoped by discipline. A package with
+  nothing mapped has no parquet row (`progress-queries-v2-api.ts:577`, zero-weight rows dropped at
+  `:601-606`), so instead of disappearing it matches on name and renders wearing a same-named
+  sibling's numbers — a Pattern 2 counterexample (the FE synthesises a row here, it does not just
+  render one). A structurally identical, independent leak exists in the filter panel via a flat
+  discipline-agnostic `mappedPackages` name set (`dashboard-filter-utils.ts:57,86`). Both are the
+  unfinished half of PLT-2821, which fixed selection but not the data joins. **Recognition
+  signature:** a duplicated-looking name across two parent categories, where the report specifically
+  says one branch has "nothing mapped" yet still shows numbers — check for an id→name fallback in
+  the join before assuming the duplicate itself is the defect. Single occurrence — promote if a
+  second project reports the same "phantom sibling shows real numbers" shape. Full findings:
+  `live-incident-board-tickets/PLT-3040-groupA-progress-tracking/context.md`.
