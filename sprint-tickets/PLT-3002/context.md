@@ -56,3 +56,39 @@ Posted as comment **109344**.
 ## Confidence — unchanged
 **2/10.** The UI shell is no longer part of the work, which shrinks the ticket, but the blocker was
 never the UI.
+
+---
+
+## 2026-08-12 — ⚠️ CORRECTION: there is no System types empty state
+
+The 08-11 entry above (and Jira comment 109344) said PR #2115 shipped a Types tab whose
+**System types toggle renders an empty state on purpose, so this ticket "fills it rather than
+restructuring the tab a second time."**
+
+**That is wrong.** Read from the branch today (`origin/PLT-3000-type-library-asset-types`,
+`TypesTab.tsx:153-171`):
+
+- `ToggleButtonGroup value='assetTypes'` is **hardcoded, with no `onChange` handler**.
+- The System types `ToggleButton` is **`disabled`**, with aria-label `systemTypesSoon`.
+- There is no System types panel, no empty state, and no way to select the segment.
+
+The comment in the code says it plainly: *"System types have no data model yet (deferred) —
+shown disabled so the destination is discoverable."* It is a **signpost, not a container**.
+
+### What this changes for PLT-3002
+The UI shell is **less** built than the 08-11 entry claimed. This ticket must additionally:
+- add selection state and an `onChange` to the toggle group, and un-disable the System button;
+- build the System types list surface behind it.
+
+It does **not** change the blocker — questions 1–3 (first-class entity vs rename · where systems
+come from · how a task attaches to a system type) still decide the table shape, and still need a
+human. Confidence stays **2/10**.
+
+### One new datapoint in this ticket's favour (from PLT-2914's branch)
+Task types now exist in code, and **IST is deliberately excluded from the selectable set**
+(`SELECTABLE_TASK_TYPE_IDS`) with the reason recorded in `task-type.types.ts`: an IST can only be
+applied to a **System Type**, and there is no `system_type` table, so creating one *"would produce
+a template nothing could ever be attached to."*
+
+So PLT-3002's missing data model is now visibly blocking a second feature, not just this one.
+That is worth carrying into any prioritisation conversation.
