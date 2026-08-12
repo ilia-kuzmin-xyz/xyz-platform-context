@@ -123,3 +123,43 @@ existing Unassigned bucket was reused. The code has since grown the dedicated co
 2. Correct the PLT-3002 record: there is **no** System types empty state to land in.
 3. Decide whether #2115's drill-in must cover the modal title to satisfy §01, or whether the
    rule is relaxed for the settings modal. That is a product/design call, not a code call.
+
+---
+
+## 2026-08-12 (later) — implementation round
+
+**#2129 (PLT-2914) merged to master** as `dbf1bada8` mid-run. That invalidated the
+"still stacked on an unmerged branch" state and is why #2115 could be re-pointed.
+
+### Done
+- **#2115** — base re-pointed `PLT-2914-…` → `master`; master merged in; the
+  rename/modify collision (master carried the Types restyle on the old `AssetsTab`
+  filename) resolved in favour of the rename. Master's `AssetsTab.tsx` was
+  byte-identical to this branch's `TypesTab.tsx` apart from one doc-comment line —
+  both already used the `hc.components.TypesTab` i18n keys — so deleting it lost
+  nothing. Also fixed its CI: it had inherited the `StyledMenu` ReferenceError from
+  a base pinned one commit before the fix.
+- **All three PR descriptions rewritten.** Two previously stated the opposite of
+  the code (empty folder names; the ungrouped-bucket drop target), and all three
+  cited `COMMISSIONING_ENV`, which #2118 deleted.
+- **PLT-3002 → PR #2134** (draft, stacked on #2115). Wires the segmented control
+  (it was hardcoded + disabled, not an empty state) and adds `SystemTypesList`.
+- **PLT-2992 → PR #2135** (draft, off master). The importer's `CHECKLIST TYPE`
+  → task-kind mapping, the ticket's only unbuilt piece.
+
+### Blocked / deliberately not done
+- **#2116's master merge.** Source side fully resolved (patch kept in the session
+  scratchpad), but master brings ~686 lines / 37 tests for the asset-type filter,
+  12 seeded through the derived-links mock PLT-2993 deletes. Porting them needs a
+  decision — with folders as real rows, the "asset-type filter" is really a folder
+  filter now. That is a design call, not a conflict resolution, and there is no way
+  to run the suite locally (`npm ci` fails on `@xyzreality/dhtmlx-gantt`, 401).
+- **Basing PLT-3002 on the Systems stack (#2126).** Tried; it is rooted on the
+  glossary rename and produced 33 conflicts against master. Instead `systemTypeService`
+  / `systemService` were written to the **same shape** as that stack's copies so
+  whichever lands second merges rather than forks. Comments in both files say so.
+
+### Schema
+`system` and `system_type` exist on **neither** database. DDL + RLS + rationale:
+`hc-frontend/docs/commissioning/system-types-schema.md`. Same tables the Systems
+stack needs — create once, for both.
