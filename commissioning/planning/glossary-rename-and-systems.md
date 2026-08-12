@@ -33,10 +33,29 @@ Probed both databases directly:
 - Systems tables **absent from both**: `system`, `system_type`, `system_element_link`
   → 404.
 
-So the rename migration has not been applied anywhere, and **the Systems stack has no
-backing schema in either database**. Its migration appears not to exist yet in xyz-supabase —
-that gap should be confirmed with Rishi before the stack is approved, since the frontend
-cannot work without it.
+So the rename migration has not been applied anywhere, and **the Systems stack has no backing
+schema in either database yet**. The migrations do exist — they are the mirrored xyz-supabase
+stack below, all still open.
+
+## Two mirrored stacks that must land together
+
+`xyz-supabase` and `hc-frontend` each carry a chain, and they pair up:
+
+| xyz-supabase | hc-frontend |
+|---|---|
+| [#11] → `develop` — `refactor(schema)!: align names with the Cx glossary` | [#2124] — follow the rename |
+| [#9] → #11's branch — `feat(systems): add system register, hierarchy and membership` | #2122 → #2126 → #2128 → #2131 → #2132 |
+| [#13] → #9's branch — `feat(systems): anchor task instances on systems, guard the hierarchy` | #2133 — link model elements to a system |
+
+Note the `!` in #11's subject — it is marked a breaking change deliberately.
+
+Also open: **[#5] → `main`** — "Sync main with develop — schema promotion (already applied) +
+docs", the promotion that keeps `main` level with `develop`.
+
+The practical consequence: this is not one migration to time, it is **two seven-deep chains that
+have to be zipped together**. Each frontend PR is only deployable once its paired migration is
+applied to that environment's database, and PostgREST gives no compatibility window
+(`pitfalls.md` §3).
 
 ## The sequencing risk
 
@@ -87,9 +106,14 @@ anything above it can move, since every PR in the chain inherits the conflict.
 
 ## What needs a human
 
-1. Confirm whether a Systems migration exists in xyz-supabase; if not, it blocks #2122 onward.
-2. Decide and execute the lockstep order per environment (`dev` first, then `stable`).
-3. Rebase #2124 onto master to unblock the chain.
+1. Agree the zip order for the two stacks, and execute it per environment (`dev` first, then
+   `stable`) — this needs Supabase environment access.
+2. Rebase #2124 onto master to unblock the frontend chain.
+3. Decide whether #5 (promote `main` to `develop`) goes before or after the rename, since it
+   changes what `stable` contains.
 
+[#5]: https://github.com/XYZReality/xyz-supabase/pull/5
+[#9]: https://github.com/XYZReality/xyz-supabase/pull/9
 [#11]: https://github.com/XYZReality/xyz-supabase/pull/11
+[#13]: https://github.com/XYZReality/xyz-supabase/pull/13
 [#2124]: https://github.com/XYZReality/hc-frontend/pull/2124
