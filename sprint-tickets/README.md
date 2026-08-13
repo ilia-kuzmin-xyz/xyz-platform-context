@@ -974,3 +974,123 @@ PLT-3025 duplication + the unfilled `<target>` + the per-user-vs-per-project sto
    feature. Worth raising before Types is assumed nearly done.
 7. **Runs must write their work down here.** The 08-10 afternoon run did not, and this run spent
    its opening minutes rediscovering three PRs from GitHub.
+
+---
+
+## 2026-08-13 — sprint flipped to 5-in-review; checkpoint 3 had real work; PLT-2963 self-corrected
+
+**The sprint composition changed materially since 08-11.** Five tickets are now `In Code Review`
+(not Analysis), consolidated onto **three** PRs — the #2115/#2116/#2117 trio from 08-10 is gone,
+superseded by the 08-12 run's PRs. If you read the 08-11 entry alone you'll chase closed PRs.
+
+| Ticket | Status | PR | Eligible for kick-off? |
+|--------|--------|----|------------------------|
+| PLT-2992 | In Code Review | [#2135](https://github.com/XYZReality/hc-frontend/pull/2135) (draft) | ❌ |
+| PLT-2993 | In Code Review | [#2138](https://github.com/XYZReality/hc-frontend/pull/2138) | ❌ |
+| PLT-2994 | In Code Review | #2138 (shared with 2993) | ❌ |
+| PLT-3000 | In Code Review | [#2136](https://github.com/XYZReality/hc-frontend/pull/2136) (draft) | ❌ |
+| PLT-3002 | In Code Review | #2136 (shared with 3000) | ❌ |
+| PLT-3025 | Dev In Progress | none | ❌ |
+| **PLT-2963** | **Analysis In Progress** | none | ✅ — the only candidate |
+
+Note the pairing: **2993+2994 share one PR, 3000+3002 share another.** Earlier runs stacked these
+as separate branches; they're now merged pairs, all three PRs based directly on `master`.
+
+### Checkpoint 1 — feedback: clean, verified per PR (not inferred)
+
+| PR | Threads | State |
+|----|---------|-------|
+| #2138 | 4 (all Copilot) | **all 4 `is_resolved: true`**, each replied and fixed in `ad34d2e` |
+| #2136 | 0 | no review yet |
+| #2135 | 0 | no review yet |
+
+`get_reviews` checked as well as the thread list (the standing lesson): **no `CHANGES_REQUESTED`
+anywhere** — only Copilot `COMMENTED` on #2138 plus our four replies. #2138's four were the
+`onDragLeave` `relatedTarget` guard on the top-level drop zone (this one mattered: it was a chunk
+of the "dropping sometimes doesn't work" manual-test feedback), dead `createMenuAnchor` state, and
+missing unit tests on `moveToFolder` + `TaskFolderService`.
+
+**No human has reviewed any of the three PRs.** 0 open threads across all of them.
+
+### Checkpoint 2 — CI: all three GREEN
+
+3/3 green on #2138 and #2135 (2× `build` + SonarCloud), 5/5 on #2136. Nothing failing, nothing
+pending, no repo-wide blocker this time (the Trivy/js-yaml saga is long closed).
+
+### ✅ Checkpoint 3 — this one actually had work: master had moved, and none of the three had it
+
+First run in a while where CP3 wasn't a no-op. `origin/master` moved **`5cb9f8b` → `5c2bc4a`** and
+was **not an ancestor of any of the three branches**.
+
+Diagnosed before merging rather than merging blind — each branch was missing **exactly two**
+commits:
+- `ddbed9e9` PLT-3028: deep-link all issue notification types to the editor (#2130)
+- `5c2bc4a3` CI: build branch images only for release branches, add concurrency groups (#2111)
+
+Touching 8 files total: 4 CI workflows, `NotificationPanel.tsx`, `issue-deep-link.ts` + its test,
+and one viewer redirect test. **Zero overlap with commissioning / task-library code**, so the
+merges were expected clean — and were:
+
+| Branch | Merge commit | Result |
+|--------|--------------|--------|
+| `PLT-2992` | `d514067` | clean |
+| `PLT-3000/PLT-3002` | `4d92c76` | clean |
+| `PLT-2993/PLT-2994` | `75fc5c8` | clean |
+
+All three pushed. **Authorship verified before pushing** — author *and* committer
+`ilia-kuzmin-xyz` on all three (the container default is still `Claude`; `git config` was set
+per-repo first, per the standing rule).
+
+⚠️ **Good news buried in the merge-base:** `dbf1bada` = **PLT-2914 (#2129), which is now on
+master** — task types, default workflow, readiness colouring. All three branches already contained
+it, so no conflict. But it means **task types now exist on master**, which is directly relevant to
+PLT-2992 and to PLT-3002's `SELECTABLE_TASK_TYPE_IDS` note.
+
+### PLT-2963 — not kicked off, and this run found the reason it *shouldn't* have been
+
+Zero replies to either of the two clarification comments (08-08, 08-10). That's **5 days** on the
+duplication question and **3 days** on the code-traced follow-up, all of it working days now.
+
+Rather than a third nudge, this run read more code — and **found that my own 08-10 recommendation
+was wrong**. Full detail in `PLT-2963/context.md` (08-13 entry); the short version:
+
+1. **"Persist the mapping with the session" is the wrong fix.** The mapping already has a
+   per-project home: `${CANVAS_API}/viewer-mapping/<projectId>`, pipeline-cached 2h
+   (`useCanvas.ts:2099`; same endpoint at `DashboardViewerPage.tsx:104`). Per-session would
+   duplicate 2.46MB × N users. **This dissolves the storage question I'd posted** — and it means
+   the real gap (that cache not surviving restart) **is PLT-3025's half**, so the
+   "viewer vs caching" split I proposed is *less* clean than 08-10 claimed, not more.
+2. **A fourth option exists and beats all three in the ticket:** make the generated viewer read
+   the mapping at runtime (`fetch('/viewer-mapping.json')` from the VFS) instead of via the static
+   import at `ForgeViewerStatic.ts:22`. Then the dashboard mounts immediately, the
+   `ArtifactPanel.tsx:407` gate is deleted, and the viewer colours in late — which *is* the
+   acceptance criterion 08-10 said couldn't be met. Held anyway: it changes the generated-viewer
+   contract, which is more than the ticket authorises.
+3. 🐛 **Latent bug, independent of this ticket.** `ViewerFilesSync`
+   (`ArtifactSandpack.tsx:229-247`) pushes late mapping/config updates into the VFS via
+   `updateFile`, but **nothing re-reads them** — both are static imports. The only
+   `fetch('/viewer-mapping.json')` in the whole app is **inside a comment** (`:274`). No tests.
+   → viewer enrichment landing after the base mapping is **silently dropped**.
+
+Posted as comment **109516**, framed explicitly as a correction so nobody acts on the 08-10 advice.
+
+**Lesson worth keeping:** 08-10 read the fetch call but not the comment two lines above it, and
+published a recommendation on that basis. Reading *around* the line you're citing is cheap; a
+wrong recommendation on a ticket someone might act on is not.
+
+### Open items for a human
+
+1. 🔴 **Three green PRs, zero human review.** #2135, #2136, #2138 — nothing technical in the way of
+   any of them. #2136 and #2135 are still **draft**, so they may not be on anyone's radar at all.
+2. 🔴 **PLT-2963 needs three answers** (2 are 5 days old): alive-or-duplicate-of-3025 · `<target>` ·
+   is the static-import→runtime-fetch change acceptable? Question 3 is new and is the only one
+   blocking code now.
+3. 🆕 **`ViewerFilesSync` is shippable on its own** if PLT-2963 stays parked — the bug is real
+   either way. Needs someone with `XYZ_AgentPipeline/` access to confirm no pipeline-generated TSX
+   fetches those files at runtime.
+4. **PLT-3002's System data model** — still missing, now visibly blocking a second feature
+   (IST task types are excluded from `SELECTABLE_TASK_TYPE_IDS` for want of a `system_type` table).
+5. **PLT-3000's unticketed scope** — §2 create/rename/delete and §3–§6 remain uncovered.
+6. **Attribution-footer conflict still undecided.** No new GitHub comments were posted this run
+   (0 open threads), so nothing new carries a Claude footer. The four replies on #2138 from the
+   08-12 run do carry one.

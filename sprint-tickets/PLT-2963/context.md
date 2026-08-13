@@ -127,3 +127,91 @@ already live in project storage, per `artifact-and-hydration.md`).
 - **9/10** (was 7) for the **frontend/viewer half**, *if* the split is agreed and the
   per-user-vs-per-project storage question above gets a one-line answer. The change itself is now
   well understood: persist + restore the mapping, then the `:407` gate stops firing.
+
+---
+
+## 2026-08-13 — ⚠️ CORRECTION to the 08-10 recommendation, plus a latent bug found next door
+
+The 08-10 entry above traced the blocking chain correctly (`ArtifactPanel.tsx:407`, the static
+JSON import, the refetch at `useCanvas.ts:2099`). **Its recommendation was wrong**, and the
+reasoning that produced my "per-session vs per-project storage" question was wrong with it.
+Both are corrected here; the 08-10 entry is kept, not deleted, so the error is legible.
+
+### Correction 1 — "persist the mapping with the session" is the wrong option
+
+08-10 ranked *persist-with-session* ✅ smallest-and-best. What it missed is one line up from the
+fetch it quoted: **the mapping already has a canonical per-project home on the server.**
+
+`useCanvas.ts:2096-2099`:
+```
+// The pipeline caches it for 2h, so warm calls are fast.
+fetch(`${CANVAS_API}/viewer-mapping/${pipelineProjectId}`)
+```
+`CanvasGalleryPage/DashboardViewerPage.tsx:104` hits the **same** endpoint.
+
+So the endpoint is already keyed per project and already cached (2h, in pipeline memory).
+Persisting per-session would duplicate 2.46MB × N users of a payload that already has one home.
+
+**This also dissolves the question I posted on 08-10** ("per-session or per-project?"). Per-project
+already exists. The actual gap is that the pipeline's 2h cache **doesn't survive a restart** — and
+that is *precisely* PLT-3025's "persist T1/T2 server-side" half.
+
+⚠️ **Consequence for the split I proposed on the ticket:** the 08-10 entry claimed the two halves
+"touch different files, different layers — genuinely independent". **That is now doubtful.** The
+best fix for this half routes through the same server-side cache PLT-3025 owns. Do **not** hand
+anyone the "viewer vs caching" split as settled — it was built on the wrong premise.
+
+### Correction 2 — there is a fourth option, better than all three in the ticket
+
+The `:407` gate exists because the injected viewer reads the mapping via a **static import**:
+`ForgeViewerStatic.ts:22` `import viewerMappingData from "./viewer-mapping.json"`, consumed at
+`:205` (`const mapping: any = viewerMappingData`). Confirmed — that constraint is real.
+
+But make the generated viewer read it at **runtime** (`fetch('/viewer-mapping.json')` out of the
+Sandpack VFS) and the whole problem inverts:
+
+| | |
+|---|---|
+| dashboard mounts immediately against an empty mapping | ✅ |
+| `ArtifactPanel.tsx:407` gate deleted outright | ✅ |
+| viewer colours in whenever the mapping lands | ✅ |
+| session persistence needed | **none** |
+| server change needed | **none** |
+| overlap with PLT-3025 | **none** |
+
+That is the acceptance criterion *"paint non-viewer content in <3s cold; viewer fills in after"* —
+which 08-10 said could not be met as written. **It can**, just not via any of the ticket's three
+listed routes. Cost: it changes the generated-viewer contract (static-import → runtime-fetch),
+which is more than the ticket authorises, so it needs a nod from whoever owns the canvas viewer
+before anyone builds it. **Not started for exactly that reason.**
+
+### 🐛 Latent bug found on the way — real regardless of what happens to PLT-2963
+
+`ArtifactSandpack.tsx` `ViewerFilesSync` (~`:229-247`) exists to push **later** mapping/config
+updates into the VFS via `updateFile`. Its own comment states the purpose: *"when later viewer
+events arrive (e.g. issue enrichment finishes after the base mapping)"*.
+
+**Nothing re-reads those writes.** Both files are static imports in `ForgeViewerStatic.ts`
+(`:22`, `:23`), so the mounted bundle never sees an update. Verified repo-wide: the **only**
+occurrence of `fetch('/viewer-mapping.json')` anywhere in the app is **inside a comment** at
+`ArtifactSandpack.tsx:274`, describing behaviour that does not exist. **No tests on
+`ViewerFilesSync`.**
+
+→ Any viewer enrichment completing after the base mapping is **silently dropped**. Issue
+enrichment is the case the code itself names.
+
+**Caveat, stated on the ticket too:** only the *injected* viewer component is visible from
+hc-frontend. If a pipeline-generated dashboard TSX fetches those files itself, the writes do land
+for that dashboard. Needs someone with `XYZ_AgentPipeline/` access to confirm.
+
+Note the symmetry: **option 4 is essentially making `ViewerFilesSync` do what it already believes
+it does.** The plumbing is written; it's wired to a static import on the far end.
+
+Posted as comment **109516**.
+
+### Confidence — updated
+- **3/10** for the ticket as written — unchanged (duplication *still* unanswered after 5 days,
+  `<target>` still blank, most of half 1 lives outside this routine's repo set).
+- **9/10 → held, not lowered**, for the FE half — but on **option 4**, not on the 08-10 plan.
+  The blocker is no longer a missing fact; it's a yes/no on changing the viewer contract.
+- The `ViewerFilesSync` fix is **independently shippable at 8/10** if PLT-2963 stays parked.
