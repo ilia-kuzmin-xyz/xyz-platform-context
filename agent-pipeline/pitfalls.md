@@ -401,3 +401,49 @@ disk footprint  23.3MB (was 108MB)
 Lesson: **row counts from a paginated walk are not evidence until the ids are
 deduplicated.** "The second run returned the same number" is worthless when
 both runs share the bug.
+
+---
+
+## 2026-08-13 — canvas viewer colouring did not match the dashboard (fixed)
+
+The canvas `status` named query mapped raw installation codes to three
+labels (`INSTALLED_ACCURATELY`→Installed, `INSTALLED%`→Installed Early,
+else→Not Installed). The dashboard colours by a **schedule-aware dynamic
+state** (`duckdb-element-store.getElementStates` + `statusCodeColours`):
+Installed Early means *installed before the linked activity's start*, and
+Late / Late Start / Planned are derived from activity dates. Consequences
+on the canvas: four of seven legend entries could never light up (dead
+filter chips), INSTALLED_INACCURATELY masqueraded as "Installed Early",
+and everything the dashboard paints yellow/orange (or excludes) rendered
+red.
+
+Fix, mirrored from the dashboard's own design:
+
+- `viewer_queries.status` is now the dashboard CASE verbatim (labels for
+  codes 0–4; unscheduled+uninstalled excluded), LEFT JOINing a
+  `schedule_activity_dates` projection.
+- The canvas page feeds that projection from the schedule hydration
+  payload (`canvas-duckdb-service.feedScheduleDates`, called from live
+  SSE delivery, both restore paths and the published-report loader) —
+  the same shape as the dashboard's ScheduleService feed. Join key:
+  `activity_links.activityId` == revision `itemId` (proven by
+  rooms_readiness' working join).
+- Emitted palette/legend shrink to the five reachable labels; the
+  composer's filterStatus vocabulary and the template's viewer legend
+  match.
+
+Verified by executing every CASE branch on real DuckDB (11 fixtures,
+incl. INSTALLED_INACCURATELY→Late and linked-without-status-row→coded),
+plus the degradation mode: with the projection empty, linked work reads
+Planned and nothing errors. Wire-verified after a server restart.
+
+**Two traps for the record:**
+- `uvicorn --reload` (or its absence) bit again: the running server was
+  serving pre-change code and the "verification" run reproduced the old
+  legend from a *cached template artefact* (`_artifact_cache` +
+  `reference/*.tsx` edits don't trigger a `.py` reload). Verify on the
+  wire after a restart, not from module state.
+- Old published dashboards persist their `viewerConfig` (old SQL + old
+  palette) and keep rendering with legacy colours; new generations get
+  the new scheme. The old SQL never references the new table, so both
+  coexist.
