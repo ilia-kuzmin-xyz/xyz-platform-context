@@ -491,3 +491,35 @@ already lived one level up.
 
 This is the same failure shape as the two inert features from this morning — code that is
 individually correct but wrong about the context it lands in.
+
+### Sonar's "1 new issue" was dead code that `tsc` cannot see
+
+After moving the heading/intro styles into `typeDetail.styles.ts`, `TEXT_PRIMARY` and its
+`baseTheme` import were left declared and unread in `ReadinessLevelsSection.tsx`.
+
+`tsc --noEmit` does **not** flag an unused module-level `const` (that needs `noUnusedLocals`,
+which this project does not set), and no test notices. So the local gate that has caught
+everything else today was blind to it — Sonar found it.
+
+**Add `npx eslint <changed files>` to the pre-push sequence.** It runs in seconds, catches
+this class, and its output is per-file so the pre-existing warnings in test files (mostly
+`sonarjs/no-duplicate-string`) are easy to ignore. Updated sequence:
+
+1. `npx vitest run <affected dirs>`
+2. `npx tsc --noEmit -p tsconfig.json | grep -v "gantt-x\|dhtmlx"` — must be empty
+3. `npx eslint <the source files you changed>` — must be empty (skip the test files)
+4. `git status --short` — only your intended files
+
+### PR descriptions drift faster than code, and reviewers test from them
+
+#2136's "Not included" section claimed system types had no detail and that the row hover
+ring had been dropped "until the detail lands". Both were false at the time of reading:
+`SystemTypeDetail.tsx` was wired and `trSx` + `cursor: pointer` were applied. I checked
+whether a merge of mine had resurrected removed code — it had not; the pre-merge remote
+already had it, so the paragraph simply described an earlier state and was never updated.
+
+This is the third time this sprint a description has contradicted its own diff. The cost is
+specific: a reviewer follows the test steps, doesn't click the thing the description says
+isn't there, and the feature ships unreviewed. **When a parallel run edits a description,
+re-read it against the code before trusting it** — and correct it in a comment rather than
+silently, so the edit is visible to whoever wrote it.
