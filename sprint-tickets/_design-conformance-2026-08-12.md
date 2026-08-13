@@ -330,3 +330,23 @@ sprint the identical thing happened with the `StyledMenu` import fix.
 a branch**, and re-check right before pushing. Verify a parallel run's fix rather than
 trusting the commit message — this run re-read the diff and re-ran the AssetListPage suite
 (374 tests) before resolving those threads.
+
+### `tsc --noEmit` locally covers the prod-build failure class — verified, not assumed
+
+`tsconfig.json` is `include: ['src/main/webapp/app/**/*']`, `exclude: ['node_modules']`,
+so **test files are type-checked**. That matters because the earlier prod-build break this
+sprint was two `def()` fixtures missing a required `folderId` — vitest transpiles without
+type-checking and sailed past it; only `webapp:build:prod:ci` caught it, at ~15 min a go.
+
+With the install workaround above, `npx tsc --noEmit -p tsconfig.json` reproduces that
+check locally in ~1 min. Confirmed by positive control rather than trusting the config:
+appending `const _probe: number = "not a number"` to a `.test.ts` made `tsc` report it,
+then the file was restored. **Do that positive control** — a clean type-check only means
+something once you have seen it fail on purpose.
+
+Filter `gantt-x`/`dhtmlx` errors (artifacts of the removed package); everything else is real.
+
+**Recommended pre-push sequence for a commissioning branch:**
+1. `npx vitest run <affected dirs>` — the suites your change touches
+2. `npx tsc --noEmit -p tsconfig.json | grep -v "gantt-x\|dhtmlx"` — must be empty
+3. `git status --short` — only your intended files (catches an unrestored `package.json`)
