@@ -239,3 +239,94 @@ The task library uses **native HTML5 DnD**, which is why manual testing reported
 pointer crossed its own icon/label — now guarded). The rest is inherent to HTML5 DnD.
 **Porting to `@dnd-kit` is the fix**, and would also supply the missing keyboard route.
 Awaiting Ilia's go-ahead as its own PR.
+
+---
+
+## 2026-08-13 — review round: the npm blocker has a workaround, and PLT-2992 was inert
+
+### ⚠️ Supersedes the "not one test can be run locally" claim above
+
+That section is still right about the cause (`npm ci` 401 on `@xyzreality/dhtmlx-gantt`,
+token has no `read:packages`) and still right that an `NPM_TOKEN` is the proper fix.
+It was **wrong that nothing can be run**. There is a workaround, and it works:
+
+```bash
+# from the hc-frontend checkout
+cp package.json package-lock.json /tmp/backup/            # ALWAYS back these up first
+python3 -c "import json;p=json.load(open('package.json'));
+del p['dependencies']['@xyzreality/dhtmlx-gantt');json.dump(p,open('package.json','w'),indent=2)"
+npm install --no-audit --no-fund --ignore-scripts         # ~50s, 2171 packages
+cp /tmp/backup/package.json /tmp/backup/package-lock.json .   # restore BEFORE committing
+```
+
+`npm ci` is all-or-nothing, so one unreachable private package blocks the whole tree;
+`npm install` on a manifest without it resolves everything else fine. `node_modules` is
+git-ignored, so it survives `git checkout` between branches — install once, use it for
+the whole session across every branch.
+
+**Caveats:**
+- Restore both manifests before `git add`. Verify with `git status --short` — only your
+  intended files should appear.
+- `tsc --noEmit` will report errors in `gantt-x/**` (the `MappingColumn` type came from
+  the removed package). Filter those out; anything else is real.
+- Anything importing the gantt will fail at runtime. Everything else — the entire
+  commissioning surface — runs.
+
+This run used it to execute **977 tests** across four suites before pushing. That is the
+difference between guessing and knowing, and it is why the two bugs below were caught
+here rather than by Ilia running the app.
+
+### PLT-2992 (#2135) shipped inert — the test passed because it tested the wrong thing
+
+`mapImportedTaskType` was wired into `validateChecklistImport`'s draft. **The page never
+calls that function.** The real path is `ChecklistImportPage.tsx` →
+`buildChecklistBatch` → `useChecklistDefinitionCreate`, and `buildChecklistBatch` built
+its draft as `{ name, description, items }` — no `type`. So every imported task landed
+on the column default and the feature did nothing.
+
+The unit test passed throughout, because it exercised `mapImportedTaskType` in isolation.
+**A mapper test proves the mapper; it proves nothing about whether anything calls it.**
+Caught by Copilot, not by the suite. Fixed in `c01ca929f` — mapping moved onto the batch
+draft, plus batch-level tests asserting `rows[n].draft.type`, which is the assertion that
+would actually have failed.
+
+*Generalisable*: when adding a pure helper to an existing flow, grep for the call site
+that reaches production **before** writing the test, and assert on the object that
+crosses the boundary — not on the helper.
+
+### Alias tables: the asymmetry worth reusing
+
+Copilot also flagged `performancetest`/`systemtest` as over-broad aliases. Agreed and
+dropped, but the useful principle is the line drawn rather than the deletion:
+
+> An alias that resolves to the **fallback** value is free — matching and not matching
+> produce the same row. An alias that resolves **away** from the fallback carries all the
+> risk. So be generous with the first kind and strict with the second.
+
+`check`/`inspection` → `checklist` stay (checklist is the default anyway). Anything
+mapping to `functionalTest`/`ist` is now restricted to documented labels and shorts.
+
+### PLT-3000/3002 (#2136) — review round
+
+Five comments, all legitimate. Three (zero-asset catalogue empty state, count gating
+across all three queries, sortable-header a11y) were fixed in `6f23c81b3`; the empty-state
+one had **killed the feature** the same way PLT-2992's did — `countByField` was seeded
+from the catalogue, but `isEmpty` still keyed on `assets.length === 0`, so a project with
+types and no assets hid the catalogue entirely. Two more addressed in `65db5eb23`:
+`SystemTypesList` now has 20 tests, and a `vi.mock` declared twice was removed.
+
+Pushed back on one: `systemTypeService.create` is unused here **on purpose**, kept
+byte-identical to Rishi's copy on the systems-register branch so whichever lands second
+merges clean. That is also the source of the ~2% Sonar duplication. The PR description
+already said so.
+
+### Parallel runs of this routine are live — check the remote before working
+
+`6f23c81b3` landed on `PLT-3000/PLT-3002` **one minute** before this run went to fix the
+same comments, authored by another session of this same scheduled routine. Earlier in the
+sprint the identical thing happened with the `StyledMenu` import fix.
+
+**Always `git fetch` + `git reset --hard origin/<branch>` immediately before starting on
+a branch**, and re-check right before pushing. Verify a parallel run's fix rather than
+trusting the commit message — this run re-read the diff and re-ran the AssetListPage suite
+(374 tests) before resolving those threads.
