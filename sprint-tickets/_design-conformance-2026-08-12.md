@@ -350,3 +350,124 @@ Filter `gantt-x`/`dhtmlx` errors (artifacts of the removed package); everything 
 1. `npx vitest run <affected dirs>` — the suites your change touches
 2. `npx tsc --noEmit -p tsconfig.json | grep -v "gantt-x\|dhtmlx"` — must be empty
 3. `git status --short` — only your intended files (catches an unrestored `package.json`)
+
+## 2026-08-13 (afternoon) — review round 2: naming, the task slider, prototype conformance
+
+### The tab is "Task library", and the design already said so
+
+Open question on #2138 was whether the tab is "Task templates" or "Task Library". It is
+**Task library** — settled by the prototype's own UI copy, which tells the user to
+"create the template in the **Task library** tab". The developer doc §8 uses the same
+name. A template is what the library *holds*; it is not what the tab is.
+
+Changed `ProjectSettings.tsx` (`label: 'Task library'`) and the builder's back link.
+The `hc.components.TaskLibraryTab` i18n namespace and the component name were already
+right — only the visible label had drifted.
+
+### Opening a task from a type detail used to destroy your place
+
+Both the asset-type and system-type details called `handleModalClose()` and navigated to
+`/projects/:id/checklists/:id`. That tore down the settings modal **and** the type you
+were reading; getting back meant reopening settings → tab → type → drill in.
+
+Fixed by stacking a third slider over the type detail, reusing `ChecklistDetailContent`,
+which was already built for this ("decoupled from routing so it can render both as a full
+page and inline inside the Task Library tab modal"). Read-only — authoring belongs to the
+Task library per doc §8.
+
+*Generalisable*: `handleModalClose()` immediately followed by `navigate()` inside a modal
+tab is almost always a smell. It means the tab had nowhere to put the thing it wanted to
+show. Check whether an inline surface already exists before routing away — in this case
+one did, in a sibling tab.
+
+`TypesTab` no longer needs `handleModalClose` at all now that import, type detail and task
+detail all render inline.
+
+### Prototype conformance — measure, don't eyeball
+
+The prototype is a Vue-ish HTML file with **inline styles on every element** (only ~750
+bytes of real CSS). So the design values are extractable exactly:
+
+```bash
+python3 -c "import re;s=open('<proto>.html').read();i=s.find('<anchor text>');print(s[i-2000:i+2000])"
+```
+
+Measured values for the type detail (all confirmed against the running code):
+
+| Element | Design |
+|---|---|
+| Section band | `flex column; gap 16px; padding 24px 32px` — **no card, no background** |
+| Section heading | 20px / 26px / 0.45px / 700 / `#E9E9E1` |
+| Section intro | 16px / 24px / 0.45px / `#E9E9E1` |
+| Step rung | `min-height 48px; background #1F1F1F; radius 16px; border 1px #303030` |
+| Step chip bar | `width 4px; radius 16px 0 0 16px` |
+| Task row | `gap 16px; padding 12px 0; border-bottom 1px #303030` (not last) |
+| Task name | 16px / 700 / 0.45px / `#E9E9E1`; icon 20px |
+| Instance card | `#1F1F1F; radius 16px; padding 10px 16px; shadow 0 2px 10px 1px rgba(0,0,0,.4)` |
+| Tag pill | `padding 4px 9px; radius 16px; border 1px <tag>; #ABABAB; 12px/14px` |
+| Tag colours | none `#303030` · red `#FD3D39` · yellow `#FFDE14` · green `#00B051` · blue `#167FFC` · white `#E9E9E1` |
+
+**The rungs were already right.** The drift was entirely in the section chrome: a
+`#272727` rounded card wrapping each section, which the prototype does not have. Worse
+than cosmetic — it put a *lighter* panel behind the `#1F1F1F` rungs, inverting the
+contrast so the rungs read as recessed instead of raised. `#272727` was also a bare
+literal in three separate files; now one token in `AssetTypePage/typeDetail.styles.ts`.
+
+### What was deliberately NOT built, and why
+
+The prototype's instance cards carry a readiness **tag pill**, a progress bar and a
+next-step label. We render name + "Part of:" only. Left alone on purpose: `IAsset` has no
+achieved state, and doc §7 is explicit that readiness is *recomputed from current config,
+never stored*. So it needs real derivation from task instances — not a styling change.
+**Rendering "No tag" on every asset would be worse than rendering nothing**, because it
+would look like an answer.
+
+Also still open: task rows don't show task type/version (doc §3 wants name + type +
+version; there is a `status` slot ready), and the drill-in still doesn't cover the modal
+title (doc §1, project-mandated — needs the overlay hoisted out of `ModalContent`, which
+is a shared-modal change).
+
+### Small win worth copying: say why something is filtered out
+
+The task picker filtered ISTs out of asset types but said nothing, so an authored IST just
+appeared to be missing. Doc §3 quotes the copy verbatim for both cases. Added as a
+footnote at the top of the menu **including when the list is empty** — which is exactly
+when the user needs the explanation most.
+
+### Sticky elements inside a flex list need the gap painted
+
+The "Move to top level" drop zone was the scroll region's first child, so dragging from
+further down the list left it scrolled out of view — nowhere to drop. Made it
+`position: sticky; top: 0`.
+
+**But**: the list is `display:flex; flexDirection:column; gap: 1`, and *a flex gap is
+transparent*. Rows scrolled visibly through the 8px band between the sticky zone and the
+first folder. Fixed with `boxShadow: 0 8px 0 0 <bg>`. Remember this for any sticky child
+of a gapped flex container.
+
+Related: an element gets **one** `background-color`, so an active-state tint over an
+opaque sticky background has to be a `backgroundImage` gradient layer, not a second
+`bgcolor`.
+
+### Optimistic updates: the tell is "the thing you interacted with unmounts on commit"
+
+Two bugs, one shape. Rename commits by unmounting the edit field; drag commits by ending
+the drag. In both cases the UI then falls back to the **cached** value for the length of
+the round-trip — so the renamed folder visibly reverted to its old name before flipping
+back, and a dropped task sat in its old folder and then jumped. The second one is most of
+what manual testing reported as "drag and drop is inconsistent".
+
+Both are now `onMutate` + rollback in `onError` + `onSettled` invalidate. Both no-op
+guards (same folder, unchanged name) sit *upstream* of the mutation, so the optimistic
+write never fires for a no-op.
+
+### Parallel runs, again — and this time one broke a build
+
+A parallel session rewrote the System types footer into a table band (summing per column,
+so the totals now describe the rows on screen rather than the project) **without updating
+the test I had pushed 40 minutes earlier**. CI went red on my file.
+
+This is the second and third collision today. The working rule stands: `git fetch` +
+`git reset --hard origin/<branch>` immediately before starting *and* before pushing, and
+verify a parallel run's fix by reading the diff and re-running the suite rather than
+trusting the commit message.
