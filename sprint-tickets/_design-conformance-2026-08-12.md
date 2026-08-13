@@ -531,3 +531,47 @@ specific: a reviewer follows the test steps, doesn't click the thing the descrip
 isn't there, and the feature ships unreviewed. **When a parallel run edits a description,
 re-read it against the code before trusting it** — and correct it in a comment rather than
 silently, so the edit is visible to whoever wrote it.
+
+## 2026-08-13 (evening) — the drag saga ends: verify in a real browser, not in theory
+
+Four blind pushes claimed to fix task-library DnD; each failed on Ilia's machine. The run
+that worked did one thing differently: **ran the app in this container and drove the drag
+with a real pointer before pushing.** That setup is now the most valuable artefact of the
+week — reuse it:
+
+1. Stub the private gantt package (webpack must resolve it):
+   `node_modules/@xyzreality/dhtmlx-gantt/{package.json,index.js,index.d.ts,codebase/dhtmlxgantt.css}`
+   — main exports a Proxy no-op `gantt`; d.ts exports `GridColumn` as an indexable any;
+   package.json needs `"types": "index.d.ts"`. The dev-overlay may still show one stale TS
+   error — remove `#webpack-dev-server-client-overlay` from the DOM in the driver.
+2. Flip `Commissioning` to true in `config/constants.ts` (~line 890). **Revert before commit.**
+3. `API_MOCKING=enabled npx webpack serve --config webpack/webpack.dev.js` → :9000 (~100s).
+   MSW serves account + a Default Project; portfolio card menu → **Edit** opens Project settings.
+4. `npm i playwright-core` in the scratchpad; launch with `executablePath: '/opt/pw-browsers/chromium'`.
+5. **Playwright `page.route` cannot see MSW's traffic** — the service worker re-issues
+   unhandled requests itself. Stub Supabase in-page instead: `addInitScript` wrapping
+   `window.fetch` for `/rest/v1/<table>`, serving GET arrays and recording PATCHes on
+   `window.__patches`. Tables: `task_folder`, `task_template`, `task_item` (snake_case rows).
+
+### The two real bugs, found only because the failure reproduced locally
+
+- **`{distance: 3, tolerance: 5}` cancels fast drags.** For a distance constraint dnd-kit
+  checks `tolerance` as a CANCEL threshold *before* checking `distance` as the start
+  threshold. A first pointermove that jumps straight past 5px kills the drag — the row
+  never moves. Slow drags work, so it reads as "intermittent". Fix: `{distance: 3}`, no
+  tolerance. ⚠️ **`EditableAttributeList.tsx` (Attributes tab) ships the identical config
+  and carries the same latent bug** — its drag handle just makes slow starts more common.
+- **Default collision detection loses slim drop targets.** It intersects the *dragged
+  row's rectangle* with every droppable; a wide row overlaps a tall folder more than the
+  36px "Move to top level" bar, so drops ON the bar resolved to the folder behind it.
+  Fix: `pointerWithin` first, `rectIntersection` as fallback. (Attributes solved the same
+  problem with its custom `root-dropzone` fallback — same lesson, theirs was the clue.)
+
+Also confirmed in-browser, not just claimed: the whole-panel drag ghost is structurally
+gone under dnd-kit (no browser drag image exists), a plain click still opens the task
+detail (the 3px threshold), and the ButtonBase fix was necessary — listeners on
+`ListItemButton` never activate, which is why Attributes hangs them on a plain-Box handle.
+
+**Test-gait note:** when driving dnd-kit with Playwright, move with fine steps
+(`steps: 60+`) — 4-step jumps skip the 3→5px window and mis-test the constraint; and
+re-measure target boxes mid-drag, because the root zone appearing shifts the list.
