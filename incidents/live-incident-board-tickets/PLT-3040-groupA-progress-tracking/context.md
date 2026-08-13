@@ -276,3 +276,17 @@ It needs a **re-send as a real Jira attachment**, not a different viewer.
 
 Note that the discriminating category check (§4) does **not** need the image and can run in parallel,
 so this ticket should not be parked waiting on the customer.
+
+## Left scope 2026-08-13 — moved Open → In Code Review
+
+Live JQL fetch (`project = PLT AND issuetype = "Live Incident" AND status NOT IN (...)`) no longer
+returns PLT-3040; direct `getJiraIssue` confirms **status = In Code Review**, `updated`
+2026-08-12T17:43:06+01:00, assignee still Darminder Atker. No new Jira comment is attached — same
+"drafted action landed off-Jira" shape as PLT-3033 leaving scope on 08-11. Read together with the
+08-12 run's drafted ask (get Darminder to run the CH08 category-mapping check), this reads as the
+check having been run, H1 confirmed, and a fix already written and up for review — not as a stall.
+No re-investigation done this run; folder tag left as `-groupA-` per the PLT-2874/PLT-2906
+precedent (advanced past scope but not yet released). Worth a light check next run on whether the
+fix that lands also covers the filter-panel leak (`dashboard-filter-utils.ts:57,86`, H3) noted
+above as a second, independent instance of the same PLT-2821 half-migration, since the code-review
+ticket may only touch the progress-panel fallback this context.md led with.
