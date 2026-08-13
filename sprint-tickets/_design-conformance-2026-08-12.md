@@ -471,3 +471,23 @@ This is the second and third collision today. The working rule stands: `git fetc
 `git reset --hard origin/<branch>` immediately before starting *and* before pushing, and
 verify a parallel run's fix by reading the diff and re-running the suite rather than
 trusting the commit message.
+
+### Correction to the table above: transcribing a prototype value is not the same as applying it
+
+The measured `padding: 24px 32px` on the prototype's section is **correct for the
+prototype and wrong for us**. In the prototype the section's scroll parent has no padding,
+so the section carries it. In `AssetTypeDetailContent` and `SystemTypeDetail` the scroll
+container already has `px={4} py={3}` — exactly the same 32/24 — and separates sections
+with `gap={3}`.
+
+Copying the value onto the section doubled the gutter to 64px and pushed every section out
+of alignment with the detail header. Caught on self-review, ~20 minutes after pushing it,
+by asking "who else pads this?" rather than by any test — no test asserts layout.
+
+**The rule**: a measured design value tells you the *rendered* result, not which element
+should own it. Before transcribing a padding/margin onto a component, check what its
+parent already contributes. The intended output was the prototype's; the padding just
+already lived one level up.
+
+This is the same failure shape as the two inert features from this morning — code that is
+individually correct but wrong about the context it lands in.
