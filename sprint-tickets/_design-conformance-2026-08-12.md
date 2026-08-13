@@ -494,6 +494,14 @@ individually correct but wrong about the context it lands in.
 
 ### Sonar's "1 new issue" was dead code that `tsc` cannot see
 
+**Correction (same day):** the heading below was wrong about *which* issue. Sonar still
+reported 1 after the `TEXT_PRIMARY` removal. The real finding was
+`sonarjs/no-duplicate-string` in the two specs added that day — repeated fixture literals
+(`'t1'` seven times, `'Chilled Water'` five times). Fixed by naming them. The dead-code
+removal below was still correct, just not what Sonar was pointing at. **Both lessons hold,
+and the second one is: don't guess at a Sonar finding when `npx eslint <changed files>`
+reproduces it locally in seconds.**
+
 After moving the heading/intro styles into `typeDetail.styles.ts`, `TEXT_PRIMARY` and its
 `baseTheme` import were left declared and unread in `ReadinessLevelsSection.tsx`.
 
