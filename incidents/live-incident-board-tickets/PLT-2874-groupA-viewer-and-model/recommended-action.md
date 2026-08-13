@@ -1,6 +1,10 @@
 # PLT-2874 — Recommended action
 
-> **2026-07-31: superseded. Resolved in diagnosis, fix in review.**
+> **2026-08-13: reopened. The 07-31 "close the incident" position below is superseded by QA finding
+> Staging still broken, in the opposite direction. See "Current: get Staging's own numbers" below —
+> read that first.**
+
+> **2026-07-31: superseded by the 08-13 reopening above. Resolved in diagnosis, fix in review.**
 >
 > Everything below is the 07-24 position and is kept because its reasoning held up. Its outcome
 > map called this correctly: *"A ≈ 628k and B ≈ 695k → gap is dbId expansion of a
@@ -10,6 +14,60 @@
 > count under the label "Elements" is a defect, and once corrected the two surfaces agree to 0.5%.
 >
 > **Current position below.**
+
+## Current (2026-08-13): get Staging's own numbers before guessing at a fix
+
+**Chosen action: (a) internal comment to Gennaro asking for two console lines + three queries —
+not a Jira status change yet.**
+
+**Why not straight to dev.** Five candidate mechanisms are live (`context.md` §"Reopened
+2026-08-13"), all consistent with the direction and magnitude observed, and none excluded. Code
+reading alone cannot separate them — they differ on data freshness/artefact state, which is
+Staging-environment-specific and invisible from this checkout. Sending this to dev now would be
+guessing which of five things to fix.
+
+**Why not back to the customer / With Technical Support.** This is an internal QA finding on a
+pre-release build, not a customer report. Nothing here needs a client.
+
+**Why not Blocked.** The three-query discriminator and the two console log lines are cheap and
+Gennaro already has the Staging session open — this is a five-minute ask, not a wait on anything
+external.
+
+### Draft internal comment (addressed to Gennaro Boccia) — DRAFT ONLY
+
+> Gennaro, thanks for catching this on Staging. Since Prod now matches (~604k vs 604k) but Staging
+> doesn't (603,844 vs 551,386) on the same editor number, this looks like a Staging-side data
+> freshness issue rather than a code regression — the fix from July is still in the code. Could you
+> open the browser console on Staging and paste two lines: the one with "calculatedOn" near
+> Pipeline B's progress load, and the "Artefact selected" line for the object-id map? And if you
+> have the DuckDB panel open, three quick counts would settle exactly where the ~52,000 elements
+> disappear:
+>
+> ```sql
+> SELECT COUNT(DISTINCT modelElementId) FROM _visible_elements;
+> SELECT COUNT(DISTINCT modelElementId) FROM element_base_data;
+> SELECT COUNT(DISTINCT modelElementId) FROM activity_links;
+> ```
+>
+> Whichever query first shows the number instead of ~604k tells us which layer to look at. No need
+> to touch Prod or the customer, this is entirely a Staging-side check.
+
+### Follow-through, not executed here
+
+- If H1 (stale `calculatedOn`) confirms: this is a Staging pipeline/data-refresh issue, not a
+  frontend bug — no code change, just re-run Staging's progress calc and recheck.
+- If H3 (wrong object-id-map version) confirms: worth checking whether Staging has an extra model
+  version whose map artefact hasn't been generated yet — again pipeline-side, not FE.
+- If none of H1/H3/H4 explain it and the `_visible_elements` count itself is short of
+  `activity_links`, that lands back on H5 (`element-count.ts:14-19` dropping falsy
+  `modelElementId` rows) and **would** be a frontend fix — add a warning log there regardless, it is
+  currently silent.
+- Do not close or comment on the customer-facing thread until Staging is understood; Prod is fine,
+  so there's no urgency to explain anything externally yet.
+
+---
+
+## Superseded 2026-07-31 position (still correct for Prod, not for Staging)
 
 ## Current: ship PR #2084, close the incident, spin out the rest
 

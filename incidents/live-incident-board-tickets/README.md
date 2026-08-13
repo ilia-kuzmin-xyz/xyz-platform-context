@@ -45,6 +45,100 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-13 — PLT-3040 left scope (→ In Code Review), PLT-2874 reopened with a QA-caught Staging regression, 6 confirmed unchanged, Group B still empty
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
+Technical Support", "With QA", "In QA", "Ready For QA", "In Code Review", "Awaiting Release / Done",
+"READY FOR RELEASE", "Done", "Customer Release Check", "ARCHIVED (NOT RELEASED)", "Blocked") ORDER BY
+created DESC`). **7 tickets in scope, all Group A** (`Open`/`In Analysis`/`With Customer`) — Group B
+empty, same as every run to date. Set = the 08-12 run's 7 minus **PLT-3040** (→ In Code Review, out
+of scope) plus **PLT-2874** (reopened — was out of scope since 07-30, now back as `Open`).
+
+### PLT-2874 — reopened this run (viewer-and-model), the one that needs a human
+
+**QA (Gennaro Boccia) commented 2026-08-12 10:44 on Staging 26.3.4: Editor 603,844 / Dashboard
+551,386 — a 52,458-element undercount, on the same ticket where Ilia's own 07-31 "diagnosed and
+fixed" comment closed the original overcount and PR #2084 shipped.** Prod, same rewind, shows Editor
+603,844 / Dashboard ~604k — matching. Same editor number, two different dashboard numbers, only on
+Staging does the pair disagree: this is a live-in-the-tree fix that a QA pass is now saying doesn't
+hold on the pre-release build. **Verified the fix is genuinely in the codebase** (not "staging is
+missing it" — that would overcount, not undercount, so it's ruled out by direction):
+`element-count.ts`'s `countDistinctElements()` (named for PLT-2874 in its own header comment) is
+wired into both `dashboard-color-service.ts` colour paths, and the query side now uses `SELECT
+DISTINCT`. Git history in this checkout cannot date the fix or find a regression commit — the
+50-commit history root is a squashed full-tree import with no PLT-2874 diff visible, and the only
+two post-import commits touching this area don't change counts. **Five ranked hypotheses for the
+Staging-only gap**, none excluded by code alone because they all differ on data-freshness/artefact
+state between environments, invisible from a local checkout: leading (6-7/10) is that the
+dashboard's element/link sync is capped at the progress artefact's `calculatedOn`
+(`dashboard-progress-service.ts:672,829-858`) while the editor's isn't
+(`linking-service.ts:101-104`) — a stale Staging progress calc would produce exactly this, direction
+and asymmetry both matching, with zero code difference required between environments. Next are a
+version-mismatched object-id-map artefact silently falling back to an older translation, a
+progress-derived date-window pinch, silent OPFS staleness on a hash-less artefact, and a latent
+null-`modelElementId` drop in the new counting helper itself. **All five are falsifiable from the
+Staging browser console and DuckDB panel in about five minutes, no code change needed** — two log
+lines plus three `COUNT(DISTINCT modelElementId)` queries at three points in the pipeline localise
+exactly where the ~52,000 elements disappear. Full findings, ranked hypotheses and the drafted
+comment to Gennaro: `PLT-2874-groupA-viewer-and-model/context.md` §"Reopened 2026-08-13" +
+`recommended-action.md`. New candidate defect pattern added to `recurring-defect-patterns.md`
+(single occurrence, unconfirmed — see below).
+
+### PLT-3040 — left scope this run, naming why per the standing rule
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-3040** | In Code Review (was Open) | Transitioned 08-12 17:43, no new Jira comment attached — same "drafted action landed off-Jira" shape as PLT-3033 on 08-11. Reads as Darminder having run the drafted category-mapping check, confirmed the mechanism, and written a fix. No re-investigation done; folder tag kept `-groupA-` per the PLT-2874/PLT-2906 precedent. |
+
+### Tickets confirmed unchanged (verified via live JQL fetch, comment counts checked byte-for-byte
+against what the 08-12 run recorded — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3024](PLT-3024-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-06 (Rishi's federation question) | 10 comments, unchanged; question now **7 days** unanswered |
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 13 days unanswered** |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **11 consecutive runs** on the board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **38 days stale**, direct close-out still unposted across **11 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Yash thanked Ilia) | 16 comments, unchanged; genuinely with the customer's project-delivery team, not a stall on us |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged; identity question to Mostafa still the only open item in the family |
+
+### Cross-ticket notes
+
+- **PLT-2874 is a new shape for this board: a QA-caught regression on the run's own past "fixed"
+  ticket, not a fresh customer report.** Every other reopening/left-scope event so far (PLT-3033,
+  PLT-3040, PLT-2906) has been a forward move (ticket progressing through the pipeline); this is the
+  first backward one — a ticket that had left scope as resolved coming back because the fix didn't
+  hold everywhere. Worth watching whether "fixed on Prod, unverified on Staging" recurs as its own
+  shape now that a QA pass has caught one.
+- **The "recommended but never posted" pattern is now eleven runs deep on both PLT-2858 and
+  PLT-2815.** Both drafts already exist verbatim in each ticket's `recommended-action.md`; nothing
+  further needs drafting, only sending.
+- **PLT-3040 leaving scope without a Jira comment continues the pattern from PLT-3033** (08-11) and
+  PLT-2906 (08-05): drafted asks that land off-Jira and show up only as a status transition. Treat as
+  a positive signal, not a stall, per the standing rule.
+
+### ⚠️ Attachments needing human — this run
+
+No new attachments this run. PLT-2874's investigation needed none — the decisive figures are in
+Gennaro's comment text, not an image. Prior gaps on the six carried-over tickets stand exactly as
+previously documented.
+
+### Needing a human now
+
+1. **PLT-2874** — new this run: send Gennaro the console/DuckDB check (drafted in
+   `recommended-action.md`) before any dev work is guessed at. This is the freshest item on the
+   board and the only one where the ball is genuinely on us right now, not parked with a customer.
+2. **PLT-2858** — post the escalate-to-Pietro comment (drafted, unchanged, 11 runs unposted). Top
+   priority by tenure: Critical priority, 30 days of customer silence on a decision only
+   Pietro/Mostafa can make.
+3. **PLT-2909** — post the one-line nudge to Ali (drafted 08-10, now 13 days unanswered).
+4. **PLT-2619** — post the identity question to Mostafa (drafted, unchanged since 08-04, the only
+   open item left in the family since the PR cleared).
+5. **PLT-2815** — execute the close-out (drafted, unchanged, 11 runs unposted). Lowest urgency —
+   administrative, not a live customer wait.
+
+---
+
 ## Run: 2026-08-12 — 1 brand-new ticket deep-dived (PLT-3040), 1 left scope (PLT-3033 → With Technical Support), 6 confirmed unchanged, new candidate defect pattern
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With

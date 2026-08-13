@@ -388,3 +388,28 @@ incident.
   the join before assuming the duplicate itself is the defect. Single occurrence — promote if a
   second project reports the same "phantom sibling shows real numbers" shape. Full findings:
   `live-incident-board-tickets/PLT-3040-groupA-progress-tracking/context.md`.
+- **Dashboard element-sync capped at the progress artefact's `calculatedOn`, editor's sync isn't,
+  2026-08-13** (PLT-2874, reopened — Staging-only, unconfirmed, leading hypothesis not yet tested
+  against the environment). After the "same word, different unit" fix above shipped, QA (Gennaro)
+  found Prod now matches the editor (~604k vs 604k) but Staging shows the dashboard **52,458 below**
+  the same editor figure — undercounting, the opposite direction from the original defect. Candidate
+  mechanism: `dashboard-progress-service.ts:672,829-858` caps the dashboard's element/link delta-sync
+  at `this._v2Loader.getCalculatedOn()` ("coloring never runs ahead of the figures"), while the
+  editor's equivalent sync (`linking-service.ts:101-104`) has no such cap — so elements linked after
+  the last progress calculation are invisible to the dashboard and visible to the editor. On an
+  environment whose progress-artefact refresh lags (plausible on a QA/Staging build that isn't
+  recalculated daily like Prod), this alone would produce exactly this signature with **no code
+  difference between environments**, only data freshness — which is why the same editor number can
+  pair with two different dashboard numbers. Two sibling hypotheses not yet excluded: a
+  version-mismatched `svf2-object-id-map` artefact silently falling back to an older translation
+  (`artefact-loader.ts:238-241`), and a progress-derived `dateRangeStart` landing later on a slower
+  Staging load (`dashboard-progress-service.ts:254-300`). **Recognition signature:** a "totals now
+  differ between environments" report where the *editor's* figure is identical between environments
+  and only the *dashboard's* figure moves — that asymmetry points at the dashboard's own sync/cache
+  layer, not at the underlying data. **Diagnostic, no code change:** read the environment's console
+  for the `calculatedOn` timestamp and the artefact-selection log line, then run
+  `COUNT(DISTINCT modelElementId)` at each of `_visible_elements` / `element_base_data` /
+  `activity_links` to localise which layer drops the count. Single occurrence, unconfirmed — promote
+  only once one of the three hypotheses is actually verified against Staging, and note here which
+  one it was. Full findings: `live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/context.md`
+  §"Reopened 2026-08-13".

@@ -188,6 +188,114 @@ WHERE statusCode IS NOT NULL;   -- apply same status filter as the tile
 
 ---
 
+## Reopened 2026-08-13 — QA finds Staging still broken, in the opposite direction
+
+Board re-query shows PLT-2874 back in scope as **Open** (was Ready For QA per the 08-05/07-30
+progression below). Folder tag renamed groupB → groupA accordingly.
+
+**New comment, 2026-08-12 10:44, Gennaro Boccia (QA), on Staging 26.3.4:**
+> Editor: 603,844. Dashboard: 551,386.
+>
+> On Prod, same rewind: Editor 603,844, Dashboard ~604k.
+
+So Prod now agrees with the editor (consistent with PR #2084 — see "Current: ship PR #2084" in
+`recommended-action.md` — having shipped and worked). Staging, on the **identical editor figure**,
+shows a dashboard number **52,458 below** it — undercounting, the opposite direction from the
+original bug (which overcounted by object-expansion). Same code, same editor number, different
+dashboard number between environments → the defect is environmental (build/data freshness), not a
+fresh code regression on this evidence alone.
+
+**Verified in the current checkout (`hc-frontend`, branch `claude/vigilant-franklin-iikevd`,
+no PLT-2874 commit is separately visible — see caveat below):**
+
+- The PR #2084 fix **is** in the tree and matches what "Diagnosed and fixed" described: the tile
+  reports `visibleElements$`, fed by `countDistinctElements()` (new helper,
+  `dashboard-panels/viewer/element-count.ts:10-20`, header comment names PLT-2874 explicitly),
+  called from both colour paths — `dashboard-color-service.ts:697-703` (initial paint) and
+  `:874-879` (`reApplyColors`, i.e. after any filter/scrubber change; the comment notes this second
+  call site is what PLT-2874's own fix-round added, "missing it here left the total reverting to
+  the object count after any filter change"). `coloredDbIds` still holds objectIds and is unchanged,
+  used only for painting (`:681,692,865,868`).
+- The query side also carries it: `dashboard-progress-service.ts:2069` and `:2083` now
+  `SELECT DISTINCT …`, materialised at `:2092` into `_visible_elements`; a unit test guards it
+  (`element-count.test.ts:3-43`).
+- **What did NOT change:** `element_base_data` is still built with `LEFT JOIN element_status /
+  activity_links / api_activities` and no `DISTINCT`, `GROUP BY map.objectId, map.modelElementId,
+  es.installationStatus, es.installationCheckDate` (`dashboard-progress-service.ts:2548-2560`) —
+  byte-for-byte the shape this file's 07-13 pass described. The fix landed at the *reporting* layer
+  only, as `investigation-log.md` proposed; vectors 2/3 (status-history duplication, unlinked-but-
+  statused scope) are structurally still there, just no longer the live symptom.
+- **Git history cannot date the fix or find a regression commit.** This checkout has 50 commits;
+  the root `ca87f65` (2026-08-03) is a squashed full-tree import — `element-count.ts`,
+  `dashboard-color-service.ts` and `dashboard-progress-service.ts` all trace to it with no earlier
+  history, so **no PLT-2874 diff/blame exists in this repo** and `git log --grep=PLT-2874` returns
+  nothing. Only two post-import commits touch this path and neither changes counts: `4ad83a7`
+  (08-07, PLT-2743, comment-only) and `b440537` (08-05, PLT-2935, adds frozen-planned-progress
+  filtering for one hardcoded project id, unrelated). **Ruling out "Staging is missing the fix":**
+  that would produce an *over*count, not the observed undercount, so it's ruled out by direction,
+  not by finding a counter-commit. `changelog.md` is stale since 2022; app version is per-environment
+  via `.github/actions/sync-version` and not visible from this checkout, so build skew between
+  Staging and Prod is real but unverifiable here.
+
+**Ranked hypotheses for the Staging-only undercount** (dashboard vs editor pull from genuinely
+different sync chains — dashboard: `ModelDetailsPanel.tsx` "Linked" via
+`linking.getLinksForModel` → `linking-service.ts:680-681`, no date filter, no object-id map at all;
+editor: the PLT-2874-fixed `_visible_elements` path, gated by object-id-map presence, a dated
+schedule link, and the date window):
+
+1. **H1 (leading, 6-7/10): dashboard link-sync is capped at the progress artefact's
+   `calculatedOn`; the editor's isn't.** `dashboard-progress-service.ts:672` derives
+   `endSyncDateTime` from `this._v2Loader.getCalculatedOn()`, passed into
+   `syncElementStatusDeltaFromAPI` / `syncActivityLinksDeltaFromAPI` (`:831,858`) — comment at
+   `:829-830`: "capped at the progress calculatedOn so coloring never runs ahead of the figures".
+   `linking-service.ts:101-104`'s equivalent sync sends no such cap. **Falsifiable in one look**: if
+   Staging's progress artefact `calculatedOn` is weeks stale (check the Pipeline B console log at
+   `dashboard-progress-service.ts:742`) while Prod's is ~today, elements linked after that date are
+   invisible to the dashboard and visible to the editor — direction and asymmetry both match, and
+   no code/config difference between environments is required, only data freshness.
+2. **H2 (4/10): silent OPFS cache staleness when an artefact carries no hash / zero size.**
+   `duckdb-service.ts:154-158` warns and falls through to a size-only check when `artefactHash` is
+   absent; `opfs-cache-manager.ts:164` skips that check when `fileSizeBytes` is falsy (`:430`
+   documents this can legitimately be 0). A Staging pipeline emitting hash-less/zero-size artefacts
+   could serve a stale cached parquet indefinitely on a QA browser specifically.
+3. **H3 (4/10): wrong `svf2-object-id-map` version selected.** `artefact-loader.ts:238-241` — if no
+   artefact matches the active model *version*, it silently falls back to
+   `matchingByModel[0]`, an older translation with a smaller element universe. Logged at
+   `artefact-loader.ts:258,273` (model-matched vs version-matched, row count) — falsifiable from the
+   Staging console directly.
+4. **H4 (2-3/10): a progress-derived `dateRangeStart` pinches the window even at scrubber-end.**
+   `dashboard-progress-service.ts:2011,2017` filter on `endDate >= dateRangeStart` /
+   `displayDate <= dateRangeEnd`; `_queryDataDateRange` (`:254-300`) falls back to a narrower
+   progress-parquet-derived start when `api_activities` isn't populated yet, and pipeline
+   ordering makes which branch wins timing-dependent — a slower Staging load could settle on a later
+   start than Prod on identical code. Logged at `:300` ("Data date range: X to Y").
+5. **H5 (background risk, not the leading cause): `countDistinctElements` silently drops rows with a
+   falsy `modelElementId`** (`element-count.ts:14-19`) and only uses the object-count fallback when
+   the resulting set is *entirely* empty — a partially-NULL `modelElementId` column in a map parquet
+   would silently undercount with no error. Worth hardening regardless of which hypothesis above is
+   the trigger.
+
+**Ruled out:** the alternate `INNER JOIN`-based runtime-mapping query
+(`dashboard-progress-service.ts:2246-2249,2312-2313`), which would genuinely undercount, cannot be
+active — `DASHBOARD_FEATURES.USE_VIEWERPAGE_ID_MAPPING` is a hardcoded `false`
+(`dashboard-provider/dashboard-project-service.ts:25-40`). No staging-only feature flag exists
+anywhere near this code (`config/constants.ts:876-893`).
+
+**The three-query discriminator, on Staging, no code change needed:**
+```sql
+SELECT COUNT(DISTINCT modelElementId) FROM _visible_elements;   -- what the tile shows
+SELECT COUNT(DISTINCT modelElementId) FROM element_base_data;   -- pre-date/status filter
+SELECT COUNT(DISTINCT modelElementId) FROM activity_links;      -- pre-object-id-map
+```
+Whichever step is where the ~52,458 disappear identifies the vector directly, per the playbook's
+"state a prediction, then run the query" discipline. Pair it with reading the Staging browser
+console for the `calculatedOn` timestamp (H1) and the artefact-selection log line (H3) — both free,
+no query needed.
+
+**Needs human:** none of H1-H5 can be settled without Staging environment access (console + DuckDB
+panel). This is a QA-owned environment; Gennaro already has it open. The fastest path is asking
+Gennaro to paste the two console lines above and run the three queries, not re-deriving from code.
+
 ## Group move: 2026-07-30 — folder re-tagged groupA → groupB
 
 Board re-check (`project = PLT AND issuetype = "Live Incident"`, JQL filter) shows PLT-2874 is now
