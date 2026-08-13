@@ -117,3 +117,22 @@ anything above it can move, since every PR in the chain inherits the conflict.
 [#11]: https://github.com/XYZReality/xyz-supabase/pull/11
 [#13]: https://github.com/XYZReality/xyz-supabase/pull/13
 [#2124]: https://github.com/XYZReality/hc-frontend/pull/2124
+
+## 2026-08-13 — deployment state re-verified (scheduled PR-review run)
+
+Probed the `dev` database again with the committed public key while reviewing #2137
+(the v2 of the frontend rename, replacing #2124):
+
+- Old names **still live** on `dev`: `tag`, `workflow_tag`, `workflow_tag_task` → 200;
+  `asset.system` and `readiness_task_link.level_id` still selectable.
+- New names **still absent**: `readiness_step`, `workflow_step`, `workflow_step_task` → 404;
+  `asset.system_label`, `readiness_task_link.readiness_step_id` → 400.
+
+So xyz-supabase#11 may have merged to the `develop` git branch, but the migration is
+**not applied to the dev database**. #2137's body states the rename "is live on the dev
+branch" and the old reads 404 — **that premise did not hold when probed** (13 Aug). Merging
+#2137 before the migration is applied would 404 every commissioning surface on `dev` for
+flag-on users (pitfalls §3 — no compatibility window). Review outcome: code side of #2137 is
+a clean mechanical rename (i18n regressions from the Copilot round all fixed, `required_item`
+/ `task_instance.type` untouched as promised); the merge is gated purely on zip-order
+execution, which still needs a human with Supabase environment access.
