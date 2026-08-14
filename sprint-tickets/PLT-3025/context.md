@@ -127,8 +127,10 @@ an access control when the attacker is the asker.**
 
 ### Checkpoint 2 — CI
 
-Green (4/4) before this run. `build` re-running on `afa2df70f` + the master merge at time of
-writing. ⚠️ **Local verification was impossible this run** — `npm ci` fails with 401 against
+Green (4/4) before this run, and **green again after it** — `build` succeeded on the merge commit
+`b7e2265a2` at 08:15:34 UTC, SonarCloud passed. That is the only verification the new spec has, so
+it matters: the 16 new cases compile and pass in CI. All five review threads resolved afterwards,
+not before. ⚠️ **Local verification was impossible this run** — `npm ci` fails with 401 against
 `npm.pkg.github.com` for `@xyzreality/dhtmlx-gantt`; the session's `GITHUB_TOKEN` has no
 package-read scope. So **no local `vitest` or `tsc --noEmit` run**; CI is the only check on the new
 spec. Future runs: don't burn time retrying the install, it is an auth boundary not a flake.
