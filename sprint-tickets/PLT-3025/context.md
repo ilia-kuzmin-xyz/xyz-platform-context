@@ -65,3 +65,85 @@ questions 1–3 are answered, since all three change its data model.
 - A pipeline restart no longer re-downloads parquet or re-runs discovery
 - Warm timings do not regress
 - A published report appears as a dashboard tab and renders with live data
+
+---
+
+## 2026-08-14 — PR #2142 in review; five Copilot threads addressed (3 of them security)
+
+**State:** PR [#2142](https://github.com/XYZReality/hc-frontend/pull/2142) open, not draft, CI green
+before this run's push, four reviewers requested (TomMasdinXYZ, DarminderA, rishib-xyz,
+SergiuszXYZ), **no human review yet**. Supersedes #2141, which auto-closed when the head branch was
+renamed to `PLT-3025` — its Copilot threads and resolutions live on the closed PR, so don't hunt
+for them on #2142.
+
+### The architecture changed since the 08-07 notes above — read this before re-planning
+
+Half 2 shipped, and half 1's viewer problem was solved by **deleting the payload**, not by caching
+it. Concretely, on this branch:
+
+- **`viewer-mapping.json` no longer exists.** Zero references anywhere under `CanvasPage/`. Element
+  data now comes from **browser DuckDB** (`canvas-duckdb-service.ts`, same engine + OPFS cache the
+  dashboard uses), with the pipeline shipping a *catalogue of named SQL* in `viewer-config.json`
+  instead of any element data. A new filter is a WHERE clause, not a pipeline release.
+- **The whole-dashboard mount gate is gone.** `ArtifactPanel.tsx` used to withhold the entire report
+  while `viewerMapping` was null; the condition is now just `needsViewer && !isActive`.
+- Published reports render as dashboard tabs via `usePublishedReport`, shared by the standalone
+  viewer and the tab panel.
+
+⚠️ **This invalidates the "persist the mapping" line of thinking recorded in `PLT-2963/context.md`
+(08-10 *and* the 08-13 correction).** There is no mapping to persist. Both entries are kept for the
+record but neither should be acted on.
+
+### Checkpoint 1 — five Copilot threads, all legitimate, all fixed in `afa2df70f`
+
+Worth noting **the previous commit (`a8ee03336`) was itself titled "origin-checked bridges", and
+Copilot reviewed that exact SHA and still flagged the bridges.** It was right to: the earlier fix
+made replies go to `e.source`/`e.origin` instead of `'*'`, which stops *broadcast* — but does
+nothing about **who is allowed to ask**. An opener or popup holding a handle on the page could post
+`canvas-sql-request` and be answered at its own origin. **Lesson: "replies only to the asker" is not
+an access control when the attacker is the asker.**
+
+| # | Finding | Verdict | Fix |
+|---|---------|---------|-----|
+| 1 | SQL + CDE-token bridges accept from any window (`ArtifactSandpack.tsx`) | valid | `isOwnFrame()` — sender must be in this page's frame tree |
+| 2 | `usePublishedReport` leaves `loading` true when inputs missing | valid | resets to idle; both consumers already gate on own resolution state, so no flash |
+| 3 | No tests on `usePublishedReport` | valid | new spec, 16 cases |
+| 4 | `CanvasDuckDBService.init` never disposes the old engine | valid | dispose deferred until outgoing init settles |
+| 5 | ForgeViewer iframe accepts any message with the right id | valid | `e.source !== window.parent` guard |
+
+**Implementation notes worth keeping:**
+
+- `isOwnFrame` walks the `parent` chain (bounded 10 hops) rather than comparing to a single iframe
+  ref. Deliberate: tying it to Sandpack's preview element means the day Sandpack nests that iframe,
+  the 3D viewer silently stops getting rows — and it fails *looking like a slow query*, not like a
+  broken bridge. `parent` is readable cross-origin so the walk works against the sandbox.
+- **Copilot flagged only one of two identical response handlers.** `fetchCdeToken`
+  (`ForgeViewerStatic.ts` ~:115) had the same hole and was fixed in the same commit. Always check
+  for the twin.
+- DuckDB disposal cannot happen before starting the new init: `_init` is async and disposing a
+  service mid-`initialize()` races its own constructor. Capture order matters too — `this._init()`
+  reassigns `this.service` synchronously before its first await, so the old ref must come off the
+  field first.
+
+### Checkpoint 2 — CI
+
+Green (4/4) before this run. `build` re-running on `afa2df70f` + the master merge at time of
+writing. ⚠️ **Local verification was impossible this run** — `npm ci` fails with 401 against
+`npm.pkg.github.com` for `@xyzreality/dhtmlx-gantt`; the session's `GITHUB_TOKEN` has no
+package-read scope. So **no local `vitest` or `tsc --noEmit` run**; CI is the only check on the new
+spec. Future runs: don't burn time retrying the install, it is an auth boundary not a flake.
+
+### Checkpoint 3 — master merged
+
+`origin/master` moved to `b700eb31b` (PLT-3040, UG electrical duplicated in dashboard) and this
+branch did not have it. Merged clean (`b7e2265a2`) — it touches `discipline-list.tsx` and
+`use-progress-panel-data.tsx`, no overlap with canvas.
+
+### Small thing noticed, deliberately not changed
+
+In `ArtifactPanel.tsx` the `needsViewer && !isActive` branch renders
+`{isActive && <ViewerLoading />}` inside a box with `display: isActive ? 'flex' : 'none'`. Inside
+that branch `isActive` is false by construction, so **both are dead** — it renders an empty hidden
+box, and `ViewerLoading` is now unreferenced in practice. Harmless, but it is leftover from when the
+gate waited on the mapping. Worth a one-line cleanup next time this file is touched; not worth
+churning a PR mid-review.

@@ -215,3 +215,58 @@ Posted as comment **109516**.
 - **9/10 → held, not lowered**, for the FE half — but on **option 4**, not on the 08-10 plan.
   The blocker is no longer a missing fact; it's a yes/no on changing the viewer contract.
 - The `ViewerFilesSync` fix is **independently shippable at 8/10** if PLT-2963 stays parked.
+
+---
+
+## 2026-08-14 — ✅ the duplication question answered itself: PLT-3025 shipped this ticket's viewer half
+
+Neither of the two questions outstanding since 08-08 got a human reply (now **6 days**). But they
+stopped mattering, because PLT-3025's frontend PR (#2142) was built in the meantime and **the
+viewer/first-paint half of this ticket is substantially done.**
+
+### What changed on the PLT-3025 branch
+
+- **`viewer-mapping.json` is gone** — zero references anywhere under `CanvasPage/`. Element data now
+  comes from browser DuckDB; the viewer posts SQL to the host page and gets rows back, with named
+  queries shipped in `viewer-config.json`.
+- **The `ArtifactPanel` whole-dashboard gate is gone** — the condition is now `needsViewer &&
+  !isActive`, and the in-place comment says *"The viewer no longer waits on a mapping payload."*
+
+### ⚠️ Supersedes BOTH earlier recommendations in this file
+
+- The **08-10** entry recommended *persist the mapping with the session*. Dead — no mapping exists.
+- The **08-13** entry corrected that to *option 4: make the viewer read the mapping at runtime*.
+  Also dead, and for a better reason than I gave: the fix wasn't to fetch the mapping later, it was
+  to **not have a mapping at all**. My "changes the generated-viewer contract, needs a nod first"
+  caveat was directionally right — the contract did change — but it happened under PLT-3025 rather
+  than needing a separate decision here.
+
+**Do not act on either entry.** They are kept so the reasoning trail stays legible, not as advice.
+
+### Correction to the 08-13 `ViewerFilesSync` bug report
+
+I reported it as: both VFS files are static imports, so late `updateFile` writes are silently
+dropped. **On master that still stands.** On the PLT-3025 branch it is *half* fixed — the mapping is
+gone so the enrichment case I named can no longer occur, but `viewer-config.json` remains a static
+import (`ForgeViewerStatic.ts:46`) while `ViewerFilesSync` still writes to it. Same shape, far
+smaller blast radius (config is small and settled at mount; the mapping was large and genuinely
+late). **Downgraded from "shippable standalone fix" to "not worth its own ticket".**
+
+### Recommendation posted (comment 109647)
+
+Close PLT-2963 as superseded — **but** three items in it are untouched by PLT-3025 and would be
+dropped on the floor by a plain duplicate-close:
+
+1. Activate a template from the user's prompt (+ serve a matched artefact directly instead of
+   regenerating) — **not in PLT-3025 at all**
+2. Hydration records have no max age (the `viewer` record was 27 days old and holds the model urn)
+3. Room Readiness drill-down: GC actual % + handover milestones — still blocked on where that data
+   lives, not on code
+
+Offered to take (1) and (2) as a small self-contained ticket — neither touches PLT-3025's files.
+
+### Confidence
+
+- **Ticket as written: 2/10** — down from 3/10, because most of what it asks for is now either done
+  or a duplicate. It is a scoping decision, not a coding task.
+- **The three orphan items: 8/10** for (1) and (2) once someone says they want them.

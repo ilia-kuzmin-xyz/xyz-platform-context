@@ -1094,3 +1094,82 @@ wrong recommendation on a ticket someone might act on is not.
 6. **Attribution-footer conflict still undecided.** No new GitHub comments were posted this run
    (0 open threads), so nothing new carries a Claude footer. The four replies on #2138 from the
    08-12 run do carry one.
+
+---
+
+## 2026-08-14 — sprint is 7-in-review + 1 in analysis; the run's work was #2142's five open threads
+
+**Sprint composition changed again.** PLT-3025 moved Dev In Progress → In Code Review and got a PR,
+and a **new ticket PLT-3043** appeared already in In Code Review. Eight tickets, one eligible.
+
+| Ticket | Status | PR | Eligible for kick-off? |
+|--------|--------|----|------------------------|
+| PLT-2992 | In Code Review | [#2135](https://github.com/XYZReality/hc-frontend/pull/2135) | ❌ |
+| PLT-2993 / PLT-2994 | In Code Review | [#2138](https://github.com/XYZReality/hc-frontend/pull/2138) | ❌ |
+| PLT-3000 / PLT-3002 | In Code Review | [#2136](https://github.com/XYZReality/hc-frontend/pull/2136) | ❌ |
+| PLT-3025 | In Code Review | [#2142](https://github.com/XYZReality/hc-frontend/pull/2142) | ❌ |
+| **PLT-3043** | **In Code Review** | 🔴 **none — no PR, no branch, no comments** | ❌ |
+| PLT-2963 | Analysis In Progress | none | ✅ — only candidate, deliberately not started |
+
+### 🔴 PLT-3043 is an anomaly worth a human's eyes
+
+"Project Settings — Type detail for System Types", created ~08-13, sitting in **In Code Review**
+with **no PR, no branch matching `*3043*` on the remote, and zero comments.** Either it was
+transitioned by mistake, or work exists somewhere this routine cannot see. Nothing to review and
+nothing to resume — flagged, not acted on. Note its description is unusually well-specified (it
+even names the `ModalContent`/`ModalTitle` hoisting problem and the `trSx` hover ring removed in
+`SystemTypesList.tsx`), so it reads like it was written *from* the PLT-3002 code.
+
+### Checkpoint 1 — #2142 had five open Copilot threads; the other three PRs were clean
+
+- #2135 — 1 thread, resolved. #2136 — 5 threads, all resolved. #2138 — 4 threads, all resolved.
+  **Still zero human reviews on any of them.**
+- **#2142 — 5 unresolved, all legitimate, all fixed this run** (`afa2df70f`). Three were security:
+  two message bridges accepting requests from any window (SQL results + a **CDE access token**), and
+  the iframe accepting spoofed responses. Plus a stuck-`loading` skeleton and a leaked DuckDB
+  engine/worker per project switch. Full detail in `PLT-3025/context.md`.
+
+**The lesson from #2142 worth carrying:** the commit immediately before the review was itself titled
+*"origin-checked bridges"*, and Copilot reviewed that SHA and flagged the bridges anyway — correctly.
+Replying only to `e.source`/`e.origin` stops results being *broadcast*; it does **not** stop an
+uninvited window from asking. *"We reply only to whoever asked"* is not an access control when the
+attacker is the one asking. Also: Copilot flagged one of **two** identical response handlers —
+always look for the twin.
+
+### Checkpoint 2 — CI
+
+All four PRs were green on entry. ⚠️ **Local test verification was impossible this run:** `npm ci`
+401s against `npm.pkg.github.com` for `@xyzreality/dhtmlx-gantt` — the session `GITHUB_TOKEN` has no
+package-read scope. No local `vitest`/`tsc`. CI is the only verification of the new spec. **Future
+runs: this is an auth boundary, not a flake — don't spend the run retrying it.**
+
+### Checkpoint 3 — one branch behind, merged clean
+
+`origin/master` at `b700eb31b`. PLT-2992 / PLT-3000+3002 / PLT-2993+2994 were already up to date;
+**PLT-3025 was missing `b700eb31b`** (PLT-3040) and was merged clean (`b7e2265a2`) — it touches the
+progress panel only, no canvas overlap. Authorship verified `ilia-kuzmin-xyz` on author *and*
+committer before pushing.
+
+### PLT-2963 — not started, and this run found the reason it should probably close
+
+The 6-day-old duplication question answered itself: **PLT-3025's #2142 delivered this ticket's
+viewer half**, by deleting the mapping payload entirely rather than caching it. That also
+invalidates *both* prior recommendations recorded on the ticket (08-10 persist-with-session, 08-13
+runtime-fetch). Posted as comment 109647 with a recommendation to close-and-re-cut, because three
+items in PLT-2963 are untouched by PLT-3025 and a plain duplicate-close would drop them.
+
+### Open items for a human
+
+1. 🔴 **PLT-3043 in In Code Review with nothing behind it** — needs a status correction or a pointer
+   to where the work lives.
+2. 🔴 **Four PRs, zero human review.** #2142 has four reviewers requested and none have looked;
+   #2135/#2136/#2138 have been sitting since 12–13 Aug with all Copilot threads resolved.
+3. **PLT-2963: close-and-re-cut, or trim?** Three orphan items named in comment 109647.
+4. **`<target>` still unfilled** in both canvas tickets — unchanged since 08-08.
+5. **PLT-3002's System data model** — still missing.
+6. **PLT-3000's unticketed scope** — §2 create/rename/delete and §3–§6. PLT-3043 now covers *part*
+   of §3 (type detail) for system types, so this is partially answered.
+7. **Attribution-footer conflict, still undecided and now worth a decision.** The session prompt asks
+   for no Claude presence in PR/Jira comments; the harness requires a Claude Code attribution footer
+   on every GitHub post. Footer kept — masking AI authorship from human reviewers is not something to
+   resolve silently in favour of the quieter option. Flagged in every run summary since 08-13.
