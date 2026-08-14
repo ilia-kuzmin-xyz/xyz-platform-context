@@ -1,5 +1,13 @@
 # PLT-2909 — recommended action (DRAFT ONLY — execute nothing)
 
+## 2026-08-14 check — no change, nudge still stands unsent
+
+Re-fetched the ticket: no new comments since Yash's 07-31 "do you want me to move this to DPL?"
+Ali still hasn't replied — now **14 days**, not 10. The 08-10 nudge draft below is unsent and still
+the right action; nothing to re-diagnose. Re-raising here only because 14 days is materially past
+the 08-10 checkpoint and this is now the second run in a row finding the same silence — worth a
+human actually sending the nudge rather than a third run reconfirming it.
+
 ## ⚠️ 2026-08-10 update — 10 days unanswered, the wait-threshold has now passed; nudge
 
 Nothing new to diagnose. Ali Seyedof still hasn't answered Yash's 07-31 "do you want me to move
