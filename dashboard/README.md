@@ -94,3 +94,36 @@ When filters change:
 ## Deep-dive docs
 
 For schemas, SQL examples, and API mappings, see [`docs/dashboard/`](../docs/dashboard/).
+
+---
+
+## 2026-08-14 — How a user reaches this page, and what still sends them to the old PowerBI report
+
+Added during the PLT-2619 triage. Verified by reading the code; nothing was built or run.
+
+Both dashboards are live in the shipped frontend, and **which one a user lands on is decided per
+project by backend state, not by any feature flag or rollout cohort.**
+
+- New (native) route `:project_id/dashboard` → `DashboardPage` is registered **unconditionally**,
+  auth-gated only — `app/pages/project/routes.tsx:55-64`. (Compare the Commissioning routes directly
+  below it, which *are* flag-wrapped.)
+- Legacy route `progress-dashboard/:id` → `ProgressReportPage` still exists (`app/routes.tsx:59-66`)
+  and embeds PowerBI (`app/pages/ProgressReportPage/ProgressReportPage.tsx:4, 163`) using a
+  per-project report id fetched from the backend (`:62`).
+- **The switch:** `resolveDashboardUrl(projectId)` — `app/helpers/dashboardNavigation.ts:6-21`.
+  `Dashboard-Mode` flag on → native (`:7-9`); else `getProjectDashboardInfo(projectId)` and a
+  **404 → native** (`:17-19`), any other response → **legacy PowerBI** (`:21`). So a project stays on
+  PowerBI for exactly one reason: a PowerBI report is still mapped to it on the backend. Called from
+  the Portfolio card (`app/pages/PortfolioPage/PortfolioPage.tsx:97-105`) and the viewer toolbar
+  (`.../viewer-bar/tools/dashboard-mode-toggle.tsx:16-21`).
+- **Two bypasses that skip the resolver entirely:**
+  - project **name** contains `v1` (bare substring — `app/helpers/V1Rules/v1ProductionRules.tsx:2-4`)
+    → Portfolio goes straight to PowerBI (`PortfolioPage.tsx:100-102`);
+  - **dashboard-only users** are hard-redirected to PowerBI (`app/hooks/useProjectContext.ts:45-50`).
+- `Dashboard-Mode` is **not** a rollout mechanism: feature flags come from a `feature-flags` browser
+  cookie with a hardcoded all-`false` default (`app/helpers/getFeatureFlagValue/getFeatureFlagValue.ts:6-15`,
+  `app/config/constants.ts:864, 886`). No org/tenant/user dimension exists anywhere in that path.
+
+**Practical consequence:** "is project X on the new dashboard yet?" is answerable in 30 seconds by
+opening it and reading the URL — `/projects/<id>/dashboard` vs `/progress-dashboard/<id>` — because
+that URL *is* the resolver's output. Do it with a non-dashboard-only account and `Dashboard-Mode` off.

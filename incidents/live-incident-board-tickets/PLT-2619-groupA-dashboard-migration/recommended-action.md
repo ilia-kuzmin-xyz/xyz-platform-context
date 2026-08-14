@@ -1,5 +1,78 @@
 # PLT-2619 — recommended action (DRAFT ONLY — execute nothing)
 
+> ## ⭐ Revised 2026-08-14 — the blocking lookup is now a 30-second URL check, and the reply to Yash can finally be written
+>
+> **Nothing below has been sent, posted or executed. No Jira write action was taken this run.**
+>
+> Framing: **resolved via communication** — pending one lookup that takes half a minute. Not Ready for
+> Dev (there is no FE work on this ticket, and now provably so — see `context.md` §2026-08-14). Not
+> With Technical Support (we are not waiting on the customer for anything we need). Not Blocked.
+>
+> ### What changed this run
+>
+> This run found the code that decides old-vs-new dashboard: `resolveDashboardUrl`
+> (`app/helpers/dashboardNavigation.ts:6-21`). A project shows the **old** PowerBI dashboard for
+> exactly one reason — the backend still has a PowerBI report mapped for it. There is no per-org
+> feature flag, no cohort, nothing to look up in a rollout table. `Dashboard-Mode` is a per-browser
+> cookie (`getFeatureFlagValue.ts:6-15`), not a rollout gate.
+>
+> **So the "needs human" step shrinks from "find out which cohort this demo is in" to this:**
+>
+> > Open the demo project from the Portfolio, click through to its dashboard, and read the URL.
+> > `…/projects/<id>/dashboard` = already on the new dashboard. `…/progress-dashboard/<id>` = still on
+> > PowerBI. Do it with a normal (not dashboard-only) account and with `Dashboard-Mode` off.
+>
+> That URL *is* the branch the code computes, so it is ground truth, not a proxy. **Owner: Ilia.**
+> It also makes the Mostafa identity question unnecessary *for this ticket* — you no longer need to
+> know whether PLT-2935's `69e232b2c222e55fa039eab2` is the same asset in order to answer Yash about
+> this one. (The Mostafa question is still worth asking on PLT-2935 for its own bookkeeping; it is
+> just no longer on PLT-2619's critical path. The 08-10 draft of it is retained below and is still
+> fine to send as-is.)
+>
+> ### Then: one reply to Yash on PLT-2619. Two branches, both pre-written.
+>
+> **Owner: Ilia Kuzmin. Addressee: Yash Patel. One message, posted on PLT-2619.** His 07-27 question
+> has been open 18 days; the ticket has had no substantive movement since. Send the branch the URL
+> check lands on.
+>
+> **Branch A — the URL is `/projects/<id>/dashboard` (already migrated):**
+>
+> > Yash, sorry for the slow reply. Checked this today: the demo project is already on the new
+> > dashboard, so the thing we were parked on back in April is done. Nothing further needed our side.
+> > Happy for you to tell the client it's running on the new one, and worth them reloading if they
+> > still have an old link bookmarked. One thing to watch: if any of their demo accounts are
+> > dashboard-only, those still land on the old PowerBI report, so let me know if someone reports
+> > seeing the old screen and I'll check the account.
+>
+> **Branch B — the URL is `/progress-dashboard/<id>` (still on PowerBI):**
+>
+> > Yash, checked this today and the demo is still on the old PowerBI report. The reason is on the
+> > backend rather than anything in the app: a project keeps showing the old dashboard for as long as
+> > a PowerBI report is still mapped to it, and it switches to the new one automatically once that
+> > mapping is gone and the project has progress data in the new pipeline. Can you confirm which
+> > project this is on the platform, exact name, and I'll get the mapping removed and check the data
+> > is there before we point the client at it.
+>
+> One question, one owner, answerable with a value, per the playbook. Branch B deliberately asks only
+> for the project name — that is still the single unknown from April, and it is the thing the client
+> chain can actually supply.
+>
+> ### What NOT to do, carried forward and still current
+>
+> - Do not close or reclassify **Freshdesk #6492** — Yash may still have an open client question there
+>   (status flipped to "Waiting on customer" on 08-03; content invisible from here).
+> - Do not send the 08-04 "chase PR #2080" message — merged 08-05, already retired on 08-10.
+> - Do not take PLT-2619 off the incident board until Yash has replied. The classification call (this
+>   is a service request, not a live incident) has been correct and unchanged since July; the
+>   bookkeeping is what should wait.
+>
+> ### Cheap fixes still undone (unchanged from 08-04, none of them have been done)
+>
+> - Link PLT-2619 ↔ PLT-2935 in Jira — `issuelinks: []` on both, still.
+> - Transition PLT-2619 deliberately; it has never been transitioned since 29 Apr (**107 days**).
+>
+> ---
+
 > ## Revised 2026-08-10 — the PR nudge below is done; only the Mostafa question remains
 >
 > PR #2080 merged 2026-08-05 (Rishi approved, Ilia merged) and PLT-2935 is now `Ready For QA` —

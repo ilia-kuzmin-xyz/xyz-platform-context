@@ -185,3 +185,58 @@ Outcome map:
 **Confidence in diagnosis: 6/10** (both code paths traced; specific cause of the Far01 gap is
 environment-dependent). **Confidence in this being the right next step: 8/10** — a clarifying question
 + one query is the low-cost move that decides bug-vs-by-design before any dev effort is committed.
+
+---
+
+## 2026-08-14 — same action, cheaper first rung (amends the 08-13 position, does not replace it)
+
+**The 08-13 chosen action stands: an internal comment to Gennaro, no Jira status change.** Still not
+dev-ready (four live hypotheses, `context.md` § 2026-08-14 adds a fifth, H6), still not a customer
+matter (internal QA on a pre-release build), still not Blocked (Gennaro has the environment open).
+
+What changed is the *order of the ask*. The 08-13 draft led with a console line and three DuckDB
+queries. This run found two checks that need no dev tools at all and one fact we are missing
+outright:
+
+1. **Which project and model.** Gennaro's editor figure, 603,844, matches neither FAR01 number this
+   folder recorded on 07-31. We may not be looking at FAR01, which means the magnitude argument that
+   ruled out the arbitrary-federated-model defect (H6) does not currently apply. This is the single
+   highest-value missing fact and it costs one word to answer.
+2. **The date slider's start and end dates on each environment** — a screenshot. If they differ,
+   H4 is live (`date-range.tsx:133-162` seeds the slider entirely from the progress-derived data
+   range). Free, and it is the only hypothesis with a symptom visible without a console.
+3. *Then* the console lines and the DuckDB ladder from the 08-13 draft, unchanged and still
+   decisive — but now with a decision table for reading it (`context.md` § 2026-08-14), including
+   the calibration that a healthy `element_base_data` reads slightly **above** the editor number,
+   not equal to it.
+
+### Draft internal comment (to Gennaro Boccia) — DRAFT ONLY, supersedes the 08-13 draft above
+
+> Gennaro, thanks for catching this. Prod matching and Staging not, on the same editor number, points
+> at Staging's own data rather than the code, so before we dig: which project and model were you on?
+> The editor figure doesn't line up with the one we measured in July, so I want to make sure we're
+> comparing the same file. And if you still have both tabs, a screenshot of the date slider on each
+> would help — if Staging's slider ends on an earlier date than Prod's, that alone explains it.
+
+*(One owner, two things that can be answered with a value and a screenshot, no jargon, no console.
+The 08-13 console-and-queries ask is held back as the follow-up once the project is named — sending
+both at once buries the cheap question under the expensive one.)*
+
+### Follow-through, not executed here (extends the 08-13 list, none of which is retracted)
+
+- If the project is **not** FAR01: re-check H6 (arbitrary federated-model pick,
+  `dashboard-project-service.ts:164-176`) on magnitude for that project before anything else — the
+  model id is readable straight off the Network tab.
+- If the sliders differ: H4, and the question becomes why Staging's data date range is shorter —
+  most likely `api_activities` losing the race to `project_progress` (`dashboard-progress-service.ts:771`
+  vs `:876`), which is again a Staging data-freshness story, not a code fix.
+- If both are identical: fall through to the 08-13 console + three-query ask verbatim, and read it
+  against the decision table in `context.md` § 2026-08-14.
+- **Independent of the outcome:** the H1 mechanism is narrower than we wrote on 08-13 — the
+  `calculatedOn` cap can only withhold links created *after the activity-links parquet snapshot*,
+  and is skipped entirely when that parquet is under five minutes old
+  (`artefact-loader.ts:604-612`). Do not describe it on the ticket as "the dashboard is capped at
+  the last progress calculation" without that qualifier; it overstates what the code does.
+- Still worth doing whatever the answer: add a warning log to `element-count.ts:14-19`, which
+  silently drops rows with a falsy `modelElementId` and only falls back to the object count when the
+  set is *entirely* empty. Unchanged from 08-13 (H5).

@@ -105,3 +105,22 @@ Package display names are NOT unique (same name can exist under several discipli
 UI: labels get a ` — <discipline>` suffix only when the name collides; unique names stay plain. Chips/search operate on labels via the shared filters' optional `getLabel` mapping.
 
 **Known limitation:** duplicates under the SAME discipline can't be told apart by pair-based consumers (schedule/viewer); id-keyed consumers (progress, quality, panel) handle them. Cross-discipline duplicates are fully handled. Discipline + dynamic category types are still name-keyed (see roadmap).
+
+## 2026-08-14 — dynamic category sections have no allow-list (added from PLT-3044)
+
+The "Filter options: where they come from" table above says dynamic categories (phase, area, zone…)
+come from `scheduleCategoryValues`. Spelling out the consequence, because a client raised it as a
+defect: **the panel offers whatever distinct values the client's own schedule mapping contains, with
+no curation step anywhere.**
+
+`buildDynamicCategoryTypes` (`dashboard-filter-utils.ts:238-306`, called from `extractFilterOptions`
+at `:181`) takes every non-core category type (`:243-246` — core = discipline, package) and fills each
+section from the distinct values the schedule service publishes on `availableCategoryValues$`, derived
+from `activity_categories_flat` (`dashboard-schedule-service.ts:68-73`; consumed at
+`dashboard-bar/filters/dashboard-filters.tsx:81-91`). Types with no schedule values are skipped
+(`:278`). Nothing filters the *values* themselves.
+
+So "the dashboard shows disciplines/areas we don't track" is normally a statement about the client's
+schedule mapping, not about the dashboard. Note this is the **mirror image** of the Pattern 3 problem
+(`incidents/recurring-defect-patterns.md`), where the panel silently *hides* zero-weight categories:
+same panel, no editorial layer in either direction.

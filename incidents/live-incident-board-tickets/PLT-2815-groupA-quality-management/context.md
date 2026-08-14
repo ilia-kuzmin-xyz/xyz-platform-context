@@ -196,3 +196,39 @@ cleanup, not a live customer wait).
 Live fetch: `updated` still `2026-07-06T10:18:45+01:00`, comment count unchanged at 13. **36 days
 stale.** Close-out recommendation unposted across nine consecutive runs. No re-diagnosis performed —
 nothing left to diagnose, only to execute.
+
+## 2026-08-14 — Confluence reference table read directly; the "as intended" numbers verified at source
+
+**Jira state (supplied to this run, not re-fetched):** status `With Customer`, priority Major,
+assignee Yash, `updated = 2026-07-06` — **39 days stale**, comment count unchanged at 13. Tenth
+consecutive run with no delta. Nothing new to diagnose.
+
+**New this run: the Confluence source was actually opened** (prior runs verified the shipped JSON
+against it; this run read the page itself via the Atlassian MCP). Page id 1630633988, "Issue Rework
+Reference Table", space UX / Digital Product Team, author Pietro Desiato, **last modified Oct 23,
+2025 — i.e. unchanged since before the ticket was raised, and unchanged since Mostafa's 23 June
+"leave it as intended" decision.** Nobody has quietly edited the table in the meantime.
+
+Verified verbatim from the page body:
+- `CAT3 | CSA | Underground Services | £600.00` — present, exactly as `rework_reference.json:67`.
+- **No `CAT4 | CSA | Underground Services` row exists** on the page either. Confirmed by reading the
+  complete table: CSA/Underground Services appears only at CAT1 (£54,560.00), CAT2 (£7,125.71) and
+  CAT3 (£600.00).
+- `CAT4 | CSA | (blank package) | £740.00` — the generic CSA fallback the Cat 4 figure resolves to.
+- The page's own fallback ladder (Cat+Disc+Pkg → Cat+Disc → Disc → null; Cat5 → 0; all missing → 0)
+  matches what `use-rework-cost-calculation.ts:94-154` implements.
+
+So both customer figures re-derive at source: 600 × 1.14 = €684.00 (package-specific rule) and
+740 × 1.14 = €843.60 (generic CSA fallback). The £600 anomaly flagged in §2 is confirmed as
+product-owned data, still live in the table: it is below the generic Cat 3 CSA (£2,003.33) and below
+the generic Cat 4 CSA (£740.00). **The diagnosis needed no correction; it is now verified against the
+authority rather than against the shipped copy of it.** Diagnosis confidence 9/10 → **10/10 on the
+arithmetic and the data**, unchanged on everything else.
+
+One cosmetic oddity noticed on the page, not load-bearing and not worth a ticket on its own: the four
+`Mechanical` generic-fallback rows at the bottom of the table are missing their empty Package cell,
+so they render as three columns instead of four. The values (Cat1 £7,920 … Cat4 £1,088) match the
+shipped JSON, so it is a table-formatting slip in Confluence, not a data discrepancy.
+
+**Nothing else changed.** The close-out recommended since 07-30 remains the only outstanding action;
+see the 2026-08-14 note in `recommended-action.md`.

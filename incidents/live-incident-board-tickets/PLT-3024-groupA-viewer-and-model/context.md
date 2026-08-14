@@ -233,3 +233,59 @@ content since Rishi's 08-06 09:16 federation question — now 5 days unanswered.
 performed; nothing material changed. The internal draft answering Rishi's own question
 (`recommended-action.md`) still hasn't been posted — now the second-longest-unposted draft on the
 board after PLT-2858's escalation.
+
+## 11. 2026-08-14 (this run) — Freshdesk-noise reading confirmed, mechanism re-verified, nothing new from the customer
+
+Live Jira re-read: status **Open**, priority **Major**, reporter and assignee both **Yash Patel**,
+project ML9, last updated **2026-08-10**. Comment trail since 08-06 is Yash's report, Rishi's
+08-06 09:16 federation question, and then **five status flips between "Waiting on customer" and
+"Open" across 08-06 → 08-10 with no human content attached to any of them**.
+
+**The §9/§10 reading of that trail is correct and is now confirmed on a third pass.** Those flips
+are Freshdesk-sync artefacts, not conversation: they arrive in bare pairs seconds apart (§10 records
+`109259`/`109260` one second apart), they carry no body, and the same signature is independently
+documented on PLT-3018. The ticket's live status reading `Open` is an accident of where the last
+flip landed, not a reopen. **Rishi's question is now 8 days unanswered and the customer has said
+nothing at all since the original report.**
+
+### Mechanism re-verified in the current checkout (branch `claude/vigilant-franklin-icxmur`, HEAD `b700eb3`)
+
+Both load-bearing citations still hold, at slightly different lines than §4 recorded:
+
+- `dashboard-project-service.ts:144-180` `_initializeModel()` — `folders.find(f =>
+  f.folderName?.toLowerCase().includes('federated'))` then `models.find(m => m.parentModelFolderId
+  === federatedFolder.modelFolderId)`. Still `.find()`, still first-match on a paginated response,
+  still no `isFederated` flag and no ordering or recency rule. If no such folder exists it logs and
+  returns — no fallback.
+- `dashboard-progress-service.ts:2547-2560` — `element_base_data` is built `FROM svf2_object_id_map
+  map` with LEFT JOINs onto status/links/activities. The map is the driving table, so the Dashboard's
+  entire element universe is that one model's map and nothing outside it can appear at any layer.
+
+So Pattern 5's PLT-3024 row is unchanged and remains CONFIRMED as a mechanism. Nothing this run
+alters §4–§8.
+
+### What this run concludes about the open item
+
+The open item is **not** a technical one. It is that we have been waiting 8 days for a customer to
+confirm a fact we do not actually need in order to explain the behaviour. The mechanism is confirmed
+project-wide and is *specified behaviour*: the customer's confirmation would only tell us whether
+**this particular case** is an instance of it. Yash — who is both reporter and assignee — has never
+been told what the code does; the internal draft answering Rishi's own question has sat unposted in
+`recommended-action.md` since 08-07.
+
+**Position for this run:** stop waiting. Tell Yash the mechanism directly so he can give the
+customer something useful instead of a question, and keep the federation check as the thing that
+confirms or excludes it rather than as a precondition for saying anything. Draft in
+`recommended-action.md` § 2026-08-14. This **supersedes** the "wait for the customer reply before
+acting" framing in §6/§9/§10 — those remain accurate about the *evidence* state, and the
+unverified list in §6 is unchanged; what is superseded is only the inference that the reply is a
+prerequisite for communicating.
+
+### What remains unverified (unchanged from §6, restated because none of it moved this run)
+
+- Whether the named missing models are inside ML9's `federated` folder.
+- Whether the **old (PowerBI)** dashboard is genuinely missing the same models — still the fact that
+  would rule out every hc-frontend mechanism for that half of the report.
+- Whether ML9 has multiple schedule revisions (H2), uses PC-EXCEL imports (§5), or lost category
+  mappings around 08-04/08-05 (§4 side detail).
+- Contents of the 3 attachments — **still unopened**, as on 08-06, 08-10 and 08-11.

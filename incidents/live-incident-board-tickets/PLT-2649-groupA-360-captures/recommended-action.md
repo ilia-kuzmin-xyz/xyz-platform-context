@@ -89,3 +89,71 @@ Playbook style: one owner, one closed question, explicit scoping.
   `GROUP BY` (`dashboard-360-service.ts:546,554`) so a room's pin takes an arbitrary
   capture's Z. Irrelevant to this incident (all captures in an affected room share the
   same bad elevation), but still non-deterministic.
+
+---
+
+## 2026-08-14 — verdict and drafts (DRAFT ONLY, execute nothing)
+
+**Verdict: resolved through communication, stay With Customer. Do not transition.** Nothing has
+changed technically since 07-24 and nothing needs to. What has changed is the clock: **21 days of
+silence** on a fix that is entirely on the client's side. That is no longer young, and a chase is
+now the whole job.
+
+The 07-30 draft above (message to Yash, "did the Freshdesk hand-off carry the detail?") was never
+recorded as sent and is **not superseded** — if it never went, ask it first, because a nudge on a
+message that went out vague will just produce another vague answer. If it did go with the detail
+intact, send draft (a) below instead. Both are for a human to send; nothing is to be posted in
+Jira by this run.
+
+### (a) Client-facing nudge, for Yash to send on Freshdesk #6622
+
+Coordinator voice, one question, answerable with a date. No new technical content, it only
+restates what was already handed over on 24 July so the recipient does not have to dig it out.
+
+> Hi, following up on ticket #6622, the 360 pin positions on PA12.
+>
+> On 24 July we sent over the exact change needed: in model
+> `PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24_detached`, the level "DC - 0G - FFL" is set to +50.4 m
+> instead of the project datum of roughly 0, while the rest of the DC building sits at 5.3, 10.6
+> and 15.9. That one value is why the ground floor 360 captures appear above the roof, and
+> correcting it and re-uploading the model fixes all 101 affected rooms at once. No captures need
+> re-taking or re-uploading.
+>
+> Could you let me know the expected date for the corrected model going back up? If project
+> delivery has not picked it up yet, say so and I will re-send the details to whoever should have
+> them.
+>
+> Once it is re-uploaded we will verify the pins on our side before closing.
+
+*Optional second paragraph, only if the client asks why it happened or seems likely to hit it
+again. Do not lead with it, it competes with the one question:* "For context, that level comes
+from a linked file in the federation whose levels all sit around 48 to 73 m, so the same
+misalignment exists on several other linked files. It is only visible on this one today because
+it is the only one with 360 captures on it. Aligning the shared coordinates across those links
+would prevent a repeat, but it is not needed to fix what you are seeing now."
+
+### (b) Internal note on the 07-13 product ideas, for Pietro Desiato (cc Jason Fingland)
+
+One decision, one owner, one question.
+
+> @Pietro Desiato PLT-2649 turned out to be a single wrong level elevation in the source model, so
+> neither idea from 13 July is needed to close it and the free-form pin editing can be dropped
+> outright, Jason's "could mess with reality on site" objection is exactly what this case proves.
+> Jason's other proposal is the keeper: a pass that flags captures no longer matching their
+> recorded level would have caught this at model upload in December instead of via the customer in
+> May, and there is a working prototype of it in the ticket folder. Should that go on DIGP-1420
+> "Model / 360 Capture Auto-Align", or do you want it as its own low priority ticket?
+
+### Standing items, unchanged and still open
+
+The four items in § "Also worth doing" and § "On close" above all still apply. Two now have more
+behind them:
+
+- **Cross-project sweep** is no longer hypothetical. Within PA12 alone, ~15 source files and ~44
+  levels sit in the 45-73 m band while their same-named twins sit at datum (see `context.md`,
+  2026-08-14). The sweep query is "levels whose elevation is a gross outlier against their
+  building's series", and PA12 is a worked example of what it should return.
+- **Post-fix verification** should expect **75 rooms with visible pins to move, plus 26 empty
+  capture points corrected silently** (101 points on the level in total), and should re-query
+  `project-levels` for `f0f4d409` expecting ~0. Baseline for the diff is
+  `analysis/PA12-levels.csv`.

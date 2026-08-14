@@ -73,3 +73,62 @@ person who'd know. No headings, no bullets, no long dashes.
 is not yet confirmed — needs the federation-membership fact). **Confidence in this being the right
 next step: 8/10** — costs nothing, answers Rishi's own question with evidence, and doesn't foreclose
 either branch before the one decisive fact comes back.
+
+---
+
+## 2026-08-14 — shift the addressee: tell Yash what we know, stop waiting on the customer
+
+**Chosen action: (a) still one internal comment, but addressed to Yash rather than Rishi.** No Jira
+status change. Not With Technical Support — the useful next move is us giving information out, not
+asking for more in.
+
+**Why the change.** The 08-07 draft below is aimed at Rishi and is still accurate, but it was written
+when Rishi's federation question was a day old. It is now 8 days old, the customer has said nothing,
+and the five Open/Waiting-on-customer flips between 08-06 and 08-10 are Freshdesk sync noise with no
+human content (confirmed a third time this run, `context.md` §11). Waiting is no longer producing
+anything.
+
+More importantly the premise has changed underneath the draft: when it was written the mechanism was
+one hypothesis of four. It is now **Pattern 5, confirmed on three occurrences, and classified as
+correct specified behaviour that simply isn't surfaced anywhere in the UI**. We do not need the
+customer's confirmation to explain the mechanism — only to confirm that this case is an instance of
+it. Yash is reporter *and* assignee, he owns the client channel, and he has never been told any of
+this.
+
+### Draft internal comment (to Yash Patel) — DRAFT ONLY, supersedes the Rishi-addressed draft below
+
+> Yash, we can give the customer an answer on this without waiting for their reply. The Dashboard
+> only ever loads one model: the first one inside the folder named "federated". Every element-level
+> number and everything drawn in 3D comes from that single file, so any model outside it is invisible
+> on the Dashboard however many elements are linked to it, while the Web Viewer shows whatever the
+> user has activated. That's how it's built rather than something broken, but nothing on screen says
+> so, which is why it reads as missing data. We've now had this same thing three times on different
+> projects.
+>
+> So Rishi's question is still the one that settles it, and it's worth asking them again: are the
+> missing models inside the federated folder in the Editor's model tree? One thing to hold back
+> though: they also said the old PowerBI dashboard is missing the same models, and that's a straight
+> embed with no code of ours in it, so if that part is accurate it can't be the same cause and we'd
+> be chasing two things.
+
+*(One owner. Explains the mechanism in plain language with no file names, gives him something to say
+to the customer today, re-asks the one open question, and flags the fact that would break the story
+before he commits to it in front of the client. No headings, no bullets, no long dashes.)*
+
+### Also worth doing, still costs nothing
+
+- **Open the 3 attachments** — still unopened after four passes. The Web Viewer screenshot may name
+  the model's folder and settle the federation question with no customer involvement at all.
+- If the customer's answer is "yes, they're in the federated folder", the branch is unchanged: pursue
+  H2 with the DuckDB query in `context.md` §4, and it becomes a real, currently-unfixed Dashboard bug.
+
+### Standing product item, unchanged
+
+Neither gate (date-slider, federation membership) shows any on-screen indication that something is
+hidden. That silence is why both PLT-2945 and PLT-3024 exist. Recorded on
+`recurring-defect-patterns.md` Pattern 5 as a standing low-priority UX ticket; not raised here.
+
+**Confidence in the mechanism: high — verified in code on three separate runs and now a
+three-occurrence pattern. Confidence that it explains ML9 specifically: unchanged and still
+unconfirmed** — it needs the federation-membership fact, and it does not account for the PowerBI half
+of the report at all.

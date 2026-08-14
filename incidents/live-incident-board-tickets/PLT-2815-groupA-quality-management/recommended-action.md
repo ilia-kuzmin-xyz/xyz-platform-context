@@ -92,3 +92,31 @@ confirmation would have let us close cleanly. That reasoning has expired:
 the cent). **Confidence that closing is now the right step: 8/10** — up from ~7/10 for the nudge; the
 residual 2 points are Yash's call on whether he wants a courtesy line to Paolo via Josh before closing
 (reasonable, but should not delay the transition).
+
+---
+
+## 2026-08-14 — close-out re-affirmed, now with the reference table verified at source
+
+The 07-30 recommendation (close, do not nudge) stands unchanged and has now gone unposted across
+**ten consecutive runs**. This run added the one piece of verification that was still second-hand:
+the Confluence reference table was read directly (page 1630633988, last modified **Oct 23, 2025**,
+unchanged since before the ticket existed), and it confirms `CAT3 | CSA | Underground Services =
+£600.00`, **no** `CAT4 | CSA | Underground Services` row, and `CAT4 | CSA | (generic) = £740.00`.
+See `context.md` 2026-08-14. So the numbers Mostafa decided to "leave as intended" on 23 June are
+still exactly the numbers in the table today. There is nothing left to check.
+
+**Action: move to Done.** The long closing comment in §1 above is still fine for the record if
+whoever closes it wants the full write-up. If they want one line instead, use this:
+
+> Closing this out. The two figures are correct per the Issue Rework Reference Table: Cat 3 for CSA
+> Underground Services has a package specific value of £600, and Cat 4 has no package specific row so
+> it falls back to the general CSA figure of £740, which is why Cat 4 reads higher once converted to
+> euros. Not a defect. Mostafa's call on 23 June was to leave the numbers as intended, and any
+> questions on the values themselves are best pointed at Josh in customer success. Freshdesk #7126 is
+> already closed on the customer's side.
+
+Transition and resolution guidance unchanged from §2 above (close with a resolution, not an empty
+one). The optional reference-table question to product in §3 also still stands and should not hold
+the close.
+
+**No Jira action was taken by this run.**

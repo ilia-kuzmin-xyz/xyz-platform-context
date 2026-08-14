@@ -379,3 +379,118 @@ Live fetch: `updated` still `2026-07-24T13:56:22+01:00`, comment count unchanged
 Live fetch: `updated` still `2026-07-24T13:56:22+01:00`, comment count unchanged at 16. 18 days since
 hand-off, still no customer reply. Genuinely with the customer's project-delivery team — no action
 needed.
+
+## 2026-08-14 — re-check (full pass, first one to open `analysis/`)
+
+**Ticket state:** unchanged since 2026-07-24 13:56. Status **With Customer**, priority Major,
+assignee Yash Patel, reporter Masum Ahmed, 16 comments. **21 days of silence** since the hand-off,
+up from 18 at the 08-11 light pass. Nothing technical is left to diagnose; the mechanism, model,
+level, wrong value, target value and remedy are all already on-ticket and already with the client.
+
+### What the prior runs got right (re-confirmed, do not re-litigate)
+
+- **Class of cause is source data, not dashboard code.** Still 10/10. Re-verified against the
+  current working tree (branch `claude/vigilant-franklin-icxmur`, line numbers moved again, see
+  below): the FE never adds a level elevation to a pin coordinate.
+- **The specific defect** (level `f0f4d409` "DC - 0G - FFL" at +50.4 m). Now independently
+  checkable from this folder's own `analysis/PA12-levels.csv`, which the earlier write-ups never
+  cited. It holds. Details below.
+- **Ruled out and still ruled out:** a frontend fix; a viewer-transform fault (Quality pins share
+  the identical transform and are correct); the metres-vs-millimetres PBP mismatch documented in
+  `hc-frontend/docs/viewerpage-vs-dashboard-pinpoint-comparison.md`; re-taking or re-uploading any
+  360 captures; and the 07-13 "re-upload vs XYZ remap" fork, which Ilia's own diagnosis made moot.
+
+### What is now stale in the earlier sections of this file
+
+1. **The `FIRST(c.zMeters)` code nit (§ "Secondary, code-adjacent — now demoted") is obsolete.**
+   That query no longer exists. `dashboard-360-service.ts` now builds a **capture-point** summary,
+   not a room summary, and picks the representative row deterministically with
+   `ROW_NUMBER() OVER (PARTITION BY capturePointId ORDER BY c.imageTakenOn DESC NULLS LAST,
+   c.fileReferenceId)`, taking `recencyRank = 1`
+   (`.../services/dashboard-360/dashboard-360-service.ts:578-614`, coordinates carried at
+   `:598-600` and mapped at `:630-632`). The non-determinism the 07-30 run flagged is gone.
+   **Do not file that nit.** (Side note, unrelated to this ticket: the pin unit changed from room
+   to capture point, so `use-pinpoints-*-render.ts` now maps `point.zMeters`, not `room.zMeters`.)
+2. **All code line numbers in § Mechanism have moved.** Current, re-verified 2026-08-14:
+   - `.../dashboard-panels/viewer/hooks/use-pinpoints-reactive-render.ts:43` and
+     `.../use-pinpoints-initial-render.ts:63` — `zPosition: point.zMeters?.toString() ?? null`.
+   - `.../viewer/services/dashboard-image-service.ts:30` and `.../dashboard-issue-service.ts:25`
+     both extend `DashboardPinpointBaseService`; the shared transform is
+     `dashboard-pinpoint-base-service.ts:176` (`_transformCoordinates`), called at `:213`.
+   - `elevation` in `dashboard-360-service.ts` appears only at `:385`, `:411`, `:460` (level
+     filter metadata, `ANY_VALUE(elevation)` inside a `GROUP BY modelLevelId`). A repo-wide grep
+     for `elevation` outside tests/mocks hits 5 sites in `duckdb-room-store.ts` and nothing on any
+     pin-coordinate path. **The FE still cannot compensate for a wrong level elevation.** ✅
+
+### New this run — the `analysis/` folder, which no prior write-up references
+
+`context.md` and `recommended-action.md` never mention `analysis/`, and `detect_stale_360.py`
+points back at a *"context.md 'Update 2026-07-15'"* section that does not exist in this file. The
+artefacts are real and load-bearing, so indexing them here:
+
+| File | What it is |
+|---|---|
+| `detect_stale_360.py` | Classifier: Quality issues define the valid vertical envelope (Y ≤ 25 m), captures above it are stale. Reproduce with four API JSON exports. |
+| `PLT-2649-stale-cohort.json` | Cohort summary: **1868 stale / 30 suspect / 4667 ok / 6667 total** captures. |
+| `PLT-2649-stale-pinpoints.csv` (75) | One row per capture point that actually holds imagery, with `yOffset = -50.4`. This is the "list of pins" Pietro asked for on 07-13. |
+| `PLT-2649-phantom-level-all-points.csv` (101) | Every capture point on the bad level, including empties. |
+| `PLT-2649-stale-captures.csv` (1868) | One row per image. |
+| `PA12-levels.csv` (92 levels) | The `project-levels` extract. Undated. |
+
+**Verified from these artefacts (arithmetic and lookups I ran myself, 2026-08-14):**
+
+- **The "101 rooms / ~1870 captures" figure Ilia gave the client is correct, with one nuance
+  worth knowing before anyone verifies the fix:** the bad level carries **101 capture points
+  across 101 distinct `modelRoomId`s**, but only **75 of them hold captures** (1868 images); the
+  other **26 are empty points**. So a post-fix spot check should expect 75 rooms to visibly move
+  and 26 more to be silently corrected. Nobody is wrong here, the numbers just count two things.
+- **Ilia's "linked file whose levels all sit at 48-73 m" is exactly right and now falsifiable.**
+  `f0f4d409` belongs to source file `2210cd43-599c-4d9b-826e-4d369b8660da`, and **all 16 of that
+  file's levels** sit between **48.10 and 73.40 m** (`SS - 1S - FFL` 48.102, `SS - 0G - FFL`
+  50.102, `GT - 0G - FFL` 50.2, `DC - 0G - FFL` 50.4, up to `Limit PLU - Eq Tqn` 73.4). The
+  sibling DC elevations Ilia quoted (5.3 / 10.6 / 15.9) come from **different** source files
+  (`ffba833f`, `cb3fe738`), where `DC-0G-FFL` correctly reads **0.0**. The federation therefore
+  holds `DC-0G-FFL` three times: twice at 0.0 and once at 50.4.
+- **⭐ The misalignment is not confined to one linked file, and the one-value fix will not clear
+  it.** Grouping all 92 levels by source file, roughly **15 source files, ~44 levels in total,
+  sit wholly inside the ~45-73 m band**: `2210cd43` (16 levels, 48.1-73.4), `c1cf12db` (8,
+  50.4-73.4), `bca5376b` (4, 48.1-60.0), `0cf0d242` (4, 55.5-66.1), plus singletons `b644c9fb`,
+  `e3e052f9`, `55063bda`, `588579c2`, `26416be1`, `05e5d34b`, `11669e82`, `458c0e49`, `5a651e03`,
+  `65d4270f`. The same buildings appear twice, once at datum and once ~50.4 m higher (`FH-0G-FFL`
+  exists at both 0.0 and 50.4). **Only `f0f4d409` currently hosts 360 capture points, which is
+  why only one symptom is visible.** Setting that single value to 0 closes PLT-2649 and leaves
+  the rest latent: the first capture taken in any SS / GT / FH / R+1 / R+2 room hosted on one of
+  those levels reproduces this ticket. That is the argument for Ilia's *option A* (align the
+  linked files' shared coordinates) over *option B* (patch the one elevation), and it is worth
+  saying to the client once, without turning it into a blocker for the fix already asked for.
+- **⚠️ Do not hand `PLT-2649-stale-pinpoints.csv` to project delivery as-is.** Its `action`
+  column offers *"set Y=0.0 (offset -50.4) OR reparent room to real L00 level"* with
+  `correctLevelId(realL00) = 7026451f`, and the cohort JSON calls `7026451f` "the real L00". In
+  `PA12-levels.csv`, `7026451f-9464-4206-9730-2df67560d108` is named **`GB-0G-FFL`** (source file
+  `96080aaf`), a **GB** building level, not a DC one. Taking the reparent branch literally would
+  move 101 DC rooms onto a GB level. The elevation-correction branch is the safe one; if
+  reparenting is ever wanted, the DC candidates at 0.0 are `344df6bc` (`ffba833f`) or `f72da41e`
+  (`cb3fe738`). Inferred from names and source-file grouping only, not confirmed with Ilia.
+- **`PA12-levels.csv` is undated, so it cannot tell us whether the client has already fixed
+  anything.** Its `DC - 0G - FFL` row still reads 50.4, but the extract predates the 07-24
+  hand-off as far as anyone can tell. It documents the *pre-fix* state and is the right baseline
+  for the post-fix re-query, nothing more.
+
+### The Pietro / Jason product side-thread (07-13) — still unclosed, and now decidable
+
+The 07-30 run already flagged this (`recommended-action.md` § "Also worth doing" #1) and it has
+not moved. What is new is that the root cause is now known, which settles which of the two ideas
+survives:
+
+- **Pietro's "adjust the pin position from the 360 editor"** and Jason's fallback **"expose X/Y/Z
+  in the details panel with multi-edit"** would not have helped here and would have hurt: the
+  correct fix was one source-model value, and hand-nudging 101 rooms would have masked a defect
+  that also affects rooms, floorplans and anything else derived from that level. Jason's own
+  objection (*"could mess with reality on site"*) is vindicated by the outcome.
+- **Jason's primary proposal, a system-side pass flagging captures that no longer match their
+  recorded level, is the one worth keeping.** It is a detector for exactly this defect class and
+  would have surfaced it at model upload in December 2025 rather than via a customer in May 2026.
+  `detect_stale_360.py` in this folder is a working prototype of it.
+- Candidate home remains **DIGP-1420 "Model / 360 Capture Auto-Align"** (Backlog, created
+  2026-07-19). Still **not verified** as the right home, still not linked to PLT-2649. Owner for
+  the decision is Pietro, with Jason. Draft in `recommended-action.md`.

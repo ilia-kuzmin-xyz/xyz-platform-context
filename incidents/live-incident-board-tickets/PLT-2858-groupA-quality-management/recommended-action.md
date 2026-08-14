@@ -159,3 +159,94 @@ decision, not another round of open-ended discussion.)*
 
 **Confidence in diagnosis: 8/10. Confidence in this being the right next step: ~7/10** (comms/process
 judgment; depends on how Mostafa wants to own zone-config ownership and the Phase idea).
+
+---
+
+## 2026-08-14 — supersedes the draft above for *what to post*; the diagnosis and routing are unchanged
+
+**Why a new draft.** The message drafted on 07-24/07-30 above opens with "Zone setup ownership +
+how-to", a question the customer already answered on 07-14 (they can't and won't configure zones).
+It has now stood unposted across **ten consecutive runs**, and posting it as written would read as
+not having read their reply, a month late. **Do not post the 07-24 draft.** Everything else in this
+file stands: same diagnosis, same owners (Pietro primary, Mostafa and Darminder on it), same
+"posting is the bottleneck, not the analysis" finding.
+
+**What changed this run.** Mostafa's 07-14 question ("what is the difference between location and
+location details") is the stated blocker on his side, and it is **fully answerable from the frontend
+code without waiting for Darminder** (re-verified this run, `context.md` 2026-08-14 section). So the
+recommendation is no longer "nudge someone to answer it" but "answer it, then ask the real decision
+in the same breath". Two separate messages, one owner each, plus one line to the BE and one to the
+customer.
+
+**Action:** still **(a) resolved through communication** in progress, not Ready for Dev, not Blocked.
+Post drafts 1 and 2 below now; 3 and 4 are parallel and do not gate them.
+
+### Draft 1 — answer Mostafa's 107320 (anyone can post this; the code says it, not Darminder's memory)
+
+> @Mostafa, coming back on your question from 14 July. They are two different fields.
+>
+> Location is the zone the issue sits in, meaning the floor, area or room from the named zones set
+> up on the model. Nobody types it, the platform fills it in, and there is no control for it in the
+> issue form at all. On ML9 it is blank on every issue because that model has no rooms configured.
+>
+> Location Detail is a plain free text box on the issue form, up to 100 characters, that anyone can
+> type into. It saves and displays fine on ML9 today, regardless of zones. On the issue panel the
+> two sit next to each other as "Location" and "Location Details", which is most of why they get
+> confused.
+>
+> One thing worth knowing before we decide anything: even once a project does have zones set up, the
+> panel currently prints the internal location id rather than the room name, so it would read as a
+> code rather than "Level 2 Plant Room". Small fix, but it has to happen before anyone sees a
+> populated Location.
+
+*(FE evidence, not for the comment: `issue-details.tsx:139-140` and `:43-48`, `issue-form.tsx:526-537`,
+no `locationId` control anywhere in the form, `format-issues.ts:87-88`.)*
+
+### Draft 2 — the decision request to Pietro and Mostafa (playbook "Decision requests to product")
+
+> @Pietro @Mostafa, this is PLT-2858, the QA Location field on ML9, and it needs a product call.
+>
+> Recap, since it has been a few weeks. The Location on a QA issue is not typed by anyone, it is
+> filled in automatically from the rooms and zones configured on the model. ML9's model has none
+> configured, so the field is empty on every issue there. That is not a bug, it is a model setup the
+> client would have to do, and they have told us twice they have never done it and do not know how.
+>
+> On 14 July they told us what they would actually like. Either a drop down of Locations they can
+> pick from when raising an issue, or take Location off the QA altogether so it stops looking like
+> data is missing on the dashboard.
+>
+> Both are cheap for us. The drop down is roughly ten to fifteen lines of frontend work, because the
+> list of locations is already fetched and there is an identical control sitting next to it for
+> Stage. Removing the field is a one line change. So this is a product decision, not a cost one.
+>
+> One caveat before anyone picks the drop down. The list it would show comes from the backend issue
+> parameters, and we do not yet know whether that list is populated for a project with no rooms
+> configured. If it comes from the same model zones, the drop down would ship empty for this client
+> and we would be back where we started. I have asked Sachin and Ali for a one line answer.
+>
+> My take is to hide the Location row when there is nothing in it, rather than delete it. That gives
+> this client exactly what they asked for, no missing data look on the dashboard, and it keeps the
+> field for the projects that do have zones configured. Then treat the drop down as its own piece of
+> work once we know where that list comes from. Shout if you would rather we remove it outright, or
+> if the drop down is the priority and you want it costed properly.
+
+### Draft 3 — the one open engineering question, to BE (Sachin or Ali)
+
+> @Sachin @Ali, one line if you can. Does `GET /api/v2/projects/{projectId}/issues/parameters` return
+> `ISSUE_LOCATION` entries for a project whose model has no named zones configured, or is that list
+> derived from the same zone hierarchy? Asking on PLT-2858: the client wants a Location drop down and
+> I need to know whether it would ship empty for them.
+
+### Draft 4 — acknowledgement to the customer, via Yash (do not wait for the decision)
+
+> Apologies for the delay coming back to you on the Location field. Your suggestion is with our
+> product team now and we will confirm which way we are going shortly. In the meantime the "Location
+> Detail" box on the issue form is free text and works today, so it can be used to record a location
+> manually if that helps.
+
+**Do not** post drafts 1 and 2 as one message; they have different owners and different answers.
+**Do not** re-send the 07-24 draft. **No Jira action was taken by this run.**
+
+**Confidence:** diagnosis 8/10 unchanged; the FE half of Mostafa's answer is now 9/10 (read on
+current code this run); the recommendation to hide-when-empty is a product steer, offered as one,
+not a finding.

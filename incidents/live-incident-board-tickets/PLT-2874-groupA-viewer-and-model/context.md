@@ -305,3 +305,153 @@ tag renamed accordingly, per the README's group-rename convention. Per this run'
 (Group B action scenario still TBD, "skip those tickets"), no fresh deep-dive was done this run —
 this is a bookkeeping-only update. Next run: if this stays in Group B, do a light dev-readiness/
 fix-ownership check like the other Group B tickets rather than a full re-investigation.
+
+---
+
+## 2026-08-14 — code-only narrowing of the Staging undercount (H1/H3/H4)
+
+Additive to the 08-13 "Reopened" section above; nothing there is retracted. Jira re-read this run:
+status still **Open**, priority Minor, assignee **Yash Patel** (was Darminder on 07-13 — noted, not
+acted on), last updated 2026-08-12. Gennaro's 08-12 comment is still the only new content.
+
+This pass re-read the three candidate code sites in the current checkout (`hc-frontend`, branch
+`claude/vigilant-franklin-icxmur`, HEAD `b700eb3`). Line numbers below are from *this* checkout and
+differ slightly from the 08-13 entry's; the mechanisms are unchanged.
+
+### VERIFIED — the `calculatedOn` cap is real, but it is narrower than H1 assumed
+
+`dashboard-progress-service.ts:672` still derives `endSyncDateTime` from
+`this._v2Loader.getCalculatedOn()`, and it is still threaded into both delta syncs
+(`:831` element_status, `:858` activity_links); the "capped at the progress calculatedOn so
+coloring never runs ahead of the figures" comment is at `:829-830`. `linking-service.ts:99-105`
+(the editor's equivalent) still sends only `lastSyncDateTime`, no end bound. So the asymmetry the
+08-13 entry described is confirmed in code.
+
+**But two properties of that code bound H1 much more tightly than the 08-13 entry allowed, and
+both were read this run rather than assumed:**
+
+1. **The cap bounds a *delta*, not the base.** `artefact-loader.ts:579-625`: the base of
+   `activity_links` is the **parquet** (`loadActivityLinksParquet`), and the API is then called with
+   `lastSyncDateTime` = the parquet's own watermark (`:601`) as the *start* and `endSyncDateTime` as
+   the *end* (`:624-625`). Nothing already in the parquet is ever removed. So H1's magnitude ceiling
+   is *only* the links created **after the activity-links parquet was generated**. If Staging's
+   parquet watermark is newer than its `calculatedOn`, the requested window is empty and the cap
+   contributes **zero** to the gap.
+2. **There is a 5-minute short-circuit that can nullify the cap entirely.**
+   `artefact-loader.ts:604-612`: if the parquet watermark is less than 5 minutes old the API delta
+   is skipped outright (`"Parquet watermark is Ns old (< 5 min) — skipping API delta"`). On a
+   freshly-published Staging artefact the dashboard's link set is *the parquet and nothing else*.
+
+**Consequence for the hypothesis, stated as a falsifiable claim:** H1 in its 08-13 form ("the cap
+hides recently-linked elements") requires ~52,458 links to have been created on Staging *after* the
+activity-links parquet snapshot. If the parquet and the progress calc are published by the same
+pipeline run — which we have not established — that window is ~empty and H1 collapses into the
+simpler statement *"Staging's activity-links parquet is stale"*, which is a data-pipeline
+observation, not a frontend-cap one. Either way the remedy is the same (refresh Staging's
+artefacts), but the *claim we make on the ticket* should be the second one unless the console shows
+`calculatedOn` well behind the parquet watermark.
+
+### VERIFIED — the three-query ladder is a clean three-way discriminator, because of a LEFT JOIN
+
+`element_base_data` is built at `dashboard-progress-service.ts:2547-2560` as
+
+```sql
+FROM svf2_object_id_map map
+LEFT JOIN element_status es ON map.modelElementId = es.modelElementId
+LEFT JOIN activity_links  al ON map.modelElementId = al.modelElementId
+LEFT JOIN api_activities  act ON al.activityId = act.itemId
+GROUP BY map.objectId, map.modelElementId, es.installationStatus, es.installationCheckDate
+```
+
+The **map** is the driving table and the link join is a LEFT join, so
+`COUNT(DISTINCT modelElementId) FROM element_base_data` measures the **object-id-map's element
+universe and nothing else** — it does *not* move when links are missing. That is what makes the
+ladder discriminate. Predicted readings, one row per hypothesis:
+
+| | `activity_links` | `element_base_data` | `_visible_elements` |
+|---|---|---|---|
+| **H1** dashboard links short (cap or stale parquet) | **short** (~551k) | full map size | short |
+| **H3** wrong/older `svf2-object-id-map` version | full (~604k) | **short** | short |
+| **H4** date window pinched | full | full map size | **short** |
+
+⚠️ **Calibration note the 08-13 entry did not carry, and which would otherwise cause a
+misreading:** "full map size" is *not* the editor's 603,844. On FAR01 the map held **1,364 more**
+elements than `project_element_list` (07-31 entry in `investigation-log.md`), so a healthy
+`element_base_data` reads ~0.2% **above** the editor number, not equal to it. Do not treat
+`element_base_data ≠ 604k` as evidence of anything by itself; only a drop to ~551k is signal.
+
+Also verified: with no discipline/package/activity filter selected there is **no** INNER JOIN onto
+`activity_links` in the `_visible_elements` query at all — `needsActivityLinksJoin` is
+`hasCategoryFilters || hasActivityFilter` (`dashboard-progress-service.ts:1983`, used at `:2019`).
+Unlinked elements are excluded purely because their `startDate` is NULL, so the display-date
+predicate at `:2004-2017` evaluates to NULL rather than TRUE. This matters: it means H1's missing
+links produce their effect *silently through NULL dates*, in the same SQL predicate that H4 acts on
+— which is precisely why the middle rung of the ladder (`element_base_data`) is the only thing that
+separates them.
+
+### NEW, and cheaper than anything proposed on 08-13 — the date slider is itself an H4 oracle
+
+`date-range.tsx:133-162` seeds the slider **entirely** from `dashboardProgressService.dataDateRange$`
+and re-seeds min, max, from, to and the slider position on *every* emission. That observable is fed
+by `_queryDataDateRange()` (`dashboard-progress-service.ts:254-300`), which prefers
+`api_activities` MIN(startDate)/MAX(finishDate) and falls back to `project_progress` then
+`category_groups` `CalendarDate` — i.e. to a **progress-artefact-derived** range. It is emitted
+twice, from Pipeline A (`:771`, awaited) and Pipeline B (`:876`, fire-and-forget inside a `.then`),
+so which range the slider ends up on is genuinely load-order dependent, exactly as H4 supposed.
+
+**Therefore:** if Staging's date slider shows different start/end dates from Prod's, H4 is live —
+and that is a *screenshot*, not a console command, not a query. This should be the first thing
+asked for, ahead of the DuckDB ladder. **Supersedes nothing; it is a cheaper rung added below the
+08-13 diagnostic, which remains correct.**
+
+### NEW hypothesis H6, not listed on 08-13 — Staging may not be loading the same federated model
+
+`dashboard-project-service.ts:164-176` picks the model with
+`folders.find(f => f.folderName?.toLowerCase().includes('federated'))` then
+`models.find(m => m.parentModelFolderId === federatedFolder.modelFolderId)` — first match in a
+paginated response with no ordering guarantee, no `isFederated` flag, no recency rule. This is the
+already-spun-out defect in `investigation-log.md` ("Spun out: dashboard picks an arbitrary model")
+and Pattern 5's PLT-3024 row. Two environments with different model-list ordering, or Staging
+carrying an extra upload, would load **different files** and legitimately report different totals
+on an identical editor number.
+
+On FAR01 this was ruled out by magnitude (its two federated twins are 2,540 elements apart, not
+52,458). **But we do not know Gennaro tested FAR01.** His editor figure, 603,844, matches neither
+number this folder recorded for FAR01 on 07-31 (editor-with-Linked-filter 606,524; dashboard
+609,643 distinct elements). The project is unstated on the comment. Until it is named, H6 cannot be
+dismissed on magnitude, and it is free to check: the chosen model id appears in the Network tab as
+`GET /api/v2/projects/{projectId}/models/{modelId}`, issued only for the chosen model
+(`model-api-service.ts:52`; tooling note already in `investigation-log.md`).
+
+### What code reading settled this run, and what it did not
+
+**Settled by reading code alone:**
+- The cap exists, is dashboard-only, and the editor has no equivalent — H1's *asymmetry* is real.
+- The cap cannot subtract rows already in the parquet, and is skipped entirely on a <5-minute-old
+  parquet. H1's *magnitude* is therefore bounded by post-parquet linking activity, which nobody has
+  measured.
+- `element_base_data` is map-driven via LEFT JOIN, so the three-query ladder separates H1/H3/H4
+  cleanly, with the calibration caveat above.
+- The slider's bounds are progress-artefact-derived on the fallback path and re-seeded on every
+  emission, so H4 has a visible, zero-tooling symptom.
+- No environment-conditional code exists on this path: `USE_VIEWERPAGE_ID_MAPPING` is still a
+  hardcoded `false` (`dashboard-project-service.ts:25-40`) — re-checked this run, unchanged since
+  08-13.
+
+**Not settled, and not settleable from this repo:**
+- Which of H1/H3/H4/H6 is Staging's actual cause. All four predict undercounting on an unchanged
+  editor number; nothing in the source distinguishes them without environment state.
+- Whether Staging's `calculatedOn` is in fact stale, and by how much.
+- Whether the activity-links parquet and the progress calc are published together (this decides
+  whether H1 is a *cap* story or a *stale parquet* story).
+- **Which project and model Gennaro tested.** The 603,844 does not match FAR01's recorded figures.
+- Whether Staging and Prod are even serving the same project data — the identical editor number on
+  both suggests they are, but that has been inferred, not confirmed.
+- Build/version skew between Staging 26.3.4 and Prod: still invisible from this checkout
+  (`changelog.md` stale since 2022; version injected per-environment via
+  `.github/actions/sync-version`). Unchanged from 08-13.
+
+**Does this change the 08-13 next step?** It reorders it, it does not replace it. The DuckDB ladder
+is still the decisive test and the console `calculatedOn`/artefact lines are still the right pair to
+read. But two free checks now come *first*: the project/model id, and the slider's own date range on
+each environment. See `recommended-action.md` § 2026-08-14.

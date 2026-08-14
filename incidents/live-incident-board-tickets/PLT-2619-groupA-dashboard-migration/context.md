@@ -457,3 +457,144 @@ Customer`. No new Jira activity on this ticket. The identity question to Mostafa
 `69e232b2c222e55fa039eab2` "Mission Critical Dashboard"?) is still the only open item in the family
 and is still unposted — carried forward unchanged from 08-04/08-10. PLT-2935's QA status not
 re-checked this run (light pass, no `updated` movement on PLT-2619 to justify the extra lookup).
+
+## ⭐ 2026-08-14 — the old-vs-new dashboard switch found in code. It is **data-driven per project**, not a feature-flag cohort
+
+This run did not re-derive the Jira story (it is unchanged: `updated` still 2026-08-03, 6 comments,
+still `With Customer`, Yash's 07-27 question to Ilia still unanswered — now **18 days**). It went
+after the one thing every prior run left as "needs human, cohort unknown": **what actually decides
+whether a given project shows the old PowerBI report or the new native dashboard.** That is now
+answered from code, and it changes the shape of the "needs human" step from "find out which rollout
+cohort this project is in" (which does not exist) to a **30-second URL lookup anyone can do**.
+
+Repo state at check time: `hc-frontend` on `claude/vigilant-franklin-icxmur`, HEAD `b700eb3`
+(PLT-3040 merge). ⚠️ The checkout is **shallow — 50 commits** — so `git log` cannot date when any of
+the files below landed. Nothing was built or run (this env cannot).
+
+### VERIFIED — both surfaces coexist in the shipped frontend
+
+- **New (native) dashboard route is registered unconditionally**, with no feature-flag wrapper:
+  `app/pages/project/routes.tsx:55-64` (`:project_id/dashboard` → `DashboardPage`, auth-gated only).
+  The contrast in the *same file* is the tell: the Commissioning routes right below are wrapped in
+  `{isCommissioningEnabled && …}` (`app/pages/project/routes.tsx:65-77`). The dashboard is not.
+- **Legacy PowerBI route still exists:** `progress-dashboard/:id` → `ProgressReportPage`
+  (`app/routes.tsx:59-66`), which embeds `<PowerBIEmbed>`
+  (`app/pages/ProgressReportPage/ProgressReportPage.tsx:4, 163`) using a **per-project** config
+  fetched from the backend (`ProgressReportPage.tsx:62`, `getProjectDashboardInfo`).
+
+So "new dashboard" and "old dashboard" genuinely are two live things in Aug 2026 — consistent with
+the PLT-3024 / PLT-2874 traffic this week that talks about both as current.
+
+### ⭐ VERIFIED — the switch itself: `resolveDashboardUrl`
+
+`app/helpers/dashboardNavigation.ts:6-21`:
+
+1. `getFeatureFlagValue('Dashboard-Mode')` true → `/projects/${projectId}/dashboard` (`:7-9`)
+2. otherwise call `serviceProvider.ProgressDashboard.getProjectDashboardInfo(projectId, { skipGlobalErrorHandler: true })` (`:11-15`)
+3. **HTTP 404** (no PowerBI report mapped for this project) → `/projects/${projectId}/dashboard` (`:17-19`)
+4. **anything else** (a report exists) → `/progress-dashboard/${projectId}` (`:21`)
+
+**Read that backwards and it is the whole answer to this ticket:** a project keeps showing the old
+PowerBI dashboard *precisely because the backend still has a PowerBI report mapped for it*. There is
+no per-project FE setting, no org flag, no allow-list. "Migrating the demo to the new dashboard"
+means, mechanically: (a) the project has progress artefacts in the new pipeline, and (b) its PowerBI
+report mapping is gone so `getProjectDashboardInfo` 404s. Both are **backend / data-ops** acts.
+
+Callers of the resolver (i.e. every entry point that can land you on either surface):
+- Portfolio project-card "open dashboard" — `app/pages/PortfolioPage/PortfolioPage.tsx:97-105`
+- Viewer toolbar dashboard button — `app/pages/organisation/ViewerPage/components/viewer-bar/tools/dashboard-mode-toggle.tsx:16-21`
+
+### VERIFIED — two bypasses that keep a project on PowerBI regardless of the resolver
+
+1. **Name-based V1 rule.** `isV1Project(projectName)` is a bare case-insensitive substring test for
+   `'v1'` on the **project name** (`app/helpers/V1Rules/v1ProductionRules.tsx:2-4`). Portfolio checks
+   it *before* the resolver and sends such projects straight to `/progress-dashboard/:id`
+   (`PortfolioPage.tsx:100-102`) — the resolver is never called. "Mission Critical Dashboard" has no
+   `v1` in it, so this should not apply here, **but only if the platform project name matches the
+   phrase the client uses**, which is exactly the identity question this ticket has hung on since
+   07-30.
+2. **Dashboard-only users.** Anyone whose access is dashboard-only is hard-redirected to
+   `${constants.url.progressDashboard}/${activeProjectId}` unconditionally, with no resolver call
+   (`app/hooks/useProjectContext.ts:45-50`). If the client's demo audience are dashboard-only users,
+   they land on PowerBI even for a fully migrated project. Worth knowing before anyone declares the
+   demo "done".
+
+### VERIFIED — `Dashboard-Mode` is NOT a rollout cohort, so there is no cohort to look up
+
+Feature flags in this FE are read from a **browser cookie** named `feature-flags`, falling back to a
+hardcoded list in which every flag is `false`
+(`app/helpers/getFeatureFlagValue/getFeatureFlagValue.ts:6-15`; the list and the `Dashboard-Mode`
+entry at `app/config/constants.ts:864` and `:886`; toggled by hand at
+`app/pages/FeatureFlagsPage/FeatureFlagsPage.tsx:20-27`). There is **no org, tenant or user dimension
+anywhere in that mechanism**. `Dashboard-Mode` is a local override for one browser — a developer/demo
+convenience, not a rollout gate.
+
+**Consequence, stated plainly:** the standing "feature flags often gate per-org, so we cannot tell
+from code" caveat that earlier runs (and this run's own brief) carried is **wrong for this feature**.
+There is no per-org gating to be blind to. What we are blind to is a **backend data fact** (does this
+project have a PowerBI report row), which is a different and much cheaper question.
+
+### AMENDS the 07-30 "Code check" section above — does not overturn its conclusion
+
+The 07-30 note said: *"There is no FE toggle that flips a project from PowerBI to native"*. Half
+right and half misleading, so recording the correction rather than deleting it:
+- **Right:** relinking is not an FE code change, and the demo cannot be "repointed" the way a PowerBI
+  report id can. That conclusion stands, unchanged.
+- **Wrong/incomplete:** there *is* an FE resolver, `resolveDashboardUrl`, and it is decisive for which
+  surface a user lands on. It just resolves from backend state instead of from configuration.
+
+### What this does and does not answer for Yash's 07-27 question
+
+- **Answered, generally and now verifiably:** the new dashboard is live, un-flagged, and is the
+  **default** for any project that has no PowerBI report mapped. The April parking reason ("waiting
+  on a non-PowerBI dashboard release") is definitively dead, not just probably dead.
+- **Not answered, specifically:** whether *this* demo project has been migrated. That is backend row
+  state plus artefact presence. Invisible from code, invisible from Jira, and this environment has no
+  DB or analytics access. **Still needs a human — but a much smaller one than before.**
+- **⭐ The cheap check that settles it (no DB, no analytics, ~30 seconds).** Open the project from the
+  Portfolio and click through to its dashboard, then read the URL:
+  - `…/projects/<id>/dashboard` → **already migrated**, the demo is on the new dashboard, nothing to do
+    but tell Yash.
+  - `…/progress-dashboard/<id>` → **still on PowerBI**, because a report is still mapped for it.
+
+  This is not a proxy for the answer — it *is* the branch `resolveDashboardUrl` computes
+  (`dashboardNavigation.ts:17-21`), so the URL is the ground truth. Caveat: do it with a normal
+  account, not a dashboard-only one (bypass 2 above), and with `Dashboard-Mode` **off** in the flags
+  cookie (bypass at `:7-9`), or the check answers a different question.
+
+### Still true and carried forward unchanged
+
+- The identity question ("is `69e232b2c222e55fa039eab2` the same asset as 'Mission Critical
+  Dashboard'?") is unresolved and still unposted to Mostafa. **Note, though, that the URL check above
+  bypasses it for PLT-2619's purposes** — you no longer need to know whether the two are the same
+  project in order to answer Yash about *this* project. The Mostafa question remains worth asking for
+  PLT-2935's own bookkeeping (its description still says "project name is not known yet"), but it is
+  no longer on PLT-2619's critical path.
+- Content of Yash's 08-03 client message on Freshdesk #6492: still invisible from here.
+- Classification unchanged: mis-filed service request, not a live incident. **113 days** end-to-end,
+  **107** in an untransitioned `With Customer`, zero engineering activity ever attached to this
+  ticket.
+
+### What remains UNVERIFIED after this run — 2026-08-14
+
+1. **Whether the demo project currently 404s on `getProjectDashboardInfo`.** The one fact that
+   decides the ticket. Backend state; not readable from code, Jira or this environment.
+2. **The platform project name behind "Mission Critical Dashboard"**, and therefore whether the
+   `isV1Project` name bypass (`v1ProductionRules.tsx:2-4`) applies to it. Unknown since April.
+3. **Whether the demo project has progress artefacts in the new pipeline at all.** A 404 routes you
+   to the native dashboard whether or not there is data behind it, so "migrated" and "useful for a
+   demo" are two different checks. Nobody has done either.
+4. **Whether the client's demo audience are dashboard-only users** (`useProjectContext.ts:45-50`),
+   which would keep them on PowerBI regardless.
+5. **When `resolveDashboardUrl` shipped.** The checkout is shallow (50 commits), `git log` on
+   `app/helpers/dashboardNavigation.ts` returns one unrelated squashed commit. So this run cannot say
+   whether the resolver existed in April — i.e. cannot say whether the April "awaiting release"
+   answer was already stale when it was given.
+6. **Anything about production rollout breadth** — how many projects are on each surface. No
+   analytics access. `analyticsService.progressDashboardAccess(projectId, dashboardType)`
+   (`app/services/analyticsService.ts:106-108`) does emit a `dashboard_access` GA event with a
+   `dashboard_type` dimension, and it is fired from the **PowerBI** page only
+   (`ProgressReportPage.tsx:68`, hardcoded `'project'`) — so GA can in principle answer "is this
+   project still hitting PowerBI", but only someone with GA access can run it. Flagged as an option,
+   not a finding.
+7. **Freshdesk #6492 content** — unchanged gap, carried from 08-04.

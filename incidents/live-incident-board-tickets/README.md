@@ -45,6 +45,62 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-14 — full board sweep, 9 in-scope tickets, Group B empty, one new-since-last-run pair (PLT-3044, PLT-3051)
+
+**Board re-queried**: `project = PLT AND issuetype = "Live Incident" AND status in ("Open", "With
+Customer", "In Analysis", "Ready For Development", "Dev In Progress") ORDER BY created DESC` → 9
+tickets, all Group A (Open/In Analysis/With Customer); Group B is empty this run, same as every
+prior run. Each ticket was handed to a domain-grouped sub-pass (dashboard-family; viewer-and-model;
+quality-management; 360-captures; progress-tracking handled inline) that read its existing folder
+first, re-fetched fresh Jira comments, and updated additively. The "(partial)" heading directly
+below this one is corrected here — that sub-pass's own write-up only knew about its own 2 tickets,
+but this was one slice of a full 9-ticket sweep run in parallel, not a partial run; nothing below
+should be read as "not re-checked this run".
+
+**Per-ticket outcome, one line each — full detail in each ticket's own folder:**
+
+- **PLT-3044** (new, filter-system) — conversationally resolved same-day by product; recommend
+  **move to Done**.
+- **PLT-3051** (new, viewer-and-model) — genuinely open; Darminder mid-investigation; we handed him
+  a narrower next step (Forge `getBulkProperties2` with no `categoryFilter`) rather than duplicating
+  his check. Attachments unopenable (403).
+- **PLT-2619** (dashboard-migration) — the rollout gate is now identified in code (`404` from
+  `getProjectDashboardInfo` ⇒ new dashboard, no per-org flag); collapses to a 30-second URL check,
+  both reply branches drafted for Yash.
+- **PLT-2874** (viewer-and-model) — Staging-only 52,458-element undercount, reopened 08-13; the
+  `calculatedOn`-cap hypothesis was narrowed and partly walked back this run (see
+  `recurring-defect-patterns.md` 08-14 amendment); asked Gennaro for project/model + a slider
+  screenshot before going further.
+- **PLT-3024** (viewer-and-model) — mechanism already confirmed (Pattern 5, federated-folder-only
+  load); recommend telling Yash the mechanism now rather than continuing to wait on the customer's
+  unanswered federation question.
+- **PLT-2909** (progress-tracking) — no change; Ali's reply is now 14 days overdue, the 08-10 nudge
+  draft is still unsent.
+- **PLT-2858** (quality-management, **Critical**, 14 days silent) — most urgent item this run;
+  Mostafa's month-old clarifying question turned out to be answerable from the code, so a full
+  answer plus a proper decision-request are drafted instead of another nudge.
+- **PLT-2815** (quality-management) — product decision already made 06-23, Confluence reference
+  table confirmed unchanged since; recommend **move to Done**.
+- **PLT-2649** (360-captures) — root cause and exact fix already fully specified 07-24, 3 weeks of
+  customer silence since; also caught a bad reparent target in a prior run's stale-pins CSV before
+  it could be handed to project delivery.
+
+- **PLT-3044** — *new folder:* `PLT-3044-groupA-filter-system/`. CH08x, "Project Area" filter offers
+  disciplines the client doesn't track (Procurement/Design/Milestone). **Already resolved on the
+  ticket**: Mostafa said 08-13 it's the client's schedule mapping, already raised with Hussein,
+  nothing our side, close it. Recommended action is **move to Done, no further action** (plus unassign
+  off Darminder). Mechanism recorded for reference only — dynamic category sections are populated
+  from the client's own schedule values with no allow-list (`dashboard-filter-utils.ts:238-306`).
+  Deliberately kept separate from PLT-3040 (same client, same screen, different mechanism).
+- **PLT-2619** — Jira unchanged (still `With Customer`, 6 comments, `updated` 08-03). What moved is
+  ours: the **old-vs-new dashboard switch is now identified in code** —
+  `resolveDashboardUrl` (`app/helpers/dashboardNavigation.ts:6-21`) routes to the legacy PowerBI page
+  iff the backend still has a report mapped for that project (404 ⇒ new dashboard). **There is no
+  per-org rollout flag**; `Dashboard-Mode` is a per-browser cookie. This collapses the long-standing
+  "needs human, cohort unknown" step into a 30-second URL check, and both branches of the reply to
+  Yash are now drafted. Partly amends the 07-30 "no FE toggle exists" note (conclusion stands,
+  mechanism was incomplete).
+
 ## Run: 2026-08-13 — PLT-3040 left scope (→ In Code Review), PLT-2874 reopened with a QA-caught Staging regression, 6 confirmed unchanged, Group B still empty
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With

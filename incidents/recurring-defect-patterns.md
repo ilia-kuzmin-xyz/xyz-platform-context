@@ -172,6 +172,18 @@ just renders it, the ticket belongs to whoever produces the data, and time spent
 wasted. State this explicitly in the ticket, because "the dashboard is wrong" naturally reads as a
 frontend bug to everyone else.
 
+**2026-08-14 addition — PLT-3044 (CH08x) is the cleanest occurrence yet, and it resolved in a day.**
+Client reported the dashboard showing disciplines they don't track (Procurement, Design, Milestone)
+under the **Project Area** filter. Product (Mostafa) called it same-day: *"it's about how they map the
+schedule. nothing from our side."* Code agrees — dynamic (non-core) category sections are populated
+from the distinct values in the client's own schedule data with **no allow-list**
+(`dashboard-filter-utils.ts:238-306`, values via `activity_categories_flat` /
+`dashboard-schedule-service.ts:68-73`). Worth noting as the **inverse of Pattern 3**: there the panel
+silently *hides* categories the client expects; here it shows everything the schedule carries and the
+complaint is that it shows too much. Same panel, no editorial layer in either direction — so when a
+filter panel's *contents* are disputed, check what populates the list before treating it as a display
+bug. Full notes: `live-incident-board-tickets/PLT-3044-groupA-filter-system/context.md`.
+
 **The trap inside the trap:** faithful rendering is not the same as blameless. The frontend's real
 failing in Pattern 1 was showing a count the user could never act on and then doing nothing
 visible when they tried. That silence is what turned a lookup into a multi-day investigation.
@@ -372,6 +384,19 @@ incident.
 - **Source-data elevation errors presented as viewer bugs** (PLT-2649). 360 pins placed wrongly
   because one level's elevation was wrong in the source model; the transform was provably correct
   and the same fault reproduced in PowerBI.
+  - *Amended 2026-08-14 (still one occurrence, not promoted).* **Recognition signature:** one pin
+    type wrong while another pin type on the same model is right, plus the same fault in PowerBI.
+    Quality issue coordinates are recorded per issue; 360 capture coordinates are derived upstream
+    from the hosting room's level. So "Quality fine, 360 wrong" points at the model, never at the
+    viewer, and no FE change can correct it (the FE reads `zMeters` verbatim and never applies an
+    elevation). **Second half of the pattern, new this run:** the wrong level was not a lone bad
+    value but one member of a whole family of misaligned linked files. In PA12, ~15 source files
+    and ~44 levels sit in a 45-73 m band while their same-named twins sit at datum; only the one
+    level hosting 360 capture points produced a visible symptom. **So when this shape appears, ask
+    how many other levels share the offset before accepting a one-value fix** — the rest are latent
+    until someone takes a capture there. Diagnostic that works: use a correctly-placed pin type as
+    the valid vertical envelope and classify the other type against it
+    (`live-incident-board-tickets/PLT-2649-groupA-360-captures/analysis/detect_stale_360.py`).
 - **Name-based fallback join across an id-keyed hierarchy, 2026-08-12** (PLT-3040, CH08-Minooka).
   Two Package categories sharing a display name under different disciplines is a supported, tested
   shape (PLT-2821 keyed selection by `activityCategoryId` precisely because names repeat), but the
@@ -413,3 +438,46 @@ incident.
   only once one of the three hypotheses is actually verified against Staging, and note here which
   one it was. Full findings: `live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/context.md`
   §"Reopened 2026-08-13".
+
+### 2026-08-14 additions to the candidate list
+
+- **Amendment to the PLT-2874 `calculatedOn`-cap candidate above (does not retract it).** Re-reading
+  the code this run narrowed the mechanism materially, so the entry above **overstates what the cap
+  does** and should not be quoted verbatim. Two verified constraints: (i) `endSyncDateTime` bounds a
+  **delta** whose *start* is the activity-links parquet's own watermark
+  (`artefact-loader.ts:579,601,624-625`) — it can never remove rows already in the parquet, so its
+  magnitude ceiling is only the links created after that snapshot; and (ii) the delta is skipped
+  outright when the parquet watermark is under five minutes old (`artefact-loader.ts:604-612`), which
+  nullifies the cap entirely on a freshly-published artefact. If the links parquet and the progress
+  calc ship together, "capped sync" collapses into the plainer "Staging's parquet is stale".
+  **The three-query ladder gains a decision table**, because `element_base_data` is built
+  `FROM svf2_object_id_map` with a **LEFT** JOIN onto links (`dashboard-progress-service.ts:2547-2560`)
+  and so does not move when links are missing: links-short ⇒ `activity_links` short only;
+  wrong-map-version ⇒ `element_base_data` short; date-window ⇒ only `_visible_elements` short.
+  Calibration trap worth carrying: a *healthy* `element_base_data` reads slightly **above** the
+  editor's number (1,364 higher on FAR01), not equal to it. **New cheaper rung, no console needed:**
+  the date slider is seeded entirely from the progress-derived data range and re-seeded on every
+  emission (`date-range.tsx:133-162`, fed by `dashboard-progress-service.ts:254-300`, emitted from
+  both `:771` and `:876`), so *comparing the slider's start/end dates between the two environments*
+  tests the date-window hypothesis from a screenshot. Still a single unconfirmed occurrence; still
+  not promotable. Details: `live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/context.md`
+  § 2026-08-14.
+
+- **Hardcoded display whitelist between a rich upstream source and the panel, 2026-08-14**
+  (PLT-3051, LVN BL1-2 — unconfirmed against the project, mechanism verified in code). Revit element
+  metadata reported as missing in the Web Viewer while present in Revit. The Forge property database
+  *is* loaded on the Editor (`viewer-service.ts:948-953` — only the Dashboard passes
+  `skipPropertyDb: true`, `use-model-loader.tsx:239-244`), but the panel filters properties down to
+  five hardcoded parameter groups — `['Constraints','Identity Data','Phasing','Dimensions','Other']`
+  (`element-properties-service.ts:7`) — applied **twice**, once as Forge's `categoryFilter` (`:171-173`)
+  and again as a receive-side discard (`:200`). Anything in another group is dropped with no log and
+  no UI hint, and all five sections render regardless of content (`:216-233`), so the failure appears
+  as five empty accordions rather than as an error. **Recognition signature:** "the source system has
+  this data and our viewer doesn't", where the panel shows correctly-named but empty containers — look
+  for a hardcoded allow-list before assuming the upstream fetch failed. Sibling shape to Pattern 5
+  (a deliberate narrowing that is invisible on screen), but the narrowing here is a *display*
+  whitelist rather than a scope gate, and unlike Pattern 5's gates this one does not look like
+  specified behaviour. Promote if a second panel is found dropping upstream data against a hardcoded
+  name list. Full findings, plus the four sibling hypotheses not yet excluded (wrong surface,
+  Navisworks category renaming, multi-select empty-by-design, unguarded `getInstanceTree()` blanking
+  the panel): `live-incident-board-tickets/PLT-3051-groupA-viewer-and-model/context.md`.

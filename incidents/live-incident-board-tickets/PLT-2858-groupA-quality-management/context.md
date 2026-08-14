@@ -342,3 +342,58 @@ Live fetch: `updated` still `2026-07-31T13:27:32+01:00`, comment count unchanged
 across nine consecutive runs** (07-24 through today); Mostafa's 107320 question to Darminder is now
 **28 days** unanswered. No re-diagnosis performed — nothing left to investigate, only to post.
 Remains top of the "needing human now" list.
+
+## 2026-08-14 — code re-verified on current checkout; Mostafa's 107320 is now answerable verbatim
+
+**Jira state (supplied to this run, not re-fetched):** status `In Analysis`, priority **Critical**,
+assignee Darminder, `updated = 2026-07-31` — i.e. **14 days of total silence**, the fourth nudge
+(108643, Yash, 07-31) still unanswered. Nothing new on the ticket since the 08-11 pass. Stall
+clocks as of today: Mostafa's 107320 question **31 days**; the customer's drop-down-or-remove ask
+(107317) **31 days**; last substantive comment (107533, 07-16) **29 days**.
+
+**What is new this run:** the §2a/§2b/§2c claims were re-read against the current `hc-frontend`
+checkout (branch `claude/vigilant-franklin-icxmur`) rather than carried forward on trust. All hold,
+with one line-number correction, and the mechanism is now stated precisely enough to *answer*
+Mostafa's 107320 instead of re-asking it. Paths relative to `src/main/webapp/`.
+
+Verified (read this run):
+- `app/.../issue-properties/blocks/issue-details.tsx:139` — `<Detail label='Location'
+  value={compare('locationId')} />`, and `:140` — `<Detail label='Location Details'
+  value={compare('locationDescription')} />`. The two rows are adjacent and distinct.
+- `compare()` at `issue-details.tsx:43-48` applies **no processor** unless one is passed, so the
+  "Location" row renders the raw `locationId` value verbatim. §2c confirmed: once zones exist, this
+  prints a GUID, not a room name. (Prior runs cited `:139` for the Location row; that is still
+  correct, and "Location Details" is `:140`.)
+- `issue-form.tsx:526-537` — the only location-ish control in the form is the free-text
+  **"Location Detail"** (`name='locationDescription'`, `:528`, `maxLength: 100`, `:536`).
+- **No control anywhere in `issue-form.tsx` writes `locationId`** — grep for `locationId` across
+  `issue-form.tsx` returns nothing. §2b confirmed: the zone Location is not user-settable in the
+  web viewer.
+- Form state for `locationId` nonetheless exists end-to-end: `hooks/use-issue-form.ts:43` (field
+  type), `:135` (init from `initialValues`), `:402-406` (required only if `ISSUE_LOCATION` is a
+  required field), `issue-edit.tsx:150,173` (carried through edit), `format-issues.ts:146`
+  (submitted as `issueLocationId`). So a dropdown needs only the control, not new plumbing —
+  the 08-03 estimate (~10-15 lines) is re-confirmed on current code.
+- `format-issues.ts:87-88` — inbound `locationId ← v2.issueLocationId`,
+  `locationDescription ← v2.locationDetails`. `issue-view-model.ts:46` has no `locationLabel`.
+- `issue-api-service.types.ts:176-179` — `IIssueLocation {issueLocationId, location}`, the
+  `{id, label}` shape a dropdown would need; `:216` — it arrives as `issueParameters.issueLocations`.
+
+**Where the `issueLocations` list comes from (NEW, narrows the one open unknown).**
+`useIssueParameters.ts:11-21` fetches it via `serviceProvider.Issue.getProjectIssueParameters`,
+which is `GET /api/v2/projects/{projectId}/issues/parameters`
+(`app/services/issueService/issue-api-service.ts:86-88`). The V1 transform maps it from parameters
+of `type === 'ISSUE_LOCATION'` (`useIssueParameters.ts:71-77`), and `use-issue-form.ts:519-521`
+treats `ISSUE_LOCATION` as an *optional* field whenever that list is non-empty.
+→ **Verified:** the dropdown's option list would be whatever that endpoint returns as
+`ISSUE_LOCATION`.
+→ **Still unverified (api-v2, out of this repo):** whether the BE populates `ISSUE_LOCATION` from
+the same named-zone hierarchy that is empty on ML9. This is the single remaining engineering
+unknown on the ticket and it only affects the dropdown branch. Owner: Sachin / Ali.
+
+**Consequence: 107320 is answerable in three sentences and does not need Darminder.** Location =
+the zone (floor/area/room) the element sits in, auto-derived on the BE from the model's named zones,
+read-only in the web viewer, blank on ML9 because that model has none configured. Location Detail =
+a free-text box on the form, up to 100 characters, typed by the user, saved as `locationDetails`,
+and working on ML9 today. The blocking clarification that has held this ticket for a month is
+resolved in `recommended-action.md` (2026-08-14 section) as a postable draft.
