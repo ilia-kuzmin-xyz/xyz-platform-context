@@ -270,3 +270,29 @@ Offered to take (1) and (2) as a small self-contained ticket — neither touches
 - **Ticket as written: 2/10** — down from 3/10, because most of what it asks for is now either done
   or a duplicate. It is a scoping decision, not a coding task.
 - **The three orphan items: 8/10** for (1) and (2) once someone says they want them.
+
+---
+
+## 2026-08-15 — deliberately silent: nothing new, and the ticket is one decision from resolution
+
+**No comment posted this run, on purpose.** Four clarification comments now sit on this ticket
+(08-08, 08-10, 08-13, 08-14). The 08-14 one is a day old and ends in a direct, answerable question
+("is there anything in the *also outstanding* list you want as a ticket?"). Posting a fifth would be
+noise, not information — there is no new code, no new finding, and no new fact since yesterday.
+
+Re-verified this run, nothing moved:
+- Status still `Analysis In Progress`.
+- No human reply on any of the three open questions — duplication with PLT-3025 (**7 days**),
+  the unfilled `<target>` in the acceptance criteria (**7 days**), scope of the orphan items (1 day).
+- PLT-3025's #2142 is **merged to master** (14 Aug 17:10), so the viewer/first-paint half described
+  in the 08-14 entry above is now on `master`, not just on a branch. That strengthens the
+  close-as-superseded recommendation; it does not change it.
+
+**Standing position (unchanged):** this is a scoping decision, not a coding task. The three orphan
+items — template activation from prompt, hydration-record max age, Room Readiness drill-down —
+are the only scope a plain duplicate-close would drop. (1) and (2) remain 8/10 and self-contained
+the moment someone asks for them.
+
+**Guidance for the next run:** do not post again unless there is genuinely new code or a reply.
+If this is still silent by ~08-20, the useful escalation is a nudge to a named person rather than
+another analysis comment on the ticket.

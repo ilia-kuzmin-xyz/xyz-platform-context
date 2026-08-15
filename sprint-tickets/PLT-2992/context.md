@@ -67,3 +67,34 @@ Posted as comment **109343**.
 
 ## Confidence — updated
 **8/10** (was 4) the moment (1) and (2) are answered. The work itself is small and well understood.
+
+---
+
+## 2026-08-15 — PR #2135 is green and all feedback is closed; only human review is missing
+
+No code change this run. Status of the ticket's last open slice:
+
+| | |
+|---|---|
+| PR | [#2135](https://github.com/XYZReality/hc-frontend/pull/2135) — `CHECKLIST TYPE` cell → task kind |
+| Review threads | **1 total, resolved** (Copilot: over-broad aliases `performancetest` / `systemtest`; dropped in `c01ca929f`) |
+| `build` | ✅ success |
+| SonarCloud | ✅ Quality Gate passed, 0 new issues |
+| `mergeable_state` | `blocked` — **awaiting human approval**, not a failing gate |
+| Reviewers requested | TomMasdinXYZ, DarminderA, rishib-xyz, SergiuszXYZ |
+
+**Action taken:** the branch was 1 commit behind `master` (PLT-3025 / #2142 merged 14 Aug).
+Merged `origin/master` in and pushed (`6275f4d42..730935978`). **Clean merge** — the merge brought
+in only `CanvasPage/` + `ViewerPage/` files; nothing under `ChecklistImportPage/` was touched, so
+there is no interaction between #2142 and this PR.
+
+⚠️ **Local test run was not possible** and this is likely to bite every future run in this
+container: `npm ci` fails with **401 Unauthorized** on `npm.pkg.github.com` for
+`@xyzreality/dhtmlx-gantt` — the private GitHub Packages registry needs a token this environment
+does not carry. `node_modules` is absent, so Vitest cannot start at all. Verification of this push
+therefore rests on CI, which is fine for a merge that touches none of the PR's own files, but
+**do not assume you can run tests locally here.**
+
+### Ticket lifecycle note (unchanged from 08-14)
+The rest of PLT-2992 is already on master via #2129 and #2138. Once #2135 lands the ticket is fully
+delivered and should be closed rather than left open against shipped work.
