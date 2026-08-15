@@ -136,3 +136,20 @@ flag-on users (pitfalls §3 — no compatibility window). Review outcome: code s
 a clean mechanical rename (i18n regressions from the Copilot round all fixed, `required_item`
 / `task_instance.type` untouched as promised); the merge is gated purely on zip-order
 execution, which still needs a human with Supabase environment access.
+
+## 2026-08-15 — stack consolidated into #2140 (review-run note)
+
+The seven-PR frontend chain above is **superseded**: #2122/#2126/#2128/#2131/#2132 are no
+longer open, and the register work now ships as **one PR, #2140**
+(`task/PLT-2977-cx-systems-register` → master, PLT-2977/2976/2979/2980/2981/2987). Detail-panel
+readiness/members/open-issues follow in a second PR stacked on it, so PLT-2981 is only partly
+closed by #2140.
+
+State at review (15 Aug): CI + Sonar green, 0 new issues, merges clean into master, all 5
+Copilot threads resolved (4 fixed, 1 reasoned decline). Services filter soft-deleted rows,
+tree helpers are cycle-safe, edit modal excludes self/descendants from the parent list.
+
+Still true and still the blocker: **no backing schema verified deployed** — `system`,
+`system_type`, `system_element_link` were absent from both databases at the 12 Aug probe, and
+#2140 additionally needs `asset_system_membership` and the `move_asset_membership` RPC. The
+zip-order decision (§ What needs a human) is unchanged; re-probe before merging #2140.
