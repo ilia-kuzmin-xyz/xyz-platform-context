@@ -98,3 +98,26 @@ therefore rests on CI, which is fine for a merge that touches none of the PR's o
 ### Ticket lifecycle note (unchanged from 08-14)
 The rest of PLT-2992 is already on master via #2129 and #2138. Once #2135 lands the ticket is fully
 delivered and should be closed rather than left open against shipped work.
+
+---
+
+## 2026-08-16 (Sunday) — no change; #2135 is one approval away, day 4
+
+Nothing to do this run. All three checkpoints re-verified and all three were no-ops:
+
+| | |
+|---|---|
+| Threads | **1 total, resolved** (Copilot alias over-breadth; dropped in `c01ca929f`) |
+| Reviews | Copilot `COMMENTED` + our reply — **no `CHANGES_REQUESTED`**, and still **no human review** |
+| `build` | ✅ success on `730935978` |
+| SonarCloud | ✅ Quality Gate passed |
+| Up to date? | ✅ `merge-base --is-ancestor origin/master origin/PLT-2992` → true; master unmoved at `8647f2257` |
+| `mergeable_state` | `blocked` — **awaiting approval, not a failing gate** |
+
+The 08-15 merge of master into this branch was the last change; master has not moved since, so
+checkpoint 3 had nothing to merge. **Nothing pushed to hc-frontend this run.**
+
+**PR #2135 has now been open and green since 12 Aug with four requested reviewers
+(TomMasdinXYZ, DarminderA, rishib-xyz, SergiuszXYZ) and zero looks.** There is nothing technical
+in its way. This is the sprint's highest-value unblock and the only thing standing between
+PLT-2992 and closure — the rest of the ticket is already on master via #2129 and #2138.

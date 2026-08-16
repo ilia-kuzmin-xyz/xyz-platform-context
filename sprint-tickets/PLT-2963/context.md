@@ -296,3 +296,49 @@ the moment someone asks for them.
 **Guidance for the next run:** do not post again unless there is genuinely new code or a reply.
 If this is still silent by ~08-20, the useful escalation is a nudge to a named person rather than
 another analysis comment on the ticket.
+
+---
+
+## 2026-08-16 (Sunday) — held again; the two offered items are out of repo scope anyway
+
+**No comment posted. Second consecutive deliberate silence**, and this time the 08-15 entry's own
+rule made the call: *"do not post again unless there is genuinely new code or a reply."* Neither
+happened. Status `Analysis In Progress`, comment count still 4, still zero human replies —
+duplication **8 days**, `<target>` **8 days**, orphan-scope question 2 days. 08-16 is a Sunday, so
+the silence is partly calendar, same as the 08-09 no-op.
+
+### Re-verified on `master` (`8647f2257`), not taken on trust
+
+The 08-14 entry described the PLT-3025 *branch*. That branch is now master, so the claims were
+re-checked against it:
+
+| Claim | Verified on master |
+|---|---|
+| `viewer-mapping.json` payload gone | ✅ **zero** `viewer-mapping` references in `CanvasPage/` |
+| `ViewerFilesSync` still pushes late updates | ✅ `ArtifactSandpack.tsx:248-265`, now `/viewer-config.json` **only** |
+| Target of those writes still a static import | ✅ `ForgeViewerStatic.ts:46` `import viewerConfigData from "./viewer-config.json"` |
+
+So the drop-the-late-update bug **is still live on master**, at exactly the reduced blast radius
+predicted on 08-14: config is small and settled at mount, where the mapping was large and genuinely
+late. Confirmed *not* worth its own ticket — but note the `ViewerFilesSync` doc comment still says
+it exists for *"issue enrichment finishes after the base mapping"*, describing a payload that no
+longer exists. A stale comment pointing at deleted machinery is how the next reader gets misled;
+worth a one-line fix whenever someone is next in that file.
+
+### 🆕 The reason a green light still wouldn't unblock code from this routine
+
+Comment 109647 offered to take **template activation from prompt** and **hydration-record max age**
+"the moment someone nods". Checked this run: both live in **`XYZ_AgentPipeline/`**, which is **not
+in this session's repo scope** — the routine can reach `hc-frontend`, `xyz-platform-context`,
+`XYZPlatformApi` and `hc-iam` only, and `XYZ_AgentPipeline/` is not checked out at all.
+
+This does not change the recommendation, but it changes what a "yes" buys: **an immediate yes is
+still not actionable here.** If those two items are wanted, they need an owner with pipeline access,
+not this routine. Worth saying out loud so nobody waits on a nod that unblocks nothing.
+
+### Standing position — unchanged
+
+Close as superseded by PLT-3025 **and** re-cut the three orphan items (template activation,
+hydration max-age, Room Readiness drill-down) as one small ticket with a real number in place of
+`<target>`. Escalation date **~08-20** from the 08-15 entry stands; the useful escalation is a nudge
+to a named person, not a fifth analysis comment.

@@ -1173,3 +1173,87 @@ items in PLT-2963 are untouched by PLT-3025 and a plain duplicate-close would dr
    for no Claude presence in PR/Jira comments; the harness requires a Claude Code attribution footer
    on every GitHub post. Footer kept — masking AI authorship from human reviewers is not something to
    resolve silently in favour of the quieter option. Flagged in every run summary since 08-13.
+
+---
+
+## 2026-08-16 (Sunday) — sprint shrank to 3; everything green, zero open threads, nothing eligible
+
+**The sprint composition changed again, and this time it got smaller.** PLT-2993, PLT-2994,
+PLT-3000, PLT-3002 and PLT-3043 are **no longer returned** by
+`project = PLT AND sprint in openSprints() AND assignee = currentUser()`. Three tickets remain:
+
+| Ticket | Status | PR | Eligible for kick-off? |
+|--------|--------|----|------------------------|
+| PLT-3025 | In Code Review | [#2142](https://github.com/XYZReality/hc-frontend/pull/2142) — **merged 14 Aug** | ❌ |
+| PLT-2992 | In Code Review | [#2135](https://github.com/XYZReality/hc-frontend/pull/2135) — open, green | ❌ |
+| **PLT-2963** | **Analysis In Progress** | none | ✅ — only candidate, deliberately held (5th run running) |
+
+⚠️ **Do not read the disappearance of 2993/2994/3000/3002/3043 as "closed".** Their PRs (#2136,
+#2138) are on master, so the work shipped — but **PLT-3043 vanished without ever having a PR or a
+branch**, which is the same anomaly flagged on 08-14, now resolved by removal from the sprint
+rather than by explanation. If a later run needs those tickets, query them by key, not by sprint.
+
+**Master moved to `8647f2257`** (PLT-3025 / #2142). The three PRs tracked since 08-12 are now
+two-thirds merged: #2136 (`689fc6fb1`), #2138 (`478932dd8`), #2142 (`8647f2257`). Only #2135 is
+still open.
+
+### Checkpoint 1 — feedback: zero open threads anywhere
+
+| PR | Threads | State |
+|----|---------|-------|
+| #2135 | 1 (Copilot) | `is_resolved: true` — replied + fixed in `c01ca929f` |
+| #2142 | 5 (Copilot) | all `is_resolved: true` — fixed in `afa2df70f`, PR since merged |
+
+`get_reviews` checked as well as the thread list (the standing lesson): **no `CHANGES_REQUESTED`
+on #2135** — only Copilot `COMMENTED` plus our reply. **Still zero human reviews**, now on day 4
+for #2135 (opened 12 Aug).
+
+### Checkpoint 2 — CI green, nothing pending
+
+#2135: `build` ✅ + `SonarCloud Code Analysis` ✅ (both on `730935978`, 15 Aug). No failing or
+queued run, no repo-wide blocker. `mergeable_state: blocked` = **awaiting human approval**, not a
+gate — same as 08-15, and the distinction is worth re-reading before anyone "fixes" it.
+
+### Checkpoint 3 — no-op, correctly
+
+`git merge-base --is-ancestor origin/master origin/PLT-2992` → **true**. The 08-15 run's merge
+(`6275f4d42..730935978`) already carried `8647f2257`, and master has not moved since. Nothing to
+merge, no conflicts. **No commits pushed this run to any repo except this one.**
+
+### PLT-2963 — held for the 2nd consecutive run, per 08-15's own guidance
+
+Nothing new: status unchanged, still zero human replies (duplication **8 days**, `<target>`
+**8 days**, orphan-scope question 2 days). The 08-15 entry set the rule *"do not post again unless
+there is genuinely new code or a reply"* and *"if still silent by ~08-20, escalate to a named person
+rather than another analysis comment"*. Both conditions hold, so **no fifth comment was posted.**
+
+One thing was re-verified on `master` rather than taken on trust (the 08-13 lesson about reading
+around the line you cite):
+
+- `viewer-mapping` has **zero references left** anywhere in `CanvasPage/` — the payload really is
+  gone from master, not just from the branch.
+- `ViewerFilesSync` (`ArtifactSandpack.tsx:248-265`) now syncs **only** `/viewer-config.json`, and
+  `ForgeViewerStatic.ts:46` still reads it as a **static import**. So the drop-the-late-update bug
+  is still technically live on master, at the reduced blast radius the 08-14 entry predicted.
+  Its doc comment still describes *"issue enrichment finishes after the base mapping"* — a mapping
+  that no longer exists. **Stale comment, small real bug, still not worth its own ticket.**
+
+Also confirmed why a green light on PLT-2963 would *still* not unblock code here: the two items
+offered in comment 109647 (template activation, hydration max-age) live in `XYZ_AgentPipeline/`,
+which is **not in this session's repo scope** (hc-frontend, xyz-platform-context, XYZPlatformApi,
+hc-iam). Even an immediate "yes" is not actionable from this routine.
+
+### Open items for a human
+
+1. 🔴 **#2135 is one approval away from done.** Green, up to date, all feedback closed, 4 reviewers
+   requested, nobody has looked since 12 Aug. This is now the single highest-value unblock.
+2. 🔴 **PLT-2963: 8 days, 4 comments, 0 replies.** Escalation date `~08-20` set on 08-15 stands.
+   The decision is *close-and-re-cut the three orphan items* vs *trim the shipped half*.
+3. **PLT-2992 should be closed once #2135 lands** — the rest of it is already on master via #2129
+   and #2138 (unchanged since 08-14).
+4. **PLT-3043 left the sprint without explanation** — was In Code Review with no PR/branch for a
+   day, now simply gone. Nothing to act on, but nobody ever accounted for it.
+5. **Attribution-footer conflict, still undecided.** No GitHub or Jira comments were posted this
+   run, so nothing new carries a Claude footer. Position unchanged: the footer stays.
+6. **`npm ci` 401 on `@xyzreality/dhtmlx-gantt`** remains an auth boundary in this container —
+   no local vitest/tsc, CI is the only verification. Do not spend a run retrying it.
