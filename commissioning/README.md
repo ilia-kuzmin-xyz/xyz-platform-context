@@ -79,6 +79,8 @@ It switches **on** when either signal is present:
 **Open, Rishi's** — a seven-PR Systems stack rooted on the glossary rename. Root PR conflicts with
 master and no backing schema is deployed. See
 [planning/glossary-rename-and-systems.md](./planning/glossary-rename-and-systems.md).
+*(16 Aug update: stack consolidated into one PR, #2140; the rename and the Systems tables are now
+applied on `dev` — `stable` still bare. Details in the planning doc's dated notes.)*
 
 **Blockers before the flag can be enabled above `dev`**
 1. `stable` holds **0 rows in every table** — the feature would load empty.

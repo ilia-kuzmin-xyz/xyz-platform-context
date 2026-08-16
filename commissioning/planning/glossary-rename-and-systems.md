@@ -153,3 +153,34 @@ Still true and still the blocker: **no backing schema verified deployed** — `s
 `system_type`, `system_element_link` were absent from both databases at the 12 Aug probe, and
 #2140 additionally needs `asset_system_membership` and the `move_asset_membership` RPC. The
 zip-order decision (§ What needs a human) is unchanged; re-probe before merging #2140.
+
+## 2026-08-16 — dev schema landed; #2140 code-verified, held for the visual pass
+
+Re-probed both databases (review run, committed publishable keys):
+
+- **`dev` has moved since 13 Aug**: the glossary rename is applied (`readiness_step`,
+  `workflow_step`, `workflow_step_task` → 200; `tag`, `workflow_tag` → 404) **and all four
+  Systems tables are live** (`system`, `system_type`, `asset_system_membership`,
+  `system_element_link` → 200). This supersedes the 15 Aug note's "absent from both" for `dev`.
+- **`move_asset_membership` RPC is still 404 on `dev`.** Not blocking #2140: only
+  `useMoveSystemMembership` calls it and no UI in the PR consumes that hook — it ships for the
+  follow-up (members management). Must exist before that second PR merges.
+- **`stable` is unchanged**: every Systems table 404s. Known blocker, tracked in README
+  § Blockers.
+
+Independent code pass over #2140 (head `11e45cb`, unchanged since 14 Aug) confirmed the 15 Aug
+note's claims first-hand: soft-delete filters on reads, cycle-safe tree helpers
+(`buildSystemTree` stranded-component promotion, seen-sets on walks), edit modal excludes
+self+descendants from the parent picker and refuses type changes that would strand task
+instances, viewer gating keeps the detail panel scoped to the active register, typed
+`CommissioningRequestError` maps unique-violations onto the name field. CI + Sonar green, all 5
+Copilot threads resolved, ~1 unrelated commit behind master, no conflicts.
+
+One gap found (medium, non-blocking): `systems-panel.tsx` never reads `isError` from
+`useSystemList` — a failed load defaults to `[]` and renders the normal empty state with the
+Create CTA, indistinguishable from an empty project (pitfalls §4's confusion, now in-code).
+Above `dev` today that is exactly what a flag-on user would see. Worth a follow-up ticket.
+
+Review outcome: **no review submitted** — the PR is a 4.6k-line UI feature built to the V3
+design link with a six-ticket visual test plan, so it needs Ilia's visual pass; code side is
+clear to approve once visuals check out.
