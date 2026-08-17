@@ -184,3 +184,20 @@ Above `dev` today that is exactly what a flag-on user would see. Worth a follow-
 Review outcome: **no review submitted** — the PR is a 4.6k-line UI feature built to the V3
 design link with a six-ticket visual test plan, so it needs Ilia's visual pass; code side is
 clear to approve once visuals check out.
+
+## 2026-08-17 — review run: no movement on #2140; #2143 + #2110 approved and quiet
+
+Scheduled PR-review sweep over Rishi/Darminder/Tom's open non-draft PRs (#2143, #2140, #2110).
+
+- **#2140 is unchanged since the 16 Aug pass** — head still `11e45cb`, no new commits, comments
+  or threads (all 5 Copilot threads remain resolved), CI + Sonar still green, 1 unrelated commit
+  behind master, no conflicts. Spot-re-verified the 16 Aug claims in code (soft-delete filter at
+  `system-service.ts:133`, seen-set walks in `systemTree.ts`, `descendantSystemIds` exclusion at
+  `edit-system-modal.tsx:69`, `useMoveSystemMembership` still consumer-less outside tests). The
+  `isError` gap at `systems-panel.tsx:64` is still there — still worth a follow-up ticket.
+  Held again for Ilia's visual pass; no comment stacked on the PR since nothing moved.
+- **#2143 (PLT-3051)** and **#2110 (PLT-2880)** — both approved by Ilia's account on 15 Aug at
+  their current heads; no developer action since, so nothing to re-review. #2110's pre-merge ask
+  (run the manual test plan — the interceptor safety net is gone) still stands.
+- Databases not re-probed this run — nothing merged that would move them; the 16 Aug census
+  (dev: rename + all four Systems tables live, RPC absent; stable: bare) is the latest.
