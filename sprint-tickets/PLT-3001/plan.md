@@ -50,3 +50,17 @@ PLT-3000/3002; measured values in `_design-conformance-2026-08-12.md`).
 Confidence: 7/8 for steps 1–3+5 (all code-side); 5 for step 4 (needs table on dev
 or product call). Draft PR; commits as ilia (git config FIXED in this container —
 verify `git config user.name` after any container restart!).
+
+## 2026-08-17 — progress
+**Draft PR #2146 open** (base master; branch based on #2140 + master — say "review
+#2140 first"). Landed: create draft page (`CreateAssetTypeContent`, 8 tests; submit
+gated on catalogue fetch because the service UPSERTS BY NAME — a submit racing the
+load would silently overwrite a type), "+ New asset type" action-bar button + slider
+in TypesTab, multi-select `AddTasksPicker` replacing the anchored menu on readiness
+steps (6 section tests rewritten to the picker contract; disabled options guarded in
+the handler because a div-based ListItemButton lets synthesised clicks through), SGP
+schema doc `docs/commissioning/asset-type-system-requirements-schema.md`.
+
+Remaining on the ticket: Other-tasks bucket → same picker (small); "Add System type"
+blocked on the SGP tables (run the schema doc's DDL on dev first); AddTaskMenu is now
+unused by the readiness section but still used elsewhere? (grep before deleting).
