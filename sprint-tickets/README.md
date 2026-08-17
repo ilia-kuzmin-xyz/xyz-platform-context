@@ -1257,3 +1257,74 @@ hc-iam). Even an immediate "yes" is not actionable from this routine.
    run, so nothing new carries a Claude footer. Position unchanged: the footer stays.
 6. **`npm ci` 401 on `@xyzreality/dhtmlx-gantt`** remains an auth boundary in this container —
    no local vitest/tsc, CI is the only verification. Do not spend a run retrying it.
+
+---
+
+## 2026-08-17 (Monday) — second consecutive fully static run; nothing eligible, nothing to push
+
+Sprint composition **identical to 08-16** — same three tickets, same statuses, and `origin/master`
+has **not moved** (`8647f2257`, PLT-3025 / #2142, landed 14 Aug). Every checkpoint was a no-op.
+
+| Ticket | Status | PR | Eligible for kick-off? |
+|--------|--------|----|------------------------|
+| PLT-3025 | In Code Review | [#2142](https://github.com/XYZReality/hc-frontend/pull/2142) — **merged 14 Aug** | ❌ |
+| PLT-2992 | In Code Review | [#2135](https://github.com/XYZReality/hc-frontend/pull/2135) — open, green | ❌ |
+| **PLT-2963** | **Analysis In Progress** | none | ✅ — only candidate, deliberately held (**6th run**) |
+
+Also checked, since the routine's scope covers four repos: **no open PR authored by
+`ilia-kuzmin-xyz` exists in `XYZPlatformApi` or `hc-iam`.** The five open PAPI PRs all belong to
+other developers (#914, #913, #848, #833, #761). #2135 is the only PR this routine owns.
+
+### Checkpoints 1–3 on #2135 — all three no-ops, re-verified not assumed
+
+| | |
+|---|---|
+| Threads | **1 total, `is_resolved: true`** (Copilot alias over-breadth, fixed `c01ca929f`) — **0 open** |
+| Reviews | Copilot `COMMENTED` + our reply only. **No `CHANGES_REQUESTED`. Still zero human reviews.** |
+| `build` | ✅ success on `730935978` |
+| SonarCloud | ✅ Quality Gate passed |
+| Up to date? | ✅ `merge-base --is-ancestor origin/master origin/PLT-2992` → true; master unmoved |
+| `mergeable_state` | `blocked` = **awaiting approval, not a failing gate** (re-read before anyone "fixes" it) |
+
+**Nothing was pushed to `hc-frontend` this run.** No Jira comment, no GitHub comment, no transition.
+
+### PLT-2963 — held for the 3rd consecutive run, correctly
+
+Status `Analysis In Progress`, comment count still **4**, still **zero human replies**. Duplication
+question now **9 days** old, `<target>` **9 days**, orphan-scope question **3 days**. The 08-15 rule
+(*"do not post again unless there is genuinely new code or a reply"*) holds on both limbs: master
+has not moved since #2142, and nobody has answered. **No fifth comment posted.**
+
+Escalation date **~08-20** from 08-15 stands — 3 days out. When it arrives the useful move is a
+nudge to a named canvas owner, **not** a fifth analysis comment on a ticket nobody is reading. The
+standing recommendation is unchanged: close as superseded by PLT-3025 **and** re-cut the three
+orphan items (template activation, hydration max-age, Room Readiness drill-down) as one small
+ticket with a real number in place of `<target>`.
+
+### 🆕 PLT-3025 has a stale status — same shape as the PLT-3043 anomaly
+
+**PLT-3025 is still `In Code Review`, but #2142 merged on 14 Aug and is `master`'s head commit.**
+Ticket last updated 08-13, i.e. before its own PR landed. There is nothing left in review.
+
+Deliberately **not transitioned by this routine**: moving someone's ticket out of code review is an
+acceptance/QA sign-off call, and a merged PR is not the same as a merged-and-accepted ticket. Flagged
+for a human instead. Worth noting this is the **second** status-vs-reality drift on this board in
+four days (PLT-3043 sat In Code Review with no PR at all on 08-14, then left the sprint unexplained
+on 08-16) — if it happens a third time it is a board-hygiene problem, not three coincidences.
+
+### Open items for a human
+
+1. 🔴 **#2135 is one approval away from done — day 5.** Green since 12 Aug, up to date with master,
+   zero open threads, four requested reviewers (TomMasdinXYZ, DarminderA, rishib-xyz, SergiuszXYZ),
+   nobody has looked. Nothing technical is in its way. Still the sprint's highest-value unblock.
+2. 🔴 **PLT-2963: 9 days, 4 comments, 0 replies.** Escalation `~08-20`. Decision needed:
+   *close-and-re-cut the three orphan items* vs *trim the shipped half*.
+3. 🆕 **PLT-3025 should leave In Code Review** — its PR is master's head commit.
+4. **PLT-2992 should be closed once #2135 lands** — the rest is already on master via #2129/#2138.
+5. **`<target>` still unfilled** in both canvas tickets — unchanged since 08-08, now 9 days.
+6. **Attribution-footer conflict, still undecided.** No GitHub or Jira comments posted this run, so
+   nothing new carries a Claude footer. Position unchanged: the footer stays, because masking AI
+   authorship from human reviewers is not something to resolve silently in favour of the quieter
+   option.
+7. **`npm ci` 401 on `@xyzreality/dhtmlx-gantt`** remains an auth boundary in this container — no
+   local vitest/tsc, CI is the only verification. Do not spend a run retrying it.

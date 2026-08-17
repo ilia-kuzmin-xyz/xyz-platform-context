@@ -121,3 +121,26 @@ checkpoint 3 had nothing to merge. **Nothing pushed to hc-frontend this run.**
 (TomMasdinXYZ, DarminderA, rishib-xyz, SergiuszXYZ) and zero looks.** There is nothing technical
 in its way. This is the sprint's highest-value unblock and the only thing standing between
 PLT-2992 and closure — the rest of the ticket is already on master via #2129 and #2138.
+
+---
+
+## 2026-08-17 (Monday) — no change; #2135 is one approval away, day 5
+
+Second consecutive fully static run. All three checkpoints re-verified against the API (not carried
+over from the 08-16 entry) and all three were no-ops:
+
+| | |
+|---|---|
+| Threads | **1 total, resolved** — **0 open** |
+| Reviews | Copilot `COMMENTED` + our reply. No `CHANGES_REQUESTED`, **no human review at all** |
+| `build` | ✅ success on `730935978` |
+| SonarCloud | ✅ Quality Gate passed |
+| Up to date? | ✅ `merge-base --is-ancestor origin/master origin/PLT-2992` → true |
+| `mergeable_state` | `blocked` — awaiting approval, **not** a failing gate |
+
+`origin/master` is unmoved at `8647f2257` since 14 Aug, so checkpoint 3 had nothing to merge for the
+second run running. **Nothing pushed to hc-frontend.**
+
+The PR has now been open, green and unreviewed since **12 Aug — five days**, with four requested
+reviewers. Nothing technical is in its way. Once it lands, PLT-2992 is fully delivered (#2129 and
+#2138 carry the rest) and should be closed rather than left open against shipped work.

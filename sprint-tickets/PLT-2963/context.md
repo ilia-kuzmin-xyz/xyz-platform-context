@@ -342,3 +342,35 @@ Close as superseded by PLT-3025 **and** re-cut the three orphan items (template 
 hydration max-age, Room Readiness drill-down) as one small ticket with a real number in place of
 `<target>`. Escalation date **~08-20** from the 08-15 entry stands; the useful escalation is a nudge
 to a named person, not a fifth analysis comment.
+
+---
+
+## 2026-08-17 (Monday) — held for the 3rd consecutive run; escalation date is 3 days out
+
+No fifth comment posted. The 08-15 rule — *"do not post again unless there is genuinely new code or
+a reply"* — holds on **both** limbs this run, and both were checked rather than assumed:
+
+- **No reply.** Comment count still 4, all four authored by this routine, zero human responses.
+  Ticket `updated` timestamp is still `2026-08-14T08:59` — i.e. our own comment 109647.
+- **No new code.** `origin/master` unmoved at `8647f2257` (#2142, 14 Aug). Nothing has landed that
+  would change the analysis since the 08-14 finding.
+
+Ages: duplication question **9 days**, `<target>` **9 days**, orphan-scope question **3 days**.
+
+### Escalation — what to do on ~08-20, and what not to do
+
+The escalation date set on 08-15 arrives in 3 days. The useful move is a **nudge to a named canvas
+owner**, not a fifth analysis comment: four comments on one ticket with zero replies is already
+past the point where more writing helps, and a fifth would mostly signal that nobody is reading.
+
+Note also the constraint recorded on 08-16, which has not changed: the two items offered in comment
+109647 (**template activation from prompt**, **hydration-record max age**) both live in
+`XYZ_AgentPipeline/`, which is **not in this routine's repo scope**. So even an immediate "yes"
+does not unblock code from here — it needs an owner with pipeline access. Say that plainly when
+escalating, so nobody waits on a nod that buys nothing.
+
+### Standing position — unchanged
+
+Close as superseded by PLT-3025 **and** re-cut the three orphan items (template activation,
+hydration max-age, Room Readiness drill-down) as one small ticket carrying a real number in place
+of `<target>`. A plain duplicate-close drops those three on the floor.
