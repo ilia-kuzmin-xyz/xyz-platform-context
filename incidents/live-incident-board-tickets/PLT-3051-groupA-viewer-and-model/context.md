@@ -9,6 +9,16 @@
   Revit-vs-Navisworks mappers). Same family as PLT-2874/2906/2923/2945/3024.
 - Triage date: **2026-08-14** (first pass, new folder).
 
+## 2026-08-17 — left scope (In Code Review)
+
+Transitioned **In Analysis → In Code Review** on 2026-08-14 17:11, no new Jira comment attached.
+Same "drafted action landed off-Jira" shape as PLT-3040 (08-12), PLT-3033 (08-11), PLT-2906 (08-05):
+reads as Darminder having run the `getBulkProperties2` console check from §5 below, confirmed one of
+H0-H4 (most likely H1, the hardcoded five-category whitelist), and written a fix. No re-investigation
+done this run; folder tag kept `-groupA-` per the standing precedent (transitioned out mid-flight, not
+resolved by this routine). The two attachments that were 403 for this run (§6) are now moot for
+triage purposes, whatever they showed fed into the fix directly rather than through here.
+
 ## 1. What is reported
 
 > "The element metadata is not visible in the Web Viewer. However, the elements in Revit they do

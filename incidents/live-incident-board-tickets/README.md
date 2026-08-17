@@ -45,6 +45,92 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-17 — 8 in-scope tickets, all 8 confirmed byte-for-byte unchanged since 08-14, one left scope (PLT-3051 → In Code Review), Group B still empty
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With
+Technical Support", "With QA", "Ready For QA", "In QA", "In Code Review", "Awaiting Release / Done",
+"READY FOR RELEASE", "Done", "Customer Release Check", "ARCHIVED (NOT RELEASED)", "Blocked") ORDER BY
+created DESC`). **8 tickets in scope, all Group A** (`Open`/`In Analysis`/`With Customer`) — Group B
+empty, same as every run to date. Set = the 08-14 run's 9 minus **PLT-3051** (→ In Code Review,
+confirmed via direct fetch, out of scope).
+
+This is the first run where **every single carried-over ticket** checked out identical to the prior
+run's own record — same comment count, same last-comment timestamp and content, on all 8. Nobody
+from the team has replied to anything on this board in the 3 days since 08-14. Read every
+`recommended-action.md` before writing this entry (playbook step 0); none needed a new word — all
+drafts below are unchanged from 08-14 and are simply re-confirmed as still the right, still-unsent
+action.
+
+### PLT-3051 — left scope this run, naming why per the standing rule
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-3051** | In Code Review (was In Analysis) | Transitioned 2026-08-14 17:11, no new Jira comment attached — same "drafted action landed off-Jira" shape as PLT-3040 (08-12), PLT-3033 (08-11), PLT-2906 (08-05). Reads as Darminder having run the `getBulkProperties2` console check this folder handed him (§5 of its `context.md`), confirmed one of H0-H4, and written a fix. No re-investigation done; folder tag kept `-groupA-` per the standing precedent (transitioned out mid-flight, not resolved by us). Brief note added to its own `context.md`. |
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts and
+content checked verbatim against what the 08-14 run recorded — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3044](PLT-3044-groupA-filter-system/context.md) | filter-system | Open | 08-13 (Mostafa: "nothing from our side... close the ticket") | 3 comments, unchanged; **recommended move-to-Done still unposted, now 3 consecutive runs** |
+| [PLT-3024](PLT-3024-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-06 (Rishi's federation question) | 10 comments, unchanged; question now **11 days** unanswered |
+| [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 17 days unanswered**; the 08-10-drafted one-line nudge to Ali is still unsent |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-12 (Gennaro's Staging undercount finding) | 4 comments, unchanged; the drafted ask to Gennaro (project/model name + date-slider screenshot) is still unsent, now **5 days** unanswered |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro decision request still unposted across **12 consecutive runs** on the board's only Critical ticket, now **17 days** silent |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **42 days stale**, direct close-out still unposted across **12 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, unchanged; **24 days** silence on a fix that sits entirely with the client's project-delivery team; the "did the hand-off carry the detail" nudge to Yash is still unsent |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged; the two-branch drafted reply to Yash (30-second URL check decides which) is still unsent, question now **21 days** open |
+
+### Cross-ticket notes
+
+- **First fully-static run on record.** Every prior run found at least one new ticket, one status
+  change, or one new comment somewhere. This run found zero content changes across all 8 carried-over
+  tickets — only the one ticket that left scope moved at all, and it moved without a comment. Worth
+  watching whether this is a quiet week or whether posting has stalled even harder than the
+  "recommended but never posted" pattern already describes.
+- **The "recommended but never posted" pattern is now twelve runs deep on both PLT-2858 and
+  PLT-2815** (dating to 07-24) — both drafts exist verbatim in each ticket's `recommended-action.md`;
+  nothing further needs drafting, only sending. Every other in-scope ticket this run is in some stage
+  of the same shape: a specific, owner-addressed draft sitting unsent while the underlying stall ages.
+- **No new candidate defect patterns and no promotions this run** — there was no new investigation to
+  produce one; `recurring-defect-patterns.md` is unchanged.
+
+### ⚠️ Attachments needing human — this run
+
+No new attachments on any of the 8 in-scope tickets. Prior gaps stand exactly as previously
+documented in each ticket's own folder (PLT-3024's 3 screenshots, PLT-2858's 4 images, PLT-2815's
+2 images + inline blobs, PLT-2649's 2 images, PLT-2909's 2 images, PLT-2874's 2 images) — not
+re-listed here. PLT-3051's own two attachments (403, needed a human to settle H0-H4) are moot now
+that the ticket has moved to code review.
+
+### Needing a human now
+
+Unchanged from 08-14 — the same five drafts, still unsent, ranked by tenure/urgency:
+
+1. **PLT-2858** — post the decision-request to Pietro (cc Mostafa), plus the short answer-Mostafa's-
+   question draft that goes with it (both in `recommended-action.md`). Top priority: Critical
+   priority, 12 runs unposted, 17 days of silence on a decision only product can make.
+2. **PLT-2909** — post the one-line nudge to Ali (drafted 08-10, now 17 days unanswered).
+3. **PLT-2619** — post the reply to Yash once the 30-second URL check is done (drafted, both
+   branches ready, now 21 days open).
+4. **PLT-2649** — post the nudge to Yash confirming the 07-24 hand-off carried the detail (drafted,
+   24 days silence).
+5. **PLT-2874** — send Gennaro the two-question ask (project/model name + date-slider screenshot)
+   before the console/DuckDB follow-up (drafted, 5 days unanswered).
+6. **PLT-3024** — post the internal comment to Yash explaining the now-confirmed Pattern-5 mechanism
+   (drafted, 11 days since the customer's federation question went unanswered).
+7. **PLT-2815** — execute the close-out (drafted, 12 runs unposted). Lowest urgency — administrative,
+   not a live customer wait.
+8. **PLT-3044** — execute the move-to-Done (drafted, 3 runs unposted). Also administrative.
+
+**Board assessment: quiet, not stuck.** No new customer reports, no new severity, no ticket gone
+newly silent — every stall above was already known and drafted for as of 08-14. Per the standing
+notification rule, this does not warrant paging Ilia; posting the drafts above is the only thing
+that would move the board, and none of them are time-critical beyond what was already true three
+days ago.
+
+---
+
 ## Run: 2026-08-14 — full board sweep, 9 in-scope tickets, Group B empty, one new-since-last-run pair (PLT-3044, PLT-3051)
 
 **Board re-queried**: `project = PLT AND issuetype = "Live Incident" AND status in ("Open", "With
