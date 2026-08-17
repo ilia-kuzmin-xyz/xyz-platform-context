@@ -64,3 +64,14 @@ schema doc `docs/commissioning/asset-type-system-requirements-schema.md`.
 Remaining on the ticket: Other-tasks bucket → same picker (small); "Add System type"
 blocked on the SGP tables (run the schema doc's DDL on dev first); AddTaskMenu is now
 unused by the readiness section but still used elsewhere? (grep before deleting).
+
+## 2026-08-17 — polish pass on PR #2146
+
+Sonar's 5 new-code issues reproduced locally with `npx eslint <diff files>`:
+- `ReadinessLevelsSection.tsx` carried two dead locals (`available`,
+  `linkedElsewhere`) — leftovers of the AddTaskMenu→AddTasksPicker port; the
+  picker builds availability inline now. Deleted.
+- `ReadinessLevelsSection.test.tsx` duplicate literals (worst 15×) extracted to
+  module consts (`STEP_RED`, `ADD_TASK_RED`, `PICKER_RED`, …).
+`SystemRequirementsSection.test.tsx` warnings are master code (PLT-2914), not
+this PR's new code — left alone. Suite 79/79 green after.

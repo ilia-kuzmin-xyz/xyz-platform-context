@@ -18,3 +18,11 @@ Plan: mirror PLT-3001's create slider on the system half; name validation with
 "System Type name already in use"; apply tasks per step via workflow_step_task
 (service exists: WorkflowStepTasks.replaceForStep/listForProject). Tests mirror 3001.
 Confidence 7 once 3001's picker exists.
+
+## 2026-08-17 — polish pass on PR #2147
+
+PLT-3003 branch contains PLT-3001's commits, so #2147's diff inherits its
+findings: merged the PLT-3001 polish commit (dead locals + test literal dedupe)
+into PLT-3003 rather than re-fixing. 3003's own files (CreateSystemTypeContent,
+SystemTypeDetail, TypesTab) lint clean. `TypesTab.test.tsx` warnings are
+pre-existing master code, not in this diff. Suites 130/130 green after merge.

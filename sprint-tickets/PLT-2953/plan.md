@@ -28,3 +28,33 @@ Plan sketch:
    (Linked/Unlinked tabs counts).
 5. Tests: session staging logic pure-unit; panel wiring with mocked viewer events.
 Confidence 5–6 until the viewer selection API is read; raise after study.
+
+## 2026-08-17 — SHIPPED: PR #2148 (draft, based on #2140)
+
+Implemented, diverging from the sketch above where the code said otherwise:
+
+- **Session lives in `use-asset-element-linking.ts` (panel lifetime), NOT the
+  viewer provider.** Conservative reading of "saved to the Cloud once the user
+  clicks Done": closing the Assets tool abandons an uncommitted session. Noted
+  in the PR as a deliberate call — lifting to the provider is small if product
+  wants resume. The sketch's "Linking in progress" resume notice therefore did
+  not ship.
+- Pure module `linking-session.ts`: `stageLink` (reconciles against server —
+  re-link-to-same / stage-then-reverse cancel out, so Done never sends empty
+  writes), `mergeLinks` (cards render server ⊕ staged), `sessionOps` (sorted,
+  deterministic), `sessionSize`. 9 unit tests.
+- Two-act write: armed pick → `pendingElementId` (held, nothing written) →
+  banner CTA "Link asset ↔ elements" stages it → footer strip "N staged
+  changes — saved to the cloud on Done" → Done flushes via the existing
+  `useAssetElementLinkSet` mutation, one call per op.
+- Unlink is staged too (null op). No confirm dialog — the artefact's dialog is
+  on the asset-detail row, which keeps its existing behaviour; the panel-card
+  unlink is session-undoable by construction.
+- Old immediate-write tests rewritten to the session contract (2 core + 4 edge);
+  assets-panel suite 300/300 green.
+- Suggested matches = PLT-2964, excluded (stated in PR).
+
+Pitfall for the next run: the edge-test rewrite left a stray `})` and a stale
+`toHaveBeenCalledTimes(1)` assertion — under the session contract a pick writes
+NOTHING (assert `pendingElementId` stability + `mockMutate` not called). If a
+test asserts mutate-on-pick anywhere else, it's asserting the pre-2953 contract.
