@@ -120,3 +120,16 @@ access control.
 - `pitfalls.md` — gotchas in this area.
 - `planning/glossary-rename-and-systems.md` — the in-flight breaking schema rename.
 - App repo: `docs/environments.md`, `docs/commissioning/README.md`.
+
+## 2026-08-17 — env-provided connection override (PLT-3056 / PAPI-3627, PR #2145)
+
+The committed connections above are now the **fallback**, not the only source. PAPI-3627 added
+`SUPABASE_URL` / `SUPABASE_ANON_KEY` env keys (DEV + STG set, PRD pending); hc-frontend #2145
+consumes them: `docker/entrypoint.sh` copies the pair into the `/management/info` JSON
+(`commissioning: { supabaseUrl, supabaseAnonKey }`, complete pair only, half pair → WARN + omit)
+and `getProfile` hands the block to `setCommissioningConnectionFromRuntimeConfig`
+(`supabase-config.ts`), which adopts it only if the URL is https and the key is
+`sb_publishable_*` — a privileged key is rejected client-side. Getters prefer the runtime pair;
+everything in "The seam" and "Environments" above still describes the fallback path, which is
+byte-identical where the env keys are absent (local, MSW, PRD for now). A spec in
+`supabase-config.test.ts` pins the entrypoint↔module field names in lockstep.
