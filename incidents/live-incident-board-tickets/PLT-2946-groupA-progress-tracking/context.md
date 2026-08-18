@@ -1,5 +1,54 @@
 # PLT-2946 — "Hutto2 Tangible Activities with wrong Actual percentage on Dashboard" — triage context
 
+## ⚠️ 2026-08-18 — this file's diagnostic draft was already overtaken by Rishi's 07-31 in-thread
+## finding, four comments this file didn't have. Read this before sending the drafted query below.
+
+The context below (comments 1-4, the DuckDB diagnostic in `recommended-action.md`) was written
+before four more comments landed on the ticket the same week — this pass is the first to catch up.
+**Rishi Bhugobaun (assignee) already ran the equivalent check himself, 2026-07-31 10:54:**
+
+> "From checking the data it seems to me that all values are correct. Regarding these screenshots -
+> the elements that are making up the percentages are relatively small and not visible at first - if
+> you filter down by status 'Installed' or 'Late' they appear and the numbers correlate with the
+> progress... Progress per activity as of now is just `# installed/# linked` - no per element
+> weighting. However I did notice some element discrepancies between the installation counts vs the
+> total count in the view - seems to be down to some elements having multiple 'objects' in the view,
+> so will investigate that further"
+
+Rishi's follow-up (same day, 16:05): **"the element discrepancy will be resolved by PLT-2874."**
+
+**What this changes:** the drafted DuckDB query below (tangible/intangible, window-delta,
+Pattern-1 discriminator) is now largely moot — Rishi already established empirically that the
+displayed percentages match the underlying element install/late counts, and attributed the one real
+discrepancy he found (installed-count vs. total-count-in-view) to the **object-vs-element counting
+defect this same board already tracks as PLT-2874** ("dashboard was counting geometry objects, the
+editor counts elements" — see `PLT-2874-groupA-viewer-and-model/context.md`). This is a **cousin
+relationship worth stating plainly**: PLT-2946's "elements have multiple objects in the view" is the
+same object-vs-element unit mismatch PLT-2874 diagnosed and partially fixed (PR #2084, 07-31), just
+observed from the install-count side rather than the total-count side. **PLT-2874 itself is not
+fully closed** — see its own 2026-08-18 update: Gennaro found a Staging-only regression 08-12, still
+open as of 08-17 ("fix still ongoing following QA testing"). So PLT-2946's residual, whatever it
+still is, is genuinely blocked on PLT-2874 shipping, not on anything specific to this ticket.
+
+**Nobody has told the customer (Thiago) anything since 2026-07-30.** Freshdesk shows the ticket sat
+untouched at "Waiting on 3rd line" the whole time; Jira `updated` only moved because of the internal
+07-31 exchange. **18 days of silence to the customer on a ticket whose technical question was
+actually answered by the assignee on day 1.**
+
+**Revised recommended action:** no new diagnostic needed (superseded — see `recommended-action.md`);
+recommend a status comment to the customer via Yash referencing Rishi's finding and PLT-2874's
+in-progress fix, rather than re-running or re-asking anything already settled.
+
+**Why this ticket wasn't on the 08-17 run's 8-ticket list.** Jira `status` shows `Open`, `updated`
+2026-08-17 11:10 — but the last actual comment is 07-31 16:05. A status transition with no comment
+attached moved this **out** of scope (to `With Technical Support`, per `PLT-3010-resolved-progress-
+tracking/context.md`'s 08-1x note referencing it there) and then **back** to `Open` at 08-17 11:10,
+most likely just after that day's own JQL snapshot — the same "missed by a few hours" shape already
+seen on PLT-3024/PLT-3033/PLT-3040. Distinct from PLT-3034's gap below, which is a genuine multi-day
+miss, not a same-day timing race.
+
+---
+
 ## Ticket
 
 | Field | Value |

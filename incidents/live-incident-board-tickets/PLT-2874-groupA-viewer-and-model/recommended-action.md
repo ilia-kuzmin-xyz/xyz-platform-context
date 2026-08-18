@@ -1,5 +1,10 @@
 # PLT-2874 — Recommended action
 
+> **2026-08-18: two new comments (Yash asking if a fix shipped; Darminder confirming a fix is under
+> QA testing) — neither answers the project/model or slider question below. The 08-14 draft to
+> Gennaro is unchanged and still the right message to send; see `context.md` § 2026-08-18 for why
+> it's now also a sanity check on whatever Darminder is testing, not just a diagnostic ask.**
+
 > **2026-08-13: reopened. The 07-31 "close the incident" position below is superseded by QA finding
 > Staging still broken, in the opposite direction. See "Current: get Staging's own numbers" below —
 > read that first.**

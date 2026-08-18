@@ -1,5 +1,26 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+## 2026-08-18 — two new comments since the 08-14 draft, still no data answer to the actual questions asked
+
+Two comments landed 2026-08-17, both after the 08-17 run's own snapshot (which still described the
+ticket as "drafted ask to Gennaro... unsent, 5 days"):
+
+- **11:06, Yash → Gennaro:** "Has a fix been released for this?"
+- **14:01, Darminder → Yash:** "Fix still ongoing following QA latest testing."
+
+Neither comment answers the two questions this folder has had open since 08-14 (which
+project/model Gennaro was actually on, and whether the two environments' date sliders match) — Yash
+asked about release status, not mechanism, and Darminder's reply confirms work is active but adds no
+new fact to discriminate H1–H6. **Read plainly: Darminder is iterating on a fix without the project/
+model or slider confirmation this folder asked for**, which is worth surfacing rather than assuming
+silently resolved — if the fix under test targets the wrong hypothesis (e.g. H1 `calculatedOn` cap)
+while the real cause is H6 (wrong project) or H4 (slider range), "QA testing" could pass on Prod and
+still miss Staging. The 08-14 draft comment to Gennaro is unchanged and still the right next message
+— it now doubles as a sanity check on whatever fix Darminder is testing, not just a diagnostic ask.
+No re-diagnosis performed; nothing here changes the confidence table below.
+
+---
+
 - **Domain slug:** viewer-and-model (justification in §6)
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2874
 - **Type:** Live Incident · **Priority:** Minor · **Status:** Open

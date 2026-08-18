@@ -45,6 +45,153 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-18 — 9 in-scope tickets: 1 relocated off-board (PLT-2909 → DPL-1684, resolved), 1 left scope (PLT-3024), 1 new ticket (PLT-3060), 2 process gaps caught (PLT-3034 missed 8 days, PLT-2946 missed a same-day flip), Group B still empty
+
+**Board re-queried** (same exclusion list as 08-17, plus a follow-up JQL to enumerate the full
+9-ticket in-scope set since the tool paginated the first query oddly — cross-checked by key,
+verified complete). **9 tickets in scope, all Group A** (`Open`/`In Analysis`/`With Customer`) —
+Group B empty, same as every run to date.
+
+### ✅ PLT-2909 — resolved via relocation, the actual headline this run
+
+The nudge this board has carried unposted for 8 consecutive runs (08-10 through 08-17) turned out
+not to need us: **Yash asked Ali directly on 08-17 14:30** ("any update on this? can I move this to
+DPL?") and **Ali answered same day 14:33**, agreeing to take it on DPL. The ticket is now **DPL-1684**
+on the Data Pipeline board — same content, out of scope here. Folder tag `groupA` → `relocated`
+(`PLT-2909-relocated-progress-tracking/`). This is the first time one of this board's long-unposted
+drafts got asked and answered without a human executing our draft verbatim — worth noting only
+because the standing "needing a human" list has treated this exact item as blocked-on-a-human-sending-
+a-message for over a week; it resolved through the team's own initiative instead.
+
+### PLT-3024 — left scope this run, naming why per the standing rule
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-3024** | With Technical Support (was Open) | Transitioned 08-17 17:00, no new comment attached — Rishi's 08-06 federation question is still unanswered (12 days), so unlike most "left scope" events on this board this reads as a genuine, if silent, hand-off rather than a resolved drafted-ask landing off-Jira. No re-investigation; folder kept `-groupA-` for reference. |
+
+### PLT-3060 — new this run (viewer-and-model), and unusually far along for a same-day ticket
+
+**"Model name disappears while Opening Models with Filter Active."** Yash's own numbered repro:
+open a model, add a "Progress – Linked" model filter, try to open Model No. 2 — it fails to open and
+vanishes from the switcher entirely; clearing the filter brings it straight back. **Traced to a
+specific code guard, not a vague timing issue:** the switcher tree (`tree.tsx:79-119`) hides any
+model absent from `allowedDbIdsByModel`; that map is only republished when a filter recompute runs
+with `executedOutsideFilterPanel !== true` (`filter-service.ts:803-813`), but opening a new model
+triggers the recompute through the *element-load* path, which explicitly sets that flag `true`
+(`:1059-1073`) — so the newly-opened model's entries are never backfilled into the map until the
+filter panel itself is touched again. Adjacent to, but distinct from, the `allowedDbIdsByModel`
+staleness Pattern 1 already flagged for element selection (`PLT-2882.../investigation-log.md:29-42`)
+— same cache, different consumer (switcher tree, not selection). Recommending **Ready For
+Development** — nothing further is needed from the customer, the mechanism is code-confirmed. New
+candidate defect pattern added to `recurring-defect-patterns.md`. Full findings:
+`PLT-3060-groupA-viewer-and-model/context.md` + `recommended-action.md`.
+
+### PLT-3034 — first triage pass, 8 days after creation (process gap, named plainly)
+
+**"Hutto2 - Wrong actual percent showing on dashboard."** Created 08-10, `Open`/Major the entire
+time, never on one of this routine's tables until today — a genuine miss, cause not investigated
+rather than guessed at. By the time of this pass the engineering team had already run a 12-comment
+investigation without us: ruled out dead/ghost links (Pattern 1) directly, then found one activity's
+shortfall traces to a linked element inside a model named `QA-SBX2-FU-FO_ME_MDL_DSI_R23-V74_X` —
+i.e. a QA/sandbox model's element counting toward production progress. Darminder's closing question
+("can BE tell QA from production?") is answered from the FE side: **no, neither can it** —
+`getElementsForActivity`/`useGroupedLinks` resolve purely by element id with no per-model allow-list
+anywhere (`linking-service.ts:684-689`), and the project model loader has no name/type-based
+exclusion (`project-service.ts:722-723`). This is an absent safeguard spanning FE+BE, not a bug in
+existing logic on either side. Drafted comment answers Darminder's question and asks whether the
+second affected activity (Mech.144.1260) shows the same shape — nobody has checked yet. New candidate
+defect pattern added to `recurring-defect-patterns.md`. Full findings:
+`PLT-3034-groupA-progress-tracking/context.md` + `recommended-action.md`.
+
+### PLT-2946 — resurfaced (status flip, not a fresh report), and its own diagnostic was already overtaken
+
+Flipped `With Technical Support` → `Open` at 08-17 11:10 with no new comment — the same "missed by a
+few hours" shape as PLT-3024/3033/3040, not a multi-day gap like PLT-3034 above. More importantly,
+**this ticket's existing `recommended-action.md` (a drafted DuckDB diagnostic to Rishi) was already
+superseded by four comments this folder hadn't caught**: Rishi ran the equivalent check himself on
+07-31 and found the displayed percentages match install/late counts, attributing the one real
+discrepancy to the object-vs-element mismatch this board tracks as **PLT-2874** (itself still open,
+"fix ongoing" as of 08-17 — see below). **18 days of silence to the customer on a ticket answered
+internally on day one.** Recommended action changed from "send the diagnostic" to "tell the customer
+what Rishi already found and that it's blocked on PLT-2874 shipping." Full update:
+`PLT-2946-groupA-progress-tracking/context.md` + `recommended-action.md`.
+
+### PLT-2874 — two new comments, neither answers what we asked
+
+Since the 08-14 draft (asking Gennaro which project/model and to compare date sliders), two comments
+landed 08-17: Yash asked Darminder if a fix shipped; Darminder said "fix still ongoing following QA
+testing." Neither names the project/model or the slider state this folder's open questions need.
+The 08-14 draft is unchanged and still the right message — now doubling as a sanity check on whatever
+Darminder's team is testing, in case the fix under test targets the wrong one of the five live
+hypotheses. Full update: `PLT-2874-groupA-viewer-and-model/context.md` § 2026-08-18.
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts and
+timestamps checked verbatim against the 08-17/08-14 record — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3044](PLT-3044-groupA-filter-system/context.md) | filter-system | Open | 08-13 (Mostafa: "nothing from our side... close the ticket") | unchanged; **recommended move-to-Done still unposted, now 4 consecutive runs** |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **13 consecutive runs**, now **18 days** silent, board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **43 days stale**, direct close-out still unposted across **13 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, unchanged; **25 days** silence on a fix that sits entirely with the client's project-delivery team |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged; the two-branch drafted reply to Yash still unsent, question now **22 days** open |
+
+### Cross-ticket notes
+
+- **First run where a long-unposted draft resolved itself through the team's own action rather than
+  a human sending our exact draft** (PLT-2909, above) — worth watching as a pattern: some of the
+  other long-stalled nudges (PLT-2858, PLT-2909's own former neighbours) may similarly resolve if the
+  people involved are simply given enough time, though 8 runs / 18+ days is a long wait to bank on.
+- **Two distinct "missed ticket" shapes this run, worth keeping separate.** PLT-3034 is a genuine
+  8-day miss with no same-day excuse — flagged plainly rather than folded into the usual
+  "missed-by-a-few-hours" note. PLT-2946 *is* the usual few-hours shape (status flipped back into
+  scope right around a prior run's own snapshot). Conflating the two would hide that PLT-3034
+  represents an actual gap in this routine's coverage, not just query timing.
+- **The "recommended but never posted" pattern is now thirteen runs deep on both PLT-2858 and
+  PLT-2815** (dating to 07-24) — unchanged, nothing further to draft, only to send.
+- **No promotions to a confirmed (non-candidate) pattern this run** — PLT-3060 and PLT-3034 are each
+  single-occurrence candidates added to `recurring-defect-patterns.md`.
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3060** — one screen recording (88.8MB mp4), not viewed (no video playback here). Not
+  load-bearing: the ticket's own text repro is a complete, unambiguous numbered sequence. Would only
+  confirm secondary detail (e.g. a brief flash before the model vanishes).
+- Prior gaps on the five confirmed-unchanged tickets stand exactly as previously documented
+  (PLT-2858's 4 images, PLT-2815's 2 images + inline blobs, PLT-2649's 2 images) — not re-listed here.
+  PLT-3024's 3 screenshots and PLT-2909's 2 images are now moot (left scope / relocated).
+
+### Needing a human now
+
+Ranked by tenure/urgency; unchanged items carried from 08-17 except where noted:
+
+1. **PLT-2858** — post the decision-request to Pietro (cc Mostafa), plus the short answer-Mostafa's-
+   question draft that goes with it (both in `recommended-action.md`). Top priority: Critical
+   priority, 13 runs unposted, 18 days of silence on a decision only product can make.
+2. **PLT-2619** — post the reply to Yash once the 30-second URL check is done (drafted, both
+   branches ready, now 22 days open).
+3. **PLT-2649** — post the nudge to Yash confirming the 07-24 hand-off carried the detail (drafted,
+   25 days silence).
+4. **PLT-2874** — send Gennaro the two-question ask (project/model name + date-slider screenshot),
+   now also serving as a check on whatever fix is currently under QA testing (drafted, unchanged).
+5. **PLT-2946** — new this run: send the customer status update referencing Rishi's 07-31 finding and
+   the PLT-2874 dependency (drafted) — 18 days of unexplained customer silence on an internally-solved
+   question.
+6. **PLT-3060** — new this run: post the mechanism to Darminder and recommend Ready For Development
+   (drafted) — unusually clean same-day diagnosis, worth moving quickly while it's fresh.
+7. **PLT-3034** — new this run: post the answer to Darminder's own question plus the
+   Mech.144.1260 check ask (drafted).
+8. **PLT-2815** — execute the close-out (drafted, 13 runs unposted). Lowest urgency — administrative.
+9. **PLT-3044** — execute the move-to-Done (drafted, 4 runs unposted). Also administrative.
+
+**Board assessment: not quiet this run — one real resolution (PLT-2909), one new ticket, two process
+gaps worth a human's attention (see below), and the long-stalled Critical ticket (PLT-2858) crossing
+18 days.** Per the standing notification rule, PLT-2858 crossing this many runs unposted on a
+Critical-priority ticket, plus the PLT-3034 coverage gap, are both worth surfacing to Ilia rather than
+staying silent this time.
+
+---
+
 ## Run: 2026-08-17 — 8 in-scope tickets, all 8 confirmed byte-for-byte unchanged since 08-14, one left scope (PLT-3051 → In Code Review), Group B still empty
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN ("With

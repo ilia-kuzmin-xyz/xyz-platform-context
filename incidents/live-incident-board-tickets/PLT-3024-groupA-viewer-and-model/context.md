@@ -1,5 +1,15 @@
 # PLT-3024 — "Dashboards not showing models for some disciplines" — triage context
 
+## 2026-08-18 — left scope (Open → With Technical Support), no new comment
+
+Status flipped 2026-08-17 17:00 with no new human comment attached (last real content is still
+Rishi's 08-06 09:16 federation question, now 12 days unanswered). No Freshdesk auto-sync noise line
+either this time, so this reads as a genuine, if silent, hand-off to Technical Support rather than
+the bare-automation-flip pattern seen on this same ticket in 08-07/08-10. Left as-is per the standing
+"transitioned out mid-flight" rule — no re-investigation, folder kept for reference. If it returns to
+Open, re-open here rather than starting fresh; the federated-model mechanism (Pattern 5, confirmed)
+below is unchanged.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-3024
 - **Issue type:** Live Incident · Software Area: Dashboard
 - **Status:** **Open** · **Priority:** Major

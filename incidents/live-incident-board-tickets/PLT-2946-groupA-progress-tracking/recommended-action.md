@@ -1,5 +1,49 @@
 # PLT-2946 — recommended action (DRAFT ONLY — execute nothing)
 
+## ✅ 2026-08-18 — SUPERSEDED. Rishi already ran the equivalent check 07-31; the ask below is moot.
+
+**New chosen action: one status comment to the customer, via Yash, not the diagnostic below.**
+
+Rishi (assignee) found, in-thread, 07-31: displayed percentages match install/late element counts;
+the one real discrepancy (install-count vs. total-count-in-view) traces to the object-vs-element
+mismatch tracked as **PLT-2874**, which is in progress but not yet shipped (Staging regression found
+08-12, still "fix ongoing" as of 08-17 — see that ticket's own folder). Nothing technical is left to
+diagnose here; what's missing is telling Thiago anything at all — the ticket has been silent to the
+customer for 18 days since 07-30 despite being answered internally on day one.
+
+### Draft comment (customer-facing, via Yash) — DRAFT ONLY
+
+> Hi Thiago — sorry for the delay. We looked into the Cable Trays percentages you flagged: the
+> install/late counts feeding the dashboard numbers are correct, so the percentages themselves aren't
+> wrong. What we did find is a separate, known counting difference between the editor and dashboard
+> when an element has more than one object in the model — that's already being fixed under a
+> different ticket and isn't specific to Hutto2. We'll confirm here once that fix is out and the
+> numbers should line up cleanly. No action needed on your side.
+
+### Why this and not the original diagnostic ask
+
+- **Not (a) the DuckDB query below, unchanged.** It would ask Rishi to re-derive what he already
+  found by inspection on 07-31 — repeating an already-answered question is the "evidence request with
+  no owner" anti-pattern in reverse (an owner who already answered, being asked again).
+- **Not Ready For Development as a new ticket.** The one open mechanism (object-vs-element,
+  multiple-objects-per-element) already has a ticket and an owner: PLT-2874. Opening a second tracking
+  item would fragment, not help.
+- **Not closing PLT-2946 outright.** It's reasonable to keep it open until PLT-2874 ships and the
+  numbers are re-checked on Hutto2 specifically — but the customer shouldn't be waiting in silence
+  for that.
+
+## Follow-through a human should own (not executed here)
+
+- **Once PLT-2874 ships:** re-check Mech.144.1260-style Hutto2 activities (or the original Cable Trays
+  examples) and close PLT-2946 with a confirmation, or reopen if the residual doesn't fully resolve.
+- **Software Area field is still empty on the intake** — set to Dashboard so it surfaces in future
+  board sweeps (unchanged ask from the original pass below).
+
+---
+
+## Original 2026-08-0x pass (superseded above, kept for record — the query below is not currently the
+## recommended next step)
+
 ## Chosen action: (a) one internal comment to the assignee, Rishi Bhugobaun
 
 **Owner: Ilia Kuzmin. Addressee: Rishi Bhugobaun, cc Yash Patel. One message, no customer contact yet.**

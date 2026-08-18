@@ -1,5 +1,16 @@
 # PLT-2909 — "Models/Elements linked to an activity appear wrong" — triage context
 
+## ✅ 2026-08-18 — moved off the PLT board, now DPL-1684. Folder tag → `relocated`.
+
+Yash's 07-31 "move to DPL?" question — carried unanswered across 8 runs (08-05 through 08-17) —
+was finally asked again by Yash himself on 08-17 14:30 and answered by Ali Seyedof same day 14:33:
+"Please move it to DPL board, I'm not sure about the root cause but will investigate." Verified live
+against `DPL-1684`: identical summary ("Models/Elements linked to an activity appear wrong"),
+identical description (Kyriakos, ATL05-08, PC-EXCEL model), same 13-comment thread carried over
+intact. **Out of scope for this board from today.** Everything below (mechanism, cross-write proof,
+confidence) is unchanged and still the best record of what's known — DPL-1684 inherits it, this
+folder is now a historical reference, not an active tracking item.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2909
 - **Issue type:** Live Incident · Software Area: **Web Viewer**
 - **Status:** **In Analysis** · **Priority:** Medium

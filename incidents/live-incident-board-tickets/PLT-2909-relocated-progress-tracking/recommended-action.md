@@ -1,5 +1,19 @@
 # PLT-2909 — recommended action (DRAFT ONLY — execute nothing)
 
+## ✅ 2026-08-18 — RELOCATED to DPL-1684, out of scope. Nothing further to draft here.
+
+The nudge this file has been carrying since 08-10 is moot: **Yash sent it himself, off the pattern
+this file drafted, on 08-17 14:30** — *"@Ali Seyedof any update on this? can I move this to DPL?"*
+— and Ali answered the same afternoon, 14:33: *"Please move it to DPL board, I'm not sure about the
+root cause but will investigate."* The ticket was moved and now lives as **DPL-1684** (same summary,
+same description, same 13-comment history — verified via direct fetch). Folder tag changed
+`groupA` → `relocated` per the standing convention (PLT-2884, PLT-2891). Nothing to post; the ball
+is now on the DPL board under Ali, not ours to track here. If DPL-1684 bounces back to PLT, re-open
+this folder rather than starting a new one — the full mechanism (PC-EXCEL cross-write, confirmed,
+9/10) below still stands.
+
+---
+
 ## 2026-08-14 check — no change, nudge still stands unsent
 
 Re-fetched the ticket: no new comments since Yash's 07-31 "do you want me to move this to DPL?"

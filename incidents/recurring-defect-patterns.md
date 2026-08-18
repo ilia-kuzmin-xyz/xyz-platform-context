@@ -481,3 +481,36 @@ incident.
   name list. Full findings, plus the four sibling hypotheses not yet excluded (wrong surface,
   Navisworks category renaming, multi-select empty-by-design, unguarded `getInstanceTree()` blanking
   the panel): `live-incident-board-tickets/PLT-3051-groupA-viewer-and-model/context.md`.
+
+### 2026-08-18 additions to the candidate list
+
+- **Filter-map recompute skipped when triggered by a model load, not the filter panel** (PLT-3060,
+  mechanism verified in code, not yet reproduced live). The model switcher tree hides any model whose
+  root dbId isn't in `allowedDbIdsByModel` once a filter is active (`tree.tsx:79-119`). That map is
+  only republished when `onElementsUpdate` runs with `executedOutsideFilterPanel !== true`
+  (`filter-service.ts:803-813`) — but opening a new model triggers the recompute through the
+  element-load path (`:1059-1073`), which calls `applyFilters(viewer, true)`, so the map is never
+  backfilled for that model and it silently disappears from the switcher until the filter is cleared
+  and reapplied. **Recognition signature:** something (a model, in this instance) that should be
+  visible under an active filter vanishes entirely rather than just failing to highlight, and clearing
+  the filter brings it straight back with no other symptom. Adjacent to Pattern 1's "filter
+  intersection" note on `use-linked-element-actions.ts` (`PLT-2882-groupA-progress-tracking/
+  investigation-log.md:29-42`) — same `allowedDbIdsByModel` cache, different consumer (switcher tree
+  vs. element selection). Promote if a second surface is found going stale for the same
+  `executedOutsideFilterPanel` reason. Full findings:
+  `live-incident-board-tickets/PLT-3060-groupA-viewer-and-model/context.md`.
+- **No model-provenance concept anywhere in the linking chain** (PLT-3034, Hutto2 — mechanism
+  verified in code, single occurrence). An element inside a QA/sandbox-named model
+  (`QA-SBX2-FU-FO_ME_MDL_DSI_R23-V74_X`) counted toward an activity's progress percentage the same as
+  a production-model element, because `getElementsForActivity`/`useGroupedLinks` resolve purely by
+  `modelElementId` with no per-model allow-list anywhere (`linking-service.ts:684-689`,
+  `useGroupedLinks.ts:59-83`), and `ModelEntity`/`ProjectService.getProjectModelList` load every model
+  the API returns with no name-pattern or type-based exclusion (`project-service.ts:722-723`).
+  **Not a bug in existing logic — an absent safeguard**: neither FE nor BE has ever needed to
+  distinguish a model's provenance, so there's nothing broken to point at, only something unbuilt.
+  **Recognition signature:** a linked/counted element traces to a model whose name suggests it isn't a
+  real project deliverable (QA, sandbox, test, WIP prefixes) — check whether the project's model list
+  contains anything that shouldn't be there before assuming a links/geometry defect (Pattern 1). Single
+  occurrence — promote if a second project shows a non-production model silently affecting a
+  customer-facing number. Full findings:
+  `live-incident-board-tickets/PLT-3034-groupA-progress-tracking/context.md`.
