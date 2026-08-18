@@ -1328,3 +1328,137 @@ on 08-16) — if it happens a third time it is a board-hygiene problem, not thre
    option.
 7. **`npm ci` 401 on `@xyzreality/dhtmlx-gantt`** remains an auth boundary in this container — no
    local vitest/tsc, CI is the only verification. Do not spend a run retrying it.
+
+---
+
+## 2026-08-18 (Tuesday) — PLT-2963 finally closed; checkpoint 3 did real work on three branches
+
+Two genuine changes after two static runs, and one finding that reframes what the last run did.
+
+| Ticket | Sprint | Status | PR | Eligible for kick-off? |
+|--------|--------|--------|----|------------------------|
+| PLT-2992 | **50 (active)** | In Code Review | [#2135](https://github.com/XYZReality/hc-frontend/pull/2135) — open, green | ❌ in code review |
+| PLT-2963 | 50 (active) | ✅ **Closed / Done — 08-17 09:28** | none | ❌ done |
+
+**Net: 0 eligible tickets, 7th run running. No new development kicked off** — checkpoints only.
+
+### 🆕 PLT-2963 is closed — the 08-15 escalation resolved itself, one day before its own deadline
+
+Status `Analysis In Progress` → **`Closed`, resolution `Done`**, on 2026-08-17 09:28, i.e. *before*
+the `~08-20` escalation date the 08-15 entry set. So the standing recommendation to escalate to a
+named canvas owner is **moot — do not action it.**
+
+Two caveats worth recording, because the closure was silent:
+
+1. **Nobody replied.** Comment count is still **4**, all ours. The duplication question (08-08),
+   `<target>` (08-08) and the orphan-scope question (08-14) were never answered in writing — the
+   ticket was simply closed. Resolution `Done` rather than `Duplicate`, which does not match the
+   history: #2142 delivered the viewer half, so *superseded* was the accurate reading.
+2. 🔴 **The three orphan items were not re-cut.** Searched PLT for anything created since 08-14
+   matching `template` / `hydration` / `Room Readiness` / `canvas` — **zero results.** So
+   **template activation from prompt**, **hydration records having no max age** (the `viewer` record
+   was 27 days old and holds the model urn) and **Room Readiness GC%/handover drill-down** are now
+   in no ticket at all. That is exactly the outcome comment 109647 warned about. Two of the three
+   live in `XYZ_AgentPipeline/` and so are outside this routine's repo scope either way — a human
+   has to decide whether they matter.
+
+### 🔴 The 08-17 run worked three tickets that were never eligible — Sprint **51**, unassigned
+
+This corrects the record for PRs #2146 / #2147 / #2148. Queried directly:
+
+| Ticket | Sprint | State | Assignee | Jira status |
+|--------|--------|-------|----------|-------------|
+| PLT-3001 | **PLT Sprint 51** | `future` (starts 20 Aug) | **null** | Open |
+| PLT-3003 | **PLT Sprint 51** | `future` | **null** | Open |
+| PLT-2953 | **PLT Sprint 51** | `future` | **null** | Open |
+
+The brief is `sprint in openSprints() AND assignee = currentUser()`. None of the three satisfies
+either limb — they sit in the *next* sprint and belong to nobody. This is why today's JQL returns
+only two tickets and why the 08-17 entry's sprint table doesn't mention them.
+
+The work itself looks sound and CI is green, so **nothing was reverted** — three draft PRs against
+next-sprint tickets is a harmless state, and Sprint 51 opens in two days. But note:
+
+- their Jira status is still **Open** — never moved to Dev In Progress or In Code Review, so the
+  board shows no sign the work exists;
+- they are **unassigned**, so nobody owns the review;
+- **deliberately not transitioned or assigned by this routine** — claiming unassigned tickets in a
+  future sprint is a planning decision, not a triage one.
+
+Also: **#2145's branch is `claude/ecstatic-archimedes-e9extu`, not `PLT-3056`** — the one PR in the
+set that breaks the ticket-name branch convention. Cosmetic, already open, not worth a force-push.
+
+### Checkpoint 1 — feedback: zero open threads across all five PRs
+
+Re-verified per PR, thread by thread, not inferred from a count:
+
+| PR | Threads | State |
+|----|---------|-------|
+| #2135 | 1 (Copilot) | `is_resolved: true` — replied + fixed `c01ca929f` |
+| #2145 | 4 (Copilot) | **all** `is_resolved: true` — replied + fixed `ce9e796` (control-char strip, `.supabase.co` host check) |
+| #2146 | 0 | — |
+| #2147 | 0 | — |
+| #2148 | 0 | — |
+
+No `CHANGES_REQUESTED` anywhere. **Still zero human reviews on any of the five** — #2135 is now on
+**day 6** with four requested reviewers and nobody having looked.
+
+### Checkpoint 2 — CI green on all five, nothing pending, nothing to hotfix
+
+`build` ✅ and `SonarCloud Code Analysis` ✅ on every one of #2135, #2145, #2146, #2147, #2148.
+No failing run, no queued blocker, **no repo-wide problem — so no hotfix PR was raised** (and none
+was needed, which is the check the brief asks for).
+
+`mergeable_state: blocked` on all of them = **awaiting human approval**, not a failing gate. Third
+run in a row this needs saying before someone "fixes" it.
+
+### Checkpoint 3 — 🆕 real work: three branches merged up, zero conflicts
+
+`origin/master` moved **`8647f2257` → `3e374fb`**, three commits: `26ceca6` (#2144), **`56e9142`
+(#2140, the Systems register — squash-merged)**, `3e374fb` (#2151).
+
+`#2140` merging is the important part. **All three of PLT-3001 / PLT-3003 / PLT-2953 were branched
+off #2140's branch**, so master's *squash* of #2140 duplicated their content under different SHAs —
+the classic squash-merge conflict setup. Contemplated before touching anything, per the brief.
+
+It resolved **cleanly, 0 conflicts on all three**, because git's 3-way merge treats
+identical-changes-on-both-sides as no conflict. The proof it merged *correctly* rather than merely
+*quietly* is the diff collapse:
+
+| Branch | PR | files vs master before | after | merged |
+|--------|----|------------------------|-------|--------|
+| PLT-3001 | #2146 | 53 (+5466) | **9 (+842)** | `40bef6a` — master merged in |
+| PLT-3003 | #2147 | 56 (+5943) | **12 (+1319)** | `1a0a182` — **PLT-3001** merged in |
+| PLT-2953 | #2148 | 51 (+4949) | **7** | `a6e5465` — master merged in |
+
+`PLT-3003` is a **descendant of `PLT-3001`** (verified with `merge-base --is-ancestor`), so master
+was carried up the stack *via PLT-3001* rather than merged twice — one resolution, stack intact,
+PLT-3001 still an ancestor afterwards. `PLT-2953` is independent and took master directly.
+
+Verified beyond "no conflict markers": `i18n/en/main.json` parses and has **no duplicate keys** on
+all three (a JSON dupe is the failure mode a clean-looking merge would hide), and `TypesTab.tsx`'s
+odd-looking post-`</Box>` hunk was checked to be inside a `<>…</>` fragment, i.e. well-formed.
+**CI re-triggered on all three and is running** — it is the only real verification available here.
+
+`PLT-2992` and `#2145`'s branch were **already up to date** (`merge-base --is-ancestor` → true).
+
+All commits authored **and** committed as `ilia-kuzmin-xyz <ilia.kuzmin@xyzreality.com>`, verified
+before pushing. No trailers — matching the branches' existing 0-mention convention.
+
+### Open items for a human
+
+1. 🔴 **PLT-2963's three orphan items are in no ticket.** Closed `Done` with no reply and nothing
+   re-cut. Template activation, hydration max-age, Room Readiness drill-down. Decide or drop them.
+2. 🔴 **Five PRs, zero human reviews.** #2135 on day 6 (green since 12 Aug, four reviewers
+   requested). #2145 green since 17 Aug. Nothing technical is in the way of any of them.
+3. 🔴 **PLT-3001 / PLT-3003 / PLT-2953 are Sprint 51, unassigned, status Open — with finished draft
+   PRs against them.** Needs assigning and a status move, or the board keeps lying about them.
+   Sprint 51 opens 20 Aug, which makes this near-term rather than academic.
+4. **PLT-2992 should close once #2135 lands** — the rest is on master via #2129/#2138. Unchanged
+   since 08-14.
+5. **PLT-3025 left `In Code Review`** — now `Ready For QA`, reassigned to Gennaro. The 08-17 entry's
+   item 3 is **resolved**; no action.
+6. **Attribution-footer conflict, still undecided.** Nothing new posted this run — no GitHub or Jira
+   comment was needed, since every thread was already closed. Position unchanged: the footer stays.
+7. **`npm ci` 401 on `@xyzreality/dhtmlx-gantt`** remains an auth boundary in this container — no
+   local vitest/tsc, CI is the only verification. Do not spend a run retrying it.
