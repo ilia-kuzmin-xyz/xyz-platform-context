@@ -1462,3 +1462,44 @@ before pushing. No trailers — matching the branches' existing 0-mention conven
    comment was needed, since every thread was already closed. Position unchanged: the footer stays.
 7. **`npm ci` 401 on `@xyzreality/dhtmlx-gantt`** remains an auth boundary in this container — no
    local vitest/tsc, CI is the only verification. Do not spend a run retrying it.
+
+#### 08-18 addendum — CI confirmed the three merges
+
+Waited for the re-triggered runs rather than skipping the check (they were the routine's own pushes):
+
+| PR | branch | `build` | SonarCloud |
+|----|--------|---------|------------|
+| #2146 | PLT-3001 `40bef6a` | ✅ success (07:43→07:59) | ✅ success |
+| #2147 | PLT-3003 `1a0a182` | ✅ success (07:43→07:58) | ✅ success |
+| #2148 | PLT-2953 `a6e5465` | ✅ success (07:43→07:59) | ✅ success |
+
+So the squash-duplicate merge was correct in substance, not just conflict-free — **all five open PRs
+are green and up to date with `3e374fb`.**
+
+One thing left deliberately untouched: **#2146 / #2147 / #2148 still carry a "review #2140 first"
+banner in their descriptions, and #2140 has merged.** Now stale and mildly misleading. Not rewritten
+— retyping three long bodies unsupervised risks mangling human-facing text for a cosmetic gain, and
+GitHub renders #2140 with a merged badge anyway. Cheap fix for whoever picks the PRs up.
+
+#### 🆕 Heads-up for the run after 20 Aug — Sprint 51 brings 6 eligible tickets at once
+
+Sprint 51 (opens 2026-08-20, 44 tickets total) has **6 assigned to Ilia, every one status `Open`**:
+
+| Ticket | Summary |
+|--------|---------|
+| PLT-1616 | Playwright automation — master-checks, Main Scene **Section** part 2 |
+| PLT-1617 | Playwright automation — Main Scene **Cube** part 1 |
+| PLT-1618 | Playwright automation — Main Scene **Cube** part 2 |
+| PLT-1619 | Integrate those Playwright suites into the **GitHub Actions** pipeline |
+| PLT-2026 | Replace reactive-element locators with stable numeric `data-testid`s |
+| +1 more | (6th of 6) |
+
+Two consequences worth pre-empting, because this routine has run at 0 eligible tickets for seven
+runs and will jump to 6 overnight:
+
+1. **The domain shifts completely** — this is test-automation/tooling, not commissioning. Nothing in
+   `sprint-tickets/` or the domain folders covers Playwright layout, fixtures or the existing suites.
+   Expect the first post-20-Aug run to spend itself on context, not code, and that is correct.
+2. **PLT-1619 touches `.github/workflows/`**, and PLT-2026 is a broad cross-cutting `data-testid`
+   sweep across many dropdowns. Neither is a "pick it up unattended" shape — both want a human to
+   scope them first. Flagging now rather than discovering it on the day.
