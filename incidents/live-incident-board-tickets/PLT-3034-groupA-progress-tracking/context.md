@@ -127,3 +127,20 @@ which sits upstream of both FE and BE and hasn't been asked yet.
 - ⚠️ Whether the QA model should be in this production project's model list at all (project-delivery/
   BIM question, not dev).
 - ⚠️ Check Mech.144.1260 for the same QA-model pattern — nobody has yet.
+
+## 2026-08-19 — left scope (→ With Technical Support), NOT our drafted answer landing
+
+Transitioned **Open → With Technical Support at 2026-08-18 15:50**, accompanied by a comment from
+**Darminder Atker at the same timestamp**: *"Have discussed with Yash and would suggest users with QA
+models unlink elements that are not part of a PC model... The other option is setting status as
+installed but unsure how this would affect user reports at end of a project."*
+
+**This is not the drafted action sitting in this folder.** It doesn't answer the FE/BE taxonomy
+question ("can BE tell QA from production models? no, neither can FE") and doesn't ask about
+Mech.144.1260 — both remain genuinely unaddressed on the ticket. Darminder and Yash instead converged
+on their own customer-facing workaround (unlink QA-linked elements, or mark them installed) and handed
+it to Technical Support to relay. Unlike the usual "our draft landed off-Jira" pattern seen elsewhere
+on this board, this is a **different, unrelated resolution path** — record it as such, not as a
+positive-signal repeat of that pattern. Folder kept as `-groupA-` per this routine's standing precedent
+(transitioned out mid-flight, not resolved by us); the drafted answer in `recommended-action.md` is
+still valid and unposted if the ticket reopens or if Darminder's workaround doesn't hold.

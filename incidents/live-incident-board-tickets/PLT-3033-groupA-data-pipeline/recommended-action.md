@@ -24,6 +24,22 @@ substantive yet.
 > check whether the "2nd Aug" schedule export includes more than one project, since that's the
 > likeliest explanation for both the extra WBS row and the jump in unmapped activities.
 
+## 2026-08-19 — superseded: images arrived, Darminder has a sharper ask now unanswered
+
+The image re-send above **landed** (4 real attachments, 08-17) — do not re-ask for those. Darminder
+has since posted his own specific question (08-17 15:08, naming the suspect node
+`'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'`) asking for the previous and current B11 schedule/XER, and
+it has sat unanswered ~2 days. This is the current live ask, replacing the generic "send the XER"
+framing above:
+
+> Hi Yash — following up on Darminder's question from 17 Aug: could you check with Matthew whether
+> he's able to share the previous B11 schedule (before 2 Aug) alongside the current 2 Aug one — or the
+> underlying XER exports for both? Darminder's working theory is that the extra WBS node is a specific
+> schedule object named "WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT" that may have ended up in the 2 Aug
+> export by mistake, and having both versions side by side is the fastest way to confirm or rule that
+> out. Thanks for getting the screenshots through, by the way — that part's unblocked now; this
+> schedule-file pair is the only open item.
+
 ### Internal note (not customer-facing) — for whoever picks this up next
 
 > Two separate code paths handle WBS/schedule data in the Web Viewer: a client-side XER preview

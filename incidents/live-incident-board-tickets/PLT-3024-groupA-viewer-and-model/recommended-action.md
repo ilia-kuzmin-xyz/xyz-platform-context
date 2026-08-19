@@ -29,6 +29,19 @@ one fact that could kill his theory (so nobody spends a day confirming federatio
 find the PowerBI half is unexplained), and offers exactly one next question, addressed to the one
 person who'd know. No headings, no bullets, no long dashes.
 
+## 2026-08-19 — still the right move, now addressed to Yash instead of Rishi, plus one added line
+
+The ticket did a silent round trip through With Technical Support (08-17→08-18, no comment added —
+see `context.md`). Per the 08-14 revision this draft should go to **Yash Patel** (client-channel
+owner), not Rishi — he's never been told what the code does. Same draft content as above, with one
+line appended given the new fact:
+
+> This also just did a short round trip through Technical Support with nothing added, so there's
+> nothing else to wait on there either.
+
+Also still worth doing, unchanged: open the 3 still-unopened attachments — the Web Viewer screenshot
+may name the model's folder and settle the federation question without the customer at all.
+
 ## Before sending — two things that need no data access
 
 1. **Open the 3 attachments** (all unopened this run) — the Web Viewer screenshot in particular may

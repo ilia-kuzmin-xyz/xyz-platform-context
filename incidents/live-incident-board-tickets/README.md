@@ -45,6 +45,166 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-19 — 12 in-scope tickets (up from 9): 2 brand-new (PLT-3063, PLT-3061), 1 advanced to Group B (PLT-3060 → Dev In Progress), 2 reappeared after a silent Technical-Support round trip (PLT-3033, PLT-3024), 1 left scope (PLT-3034), new Pattern 6 promoted
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status IN ("Open", "In
+Analysis", "With Customer", "Ready For Development", "Dev In Progress") ORDER BY created DESC`, cross-
+checked by paging around the tool's known 5-node-per-call quirk with `key NOT IN (...)` follow-ups
+until `remainingCount` hit 0 — same workaround the 08-18 run used). **12 tickets in scope**, up from
+9 on 08-18: **11 Group A** (`Open`/`In Analysis`/`With Customer`) + **1 Group B** (PLT-3060, `Dev In
+Progress`) — the first non-empty Group B entry this board has ever had.
+
+### PLT-3063 — new this run (quality-management)
+
+**"Dashboard issue numbers are not listed correctly web viewer," DC5, Medium, assigned Darminder,
+created 08-18.** Two complaints: (A) dashboard issue numbers don't match the editor's and look
+"reversed"; (B) issues #155-158 visible in the editor but absent from the dashboard. **(B) is already
+reported resolved** by Yash in the ticket's one comment. **(A) is a verified, specific frontend bug,
+not a sort-direction issue:** the dashboard's Quality-panel card renders `#{index + 1}` — list
+position — instead of the real `issueNumber`, which is never carried through the dashboard's own
+API-to-UI mapper at all (`issue-item.tsx:425`, `use-quality-data.ts:24-105`); the editor renders the
+real field correctly (`issue-item.tsx:123`). Both surfaces sort newest-first identically — no inverted
+sort exists. Dev-ready, no customer clarification needed. New single-occurrence candidate pattern
+added to `recurring-defect-patterns.md`. Full findings: `PLT-3063-groupA-quality-management/context.md`
++ `recommended-action.md`.
+
+### PLT-3061 — new this run (quality-management), and directly related to a long-stalled board ticket
+
+**"CAT2 Rework cost not auto populating," ML9, Medium, assigned Darminder, created 08-17.** Same
+code, same file, same reference table as **PLT-2815** (also on this board, quality-management,
+44 days stale) — `use-rework-cost-calculation.ts` + `rework_reference.json`. Darminder had already
+guessed the right shape in-thread ("it might be values that we don't have set in the reference
+table") before any code was read. Verified: the error text the customer saw
+(`getEstimatedReworkCostHelperText:203`) only fires on a total lookup miss (Rule 3), and the table
+covers exactly three Discipline strings (`CSA`, `Electrical`, `Mechanical`) at any Category — the
+working hypothesis is that ML9's issue #1125 carries a Discipline outside those three, a coverage gap
+one level coarser than PLT-2815's. Falsifiable in one step (pull the issue's own Discipline/Package
+strings), not yet confirmed. **This is the second occurrence of the same underlying shape as
+PLT-2815 — promoted to `recurring-defect-patterns.md` as new Pattern 6** ("product-owned reference
+table with unbounded coverage"). Full findings: `PLT-3061-groupA-quality-management/context.md` +
+`recommended-action.md`.
+
+### PLT-3060 — advanced straight to Group B, skipping Ready For Development
+
+Yesterday's fully-diagnosed ticket (model vanishing from the switcher under an active filter) is now
+**Dev In Progress** — Darminder transitioned it directly 08-18 15:31, with no intermediate "Ready For
+Development" stop and no comment (our drafted mechanism handoff was never posted; he appears to have
+picked it up from the description's own repro). Folder renamed `PLT-3060-groupA-viewer-and-model` →
+`PLT-3060-groupB-viewer-and-model` — first-ever non-empty Group B entry on this board. No further
+input needed from us.
+
+### PLT-3033 and PLT-3024 — both reappeared after a Technical-Support round trip, one substantive, one empty
+
+Both tickets had left scope earlier this month (→ With Technical Support) and are back `With
+Customer` — but the two round trips could not be more different:
+
+- **PLT-3033** (data-pipeline, WI1 B11) — **substantive.** The original blocker (broken description
+  images) cleared 08-17 when 4 real attachments landed; Darminder then posted his first real technical
+  reply, naming a specific suspect node (`'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'`) and asking for the
+  previous + current B11 schedule to compare — a sharper, concrete refinement of the existing H1
+  hypothesis, not a new mechanism. That new ask has sat ~2 days unanswered. Confidence up marginally
+  (4/10 → 5/10) on sharper framing, not new evidence. Updated draft asks Yash to relay the specific
+  schedule-file request rather than repeating the generic "send the XER" ask.
+- **PLT-3024** (viewer-and-model, ML9) — **empty.** Zero comments were posted during the ~17-hour
+  Technical-Support window (08-17 17:00 → 08-18 10:17, both transitions by Darminder) — no diagnosis,
+  no reply to Rishi's now-13-day-old federation question. Reads as a queue bounce that added nothing,
+  which if anything strengthens the case (unchanged since 08-14) for telling Yash the mechanism now
+  rather than continuing to wait for a volunteer answer. Draft updated with one added line noting the
+  round trip added nothing.
+
+### PLT-3034 — left scope this run, naming why per the standing rule
+
+| Ticket | Status now | What happened |
+|---|---|---|
+| **PLT-3034** | With Technical Support (was Open) | Transitioned 08-18 15:50, **with** a comment this time — but it is Darminder and Yash converging on their own customer-facing workaround (unlink QA-linked elements, or mark as installed), not our drafted answer to Darminder's own FE/BE-taxonomy question. **Different from the usual "our draft landed off-Jira" pattern** — this is a genuinely separate resolution path, recorded as such rather than folded into that pattern. Both our drafted points (the taxonomy answer, the Mech.144.1260 cross-check) remain unaddressed by anyone. Folder kept `-groupA-` per standing precedent. |
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts and
+timestamps checked verbatim against the 08-18 record — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3044](PLT-3044-groupA-filter-system/context.md) | filter-system | Open | 08-13 (Mostafa: "nothing from our side... close the ticket") | **new comment 08-18** (Yash posted a bare link to external support ticket #7628, no text) — flagged for whoever executes the close to check first; disposition unchanged, move-to-Done still unposted, now **5 consecutive runs** |
+| [PLT-2946](PLT-2946-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Rishi's PLT-2874 follow-up) | unchanged; customer-status-update draft still unposted, now **20 days** |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-17 (Darminder: "fix still ongoing") | unchanged; this is now the **second** unqualified "ongoing" claim with no ship date or named mechanism — added a separate sanity-check line to Darminder alongside the existing Gennaro ask |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **14 consecutive runs**, now **19 days** silent, board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **44 days stale**, direct close-out still unposted across **14 consecutive runs**; now directly relevant to new ticket PLT-3061 (same subsystem, see Pattern 6) |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, unchanged; **26 days** silence on a fix that sits entirely with the client's project-delivery team |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, unchanged; the two-branch drafted reply to Yash still unsent, question now **23 days** open |
+
+### Cross-ticket notes
+
+- **First non-empty Group B on record.** Every prior run's entire in-scope set was Group A; PLT-3060
+  is the first ticket this board has ever tracked reaching Ready For Development / Dev In Progress
+  while still being watched here. Per the standing rule, Group B tickets get a one-line status note,
+  not a full pass — that's all PLT-3060 gets from here unless it stalls or bounces back.
+- **Two reappearances this run, opposite in substance.** PLT-3033's round trip produced real new
+  information (images arrived, a named hypothesis); PLT-3024's produced none at all. Worth keeping
+  these visibly distinct rather than treating "left scope then came back" as one shape — conflating
+  them would hide that PLT-3024's Technical-Support visit was pure queue friction.
+- **PLT-3034's left-scope comment is a new shape too** — not our draft landing, not a silent bounce,
+  but the team reaching its own separate resolution (a customer-facing workaround) that happens to
+  route through the same status transition. Three distinct "leaves scope" shapes now exist on this
+  board: silent bounce (PLT-3024 today, PLT-3051/3040/3033/2906 historically), draft landing off-Jira
+  verbatim, and team-reached-its-own-answer (PLT-3034 today, PLT-2909 on 08-18). Worth a taxonomy note
+  if a fourth shape ever appears.
+- **New Pattern 6 promoted** (`recurring-defect-patterns.md`) — PLT-2815 + PLT-3061 are the same
+  reference-table-coverage-gap mechanism, five weeks apart, meeting the two-occurrence bar for the
+  first time since Pattern 5 was promoted on 08-07.
+- **The "recommended but never posted" pattern is now fourteen runs deep on both PLT-2858 and
+  PLT-2815** (dating to 07-24) — both drafts exist verbatim in each ticket's `recommended-action.md`;
+  nothing further needs drafting, only sending.
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3063** — 2 Freshdesk-hosted screenshots + 2 native Jira inline images, none opened (no
+  helpdesk session / no authenticated binary fetch available here). Not load-bearing — the numbering
+  mechanism is already code-confirmed end-to-end; these would only confirm the exact displayed
+  numbers and the pre-fix type/status of issues 155-158.
+- **PLT-3061** — 1 screenshot + 1 customer repro video, neither opened (binary media). These carry the
+  one fact still needed (issue #1125's exact Discipline/Package strings) — but that fact is more
+  reliably pulled directly from the issue record than transcribed from a video, per the drafted action.
+- Prior gaps on the seven confirmed-unchanged tickets stand exactly as previously documented
+  (PLT-2858's 4 images, PLT-2815's 2 images + inline blobs, PLT-2649's 2 images) — not re-listed here.
+  PLT-3060's screen recording is now moot (ticket in Dev In Progress).
+
+### Needing a human now
+
+Ranked by tenure/urgency; unchanged items carried from 08-18 except where noted:
+
+1. **PLT-2858** — post the decision-request to Pietro (cc Mostafa), plus the short answer-Mostafa's-
+   question draft that goes with it (both in `recommended-action.md`). Top priority: Critical
+   priority, **14 runs** unposted, **19 days** of silence on a decision only product can make.
+2. **PLT-2619** — post the reply to Yash once the 30-second URL check is done (drafted, both
+   branches ready, now **23 days** open).
+3. **PLT-2649** — post the nudge to Yash confirming the 07-24 hand-off carried the detail (drafted,
+   **26 days** silence).
+4. **PLT-2874** — send Gennaro the two-question ask (project/model name + date-slider screenshot),
+   plus the new sanity-check line to Darminder (drafted, unchanged in substance).
+5. **PLT-2946** — send the customer status update referencing Rishi's 07-31 finding and the
+   PLT-2874 dependency (drafted, unchanged) — **20 days** of unexplained customer silence on an
+   internally-solved question.
+6. **PLT-3033** — new ask this run: relay Darminder's specific schedule-file-pair request to Matthew
+   via Yash (drafted) — the more valuable, more targeted successor to the original "send the XER"
+   ask, which is now moot (images arrived).
+7. **PLT-3024** — post the internal comment to Yash explaining the confirmed Pattern-5 mechanism,
+   now with a line noting the empty Technical-Support round trip (drafted, unchanged in substance).
+8. **PLT-3063** — new this run: post the numbering-bug mechanism to Darminder, dev-ready, no
+   customer clarification needed (drafted).
+9. **PLT-3061** — new this run: ask Darminder to pull issue #1125's Discipline/Package values
+   directly rather than waiting on the video (drafted) — settles whether this is the same
+   reference-table gap as PLT-2815 in one query.
+10. **PLT-2815** — execute the close-out (drafted, 14 runs unposted). Lowest urgency — administrative.
+11. **PLT-3044** — execute the move-to-Done (drafted, 5 runs unposted), after checking support ticket
+    #7628 (new comment, not yet reviewed). Also administrative.
+
+**Board assessment: the busiest run on record — 12 tickets in scope (up from 9), 2 brand-new, the
+board's first Group B entry, and two reappearances of genuinely different character.** None of that
+changes the standing bottleneck: analysis is not what's blocking this board, posting is. PLT-2858
+crossing 19 days of silence at Critical priority on a ticket only product can unblock, plus the sheer
+increase in in-scope volume this run, are both worth surfacing to Ilia.
+
+---
+
 ## Run: 2026-08-18 — 9 in-scope tickets: 1 relocated off-board (PLT-2909 → DPL-1684, resolved), 1 left scope (PLT-3024), 1 new ticket (PLT-3060), 2 process gaps caught (PLT-3034 missed 8 days, PLT-2946 missed a same-day flip), Group B still empty
 
 **Board re-queried** (same exclusion list as 08-17, plus a follow-up JQL to enumerate the full

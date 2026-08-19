@@ -397,3 +397,13 @@ read-only in the web viewer, blank on ML9 because that model has none configured
 a free-text box on the form, up to 100 characters, typed by the user, saved as `locationDetails`,
 and working on ML9 today. The blocking clarification that has held this ticket for a month is
 resolved in `recommended-action.md` (2026-08-14 section) as a postable draft.
+
+## 2026-08-19 — re-verified, unchanged
+
+Live fetch confirmed byte-for-byte against the folder: 27 comments, same authors/bodies/timestamps,
+newest still comment 108643 (Yash's 07-31 "any update on this?" to Mostafa). No new comment, no
+status/priority/assignee change. Silence since last comment: **19 days**. Since Mostafa's unanswered
+07-14 clarifying question: **36 days**. The escalate-to-Pietro decision-request plus the
+answer-Mostafa's-question draft (both in `recommended-action.md`) have now sat unposted across **14
+consecutive runs** (07-24 → 08-19) — still the board's top-priority unposted item, Critical priority,
+board's only ticket at that severity.

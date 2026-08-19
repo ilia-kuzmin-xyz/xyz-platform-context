@@ -365,6 +365,49 @@ incident.
 
 ---
 
+## Pattern 6 — Product-owned reference table with unbounded coverage (2026-08-19, promoted from candidate)
+
+**Confirmed on two occurrences** (PLT-2815, then PLT-3061 five weeks later — same code, same table).
+A calculation is implemented entirely in the frontend as a lookup against a shipped, static,
+product/UX-owned reference dataset (not backend, not derived from live data), matched by a fallback
+ladder. The code is correct; the *data* — a hand-authored Confluence table with no systematic
+coverage guarantee across the live set of category/discipline/package names a project can actually
+produce — has gaps. The gap surfaces two different ways depending on where in the fallback ladder it
+bites.
+
+| Ticket | Table / file | Gap shape | Symptom |
+|---|---|---|---|
+| PLT-2815 | `rework_reference.json` via `use-rework-cost-calculation.ts` | A package-specific row exists for one Category on a Discipline+Package combo, but not the sibling Category — so the two categories resolve via *different* rules (one exact match, one generic discipline-level fallback) | Inverted-looking pair: Category 3 cost € lower than Category 4, both technically correct in isolation |
+| PLT-3061 | same file, same table | The Discipline itself isn't one of the table's three hard-coded strings (`CSA`, `Electrical`, `Mechanical`) at any Category — no row matches at any level of the fallback ladder | Total miss (`cost: null`), UI shows "mapping data is missing," field never auto-populates |
+
+### Mechanism
+
+`use-rework-cost-calculation.ts` implements a three-rule fallback ladder (exact Category+Discipline+
+Package match → generic Category+Discipline match with blank Package → `null`) against
+`rework_reference.json`, sourced from a Confluence page ("Issue Rework Reference Table", owned by
+Pietro Desiato). The code is a faithful, verified implementation of the documented ladder — in both
+tickets the arithmetic reproduces the customer's reported figures to the cent. The defect, such as it
+is, is in the table's coverage: it was hand-authored once and has no mechanism to guarantee every
+Category × Discipline × Package combination a live project can produce actually resolves to a
+sensible, consistently-ruled value.
+
+### Recognition signature
+
+A rework-cost (or any similar product-owned-lookup) ticket where: (a) the code path traces cleanly to
+a static JSON/reference-table match with a fallback ladder, and (b) the "bug" reproduces exactly from
+the table's own published values with no arithmetic error. Before treating it as a dev bug, check
+which rule each side of the comparison matched — if they matched via *different* rules, or one
+matched no rule at all, the fix is a data/product addition to the reference table, not a code change.
+Route to the table's owners (Mostafa/Pietro for this table) rather than assigning a dev fix.
+
+**Standing risk, not yet a ticket:** the lookup code does plain `===` string matching with no
+normalization (`use-rework-cost-calculation.ts:101-104`, `:126-128`) and a hard-coded FX-conversion
+table (`:18-23`) — both are latent maintenance risk (a discipline name that differs by case or a
+stale FX rate would silently produce the same "coverage gap" symptom) independent of the table's
+content itself.
+
+---
+
 ## Candidate patterns (one occurrence, watch for a second)
 
 - **Viewable-name fallback vs on-device client** (PLT-2923). A model renders on the headset but
@@ -498,7 +541,8 @@ incident.
   investigation-log.md:29-42`) — same `allowedDbIdsByModel` cache, different consumer (switcher tree
   vs. element selection). Promote if a second surface is found going stale for the same
   `executedOutsideFilterPanel` reason. Full findings:
-  `live-incident-board-tickets/PLT-3060-groupA-viewer-and-model/context.md`.
+  `live-incident-board-tickets/PLT-3060-groupB-viewer-and-model/context.md` (folder renamed
+  groupA→groupB 2026-08-19 — ticket advanced straight to Dev In Progress).
 - **No model-provenance concept anywhere in the linking chain** (PLT-3034, Hutto2 — mechanism
   verified in code, single occurrence). An element inside a QA/sandbox-named model
   (`QA-SBX2-FU-FO_ME_MDL_DSI_R23-V74_X`) counted toward an activity's progress percentage the same as
@@ -514,3 +558,19 @@ incident.
   occurrence — promote if a second project shows a non-production model silently affecting a
   customer-facing number. Full findings:
   `live-incident-board-tickets/PLT-3034-groupA-progress-tracking/context.md`.
+- **Dashboard issue number is fabricated from list position, not the real field** (PLT-3063, DC5 —
+  mechanism verified in code, single occurrence). The Dashboard's Quality-panel issue card renders
+  `#{index + 1}` from the item's position in the currently rendered list
+  (`quality-panel/components/issue-item/issue-item.tsx:425`), not the real `issueNumber` — the
+  dashboard's `IssueItem` type and its API-to-UI mapper (`use-quality-data.ts:24-105`) never carry
+  `issueNumber` through at all. The editor renders the real field correctly
+  (`issues-panel/blocks/issue-item.tsx:123`, `format-issues.ts:70`). Both surfaces actually sort
+  newest-first identically — no inverted-sort bug found — so the "looks reversed" complaint is fully
+  explained by the same row showing a positional counter on one surface and the true, much larger
+  persisted number on the other. **Recognition signature:** a customer says two surfaces' displayed
+  "numbers" for the same item disagree or look inverted, but the underlying sort order matches on
+  both — check whether one surface is deriving its displayed number from list position instead of
+  reading a real identifying field, before assuming a sort-direction bug. Single occurrence — promote
+  if a second numbered-list surface (QA issues, activities, anything with a visible "#N") shows the
+  same index-as-identifier substitution. Full findings:
+  `live-incident-board-tickets/PLT-3063-groupA-quality-management/context.md`.

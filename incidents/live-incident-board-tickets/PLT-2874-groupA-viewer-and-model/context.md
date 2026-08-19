@@ -476,3 +476,12 @@ dismissed on magnitude, and it is free to check: the chosen model id appears in 
 is still the decisive test and the console `calculatedOn`/artefact lines are still the right pair to
 read. But two free checks now come *first*: the project/model id, and the slider's own date range on
 each environment. See `recommended-action.md` § 2026-08-14.
+
+## 2026-08-19 — re-verified, unchanged; second unqualified "ongoing" claim
+
+Live fetch: still 6 comments, newest still Darminder's 08-17 14:01 "fix still ongoing following QA
+latest testing" to Yash. Nothing from Gennaro answering the project/model/slider ask; nothing naming
+a ship date or which hypothesis (H1/H3/H4/H6) the fix under test actually targets. This is now the
+**second** unqualified "ongoing" claim (08-14, then 08-17) with no discriminating detail attached —
+worth a sanity-check line added to whatever is sent next, since QA could pass while addressing the
+wrong mechanism for the Staging-specific undercount. Added to the draft in `recommended-action.md`.

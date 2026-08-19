@@ -223,6 +223,19 @@ outright:
 > comparing the same file. And if you still have both tabs, a screenshot of the date slider on each
 > would help — if Staging's slider ends on an earlier date than Prod's, that alone explains it.
 
+## 2026-08-19 — add a separate sanity-check line to Darminder, not a rewrite of the Gennaro ask
+
+Darminder's "fix still ongoing following QA testing" has now been said twice (08-14, 08-17) with no
+ship date and no named mechanism. Worth a short, separate one-liner to Darminder alongside (not
+replacing) the Gennaro ask above, since a fix could pass QA while targeting the wrong one of H1/H3/H4/H6:
+
+> Darminder — which of the ranked hypotheses is the fix under test actually targeting, and does it
+> touch Staging specifically or just Prod? Want to make sure QA passing confirms the Staging undercount
+> is actually gone, not just that Prod stayed fine.
+
+This is a process/communication gap, not a new diagnostic fact — it doesn't change the hypothesis
+ranking in `context.md`.
+
 *(One owner, two things that can be answered with a value and a screenshot, no jargon, no console.
 The 08-13 console-and-queries ask is held back as the follow-up once the project is named — sending
 both at once buries the cheap question under the expensive one.)*

@@ -494,3 +494,10 @@ survives:
 - Candidate home remains **DIGP-1420 "Model / 360 Capture Auto-Align"** (Backlog, created
   2026-07-19). Still **not verified** as the right home, still not linked to PLT-2649. Owner for
   the decision is Pietro, with Jason. Draft in `recommended-action.md`.
+
+## 2026-08-19 — re-verified, unchanged
+
+Live fetch: status With Customer, priority Major, assignee Yash Patel, 16 comments, `updated`
+still `2026-07-24T13:56:22` — identical to the 08-18 record. **26 days** of silence since Ilia's
+hand-off to the client's project-delivery team. The nudge-to-Yash draft in `recommended-action.md`
+remains correct and unposted.

@@ -299,3 +299,18 @@ prerequisite for communicating.
 - Whether ML9 has multiple schedule revisions (H2), uses PC-EXCEL imports (§5), or lost category
   mappings around 08-04/08-05 (§4 side detail).
 - Contents of the 3 attachments — **still unopened**, as on 08-06, 08-10 and 08-11.
+
+## 2026-08-19 — reappeared (With Technical Support → With Customer), empty round trip
+
+Comment timeline unchanged since 08-10 (last real content is still Rishi's 08-06 09:16 federation
+question, now **13 days** unanswered — the auto-sync bot flips through 08-10 add no content). What's
+new is from the **changelog**, not comments: `Open → With Technical Support` at **08-17 17:00:37**
+(Darminder), then `With Technical Support → With Customer` at **08-18 10:17:49** (Darminder again) —
+**zero comments were posted in that ~17-hour window.** No diagnosis, no reply to Rishi, no BE answer.
+This reads as a queue bounce/triage pass that added no information, not an investigation.
+
+**Does not change the mechanism or the recommendation** — Pattern 5 stands unaffected, and if
+anything the empty round trip strengthens the 08-14 case for telling Yash the mechanism now rather
+than continuing to wait for a volunteer answer: Technical Support looked at it and had nothing to add
+either. Group tag `groupA` (current status "With Customer") — domain tag `viewer-and-model`
+unchanged.

@@ -182,3 +182,27 @@ The customer also said the actual XER file is "too large to attach" but offered 
 request — that offer has not been taken up in-thread. **The XER file is the single highest-value
 artifact for this ticket** (settles H1 in one query) and getting it is more valuable than the three
 screenshots.
+
+## 2026-08-19 — reappeared (flipped back from With Technical Support), one blocker cleared, a new one opened
+
+Ticket went quiet 08-10→08-16 (Darminder's 08-10 12:44 re-send ask unanswered), then moved. Fresh
+comments since:
+
+- **2026-08-17 10:10/10:12, Yash Patel** — reposts the description, and this time **4 real PNG
+  attachments land** (not the broken `blob:` placeholders). The original image-re-send blocker is
+  now **cleared**. The XER file offer is repeated verbatim but still not sent.
+- **2026-08-17 15:08, Darminder Atker** — first substantive technical reply, now that he can see the
+  images: names a specific suspect node, **`'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'`**, as the likely
+  extra parent WBS, and asks for **both the previous schedule and the current one** to compare (a
+  sharper, concrete refinement of H1 — an unscoped multi-project/EPS export — rather than a new
+  mechanism). Status moved to **With Customer** 08-18, consistent with the ball now sitting on that ask.
+
+Re-grepped `schedule-parser.ts` for `DRAFT`/`LIVE`/`proj_id`/`proj_short_name` — zero matches,
+reconfirming (not changing) the 08-11 finding: no project/EPS-scoping or draft/live-status filtering
+anywhere in this client-side parser (dead-code caveat for the real upload flow still applies).
+
+**Updated confidence: 5/10** (up from 4/10) — improvement is from a sharper, named hypothesis and a
+domain-side reply, not from new evidence resolving the mechanism. Still gated on the same class of
+artifact (the schedule files) as before. Group tag `groupA` (current status "With Customer") — folder
+was already correctly named `PLT-3033-groupA-data-pipeline` (renamed 08-15, before this reopening;
+no rename needed now).

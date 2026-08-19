@@ -113,3 +113,18 @@ otherwise).
   the 200ms debounce at `filter-service.ts:61-69`?).
 - ⚠️ Confirm the bug reproduces with model filters other than "Progress – Linked" (any filter that
   populates `_modelFilters$` should trigger the same `executedOutsideFilterPanel` path).
+
+## 2026-08-19 — advanced to Group B (Open → Dev In Progress), folder renamed groupA → groupB
+
+**Darminder Atker transitioned Open → Dev In Progress directly at 2026-08-18T15:31:48**, skipping
+"Ready For Development" — no intermediate stop, and no comment accompanied the transition (still
+only the original 08-17 repro comment from Yash on the ticket; our drafted mechanism handoff was
+never posted). Reads as Darminder having picked this up from the description's own repro rather than
+from a written mechanism handoff, and starting work independently. He remains assignee.
+
+Per this routine's Group A/B rule, the ticket has now progressed past Group A entirely — folder
+renamed `PLT-3060-groupA-viewer-and-model` → `PLT-3060-groupB-viewer-and-model`. No further
+clarification needed from us; the code-confirmed mechanism (`filter-service.ts:803`
+`executedOutsideFilterPanel` guard skipping the `allowedDbIdsByModel` publish on model-triggered
+recomputes) stands as recorded above, worth a quick informal check with Darminder that it matches
+what he's implementing, but not blocking.

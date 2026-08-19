@@ -193,3 +193,11 @@ Nobody has run a query or opened a screenshot yet; a ranked mechanism list plus 
 ## Recommended action (drafted, not executed)
 
 See `recommended-action.md` in this folder for the full drafted comment and diagnostic SQL.
+
+## 2026-08-19 — re-verified, unchanged
+
+Live fetch: still 8 comments, newest still Rishi's 07-31 16:05 PLT-2874 follow-up. No new activity.
+Customer silence is now **20 days** (07-30 → 08-19) on a question Rishi answered internally on day
+one. Checked PLT-2874 (the ticket this one is blocked on) fresh: still `Open`, `updated
+2026-08-17T14:01:56` — no visible progression past "fix ongoing" (see PLT-2874's own 08-19 entry).
+The customer-status-update draft in `recommended-action.md` remains correct and unposted.

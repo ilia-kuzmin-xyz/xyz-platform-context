@@ -101,3 +101,16 @@ PLT-3044 is upstream data. They share a client and a screen, nothing else.
 The ticket sits **assigned to Darminder** (fullstack lead) and **Open**, which reads as "a developer
 owes work on this" — while product has already said there is no work. Left as-is here; the
 recommended action addresses it.
+
+## 2026-08-19 — re-verified, one new comment not yet accounted for
+
+Live fetch: status/priority/assignee all unchanged, but Jira now has **4 comments, not 3** — a
+comment from **Yash Patel, 2026-08-18T09:19**, was added: a bare smartlink to
+`https://support.xyzreality.com/a/tickets/7628`, no accompanying text. Nobody has opened that
+external support-ticket link (out of scope for this repo's tooling); it may just be Yash's own
+cross-reference for the close-out, or it may carry new client content. It does not visibly
+contradict Mostafa's 08-13 "nothing from our side, close it" verdict, so the close-out recommendation
+below stands, but the folder had not recorded this comment before now — flagging so the next run (or
+whoever executes the close) checks ticket #7628 first rather than assuming it's inert.
+
+Recommended action still unposted, now **5 consecutive runs** (08-14 → 08-19).

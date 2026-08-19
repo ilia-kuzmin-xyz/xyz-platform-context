@@ -232,3 +232,19 @@ shipped JSON, so it is a table-formatting slip in Confluence, not a data discrep
 
 **Nothing else changed.** The close-out recommended since 07-30 remains the only outstanding action;
 see the 2026-08-14 note in `recommended-action.md`.
+
+## 2026-08-19 — re-verified, unchanged; flag re: new related ticket PLT-3061
+
+Live fetch: identical on every field to the record above (13 comments, newest still 106553,
+`updated` still 2026-07-06). **44 days stale**, close-out unposted across **14 consecutive runs**.
+
+**New this run:** a fresh ticket, **PLT-3061** ("CAT2 Rework cost not auto populating"), was
+triaged today and hits the exact same subsystem — `use-rework-cost-calculation.ts` +
+`rework_reference.json`, the same reference-table-driven rework-cost lookup this ticket's diagnosis
+covers. PLT-3061's working hypothesis (pending confirmation) is a **missing Discipline row** for the
+customer's project, causing a total miss (`null`) rather than this ticket's mismatched-fallback
+inversion — same class of defect (product-owned reference-table coverage gap), different shape (total
+miss vs. wrong-rule match). See `PLT-3061-groupA-quality-management/context.md`. Promoted to
+`recurring-defect-patterns.md` as a new pattern this run (two confirmed occurrences: this ticket +
+PLT-3061) — see that file. Does not change this ticket's own recommended action (still: close it out,
+already resolved as "as intended" by product on 06-23).

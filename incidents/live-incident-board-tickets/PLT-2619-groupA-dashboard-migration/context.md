@@ -598,3 +598,11 @@ right and half misleading, so recording the correction rather than deleting it:
    project still hitting PowerBI", but only someone with GA access can run it. Flagged as an option,
    not a finding.
 7. **Freshdesk #6492 content** — unchanged gap, carried from 08-04.
+
+## 2026-08-19 — re-verified, unchanged
+
+Live fetch: status With Customer, priority Medium, assignee Yash Patel, 6 comments, `updated`
+still `2026-08-03T15:13:28` — identical to the 08-18 record. Yash's 07-27 question ("can we update
+this to new dashboard if not done already?") is now **23 days** unanswered. The two-branch drafted
+reply in `recommended-action.md` remains correct and unposted; the "cheap fixes still undone" list
+there (issue-link PLT-2619↔PLT-2935, deliberate transition after 112 days static) is also unchanged.
