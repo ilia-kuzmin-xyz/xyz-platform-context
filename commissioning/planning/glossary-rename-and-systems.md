@@ -201,3 +201,64 @@ Scheduled PR-review sweep over Rishi/Darminder/Tom's open non-draft PRs (#2143, 
   (run the manual test plan — the interceptor safety net is gone) still stands.
 - Databases not re-probed this run — nothing merged that would move them; the 16 Aug census
   (dev: rename + all four Systems tables live, RPC absent; stable: bare) is the latest.
+
+## 2026-08-19 — review run: #2149 (detail panel, the PR stacked on #2140) code-verified, held for the visual pass; #2152 approved
+
+Scheduled sweep over Rishi/Darminder/Tom's open non-draft PRs: #2152, #2149, #2143. #2140 has
+merged since the 17 Aug note — master now carries the systems register, and **#2149**
+(`task/PLT-2984-cx-system-details`, PLT-2984/2982/2983/2985) is the promised second PR: readiness
+sequence, members, elements, open issues and drill-ins on the system detail panel. 74 files,
++9.2k lines, 37 commits.
+
+**Dev database re-probed (committed publishable keys):**
+- Everything #2149 needs is live on `dev`: `system_readiness` → 200, `task_instance.system_id`
+  + `.bucket` selectable, `workflow_step_task.system_type_id` + `.bucket` selectable, all four
+  Systems tables still 200. The PR body's "verified against dev after xyz-supabase #17" premise
+  holds.
+- **`move_asset_membership` RPC is still absent on `dev`** — probed with the exact named params
+  the client sends (`p_asset_id`, `p_from_system_id`, `p_to_system_id`) → PGRST202. Same state as
+  16 Aug. Still not blocking: `move-asset-modal.tsx` ships in #2149 but nothing imports it, so
+  the RPC has no live consumer. It MUST land before whichever PR wires the modal in.
+- **`stable` is not just empty — it is still on the PRE-RENAME schema**: `tag`/`workflow_tag` →
+  200, `readiness_step`/`workflow_step`/`workflow_step_task` → 404, all Systems tables → 404.
+  This sharpens README § Blockers: enabling the flag above `dev` would 404 every commissioning
+  surface (pitfalls §3), not merely load empty (pitfalls §4). The 12 Aug "schema parity verified"
+  claim no longer holds for `stable`.
+
+**#2149 code pass** (head `859965f`, build + Sonar green, 0 new issues, 1 unrelated commit behind
+master, no conflicts, both Copilot threads resolved with sound replies):
+- Copilot's suppressed headline findings are all fixed at this head: system-only anchors default
+  to `system_readiness` (checklist-instance-service.ts), buckets share one normalised union
+  (`commissioningApi/task-instance-bucket.ts`), requirement groups key on `templateId` not name
+  (use-system-step-tasks.ts — comment even cites the two "Test" templates on dev), and
+  `setSystemDetailId` was narrowed to a plain setter so the functional-update hole is gone.
+- Latent, follow-up worthy (nothing writes `system_requirement` instances yet, so not live):
+  `listForSystemStep` doesn't filter by bucket — once requirement generation lands anchored on
+  (system, step), reconcile could mistake a requirement row for the system-own instance of the
+  same template and skip generating it. Also `SystemReadinessService.setAchieved` doesn't clear
+  `is_overridden`/`override_reason`, but no UI calls `setAchieved(false)`, so unreachable today.
+- **Not flag-gated:** the viewer-x split-pane width rework (both side panes normalised to 344px,
+  dragged widths remembered, right pane node kept stable for split.js) runs for every viewer
+  user. Code is sound — master's properties panel already forced ≥344px via its own CSS
+  min-width, the new code just makes the splitter arithmetic match — but this is exactly the
+  surface a visual pass exists for. Same for the issues-panel scroll-to-selected work.
+
+Review outcome for #2149: **no review submitted** — same call as #2140 on 16 Aug: a
+four-ticket UI feature built to design screenshots (PLT-2985 still carries an unresolved "TBC"
+on which issues should count) with a long visual test plan needs Ilia's visual pass; code side
+found no critical/major issues and is clear to approve once visuals check out.
+
+**#2152 (PLT-2880 follow-up, Rishi) — approved on Ilia's account.** Four call sites missed by
+the #2110 interceptor removal, each verified against the service it hits: `uploadModel` posts
+through the V2 platform api instance (postgres id ✓), `getProjectAssignableContacts` is V1
+`ms/iam` (mongo id ✓), issue parameters is `/api/v2` behind `useProjectId` with `enabled`
+gating ✓, delete dialog resolves postgres for V2 and keeps mongo for V1 with Remove disabled
+until resolved ✓. Tests added at every fixed site; all 3 Copilot threads resolved (2 fixed, 1
+reasoned decline that holds — repo has strictNullChecks off). Carried the #2110 ask forward in
+the approval: run the manual plan before merge, the safety net is gone.
+
+**#2143** — unchanged since Ilia's 15 Aug approval (same head `ad31b1a`, no new activity);
+nothing stacked on it, per the don't-repeat rule.
+
+Open review threads across the three PRs: **0** (5 Copilot threads total, all resolved by the
+author with fixes or reasoned replies).
