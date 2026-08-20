@@ -113,3 +113,33 @@ row 2 blank, row 3 `Entry Type | Text | Answer Type | Responsibility | Line #`.
 **Rule**: Commissioning colour work goes through the theming module's override hook
 (`getOverrideColour`), not through a status service. This is shared surface on PLT-2743's
 architecture — changes there affect non-commissioning viewer colouring too.
+
+## 10. react-jhipster `<Translate>` never re-renders on a contentKey change (2026-08-20)
+
+**Symptom**: A button that swaps between two branches of a ternary (`editing ? <Cancel> : <Edit>`)
+keeps the OLD branch's label — the footer's Cancel button read "Edit" — while `translate()` for the
+same key returns the right string.
+
+**Cause**: `Translate.shouldComponentUpdate` (react-jhipster `lib/language/translate.js`) returns
+true only when the locale's `lastChange` or the `interpolate` prop changes. **It ignores
+`contentKey`.** When React reconciles the two ternary branches, MUI `Button` + `Translate` match by
+type and position, so the component is *updated*, not remounted — and never re-translates.
+
+**Rule**: Any `<Translate>` whose contentKey can change across a re-render in the same tree
+position needs a `key` on it (or on its ancestor) so the branch remounts. The type-detail footers
+key their buttons (`key='edit-cancel'` etc.) for exactly this.
+
+**Diagnosis pattern that found it**: served i18n JSON, the runtime TranslatorContext store (via a
+webpack module-cache probe) and `translate()` all said "Cancel" while the DOM said `<span>Edit</span>`
+— when data, store and resolver all agree and the DOM disagrees, suspect stale reconciliation.
+
+## 11. `defaultOpen` on WorkflowStep is initial-only — mode flips need a key
+
+**Symptom** (2026-08-20): entering the detail's edit session, ladder steps that should open up stay
+collapsed; a freshly staged task (New badge) is invisible.
+
+**Cause**: `WorkflowStep` seeds `useState(defaultOpen)` at MOUNT. A step mounted in view mode
+(collapsed) keeps its state when the same element re-renders with `defaultOpen=true`.
+
+**Rule**: Key the step on the mode (`key={edit ? id + '-edit' : id}`) so the session flip remounts
+it. Same class of bug as pitfall 10 — reconciliation keeping state you meant to reset.

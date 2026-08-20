@@ -93,3 +93,31 @@ applied on `dev` — `stable` still bare. Details in the planning doc's dated no
   to fix? (`pitfalls.md` §8)
 - Should the design's left-rail task-type cards replace the type dropdown?
 - Do the commissioning tabs adopt the Project Settings house style, or the reverse?
+
+## 2026-08-20 — type edit mode shipped on #2147; Rishi PR conflict map
+
+- **Type edit session (PLT-3001/PLT-3003 scope-extension, pushed to #2147, head `1c359c09`)**:
+  both type details (AssetTypeDetailContent, TypesTab/SystemTypeDetail) now carry the prototype's
+  edit mode — **view mode is read-only** (the stray read-mode "+ Add task" buttons are gone),
+  Edit stages adds (New badge) / removals (strikethrough + Undo), Save confirms via the new
+  `AssetTypePage/TypeChangesReview.tsx` page, applies retry-safely (an `applied` set skips landed
+  mutations on retry). Asset side applies via `ReadinessTasks.link/unlink` (+ optional
+  `removeTemplateInstancesOnType` behind a review-page checkbox); system side via the per-step
+  `WorkflowStepTasks.setForStep` replace-set. Shared pieces (DiscardChangesDialog, NewBadge,
+  addTaskButtonSx) extracted to `AssetTypePage/typeEditShared.tsx`; both create pages import them.
+  **Scoped out of v1** (stated in the PR): rename (name-keyed register/links, no cascade), sysreq
+  add/remove in edit (no delete route), deep Impact aggregation on the review page.
+  ReadinessLevelsSection's API changed: add/remove is now driven by an optional
+  `edit: ReadinessEditController` prop; without it the section is read-only (RemoveTaskDialog no
+  longer lives there — the instance decision moved to the review page).
+- **No type-edit anywhere else**: checked Rishi's open PRs. **#2149** (PLT-2984/82/83/85, viewer
+  system detail panel, ready for review) touches our surface only in SystemTypeDetail's ladder
+  memo (adds an `appliesToSystemType` filter) + serviceProvider/commissioningApi index — small,
+  resolvable conflicts with #2147. **#2150** (PLT-3058 target data model, draft, stacked on #2149,
+  blocked on xyz-supabase #16) re-plumbs ReadinessLevelsSection/SystemTypeDetail onto
+  `asset_type_task`/`system_type_task` and rewrites `ensureDefaultWorkflow` — deeper overlap with
+  both our edit session and `createSystemTypeWorkflow`; whoever lands second re-keys the edit
+  session's staging (step ids move from `workflow_step` to per-type mappings).
+- Two new pitfalls recorded (§10 react-jhipster `<Translate>` ignores contentKey changes;
+  §11 `defaultOpen` is initial-only) — both reconciliation-keeps-state bugs found while
+  browser-verifying the edit session.
