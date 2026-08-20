@@ -49,3 +49,27 @@ base master, ready-for-review, head `PLT-3003` (contains both halves + the
 footer-bar rework). Multi-ticket PR titles are house style (see #2140, #2149).
 Branch `PLT-3001` still exists but has no open PR — future asset-half work goes
 through PLT-3003/#2147 until it merges.
+
+## 2026-08-20 (evening) — visual pass, PLT-2992 fold-in, review round 2
+
+Real-browser verification (recipe worked again; project card menu = the
+`[data-type]` CardSettingsIcon, hover-revealed): the footer bar's grey button
+showed a stray YELLOW border + 4px radius — a global button rule out-cascades
+sx, fixed with `border: '0 !important'` + `borderRadius: '8px !important'`.
+Create pages' scroll container was missing the detail page's `py + gap={3}`
+rhythm (name divider hugged the "Asset Readiness levels" heading). Cancel
+buttons (outlined secondary) rendered near-invisible on the dark surface →
+prototype ghost style. **System-tab CTA label verified CORRECT in browser**
+("+ New System Type") — the user's mislabel report was a stale build.
+
+#2135 (PLT-2992, CHECKLIST TYPE → task kind) judged worth keeping (the kind
+drives IST rules/outcome model), merged into PLT-3003, PR closed. #2147 title
+now "PLT-3001 / PLT-3003 / PLT-2992".
+
+Copilot round 2 folded in: isMissingRelation (42P01/PGRST205/404) is the ONLY
+non-fatal prerequisite failure — real failures keep the create page up with a
+visible retry that resumes from the created type (createdTypeRef +
+savedRequirementsRef, no re-create → no dup-guard lockout);
+createSystemTypeWorkflow fails fast + removes the minted workflow if step
+seeding fails (tests added, 22 pass); picker groups in one pass; detail picker
+exclusions computed once. All 5 threads resolved.
