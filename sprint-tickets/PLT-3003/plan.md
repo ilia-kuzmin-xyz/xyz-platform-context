@@ -40,3 +40,12 @@ workflow would leak applied tasks across types. `createSystemTypeWorkflow` runs 
 asset ensure first so the project's OLDEST workflow stays the asset Default
 (`pickDefaultWorkflow` picks by age — a system workflow born first would get asset
 types backfilled onto it).
+
+## 2026-08-20 (later) — consolidated into ONE PR per the user
+
+#2146 closed; **#2147 is now the single Types-tab PR** ("PLT-3001 / PLT-3003:
+Types tab — create asset & system types as the prototype's draft editors"),
+base master, ready-for-review, head `PLT-3003` (contains both halves + the
+footer-bar rework). Multi-ticket PR titles are house style (see #2140, #2149).
+Branch `PLT-3001` still exists but has no open PR — future asset-half work goes
+through PLT-3003/#2147 until it merges.
