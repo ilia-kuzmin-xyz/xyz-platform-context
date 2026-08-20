@@ -66,3 +66,49 @@ framing above:
   code or reachable some other way — worth a direct question to Darminder/Rishi regardless of how
   this ticket resolves, since dead code with a known bug sitting unused is still worth flagging for
   cleanup or deletion.
+
+## 2026-08-20 — the 08-19 draft is reconfirmed unchanged, plus one free internal check to run before it
+
+**No new comments since 08-17 15:08.** The 08-19 draft to Yash (relay Darminder's specific
+schedule-pair request to Matthew) was never posted and is **still the right customer-facing message,
+word for word**. Nothing about it needs updating. It is reproduced by reference, not rewritten.
+
+What this pass adds is a **cheaper step to take first**, because the ticket has now been parked "With
+Customer" for three days on an artifact we may not need.
+
+### Step 1 — internal, free, run before chasing the customer
+
+**Owner: Darminder Atker.**
+
+> Darminder, before we chase Matthew for the schedule files, one thing worth ruling out from our side:
+> does 'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT' show up in the schedule switcher on B11 as its own
+> schedule entry, or only inside the activity tree? If B11 has two schedules loaded and one of them is
+> that draft, this is a schedule management problem rather than anything to do with how the XER was
+> parsed, and we can sort it without waiting on him. If the switcher won't open, the project only has
+> the one schedule and we do need the files.
+
+Rationale and code trail in `context.md` § 2026-08-20 (H4): `project-provider.tsx:17-18`,
+`schedule-list.tsx:136-139`, and `getScheduleFlagLabel` at `schedule-list.tsx:215-221`, which confirms
+the `LIVE`/`DRAFT` suffix is source text and not something our UI adds.
+
+### Step 2 — the 08-19 message to Yash, unchanged
+
+If step 1 comes back negative (no such schedule entry), send the 08-19 draft above to Yash exactly as
+written. Do not re-ask for the screenshots; those arrived on 08-17.
+
+### Step 3 — chase discipline, if Yash does not respond
+
+The relay ask has failed silently once already. Per the playbook's *"evidence requests without owners"*
+anti-pattern, this needs a named owner and a date, not another open request into the thread. If Yash has
+not responded within a working day of step 2, the ask should go to whoever owns the customer channel for
+WI1, not be repeated into the same thread.
+
+### Assessment of the current status
+
+**With Customer is the wrong status for this ticket today.** Nothing has been asked of the customer on
+the Jira since 08-10, and Darminder's 08-17 request was addressed to Yash internally, not relayed
+outward as far as the thread shows. The ticket is not waiting on the customer; it is waiting on somebody
+to ask him. Flagging rather than proposing a transition, since this routine takes no live action.
+
+**Group A, unchanged. Confidence 5/10, unchanged.** Not Ready For Development: no mechanism above 6/10
+and the two leading candidates live in backend ingest code outside this repo.

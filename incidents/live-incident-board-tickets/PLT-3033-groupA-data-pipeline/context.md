@@ -206,3 +206,73 @@ domain-side reply, not from new evidence resolving the mechanism. Still gated on
 artifact (the schedule files) as before. Group tag `groupA` (current status "With Customer") — folder
 was already correctly named `PLT-3033-groupA-data-pipeline` (renamed 08-15, before this reopening;
 no rename needed now).
+
+## 2026-08-20 — no reply from Matthew or Yash. Darminder's ask is now 3 days cold. One new internally-checkable hypothesis.
+
+Status re-fetched today: **With Customer**, last updated **2026-08-18 10:08** (that update was the
+status transition itself, not a comment). **Comment count is still 5, unchanged since 08-17 15:08** —
+so nothing at all has been posted since the 08-19 snapshot. Darminder's request for the previous and
+current B11 schedules has now sat unanswered for **three days**, and the ticket has been parked "With
+Customer" for two of them with no evidence the ask was ever relayed to Matthew.
+
+The 08-19 recommended action (get Yash to relay Darminder's *specific* schedule-pair request rather than
+the generic "send the XER") therefore **still applies unchanged and un-actioned**. Everything in §1–§7
+above and in the 08-19 entry remains true; nothing is superseded.
+
+### New this pass: H4 investigated and mostly killed — recorded so it is not re-run
+
+**H4 (proposed and tested this pass): the "extra parent WBS" is not a WBS node at all but a second
+*schedule* in the project, surfacing in the tree.** A project holds **multiple** `ScheduleEntity`
+objects with one active at a time — `project-provider.tsx:17-18,57,60` (`schedules: ScheduleEntity[]`,
+`activeSchedule`), rendered by a switcher at `gantt-x/bar/blocks/schedule-list.tsx`. `ScheduleEntity`
+carries `name`, `fileName`, `isCurrent`, `isBaseline`, `isActive`
+(`schedule-entity.ts:572-598`), and the suspect string `'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'` has a
+schedule-filename shape rather than a WBS-node shape.
+
+**Mostly falsified, on one specific sub-claim.** The `- LIVE - DRAFT` suffix is **not** composed by our
+UI. `getScheduleFlagLabel` (`schedule-list.tsx:215-221`) only ever emits `'Current'`, `'Baseline'` or
+`'Baseline & Current'` — never `LIVE` or `DRAFT`, and it renders into a separate `FlagBadge` element
+(`schedule-list.tsx:145`), not concatenated into the name. So the suffix is **part of the source string
+itself**, which is what a P6 project or EPS node named `... - LIVE - DRAFT` would look like. **This
+strengthens H1** (multi-project/EPS XER export, §4) rather than replacing it.
+
+**What survives of H4, and why it is still worth 60 seconds.** The suffix argument kills "our UI
+invented the label", not "the string is a schedule name in our schedule list" — `name`/`fileName` are
+free text taken from the uploaded file, so a schedule row could carry exactly that string. The
+discriminator is trivial and needs **nothing from the customer**: open the schedule switcher on WI1 B11
+and see whether `'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'` appears as a **schedule entry**. Note the
+switcher is disabled when a project has only one schedule (`schedule-list.tsx:136-139`,
+`schedules.length <= 1`), so "the switcher won't open" is itself the answer for the single-schedule case.
+
+- Appears as a schedule entry → the project has two schedules loaded and this is a schedule-management
+  problem (a draft uploaded alongside the live one), not an XER parsing bug. Fixable without backend.
+- Does not appear → H1 stands, the node came from inside the XER, and the schedule files are genuinely
+  required.
+
+**H4 confidence: 2/10** as the mechanism (the flag-label check argues against it), but **the check is
+worth running first anyway** because it is free, internal, and would unstick a ticket that has been
+waiting three days on a customer artifact that may not be needed.
+
+### Ranked hypotheses after this pass
+
+1. **H1 — multi-project/EPS XER export not scoped by `proj_id`. 6/10** (up from 5/10). The
+   `- LIVE - DRAFT` suffix being source-authored text, not UI-generated, is a small independent point in
+   its favour: it reads as a customer-authored P6 project name.
+2. **H2 — parent-reference loss on re-ingest promoting an orphan to root. 4/10** (unchanged).
+3. **H3 — id/namespace collision on re-upload. 3/10** (unchanged).
+4. **H4 — second schedule in the project rendering as an extra parent. 2/10** (new, mostly falsified,
+   but cheapest to check).
+
+**Overall triage confidence: 5/10, unchanged from 08-19.** No new evidence arrived; the increment from
+this pass is one hypothesis eliminated and one free check identified, not progress on the mechanism. The
+blocker is identical to 08-19: the schedule files, or the backend XER-ingest code, neither of which is
+reachable from this repo.
+
+### Attachment gap (unchanged, restated for completeness)
+
+The four real PNGs Yash posted on 08-17 (comments 109749, 109750) cleared the original broken-`blob:`
+blocker, but **this routine cannot open image content**, so their contents remain unverified here — they
+are what Darminder based his 08-17 15:08 hypothesis on. The **XER files remain the single
+highest-value missing artifact** and settle H1 in one query (`SELECT DISTINCT proj_id FROM PROJWBS`).
+The customer offered them unprompted in the original description on 08-10 and the offer has still never
+been taken up, ten days later. That is the standout process failure on this ticket.

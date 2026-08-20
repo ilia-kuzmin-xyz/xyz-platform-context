@@ -53,3 +53,42 @@ In quality-only mode, the filter panel hides spatial filters (room, level, statu
 ## Key service
 
 `DashboardQualityService` in `services/dashboard-quality/`. Lazy — only initializes on first QLT tab open. Contains all SQL query builders (`quality-sql-queries.ts`).
+
+## 2026-08-20 — Estimated rework cost (closes a doc gap flagged by four prior incident runs)
+
+Added because PLT-2815 (07-13, 07-30) and PLT-3061 (08-19, 08-20) each recorded that this subsystem is
+undocumented here. Schematic only; the incident detail lives in
+`incidents/recurring-defect-patterns.md` Pattern 6.
+
+**Where it runs.** Entirely in the frontend, at issue-creation/edit time in the web viewer — not the
+dashboard, and not a backend or pipeline computation. Hook:
+`.../issue-properties/blocks/hooks/use-rework-cost-calculation.ts`; rendered by
+`form-fields/issue-cost-field.tsx`.
+
+**How a value is produced.** A lookup against a **static shipped JSON file**,
+`.../issue-properties/blocks/rework_reference.json` (90 rows), which mirrors a product/UX-owned Confluence
+page ("Issue Rework Reference Table", page id 1630633988, owned by Pietro Desiato). Three-rule fallback
+ladder:
+
+| Rule | Match | Result | Lines |
+|---|---|---|---|
+| 1 | Category + Discipline + Package, exact | that row's cost | `:93-121` |
+| 2 | Category + Discipline, Package `""` | generic discipline cost | `:123-144` |
+| 3 | neither | `null` | `:146-154` |
+
+Two special cases return `0` rather than `null`: Category 5 (`:66`) and a Discipline that is not a
+category on the project at all (`:79-81`). The resulting GBP figure is then multiplied by a **hard-coded**
+FX factor (`:18-23`, e.g. `EUR: 1.14`).
+
+**What the user sees on a miss.** `cost: null` means the field is *not* auto-populated (left blank) and
+the helper text reads "Model is missing mapping data needed to auto-generate a rework cost. Please set a
+value." (`getEstimatedReworkCostHelperText`, `:203`). Blank, not zero — the distinction matters when
+someone reports "it returns 0".
+
+**The pitfall.** The reference table covers exactly three Discipline strings — `CSA`, `Electrical`,
+`Mechanical` — while projects define their own category values freely, and matching is plain `===` with
+no normalization or aliasing (`:101-104`, `:126-128`). Any project-specific discipline name (ML9's
+`CSA-TCB`, PLT-3061) silently misses at every category. Coverage gaps here are **data/product issues owned
+by Mostafa and Pietro, not dev bugs** — the code is a faithful implementation of the documented ladder.
+Before treating a wrong or missing rework cost as a defect, get the issue's exact Category/Discipline/
+Package strings and check them against the JSON.

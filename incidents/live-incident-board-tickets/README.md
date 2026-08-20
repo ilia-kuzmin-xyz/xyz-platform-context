@@ -45,6 +45,196 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-20 — 10 in-scope tickets (down from 12): PLT-3061 confirmed as the Pattern-6 gap (decision request now with product), 3 left scope (PLT-3060 fix posted → In Code Review, PLT-3044 + PLT-2946 resolved → Done), PLT-3034 re-entered scope on a customer rebuttal, PLT-2874 quietly reassigned Yash → Ilia, board's Critical ticket now 15 runs / 37 days unposted
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN (...)`, worked
+around the tool's known 5-node-per-call quirk with a `key NOT IN (...)` follow-up until the second page
+came back with `hasNextPage: false` and no `remainingCount`). **10 tickets in scope, all Group A**
+(`Open`/`In Analysis`/`With Customer`) — Group B empty again; PLT-3060 (yesterday's first-ever Group B
+entry) progressed past it into In Code Review this run. Domain-grouped sub-passes ran in parallel
+(quality-management: PLT-3063/3061/2858/2815; viewer-and-model: PLT-3024/2874; progress-tracking +
+data-pipeline: PLT-3034/3033), each reading its own folder before re-fetching Jira; 360-captures and
+dashboard-migration (PLT-2649, PLT-2619) were re-verified inline, same as prior confirmed-unchanged
+passes.
+
+### PLT-3061 — the one real development this run, and the reason for a new decision request
+
+**Darminder did exactly what the 08-19 draft was going to ask him to do, unprompted:** pulled issue
+#1125's own Discipline/Package values off the record rather than waiting on the customer's video.
+**Category 2, Discipline `CSA-TCB`, Package `Underground Services`.** `rework_reference.json` has 90
+rows and exactly three Discipline strings (`CSA`, `Electrical`, `Mechanical`), zero occurrences of
+`TCB` — Rules 1 and 2 both miss, Rule 3 returns `null` (`use-rework-cost-calculation.ts:146-154`). This
+confirms Pattern 6 (product-owned reference table, unbounded coverage) on its second occurrence, now
+with the exact gap identified rather than hypothesised. Three things worth carrying forward: the gap is
+**Discipline-wide, not CAT2-specific** — no rule filters on Category before Discipline, so all four
+categories on `CSA-TCB` fail the same way; a miss returns `cost: null` (field left **blank**, helper
+text "mapping data is missing"), never `0` — Darminder's own framing of "user is getting 0 returned" is
+imprecise and worth correcting before product reasons from it; and **ML9 already uses plain `CSA`
+successfully on the same `Underground Services` package** (that's PLT-2815's row), so `CSA-TCB` reads as
+a naming variant of an existing trade, not a new one — opening a cheaper "alias it" option alongside the
+straight data-fix. **The 08-19 draft (ask Darminder to pull the values) is superseded — do not post
+it.** Replaced with a decision request to Mostafa and Pietro, ending on one question: *is `CSA-TCB`
+meant to cost the same as `CSA`, or does it need its own figures?* Not dev-ready — there is no code
+defect. Silence is under 24 hours, no stall yet. `recurring-defect-patterns.md` Pattern 6 updated
+additively with this confirmation and a genuinely new trap it exposed (below). Full findings:
+`PLT-3061-groupA-quality-management/context.md` + `recommended-action.md`.
+
+### PLT-2874 — no new comments, but the ticket quietly changed hands
+
+Comment count unchanged (6, newest still Darminder's 08-17 "fix still ongoing"), but `updated` moved to
+**2026-08-19 19:52:56**, one event the 08-19 run's own snapshot missed: **Darminder reassigned the
+ticket from Yash to Ilia, with no comment.** Checked GitHub directly rather than inferring: PLT-2874
+appears in exactly one PR, **#2084, merged 07-31**, and none of the 17 currently-open PRs touches
+element counting, `calculatedOn`, or the dashboard total — there is **no frontend fix in flight** for
+the Staging-only 52,458-element undercount. The five ranked hypotheses (leading: stale Staging
+progress-artefact `calculatedOn` watermark) stand exactly as recorded 08-13/08-14, undiscriminated. The
+Gennaro ask is unchanged and now 6 days unsent; the Darminder line was re-pointed at something
+answerable with a link (*"where does the fix for this live — I can't find a branch or PR beyond the one
+that merged 31 July"*), since the reassignment means the two open drafts are now Ilia's own next action
+rather than a nudge to someone else. Full update: `PLT-2874-groupA-viewer-and-model/context.md`.
+
+### PLT-3034 — re-entered scope on a customer rebuttal, and a workaround already in circulation may be actively wrong
+
+Left scope to With Technical Support 08-18 15:50, back With Customer 08-19 ~12:48 — under 24 hours, and
+it ended because **the customer answered and rejected the premise**, not because of a silent bounce.
+Timeline: 08-18 10:01 Yash asks Darminder for a customer instruction; 08-18 13:24 Darminder says
+mark-installed is safest, unlink is risky; 08-18 15:50 he **reverses that ordering with no stated
+reason** and hands the unlink workaround to Technical Support; 08-19 12:25 Yash relays the customer
+verbatim: *"As I never link anything to a QA model I havent even considering checking it. Would be nice
+to understand why those went being linked to those QA models"*; 08-19 12:39 Darminder declines the
+provenance investigation on capacity grounds; 08-19 12:48 → back With Customer. **New code finding:** a
+link carries no model of its own — the linking panel derives each "model heading" at render time from
+every model an element id happens to appear in (`element-entity.ts:16-18`, `model-entity.ts:274-277`),
+and reads installation status **per element, not per (element, model)** (`useGroupedLinks.ts:66`), so an
+element shared between a production model and a QA model shows the same status under both headings.
+That means the customer's flat denial is fully consistent with the code: **Fork A** (shared element id,
+one real link, the QA heading is a display artifact — "unlink the QA element" would sever the
+production link and "mark it installed" would falsify a genuinely uninstalled element) is as live as
+**Fork B** (a QA-only element, Darminder's original assertion), and nothing on the ticket discriminates
+them yet. Recommended action: stay Group A, one internal question to Darminder before anything else
+reaches the customer — does the element on `DH2.29-30.1100` appear under more than one model heading, or
+only under the QA model? Both circulating workarounds are potentially harmful under Fork A, so **whether
+either has already reached the customer is worth confirming now**, separately from the mechanism
+question. Promoted an amendment to Pattern 6's sibling candidate pattern (model-provenance gap) in
+`recurring-defect-patterns.md` — necessary but not sufficient signature, with the shared-element trap
+spelled out. Full findings: `PLT-3034-groupA-progress-tracking/context.md`.
+
+### PLT-3033 — nothing has moved, but a cheaper check than the customer ask surfaced
+
+Comment count unchanged (5, since 08-17 15:08) — Darminder's specific schedule-pair request is now
+**3 days cold**, no evidence it was ever relayed to the customer. The 08-19 draft to Yash is
+reconfirmed **word for word**, still the right message when needed. What's new: a free internal check
+that should run first. `getScheduleFlagLabel` (`schedule-list.tsx:215-221`) only ever emits
+Current/Baseline, so the `'... - LIVE - DRAFT'` suffix in the report is source-authored text, not
+something the UI adds — which strengthens H1 (multi-project XER) to 6/10, but also means the honest
+first move is asking Darminder whether that string shows up as its own entry in B11's schedule switcher
+(`project-provider.tsx:17-18`, `schedule-list.tsx:136-139`) before waiting on the customer for files that
+may not be needed. Also flagging plainly: **`With Customer` looks like the wrong status** — nothing has
+been asked of the customer on the Jira since 08-10; the ticket is waiting on somebody to ask him, not on
+him. Confidence unchanged, 5/10. Full update: `PLT-3033-groupA-data-pipeline/recommended-action.md`.
+
+### Three tickets left scope this run
+
+| Ticket | Was | Now | What happened |
+|---|---|---|---|
+| **PLT-3060** | Dev In Progress (Group B) | In Code Review | Darminder posted the fix description and dev-test confirmation 08-19 evening: `tree.tsx` keeps a model's row visible regardless of filters (filtering only its nested elements); `viewer-service.ts` re-applies active filters after a model load; `filter-service.ts` refreshes the cached element map on every recompute instead of letting it go stale, fixes the isolation-array Forge-semantics inversion, clears stale manual-isolation state on a new filter selection, and widens the auto-reapply trigger to any active filter category (was missing Level and Room). Broader than this folder's own diagnosed mechanism (`filter-service.ts:803` `executedOutsideFilterPanel` guard) — the isolation-array and manual-isolation fixes address adjacent bugs not in the original repro, so this folder cannot confirm the shipped fix precisely matches what it diagnosed versus a wider rewrite of the same area. No PR/diff located, only Darminder's prose. Folder kept `-groupB-` per standing precedent (left scope mid-flight, not closed by us). |
+| **PLT-3044** | Open | **Done** | Closed 08-19 17:02, matching this folder's 08-14 recommendation almost exactly — but by the team's own words, not our drafted comment. A related follow-up (Freshdesk #7628, "hide from the dashboard without unmapping") landed 08-18/08-19 and got a plain no from Mostafa (*"whatever is mapped and has hours is shown on the dashboards"*), consistent with the no-allow-list mechanism this folder recorded. Folder renamed `groupA` → `resolved`. |
+| **PLT-2946** | Open | **Done** | Closed via a bare Freshdesk-status-change comment on 08-19 12:20, with **zero comments of any kind** between Rishi's 07-31 finding and the close — not our draft, not a team workaround comment, not a silent status bounce either; a new fourth "leaves scope" shape for this board's taxonomy (closure with no visible communication in Jira either direction). May reflect a conversation on Freshdesk this repo can't see. Technical disposition (Rishi's numbers correct, residual attributed to PLT-2874) stands, unconfirmed by anyone since. Folder renamed `groupA` → `resolved`. |
+
+### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts and
+timestamps checked verbatim against the 08-19 record — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3063](PLT-3063-groupA-quality-management/context.md) | quality-management | Open | 08-18 (Darminder assigned, no reply) | 1 comment, unchanged; spot-checked the load-bearing line (`issue-item.tsx:425` still `#{index+1}`) rather than trusting the prior read; draft to Darminder unposted, now **2 consecutive runs**; queued behind his PLT-3061 work this window, not ignored |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, byte-identical; escalate-to-Pietro still unposted across **15 consecutive runs**, now **20 days** customer silence / **37 days** on Mostafa's own unanswered question to Darminder; board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **45 days stale**, close-out still unposted across **15 consecutive runs**; its 07-30 "optional follow-up" question (is the €600 Cat3/CSA/Underground-Services row right?) now has a live thread to fold into — PLT-3061 put Mostafa and Pietro on this exact table 08-19 |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, byte-identical; **27 days** silence on a fix that sits entirely with the client's project-delivery team |
+| [PLT-2619](PLT-2619-groupA-dashboard-migration/context.md) | dashboard-migration | With Customer | 08-03 (Freshdesk → Waiting on customer) | 6 comments, byte-identical; the two-branch drafted reply to Yash still unsent, question now **24 days** open, still gated on a 30-second URL check nobody has run |
+| [PLT-3024](PLT-3024-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | 08-06 (Rishi's federation question) | 10 comments, byte-identical for the sixth re-verification pass; federation question now **14 days** unanswered; draft to Yash gained a disposition line proposing we write up the answer and close if the customer stays silent this week |
+
+### Cross-ticket notes
+
+- **New Pattern-6 trap, not a new pattern.** The PLT-3034 finding above (shared-element-id display
+  artifact across model headings) amends the existing model-provenance candidate pattern rather than
+  standing alone — recorded in `recurring-defect-patterns.md` as a "necessary but not sufficient"
+  refinement of that pattern's recognition signature.
+- **A fourth "leaves scope" shape appears** (PLT-2946): closure with no visible Jira communication at
+  all, distinct from the three shapes catalogued 08-19 (draft-landed-verbatim, silent bounce,
+  team-reached-its-own-answer).
+- **Two tickets this run are examples of the same underlying discipline** — check the mechanism before
+  trusting a display, and check who actually asked the customer before trusting a status. PLT-3034's
+  shared-element headings and PLT-3033's stale "With Customer" status are different surfaces of "the
+  ticket's Jira state doesn't mean what it appears to mean."
+- **`dashboard/quality-tab.md` gained its first section on rework cost**, closing a doc gap four prior
+  runs (07-13 onward) had flagged but never filled — schematic only, full incident detail stays in
+  `recurring-defect-patterns.md`.
+- **The "recommended but never posted" pattern is now fifteen runs deep on both PLT-2858 and PLT-2815**
+  (dating to 07-24) — both drafts exist verbatim in each ticket's `recommended-action.md`; nothing
+  further needs drafting, only sending.
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3063** — 4 screenshots (2 Freshdesk, 2 Jira inline), still unopened. Not load-bearing — the
+  numbering mechanism is code-confirmed end-to-end.
+- **PLT-3034** — 3 PNGs from 08-17 14:22, still unopened; these likely settle Fork A vs Fork B directly
+  (whether the linked-elements panel shows the element under more than one model heading) faster than
+  the drafted question to Darminder would.
+- **PLT-3033** — the XER files, offered unprompted by the customer 10 days ago and never collected,
+  still settle the multi-project-schedule hypothesis (H1) in one query.
+- Prior gaps on the remaining confirmed-unchanged tickets stand exactly as previously documented
+  (PLT-2858's 4 images, PLT-2815's 2 images + inline blobs, PLT-2649's 2 images, PLT-3024's 3
+  screenshots) — not re-listed here. PLT-3060's screen recording and PLT-3044/PLT-2946's attachments are
+  now moot (all three left scope).
+
+### Needing a human now
+
+Ranked by tenure/urgency; unchanged items carried from 08-19 except where noted:
+
+1. **PLT-2858** — post the decision-request to Pietro (cc Mostafa), plus the short answer-Mostafa's-
+   question draft that goes with it (both in `recommended-action.md`). Top priority, unchanged reasoning,
+   now sharper: Darminder was demonstrably active in this exact domain this window (he investigated
+   PLT-3061 and tagged Mostafa/Pietro 08-19), so this is a dropped thread under newer work, not an absent
+   owner — a direct nudge naming the one-line question would very likely clear it. Critical priority, 15
+   runs unposted, 37 days silent on a decision only product can make. Also worth raising once: Critical
+   does not fit a config gap with a working manual workaround, and it is distorting the board.
+2. **PLT-3034** — new, and separate from the mechanism question: **confirm what has actually reached the
+   customer already.** Two workarounds (unlink / mark-installed) circulated internally 08-18 and one was
+   hand to Technical Support; under Fork A both are actively harmful if acted on. Then send the one
+   internal question to Darminder (element under one model heading or several) before anything else goes
+   to the customer.
+3. **PLT-2619** — post the reply to Yash once the 30-second URL check is done (drafted, both branches
+   ready, now **24 days** open).
+4. **PLT-2649** — post the nudge to Yash confirming the 07-24 hand-off carried the detail (drafted, **27
+   days** silence).
+5. **PLT-3061** — new this run: post the decision request to Mostafa/Pietro (*"is CSA-TCB meant to cost
+   the same as CSA, or does it need its own figures?"*), drafted, fresh (under 24h old, not yet a stall).
+6. **PLT-3024** — post the internal comment to Yash explaining the confirmed mechanism (drafted,
+   unchanged in substance, now carries a disposition line for if the customer stays silent this week).
+7. **PLT-2874** — reassigned to Ilia 08-19 with no comment; the "where does the fix live" question and
+   the Gennaro ask (drafted) are now his own next action, not a nudge to someone else.
+8. **PLT-3063** — post the numbering-bug mechanism to Darminder (drafted, dev-ready, no customer
+   clarification needed) — reasonable to leave one more cycle given he's mid-PLT-3061, escalate to a
+   direct dev ticket if it's still silent next run.
+9. **PLT-3033** — send Darminder the free internal schedule-switcher check before chasing the customer
+   for XER files (drafted); separately, flag that "With Customer" misdescribes a ticket nobody has
+   actually asked anything of since 08-10.
+10. **PLT-2815** — execute the close-out (drafted, 15 runs unposted), and fold the Cat3/CSA/Underground-
+    Services follow-up question into whatever reply lands on PLT-3061's new thread. Lowest urgency —
+    administrative.
+
+**Board assessment: the board thinned (12 → 10) but the average ticket got harder, not easier.** Three
+tickets resolved themselves in the pipeline exactly as this routine hoped (3060, 3044, 2946), which is
+the system working. But PLT-3061 turned from "waiting on one fact" into "waiting on a product decision
+with real stakes" in one run, PLT-3034 turned from "our answer, unposted" into "a possibly-harmful
+workaround may already be with the customer," and PLT-2858 is not a config gap anymore in effect — it is
+the single most expensive silence on the board, now measured in weeks against a Critical label. None of
+the three drafted messages ahead of it (PLT-2858, PLT-3034's confirm-the-workaround, PLT-2619) can be sent
+by this routine. Worth surfacing to Ilia: the Critical ticket's silence, and specifically whether either
+PLT-3034 workaround already reached the customer.
+
+---
+
 ## Run: 2026-08-19 — 12 in-scope tickets (up from 9): 2 brand-new (PLT-3063, PLT-3061), 1 advanced to Group B (PLT-3060 → Dev In Progress), 2 reappeared after a silent Technical-Support round trip (PLT-3033, PLT-3024), 1 left scope (PLT-3034), new Pattern 6 promoted
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status IN ("Open", "In

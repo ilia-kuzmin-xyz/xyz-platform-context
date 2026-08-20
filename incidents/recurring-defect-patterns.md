@@ -594,6 +594,20 @@ both PLT-3061 and PLT-2815 the ticket carried media that could not answer a ques
   occurrence — promote if a second project shows a non-production model silently affecting a
   customer-facing number. Full findings:
   `live-incident-board-tickets/PLT-3034-groupA-progress-tracking/context.md`.
+  - **2026-08-20 amendment — the recognition signature above is necessary but not sufficient.** Nothing
+    in the entry is retracted, but a trap was found in applying it. Seeing a linked element listed under
+    a QA/sandbox-named model heading in the editor does **not** establish that a link was made to that
+    model. A link is stored against an element id with no model on it; the linking panel derives the
+    model headings at render time from the set of every model that element id was found in
+    (`element-entity.ts:9,14,16-18`, `model-entity.ts:274-277` — `if (existing) existing.models.add(this.id)`,
+    `useGroupedLinks.ts:59-78`), and element status is read per element, not per (element, model)
+    (`useGroupedLinks.ts:66`), so the same "late" badge repeats under every heading. **Before concluding
+    "someone linked to a QA model", check whether the element id appears under more than one model
+    heading.** If it does, the element is shared between a production model and the QA model, there is
+    one link not two, and "unlink the QA element" would break the production link while "mark it
+    installed" would record a genuinely uninstalled element as installed. This bit on PLT-3034: the
+    customer stated flatly on 08-19 that he never links to QA models, which is fully consistent with the
+    code and with the screenshots, and a workaround premised on the opposite had already gone out.
 - **Dashboard issue number is fabricated from list position, not the real field** (PLT-3063, DC5 —
   mechanism verified in code, single occurrence). The Dashboard's Quality-panel issue card renders
   `#{index + 1}` from the item's position in the currently rendered list
