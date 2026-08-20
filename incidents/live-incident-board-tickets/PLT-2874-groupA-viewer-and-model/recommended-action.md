@@ -258,3 +258,67 @@ both at once buries the cheap question under the expensive one.)*
 - Still worth doing whatever the answer: add a warning log to `element-count.ts:14-19`, which
   silently drops rows with a falsy `modelElementId` and only falls back to the object count when the
   set is *entirely* empty. Unchanged from 08-13 (H5).
+
+---
+
+## 2026-08-20 — Gennaro ask unchanged; the Darminder line is re-pointed at a checkable question
+
+**Chosen action: unchanged — two short internal comments, no Jira transition.** The 08-14 draft to
+Gennaro (project/model name + the two date-slider screenshots) is still the right first message and
+is **still unsent, now 6 days**. Nothing in the comment thread moved this run, so nothing in the
+diagnosis moved either.
+
+Two facts from `context.md` § 2026-08-20 change the framing, not the plan:
+
+1. **The ticket was reassigned to Ilia by Darminder on 08-19 19:52, with no comment.** So the ask to
+   Gennaro is no longer something to hand to a coordinator — it is the assignee's own next action.
+2. **There is no fix in flight for PLT-2874 in `hc-frontend`.** PR #2084 (merged 07-31) is the only PR
+   under this key, and none of the 17 open PRs touches element counting. That does not mean no work
+   is happening — an H1/H3 remedy would be a Staging pipeline or artefact refresh with no frontend
+   diff at all — but it does mean "fix still ongoing", said twice with no specifics, cannot currently
+   be pointed at anything reviewable.
+
+### Draft 1 — to Gennaro Boccia — DRAFT ONLY, unchanged from 08-14, still unsent
+
+> Gennaro, thanks for catching this. Prod matching and Staging not, on the same editor number, points
+> at Staging's own data rather than the code, so before we dig: which project and model were you on?
+> The editor figure doesn't line up with the one we measured in July, so I want to make sure we're
+> comparing the same file. And if you still have both tabs, a screenshot of the date slider on each
+> would help — if Staging's slider ends on an earlier date than Prod's, that alone explains it.
+
+### Draft 2 — to Darminder Atker — DRAFT ONLY, replaces the 08-19 wording below
+
+The 08-19 line asked which hypothesis the fix targets. **Better question, same purpose, answerable
+with a link instead of an explanation** (and it is the question the GitHub check this run left open):
+
+> Darminder, where does the fix for this live? I can't find a branch or PR against PLT-2874 beyond
+> the one that merged on 31 July, so I want to make sure I'm not about to redo work you already have
+> in progress.
+
+*(One owner, one question, answerable with a URL or a one-line "it's a Staging data refresh, not
+code". Non-accusatory: the likeliest true answers are that it sits under another key or is a pipeline
+re-run, both of which are useful to know and neither of which is a criticism. Supersedes the 08-19
+draft's wording; that draft is kept below for the record and should not also be sent.)*
+
+**Send order:** Draft 1 first. Draft 2 can go the same day — different owner, different question, so
+it does not bury the cheap ask.
+
+### If Draft 2 comes back "there is no fix, it's a data refresh"
+
+Then the ticket is not a frontend defect at all and the disposition changes: it becomes a Staging
+environment/data-freshness item, the three-query ladder in `context.md` § "Reopened 2026-08-13" is
+run once to confirm which layer was short, and PLT-2874 itself can close against the Prod behaviour
+that already matches. **Do not close it before the ladder is run** — H5
+(`element-count.ts:14-19` silently dropping rows with a falsy `modelElementId`) would survive a data
+refresh and stay latent.
+
+### Follow-through, unchanged from 08-14
+
+All items in the 08-14 follow-through list stand, including the standing hardening item: add a
+warning log to `element-count.ts:14-19`, which currently drops falsy-`modelElementId` rows in silence
+and only falls back to the object count when the set is entirely empty. Worth doing whichever
+hypothesis turns out to be the trigger.
+
+**Confidence in the next step: 8/10.** Two cheap questions to two named owners, neither of which
+presumes a mechanism. **Confidence in the diagnosis: unchanged, 6/10** — five hypotheses live, none
+excluded, all still discriminated only by Staging environment state.

@@ -485,3 +485,74 @@ a ship date or which hypothesis (H1/H3/H4/H6) the fix under test actually target
 **second** unqualified "ongoing" claim (08-14, then 08-17) with no discriminating detail attached —
 worth a sanity-check line added to whatever is sent next, since QA could pass while addressing the
 wrong mechanism for the Staging-specific undercount. Added to the draft in `recommended-action.md`.
+
+## 2026-08-20 — no new comments, but the ticket was silently reassigned to Ilia; and no fix PR exists
+
+Live fetch: **still 6 comments**, newest still Darminder's 08-17 14:01 "Fix still ongoing following QA
+latest testing." Status still **Open**, priority **Minor**, project/model still unnamed by Gennaro.
+So on the comment thread nothing moved and no re-diagnosis is warranted.
+
+**But `updated` had moved to 2026-08-19T19:52:56, which the 08-19 entry did not see.** The changelog
+explains it, and it is material:
+
+- **2026-08-19 19:52:56 — Darminder Atker reassigned the ticket from Yash Patel to Ilia Kuzmin, with
+  no comment.** Two hours after that day's triage pass. The assignee chain since the reopen now reads
+  Gennaro (07-31, by automation) → Radu Vulpe (08-11) → Yash Patel (08-12, by Gennaro) → **Ilia
+  (08-19, by Darminder)**.
+- Two earlier changelog events this folder had also not recorded: **08-17 10:07:32** the Jira
+  automation account moved `Open → Customer Release Check`, and **08-17 11:08:36** Yash moved it back
+  `Customer Release Check → Open`, three minutes after asking Gennaro whether a fix had shipped. That
+  is bookkeeping noise, not signal, but it explains why the ticket briefly read as release-ready.
+
+### What the reassignment means, stated carefully
+
+Read plainly: **the person who said a fix was "still ongoing" has handed the ticket to someone else
+without saying what is ongoing, and the new owner is the same engineer who diagnosed and shipped the
+original fix (PR #2084).** That is not evidence of anything about the mechanism. It is evidence about
+process — the "ongoing fix" now has no named owner on the ticket, and whoever picks it up inherits an
+unqualified claim rather than a state.
+
+### VERIFIED this run, and it materially undercuts the "fix ongoing" claim
+
+Checked GitHub directly rather than inferring from the ticket:
+
+- **`PLT-2874` appears in exactly one pull request in `XYZReality/hc-frontend`: PR #2084**, opened
+  2026-07-30 13:32, **merged 2026-07-31 14:24**, by `ilia-kuzmin-xyz`. That is the original
+  distinct-element fix already recorded in the 08-13 entry. There is no second PR under this key,
+  open or closed.
+- **No open PR in the repo touches this area.** All 17 currently-open PRs were listed and inspected
+  by title; none references PLT-2874, element counting, `calculatedOn`, or the dashboard element
+  total. The open set is bundle-size work (#2157, #2158), commissioning (#2149, #2150, #2153-ish
+  family), canvas (#2154, #2155), plus PLT-3060, PLT-3077, PLT-3057, PLT-3056, PLT-2992, PLT-3001,
+  PLT-3003, PLT-2953, and CI/coverage.
+
+**So, as a falsifiable claim with its bound stated:** *there is no frontend fix in flight for
+PLT-2874 in `hc-frontend` as of 2026-08-20.* What this does **not** rule out, and must not be
+overstated on the ticket: the work could sit under a different Jira key, in a backend or
+data-pipeline repo, or as a Staging artefact/pipeline re-run that needs no code at all — and given
+the 08-13/08-14 analysis (H1/H3 both resolve to Staging data freshness, not code), a
+non-`hc-frontend` remedy is in fact the *likely* shape if the claim is accurate. The point is only
+that **"fix still ongoing" cannot currently be pointed at anything in this repo**, which makes "where
+does the fix live" a fair, cheap, single-value question.
+
+### What has not changed
+
+Nothing in the diagnosis. H1 (dashboard link-sync bounded by the progress artefact's `calculatedOn`,
+narrowed on 08-14 to "post-parquet links only", `dashboard-progress-service.ts:672,829-831,858`;
+`artefact-loader.ts:579,601,604-612,624-625`), H3 (wrong `svf2-object-id-map` version,
+`artefact-loader.ts:238-241`), H4 (pinched date window, `date-range.tsx:133-162` seeded from
+`dashboard-progress-service.ts:254-300`), H5 (`element-count.ts:14-19` silently dropping falsy
+`modelElementId`) and H6 (arbitrary federated-model pick, `dashboard-project-service.ts:164-176`) are
+all still live and still mutually undiscriminated. **No code was re-read this run** — the 08-14
+citations are carried forward as recorded, not re-verified, and the three-query ladder plus its
+decision table remain the decisive test. The two questions this folder has had open since 08-14 —
+**which project/model Gennaro tested**, and **whether the two environments' date sliders match** —
+are both still unanswered, now for six days.
+
+### Attachment gap
+
+The 2 original PNGs (`image-20260707-142150.png`, `image-20260707-142256.png`, Mostafa, 07-07) remain
+unopened and unopenable by this agent. Their value is now low: they document the *original* 07-07
+overcount, which was diagnosed and fixed, not the Staging undercount that reopened the ticket.
+**The screenshot that would actually settle something does not exist yet** — it is the date-slider
+pair from Staging and Prod that the 08-14 draft asks Gennaro for.

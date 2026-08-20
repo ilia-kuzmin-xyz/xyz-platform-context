@@ -314,3 +314,48 @@ anything the empty round trip strengthens the 08-14 case for telling Yash the me
 than continuing to wait for a volunteer answer: Technical Support looked at it and had nothing to add
 either. Group tag `groupA` (current status "With Customer") — domain tag `viewer-and-model`
 unchanged.
+
+## 2026-08-20 — confirmed unchanged (sixth re-verification pass); Rishi's question now 14 days unanswered
+
+Live fetch this run: **10 comments, byte-identical to the 08-11/08-14/08-19 record** (last comment
+`109260`, 2026-08-10 11:34:13, a Freshdesk auto-sync "Open" flip). Status **With Customer**, priority
+**Major**, reporter and assignee both **Yash Patel**, project ML9, `updated =
+2026-08-18T10:17:49+01:00` — the same timestamp the 08-19 entry recorded, so **nothing at all has
+happened on this ticket in the last two days**.
+
+Changelog re-read to be sure nothing silent moved: the newest event is still Yash's `With Technical
+Support → With Customer` at 08-18 10:17:49, preceded by Darminder's `Open → With Technical Support`
+at 08-17 17:00:37. The 08-19 reading of that pair as an **empty round trip** (no comment posted in
+the ~17-hour window) is confirmed against the raw changelog this run and is unchanged.
+
+Counters, as of today:
+- **Rishi's federation question (08-06 09:16): 14 days unanswered.** Customer has said nothing since
+  the original 08-06 report.
+- **Internal draft answering that question: 13 days unposted** (written 08-07, re-aimed at Yash
+  08-14, still not sent).
+- Six re-verification passes now (08-10, 08-11, 08-14, 08-18, 08-19, 08-20) with **zero new human
+  content** across all six.
+
+**No re-investigation performed** — per the standing rule, nothing new arrived, so §4–§8 and the
+Pattern 5 mechanism stand exactly as written. No code was re-read this run and no citation is
+claimed to have been re-verified beyond the 08-14 pass.
+
+### The only thing this run changes: the wait now has a cost worth naming
+
+Two facts have accumulated that were not both true when the "post the draft to Yash" position was
+set on 08-14: (i) Technical Support has now looked at the ticket and returned it without adding
+anything, and (ii) the customer has been silent for a fortnight on a **Major** incident. The
+recommendation is unchanged in substance — send the Yash comment — but it should now carry a
+disposition proposal rather than only an explanation, because the ticket has no path to closure
+while it sits in "With Customer" waiting on a fact we have already established we do not need. See
+`recommended-action.md` § 2026-08-20. This **extends**, and does not supersede, the 08-14 position.
+
+### Attachment gap — unchanged and still the cheapest unclosed item
+
+All **3 screenshots remain unopened** across every pass (08-06, 08-10, 08-11, 08-14, 08-18, 08-19,
+08-20): `image-20260806-071859.png`, `image-20260806-071914.png`, `image-20260806-071926.png`, all
+uploaded by Yash 08-06 08:21, all binary media this agent cannot view. **What they would settle:**
+the Web-Viewer-linked-models screenshot may show the missing model's name and its folder in the
+model tree, which would answer the federation question outright and end the 14-day wait without the
+customer. This is the single highest-value, lowest-cost unclosed action on the ticket and it has now
+been flagged unactioned seven times.

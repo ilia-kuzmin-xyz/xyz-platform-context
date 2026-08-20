@@ -248,3 +248,34 @@ miss vs. wrong-rule match). See `PLT-3061-groupA-quality-management/context.md`.
 `recurring-defect-patterns.md` as a new pattern this run (two confirmed occurrences: this ticket +
 PLT-3061) — see that file. Does not change this ticket's own recommended action (still: close it out,
 already resolved as "as intended" by product on 06-23).
+
+## 2026-08-20 — re-verified, unchanged; PLT-3061's hypothesis has now CONFIRMED, which affects §3 of the action
+
+**Live fetch:** 13 comments, identical to the recorded set — newest still **106553** ("Freshdesk #7126
+status changed to: Closed", 07-06). Status `With Customer`, priority Major, assignee Yash Patel,
+`resolution = null`, `updated = 2026-07-06T10:18:45+01:00`. **45 days stale**, close-out unposted across
+**15 consecutive runs** (07-30 → 08-20). Nothing re-diagnosed; there is nothing left to diagnose.
+
+**What is new is next door.** The 08-19 note above flagged PLT-3061 as a second occurrence of the same
+reference-table coverage problem, with its cause still hypothetical. **It confirmed on 08-19 evening.**
+Darminder pulled the values off the customer's issue (comment 109980): Category 2, Discipline **`CSA-TCB`**,
+Package **`Underground Services`** — and `CSA-TCB` appears nowhere in `rework_reference.json`, which carries
+only `CSA`, `Electrical` and `Mechanical`. See `PLT-3061-groupA-quality-management/context.md` (2026-08-20).
+
+Two things about that are directly relevant to this ticket:
+
+1. **Same project, same package, adjacent discipline.** PLT-3061's failing combination is `CSA-TCB` +
+   `Underground Services` on ML9. This ticket's is `CSA` + `Underground Services` on ML9 — the very row
+   (`rework_reference.json:65-67`) whose Cat 3 value of £600 was flagged as anomalous in §2. So ML9 runs two
+   CSA-flavoured discipline names against the same package, one covered and one not.
+2. **This ticket's "optional follow-up" question is no longer hypothetical or homeless.** §3 of
+   `recommended-action.md` recommended asking Mostafa and Pietro whether `Cat3 | CSA | Underground Services
+   = £600` is correct and whether a package-specific Cat 4 row should be added — raised as a separate item
+   that, predictably, nobody ever raised. **Mostafa and Pietro are now actively being asked about this exact
+   table, about this exact package, on PLT-3061 as of 08-19.** That is the cheapest opening this question
+   has had in two months.
+
+**None of this reopens the diagnosis or changes the close-out recommendation.** This ticket's own answer was
+settled by product on 06-23 ("leave it as intended"), reproduced to the cent, and verified against the
+Confluence source on 08-14. It should still be closed. The only change is that its orphaned follow-up
+question now has a live thread to travel on.

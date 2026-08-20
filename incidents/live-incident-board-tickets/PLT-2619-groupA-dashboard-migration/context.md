@@ -606,3 +606,11 @@ still `2026-08-03T15:13:28` — identical to the 08-18 record. Yash's 07-27 ques
 this to new dashboard if not done already?") is now **23 days** unanswered. The two-branch drafted
 reply in `recommended-action.md` remains correct and unposted; the "cheap fixes still undone" list
 there (issue-link PLT-2619↔PLT-2935, deliberate transition after 112 days static) is also unchanged.
+
+## 2026-08-20 — re-verified, unchanged
+
+Live fetch: status With Customer, priority Medium, assignee Yash Patel, still 6 comments, `updated`
+still `2026-08-03T15:13:28` — byte-for-byte identical to 08-19. Yash's 07-27 question is now
+**24 days** unanswered. The two-branch drafted reply in `recommended-action.md` remains correct and
+unposted; the 30-second URL check (open the demo project, read whether it's `/dashboard` or
+`/progress-dashboard/<id>`) is still the only thing standing between this ticket and a reply.

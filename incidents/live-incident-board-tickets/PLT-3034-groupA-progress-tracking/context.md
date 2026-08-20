@@ -144,3 +144,119 @@ on this board, this is a **different, unrelated resolution path** — record it 
 positive-signal repeat of that pattern. Folder kept as `-groupA-` per this routine's standing precedent
 (transitioned out mid-flight, not resolved by us); the drafted answer in `recommended-action.md` is
 still valid and unposted if the ticket reopens or if Darminder's workaround doesn't hold.
+
+## 2026-08-20 — back in scope. The customer rejected the premise of the workaround.
+
+Status re-fetched today: **With Customer**, last updated **2026-08-19 12:48**. The
+With-Technical-Support window recorded on 08-19 lasted **under 24 hours** (08-18 15:50 → ~08-19 12:2x).
+It came back not because the workaround was tried and failed, but because **the customer answered and
+denied the premise it rests on**.
+
+### Full reconstruction of the window (comments the 08-19 snapshot did not have)
+
+| When (BST) | Who | What |
+|---|---|---|
+| 08-18 10:01 | Yash Patel | *"What would be the further course of action on user side?"* — asks Darminder for a customer-facing instruction. |
+| 08-18 13:24 | Darminder Atker | *"I think safest option would be to mark QA element as installed. The other option is unlinking the QA element from activity but unsure how this affects their reports."* — **mark-installed is primary, unlink is the risky fallback.** |
+| 08-18 15:50 | Darminder Atker | The consolidated comment already recorded on 08-19. **Note the reversal:** unlink is now the recommendation and mark-installed is the caveated fallback — the opposite ordering from 13:24, ~2.5h earlier. No stated reason for the flip. Ticket transitions Open → With Technical Support here. |
+| 08-19 12:23 | Yash Patel | Freshdesk #7611 → **Open** (customer has replied). |
+| 08-19 12:25 | Yash Patel | Relays the customer verbatim: *"As I never link anything to a QA model I havent even considering checking it. Would be nice to understand why those went being linked to those QA models."* |
+| 08-19 12:39 | Darminder Atker | *"This would require investigating who updated links of those QA models. At this stage we have limited resource and if is highly critical to find the source then this can be checked."* — declines the provenance investigation on capacity grounds, offers it conditionally. |
+| 08-19 12:48 | Yash Patel | Freshdesk → **Waiting on customer**. Jira lands on **With Customer**. |
+
+**What this changes.** The 08-18 workaround assumes a human linked elements into a QA model. The
+customer says he never links to QA models at all. Nobody has reconciled those two statements, and the
+ticket is now parked "With Customer" **on a question the customer cannot answer** — he is being asked
+to confirm behaviour he has just denied. That is a stall, not a wait.
+
+### NEW code finding — the customer's denial is fully consistent with the code
+
+This is the substantive addition of this pass, and it **does not contradict** any earlier finding; it
+refines what "linked to a QA model" can mean.
+
+**A link has no model. The model heading in the linking panel is derived at render time.**
+
+- Element identity is `modelElementId`, and `ProjectService.elements` is a **single global map keyed by
+  that id** — `element-entity.ts:16-18` only registers an entity if the id is not already present.
+- When a model loads its element metadata, an element id already seen in another model does **not**
+  create a second entity; the existing one simply gains a model:
+  `model-entity.ts:274-277` — `const existing = this._projectService.elements.get(element.modelElementId)`
+  … `if (existing) existing.models.add(this.id)`. `ElementEntity.models` is an additive `Set<string>`
+  (`element-entity.ts:9,14`).
+- Links resolve by element id only, never by model — `linking-service.ts:684-689`
+  (`getElementsForActivity` maps element ids through `projectService.elements`).
+- The linking panel then **buckets each linked element under every model in that set** —
+  `useGroupedLinks.ts:59-78`, `for (const model of element.getModels())`, one row per (element, model)
+  pair.
+- Status is read **per element, not per (element, model)** — `useGroupedLinks.ts:66`,
+  `elementStateService.getElementState(element.id)`. The same "late" badge is therefore rendered under
+  *every* model heading the element appears in.
+
+**Consequence:** seeing a linked element listed under `QA-SBX2-FU-FO_ME_MDL_DSI_R23-V74_X` in the editor
+**does not prove anyone linked anything to a QA model.** It is equally consistent with someone linking
+one element in a production model whose `modelElementId` also exists in the QA model. The
+`if (existing)` branch at `model-entity.ts:277` exists precisely because one `modelElementId` can appear
+in more than one loaded model — if ids were per-model unique that branch would be dead code.
+
+### The fork this opens, and the one check that decides it
+
+- **Fork A — shared element id.** The QA model contains an element with the *same* `modelElementId` as a
+  PC-model element. There is then **one** link and **one** element. "Unlink the QA element" is
+  meaningless (unlinking it removes the production link too), and the element is genuinely not marked
+  installed — the QA model is a **red herring** and the real answer to the customer is "this element
+  simply is not marked installed; the QA heading is a display artifact."
+- **Fork B — QA-only element id.** The element id exists *only* in the QA model, which is what
+  Darminder asserted on 08-18 15:50 (*"elements in QA model that does not have a PC model with the same
+  element"*). Then a link genuinely does point at a QA-only element, someone or something created it,
+  and the customer's "why?" is a legitimate, answerable provenance question.
+
+**Discriminator, one check, no customer involvement, no new tooling:** in the editor's linked-elements
+panel for `DH2.29-30.1100`, does the offending element id appear under **more than one** model heading?
+More than one → Fork A. Only under the QA heading → Fork B. Darminder already had this panel open on
+08-17 (attachments `image-20260817-132030/132133/132204.png`); the answer may already be visible in
+those screenshots.
+
+**Why this matters more than it looks:** under Fork A, both workarounds Darminder offered are wrong —
+unlinking would break the production link, and marking installed would be marking a genuinely
+uninstalled element as installed, which is the reporting risk he himself flagged at 08-18 13:24.
+
+### What is still true, stale, and new
+
+- **Still true.** FE renders backend parquet faithfully (9/10, unchanged). No model-provenance concept
+  anywhere in FE (`project-service.ts:722-723`, `linking-service.ts:684-689`) — reconfirmed, unchanged.
+  Mech.144.1260 still has **no** QA-model finding on record; still nobody has looked.
+- **Stale.** The 08-19 framing that the ticket had "left scope" — it is back, and the workaround it left
+  on is now contested by the customer.
+- **New.** The customer's denial (08-19 12:25); Darminder's capacity-based decline of the provenance
+  question (08-19 12:39); the derived-model-grouping code finding above; the Fork A/B discriminator.
+- **Not superseded.** Nothing in this file above is retracted. The 08-19 entry's characterisation of the
+  08-18 workaround as "a different, unrelated resolution path" stands and is now better evidenced.
+
+### Confidence (this pass)
+
+- **FE renders parquet faithfully, no FE arithmetic bug: 9/10** (unchanged).
+- **Model grouping in the linking panel is derived from element→model set membership, not stored on the
+  link: 9/10** — read directly across four files, no inference.
+- **"Linked to a QA model" is therefore not established by the editor screenshots alone: 8/10.**
+- **Fork A vs Fork B: genuinely undecided, ~50/50** — Darminder asserts B but has not shown the check
+  that distinguishes them. This is the single highest-value open question on the ticket.
+- **Same mechanism explains Mech.144.1260's 75%: 3/10** (unchanged — still nobody has looked).
+
+### NEEDS HUMAN (updated)
+
+- ⚠️ **Run the Fork A/B discriminator** (does the element id appear under more than one model heading).
+  Editor-only, ~1 minute, decides whether the advice already given to the customer is safe.
+- ⚠️ **Do not let the "mark as installed" advice go out unqualified.** If Fork A holds, it marks a real
+  uninstalled element as installed and corrupts end-of-project reporting — Darminder's own 08-18 13:24
+  caveat, now with a concrete mechanism behind it.
+- ⚠️ Whether the QA model belongs in this production project's model list at all (unchanged, still
+  unasked).
+- ⚠️ Check Mech.144.1260 for the same shape (unchanged, still nobody has).
+
+### Attachment note
+
+All 12 attachments on this ticket are real Jira attachments (no `blob:` placeholder problem here, unlike
+PLT-3033) but **this routine cannot open image content**. The three from 08-17 14:22
+(`image-20260817-132030.png`, `-132133.png`, `-132204.png`) are the ones that would likely settle Fork
+A vs Fork B without any new work, since they show the linked-elements panel for `DH2.29-30.1100`. A
+human glancing at them may be able to close this question immediately.

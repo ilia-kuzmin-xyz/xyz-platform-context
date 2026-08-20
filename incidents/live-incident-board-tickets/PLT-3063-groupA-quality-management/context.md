@@ -100,3 +100,21 @@ with zero on-screen indication. **Inferred, not verified against DC5's actual is
 ## Recommended action
 
 See `recommended-action.md`.
+
+## 2026-08-20 — re-verified, unchanged; code claim spot-checked and still true
+
+**Live fetch:** status `Open`, priority Medium, assignee Darminder Atker, `resolution = null`,
+`updated = 2026-08-18T10:39:18+01:00`, **1 comment** — still Yash's 109849 relay of 08-18 10:39. No new
+comment, no status change, no assignee change since the folder was created on the 08-19 run. **2 days old,
+2 runs, and nobody has replied to Yash yet** — Darminder has not commented on this ticket at all.
+
+**Spot-check, not a re-investigation.** Because the standing recommendation is to hand this to a developer
+citing exact lines, one line was re-read on the current checkout rather than trusted: the dashboard Quality
+card still renders `#{index + 1}` at
+`app/pages/organisation/ViewerPage/components/dashboard-panels/quality-panel/components/issue-item/issue-item.tsx:425`.
+The §3 mechanism therefore stands unchanged and unqualified. Nothing else re-derived.
+
+**Attachment gap unchanged:** the 2 Freshdesk-hosted screenshots and the 2 native Jira inline attachments
+(ids 62794-62797) remain unopened — no tool here can fetch authenticated helpdesk or Jira binary media.
+They would confirm the exact numbers displayed on each surface; they cannot change the mechanism, which is
+read end-to-end in code. Do not guess their contents.

@@ -250,3 +250,28 @@ no `locationId` control anywhere in the form, `format-issues.ts:87-88`.)*
 **Confidence:** diagnosis 8/10 unchanged; the FE half of Mostafa's answer is now 9/10 (read on
 current code this run); the recommendation to hide-when-empty is a product steer, offered as one,
 not a finding.
+
+## 2026-08-20 — drafts unchanged and still correct; 15th run unposted. Escalate to Ilia.
+
+Zero movement on the ticket (20 days silent, 37 days on Mostafa's unanswered question — see `context.md`
+2026-08-20). **Drafts 1 to 4 in the 2026-08-14 section above are unchanged, still accurate against the
+current code, and still the right thing to post.** Nothing in them needs rewording. Do not post the 07-24
+draft, which remains superseded for the reason given in the 08-14 section.
+
+The only change this run is to the framing of who this is waiting on. It is no longer waiting on analysis,
+on Darminder, on Mostafa or on Pietro. **It is waiting on a human in this routine to paste four short
+messages that have been ready since 08-14.** Fifteen consecutive runs have each produced a correct
+recommendation and no posted comment, which is precisely the failure mode this routine exists to catch.
+
+**Recommended handling for Ilia, in priority order when he next picks these up:**
+1. Post Draft 1 (answers Mostafa's 107320 from code — unblocks the person who says he is blocked).
+2. Post Draft 2 (the product decision to Pietro and Mostafa).
+3. Post Draft 4 (acknowledgement to the customer via Yash — they have been waiting 37 days on a written
+   request and this does not depend on the decision).
+4. Draft 3 to Sachin or Ali is parallel and gates nothing.
+
+Also still worth raising when it is posted: the **priority mismatch** noted in the coordinator section
+above. Critical does not fit a config gap with a working manual workaround, and while it stays Critical it
+distorts the board.
+
+**No Jira action was taken by this run.**

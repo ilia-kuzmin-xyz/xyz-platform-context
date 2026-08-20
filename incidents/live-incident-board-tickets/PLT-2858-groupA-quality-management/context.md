@@ -407,3 +407,37 @@ status/priority/assignee change. Silence since last comment: **19 days**. Since 
 answer-Mostafa's-question draft (both in `recommended-action.md`) have now sat unposted across **14
 consecutive runs** (07-24 → 08-19) — still the board's top-priority unposted item, Critical priority,
 board's only ticket at that severity.
+
+## 2026-08-20 — re-verified, unchanged; 15th consecutive run with the drafts unposted
+
+**Live fetch:** 27 comments, byte-for-byte the same set the folder already records — newest is still
+comment **108643** (Yash, 07-31 13:27, "any update on this?"). Status `In Analysis`, priority **Critical**,
+assignee Darminder Atker, `resolution = null`, `updated = 2026-07-31T13:27:32+01:00`. No new comment, no
+status/priority/assignee change. Nothing to investigate; nothing was re-derived this run.
+
+**Stall clocks as of 2026-08-20:**
+
+| Clock | Since | Days |
+|---|---|---|
+| Total silence on the ticket | 108643, 07-31 | **20** |
+| Mostafa's 107320 question to Darminder unanswered | 07-14 | **37** |
+| Customer's drop-down-or-remove request unanswered | 107317, 07-14 | **37** |
+| Last substantive (non-nudge) comment | 107533, 07-16 | **35** |
+| Escalate-to-Pietro first recommended, never executed | 07-24 | **27** |
+
+**Consecutive runs with a complete, postable draft sitting unposted: 15** (07-24 → 08-20). This remains
+the board's only Critical-priority open item and its stalest loop by a wide margin. The analysis has been
+finished for six days (the 08-14 pass made Mostafa's question answerable verbatim from code); every run
+since has added nothing but a larger number in this table. **Posting is the bottleneck, and no agent in
+this routine can post — this needs Ilia.**
+
+One observation that sharpens the escalation rather than repeating it: Darminder was **active elsewhere on
+this exact domain during the review window** — he investigated and commented on PLT-3061 on 08-19 evening,
+including tagging Mostafa and Pietro. So the silence on PLT-2858 is not absence, it is a dropped thread
+sitting under newer work. A direct nudge naming the one-line question would very likely clear it, which is
+what makes 37 days particularly costly.
+
+**Attachment gaps unchanged** — all five images (`image-20260701-092301.png`, `image-20260701-092309.png`,
+`image-20260701-114131.png`, `image-20260714-113920.png`, and the inline `blob:` refs) remain unfetchable
+here; the 07-14 one returned HTTP 403 to a prior run. None are load-bearing: every substantive claim in this
+file is stated verbatim in comment text or read directly from code. Do not guess their contents.

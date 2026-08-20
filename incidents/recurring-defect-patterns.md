@@ -406,6 +406,42 @@ table (`:18-23`) — both are latent maintenance risk (a discipline name that di
 stale FX rate would silently produce the same "coverage gap" symptom) independent of the table's
 content itself.
 
+### 2026-08-20 update — PLT-3061's gap confirmed, and the "standing risk" above has now actually fired
+
+The PLT-3061 row in the table above was written on 08-19 with its cause still a hypothesis. It
+confirmed the same evening. Darminder pulled the values off the customer's issue (PLT-3061 comment
+109980): Category 2, Discipline **`CSA-TCB`**, Package `Underground Services`. `rework_reference.json`
+contains 90 rows and exactly three Discipline strings (`CSA`, `Electrical`, `Mechanical`) — zero
+occurrences of `TCB`. Rule 3 total miss, `cost: null`, blank field plus the "mapping data is missing"
+helper text. The hypothesis was recorded before the data arrived and needed no correction.
+
+Three refinements to the pattern, all learned from that confirmation:
+
+1. **The gap is Discipline-wide, so the fix must be too.** Nothing in the lookup filters on Category
+   before Discipline; every rule matches on both. A missing Discipline therefore breaks *all four*
+   categories on that discipline at once. The reporting customer will only mention the category they
+   happen to need (CAT2 here, for a weekly QA report), which makes the ticket look narrower than it is.
+   **Always widen the ask before product answers it** — answering the one combination named in the
+   ticket fixes one cell and leaves the discipline broken.
+2. **The trigger is a project inventing a naming variant, not a genuinely new trade.** ML9 already used
+   plain `CSA` successfully — that is the same project and the same `Underground Services` package
+   behind PLT-2815. `CSA-TCB` is a second, subcontractor-suffixed spelling of a covered discipline.
+   That makes this the **first real firing of the "standing risk" noted directly above**: the plain
+   `===` match with no normalization (`use-rework-cost-calculation.ts:101-104`, `:126-128`). It is no
+   longer latent. Whenever a project can freely name its own category values and the lookup compares
+   them literally, coverage gaps are guaranteed over time, not merely possible.
+3. **`null` and `0` are different outcomes and the distinction matters.** Rule 3 returns `cost: null`
+   (`:146-154`) and the UI then skips auto-population and leaves the field blank. The `cost: 0` paths
+   are only Category 5 (`:66`) and discipline-not-a-project-category (`:79-81`). Blank is the safe
+   failure — a spurious `0` would silently understate a cost report. Expect the distinction to be
+   reported imprecisely in-thread (it was here, in 109980) and check the code rather than the comment
+   before product reasons about the fix.
+
+**Recognition addition:** when a rework-cost or similar lookup returns nothing at all, get the exact
+category-value *strings* off the issue record before anything else. One string comparison against the
+reference file settles the whole diagnosis, and no screenshot or repro video substitutes for it — on
+both PLT-3061 and PLT-2815 the ticket carried media that could not answer a question one field value did.
+
 ---
 
 ## Candidate patterns (one occurrence, watch for a second)

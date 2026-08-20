@@ -38,3 +38,18 @@ himself). No headings, no bullets, no long dashes in the actual sent message.
 The screenshots (Freshdesk + Jira inline, both unopened this run) would only confirm the exact
 numbers shown — not required before starting the fix, since the mechanism is already code-confirmed
 end-to-end. Worth a quick look before shipping, to sanity-check nothing else is going on.
+
+## 2026-08-20 — unchanged, still unposted (2nd consecutive run)
+
+Nothing on the ticket has moved and nothing in the diagnosis has changed. The dev-ready recommendation and
+the draft comment to Darminder above stand **exactly as written** — no edits needed, still not posted.
+`issue-item.tsx:425` re-checked on the current checkout this run and still reads `#{index + 1}`, so every
+file reference in the draft is safe to send as-is.
+
+The only thing worth noting for the next run: Darminder has now had this ticket for two days without
+commenting, while he *did* engage on PLT-3061 in the same window (he posted there on 08-19 evening). So he
+is active and this one is simply queued behind the rework-cost ticket, not ignored. If it is still silent
+in a few more runs, that changes the recommendation from "hand him the pointers" to "raise the dev ticket
+directly and tell him it exists", since the analysis needs nothing from him.
+
+**No Jira action was taken by this run.**

@@ -114,3 +114,20 @@ below stands, but the folder had not recorded this comment before now — flaggi
 whoever executes the close) checks ticket #7628 first rather than assuming it's inert.
 
 Recommended action still unposted, now **5 consecutive runs** (08-14 → 08-19).
+
+## 2026-08-20 — resolved, folder renamed groupA → resolved
+
+**Closed.** Freshdesk ticket #7628 (the same client, same screen) had a related but distinct ask
+land 08-18/08-19: Yash relayed *"Any chance you or somebody else be able to hide those from the
+dashboard visualization? I dont want to remove this from the schedule mapping."* — i.e. hide the
+display without touching the mapping this ticket's own mechanism note (`dashboard-filter-utils.ts:
+238-306`, no allow-list) already predicted would be asked. **Mostafa's answer (08-19T12:45) was a
+plain no: "no whatever is mapped and has hours is shown on the dashboards."** Consistent with the
+mechanism recorded 08-14 — there is no allow-list layer to hide-without-unmapping through, so the
+answer to the follow-up ask was always going to be no once someone posed it. The parent Jira ticket
+was transitioned to **Done at 2026-08-19T17:02:09** shortly after. Nobody used this folder's drafted
+closing comment verbatim — Mostafa's 08-13 verdict plus his 08-19 "no" did the same job in the
+team's own words — but the disposition (close, no dev work, cause is upstream client schedule
+mapping) landed exactly as recommended since 08-14. No further action needed. Folder tag changed
+`groupA` → `resolved` per the board README's convention for a ticket whose fix/disposition is
+confirmed and owned, closed on this board.

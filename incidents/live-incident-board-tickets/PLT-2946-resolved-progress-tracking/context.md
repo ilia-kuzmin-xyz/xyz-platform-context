@@ -201,3 +201,19 @@ Customer silence is now **20 days** (07-30 → 08-19) on a question Rishi answer
 one. Checked PLT-2874 (the ticket this one is blocked on) fresh: still `Open`, `updated
 2026-08-17T14:01:56` — no visible progression past "fix ongoing" (see PLT-2874's own 08-19 entry).
 The customer-status-update draft in `recommended-action.md` remains correct and unposted.
+
+## 2026-08-20 — resolved (closed), but not via our drafted message — flagging the shape
+
+**Closed.** One new event: `Freshdesk ticket status changed to: Closed`, posted by Yash Patel at
+**2026-08-19T12:20:27**, with **no comment of any kind in between** Rishi's 07-31 16:05 finding and
+this closure — no customer-status-update, not our drafted one or any other, appears anywhere on the
+Jira ticket. This is a new "leaves scope" shape for this board's taxonomy (see the 08-19 run's
+cross-ticket notes for the other three): not our draft landing verbatim, not a silent Technical-
+Support bounce, not the team reaching its own documented workaround — this is a **closure with zero
+visible communication**, in either direction, in the eight days between the internal finding and the
+close. It's possible Yash closed the linked Freshdesk ticket (#7557) directly with the customer over
+a channel this repo can't see (email, a call), so this is not evidence the customer was left hanging
+— only that this folder cannot confirm either way. Net technical outcome stands as recorded 08-18:
+Rishi's numbers were correct, the one real discrepancy was correctly attributed to PLT-2874 (still
+open, unresolved as of today — see that ticket's own 08-20 entry), and that attribution was never
+contradicted. No further action needed here. Folder tag changed `groupA` → `resolved`.

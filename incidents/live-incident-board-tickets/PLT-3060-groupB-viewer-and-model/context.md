@@ -128,3 +128,24 @@ clarification needed from us; the code-confirmed mechanism (`filter-service.ts:8
 `executedOutsideFilterPanel` guard skipping the `allowedDbIdsByModel` publish on model-triggered
 recomputes) stands as recorded above, worth a quick informal check with Darminder that it matches
 what he's implementing, but not blocking.
+
+## 2026-08-20 — fix posted, ticket now In Code Review, left scope
+
+**Status: In Code Review** (was Dev In Progress). Darminder posted two comments 08-19 evening
+(18:54, 18:58) with the actual fix description and dev-testing confirmation. Summary of what he
+describes: `tree.tsx` now keeps a model's row visible in the Model Layers panel regardless of
+filters (filtering only the elements nested under it, not the row itself); `viewer-service.ts`
+re-applies any active filter right after a model finishes loading; `filter-service.ts` carries the
+bulk of the fix — the cached element map now refreshes on every recompute instead of going stale,
+the isolation array omits (rather than explicitly empties) zero-match models to match Forge's
+semantics, a new filter selection clears leftover manual-isolation state, and the auto-reapply
+trigger now checks any active filter category instead of a hand-picked list that had missed Level
+and Room. He confirmed locally: loaded a model, applied a filter, loaded a second model, and it
+stayed in the list, with a screenshot attached. **This is broader than just the `tree.tsx:79-119` /
+`filter-service.ts:803-813` mechanism this folder diagnosed** — the isolation-array and
+manual-isolation-state fixes address adjacent bugs (irregular hide/show between two loaded models)
+that weren't part of the original repro or this folder's diagnosis, so there's no way from here to
+confirm the described fix precisely matches the mechanism recorded above versus a broader rewrite of
+the same area. Not verified against the code (a PR/diff wasn't located; only Darminder's own prose
+description is on the ticket). Left scope (In Code Review is excluded from this board's sweep) —
+no further action needed from us unless it bounces back.

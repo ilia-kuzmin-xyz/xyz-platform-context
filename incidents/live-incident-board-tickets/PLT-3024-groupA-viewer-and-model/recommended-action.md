@@ -145,3 +145,63 @@ hidden. That silence is why both PLT-2945 and PLT-3024 exist. Recorded on
 three-occurrence pattern. Confidence that it explains ML9 specifically: unchanged and still
 unconfirmed** — it needs the federation-membership fact, and it does not account for the PowerBI half
 of the report at all.
+
+---
+
+## 2026-08-20 — same message, now with a disposition attached (extends 08-14/08-19, supersedes neither)
+
+**Chosen action: still (a) — one internal comment to Yash Patel. Still no Jira transition executed
+by this routine.** Nothing new arrived this run (`context.md` § 2026-08-20: 10 comments unchanged,
+`updated` still 08-18), so the mechanism, the addressee and the reasoning are all unchanged.
+
+What is added is a **disposition line**. On 08-14 the argument was "stop waiting, tell Yash the
+mechanism". That is still right, but a fortnight of silence on a Major incident plus an empty round
+trip through Technical Support means the message should also say what happens if the customer never
+answers — otherwise the ticket sits in "With Customer" indefinitely and the next run writes the same
+note again. One question, one owner, no transition proposed without a human agreeing to it.
+
+### Draft internal comment (to Yash Patel) — DRAFT ONLY, unposted. Full text, send as one message.
+
+> Yash, we can give the customer an answer on this without waiting for their reply. The Dashboard
+> only ever loads one model: the first one inside the folder named "federated". Every element-level
+> number and everything drawn in 3D comes from that single file, so any model outside it is invisible
+> on the Dashboard however many elements are linked to it, while the Web Viewer shows whatever the
+> user has activated. That's how it's built rather than something broken, but nothing on screen says
+> so, which is why it reads as missing data. We've now had this same thing three times on different
+> projects.
+>
+> So Rishi's question is still the one that settles it, and it's worth asking them again: are the
+> missing models inside the federated folder in the Editor's model tree? One thing to hold back
+> though: they also said the old PowerBI dashboard is missing the same models, and that's a straight
+> embed with no code of ours in it, so if that part is accurate it can't be the same cause and we'd
+> be chasing two things.
+>
+> It also went to Technical Support and came back last week with nothing added, so there's nothing
+> else pending on our side. If we don't hear back from them this week, my suggestion is we write up
+> the federated-folder explanation as the answer and close this, and I'll raise a separate ticket for
+> the real gap here, which is that the Dashboard gives no on-screen sign that a model is outside the
+> federation.
+
+*(One owner. Plain language, no file names, no bullets, no long dashes. Gives Yash something to say
+today, keeps the one open question, flags the fact that would break the story, and names an exit so
+the ticket can stop being re-triaged. The closing suggestion is a proposal to Yash, not an action
+taken here.)*
+
+### Still worth doing, still costs nothing, still not done (seventh run)
+
+**Open the 3 attachments.** The Web Viewer screenshot may name the missing model's folder and settle
+the federation question with no customer involvement at all. Flagged unactioned on every pass since
+08-06.
+
+### Why still not the other outcomes
+
+- **Not Ready for Development.** No fixable defect is confirmed. Pattern 5's gate is specified
+  behaviour; the only dev-shaped item is the UX indicator, which belongs on its own low-priority
+  ticket, not on a Major live incident.
+- **Not With Technical Support.** Already tried, 08-17 to 08-18, returned with nothing added.
+- **Not Blocked.** Blocked would be honest about the wait but wrong about the cause: we are not
+  blocked on information, we are sitting on an unposted answer.
+
+**Confidence unchanged:** mechanism high (verified across three passes, Pattern 5 third occurrence);
+that it explains ML9 specifically, still unconfirmed and still needing the federation fact or the
+screenshots.

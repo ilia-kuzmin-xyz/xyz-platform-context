@@ -120,3 +120,32 @@ one). The optional reference-table question to product in §3 also still stands 
 the close.
 
 **No Jira action was taken by this run.**
+
+## 2026-08-20 — close-out unchanged (15th run unposted); §3's follow-up question now has a live thread
+
+**The recommendation is unchanged: post a closing comment and transition `With Customer` → `Done` with a
+resolution.** Both versions of the closing comment above (the full §1 write-up and the one-paragraph
+2026-08-14 version) are still accurate and still fine to send as written. 45 days stale, 15 consecutive
+runs recommending this without it being executed.
+
+**The one substantive change this run** concerns §3, the "optional follow-up" question to Mostafa and
+Pietro about the anomalous `Cat3 | CSA | Underground Services = £600` figure. That question has sat
+unraised since 07-30 because it had no natural home. It has one now: **PLT-3061 put Mostafa and Pietro on
+this exact reference table, and this exact `Underground Services` package, on 08-19** (their input is being
+asked for on the missing `CSA-TCB` rows — see that ticket's 2026-08-20 notes). Ask it there, in the same
+thread, while they are engaged.
+
+Suggested wording if it is folded into the PLT-3061 conversation, kept to one short paragraph so it does
+not hijack that ticket's own decision:
+
+> While the table is open, one older question from PLT-2815 that never got asked. Cat 3 for CSA Underground
+> Services is £600, which is the lowest Cat 3 anywhere in the table and sits below both the general Cat 3
+> CSA figure of £2,003 and the general Cat 4 CSA figure of £740. That is why a client saw Cat 4 priced above
+> Cat 3 back in June. It was left as intended at the time. Now that Underground Services is being looked at
+> again, is £600 still right?
+
+**This does not gate the close.** PLT-2815 should be closed regardless of whether or when that question gets
+an answer; the question is about the table's content, not about this incident. Do not hold the transition
+for it, and do not reopen the ticket if the answer comes back later.
+
+**No Jira action was taken by this run.**

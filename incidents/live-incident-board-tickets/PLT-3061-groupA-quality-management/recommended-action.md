@@ -38,3 +38,84 @@ Route to Mostafa/Pietro (same owners as PLT-2815's reference-table decisions) wi
 missing Discipline named — a product/data addition to the Confluence-sourced reference table, not a
 dev ticket. Consider handling both PLT-2815 and PLT-3061 in the same product conversation, since
 they're the same table.
+
+---
+
+## 2026-08-20 — the 08-19 draft is SUPERSEDED; do not post it. New draft below, to product.
+
+**Why superseded.** The 08-19 draft asked Darminder to pull issue #1125's Discipline and Package values
+directly instead of waiting on the customer's video. **He did exactly that, unprompted, on 08-19 at 19:48**
+(comment 109980): Category 2, Discipline `CSA-TCB`, Package `Underground Services`. Posting the 08-19 draft
+now would ask for work already delivered. It stays in this file above as the record of what was recommended
+and why; it is simply no longer the action.
+
+**What the answer turned out to be.** The 08-19 hypothesis was right: `CSA-TCB` appears nowhere in
+`rework_reference.json`, which carries exactly three Discipline strings (`CSA`, `Electrical`, `Mechanical`)
+across its 90 rows. Rule 3 total miss, `cost: null`, blank field plus the "mapping data is missing" helper
+text. Full verification in `context.md` (2026-08-20 section).
+
+## Chosen action: (a) resolve through communication — one supporting message to Mostafa and Pietro, then this becomes a product/data change, not a dev ticket
+
+Darminder has already asked them the right question. He asked it about **one cell** though, and the answer
+they give to that question will not fix the customer's problem. The single highest-value contribution left
+is to widen the ask before they answer it, and to correct one factual detail in his comment so product
+isn't reasoning from "we return 0".
+
+**Why not (b) Ready For Development.** There is no code defect. The calculation faithfully implements the
+documented ladder; the table has no row. The only code-shaped option (aliasing `CSA-TCB` to `CSA`) is
+downstream of a product decision that hasn't been taken.
+
+**Why not (c) With Technical Support.** Nothing further is needed from the customer. Everything required to
+decide is now in the ticket.
+
+**Why not (d) Blocked.** The owners are named, engaged and tagged as of last night. Under 24 hours of
+silence is not a stall.
+
+### Draft comment — addressed to Mostafa and Pietro, DRAFT ONLY, nothing posted by this run
+
+> Mostafa, Pietro, one thing worth widening before you answer Darminder's question above. The combination
+> he listed is not a one off gap. CSA-TCB does not appear anywhere in the rework reference table, which only
+> has three disciplines in it, CSA, Electrical and Mechanical. So it is not just Category 2 on Underground
+> Services that comes back empty, it is every category and every package on that discipline, and it has been
+> failing that way for this client all along rather than starting recently.
+>
+> Small correction to the note above as well, since it changes how this reads. We do not return zero, we
+> return nothing at all and leave the cost box empty with a message telling the user to set a value. That is
+> the better outcome of the two, because a zero would have quietly understated their QA totals.
+>
+> The thing that makes this odd is that ML9 already uses plain CSA elsewhere, and that one does resolve.
+> That is the same discipline and the same Underground Services package behind PLT-2815 back in June. So
+> CSA-TCB looks like a second naming variant the project has introduced rather than a new trade.
+>
+> My take is to add a full set of CSA-TCB rows now, one per category at minimum, so the client is unblocked
+> for Friday, and separately decide whether variants like this should map onto their parent discipline
+> automatically. The matching today is an exact text comparison, so anything a project names slightly
+> differently will keep landing here. Happy to be overruled if you would rather CSA-TCB carry its own
+> distinct numbers.
+>
+> Is CSA-TCB meant to cost the same as CSA, or does it need its own figures?
+
+One question at the end, one decision, two owners who share the table. Prose, no headings, no bullets, no
+long dashes in the sent text, per the playbook's "decision requests to product" shape: context, cause in
+plain language, the correction, a recommendation rather than an open question, and a line inviting
+disagreement.
+
+### If product answers "same as CSA"
+
+That is the alias route and it needs a small dev ticket (`use-rework-cost-calculation.ts:101-104`, `:126-128`
+are the plain `===` comparisons). Worth raising jointly with the standing normalization risk already logged
+under Pattern 6.
+
+### If product answers "its own figures"
+
+Pure data change to `rework_reference.json` plus the Confluence source page (id 1630633988, owned by Pietro).
+No dev work. Ask for a generic blank-Package row per Category as the floor, so the fallback ladder has
+something to land on for packages nobody enumerates.
+
+### Coordination note
+
+Worth folding **PLT-2815's** long-standing open question into the same conversation while Mostafa and Pietro
+are actually engaged on this table — see that ticket's `recommended-action.md` §3. Two questions about one
+table, one thread, rather than a second thread nobody opens.
+
+**No Jira action was taken by this run.**

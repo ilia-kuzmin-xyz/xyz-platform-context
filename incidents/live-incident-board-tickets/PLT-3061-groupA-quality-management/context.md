@@ -104,3 +104,96 @@ occurrences: PLT-2815 + PLT-3061) — see that file.
 ## Recommended action
 
 See `recommended-action.md`.
+
+## 2026-08-20 — HYPOTHESIS CONFIRMED: the Discipline is `CSA-TCB`, which is not in the reference table
+
+**Live fetch:** status `Open`, priority Medium, assignee Darminder, `updated = 2026-08-19T19:49:02+01:00`,
+**4 comments (was 3)**. One new comment since the 08-19 run.
+
+### The new comment — 109980, Darminder Atker, 08-19 19:48 (edited 19:49), to Mostafa + Pietro, cc Yash
+
+Verbatim substance: *"could you advise what the cost should be for what the user has entered: Category 2,
+Discipline: CSA-TCB, Package: Underground Services. This is not covered in the rework cost json so I think
+we need to update the file with new combinations and cost? This is why the user is getting 0 returned."*
+Screenshot of the current table attached (not opened — see below).
+
+**Darminder independently did exactly what the 08-19 run's draft asked for** (pull the Discipline/Package
+values off the issue record rather than wait on the customer's video), and posted the result. The 08-19
+drafted comment to Darminder is therefore **superseded and must not be posted** — it would ask for
+something already delivered. Pointer kept: see the 08-19 section of `recommended-action.md`.
+
+### The 08-19 prediction was correct, and is now code-confirmed
+
+§4 of this file predicted: *"issue #1125 carries a Discipline value that is not literally `CSA`,
+`Electrical` or `Mechanical`... so no row matches at any Category... falls through to Rule 3 (`null`)...
+this would fail identically for CAT1/3/4 on the same Discipline, not just CAT2."*
+
+Verified against the current checkout this run:
+- `rework_reference.json` contains **90 rows and exactly three Discipline strings** — `CSA`, `Electrical`,
+  `Mechanical`. **Zero occurrences of the substring `TCB` anywhere in the file.** So `CSA-TCB` matches
+  nothing at any Category and at any Package, including the blank-Package generic fallback rows.
+- Therefore Rule 1 (`use-rework-cost-calculation.ts:93-121`) misses, Rule 2 (`:123-144`) misses, and
+  execution reaches Rule 3 (`:146-154`).
+- **Scope is Discipline-wide, not CAT2-specific — confirmed.** Nothing in the lookup is category-first;
+  every rule filters on Discipline name too. Any issue on ML9 tagged `CSA-TCB` fails identically at
+  Category 1, 2, 3 and 4. CAT2 is simply the category this customer needs weekly for their QA report.
+
+### Correction to Darminder's comment: the code returns **null (blank field)**, not `0`
+
+Worth getting right before product acts on it, because "0" and "blank" imply different fixes and
+different reporting risk.
+
+- Rule 3 returns `cost: null` (`use-rework-cost-calculation.ts:146-154`), not `0`.
+- The only `cost: 0` paths are Category 5 (`:66`) and **discipline-not-found-as-a-project-category**
+  (`:79-81`). The latter does not apply here: `CSA-TCB` *is* a valid project category on ML9 (the user
+  selected it in the form), so `disciplineCategory` resolves and `disciplineName = 'CSA-TCB'` (`:91`).
+- With `calculatedCost === null`, `issue-cost-field.tsx` **skips auto-population entirely** (the effect
+  returns early on `calculatedCost === null`), so the field is left **empty**, and
+  `getEstimatedReworkCostHelperText` falls to its last branch (`:203`): *"Model is missing mapping data
+  needed to auto-generate a rework cost. Please set a value."*
+- This matches the customer's reported symptom exactly ("an error message indicates that mapping data is
+  missing") and **is the safer of the two behaviours** — a blank field cannot silently understate a QA
+  report the way a spurious `0` would. No data-integrity incident on top of the coverage gap.
+
+### New and materially important: ML9 has BOTH `CSA` and `CSA-TCB`, on the same Package
+
+PLT-2815 (same project ML9, same Package `Underground Services`) resolved fine through Discipline `CSA` —
+that is where the `Cat3 | CSA | Underground Services | £600.00` row (`rework_reference.json:67`) came from.
+So ML9's category config carries **two** CSA-flavoured discipline names, one covered and one not. `CSA-TCB`
+reads as a project-side naming variant or a subcontractor/work-package suffix rather than a genuinely new
+trade.
+
+**Consequence for the fix, and this is the part that changes the ask:** adding a single
+`Category 2 | CSA-TCB | Underground Services` row would answer Darminder's literal question and still
+leave CAT1/3/4 on that discipline broken, plus every other Package under `CSA-TCB`. The decision product
+actually needs to take is at **Discipline level**, and there are two shapes:
+1. **Add a full `CSA-TCB` block** to the reference table (a generic blank-Package row per Category at
+   minimum, plus any package-specific rows they want) — pure data, no code change, but it recurs the next
+   time any project invents a discipline name.
+2. **Treat `CSA-TCB` as an alias of `CSA`** — cheaper conceptually and fixes all four categories at once,
+   but requires a code change (the matcher is plain `===` with no normalization,
+   `use-rework-cost-calculation.ts:101-104`, `:126-128`) plus a decision about where aliases live.
+
+Option 1 is product-only and can ship today; option 2 is the structural fix for Pattern 6's standing risk.
+They are not exclusive — 1 now, 2 as tech debt, is a defensible answer.
+
+### Status of the ticket
+
+Still `Open`, still Group A, but the blocker has moved: it is no longer "we don't know the values", it is
+**"product must decide what CSA-TCB is worth"**. Owners are Mostafa and Pietro, already tagged by Darminder
+in 109980. Nobody has replied to him yet (posted 19:48 the previous evening, so silence is not yet
+meaningful — under 24 hours).
+
+### Attachment gap this run
+
+- ⚠️ Screenshot on comment 109980 (Darminder's view of "what we currently have", inline `blob:` media) —
+  **not opened**, no tool to fetch authenticated Jira media. It would only show the reference table's
+  current contents, which this run read directly from `rework_reference.json` in the repo, so nothing
+  load-bearing is missing.
+- ⚠️ Still unopened from prior runs: `image-20260817-155738.png` (Darminder's passing CAT2 test) and
+  `Video Project 2.mp4` (customer repro). Both now moot — the field values they would have shown are
+  stated in text in 109980.
+
+**Confidence: 9/10** on the mechanism (both halves now verified in code against the actual reported
+Discipline string; the residual 1 point is that I have not personally inspected ML9's category config to
+confirm `CSA-TCB` is spelled exactly that way in the project data rather than in Darminder's typing).

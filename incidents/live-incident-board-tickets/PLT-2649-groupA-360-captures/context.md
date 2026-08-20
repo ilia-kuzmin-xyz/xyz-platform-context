@@ -501,3 +501,10 @@ Live fetch: status With Customer, priority Major, assignee Yash Patel, 16 commen
 still `2026-07-24T13:56:22` — identical to the 08-18 record. **26 days** of silence since Ilia's
 hand-off to the client's project-delivery team. The nudge-to-Yash draft in `recommended-action.md`
 remains correct and unposted.
+
+## 2026-08-20 — re-verified, unchanged
+
+Live fetch: status With Customer, priority Major, assignee Yash Patel, still 16 comments, `updated`
+still `2026-07-24T13:56:22` — byte-for-byte identical to 08-19. **27 days** of silence on a fix that
+sits entirely with the client's project-delivery team. The nudge-to-Yash draft in
+`recommended-action.md` remains correct and unposted.
