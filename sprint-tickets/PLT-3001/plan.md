@@ -75,3 +75,24 @@ Sonar's 5 new-code issues reproduced locally with `npx eslint <diff files>`:
   module consts (`STEP_RED`, `ADD_TASK_RED`, `PICKER_RED`, …).
 `SystemRequirementsSection.test.tsx` warnings are master code (PLT-2914), not
 this PR's new code — left alone. Suite 79/79 green after.
+
+## 2026-08-20 — REWORKED: create page → full draft editor (user rejected the first cut)
+
+The first cut implemented the **Developer Doc** (`Project_Settings_Types__Developer_Doc`),
+which says create = name-only, "tasks applied per step after the type is created".
+The **Types Prototype** (`Project_Settings__Types_Prototype.dc*.html`, the artefact the
+user tests against) contradicts it: `startCreate()` opens the FULL detail page in
+`createDraft` mode — editable ladder (per-step Add task, green "New" badges), System
+prerequisites (+ Add System type dropdown), Save/Cancel, "Discard changes?" on Back.
+**PITFALL: when the two documents disagree, the PROTOTYPE wins.** The prototype is a
+single interactive page (view-model script at the bottom, ~lines 791+), not artboards —
+read `startCreate/cancelCreate/saveEdit/finalizeSave` + the `addTask` VM for behaviour.
+
+Shipped on #2146 (commit 624fda232): draft editor with local staging (ladder tasks +
+sysreq groups), Save = create row → apply staged; picker redesigned to the prototype's
+add-tasks page (folder groups, card selection ring, v/Modified meta, "Add N selected
+tasks", not-addable tasks HIDDEN not greyed). System prerequisites now persist via
+`assetTypeSystemRequirementService` — schema doc amended: `step_id` is the semantic
+'blue'/'white' key, NOT a workflow_step FK. Detail's section reads the rows (static
+stub deleted from readiness.ts). Copilot review folded in (isFetched→isSuccess gate,
+aria-invalid/describedby); all 5 threads resolved.

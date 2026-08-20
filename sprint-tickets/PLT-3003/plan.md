@@ -26,3 +26,17 @@ findings: merged the PLT-3001 polish commit (dead locals + test literal dedupe)
 into PLT-3003 rather than re-fixing. 3003's own files (CreateSystemTypeContent,
 SystemTypeDetail, TypesTab) lint clean. `TypesTab.test.tsx` warnings are
 pre-existing master code, not in this diff. Suites 130/130 green after merge.
+
+## 2026-08-20 — REWORKED with the asset side (see PLT-3001 08-20 note)
+
+Same draft-editor pattern for "+ New system type" (#2147 commit 89b950b96): Blue/White
+ladder staged locally, ISTs offered, Save provisions the type's OWN two-rung workflow
+via `createSystemTypeWorkflow` then applies tasks via setForStep on the minted steps.
+**Bug found in the first cut: created system types had `workflowId: null`** (create
+passed only {name}), so the detail's task application was dead on arrival — the
+"adopts the project's default workflow" claim in the original PR body was wrong.
+Per-type workflow because `workflow_step_task` hangs off workflow_step rows: a shared
+workflow would leak applied tasks across types. `createSystemTypeWorkflow` runs the
+asset ensure first so the project's OLDEST workflow stays the asset Default
+(`pickDefaultWorkflow` picks by age — a system workflow born first would get asset
+types backfilled onto it).
