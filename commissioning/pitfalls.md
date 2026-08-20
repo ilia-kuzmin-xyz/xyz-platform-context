@@ -143,3 +143,11 @@ collapsed; a freshly staged task (New badge) is invisible.
 
 **Rule**: Key the step on the mode (`key={edit ? id + '-edit' : id}`) so the session flip remounts
 it. Same class of bug as pitfall 10 — reconciliation keeping state you meant to reset.
+
+**2026-08-20, second instance (user-reported)**: the Types tab footer CTA — "+ New Asset Type" /
+"+ New System Type" are two `<Button><Translate/></Button>` branches of a ternary in the same tree
+position, so toggling the sub-tab kept the previous half's LABEL while the testid and onClick
+updated underneath (the click opened the correct page, which is why the testid-based browser check
+missed it — **assert visible text, not testids, when hunting this bug**). Note the unit-test mocks
+can never catch this class: tests stub `Translate` with a plain function component that re-renders
+on every prop change. Fixed the same way (`key='asset-cta'` / `key='system-cta'`).
