@@ -96,3 +96,18 @@ tasks", not-addable tasks HIDDEN not greyed). System prerequisites now persist v
 'blue'/'white' key, NOT a workflow_step FK. Detail's section reads the rows (static
 stub deleted from readiness.ts). Copilot review folded in (isFetched→isSuccess gate,
 aria-invalid/describedby); all 5 threads resolved.
+
+## 2026-08-20 (later) — Types tab footer bar + PR stacking
+
+Prototype's list footer = TWO visible buttons: grey left ("Pull from Portfolio",
+stubbed even in the prototype; "Import from file" exists but display:none) and
+the yellow "+ New Asset Type" CTA right. The tab's bar had three ghost buttons
+(Import / New / Delete all). Rebuilt: Import (grey, real feature filling the
+import slot) left, yellow CTA right ("+ New Asset Type" / "+ New System Type"
+per half, title-case per design); Delete all removed from this tab (no design
+counterpart; still available on the Asset list surface). Commit ecedb266f.
+
+PRs bound into a stack per the user: **#2147's base retargeted to `PLT-3001`**,
+so its diff is the system half only and both review as one Types experience;
+GitHub retargets it to master when #2146 merges. Checkout `PLT-3003` = full
+combined build for testing.
