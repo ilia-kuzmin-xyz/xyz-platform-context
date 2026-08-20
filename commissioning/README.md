@@ -121,3 +121,19 @@ applied on `dev` — `stable` still bare. Details in the planning doc's dated no
 - Two new pitfalls recorded (§10 react-jhipster `<Translate>` ignores contentKey changes;
   §11 `defaultOpen` is initial-only) — both reconciliation-keeps-state bugs found while
   browser-verifying the edit session.
+
+### 2026-08-20 (evening addendum) — #2147 review round + sysreq schema path
+
+- Rishi requested changes on #2147: footer button misalignment (fixed — every ghost
+  Cancel was 36px beside the 32px yellow CTA; one shared `ghostButtonSx` in
+  `typeEditShared.tsx` now covers 6 footers, commit `4251e8e8`) and a "search bar
+  missing its icon" screenshot that does NOT reproduce — all four search inputs on the
+  PR's surfaces carry icons at every relevant commit; asked him which screen he meant.
+- System prerequisites don't persist on any env: the two tables exist on neither dev
+  nor stable (probed both via PostgREST — PGRST205). The schema doc
+  (`docs/commissioning/asset-type-system-requirements-schema.md`) now carries TWO
+  variants: the dev stopgap (tag-keyed `step_id`) and a PLT-3058-aligned variant
+  (`step_id` FK → workflow-owned `readiness_step`) meant to land via xyz-supabase,
+  stacked on xyz-supabase #16. The schema was designed in-session, no backend review
+  yet — Rishi asked to look. Nobody runs the stopgap on stable.
+- Someone merged master into PLT-3003 remotely mid-evening; pulled+merged clean.
