@@ -151,3 +151,42 @@ updated underneath (the click opened the correct page, which is why the testid-b
 missed it — **assert visible text, not testids, when hunting this bug**). Note the unit-test mocks
 can never catch this class: tests stub `Translate` with a plain function component that re-renders
 on every prop change. Fixed the same way (`key='asset-cta'` / `key='system-cta'`).
+
+## 2026-08-21 — A system type with `workflow_id = null` silently breaks anything that hangs off its ladder
+
+**Symptom:** saving a System prerequisite fails with *"Saving failed — nothing was lost.
+Try again."* and retrying never works. The network tab shows a perfectly healthy
+`GET /rest/v1/system_type?project_id=eq.<p>&id=eq.<st>&select=*` returning **200 with one row** —
+which is what makes this misread as "no response" / a broken request. It is not. Read the row:
+`workflow_id` is `null`.
+
+**Cause:** `workflow_step_task` keys on the *workflow's* step rows, so a system type with no
+workflow has nowhere for task config to land. `stepMapFor` returns empty maps, and
+`AssetTypeSystemRequirementService.create` refuses (deliberately — a silent drop used to look
+like a successful save). System types created before `createSystemTypeWorkflow` existed all carry
+`workflow_id = null`: **1 of 6 on dev** at the time of writing (`Supply Air`,
+`fb449dff-a4d4-4467-bbbb-844aae5f044c`, project `6a304a8ab42d0e53463ce722`, created 13 Aug).
+
+**Diagnosing it, without a browser:** the publishable key is public, so query PostgREST directly.
+```bash
+K=<sb_publishable_… from supabase-config.ts>
+curl -sS -H "apikey: $K" -H "Authorization: Bearer $K" \
+  "https://ohmzwpcilvxpozljllle.supabase.co/rest/v1/system_type?select=id,name,workflow_id"
+```
+A `null` `workflow_id` on any row is the tell. Same check applies to `asset_type`.
+
+**Fixed** by `ensureSystemTypeWorkflow` (`services/defaultWorkflowSetup`), the system-side
+counterpart of `ensureDefaultWorkflow`: it mints the Blue → White workflow on demand and assigns
+it, so legacy rows repair themselves the first time someone saves a prerequisite against them.
+Composed in `useCreateAssetTypeSystemRequirement`, **not** in the requirement service — that
+service is imported by `serviceProvider`, which the provisioning helper imports, so calling it
+from the service would close an import cycle.
+
+**Two general lessons worth keeping:**
+1. *A 200 with a row is not a working feature.* The failing request was the honest one; the bad
+   data was in its body. Read response bodies before blaming the request.
+2. *A deliberate refusal still needs a message that matches its permanence.* The generic
+   "Try again" strip made an unfixable state look transient. Permanent failures now carry their
+   own copy (`review.errorSystemLadder`).
+
+hc-frontend `PLT-3003` / PR #2147, commit `b1584834`.
