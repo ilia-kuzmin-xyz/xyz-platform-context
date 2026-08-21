@@ -334,3 +334,116 @@ these guards effective; without it they are decorative.
 **Confidence: the five structural defects stay at 9/10** (independently verified, unaffected by this
 result). **Root cause: down from 5/10 to "unknown"** — the leading hypothesis was falsified and no
 replacement has evidence yet. Saying so plainly rather than promoting the next-most-plausible guess.
+
+---
+
+## 9. ROOT CAUSE FOUND — a zero-weight package makes the panel emit `null` progress, and `null` is the spinner's own "still loading" signal
+
+**Superseded: §8's "hang mechanism is currently unexplained" and H6.** The mechanism is now traced
+end to end in code, and the predicate question from §8 is also answered — Ilia's `0` was **real**, not
+a typo.
+
+### The data that settled it
+
+Census of `activity_categories_flat` (`discipline`, `package`, activity count) came back with **both**
+`UG Electrical` packages present:
+
+| discipline | package | activities |
+|---|---|---|
+| Electrical | UG Electrical | **543** |
+| CSA | UG Electrical | **2** |
+
+Confirmed columns on this project: `activityId, discipline, package, phase, wbs location`. So the §8
+predicate was correct after all, and `(CSA, UG Electrical)` genuinely joins to **zero elements** — its
+2 activities have no `activity_links` rows. **It is a stub package: 2 activities, 0 linked elements,
+therefore zero weight.**
+
+### The chain, every step verified in code
+
+1. Panel renders the package because `category_groups` has a row for its `ActivityCategoryId`
+   (`use-progress-panel-data.tsx:268-277`). It is clickable like any other.
+2. Click → `filters.package = ['<CSA/UG Electrical uuid>']` (`discipline-list.tsx:223` passes the id)
+   → `dataLevel = 'package'` (`dashboard-progress-service.ts:351-357`) →
+   `filteredPackageIds = ['<uuid>']` (`:1040`).
+3. `getProjectProgressV2API` builds `start_data` / `end_data` with
+   **`AND ${weightColumn} > 0`** (`progress-queries-v2-api.ts:218`, `:235`) plus the
+   `ActivityCategoryId IN (...)` filter. Weight is `TotalPlannedLaborUnits` (labour-hours, the
+   default) or `TotalLinkedElements`. **Zero weight → both CTEs return zero rows.**
+4. `delta_by_package` is a `FULL OUTER JOIN` of two empty sets (`:254-255`) → **empty**.
+5. The final `SELECT SUM(ActualDelta) / NULLIF(SUM(Weight), 0) * 100 as actual … FROM delta_by_package`
+   (`:257-262`) is **an ungrouped aggregate over an empty table, so it still returns exactly one row**
+   — with every column `NULL`.
+6. `return result?.[0] || null` (`:272`) — the row is a truthy object, so it returns
+   **`{ actual: null, planned: null, baseline: null, date: … }`**, not `null`.
+7. `if (projectProgress)` (`:1229`) is therefore **true**, and `:1230` runs
+   `this._maxActualProgress$.next(projectProgress.actual)` → **`next(null)`**.
+8. `hasReceivedData = maxActualProgress !== null` (`use-progress-panel-data.tsx:32`) → **false**.
+9. The escape hatch does not fire: `hasNoProgressData = !hasError && !isLoading && !allLoaded &&
+   !hasReceivedData` (`:37`) requires **`!allLoaded`**, but the files *are* loaded, so it is `false`.
+10. `progress-panel.tsx:179` → `!hasError && !hasNoProgressData && (isLoading || !hasReceivedData)`
+    → **true** → the whole panel is replaced by `CircularProgress` (`:192`).
+
+**And it cannot recover.** The full-panel spinner replaces the discipline/package list itself, so the
+user cannot click the package again to deselect it. The filter stays applied, `maxActualProgress` stays
+`null`, and nothing will emit a non-null value again. **A page refresh is the only exit** — which is
+precisely what the customer reported.
+
+### Why this matches every reported detail
+
+- *"All other packages work fine"* — every other package has weight > 0, so step 3 returns rows.
+- *"Immediately"* — the query is trivially fast; there is nothing large about it. This is why H1 was
+  wrong: the failure is an empty result, not a big one.
+- *"Have to refresh the entire page"* — the deselect control is inside the spinner.
+- *Customer's "~15 minutes, twice"* — no memory story needed after all. They were clicking around and
+  hit a zero-weight package (twice). The §4 heap-pressure reconciliation is **superseded and should
+  not be quoted**; it was a plausible story for a symptom that has a simpler cause.
+- *Reads as a "crash/reset" rather than an error* — D4: there is no error path, so an unrenderable
+  state can only look like loading.
+
+### Why it was never caught
+
+`duckdb.query<{ actual: number; planned: number; … }>` (`progress-queries-v2-api.ts:265-270`) declares
+the columns as **`number`** when the SQL can return `NULL`. The type is a lie, so TypeScript could not
+flag `next(null)` into a `BehaviorSubject<number | null>` (`:135`) — a subject whose `null` the panel
+reads as *"first query hasn't finished yet"*. The two meanings of `null` (never-loaded vs
+no-measurable-data) collide on the same channel.
+
+The author of `use-progress-panel-data.tsx:34-37` **anticipated exactly this failure** — *"Data will
+never arrive, so the panel must show an empty state rather than wait on hasReceivedData forever"* —
+but keyed the guard on `!allLoaded`, which only covers "this project has no progress outputs at all",
+not "the current filter selects something with no measurable data".
+
+### Same defect, second call site
+
+The activity-level path has the identical shape:
+`SUM(...) / NULLIF(SUM(u.Weight), 0) * 100 as actual` (`progress-queries-v2-api.ts:729-730`) feeding
+`this._maxActualProgress$.next(projectProgress.actual)` at `dashboard-progress-service.ts:1140`. So a
+Gantt/room selection resolving to only zero-weight activities should strand the panel the same way.
+**Not reproduced, but the code shape is the same — any fix must cover both call sites.**
+
+Note the package path is the *only* one missing this handling: the activity path already has an
+explicit "filter matched nothing → emit zeros" branch (`:1099-1114`, which emits `0` and returns
+early). That is the precedent for the fix and shows the intended behaviour.
+
+### Confidence
+
+**9/10 on the mechanism.** Every step read on current HEAD; the data confirms steps 1-3 independently.
+The residual point: I have not seen `category_groups` confirm both weight columns are 0 for this
+`ActivityCategoryId` (inferred from the 0-element join plus the observed symptom), and I have not run
+the app. One query closes it — `recommended-action.md` §6.
+
+### Corrections to earlier sections of this file
+
+- **§4 / H1 (fan-out, OOM): falsified.** Not the cause. The `_visible_elements` fan-out concern
+  remains a legitimate *scalability* observation but has nothing to do with this incident.
+- **§4's "15 minutes" heap-pressure story: withdrawn.** Superseded by §9.
+- **§8's "hang mechanism unexplained" and H6: resolved by §9.**
+- **§8's doubt about the predicate: resolved — the predicate was right.**
+- **§5's H2/H3/H4/H5: all moot.** The spinner is the full-panel one (H2's family) but stuck via
+  `!hasReceivedData`, not via `isLoading` — so even H2 as written was wrong about the state.
+- **The five structural defects (§3) stand unchanged**, and D4 in particular is why this presented as
+  a crash. They are still worth fixing, but they are no longer needed to explain this ticket.
+- **The `UG Electrical` name collision is not implicated.** Verified correct in §8. Keep as latent risk.
+- **Query C in the 08-21 chat was my error**, not a finding: `ParentDiscipline` is an alias the FE's own
+  query creates (`progress-queries-v2-api.ts:943`, `cat.discipline as ParentDiscipline`), not a raw
+  `category_groups` column. The Binder Error is expected and means nothing.

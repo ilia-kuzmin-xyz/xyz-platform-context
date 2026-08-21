@@ -228,3 +228,115 @@ than any query:
 unrecoverable freeze, whatever the trigger. Note that D1 also silently disables the three 60-second
 guards in `dashboard-color-service.ts` (`context.md` §8, last note), which strengthens the case for
 fixing it first.
+
+---
+
+## §6 2026-08-21 — ROOT CAUSE FOUND. This is now READY FOR DEVELOPMENT.
+
+**Supersedes §1, §5a and §5b — do not run those diagnostics, they are answered.** Full trace in
+`context.md` §9. One-line statement of the defect:
+
+> A package with zero progress weight is filtered out of the progress query by
+> `AND weightColumn > 0`, the surviving ungrouped aggregate returns a single all-`NULL` row, that
+> `null` is pushed onto `maxActualProgress$`, and the panel reads `maxActualProgress === null` as
+> *"the first query hasn't finished"* — so it renders the full-panel spinner forever, over the very
+> list the user would need to deselect the package from.
+
+`(CSA, UG Electrical)` on LVN1-2 is such a package: **2 activities, 0 linked elements.** Its sibling
+`(Electrical, UG Electrical)` has 543 activities and works fine.
+
+### 6a — One query to close the last 1/10 of doubt (optional, not blocking)
+
+```sql
+SELECT ActivityCategoryId, CategoryName,
+       MAX(TotalPlannedLaborUnits) AS max_labour,
+       MAX(TotalLinkedElements)    AS max_elements,
+       COUNT(*)                    AS date_rows
+FROM category_groups
+WHERE TypeName = 'Package' AND CategoryName = 'UG Electrical'
+GROUP BY ActivityCategoryId, CategoryName
+```
+
+**Prediction:** two rows. The Electrical one has weight > 0; **the CSA one has `max_labour = 0` and
+`max_elements = 0`.** If the CSA row instead shows weight > 0, §9's step 3 is wrong and the trace needs
+revisiting.
+
+### 6b — The blast radius, and a falsifiable prediction worth running
+
+Any zero-weight package hangs the panel identically. This is not a one-package bug.
+
+```sql
+SELECT ActivityCategoryId, CategoryName,
+       MAX(TotalPlannedLaborUnits) AS max_labour,
+       MAX(TotalLinkedElements)    AS max_elements
+FROM category_groups
+WHERE TypeName = 'Package'
+GROUP BY ActivityCategoryId, CategoryName
+HAVING MAX(TotalPlannedLaborUnits) = 0 OR MAX(TotalLinkedElements) = 0
+ORDER BY CategoryName
+```
+
+**Prediction: every package this returns will strand the panel when clicked** (those with
+`max_labour = 0` under labour-hours weighting, which is the default; those with `max_elements = 0`
+under element-count weighting). Clicking one other package off that list is the cheapest possible
+confirmation of the whole diagnosis — and it also tells the customer which packages to avoid until the
+fix ships. Likely candidates from the activity census, to sanity-check the output against:
+`CSA / Wet Utilities` (1 activity), `Electrical / Earthing` (1), `CSA / Site Set Up` (2),
+`Electrical / Containment` (2), `Electrical / Install Elec Equip` (3).
+
+⚠️ Activity count is **not** weight — a package with many activities can still have zero linked
+elements. Trust the query, not the census.
+
+### 6c — The fix
+
+**Primary, minimal, ships now.** Treat a null aggregate as "no measurable data for this selection"
+instead of letting it masquerade as "not loaded yet". The file already contains the intended
+behaviour for the sibling case — the activity path's explicit "filter matched nothing → emit zeros"
+branch at `dashboard-progress-service.ts:1099-1114`. Mirror it:
+
+- At `:1229-1233` (package/project path) and `:1139-1143` (activity path — **same defect, second call
+  site**, via the identical `NULLIF(SUM(u.Weight), 0)` at `progress-queries-v2-api.ts:729-730`), stop
+  forwarding a possibly-null `actual` straight onto the subject. Emit `0` when the aggregate came back
+  null, as the activity-empty branch already does.
+- **Fix the type lie that hid this**: `duckdb.query<{ actual: number; planned: number; … }>`
+  (`progress-queries-v2-api.ts:265-270`, and `:154`, `:738`) should declare `number | null`. Doing this
+  *first* makes the compiler point at every unguarded call site, which is how to be sure both are
+  found rather than just the two named here.
+
+**Follow-up, needs a design call.** Emitting `0` renders "0.00%", which is defensible but not
+informative — the honest state is "this package has nothing measurable in it". The right fix is to
+widen the `hasNoProgressData` concept (`use-progress-panel-data.tsx:37`) so it also covers "the
+current filter resolves to no weighted data", and show the empty state instead of zeros. Worth a word
+with Jason on the copy. **Do not let this hold the primary fix** — the primary fix already restores the
+user's ability to deselect, which is the whole incident.
+
+**Regression test.** This is exactly what the hermetic golden-master suite exists for
+(`docs/dashboard/progress-regression-testing-plan.md`, `npm run jest:regression`). A fixture package
+with zero weight, asserting a non-null emission on `maxActualProgress$`, would have caught this and
+will stop it returning.
+
+### 6d — Disposition and what to tell whom
+
+**Move to Ready For Development.** Root cause identified, fix is small and local, two call sites named,
+no product decision required for the primary fix.
+
+Two things worth saying on the ticket, and they have different owners:
+
+1. **To Yash, for the customer** — there is a real workaround now, which is better than "refresh and
+   hope": the packages that do this are the ones with no linked elements and no planned labour hours,
+   they are stub rows in the schedule, and 6b lists them exactly. Until the fix ships, avoiding those
+   avoids the freeze. Also worth correcting the ticket's framing: it is not a crash, it is not
+   time-based, and it is not "after 15 minutes" — it is one specific click, and it will reproduce on
+   the first click every time.
+2. **To Mostafa / Pietro, separately and lower priority** — LVN1-2's schedule carries packages with
+   zero linked elements and zero labour (`CSA / UG Electrical` has 2 activities and no links, while
+   `Electrical / UG Electrical` has 543). That is arguably a data-quality question for project
+   controls independent of our bug. **Do not bundle this with the fix** — the dashboard must not hang
+   on a legitimately empty package regardless of whether the schedule should contain one.
+
+### 6e — What is no longer relevant
+
+The five structural defects in §3 are **still worth fixing** but are **no longer the story of this
+ticket**. Of them, D4 (query errors can never surface) is the one that made this present as a crash
+rather than an error, so it is the natural companion PR. H1/fan-out, the memory-limit item, and the
+Ctrl+Shift+D diagnostic are all off the critical path — do not spend more time on them here.
