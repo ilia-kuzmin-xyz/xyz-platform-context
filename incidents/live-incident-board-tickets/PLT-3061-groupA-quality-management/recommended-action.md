@@ -119,3 +119,25 @@ are actually engaged on this table — see that ticket's `recommended-action.md`
 table, one thread, rather than a second thread nobody opens.
 
 **No Jira action was taken by this run.**
+
+## 2026-08-21 — draft above still unposted, now past 24h silent; strengthen with the customer's own words
+
+**Nothing to change in substance.** The 2026-08-20 draft to Mostafa and Pietro is still correct and still
+the right message. What changed is the evidence behind it: the customer independently told Yash (110058)
+that their project split the "CSA" discipline into "CSA - TCB" and "CSA - KGE" for their two main
+contractors — the exact naming-variant mechanism the draft already guesses at from the code side. Worth
+adding one sentence to the draft citing this, since it turns "looks like a naming variant" into "the
+customer confirms it is a naming variant," which makes the recommendation harder to argue with.
+
+**Also worth adding to the question:** the customer's message names a second variant, `CSA-KGE`, not yet
+checked against `rework_reference.json` this run. If it is Group A's second contractor entity, it almost
+certainly has the identical gap (same three-Discipline-string table), so the decision request to product
+should cover both `CSA-TCB` and `CSA-KGE` in one pass rather than requiring a third round when `CSA-KGE`
+surfaces on its own ticket later.
+
+**Escalation note, not yet action:** Darminder's tag of Mostafa and Pietro (109980) is now ~36 hours
+unanswered — past the 24h threshold this file used yesterday to say "not yet a stall." Not recommending a
+Jira transition yet (a day and a half on a non-urgent-looking decision request is not unusual for this
+team), but flagging it since the customer has a stated Friday-morning weekly deadline for this data.
+
+**No Jira action was taken by this run.**

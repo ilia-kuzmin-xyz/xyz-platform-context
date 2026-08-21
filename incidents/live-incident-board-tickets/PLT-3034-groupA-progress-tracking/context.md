@@ -260,3 +260,10 @@ PLT-3033) but **this routine cannot open image content**. The three from 08-17 1
 (`image-20260817-132030.png`, `-132133.png`, `-132204.png`) are the ones that would likely settle Fork
 A vs Fork B without any new work, since they show the linked-elements panel for `DH2.29-30.1100`. A
 human glancing at them may be able to close this question immediately.
+
+## 2026-08-21 — no change
+
+Live fetch: status `With Customer`, 19 comments, `updated = 2026-08-19T12:48:11` — identical to the last
+run. No new comment since Yash's relay of the customer's pushback ("As I never link anything to a QA
+model..."). Fork A/B question, the three standing drafts and the Mech.144.1260 follow-up all stand
+unchanged.

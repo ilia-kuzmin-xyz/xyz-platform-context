@@ -197,3 +197,26 @@ meaningful — under 24 hours).
 **Confidence: 9/10** on the mechanism (both halves now verified in code against the actual reported
 Discipline string; the residual 1 point is that I have not personally inspected ML9's category config to
 confirm `CSA-TCB` is spelled exactly that way in the project data rather than in Darminder's typing).
+
+## 2026-08-21 — customer independently confirms the mechanism; decision request now past 24h silent
+
+**New comment since the 08-20 run: 110058 (2026-08-20 13:33), Yash relaying the customer.** The customer
+discussed the issue with Dario, investigated with Joshua, and concluded: *"the missing automatic
+calculation of the rework cost is due to how the 'CSA' discipline is currently set up in our project. This
+discipline has always been a single entry, but it is now split into 'CSA - TCB' and 'CSA - KGE' (the two
+main contractors). This split is not reflected in the table for the automatic rework cost calculation."*
+
+This is the customer independently arriving at the same conclusion the 08-20 draft to Mostafa/Pietro
+already stated (naming variant of an existing trade, not a new one) — it removes the residual doubt noted
+above about whether `CSA-TCB` is spelled that way by project convention: it now is, confirmed from the
+customer's own side, and a second variant (`CSA-KGE`) is now named that this run has not yet checked
+against `rework_reference.json`. **Confidence raised to 9.5/10; the one remaining gap is `CSA-KGE`
+coverage, not yet checked this run — same three-Discipline-string table, so it almost certainly misses the
+same way, but not verified.**
+
+**Silence status: Darminder's decision request (109980, tagging Mostafa and Pietro) was posted 2026-08-19
+19:48. As of this run it has stood unanswered for approximately 36 hours** — past the 24-hour threshold the
+08-20 run flagged as "not yet a stall." No comment from Mostafa or Pietro on this ticket. **The 08-20 draft
+to Mostafa and Pietro (`recommended-action.md`, 2026-08-20 section) was never posted by this routine** —
+still draft only, still accurate, and now stronger: the customer's own explanation can be added as
+corroboration in the same message.

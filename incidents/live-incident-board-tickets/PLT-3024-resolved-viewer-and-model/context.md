@@ -359,3 +359,10 @@ the Web-Viewer-linked-models screenshot may show the missing model's name and it
 model tree, which would answer the federation question outright and end the 14-day wait without the
 customer. This is the single highest-value, lowest-cost unclosed action on the ticket and it has now
 been flagged unactioned seven times.
+
+## 2026-08-21 — LEFT SCOPE: transitioned to Done
+
+Live fetch: status `Done`, `updated = 2026-08-20T11:21:27` — moved out of `With Customer` on 08-20,
+after that morning's run. Folder retagged `groupA` → `resolved`. The disposition question raised in
+the 08-20 section (does it have a path to closure while parked on a fact we'd already established we
+didn't need) appears to have resolved itself. Not independently re-verified against Jira comments.

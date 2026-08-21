@@ -276,3 +276,11 @@ are what Darminder based his 08-17 15:08 hypothesis on. The **XER files remain t
 highest-value missing artifact** and settle H1 in one query (`SELECT DISTINCT proj_id FROM PROJWBS`).
 The customer offered them unprompted in the original description on 08-10 and the offer has still never
 been taken up, ten days later. That is the standout process failure on this ticket.
+
+## 2026-08-21 — no change
+
+Live fetch: status `With Customer`, 5 comments, `updated = 2026-08-18T10:08:13` — identical to the last
+run. No reply from Darminder to his own 08-17 15:08 question about the schedule switcher, and the
+customer's offered XER files still haven't been requested — now **11 days** since the original offer.
+Step 1 (ask Darminder about the schedule-switcher entry, see `recommended-action.md`) remains the cheapest
+unblock and is still unposted.

@@ -322,3 +322,9 @@ hypothesis turns out to be the trigger.
 **Confidence in the next step: 8/10.** Two cheap questions to two named owners, neither of which
 presumes a mechanism. **Confidence in the diagnosis: unchanged, 6/10** — five hypotheses live, none
 excluded, all still discriminated only by Staging environment state.
+
+## 2026-08-21 — unchanged; drafts now 7 days unsent
+
+Both drafts still stand exactly as written. This ticket is assigned to Ilia, so both are his own next
+action rather than a nudge to someone else. Nothing in the GitHub re-check (`context.md`, 2026-08-21)
+changes the plan. **No Jira action was taken by this run.**

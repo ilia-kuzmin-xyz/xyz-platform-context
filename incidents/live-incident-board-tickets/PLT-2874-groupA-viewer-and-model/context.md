@@ -556,3 +556,16 @@ unopened and unopenable by this agent. Their value is now low: they document the
 overcount, which was diagnosed and fixed, not the Staging undercount that reopened the ticket.
 **The screenshot that would actually settle something does not exist yet** — it is the date-slider
 pair from Staging and Prod that the 08-14 draft asks Gennaro for.
+
+## 2026-08-21 — no new Jira activity; GitHub re-checked directly, claim still holds
+
+Live fetch: status `Open`, assignee Ilia Kuzmin (unchanged since the 08-19 reassignment), 6 comments,
+`updated = 2026-08-19T19:52:56` — byte-for-byte identical to the 08-20 snapshot. **7 days** since the
+08-14 drafts to Gennaro and Darminder went unsent.
+
+Re-ran the GitHub check rather than trusting yesterday's (per investigation discipline: reproduce, don't
+assume unchanged state carries over silently). `search_pull_requests query:"PLT-2874 in:title,body"`
+against `hc-frontend` returns exactly one result, PR #2084, closed/merged 2026-07-31 — the same one
+recorded on 08-20. `list_pull_requests state:open` now returns 13 open PRs (was 17 on 08-20; four merged
+or closed in the interim), and none references PLT-2874, element counting, or the dashboard total. **The
+falsifiable claim from 08-20 — no frontend fix in flight for PLT-2874 — still holds as of this run.**

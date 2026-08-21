@@ -114,6 +114,21 @@ card still renders `#{index + 1}` at
 `app/pages/organisation/ViewerPage/components/dashboard-panels/quality-panel/components/issue-item/issue-item.tsx:425`.
 The §3 mechanism therefore stands unchanged and unqualified. Nothing else re-derived.
 
+## 2026-08-21 — MOVED TO GROUP B: status is now Dev In Progress; folder retagged
+
+Live fetch: status `Dev In Progress` (was `Open`), assignee still Darminder Atker, still 1 comment,
+`updated = 2026-08-20T18:42:04` — the transition happened 08-20 evening, after the 07:15 run, with no
+new comment. Darminder appears to have taken the fix directly rather than replying to the "raise it
+as a dev ticket, or are you taking it yourself?" question in the standing draft — exactly the second
+option that draft offered. Folder retagged `groupA` → `groupB`.
+
+**Neither Group B exception applies** (not assigned to Ilia; the one comment on the ticket is a status
+relay, not a question aimed at us), so this gets the one-line Group B treatment going forward rather
+than a full pass: dev-ready, self-picked-up, no clarification needed, nothing drafted this run. Worth a
+light check on a future run that the shipped fix actually threads `issueNumber` through
+(`use-quality-data.ts` / `issue-item.tsx:425`) rather than something narrower, but that is a verification
+task, not a blocker.
+
 **Attachment gap unchanged:** the 2 Freshdesk-hosted screenshots and the 2 native Jira inline attachments
 (ids 62794-62797) remain unopened — no tool here can fetch authenticated helpdesk or Jira binary media.
 They would confirm the exact numbers displayed on each surface; they cannot change the mechanism, which is

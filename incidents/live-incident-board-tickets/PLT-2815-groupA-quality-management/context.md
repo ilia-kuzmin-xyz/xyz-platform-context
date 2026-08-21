@@ -279,3 +279,12 @@ Two things about that are directly relevant to this ticket:
 settled by product on 06-23 ("leave it as intended"), reproduced to the cent, and verified against the
 Confluence source on 08-14. It should still be closed. The only change is that its orphaned follow-up
 question now has a live thread to travel on.
+
+## 2026-08-21 — no Jira change; the PLT-3061 thread it was riding on is now itself past 24h silent
+
+Live fetch: status `With Customer`, 13 comments, `updated = 2026-07-06T10:18:45` — identical to the last
+run; **46 days** since that update, **17th consecutive run** recommending the close that has not been
+posted. The opening this ticket's orphaned £600-anomaly question was riding on (PLT-3061's live Mostafa/
+Pietro thread) has itself gone quiet — see `PLT-3061-groupA-quality-management/context.md`, 2026-08-21 —
+so there is no fresher opening yet, just a slightly older one. Close-out recommendation is unaffected
+either way; it does not depend on that question being asked.

@@ -614,3 +614,11 @@ still `2026-08-03T15:13:28` — byte-for-byte identical to 08-19. Yash's 07-27 q
 **24 days** unanswered. The two-branch drafted reply in `recommended-action.md` remains correct and
 unposted; the 30-second URL check (open the demo project, read whether it's `/dashboard` or
 `/progress-dashboard/<id>`) is still the only thing standing between this ticket and a reply.
+
+## 2026-08-21 — LEFT SCOPE: transitioned to Done
+
+Live fetch: status `Done`, `updated = 2026-08-20T10:40:46` — moved out of `With Customer` sometime
+between the 08-20 07:15 run and now, i.e. same day, after this folder's last snapshot. No comment
+history was re-fetched (out of scope once Done); folder retagged `groupA` → `resolved`. Whether it
+closed via the drafted Yash reply or independently is not verified — worth a spot-check next time
+someone is in Jira, but does not block anything since it is off the live-incident board either way.

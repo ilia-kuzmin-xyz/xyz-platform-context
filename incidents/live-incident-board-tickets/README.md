@@ -45,6 +45,79 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-21 — 8 in-scope tickets (down from 10): PLT-3024/PLT-2619 left scope (both → Done), PLT-3063 self-resolved into Group B (Dev In Progress, first ticket in that group since PLT-3060), PLT-3061's decision request now past 24h silent with the customer independently confirming the mechanism, everything else unchanged
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, 196 issues
+across 2 pages). Status breakdown: 173 Done, 5 Archived, 4 With Customer (unchanged tickets, see below),
+4 Customer Release Check (excluded — release-gate stage, not evaluated), 2 With Technical Support, 2 Ready
+For QA, 1 Blocked, 1 Ready For Release, plus the 8 in-scope below. **8 tickets in scope**: 7 Group A
+(`Open`/`In Analysis`/`With Customer`) + 1 Group B (`Dev In Progress`, PLT-3063). Read every existing
+folder before re-fetching Jira, per the routine's own rule 0 — six of the eight had **zero new Jira
+activity** since the 08-20 07:15 run and got a short "no change" append rather than a re-investigation;
+two had real deltas (PLT-3061, PLT-3063); two left scope entirely.
+
+### Left scope — PLT-3024, PLT-2619 (both → Done)
+
+Both transitioned `With Customer` → `Done` on 08-20, after that morning's run captured them still open
+(`updated` timestamps 08-20 10:40 and 11:21, both same day, a few hours after the 07:15 snapshot). Neither
+transition was independently re-verified against Jira comments — noted in each folder as unconfirmed
+whether it closed via the drafted reply or independently. Folders retagged `groupA` → `resolved`:
+`PLT-2619-resolved-dashboard-migration/`, `PLT-3024-resolved-viewer-and-model/`.
+
+### PLT-3063 — moved to Group B; looks self-resolved
+
+Status flipped `Open` → `Dev In Progress` on 08-20 evening (`updated` 18:42), with **no new comment** —
+Darminder appears to have taken the fix himself rather than answering the standing draft's closed
+question ("raise it as a dev ticket, or are you taking it directly since you're already assigned?"). That
+question offered exactly this as one of its two branches. Folder retagged `groupA` → `groupB`; per the
+routine's own Group B exceptions (assigned to Ilia, or most recent comment is a question at us — neither
+applies here), this now gets one-line treatment rather than a full pass. Worth a light check on a future
+run that the shipped fix actually threads `issueNumber` through rather than something narrower.
+
+### PLT-3061 — customer confirms the mechanism unprompted; decision request now past the 24h mark
+
+New comment since 08-20 (110058, 13:33 same day): the customer told Yash, independently of anything asked
+of them, that their project split the "CSA" discipline into "CSA - TCB" and "CSA - KGE" for two main
+contractors — the exact naming-variant mechanism the 08-20 draft to Mostafa and Pietro already inferred
+from the reference-table shape. This resolves the residual doubt the 08-20 confidence score carried (9/10,
+withheld one point for not having independently seen the project's own discipline naming) and raises it to
+9.5/10 — the remaining half-point is `CSA-KGE`, named by the customer but not yet checked against
+`rework_reference.json` this run. **Darminder's tag of Mostafa and Pietro (109980, 08-19 19:48) has now
+gone unanswered for roughly 36 hours**, past the 24-hour threshold the 08-20 run used to say "not yet a
+stall." The 08-20 draft was never posted by this routine and remains the right message, strengthened by
+one line citing the customer's own confirmation and widened to cover `CSA-KGE` alongside `CSA-TCB`. Full
+update: `PLT-3061-groupA-quality-management/context.md` + `recommended-action.md`.
+
+### Unchanged (no new Jira activity since 08-20) — brief notes only, appended to each `context.md`
+
+- **PLT-2858** (Critical, In Analysis) — 17th consecutive run unposted. 21 days since the last comment
+  (108643, 07-31), 39 days since Mostafa's unanswered "leave it with me," 45 days since the customer's "we
+  don't know how." Four drafts have been ready since 08-14 and are still accurate. This remains the board's
+  single most costly open item, and the cost is entirely in posting, not analysis.
+- **PLT-2874** (Open, assigned Ilia) — 7 days since the two 08-14 drafts (to Gennaro, to Darminder) went
+  unsent. Re-ran the GitHub PR check rather than trusting yesterday's: still only PR #2084 (merged 07-31)
+  references PLT-2874 across 13 currently-open PRs (down from 17 on 08-20). No frontend fix in flight,
+  confirmed a second time.
+- **PLT-3034** (With Customer) — no new comment since 08-19's customer pushback on the "unlink QA
+  elements" advice. Fork A/B question and the three standing drafts unchanged.
+- **PLT-3033** (With Customer) — no reply from Darminder to his own 08-17 schedule-switcher question. XER
+  files the customer offered on 08-10 still not requested, now 11 days.
+- **PLT-2815** (With Customer, close-out recommended) — 46 days stale, 17th run recommending the
+  `Done` transition that hasn't happened. Its orphaned follow-up question (the £600 anomaly) was riding on
+  PLT-3061's live thread; that thread has itself now gone quiet, so there's no fresher opening, just a
+  slightly older one.
+- **PLT-2649** (With Customer) — 28 days silent, waiting on the client's project-delivery team to correct
+  one model level's elevation. Nudge-to-Yash draft unchanged.
+
+### Notification
+
+Sent: PLT-2858 is now 17 runs / 45 days with ready drafts unposted (the routine's standing top escalation),
+and PLT-3061's decision request — customer-facing, weekly-Friday-deadline — just crossed 24h silent with
+new corroborating evidence to add. Both need Ilia to act; nothing else on the board rose to that bar this
+run (PLT-3063's self-resolution and the two Done transitions are good news, not asks).
+
+---
+
 ## Run: 2026-08-20 — 10 in-scope tickets (down from 12): PLT-3061 confirmed as the Pattern-6 gap (decision request now with product), 3 left scope (PLT-3060 fix posted → In Code Review, PLT-3044 + PLT-2946 resolved → Done), PLT-3034 re-entered scope on a customer rebuttal, PLT-2874 quietly reassigned Yash → Ilia, board's Critical ticket now 15 runs / 37 days unposted
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status NOT IN (...)`, worked

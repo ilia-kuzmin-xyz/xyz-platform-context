@@ -406,6 +406,15 @@ table (`:18-23`) — both are latent maintenance risk (a discipline name that di
 stale FX rate would silently produce the same "coverage gap" symptom) independent of the table's
 content itself.
 
+**2026-08-21 — field confirmation of the naming-variant hypothesis.** On PLT-3061, the customer told
+Yash directly (comment 110058) that their project split the single "CSA" discipline into "CSA - TCB"
+and "CSA - KGE" for two main contractors, and that split was never reflected in the reference table.
+This is a live customer confirming, unprompted, that a coverage gap in this pattern's shape can
+originate from the *client's own project configuration changing* mid-project, not just from a table
+that was incomplete from day one. Worth checking for this specifically when a previously-working
+Category/Discipline/Package combination on an established project starts failing: ask whether the
+project renamed or split a discipline/contractor recently, before assuming the table was always wrong.
+
 ### 2026-08-20 update — PLT-3061's gap confirmed, and the "standing risk" above has now actually fired
 
 The PLT-3061 row in the table above was written on 08-19 with its cause still a hypothesis. It

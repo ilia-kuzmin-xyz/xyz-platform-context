@@ -441,3 +441,13 @@ what makes 37 days particularly costly.
 `image-20260701-114131.png`, `image-20260714-113920.png`, and the inline `blob:` refs) remain unfetchable
 here; the 07-14 one returned HTTP 403 to a prior run. None are load-bearing: every substantive claim in this
 file is stated verbatim in comment text or read directly from code. Do not guess their contents.
+
+## 2026-08-21 — 17th consecutive run, still unposted; zero Jira movement
+
+Live fetch: status `In Analysis`, priority Critical, assignee Mostafa Kamel Hussien, `resolution = null`,
+27 comments total — same count as 08-20, newest still 108643 (2026-07-31, Yash's "any update?"). **21 days**
+since that comment, **45 days** since the customer's "we don't know how" (106728, 07-07), **39 days** since
+Mostafa's own "leave it with me" (107208, 07-13) went unanswered. Nothing re-derived this run — the
+diagnosis and the four ready drafts in `recommended-action.md` (2026-08-14 section) stand exactly as
+written and remain accurate against a Critical, customer-facing ticket with a working manual workaround.
+Restating rather than re-arguing: this is not an analysis gap.

@@ -275,3 +275,11 @@ above. Critical does not fit a config gap with a working manual workaround, and 
 distorts the board.
 
 **No Jira action was taken by this run.**
+
+## 2026-08-21 — 17th consecutive run, unchanged
+
+No new information to add and nothing in Drafts 1-4 needs rewording. Restating the priority-ordered
+handling list from 08-20 verbatim since it is still the recommendation: post Draft 1 (unblocks Mostafa),
+then Draft 2 (the product decision), then Draft 4 (customer acknowledgement via Yash —45 days waiting on a
+written request), with Draft 3 to Sachin/Ali parallel and non-gating. **No Jira action was taken by this
+run.**
