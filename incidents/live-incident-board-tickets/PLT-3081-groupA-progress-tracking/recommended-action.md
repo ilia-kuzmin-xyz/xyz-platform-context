@@ -166,3 +166,65 @@ negative greps run rather than assumed. H1 as *the* trigger: **5/10** — it is 
 varies by package, which is suggestive, but the strongest version of it was disproved this run
 (`activity_categories_flat` is one row per activity), and no data has been seen. The 15-minutes /
 immediate reconciliation: **4/10**, plausible and unverified.
+
+---
+
+## §5 2026-08-21 update — pair confirmed, H1 falsified, next asks
+
+Package pair is **`discipline = 'CSA'`, `package = 'UG Electrical'`** (one package; "UG" =
+Underground, so Yash's and Ilia's labels were the same thing). Rung 3 query (a) returned
+`joined_rows = 0, distinct_objects = 0`. See `context.md` §8 for the full reading.
+
+### 5a — Validate the predicate FIRST. A wrong predicate returns 0 too.
+
+`activity_categories_flat`'s columns are generated from the project's category **typeName** strings
+(`api-categories-loader.ts:195-207`), so the column names are not guaranteed to be `discipline` /
+`package` on this project, and the values could differ by case or whitespace. Until this comes back,
+the `0` cannot be built on.
+
+```sql
+-- (i) real column names on THIS project
+DESCRIBE activity_categories_flat;
+
+-- (ii) the decisive one: exact strings AND activity counts in a single pass.
+--      Also doubles as the control for (a) — every sibling package's count is right here.
+SELECT discipline, package, COUNT(*) AS activities
+FROM activity_categories_flat
+WHERE package ILIKE '%electric%' OR discipline ILIKE '%electric%' OR discipline ILIKE '%csa%'
+GROUP BY 1, 2
+ORDER BY 3 DESC;
+
+-- (iii) does the parquet the PANEL reads agree with the flat table the FILTER reads?
+SELECT ActivityCategoryId, CategoryName, ParentDiscipline, TypeName
+FROM category_groups
+WHERE CategoryName ILIKE '%electric%'
+GROUP BY ALL;
+```
+
+**Readings.** If (ii) shows `(CSA, UG Electrical)` with a healthy count → the `0` was a predicate
+typo, H1 is back open, and (ii) has handed us the control numbers anyway. If (ii) shows **no such
+pair** while (iii) shows the package present in `category_groups` → the `0` is real, H1 is dead, and
+we have a source-disagreement finding (`context.md` §8) that is arguably worth its own ticket
+regardless of the hang.
+
+### 5b — The two zero-cost questions are now the critical path, not more SQL
+
+Both have been asked once and are still unanswered. With size off the table they are now worth more
+than any query:
+
+1. **Which spinner** — whole left panel replaced, or the small green one beside the header with
+   numbers still visible underneath? Splits H2 from H3/H4 outright (`context.md` §2).
+2. **The console at the moment it hangs** — `Query failed` / `Query execution failed:` / **nothing**.
+   Distinguishes "threw" from "never settled". An unhandled rejection naming `_queryAllData` would
+   point straight at D3.
+3. **Was any other filter active** (room, level, floor, status, XYZ Tracked, a Gantt selection) when
+   you clicked? D3's only realistic throw site is the awaited `_resolveRoomLevelToActivityIds` at
+   `:1026`, which is *only reached when a room or level filter is active*. A yes here would make D3
+   the answer almost immediately.
+
+### 5c — Unchanged
+
+§3's dev-ready list is unaffected by any of this — those five defects are what turn a failure into an
+unrecoverable freeze, whatever the trigger. Note that D1 also silently disables the three 60-second
+guards in `dashboard-color-service.ts` (`context.md` §8, last note), which strengthens the case for
+fixing it first.

@@ -232,3 +232,105 @@ executed.
 - ⚠️ The two inline `blob:` screenshots on comment 110140 — not opened, same reason.
 
 Do not guess their contents.
+
+---
+
+## 8. 2026-08-21, later the same day — package pair confirmed, and the first data came back `0`
+
+### The naming discrepancy is resolved: it is ONE package, not two
+
+Ilia confirmed: **package `UG Electrical`, discipline `CSA`.** So "UG" = Underground — Yash's
+"Underground - CSA" and Ilia's "Electrical - CSA" are the same thing, each a partial reading of the
+panel label `UG Electrical — CSA`. §1's open question is closed. **No second failing package.**
+
+Worth recording because it is not a coincidence: `UG Electrical` under `CSA` vs under `Electrical` is
+the *literal example* written into the code comment at `use-progress-panel-data.tsx:229-231`. Whoever
+wrote that comment was looking at real data of this shape. So the collision is real and known.
+
+### The collision is NOT the trigger — verified and set aside
+
+Traced the selected-package id all the way through the colour/visibility path this run:
+`combinedPackageIds = [...packages]` for a package-only selection (`:1923-1924`) →
+`Array.from(new Set(...))` (`:1929`) → `resolvePackagePairs` (`:1930`), which is a straight
+UUID→pair `Map.get` (`dashboard-filter-service.ts:163-171`). **One id in, one pair out. Selecting the
+CSA copy does not pull in the Electrical copy.** The doubling sub-hypothesis is dead.
+
+The top-bar filter panel is also safe: `setCategoryMaps` builds `_uniqueNameToPackageId` with an
+explicit `null`-sentinel for ambiguous names (`dashboard-filter-service.ts:126-134`), so
+`resolvePackageIdByName('UG Electrical')` returns `undefined` rather than guessing, and the only
+caller (`dashboard-filters.tsx:258-268`) treats `undefined` as "no id". An `undefined` reaching
+`filters.package` would be dropped with a warning by `_buildFilteredPackageIds` (`:573-577`) and by
+`resolvePackagePairs`. **Collision handling is correct throughout. Keep it as a latent-risk note, not
+a cause.**
+
+### The fan-out hypothesis (H1) is dead — CONDITIONAL on the predicate being right
+
+Ilia ran query (a) and returned `joined_rows = 0, distinct_objects = 0`.
+
+If that predicate is correct, **H1 is falsified outright**: there is no fan-out, no large intermediate,
+nothing to exhaust memory. The query is empty and therefore fast. Whatever hangs, it is not the size
+of this join.
+
+⚠️ **But a `0` is exactly what a slightly-wrong predicate also returns, and the run instructions are
+explicit about this** ("Before comparing two numbers, reproduce each exactly. If a query is off even
+slightly, that surface is not understood yet and anything built on the comparison is worthless").
+`activity_categories_flat`'s columns are generated dynamically from category **typeName** strings
+(`api-categories-loader.ts:195-207` — `coreColumns` + `extraColumns`, each quoted `VARCHAR`), so the
+real column names are whatever the API's category types are called on this project; and the literal
+values could differ by case or whitespace. **Two readings of the same `0`, and they point opposite
+ways:**
+
+1. **Predicate wrong** → the `0` carries no information at all, and H1 is still open.
+2. **Predicate right** → H1 is dead, *and* we have a genuine new finding (below).
+
+A discovery query settles it in one round trip; drafted in `recommended-action.md` §5. **Do not build
+on this `0` until that comes back.**
+
+### If the `0` is real, it is itself the more interesting finding
+
+The panel only renders a package when `categorySummaryUnfiltered` (from the `category_groups`
+parquet) has a matching row — packages with no data return `null` and are filtered out
+(`use-progress-panel-data.tsx:268-277`, `:316`). **Ilia sees `UG Electrical — CSA` in the list with
+progress numbers on it.** So the parquet has data for that ActivityCategoryId while
+`activity_categories_flat` (built from the API, one row per activity) has no activity carrying that
+(discipline, package) pair.
+
+That is a **disagreement between the two sources the dashboard uses for the same concept** — the same
+class of defect as PLT-2874 (two surfaces counting different things) and adjacent to PLT-3034's
+unexplained link-count mismatch. Consequence in this code: `hasCategoryFilters` is `true` (a pair
+resolved), so the early "no known pairs" bail at `:1937-1944` is skipped, the real SQL runs, and
+`_visible_elements` is materialised **empty**. The panel shows numbers for a package the element layer
+believes has nothing in it.
+
+**Not yet established:** that an empty `_visible_elements` *hangs* anything. Searched for a
+retry-until-non-empty loop that would spin on a legitimately empty result and did not find one — the
+three `while` loops in `dashboard-color-service.ts:287,320,352` poll for *table existence* and all
+carry 60s caps, and `dashboard-quality-service.ts:184`'s `while (true)` is a paginator with a
+`break` at `:193-195`. So no infinite loop was found on the empty path. **The hang mechanism is
+currently unexplained.**
+
+### New observation on the three colour-service wait loops
+
+They are not a cause but they are an amplifier worth noting: each iteration `await`s
+`duckdb.query(...)`, and the elapsed-time check happens only at the top of the iteration
+(`:288`, `:321`, `:353`). On a wedged connection the `await` never returns, so **the 60-second
+timeout never fires** — the loop cannot reach its own guard. Any fix to D1 (query timeout) makes
+these guards effective; without it they are decorative.
+
+### Where this leaves the hypothesis set
+
+- **H1 (fan-out / OOM)** — dead if the predicate holds, otherwise still open. Blocked on the
+  discovery query.
+- **H2 (`isLoading` stuck, i.e. the full-panel spinner)** — untested, and now the cheapest live lead.
+  Still blocked on the one question nobody has answered: **which spinner is it.**
+- **H3 (throw in the unguarded window, D3)** — still live, and relatively more likely now that size
+  is off the table. Needs the console, and needs to know whether any room/level filter was active.
+- **H4 (colour/viewer path)** — still live, still unexamined beyond the loop audit above.
+- **H5 (slow, not hung)** — effectively dead: with `joined_rows = 0` there is nothing slow to do,
+  *if* the predicate holds.
+- **H6 (new) — the empty-`_visible_elements` path does something pathological downstream.** Opened by
+  this result, not yet investigated. No infinite loop found so far.
+
+**Confidence: the five structural defects stay at 9/10** (independently verified, unaffected by this
+result). **Root cause: down from 5/10 to "unknown"** — the leading hypothesis was falsified and no
+replacement has evidence yet. Saying so plainly rather than promoting the next-most-plausible guess.
