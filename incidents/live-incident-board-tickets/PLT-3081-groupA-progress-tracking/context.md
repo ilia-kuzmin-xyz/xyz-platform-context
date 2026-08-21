@@ -537,3 +537,83 @@ to fix. **Trigger: ~6/10** — date-coverage mismatch is now the leading and bes
 but the specific slider position has not been reproduced. Two wrong trigger hypotheses so far (fan-out,
 zero-weight) with the mechanism intact through both, which is a hint in itself: **the fix does not
 depend on identifying the trigger.** Guarding the null fixes every version of it.
+
+---
+
+## 11. Date-coverage falsified too. Stopping hypothesis generation; one contradiction now dominates.
+
+`global_dates = 1024`, `pkg_dates = 1024`, `global_first = pkg_first = 1753056000000`. Package
+`18464cd1` has a row on **every date the parquet holds, from the first one**. No gap exists for a
+slider position to land in, so **§10's date-coverage trigger is dead.** Recording it as killed so no
+future run re-runs it.
+
+### Three trigger hypotheses falsified, each by one query
+
+| # | Hypothesis | Killed by |
+|---|---|---|
+| H1 | Join fan-out / DuckDB-Wasm OOM | `joined_rows = 0` — the join is empty, not huge |
+| §9 | Selected package has zero weight | `MAX` labour 33,610 / elements 45,343 — and my aggregate was the wrong shape for a per-date predicate |
+| §10 | Date-coverage gap at the slider's nearest dates | coverage identical to global, 1024/1024, same first date |
+
+**The mechanism survived all three.** That is now the most informative fact in this file: the
+`null → hasReceivedData=false → permanent spinner` chain is verified in code and independent of
+whatever produces the null, so the fix is trigger-independent. But it is *not* demonstrated that a
+null is actually produced here, and §11's data now argues against it — a package with weight on all
+1024 dates should make `start_data`/`end_data` non-empty and yield real numbers.
+
+### The contradiction to resolve before anything else
+
+- `category_groups`: `18464cd1` "UG Electrical" → **45,343** `TotalLinkedElements`, 1024 date rows.
+- `element_base_data ⋈ activity_links ⋈ activity_categories_flat` on `(CSA, UG Electrical)` → **0**.
+
+These cannot both describe the same package. **Leading reading: `18464cd1` is the *Electrical*-discipline
+`UG Electrical` (543 activities), and the CSA-discipline one (2 activities, no links) has no
+`category_groups` row at all.**
+
+If that holds, then given §10's verified finding that the panel's name-fallback can never fire in
+package mode (no `ParentDiscipline` in `getCategorySummaryV2API`'s SELECT), **only `18464cd1` can be
+rendered** — and its panel label depends on which discipline the **API category tree** assigns as its
+parent, which is *in-memory state not present in DuckDB* and therefore not answerable from any query
+run so far.
+
+Two branches, and they point at different bugs:
+
+- **(A) API tree says `18464cd1`'s parent is CSA**, while `activity_categories_flat` attributes those
+  activities to `Electrical`. Then the panel legitimately shows "UG Electrical — CSA"; the *progress*
+  query on `18464cd1` returns real numbers (no null, **mechanism does not fire**); but the *colour*
+  path filters `(CSA, UG Electrical)` and gets 0 activities → `_visible_elements` **empty**. The stuck
+  spinner would then be in the viewer/colour path (H4), not the progress panel — and the two data
+  layers disagree about which discipline owns this package, which is the underlying defect.
+- **(B) API tree says the parent is Electrical.** Then the panel row is "UG Electrical — Electrical"
+  and the package the user believes they clicked is not the one the code saw — meaning the reported
+  label and the actual selection diverge, and the whole investigation has been aimed at the wrong row.
+
+**Neither branch is decidable from `category_groups` / `activity_categories_flat`.** Both are decidable
+from one console line, below.
+
+### The one observation that settles it, and has been asked for four times without arriving
+
+`dashboard-progress-service.ts:1283-1293` logs, on every package-level query:
+
+```
+Data queried (V2 API - Project/Package level)  { …, projectProgress: { actual, planned } }
+```
+
+**That line prints the exact variable at the centre of the mechanism.**
+
+- `actual: null` → mechanism confirmed, ship the guard, done.
+- `actual: <number>` → **the mechanism does not fire for this ticket**, the progress panel is not what
+  is stuck, and the investigation restarts at H4 (colour/viewer) with `_visible_elements` empty as the
+  starting fact.
+
+Also worth capturing in the same paste: `[📊 FILTER] Filtering by packages: N` (`:1957`) and
+`Activity category filter expansion: {input: {disciplines, packages}, expandedIds}` (`:603`) — the
+second prints the selected id, which resolves branch (A) vs (B) directly.
+
+**Process note for the next run, and the real lesson of this ticket so far:** four rounds of SQL have
+each killed a hypothesis without confirming one, while the single cheapest observation — what the app
+logs at the moment of failure — has never been captured. The run instructions' rule *"state each
+hypothesis as a prediction one query can falsify, then run it"* was followed; what was skipped is the
+prior rule, *"ask what tooling the human has before designing a diagnostic"* — DuckDB access was
+offered and taken up, and it framed every subsequent step as a data question when the decisive
+evidence was always runtime state. **Get the console line before writing another query.**
