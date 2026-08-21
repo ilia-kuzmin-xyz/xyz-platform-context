@@ -133,3 +133,50 @@ and `getProfile` hands the block to `setCommissioningConnectionFromRuntimeConfig
 everything in "The seam" and "Environments" above still describes the fallback path, which is
 byte-identical where the env keys are absent (local, MSW, PRD for now). A spec in
 `supabase-config.test.ts` pins the entrypoint↔module field names in lockstep.
+
+## 2026-08-21 — System prerequisites moved onto `workflow_step_task` (no migration)
+
+Supersedes the plan in `docs/commissioning/asset-type-system-requirements-schema.md` (hc-frontend)
+that called for two bespoke tables, `asset_type_system_requirement` + `..._task`. Those were never
+created — probed both envs, absent on `dev` and on `stable` alike, which is why prerequisite saves
+looked successful and persisted nothing. That report ("saving does not seem to apply them", Rishi,
+20 Aug) had this as its root cause.
+
+**The table is now shared, discriminated by a `bucket` column:**
+
+| `bucket` | meaning | `system_type_id` |
+|---|---|---|
+| `asset_readiness` | a type's own gating tasks on its ladder step | null |
+| `system_requirement` | an asset type's System prerequisite for that system type | set |
+
+Verified on `dev`: `bucket` and `system_type_id` both exist, `bucket='asset_readiness'` is already
+in use, and the upsert's conflict target `(workflow_step_id, task_template_id, system_type_id, bucket)`
+has a matching unique constraint — probed with a deliberately invalid FK, which returned **23503 at
+execution** rather than 42P10 at planning, so the constraint resolved and nothing was written. That
+probe is the cheap way to confirm a conflict target without inserting.
+
+**The pitfall this creates, and it already bit:** `workflowStepTaskService` predates the split and
+filtered on `(project_id, workflow_step_id)` only. Two live bugs, both fixed in `655787ac`:
+
+- `setForStep` deletes-then-reinserts with no bucket predicate, so saving *any* step of a system
+  type wiped the `system_requirement` rows sharing that step. Fired on the ordinary edit-session Save.
+- `listForProject` / `getForStep` didn't filter either, so prerequisites surfaced as the system
+  type's own ladder tasks and inflated the Tasks column.
+
+**Rule for anything touching this table: every read, write and delete carries a bucket predicate.**
+`clear()` is the deliberate exception (project-wide, no production callers). Deletes on the
+prerequisite side additionally scope by `system_type_id`.
+
+**Known limitation, by design for now:** the table has no `asset_type_id`, so a prerequisite saved
+against an asset type applies to *every* member asset of the system, not only to assets of that
+type. `listForAssetType` ignores its `assetTypeId` argument and returns the project's requirements
+grouped by system type. The dimension arrives with Rishi's `system_type_task.asset_type_id`
+(PLT-3058 / #2150); at that point only `assetTypeSystemRequirementService` changes.
+
+`create()` now **throws** (not skips) when a staged step tag has no matching step on the system
+type's workflow — a silent drop read as a successful save. Hit when a system type carries an asset
+ladder (Red/Yellow/Green) or no workflow instead of the Blue/White pair `createSystemTypeWorkflow`
+mints. `removeTask()` deliberately does *not* throw in the same situation: create refuses those,
+so no row can exist to remove, and failing a save with nothing to do would be wrong.
+
+Landed on hc-frontend `PLT-3003` (PR #2147) — commits `f5f2cafb`, `655787ac`, `f0812cb8`, `460a8e8c`.
