@@ -698,3 +698,81 @@ ps.categories$.subscribe(cats => console.table(
 
 Recorded because it makes the next round conclusive whichever way it falls, and because it needs no SQL
 and no log lines.
+
+---
+
+## 13. Adversarial review attempted and FAILED. But the schema doc settles the precondition question.
+
+**The review did not run.** A 4-lens adversarial workflow was launched against the PLT-3081 branch
+(precondition / regression / wiring / alternative-cause). All four attack agents died: every tool call
+was rejected by a broken permission handler in the environment, so none of them read a single file, and
+all four hit the structured-output retry cap. `journal.jsonl` holds exactly one result line and it is
+empty. The synthesiser, handed three empty arrays, **correctly refused to produce a verdict** rather
+than paraphrase the prompt back as review. **Do not record this branch as "reviewed, no findings" —
+record it as "review did not run."**
+
+The synthesiser did contribute the sharpest question of the investigation, and it is answerable:
+*does the overview query filter on `ActivityCategoryId`, or on package name?* Because if it keys on
+name alone it would match the one existing weighted row-group and the precondition could never hold.
+
+**Answered from code:** it keys on **`ActivityCategoryId`**, a UUID —
+`AND ActivityCategoryId IN ('${filteredPackageIds.join("','")}')`
+(`progress-queries-v2-api.ts:176`), and `filteredPackageIds` are validated against the **API category
+tree**, not against `category_groups` (`dashboard-progress-service.ts:572-577`). So a selected id that
+is simply absent from `category_groups` yields zero rows in both CTEs. The name-only branch the
+synthesiser worried about does not exist.
+
+### The decisive fact, and it corrects §10 *and* my later pessimism
+
+`docs/dashboard/duckdb-tables/README.md:30-53` gives `category_groups`' schema: one row per
+**(`ActivityCategoryId`, `CalendarDate`)**, with `TotalLinkedElements` and `TotalPlannedLaborUnits` as
+**per-row, therefore per-date, columns** — not static per-package totals.
+
+**So the precondition CAN hold.** `MAX(weight) > 0` over 1024 dates says nothing about the weight on
+the two dates the overview query actually resolves. §10 correctly identified that my `MAX` aggregate
+could not test a per-date predicate; what §10 and §11 then did wrong was to treat the `MAX` result as
+*evidence against* the mechanism. It is not evidence either way. **Both "the data argues against it"
+(my later framing) and "zero-weight package" (§9) were overreadings of the same unsuitable query.**
+
+Same doc also independently confirms `category_groups` has **no `ParentDiscipline` column** (the
+enriched `ParentDiscipline` lives on `actual_category_progress`, `progress-schemas.md:43-66`), which
+corroborates §10's finding that the panel's name-match fallback can never fire in package mode.
+
+### The one query that settles it — now with MIN, which is the part I kept omitting
+
+```sql
+SELECT COUNT(*)                          AS date_rows,
+       MIN(TotalPlannedLaborUnits)       AS min_labour,
+       MAX(TotalPlannedLaborUnits)       AS max_labour,
+       MIN(TotalLinkedElements)          AS min_elements,
+       MAX(TotalLinkedElements)          AS max_elements,
+       SUM(CASE WHEN COALESCE(TotalPlannedLaborUnits,0) = 0 THEN 1 ELSE 0 END) AS dates_zero_labour,
+       SUM(CASE WHEN COALESCE(TotalLinkedElements,0)    = 0 THEN 1 ELSE 0 END) AS dates_zero_elements
+FROM category_groups
+WHERE TypeName = 'Package'
+  AND ActivityCategoryId = '18464cd1-40b5-4271-b7fa-d5620474f217'
+```
+
+`min_* = max_*` means the weight is a constant repeated per date, and the precondition can only be
+reached by a selected id being **absent** from `category_groups` rather than by zero weight.
+`dates_zero_* > 0` means the precondition is live and slider position decides it.
+
+### Better still, from the synthesiser: a breakpoint beats both a query and a console line
+
+Break (or drop one `console.log`) at `result?.[0] || null` in `getProjectProgressV2API`
+(`progress-queries-v2-api.ts`, project/package branch), click the package, and read the raw result plus
+the bound filter values:
+
+- `[{ actual: null, ... }]` → **precondition confirmed**, the fix is on target, close the ticket.
+- `[]` or a non-null `actual` → **hypothesis four falls**, and the freeze is elsewhere.
+
+This needs no feature flag, no cookie and no `window.projectService`, which is what defeated §12. It
+also dumps the resolved start/end dates and the ActivityCategoryId actually used, which is the single
+piece of state nobody has captured across the whole investigation.
+
+### Standing instruction for the next run
+
+**Get one runtime observation before writing another query.** Four SQL rounds have each killed a
+hypothesis; zero have confirmed one. The pattern is not bad luck, it is a methodological error: SQL can
+only test conditions I have already guessed correctly, whereas the breakpoint above reads out the
+actual value regardless of which guess is right.
