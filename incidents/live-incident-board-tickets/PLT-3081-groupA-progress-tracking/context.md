@@ -617,3 +617,84 @@ hypothesis as a prediction one query can falsify, then run it"* was followed; wh
 prior rule, *"ask what tooling the human has before designing a diagnostic"* — DuckDB access was
 offered and taken up, and it framed every subsequent step as a data question when the decisive
 evidence was always runtime state. **Get the console line before writing another query.**
+
+---
+
+## 12. How to read runtime state without relying on log lines (2026-08-21)
+
+Ilia is reproducing via a plugin that replays prod data on a dev branch, and asked whether the log
+lines will fire or whether the functions have to be called manually. Both routes exist; the second is
+better and needs no code change.
+
+### The logging picture, verified
+
+- `dashboard-progress-service.ts:17` uses `createServiceLogger` → `createLogger` from
+  `app/services/logService`. **It is NOT gated by `dashboard-logger.ts`'s `CURRENT_LEVEL`/`excludedServices`** —
+  those govern the separate `dashboardLogger` object.
+- `createServiceLogger`'s `data()` maps to `log.info()` (`dashboard-logger.ts:246`), and
+  `logService/logger.ts:15` sets `CONSOLE_VERBOSE = process.env.NODE_ENV !== 'production'`, with
+  `shouldLogToConsole` allowing info/debug whenever that is true (`:17-18`). **So on a dev build the
+  `Data queried (V2 API - Project/Package level)` line already prints.** Only a production bundle
+  suppresses it.
+- `logService/logger.ts:99-118` also persists every line via `write()` to OPFS, so there is a
+  downloadable log file route (`LogFileService`, `isLogFileSupported`) independent of the console.
+
+### ⚠️ Side finding — `dashboard-logger.ts`'s level table is inverted (own small ticket)
+
+`LEVELS` maps `DEBUG: 0`, identical to `SILENT` (`:65-71`), and `shouldLog` is
+`LEVELS[level] <= LEVELS[CURRENT_LEVEL]`. Consequences:
+
+- Setting `CURRENT_LEVEL = 'DEBUG'` makes `shouldLog('INFO')` → `3 <= 0` → **false**. Raising the level
+  to DEBUG *removes* info/success/data/warn output. The file's own docblock promises the opposite
+  ("DEBUG: All logs including detailed operations").
+- `shouldLog('DEBUG')` is `0 <= anything` → **true even at `SILENT`**, so `debug()`, `group()`,
+  `time()` and `table()` emit when logging is supposedly off.
+
+`DEBUG` should rank `4`. Impact is limited because the dashboard services have migrated to
+`createServiceLogger`, but anyone debugging this ticket would naturally flip that constant and get
+less output, which is a real trap. Worth a one-line fix.
+
+### The good route: `window.projectService`
+
+`dashboard-project-provider.tsx:128-132` already exposes it — *"Conditionally expose projectService
+globally for Playwright or debugging"* — gated on the feature flag **`enableGlobalWebViewerAPI`**.
+Turn that flag on and everything below is readable from the console.
+
+**These are pure in-memory state reads — they do not touch DuckDB, so unlike SQL they are safe to run
+on the wedged tab.** That matters: every prior diagnostic had to be run in a fresh tab, which is
+precisely why none of them observed the failed state.
+
+```js
+const ps = projectService.dashboardProgressService
+
+// (1) WHICH package was actually selected — resolves §11's branch (A) vs (B) outright
+projectService.dashboardFilterService.getCurrentFilters()
+//     → read .package (array of activityCategoryId), .discipline, .dateRange
+
+// (2) WHICH SPINNER — answers the question outstanding since the first pass.
+//     BehaviorSubjects replay their current value, so this works after the fact.
+ps.maxActualProgress$.subscribe(v => console.log('maxActualProgress =', v))
+ps.isQuerying$.subscribe(v => console.log('isQuerying =', v))
+console.log('isInitializing', ps.isInitializing, 'isLoadingFiles', ps.isLoadingFiles, 'allLoaded', ps.allLoaded)
+
+// (3) WHICH DISCIPLINE the API tree assigns to each UG Electrical — resolves §11's contradiction
+ps.categories$.subscribe(cats => console.table(
+  cats.filter(c => c.categoryName === 'UG Electrical').map(c => ({
+    id: c.activityCategoryId,
+    type: c.typeName,
+    parent: cats.find(d => d.activityCategoryId === c.parentActivityCategoryId)?.categoryName,
+  }))
+))
+```
+
+### Decision table for (2) — this is the whole diagnosis in one read
+
+| Observation while stuck | Verdict |
+|---|---|
+| `maxActualProgress = null` | §9/§10 mechanism **confirmed**. Ship the guard. |
+| `maxActualProgress` is a number, `isQuerying = true` | Mechanism dead; **D3** (`_isQuerying$` set outside its try, `:1013` vs `:1056`) is the cause. |
+| `maxActualProgress` is a number, `isInitializing`/`isLoadingFiles` true | Mechanism dead; a loader is stuck (H2). |
+| all three healthy, panel still spinning | The progress panel is not what is stuck → **H4**, viewer/colour path, with empty `_visible_elements` as the starting fact. |
+
+Recorded because it makes the next round conclusive whichever way it falls, and because it needs no SQL
+and no log lines.
