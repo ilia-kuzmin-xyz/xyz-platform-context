@@ -452,6 +452,27 @@ playbook's Group A drafting rules.
 > release. Until then, avoiding that one package avoids the freeze, and a refresh clears it if it does
 > happen.
 
+### Draft C — DM to Mostafa. Short, and it hands him the one genuine product call.
+
+He escalated this to Ilia, so he needs the status, and he is the right owner for the single product
+question the fix raises. Kept to two short paragraphs, no code detail.
+
+> Mostafa, quick one on PLT-3081. It turned out not to be a crash, and not related to how long the
+> dashboard has been open. Selecting the UG Electrical package under CSA leaves the progress panel
+> loading forever, because the progress figure for that selection comes back empty and the panel reads
+> empty as still loading. Fix is written and on a branch, waiting on review and a release.
+>
+> One small product call for you when you have a minute. For a selection with nothing measurable in
+> it, the fix currently shows 0.00%. The more honest thing would be a short "no measurable data for
+> this selection" state instead. I am happy either way, but the second needs a line of copy from Jason.
+> Which would you rather have?
+
+Rationale for handing him this specific question: it is the only decision in the whole ticket that is
+genuinely product rather than engineering (see §7 out-of-scope item 2), it is small, and it is
+answerable with a value. Do **not** widen the DM into the schedule-data-quality question about
+same-named packages across disciplines; that is a separate conversation and bundling it will stall
+both.
+
 ### Notes for whoever posts these
 
 - **Do not include the "packages that will hang" list.** It came from the §9 reading that §10
