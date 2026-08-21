@@ -447,3 +447,93 @@ the app. One query closes it — `recommended-action.md` §6.
 - **Query C in the 08-21 chat was my error**, not a finding: `ParentDiscipline` is an alias the FE's own
   query creates (`progress-queries-v2-api.ts:943`, `cat.discipline as ParentDiscipline`), not a raw
   `category_groups` column. The Binder Error is expected and means nothing.
+
+---
+
+## 10. CORRECTION to §9 — the mechanism holds, my identification of the trigger did not
+
+Two further queries came back and **falsify §9's step 3 as written.** Recording this properly rather
+than quietly editing §9, because the wrong turn is instructive.
+
+### The data
+
+`category_groups`, `CategoryName = 'UG Electrical'`, grouped by id — **one row, not two**:
+
+| ActivityCategoryId | max_labour | max_elements | date_rows |
+|---|---|---|---|
+| `18464cd1-40b5-4271-b7fa-d5620474f217` | **33,610** | **45,343** | 1,024 |
+
+So the clicked package is emphatically **not** zero-weight. §9's "2 activities, 0 linked elements,
+therefore zero weight" conflated two different tables: `activity_categories_flat` has two
+`UG Electrical` packages (CSA:2 activities, Electrical:543), but `category_groups` has only one, and it
+is a large one.
+
+**My error, stated plainly: I asked for `MAX(weight)` when the FE's predicate is per-date
+(`AND ${weightColumn} > 0` inside a `CalendarDate = …` filter).** A package can have `MAX` weight in
+the tens of thousands and still have zero qualifying rows on the *specific* date the query picks. The
+aggregate I chose could not test the predicate I was reasoning about. §9's steps 4-10 are untouched;
+only step 3's *reason* for the empty CTEs was wrong.
+
+The 08-21 blast-radius query (`HAVING MAX(...) = 0`) is likewise the wrong shape and its output
+(`Air Ducts`, `Controls`, `Curtain Wall`, `Level 3`, …) should **not** be circulated as "packages that
+will hang" — that list was built on the same mistaken aggregate. Several of those rows are also
+interesting for a different reason (weight in one column, zero in the other), but that is a
+weighting-method question, not this bug.
+
+### What actually differs, verified in code — the panel list and the overview number use DIFFERENT dates
+
+This is the real structural defect, and it is cleaner than anything hypothesised so far:
+
+| Surface | Date it queries | Weight predicate |
+|---|---|---|
+| **Package list in the left panel** (`getCategorySummaryV2API`) | `CalendarDate = '${latestDateStr}'` — the **MAX date in the parquet** (`:532`, `:546`, `:576`) | `AND ${weightColumn} > 0` (`:577`) |
+| **Overview headline** (`getProjectProgressV2API`) | `start_nearest` / `end_nearest` — nearest dates at or before the **date slider's** start and end (`:194-203`) | `AND ${weightColumn} > 0` (`:218`, `:235`) |
+
+And note `start_nearest` / `end_nearest` are computed **globally, with no category filter** — they are
+the nearest dates across *all* packages, then the selected package is required to have a qualifying row
+on exactly those dates.
+
+**So the two surfaces disagree by construction.** A package is *listed* because it has weight at the
+parquet's latest date; the overview then demands a qualifying row at the slider's nearest dates. When
+the selected package has no qualifying row at **both** the start-nearest and end-nearest date, both
+CTEs are empty → `FULL OUTER JOIN` of two empty sets → ungrouped aggregate returns **one all-NULL
+row** → `{ actual: null }` is truthy → `next(null)` → `hasReceivedData` false → **permanent full-panel
+spinner over its own deselect control.** Steps 4-10 of §9, unchanged and still verified.
+
+Both CTEs must be empty, because the join is a FULL OUTER — one surviving side is enough to produce a
+non-null result. That is why this needs a *particular* slider position, not just any.
+
+### Why this fits the reports better than §9 did
+
+- **Date-dependent**, so the same package can work at one slider position and hang at another. This is
+  the first hypothesis that explains the customer's *"~15 minutes … twice"* without inventing a memory
+  story: they had been moving the slider.
+- **Still immediate on click** and still package-specific, because date coverage differs per package.
+- **Still only recoverable by refresh**, since refresh resets both the filter and the slider.
+
+### Corroborating detail: the trend query defends against this and the overview does not
+
+`getProgressTrendV2API` wraps every output in `COALESCE(…, 0)` (`:464-470`), so the chart degrades to
+zeros. `getProjectProgressV2API` does not (`:257-262`) and passes raw NULL up. Same file, same author,
+same failure mode — one guarded, one not. That asymmetry is the bug in one line.
+
+### Also verified while here: the panel's name-fallback cannot fire in package mode
+
+`getCategorySummaryV2API`'s SELECT list is `CategoryName, TypeName, ActivityCategoryId,
+TotalAvgActualProgress, TotalAvgPlannedProgress, ActivityCount` — **no `ParentDiscipline`**. So in
+`use-progress-panel-data.tsx:272-273` the fallback arm `cat.ParentDiscipline === disciplineCategory
+.categoryName` compares `undefined` to a name and is **always false**. Only the UUID match at `:271`
+can ever succeed in package mode.
+
+Consequence worth its own note: **only one of the two `UG Electrical` packages can ever appear in the
+panel** — whichever owns `18464cd1`. The other is silently dropped (`:276` → `null` → filtered at
+`:316`), so a package that genuinely exists in the schedule is invisible on the dashboard. That is a
+separate defect from this incident and probably worth its own ticket.
+
+### Status
+
+**Mechanism: 9/10, unchanged and thrice-verified.** It has survived every data point; it is the thing
+to fix. **Trigger: ~6/10** — date-coverage mismatch is now the leading and best-fitting explanation,
+but the specific slider position has not been reproduced. Two wrong trigger hypotheses so far (fan-out,
+zero-weight) with the mechanism intact through both, which is a hint in itself: **the fix does not
+depend on identifying the trigger.** Guarding the null fixes every version of it.
