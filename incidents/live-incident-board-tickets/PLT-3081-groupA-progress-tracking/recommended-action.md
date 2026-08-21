@@ -334,6 +334,74 @@ Two things worth saying on the ticket, and they have different owners:
    controls independent of our bug. **Do not bundle this with the fix** — the dashboard must not hang
    on a legitimately empty package regardless of whether the schedule should contain one.
 
+## §7 2026-08-21 — FIX PUSHED (diagnosis abandoned as too costly)
+
+`hc-frontend` **`claude/vigilant-franklin-nyvkcp`**, commit **`035cb47`**, branched fresh from
+`origin/master` at `711aa7e`. **No PR opened** (not requested).
+
+**Why the fix shipped without a confirmed trigger.** Four rounds of SQL each killed a hypothesis
+(§8, §9, §10, §11) while the runtime read that would have settled it never landed:
+`window.projectService` returned `false` even with `enableGlobalWebViewerAPI` toggled — most likely an
+origin mismatch, since the flag lives in a `feature-flags` **cookie**
+(`helpers/getFeatureFlagValue/getFeatureFlagValue.ts`, default `false` at `constants.ts:895`) and the
+prod-data plugin serves the app from a different host than where the flag was set. At that point the
+diagnosis had cost more than the fix, and Ilia said as much. The fix is correct regardless of trigger
+and turns an unrecoverable freeze into a visible warning, so it was the right thing to ship.
+
+### What the change does
+
+Routes both overview emission points through a new `_emitOverviewProgress`
+(`dashboard-progress-service.ts`), which coalesces a missing aggregate to `0` — matching what the
+activity-level "filter matched no activities" branch already emits — and **logs one `logger.warn`
+when it fires**.
+
+**The warn is the diagnostic, and it is why this is fix-plus-proof in one build.**
+`logService/logger.ts:17-18` is `level === 'warn' || level === 'error' || CONSOLE_VERBOSE`, so
+**warn/error always reach the console in any build, regardless of flags or NODE_ENV**. If clicking
+`UG Electrical — CSA` now prints `Overview progress returned no weighted rows (package level)`, the
+§9/§10 mechanism is confirmed and the ticket is closed. If the panel still hangs with **no** warning,
+the mechanism is not the cause and the next place to look is the viewer/colour path (H4) with empty
+`_visible_elements` as the starting fact. **Either way the next run gets a definite answer without a
+feature flag, a cookie, or a console handle.**
+
+### Correction to §6c — a claim I made twice and had to withdraw
+
+§6c said to "fix the return type first so the compiler points at every unguarded call site". **That
+does not work in this repo:** `tsconfig.json` sets no `strict` and no `strictNullChecks` (verified —
+the full file was read, there is no `extends`), so `null` is assignable to `number` and the widened
+types flag nothing. The types were still widened, as documentation of what the SQL returns, but the
+two call sites were found **by grep, not by the type checker**. The one benefit of strictNullChecks
+being off: the existing regression suite (`round2(result.actual)`) does not break on the wider type.
+
+### ⚠️ No local validation, and this is not a formality
+
+`npm ci` cannot run here (no `node_modules`), so **lint, typecheck and the vitest/regression suites
+were all skipped**. What *was* done instead: both changed files brace/paren balanced, `logger.warn`'s
+two-argument shape checked against existing calls in the same file (`:316`), every consumer of the
+three widened types enumerated (only the service and the regression suite), and a misplaced docblock
+caught and fixed on diff review (the new method had orphaned `_queryAllData`'s comment). **CI is the
+first real validation.**
+
+### Deliberately out of scope, each worth its own ticket
+
+1. `getProjectProgressV2API` returning `null` outright — a caught exception — still emits nothing, so
+   the panel spins forever if it happens on first load. The real fix is D4: route query errors to
+   `errors$` and widen `hasError` (`use-dashboard-progress.ts:113`).
+2. "0.00%" is not the honest label for a weightless selection; "no measurable data" is. Needs
+   `hasNoProgressData` widened plus copy from Jason.
+3. D1/D2: no query timeout, no worker error handler, one shared connection.
+4. `dashboard-logger.ts` `LEVELS` inverted (`DEBUG: 0`) — setting DEBUG *reduces* output.
+5. Only one of the two `UG Electrical` packages can ever render (§10), so a real schedule package is
+   invisible on the dashboard.
+
+### Still owed to the ticket
+
+Nothing has been posted to Jira. §6d's two drafts (Yash/customer, and the product note about LVN1-2's
+schedule carrying same-named packages across disciplines) still stand, **minus** the workaround list —
+that was built on the falsified §9 reading and **must not be sent**.
+
+---
+
 ### 6e — What is no longer relevant
 
 The five structural defects in §3 are **still worth fixing** but are **no longer the story of this
