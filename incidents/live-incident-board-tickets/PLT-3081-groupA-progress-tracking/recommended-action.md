@@ -402,6 +402,71 @@ that was built on the falsified §9 reading and **must not be sent**.
 
 ---
 
+## §8 2026-08-21 — DRAFT Jira comment and customer-facing line. Not posted.
+
+Two messages, two audiences. Do not merge them: the first is for the thread, the second is for Yash to
+relay. Plain prose, no headings, no bullets, no long dashes, one question to one owner, per the
+playbook's Group A drafting rules.
+
+### Draft A — comment on the ticket, addressed to the thread with one ask to Yash
+
+> Picked this up and I have the failure mechanism, though not yet the full reason behind it.
+>
+> What happens. Selecting the UG Electrical package under the CSA discipline puts the left hand
+> progress panel into a loading state that never ends. It is not a crash and it is not time based. It
+> reproduces on the first click every time, so the description's framing of about fifteen minutes of
+> use is a coincidence of when the user happened to click that package rather than a pattern. A page
+> refresh is the only recovery, and the reason for that is worth knowing: the spinner replaces the
+> whole panel including the discipline and package list, so once it starts there is no longer a
+> control on screen to deselect the package with.
+>
+> Why it happens. The overview progress figure for a selection is a weighted total. For this
+> particular selection that calculation comes back with no rows at all, and an empty total in SQL is
+> null rather than zero. The panel uses that same null as its signal for "the first query has not come
+> back yet", so a null from a query that has actually finished is indistinguishable from one that
+> never ran. The panel ends up waiting forever for something that already arrived.
+>
+> What I have done. A fix is pushed to claude/vigilant-franklin-nyvkcp, commit 035cb47, branched off
+> current master. It treats a missing total as zero, which is what the equivalent code path for
+> activity selections already does, and it logs a warning when that happens so the next build tells us
+> plainly whether this is what users are hitting. No PR raised yet and nothing released. I could not
+> run lint, typecheck or tests in my environment, so CI is the first real check on it.
+>
+> What I still do not know. Why this package's calculation returns nothing in the first place. I tested
+> three explanations against the project data and all three were wrong, so I have stopped guessing
+> rather than keep going. The fix does not depend on the answer. Whatever leaves the total empty, the
+> panel will now show a number and stay usable instead of freezing, and the warning will point at the
+> next place to look if there is more to it.
+>
+> Yash, one thing that would help. Has the customer hit this on any package other than UG Electrical
+> under CSA? If it is only that one, avoiding it is a clean workaround until the fix ships, and I would
+> rather give them that than have them refreshing.
+
+### Draft B — short line for Yash to relay to the customer
+
+> We have found the cause. Selecting the UG Electrical package under CSA puts the dashboard into a
+> loading state it cannot come out of, because the progress figure for that particular selection comes
+> back empty and the page treats an empty result as though the data were still on its way. It is
+> specific to that one selection rather than to how long the dashboard has been open, so it happens on
+> the first click rather than after a period of use. A fix is written and will come through in a
+> release. Until then, avoiding that one package avoids the freeze, and a refresh clears it if it does
+> happen.
+
+### Notes for whoever posts these
+
+- **Do not include the "packages that will hang" list.** It came from the §9 reading that §10
+  falsified. The only package we can honestly name is `UG Electrical` under `CSA`.
+- **Do not claim the root cause is found.** The *freeze* is explained and fixed; *why the total is
+  empty for this package* is not. Draft A is worded to hold that line, and it should stay that way.
+- The ticket's summary, "Dashboard Crash / Reset", is misleading now. Worth renaming to something like
+  "Progress panel stuck loading after selecting a package", but that is Yash's or Darminder's call.
+- **Priority is worth a look.** Medium fits a single-package freeze with a refresh workaround, so
+  probably leave it, but flag it if the customer reports more packages.
+- Darminder is the natural reviewer for the branch, and items 1 to 5 in §7's out-of-scope list are his
+  call to schedule or drop.
+
+---
+
 ### 6e — What is no longer relevant
 
 The five structural defects in §3 are **still worth fixing** but are **no longer the story of this
