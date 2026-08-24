@@ -1617,3 +1617,87 @@ Residual noise to ignore: six `Cannot find module '@xyzreality/dhtmlx-gantt'` ty
 pre-existing `mapping-columns.tsx(69,7) TS2353`, and hundreds of pre-existing `TS6133` unused
 symbols — `check-types` is **not** a CI gate (CI runs `npm run lint && npm run test -- --coverage`
 plus a webpack build).
+
+---
+
+## 2026-08-24 (later run) — PR merge, stale CHANGES_REQUESTED, master re-sync
+
+Additive to the earlier 2026-08-24 entry above; does not supersede it.
+
+### ⚠️ A thread-only review check MISSES blocking reviews — read this before triaging PRs
+
+This run's first pass reported "**#2147: all 6 review threads resolved**" and moved on. That was
+**wrong in effect**: `pull_request_read(method: get_review_comments)` returns *review threads*
+only. A reviewer's **top-level review body** is not a thread and does not appear there.
+
+`rishib-xyz` had left a **`CHANGES_REQUESTED`** review on #2147 (2026-08-20, review
+`4985343380`) carrying three items — search icon, misaligned buttons, a pending question on system
+prerequisites — none of which were threads. The PR was formally blocked and the first pass called
+it clean.
+
+**Always pair the two calls:**
+
+```
+pull_request_read(method: get_review_comments)  # threads
+pull_request_read(method: get_reviews)          # top-level bodies + APPROVED/CHANGES_REQUESTED state
+```
+
+All three items turned out to be already fixed (`41b72dd` search icon, `4251e8e` button
+alignment, `f0812cb` prerequisites editing) — the review was simply **stale**. A stale
+`CHANGES_REQUESTED` still blocks: it needs a **re-request**, which the PR did not have
+(`requested_reviewers` was `TomMasdinXYZ, DarminderA, SergiuszXYZ` — not rishib). Re-requested
+this run.
+
+### PLT-3081 / #2178 — merged
+
+Merged as `043144d`. The deferred Copilot thread on the emitter test was closed first by landing
+`886f163` (wiring extracted to `utils/emit-overview-progress.ts`, 8 cases). The **second** Copilot
+thread — project-level completed-no-row leaving `maxActualProgress$` null — was **left open and
+went in with the merge**; it is still a real, narrower gap, tracked with the `errors$`/`hasError`
+routing follow-up. Ticket moved `In Code Review → Ready For QA` (transition id `10`; note the
+Live Incident workflow has *different* transition ids from the Bug/Task workflow — fetch them
+per issue, don't reuse).
+
+### PLT-2896 — shipped
+
+PR **#2180** (draft), branch `PLT-2896` off master, build + Sonar green.
+
+Root cause was **wider than the ticket**. `app/routes.tsx` mounts `projects/*`, so that wildcard
+claims every URL under `/projects` and the root `*` never gets a look in; the nested
+`ErrorBoundaryRoutes` inside `pages/project/routes.tsx` had **no fallback**, and a nested
+`<Routes>` never falls through to its parent. Flag off → no canvas routes registered → match
+nothing → `null` → blank screen. **None of the six nested route modules declared a fallback**, so
+`/projects/:id/assets` (Commissioning off), `/viewer/nope`, `/organisation/nope` were all blank
+too.
+
+Fixed once in the shared `ErrorBoundaryRoutes` rather than six copies, declared **after**
+`{children}` — React Router ranks equal-specificity siblings by declaration order
+(`rankRouteBranches` → `compareIndexes`), so a module's own `*` still wins. The root's explicit
+`*` became a duplicate of the same element and was removed. 5 tests in
+`error-boundary-routes.test.tsx`.
+
+### Checkpoint 3 — re-synced after the merge
+
+`043144d` (the #2178 merge) put all four remaining branches 1 behind. **Zero file overlap** —
+that commit touches only `dashboard-progress/*`. All four merged clean and pushed:
+`PLT-2896 → 51b3c96`, `PLT-3003 → e791380`, `PLT-2953 → f967ac0`,
+`claude/ecstatic-archimedes-e9extu → 37a9da8`.
+
+### Ticket states at end of run
+
+| Ticket | State | Why |
+|---|---|---|
+| PLT-2896 | In Code Review, #2180 draft, green | delivered |
+| PLT-3081 | Ready For QA | #2178 merged |
+| PLT-3004 | Analysis In Progress | already shipped by PR #2136; awaiting design confirmation |
+| PLT-2932 | Analysis In Progress | Option A vs B needs a human; design unreachable |
+| PLT-2967 | Analysis In Progress | design unreachable |
+| PLT-2968 | Analysis In Progress | design unreachable |
+
+### The recurring blocker — say it plainly each run
+
+**Four of five tickets stalled on design access, not on engineering.** Every
+`claude.ai/design/p/...` link on these tickets returns **403**, and Jira attachments (e.g.
+PLT-2932's `Observed Discrepancy Imperial (standalone).html`, id 61324) are not reachable through
+the Atlassian MCP. Until that is fixed, every scheduled run will re-derive the same analysis and
+park the same tickets. This is the single highest-leverage thing to unblock.
