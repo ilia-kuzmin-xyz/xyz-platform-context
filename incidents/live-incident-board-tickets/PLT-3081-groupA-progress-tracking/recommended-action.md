@@ -494,3 +494,39 @@ The five structural defects in §3 are **still worth fixing** but are **no longe
 ticket**. Of them, D4 (query errors can never surface) is the one that made this present as a crash
 rather than an error, so it is the natural companion PR. H1/fan-out, the memory-limit item, and the
 Ctrl+Shift+D diagnostic are all off the critical path — do not spend more time on them here.
+
+## §9 2026-08-24 — PR #2178 brought to review-ready
+
+`https://github.com/XYZReality/hc-frontend/pull/2178`, branch `PLT-3081`, head `6e6ce09`.
+Reviewers already assigned: TomMasdinXYZ, rishib-xyz, SergiuszXYZ.
+
+**Branch contents** (4 commits, 4 files, +232/-67 vs master):
+- `80b5def` the null guard + pure `coalesceOverviewProgress` + its 8-case test
+- `de699cc` **Ilia's own commit** — nullable return types, and a better note on why the
+  *project-level* branch returns null via zero rows rather than an all-NULL row
+- `3b0e10e` `_isQuerying$` cleared in a `finally`, filter-prep moved inside the try
+- `6e6ce09` merge of master (clean, no conflicts; our 4-file diff unchanged after it)
+
+**Done this pass:**
+1. Merged master in — the branch had fallen 2 commits behind.
+2. **Rewrote the PR body around the confirmed root cause.** The old body still said "the trigger
+   isn't explained, three theories falsified", which was stale and actively misleading with three
+   reviewers assigned. New body leads with the name-vs-identity gating at
+   `dashboard-filter-utils.ts:65,86`, explains the prod/dev difference, and walks the 6-step chain
+   to the spinner.
+3. Corrected two false claims in the old body: the *"list stays clickable"* test step (the list comes
+   from an independent stream that can itself be empty), and the omission of `3b0e10e`.
+4. Added an explicit **"this fixes the failure mode, not the root cause"** section so nobody reads a
+   merge as closing the defect.
+5. Retitled: "weightless selection" → "unmatched package selection", which is what it actually is.
+6. Read the only PR comment: SonarQube **Quality Gate passed**, 0 new issues, 64.0% coverage on new
+   code, 0.0% duplication. No action needed.
+
+**Outstanding before merge:** CI green. `build` was `in_progress`, `mergeable_state` was `blocked`;
+a monitor is watching the checks. Nothing was validated locally (no `node_modules`), so CI is the
+first real validation — as the PR body states.
+
+**Not done deliberately:** the root fix (identity-aware package gating). It belongs in its own PR
+because `buildFilterOptions` is shared with the ViewerPage schedule path
+(`dashboard-filter-utils.ts:68-77` handles `ScheduleActivityDto`). Listed as item 1 of five
+follow-ups in the PR body.
