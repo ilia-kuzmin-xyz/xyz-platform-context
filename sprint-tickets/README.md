@@ -1701,3 +1701,35 @@ that commit touches only `dashboard-progress/*`. All four merged clean and pushe
 PLT-2932's `Observed Discrepancy Imperial (standalone).html`, id 61324) are not reachable through
 the Atlassian MCP. Until that is fixed, every scheduled run will re-derive the same analysis and
 park the same tickets. This is the single highest-leverage thing to unblock.
+
+---
+
+## 2026-08-24 (third wake) — #2147 merged, Jira + re-sync fallout
+
+Additive. `#2147` (PLT-3001 / PLT-3003 / PLT-2992) **merged** as master `e5d7685` after
+`rishib-xyz` approved ("LGTM, thanks for making those changes!") — the re-request cleared the
+stale CHANGES_REQUESTED. Then:
+
+- **Jira:** PLT-3001 and PLT-3003 moved `In Code Review → Ready For QA` (transition `921`
+  "Assign to QA", Task workflow). PLT-2992 was already Ready For QA (it's Gennaro's).
+- **Re-sync #2:** the merge put the three remaining branches 1 behind again. This time there
+  **were** overlaps (previous merges had none): PLT-2953 collides on `i18n/en/main.json`,
+  `claude/ecstatic-archimedes-e9extu` on `services/commissioningApi/index.ts`. **git auto-merged
+  both clean** (additive hunks in different regions) — but a clean *git* merge of JSON / a TS
+  barrel can still be syntactically broken, so both were **verified after**: `main.json` parses as
+  valid JSON, the barrel has no markers and all exports intact. Pushed:
+  `PLT-2896 → 514870f`, `PLT-2953 → beb01f8`, `claude/ecstatic-archimedes-e9extu → e7fc79f`.
+
+**Lesson to keep:** after a git auto-merge that touched a structured file (JSON/YAML/a barrel),
+**validate the file**, don't trust "0 conflicts". `python3 -c "import json; json.load(...)"` for
+JSON; grep for markers; eyeball a barrel's export list.
+
+### Live PR ledger at end of run
+
+| PR | Ticket(s) | State |
+|---|---|---|
+| #2178 | PLT-3081 | **merged** → Ready For QA |
+| #2147 | PLT-3001/3003/2992 | **merged** → 3001/3003 Ready For QA |
+| #2180 | PLT-2896 | open, draft, green, master-synced (514870f) |
+| #2148 | PLT-2953 | open, green, master-synced (beb01f8) — *still In Code Review, blocked on design for the linking-mode UX* |
+| #2145 | PLT-3056 | open, green, master-synced (e7fc79f) |
