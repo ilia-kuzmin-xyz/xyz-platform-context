@@ -536,3 +536,20 @@ theirs, not this routine's.
 because `buildFilterOptions` is shared with the ViewerPage schedule path
 (`dashboard-filter-utils.ts:68-77` handles `ScheduleActivityDto`). Listed as item 1 of five
 follow-ups in the PR body.
+
+## §10 2026-08-24 — DRAFT note to QA (Gennaro / Radu). Not sent.
+
+Rationale: the bug needs two same-named packages under different disciplines where only one has
+parquet data. That is a property of LVN1-2's schedule, not of the build, so QA cannot reproduce it on
+an arbitrary project and a "could not reproduce" result would be meaningless. The regression line is
+kept deliberately: this touches the progress panel's overview emission, so telling QA to skip
+*everything* would be wrong.
+
+> This one needs a very specific data shape to reproduce: two packages with the same name under
+> different disciplines, where only one of them has progress data behind it. LVN1-2 has that, most
+> projects do not, and production does not, which is why it never showed up there. Without that setup
+> the bug cannot be triggered at all, so there is nothing meaningful to reproduce and I would skip it.
+>
+> Worth two minutes on any project though. Open the progress panel, select a normal package and a
+> discipline, and confirm the figures are unchanged. That is the only thing this change could
+> realistically affect.
