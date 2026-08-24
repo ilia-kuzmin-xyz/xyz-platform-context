@@ -617,3 +617,63 @@ re-verified — if the "fix still ongoing" claim is put to Darminder, re-check f
 from here. Two questions have been open 10 days on a ticket QA has reopened, and a claim that a fix
 is in flight has never been pointed at anything. The branch removes the excuse for the delay: once
 it is on Staging, the answer arrives by itself on the next dashboard load.
+
+## 2026-08-24 (later) — reclassified: this needs a team discussion, not only a chase
+
+Ilia's call, and it is right. The chase framing assumed one number is wrong and someone just has to
+answer a question. Reading both pipelines end to end this session shows that is not the shape of it.
+
+**Full structural comparison written up as `dashboard/editor-vs-dashboard-element-counts.md`** —
+promoted out of this folder because it is not ticket history, it is how the two surfaces work.
+Summary of what is new there:
+
+- **The two surfaces do not share a database.** Editor and dashboard each construct their own
+  `DuckDBService` (`project-service.ts:176`, `dashboard-project-service.ts:84`) and load different
+  artefacts. The dashboard deliberately does not load `project_element_list` at all
+  (`dashboard-progress-service.ts:820`). No single query can return both numbers, which is why the
+  diagnostic has to emit two blocks correlated by session id.
+- **Ten divergence vectors, with directions.** Three of them push the dashboard down and are all
+  currently invisible, which is the shape QA reported. Two push it up and are what the original
+  07-07 overcount was about. The gap was never going to be zero.
+- **"Full date range" does not mean "all elements", and this changes how the test must be run.**
+  `startDate`/`endDate` in `element_base_data` come from `MIN`/`MAX` over a LEFT JOIN to
+  `api_activities`, so an element with no link — or whose linked activities all lack a start or
+  finish date — gets NULL. `NULL <= '2030-01-01'` is NULL, not TRUE, so those elements are excluded
+  **at every date range**, including the widest the slider reaches. Widening cannot recover them.
+  Three different populations are dropped this way and are indistinguishable today, one of which is
+  simply "`api_activities` had not finished loading" — a load-order race, and exactly the profile of
+  identical code giving different numbers per environment.
+- **`logger.info` never reaches the console on a production build**
+  (`logService/logger.ts:15-19`, `CONSOLE_VERBOSE = process.env.NODE_ENV !== 'production'`). The
+  first version of the diagnostic on the branch was written at info and would have been invisible on
+  Staging and Prod — the only places it matters. Corrected to warn.
+- **The prod debug channel already exists and we have not been using it.** `createLogger` writes
+  every passing line to an OPFS session log independently of the console; `log-auto-upload.ts`
+  uploads it periodically, on error, and on unload; and Help → `SyncLogModal` gives the user a
+  button plus a copyable session id. That is where PLT-3084's
+  `platform-web-4d72a647-...` came from. No new flag or query param is needed.
+- **Side finding, deserves its own ticket:** `dashboard-logger.ts` has `CURRENT_LEVEL = 'SILENT'`
+  hardcoded and a levels table where `DEBUG` is ranked `0`, equal to `SILENT`. Since
+  `shouldLog = LEVELS[level] <= LEVELS[CURRENT_LEVEL]`, the only level that passes is DEBUG, so every
+  direct `dashboardLogger.info/warn/error` and `logInitSummary` call is dead in every environment,
+  errors included. `createServiceLogger` bypasses this table, so it is not the cause of anything on
+  this ticket, but a chunk of dashboard logging has been silently off.
+
+### Why a discussion and not a fix
+
+The residual after subtracting the designed differences may be small or zero. What is not settled is
+a set of product/architecture questions no single engineer should answer alone:
+
+1. Should the tile labelled "Elements" count scheduled work, or elements? Today it counts elements
+   with a paintable status inside a date window, which is neither of the things a reader assumes.
+2. Should an element linked only to undated activities be invisible on the dashboard? Today it is,
+   permanently, and nobody chose that.
+3. Should the editor's "Linked" stay filtered to the active schedule while the dashboard is not?
+4. Are `svf2_object_id_map` and `project_element_list` meant to hold the same element universe? They
+   differed by 1,364 on FAR01. Ali was asked on 07-31 and has not answered.
+
+Attendees that actually matter: Mostafa or Pietro for 1 and 2, Darminder for 3, Ali or Sachin for 4,
+Gennaro for the Staging evidence.
+
+**Branch updated:** `PLT-2874-dashboard-element-count-diagnostics`, commit `48839a8`. Both ladders,
+at warn, with `baseDataUndated` and `apiActivitiesRows` added as the rung that was invisible.
