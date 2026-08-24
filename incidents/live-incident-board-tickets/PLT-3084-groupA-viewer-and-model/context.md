@@ -122,3 +122,66 @@ package `@xyzreality/dhtmlx-gantt` (401). CI is the first validation.
   before the Ctrl+Z press decides between D1, D2 and the selection-on-the-stack explanation: what
   is needed is whether a model finished loading, or a schedule was saved, in that window.
 - ⚠️ `image-20260824-075819.png` (Yash) — not opened. Low value; the description is in text.
+
+## 2026-08-24 (later) — why it works on dev and fails on prod, on the same Friday release
+
+Ilia's question: same build, different behaviour. That is not a paradox here — it is a prediction
+of D1. **None of the three defects is reachable by code alone; all three need a runtime event to
+fire, and the events are data- and scale-dependent.** A small dev project never fires them; a
+large federated production project fires them constantly.
+
+### The mechanism, and it is specific
+
+`ViewerService._clearHistory()` (`viewer-service.ts:427-439`) resets the global undo cursor, and it
+is wired to **`MODEL_ROOT_LOADED_EVENT`** (`:136`, `:144`, handler `:423-425`) and to the
+model-unloaded handler (`:601`). So the cursor is reset **once per model load, every time, for the
+life of the session** — not once at startup.
+
+Models are loaded one at a time in a loop (`viewer-service.ts:822-824`) and, crucially, **more can
+be loaded at any point afterwards** via `addExtraDocument` (`:840-845`).
+
+**And one of its callers is the linking UI itself.** `activity-linking-list/components/linked-node.tsx:67-76`
+offers a **"Load model"** menu item on any unloaded model node, sitting in the same context menu as
+"Select element(s)" and "Unlink from activity" (`:47-66`). Other callers:
+`scene-properties/other-models-section.tsx:90`, `issue-model-element-details.tsx:44`,
+`upload-panel.tsx:74`.
+
+So the reported workflow — link elements to activities across a federation where not every model is
+open — routes through model loading **in the same panel, between the link and the Ctrl+Z**.
+
+### Why that maps exactly onto dev vs prod
+
+| | dev | prod (AT10X) |
+|---|---|---|
+| models in the federation | one, or a handful | many |
+| are models still being opened mid-session | no, all loaded at startup | **yes — the ticket says so** |
+| `_clearHistory()` fires | once, before anyone can press Ctrl+Z | every time a model is opened or closed |
+| `syncActivityLinks()` duration | milliseconds on a tiny link table | paginated at 20k links (`linking-service.ts:49`) |
+
+**The ticket contains its own evidence for the middle row.** Yash's comment says the *other*
+symptom — select-linked-elements missing elements — "has been resolved and is working as expected
+**when all relevant models are open**". That is a direct statement that the user was working with
+models not yet open, i.e. opening them, i.e. firing `MODEL_ROOT_LOADED_EVENT` mid-session. On dev
+nobody does that because there is nothing to open.
+
+### Checked and ruled out as the environment difference
+
+- **No periodic sync exists.** Grepped every `setInterval` under `ViewerPage/`: viewer FPS sampling
+  (`viewer-service.ts:379`), upload-panel polling, capture-360, the DuckDB monitor panel, the
+  dashboard-logger tick (disabled), session-expiry warnings. **Nothing re-syncs links on a timer**,
+  so D2 is event-driven only — a schedule save or a failed link — and cannot fire spontaneously.
+- **No environment-conditional code on this path.** No feature flag gates the history service, the
+  linking service or the hotkey binding.
+
+### So the answer to "how come"
+
+The build is identical and the bug is in the code on both. What differs is **how often the trigger
+fires**. On dev the cursor is reset once, before the user touches anything, so it is invisible. On
+prod every model the user opens — including from the linking panel they are working in — resets it
+again, and any undo they had performed is silently re-armed while redo dies. That is why reusing
+Friday's release changes nothing: the release was never the variable.
+
+**Falsifiable, on prod, no branch build needed:** link elements → open any model from the linking
+panel's "Load model" menu → press Ctrl+Z. Predicted: the link does not revert and Ctrl+Shift+Z is
+dead. Then repeat without opening a model. Predicted: works. If both behave the same, D1 is wrong
+and the cause is D2 or the selection-on-the-same-stack behaviour.
