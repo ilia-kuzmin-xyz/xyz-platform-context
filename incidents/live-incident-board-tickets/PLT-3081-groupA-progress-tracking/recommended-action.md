@@ -522,9 +522,15 @@ Reviewers already assigned: TomMasdinXYZ, rishib-xyz, SergiuszXYZ.
 6. Read the only PR comment: SonarQube **Quality Gate passed**, 0 new issues, 64.0% coverage on new
    code, 0.0% duplication. No action needed.
 
-**Outstanding before merge:** CI green. `build` was `in_progress`, `mergeable_state` was `blocked`;
-a monitor is watching the checks. Nothing was validated locally (no `node_modules`), so CI is the
-first real validation — as the PR body states.
+**CI GREEN as of 2026-08-24.** `build` (which runs `npm run lint && npm run test -- --coverage`)
+**success**; `SonarCloud Code Analysis` **success**; Quality Gate passed with 0 new issues and 64.0%
+coverage on new code. This is the first real validation of any of the change — nothing was linted,
+typechecked or tested in the authoring environment (no `node_modules`). It confirms the new
+`coalesce-overview-progress` test compiles and passes, the `_isQuerying$` try/finally restructure did
+not break the service, and lint is clean.
+
+**Nothing outstanding on the PR.** It is with TomMasdinXYZ, rishib-xyz and SergiuszXYZ; merging is
+theirs, not this routine's.
 
 **Not done deliberately:** the root fix (identity-aware package gating). It belongs in its own PR
 because `buildFilterOptions` is shared with the ViewerPage schedule path
