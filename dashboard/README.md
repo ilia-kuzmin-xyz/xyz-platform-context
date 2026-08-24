@@ -39,6 +39,7 @@ The Dashboard Page is an in-browser analytics surface that replaces PowerBI repo
 | **DAT** | Data Pipeline — how parquets and API data reach DuckDB | [data-pipeline.md](data-pipeline.md) |
 | **VWR** | 3D Viewer — element ID mapping and status colouring | [viewer-and-model.md](viewer-and-model.md) |
 | **CCH** | Caching — OPFS cache, service worker, lazy loading | [caching.md](caching.md) |
+| **ELM** | Editor vs Dashboard element counts — why the two surfaces count different things (2026-08-24, PLT-2874) | [editor-vs-dashboard-element-counts.md](editor-vs-dashboard-element-counts.md) |
 | — | Project Types — full-progress vs quality-only, what changes | [project-types.md](project-types.md) |
 | — | Startup Journey — from route entry to first data on screen | [startup-journey.md](startup-journey.md) |
 | — | Known pitfalls and gotchas | [pitfalls.md](pitfalls.md) |
