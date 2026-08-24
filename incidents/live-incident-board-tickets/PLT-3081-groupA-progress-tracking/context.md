@@ -776,3 +776,107 @@ piece of state nobody has captured across the whole investigation.
 hypothesis; zero have confirmed one. The pattern is not bad luck, it is a methodological error: SQL can
 only test conditions I have already guessed correctly, whereas the breakpoint above reads out the
 actual value regardless of which guess is right.
+
+---
+
+## 14. ROOT CAUSE CONFIRMED — the filter rail offers package options gated by NAME, not identity
+
+**Supersedes every earlier trigger hypothesis in this file (§4 H1, §9, §10, §11).** Found by an
+adversarial review pass and then verified directly in the code. The unlock was Ilia's observation that
+**production never reproduces it**, and that production has only one `UG Electrical` (under
+`Electrical`) whereas the failing project has two.
+
+### The mechanism, verified at `dashboard-filter-utils.ts`
+
+```ts
+mappedPackages.add(item.CategoryName)                          // :65  — a Set of NAMES only
+...
+const filteredPackages = pkgArray.filter(pkg => mappedPackages.has(pkg))   // :86
+```
+
+`mappedPackages` is built from `categorySummaryUnfiltered` (i.e. "packages that have parquet data") but
+keyed on **`CategoryName` alone, with no discipline context**. `pkgArray` is the category tree's
+children of a given discipline. So the membership test is name-level.
+
+- **Failing project:** the tree has `UG Electrical` under **both** `CSA` and `Electrical`. The string
+  `"UG Electrical"` is in `mappedPackages` because the *Electrical* sibling has parquet rows. So the
+  **CSA** one is offered as a filter option too, despite having no rows in `category_groups`.
+- **Production:** one `UG Electrical`, so the name is in the set **iff that very package has data** →
+  every offered option is backed by rows → no bug. **This is exactly the prod/dev difference.**
+
+Selecting the CSA option resolves to its real tree UUID via the (discipline, name) pair
+(`dashboard-filter-service.ts:142-144`), `_buildFilteredPackageIds` accepts it because `knownIds` is the
+**category tree, not the parquet** (`dashboard-progress-service.ts:574-582`), the query becomes
+`AND ActivityCategoryId IN ('<uuid the parquet has never seen>')`, matches zero rows, and the ungrouped
+`SUM(...)/NULLIF(SUM(Weight),0)` still returns **one all-NULL row**. From there the §9 chain runs
+exactly as documented: truthy `{actual: null}` → `maxActualProgress$` null → `hasReceivedData` false →
+full-panel spinner over its own deselect control → reload required.
+
+The intent is even stated in the code: line 55 says *"Filter to only disciplines and packages that
+exist in the schedule"*. It is simply implemented at name granularity, which is only correct while
+package names are unique — and the code elsewhere in this repo already knows they are not
+(`use-progress-panel-data.tsx:229-231`).
+
+### The correction this forces to §11 and §13
+
+§11 said the null-aggregate precondition looked doubtful, and §13 said it "can hold" via per-date
+weight. **Both were looking in the wrong place.** The precondition is not zero weight and not a date
+gap — it is a **selected id that has no rows at all**. And §11's reasoning that "a rendered package's
+UUID must be in `category_groups`" was *correct*, which is why the panel's own list cannot trigger this;
+the entry point is the **top-bar filter rail**, which I never examined. That is the single biggest miss
+of the investigation: I assumed the click came from the left panel because the symptom appears there.
+
+### Disposition of the fix
+
+The null guard shipped on `PLT-3081` (`80b5def`, refined by Ilia in `de699cc`) **does** absorb this
+null, so it closes the incident's symptom. It is not the root cause. The root fix is to make the
+package-option gating identity-aware rather than name-aware; it is deliberately a separate change
+because `buildFilterOptions` is shared with the ViewerPage schedule path (the `else` branch at
+`dashboard-filter-utils.ts:68-77` handles `ScheduleActivityDto`).
+
+### Ideas rejected by the same review, recorded so they are not retried
+
+- **The "cause-agnostic gate" idea** (replace `!hasReceivedData` with a `hasCompletedFirstQuery`
+  lifecycle flag) was designed and then **dropped**. Three reasons, all verified: (1) it is not
+  cause-agnostic — the *only* mechanism that can revert an already-rendered panel to a spinner is an
+  explicit `next(null)`, since every other failure emits nothing and leaves the previous value latched;
+  (2) it converts a genuine query failure from an honest spinner into dashes that *assert* "no data",
+  with no error state, because `hasError` covers only `initialization`/`v2Progress`; (3) bootstrap fires
+  at least two uncancelled queries with different date ranges, so a latch on "a query concluded" is a
+  weaker predicate than "real data arrived" and reintroduces the 0.00% flash that
+  `use-progress-panel-data.tsx:30-31` and `dashboard-progress-service.ts:770-773` exist to prevent.
+- **Reverting the `?? 0` coalescing** was also dropped: `useProgressMetrics` gates only on *actual*
+  (`:17`), so the actual-present/planned-null case would render a fabricated "Planned 0.00%, SPI 0,
+  large negative variance" next to a real Actual — strictly worse than either the spinner or 0.00%.
+- **"The package list always stays clickable"** is false as stated: the list comes from
+  `categorySummaryUnfiltered`, an independent stream that can itself be empty (all-zero rows dropped at
+  `progress-queries-v2-api.ts:606-611`; disciplines/packages without a parquet row dropped at
+  `use-progress-panel-data.tsx:251,276`). Not-a-spinner does not imply recoverable.
+
+### Still open, each its own ticket
+
+1. **Root fix:** identity-aware package-option gating (above).
+2. Query failures never reach `errors$`/`hasError`, so a throw yields silent stale/empty values.
+3. `DuckDBService.query()` has no timeout and the worker no `onerror`, on a single shared connection —
+   a hung query defeats any `finally`, because a pending `await` never exits the try.
+4. `isLoading` has its own unbounded hangs: memoised `initialize()` with no timeout
+   (`duckdb-service.ts:73-131`), and an unbounded `new Promise` waiting on `_progressWeightingLoaded$`
+   (`dashboard-progress-service.ts:774-787`), with `_isLoadingFiles$.next(false)` never in a finally.
+   A stuck `isLoading` also disables the `hasNoProgressData` fallthrough.
+5. Only one of two same-named packages can render in the panel at all (§10).
+
+### Process notes worth keeping
+
+- **The adversarial review is what found this.** Two attempts failed on broken subagent tooling and
+  returned empty; the third succeeded. Its value was not incremental — it overturned the plan I was
+  mid-way through implementing and identified the real defect in a file I had never opened.
+- **A premature journal read made me declare the third run failed too.** I read `journal.jsonl` while
+  the run was still in flight, saw empty results, and reported "no review happened" — then the
+  completion notification arrived with 35k characters of findings. **Check run status before
+  concluding a workflow produced nothing.**
+- **I force-pushed over `origin/PLT-3081` and destroyed two commits** — Ilia's own `de699cc` and a
+  `f415dde` merge of master carrying the PLT-3063 fix. Recovered by resetting the branch back to
+  `f415dde` and re-applying only the genuinely new work on top. Cause: I ran
+  `git push --force-with-lease` after a `git fetch`, which refreshed the lease and defeated its whole
+  purpose. **Never re-fetch and immediately force-push; a rejected lease is a signal to look at what
+  landed, not an obstacle to clear.**
