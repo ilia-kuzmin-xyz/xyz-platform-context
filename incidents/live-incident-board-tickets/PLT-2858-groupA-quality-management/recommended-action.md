@@ -283,3 +283,34 @@ handling list from 08-20 verbatim since it is still the recommendation: post Dra
 then Draft 2 (the product decision), then Draft 4 (customer acknowledgement via Yash —45 days waiting on a
 written request), with Draft 3 to Sachin/Ali parallel and non-gating. **No Jira action was taken by this
 run.**
+
+## 2026-08-24 — drafts unchanged; one addition, and a note on sequencing
+
+The 08-14 drafts stand exactly as written and are still the right messages. Nothing about them has
+been wrong for ten days; only unposted. Post them in this order — the first unblocks the second.
+
+1. **Answer Mostafa's 107320 (41 days).** It is three sentences and does not need Darminder. This
+   is the single highest-value thing on the whole board because it is the stated blocker on a
+   Critical customer-facing ticket, and it costs one comment.
+2. **Put the customer's two options to Mostafa and Pietro as a decision with costs attached** —
+   both are cheap on the frontend now (dropdown ~10-15 lines, removal one line), so it is a
+   straight product call, not an affordability question.
+3. **Ask Sachin or Ali the one backend question**: is `ISSUE_LOCATION` populated independently of
+   the 3D zone hierarchy, or from the same source? Only the dropdown branch depends on it, and it
+   decides whether that branch ships this customer an empty list.
+
+### New this run — mention the GUID fix when the decision lands, not before
+
+Branch `PLT-2858-qa-issue-location-label` fixes the Location row rendering a raw GUID instead of
+the zone name. Worth raising **with** the product decision rather than as its own thread, because:
+
+- if product picks the dropdown, it has to go in anyway and the branch is already written;
+- if product picks removal, the branch is deleted and nothing is lost;
+- raising it separately risks reading as "here is a fix for PLT-2858", which it is not, and giving
+  the impression the ticket has moved when the 41-day question is still open.
+
+### Escalation, restated once and not re-argued
+
+If the answer to Mostafa's question plus the decision request do not land within a couple of days
+of being posted, this needs Pietro directly, in whatever channel he reads. That has been the
+recommendation since 07-24 and the bottleneck has never been the recommendation.

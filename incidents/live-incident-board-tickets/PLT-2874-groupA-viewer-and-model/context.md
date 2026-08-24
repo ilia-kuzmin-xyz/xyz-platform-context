@@ -569,3 +569,51 @@ against `hc-frontend` returns exactly one result, PR #2084, closed/merged 2026-0
 recorded on 08-20. `list_pull_requests state:open` now returns 13 open PRs (was 17 on 08-20; four merged
 or closed in the interim), and none references PLT-2874, element counting, or the dashboard total. **The
 falsifiable claim from 08-20 — no frontend fix in flight for PLT-2874 — still holds as of this run.**
+
+## 2026-08-24 — no Jira movement; the ladder is now emitted by the code instead of asked for
+
+Requested pass, not the scheduled sweep. Jira re-fetched: status `Open`, priority Minor, assignee
+Ilia Kuzmin, **6 comments**, newest still Darminder's 08-17 14:01 "Fix still ongoing following QA
+latest testing". `updated = 2026-08-19T19:52:56` — identical to the 08-20 and 08-21 snapshots.
+
+**Stall clocks:** 12 days since Gennaro's Staging figures (08-12); **10 days** since the 08-14 pass
+drafted the two questions that would settle it (which project/model, do the sliders match) and
+neither was ever sent; 7 days since the second unqualified "ongoing" claim. Nothing re-diagnosed —
+H1, H3, H4, H5, H6 stand exactly as recorded on 08-13/08-14 and remain mutually undiscriminated.
+
+### What changed this run: the diagnostic stopped being a request
+
+Ten days of waiting for someone to run three console queries on Staging has produced nothing, and
+asking QA to type multi-line console SQL was always the weak link. Branch
+`PLT-2874-dashboard-element-count-diagnostics` (hc-frontend, off `origin/master`, **not raised as a
+PR**) makes the app emit it:
+
+- `_logElementCountLadder()` in `dashboard-progress-service.ts` runs the three counts once per
+  service instance, right after `_visible_elements` is materialised, and logs them at info with the
+  project id, the progress artefact's `calculatedOn` and the date range the slider is seeded from.
+  That is the ladder plus both of the "free checks" the 08-14 entry wanted, in one copy-pasteable
+  line. The decision table is carried in the method's doc comment so whoever reads the log does not
+  need this file.
+- The calibration caveat is in the comment too: a healthy `element_base_data` sits slightly *above*
+  the editor's number (FAR01's map held 1,364 more elements than `project_element_list`), so only a
+  drop to roughly the tile's figure is signal.
+
+**H5 hardened while in there.** `countDistinctElements` (`element-count.ts`) drops rows with a falsy
+`modelElementId` and only falls back to the object count when the set is *entirely* empty, so a
+partially-NULL column in a map parquet undercounts with no error — the same shape as the reported
+symptom. The count is unchanged; the mixed case now warns. Two tests added.
+
+**Not built or run.** `npm ci` fails on `@xyzreality/dhtmlx-gantt` (401). CI is first validation.
+
+### The GitHub claim, re-checked
+
+Not re-run this run. The 08-20 and 08-21 checks both found exactly one PR under this key (#2084,
+merged 07-31) and no open PR touching element counting. Carried forward as recorded, not
+re-verified — if the "fix still ongoing" claim is put to Darminder, re-check first.
+
+### Category
+
+**Stale, unresponded — needs a human to chase**, with the debugging now done as far as it can go
+from here. Two questions have been open 10 days on a ticket QA has reopened, and a claim that a fix
+is in flight has never been pointed at anything. The branch removes the excuse for the delay: once
+it is on Staging, the answer arrives by itself on the next dashboard load.

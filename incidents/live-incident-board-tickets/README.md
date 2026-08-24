@@ -45,6 +45,46 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Requested pass: 2026-08-24 — 4 tickets taken deliberately (PLT-3061, PLT-2874, PLT-3084, PLT-2858), one debugging branch pushed per ticket, PLT-3084 new and root-caused
+
+**Not the scheduled board sweep.** Ilia named four tickets and asked for each to be debugged as far
+as it can go from here, on its own `PLT-xxxx-*` branch in `hc-frontend`, then sorted into one of
+three buckets: stale-and-needs-a-chase, technical debt resolvable in a session, or too global to
+settle without a room. No Jira action taken — drafts only, per the standing rule.
+
+**Branches pushed (none raised as a PR, none built or run — `npm ci` fails on the private package
+`@xyzreality/dhtmlx-gantt`, so CI is the first validation):**
+
+| Ticket | Branch | Bucket |
+|---|---|---|
+| PLT-3084 | `PLT-3084-undo-ctrl-z-linking` | tech debt, resolvable — root-caused this run |
+| PLT-2874 | `PLT-2874-dashboard-element-count-diagnostics` | stale — chase, branch removes the blocker |
+| PLT-3061 | `PLT-3061-rework-cost-discipline-coverage` | stale — chase, product owes 8 values |
+| PLT-2858 | `PLT-2858-qa-issue-location-label` | stale — chase, worst on the board |
+
+**PLT-3084 is the one with new findings.** Created 08-24, first investigation. Linking *is* on the
+undo stack by design, so the report is a defect. Three verified defects in the seam between
+`HistoryService`'s single global cursor and the private stacks each service keeps: the cursor is
+reset to the end of the list on **every model load and unload** (`clearHistoryOfType` discards the
+caller's position, and `ViewerService._clearHistory` is wired to `MODEL_ROOT_LOADED_EVENT`);
+`LinkingService.invalidateLinks` drops its private stacks and leaves the global `Link` entries
+behind, so each orphan costs one silent no-op Ctrl+Z; and the no-callback branch moves the cursor
+twice. Also worth telling the customer: selection shares the same stack, so the first Ctrl+Z after
+clicking anything undoes the selection, not the link — by design. The 142 MB screen recording is
+the one load-bearing attachment and cannot be opened here; it would say which defect they hit.
+
+**No ticket moved bucket into "too global for us".** Three of the four are the same shape: the
+analysis has been finished for days or weeks and the only missing input is a person answering a
+question. PLT-2858 is 41 days on a one-line clarification, PLT-3061 is 5 days on a product decision
+the customer needs weekly, PLT-2874 is 10 days on two questions QA can answer in a sentence. The
+branches were written to remove every remaining excuse for the delay — PLT-2874's makes the app
+emit the diagnostic nobody was going to run by hand, PLT-3061's names the failing combination in
+the console so support stops taking two days to find it.
+
+**PLT-3061's one open gap is closed:** `CSA-KGE` misses the reference table exactly as `CSA-TCB`
+does (zero occurrences of either string in all 90 rows), so the blast radius is 8 combinations, not
+1, and the ask to product should be 8 values or an inherit-from-CSA rule.
+
 ## Run: 2026-08-21 — 8 in-scope tickets (down from 10): PLT-3024/PLT-2619 left scope (both → Done), PLT-3063 self-resolved into Group B (Dev In Progress, first ticket in that group since PLT-3060), PLT-3061's decision request now past 24h silent with the customer independently confirming the mechanism, everything else unchanged
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, 196 issues

@@ -455,6 +455,20 @@ both PLT-3061 and PLT-2815 the ticket carried media that could not answer a ques
 
 ## Candidate patterns (one occurrence, watch for a second)
 
+- **Two sources of truth for one undo stack, 2026-08-24** (PLT-3084, AT10X). The viewer keeps a
+  single global ordered history with a cursor (`history-service.ts`) *and* a private stack inside
+  each service that registered callbacks (linking, selection, hide/isolate, section). Nothing keeps
+  the two in step, and **every way they fall out of step swallows an undo silently** — the user
+  presses Ctrl+Z, nothing happens, no error. Three instances found in one read: the cursor is reset
+  to the end of the list by `clearHistoryOfType`, which fires on every model load and unload
+  regardless of whether it drops anything; `LinkingService.invalidateLinks` clears its private
+  stacks and leaves the matching global entries orphaned; and the no-callback branch moves the
+  cursor twice. **Recognition signature:** "X sometimes does nothing, with no message", on a
+  feature where one component owns the ordering and another owns the payload. **Diagnostic:** make
+  the empty-stack path log instead of returning bare — the silence is the bug's cover, not a
+  side effect of it. Promote if a second feature built on `HistoryService` shows the same shape,
+  or if the same split-ownership pattern turns up elsewhere.
+
 - **Viewable-name fallback vs on-device client** (PLT-2923). A model renders on the headset but
   not in the browser. The web viewer picks its viewable by name from a fallback chain, `Navis` then
   `XYZ` then `EXPORT TO HOLOSITE` then `{3D}`, and renders nothing at all, with no error, if none

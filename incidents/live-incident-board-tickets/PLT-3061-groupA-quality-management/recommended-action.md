@@ -141,3 +141,36 @@ Jira transition yet (a day and a half on a non-urgent-looking decision request i
 team), but flagging it since the customer has a stated Friday-morning weekly deadline for this data.
 
 **No Jira action was taken by this run.**
+
+## 2026-08-24 — supersedes the 08-20 draft: ask for eight values, not one
+
+The 08-20 draft to Mostafa and Pietro is **still unposted and now understates the ask.** It asks
+for a cost for `Category 2 / CSA-TCB / Underground Services`. This run confirmed `CSA-KGE` misses
+identically, so the real gap is both contractor variants at all four priced categories. Do not post
+the 08-20 version; post this instead.
+
+### Draft comment to Mostafa and Pietro (NOT posted)
+
+> Mostafa, Pietro — following Darminder's question on the 19th, the gap is wider than the one
+> combination. ML9 split its CSA discipline into CSA - TCB and CSA - KGE per contractor, and the
+> rework reference table carries only CSA, Electrical and Mechanical. So neither variant returns a
+> cost at any category or any package, not just Category 2. The field is left blank rather than
+> showing zero, which is the safer of the two, but it means nothing auto-populates for either
+> contractor.
+>
+> The smallest fix is eight rows: CSA - TCB and CSA - KGE, at Categories 1 to 4, with a blank
+> package so they cover every package the way the existing disciplines do. Can you give me those
+> eight values, or tell me they should simply inherit CSA's numbers?
+>
+> The customer needs this by Friday mornings for their QA report, and Joshua is filling it in by
+> hand each week until it lands.
+
+One question, one decision, one owner pair. If they say "inherit CSA", that is the alias option and
+becomes a small code change instead of a data change — worth naming as tech debt either way, since
+the next project to invent a discipline name hits this again.
+
+### Action on the board
+
+Leave in `Open`. This is not blocked in the Jira sense — it is waiting on a product answer that has
+been asked for and not given. If there is still no reply by 08-26 (a week), it is worth raising in
+whatever channel Mostafa reads rather than a fourth Jira comment.

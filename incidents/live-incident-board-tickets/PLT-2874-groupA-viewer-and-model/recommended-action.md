@@ -328,3 +328,36 @@ excluded, all still discriminated only by Staging environment state.
 Both drafts still stand exactly as written. This ticket is assigned to Ilia, so both are his own next
 action rather than a nudge to someone else. Nothing in the GitHub re-check (`context.md`, 2026-08-21)
 changes the plan. **No Jira action was taken by this run.**
+
+## 2026-08-24 — the 08-14 drafts are still right; add the diagnostic branch as the unblocking move
+
+The 08-14 drafts to Gennaro and Darminder are unchanged and still unsent, now 10 days. Post them.
+But the thing that actually breaks the deadlock is shipping the diagnostic to Staging, because it
+turns "please run three queries" into "open the dashboard and paste the line".
+
+### Draft comment to Gennaro (NOT posted, supersedes nothing — same two questions)
+
+> Gennaro, two things on the Staging numbers from the 12th, both quick.
+>
+> Which project and model were you on? The editor figure of 603,844 does not match anything we have
+> recorded for FAR01, so I cannot rule out that Staging is loading a different federated model than
+> Prod — the dashboard picks the first model it finds in the federated folder with no ordering
+> guarantee, so two environments can legitimately land on different files.
+>
+> And do the date sliders show the same start and end dates on Staging and Prod? If they differ,
+> that alone explains the gap and nothing else needs investigating.
+
+### Draft comment to Darminder (NOT posted)
+
+> Darminder, on the fix that is still ongoing — which of the causes is it targeting? I ask because
+> the Staging undercount and the original Prod overcount have different mechanisms, and the
+> analysis so far points at Staging data freshness rather than frontend code, so a fix that passes
+> QA on Prod could still leave Staging short. Also, is it in hc-frontend? I could not find an open
+> PR there under this key.
+
+### Action on the board
+
+Leave in `Open`. Ask Darminder to get `PLT-2874-dashboard-element-count-diagnostics` onto Staging,
+or merge it into whatever is in flight — it is log-only apart from a warn in
+`countDistinctElements`, so it is cheap to carry. Once it is there, the next dashboard load on
+Staging answers H1 vs H3 vs H4 without anyone running a query.

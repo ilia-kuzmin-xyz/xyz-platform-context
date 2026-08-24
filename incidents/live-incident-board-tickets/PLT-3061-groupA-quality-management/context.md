@@ -220,3 +220,63 @@ same way, but not verified.**
 to Mostafa and Pietro (`recommended-action.md`, 2026-08-20 section) was never posted by this routine** —
 still draft only, still accurate, and now stronger: the customer's own explanation can be added as
 corroboration in the same message.
+
+## 2026-08-24 — CSA-KGE confirmed to miss identically; diagnostic branch pushed
+
+Requested pass over the ticket, not the scheduled sweep. Jira re-fetched: status `Open`, priority
+Medium, assignee Darminder, **6 comments** (was 6 on 08-21), newest still 110058 (Yash relaying the
+customer, 08-20 13:33). No reply from Mostafa or Pietro. **Darminder's decision request (109980,
+08-19 19:48) has now stood unanswered for 5 days.**
+
+### The one gap the 08-21 entry left open is now closed
+
+That entry flagged `CSA-KGE` as named by the customer but unchecked. Checked this run against
+`rework_reference.json` in the current checkout:
+
+- 90 rows, exactly three Discipline strings — `CSA` (32 rows), `Electrical` (27), `Mechanical` (31).
+- **Zero occurrences of `TCB`. Zero occurrences of `KGE`.**
+
+So both halves of ML9's split miss at every category and every package, and the blast radius is
+**8 combinations, not 1**: `CSA-TCB` and `CSA-KGE` × Categories 1-4. (Category 5 short-circuits to 0
+before the lookup, `use-rework-cost-calculation.ts:64-73`, and the table prices only Categories 1-4.)
+Confidence on the mechanism now 10/10 — nothing is inferred.
+
+**This sharpens the ask to Mostafa and Pietro.** The 08-20 draft asks for a cost for one triple.
+The right ask is eight, or a rule. Adding a single `Category 2 | CSA-TCB | Underground Services` row
+answers Darminder's literal question and leaves seven holes.
+
+### Verified about the table's structure, which bounds what "just add rows" costs
+
+Every discipline currently has a blank-Package fallback row at every category it prices — no
+exceptions, checked programmatically. That matters because Rule 2
+(`use-rework-cost-calculation.ts:123-144`) depends on it: without a generic row, an unlisted package
+falls straight through to Rule 3 and returns null. **So the minimum viable data fix is 8 rows** (two
+disciplines × four categories, blank package), not 8 package-specific ones. That is small enough
+that option 1 (pure data) is clearly the thing to do now, with the alias question (option 2) carried
+as tech debt rather than blocking.
+
+### Branch
+
+`PLT-3061-rework-cost-discipline-coverage` (hc-frontend, off `origin/master`), **not raised as a
+PR.** It does not touch the costs — that is product's. It does two things:
+
+- Rule 3 now logs the exact triple it failed on and whether the discipline is absent from the table
+  entirely. Establishing that ML9's value was `CSA-TCB` took two days through support; next time it
+  is one line in the console. (`use-rework-cost-calculation.ts`, Rule 3.)
+- A new `rework_reference.test.ts` pins the table's shape: the three disciplines, a blank-package
+  fallback wherever a discipline is priced at a category, no duplicate combinations, every cost
+  finite. Prices stay untested so product can edit freely; adding or dropping a discipline becomes
+  deliberate. All four assertions hold against the file as it stands.
+
+Package-name resolution was hoisted out of Rule 1 to make it available to the log. Kept as
+`!== undefined` rather than a truthiness check so a category named with the empty string still
+matches the generic rows exactly as before — behaviour-preserving.
+
+**Not built or run.** `npm ci` fails on `@xyzreality/dhtmlx-gantt` (401).
+
+### Category
+
+**Stale, unresponded — needs a human to chase.** Not a code problem and not ambiguous: the
+mechanism is settled to the row, the fix is 8 rows of product-owned data, and the only thing
+missing is Mostafa or Pietro answering a question that has been open 5 days on a ticket where the
+customer needs numbers every Friday morning.

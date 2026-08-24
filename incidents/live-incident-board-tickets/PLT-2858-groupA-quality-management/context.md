@@ -451,3 +451,57 @@ Mostafa's own "leave it with me" (107208, 07-13) went unanswered. Nothing re-der
 diagnosis and the four ready drafts in `recommended-action.md` (2026-08-14 section) stand exactly as
 written and remain accurate against a Critical, customer-facing ticket with a working manual workaround.
 Restating rather than re-arguing: this is not an analysis gap.
+
+## 2026-08-24 — 22nd run unposted; the latent GUID defect is now fixed on a branch
+
+Requested pass, not the scheduled sweep. Jira re-fetched: status `In Analysis`, priority
+**Critical**, assignee **Mostafa Kamel Hussien**, `resolution = null`, **27 comments** — newest
+still 108643 (Yash, 2026-07-31 13:27, "any update on this?"). Byte-identical to the 08-21 snapshot.
+
+**Stall clocks as of 2026-08-24:**
+
+| Clock | Since | Days |
+|---|---|---|
+| Total silence on the ticket | 108643, 07-31 | **24** |
+| Mostafa's 107320 question to Darminder unanswered | 07-14 | **41** |
+| Customer's drop-down-or-remove request unanswered | 107317, 07-14 | **41** |
+| Last substantive (non-nudge) comment | 107533, 07-16 | **39** |
+| Escalate-to-Pietro first recommended, never executed | 07-24 | **31** |
+
+Nothing re-derived. The diagnosis has been finished since 08-14 and every run since has added a
+larger number to this table.
+
+### What changed this run: §2c stopped being a note and became a fix
+
+§2c (`issue-details.tsx` binds the Location row to the raw `locationId` with no processor, so it
+renders a GUID) has been carried as a side-finding since 07-13. Re-verified on current
+`origin/master` this run — still `<Detail label='Location' value={compare('locationId')} />` — and
+fixed on branch `PLT-2858-qa-issue-location-label` (hc-frontend, **not raised as a PR**).
+
+**This deliberately does not pre-empt the product decision.** Dropdown vs remove is still open and
+untouched. The GUID is the defect *underneath* it: it is live on every project that does have zones
+configured, it is wrong under either branch that keeps the field, and it dies harmlessly with the
+field if product picks removal. ML9 never saw it only because that model has no zones at all, which
+is why the row is simply empty there — the symptom the customer actually reported.
+
+`issueParameters.issueLocations` already carries the `{issueLocationId, location}` pairs and is
+already in scope in the component, so this is a lookup and nothing more. Extracted to
+`issue-location-name.ts` with five tests, following the `element-count.ts` convention, because
+nothing here can run a component test. An id the parameter list does not know falls back to itself
+rather than blanking, so a backend/parameter mismatch stays visible instead of reading as missing
+data.
+
+**Not built or run.** `npm ci` fails on `@xyzreality/dhtmlx-gantt` (401).
+
+### The one engineering unknown is unchanged and still owned by api-v2
+
+Whether the backend populates `ISSUE_LOCATION` from the same named-zone hierarchy that is empty on
+ML9. It only affects the dropdown branch, and it decides whether that branch actually unblocks this
+customer or ships them an empty list. Owner: Sachin or Ali. Never asked.
+
+### Category
+
+**Stale, unresponded — needs a human to chase, and it is the worst one on the board.** Critical
+priority, customer-facing, 41 days on a one-line clarification that has been answerable verbatim
+from code since 08-14, and four ready drafts that no agent in this routine can post. This is not an
+analysis gap and no further investigation will move it.
