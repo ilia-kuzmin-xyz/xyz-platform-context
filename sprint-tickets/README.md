@@ -1503,3 +1503,117 @@ runs and will jump to 6 overnight:
 2. **PLT-1619 touches `.github/workflows/`**, and PLT-2026 is a broad cross-cutting `data-testid`
    sweep across many dropdowns. Neither is a "pick it up unattended" shape — both want a human to
    scope them first. Flagging now rather than discovering it on the day.
+
+---
+
+## Triage — 2026-08-24 (Sprint 52-ish; first run where eligible tickets actually existed)
+
+JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()`.
+Eight tickets assigned; three excluded as in-flight (PLT-3001 / PLT-3003 In Code Review,
+PLT-2953 Dev In Progress). **Five eligible, all status `Open`** — the first non-zero run since
+the long PLT-1770 drought. Note the composition is *not* the Playwright batch the 2026-08-06
+entry predicted; that batch is not in this sprint.
+
+Grouped by top-level domain before starting, so domain context was loaded once each:
+
+| Domain | Tickets |
+|---|---|
+| App-wide routing (surfaced by Canvas) | PLT-2896 |
+| Web viewer → Issues | PLT-2932 |
+| Commissioning → Project Settings / Types | PLT-3004 |
+| Commissioning → viewer Assets panel | PLT-2967, PLT-2968 |
+
+### Outcome
+
+| Ticket | Verdict | New status |
+|---|---|---|
+| PLT-2896 | **Implemented** — branch `PLT-2896`, draft PR **#2180** | In Code Review |
+| PLT-3004 | **Already on master** (shipped by PLT-3000/3002, PR #2136 `689fc6f`) | Analysis In Progress |
+| PLT-2967 | Kebab + `View tasks` already exist; only the accordion-vs-modal shape is open | Analysis In Progress |
+| PLT-2968 | Genuinely unbuilt, but blocked on persistence + cascade decisions | Analysis In Progress |
+| PLT-2932 | Blocked — FE-only vs BE-field is undecided | Analysis In Progress |
+
+Clarification comments posted on all four Analysis tickets, each prefixed as raised by Claude.
+
+### ⚠️ The one systemic finding — every design link is unreachable
+
+**Four of five tickets stalled on the same wall.** Design references come in two forms and
+*neither* is readable by this routine:
+
+1. **Jira attachments** (e.g. `Observed Discrepancy Imperial (standalone).html`, id 61324) — the
+   `/rest/api/3/attachment/content/<id>` URL needs Jira auth the Atlassian MCP does not expose.
+   No MCP tool downloads attachments.
+2. **`https://claude.ai/design/p/<uuid>?file=….dc.html` share links** — `WebFetch` gets **403**;
+   the `Artifact` tool rejects them (`not an artifact URL` — it only accepts
+   `…/code/artifact/<uuid>`).
+
+Inline description screenshots are also useless: they arrive as
+`![](blob:https://media.staging.atl-paas.net/?…)` blob URLs, not fetchable content.
+
+**This is the single highest-leverage thing to fix for this routine.** Until designs are readable,
+any ticket whose description is effectively "See designs" will be parked, correctly but
+unproductively. Options worth raising with a human: paste the key design details as *text* into
+the ticket, or attach flat PNGs described in the description, or grant the routine a Jira token
+that can pull attachment content.
+
+### Checkpoint 1 — review feedback
+
+Threads across the four PRs authored by Ilia:
+
+| PR | Threads | State after this run |
+|----|---------|---|
+| #2178 (PLT-3081) | 3 | 1 was already resolved; **1 resolved this run** (see below); 1 left open deliberately |
+| #2147 (PLT-3001/3003) | 6 | all resolved |
+| #2148 (PLT-2953) | 0 | — |
+| #2145 (PLT-3056) | 4 | all resolved |
+
+**Closed a deferral rather than carrying it.** #2178 carried a Copilot point that
+`_emitOverviewProgress` had no test, which a previous run had answered with "I'll do it as a
+follow-up". This run had a working `node_modules` (see below) so it was actually landed —
+`886f163`, commit *"make the overview emitter directly testable"*. The wiring moved to
+`utils/emit-overview-progress.ts` taking the three subjects + logger as narrowed arguments;
+8 new cases. Thread replied to and resolved.
+
+**Still open, on purpose:** #2178's thread about the project-level SQL branch returning zero rows
+(`FROM end_data`) rather than an all-NULL row. Both obvious fixes overreach the PR — touching the
+SQL risks the golden-master regression baselines, and emitting 0 on a null result would swallow a
+*thrown* query too. Tracked with the `errors$`/`hasError` routing follow-up.
+
+### Checkpoint 2 — builds
+
+All green (`build` + `SonarCloud`) on #2147, #2148, #2145 before this run's pushes; #2178's build
+was in progress and skipped per the rules, then re-triggered by the push. **No build-fix PR needed
+— no cross-cutting CI blocker this run.**
+
+### Checkpoint 3 — master alignment
+
+All four branches were exactly **2 commits behind** master (`e1d208c` SSOAzureXYZ flag removal,
+`1929367` canvas 26.3.4.1) and all four merged **clean** (`git merge-tree`), with **zero file
+overlap** against those two commits. Merged and pushed anyway:
+`PLT-3003 → c279c69`, `PLT-2953 → d1c5cbb`, `claude/ecstatic-archimedes-e9extu → f02982d`.
+
+⚠️ **PLT-3081 had already been merged with master remotely** (`6e6ce09`) while this run was
+working — the local merge had to be dropped and the new commit cherry-picked onto the remote head.
+**Always `git fetch` the branch again immediately before pushing**; a parallel actor is touching
+these branches.
+
+### 🔧 Local `npm ci` — solved, write this down
+
+`npm ci` **fails** in the sandbox: `@xyzreality/dhtmlx-gantt` lives on `npm.pkg.github.com` and
+needs `NPM_TOKEN`. The session's `GITHUB_TOKEN` is **rejected** (401). Previous runs therefore
+committed with "NOT VALIDATED LOCALLY" in the message.
+
+**Workaround that works** — this run ran the full 4338-test suite locally:
+
+```bash
+cp package.json package-lock.json /tmp/backup/
+python3 -c "import json;d=json.load(open('package.json'));d['dependencies'].pop('@xyzreality/dhtmlx-gantt');json.dump(d,open('package.json','w'),indent=2)"
+npm install --no-audit --no-fund      # ~50s, 2171 packages
+cp /tmp/backup/package.json /tmp/backup/package-lock.json .   # restore BEFORE committing
+```
+
+`node_modules` survives the restore. `npx vitest`, `npx eslint`, `npx tsc --noEmit` all work.
+Residual noise to ignore: six `Cannot find module '@xyzreality/dhtmlx-gantt'` type errors, one
+pre-existing `mapping-columns.tsx(69,7) TS2353`, and hundreds of pre-existing `TS6133` unused
+symbols — `check-types` is **not** a CI gate (CI runs `npm run lint && npm run test -- --coverage`
+plus a webpack build).
