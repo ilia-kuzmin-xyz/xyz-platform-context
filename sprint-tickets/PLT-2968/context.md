@@ -73,3 +73,22 @@ Once answered, the build order is: extend the ladder's `StyledMenu` → override
 override into `use-readiness-steps` so `achievedOf()` consults it → then check every consumer in
 Blocker 2. Do **not** patch `achieved` in the ladder component only; the rule was deliberately
 centralised in the hook.
+
+---
+
+## 2026-08-25 — second run: still blocked, no new information
+
+Re-checked at the start of the scheduled run. **No answer posted; the 08-24 analysis stands.**
+
+- Ticket is still `Analysis In Progress`; the only comment is our own 08-24 clarification.
+- **Did not re-comment** — re-asking the same questions would only bury the original ask.
+- **The design screenshots are unreachable from this environment, confirmed twice.** Jira's
+  `/rest/api/3/attachment/content/<id>` is **403** without a bearer token and the MCP `fetch` tool
+  takes an ARI, not a URL. The `claude.ai/design/p/...` share link is equally closed. Don't retry.
+- Blockers 1 and 2 (no override anywhere in the data model; the readiness cascade in
+  `use-readiness-steps.ts:52` reaches the asset chip, Affects Systems, the viewer legend and the
+  dashboard) are **design/persistence decisions, not research gaps**. More code reading will not
+  resolve them, which is why this run did not attempt it.
+
+This one is the riskier of the pair — it is `Critical` priority but needs a persistence decision
+and touches the readiness cascade app-wide. Worth raising verbally rather than waiting on Jira.

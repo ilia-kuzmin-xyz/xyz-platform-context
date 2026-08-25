@@ -50,3 +50,27 @@ So if the answer is "a modal", this becomes wiring, not new UI.
 
 PLT-2968 adds `Override readiness level` to the **same** `StyledMenu`. Worth doing them in one
 branch if both get answered.
+
+---
+
+## 2026-08-25 — second run: still blocked, no new information
+
+Re-checked at the start of the scheduled run. **Nothing has changed and no answer was posted**, so
+the 08-24 analysis above stands in full. Recording this only so a third run doesn't spend the
+effort re-deriving it.
+
+- Ticket is still `Analysis In Progress`; the only comment is our own 08-24 clarification.
+- **Did not re-comment.** Asking the same five questions again adds noise to the ticket and buries
+  the original. The ask is already visible to Darminder; the ball is with design.
+- **Attachment route re-tested and it is genuinely closed.** The Jira REST attachment endpoint
+  (`/rest/api/3/attachment/content/<id>`) returns **403** without a bearer token, and the MCP
+  `fetch` tool only accepts an ARI (`ari:cloud:jira:…:issue/…`), not an arbitrary attachment URL —
+  so there is no path from this environment to the four PNGs on the ticket. Same for the
+  `claude.ai/design/p/...` link. Do not burn time on this again: the screenshots need to be
+  pasted into a comment as text/description, or the answer given in words.
+- No branch and no PR for this ticket, deliberately. Confidence on the accordion-vs-modal question
+  is unchanged at roughly 50%, well under the bar for starting.
+
+**Unchanged recommendation:** if the inline accordion is acceptable, this ticket is already
+delivered and should be closed; if a tag-level modal is wanted, `AssetWorkflowStepTasks.tsx` plus
+the dormant `onViewTasks?` prop make it a wiring job.
