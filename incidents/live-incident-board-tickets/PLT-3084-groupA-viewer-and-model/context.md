@@ -435,3 +435,34 @@ D2 (orphaned Link entries after `invalidateLinks`) and D3 (double cursor move in
 branch) are all still real on master and all still worth fixing — **D3 in particular is what turned
 this bug from a visible console error into a silent purge.** But they are a separate piece of work
 and must not be described as the fix for PLT-3084.
+
+### Confirmed from the deployed bundle itself (2026-08-24)
+
+`window.projectService.linkingService.constructor.toString()` on prod returns a constructor with
+**no `registerHistoryCallbacks` call at all**:
+
+```js
+constructor(e){ this.projectService=e, this.activityToElements=new Map,
+  this.elementToActivities=new Map, this._isDisposed=!1, this.links$=new u.t([]),
+  this.linkChanges$=new _.B, this.undoStack=[], this.redoStack=[],
+  this.batchSize=500, this.pageSize=2e4, this.warnOnRelinking=!0 }
+```
+
+while its `dispose()` still calls `deregisterHistoryCallbacks(k.f.Link)` — deregistration with no
+registration, precisely the asymmetry PLT-2743's commit message described. `linkSelectedElements`
+does call `addHistoryAction(k.f.Link)`, so entries enter the history with nothing able to service
+them. No inference left in this diagnosis.
+
+**Prod is materially older than one commit.** Markers in the deployed bundle, all of which master
+no longer has:
+
+| Deployed prod | master |
+|---|---|
+| `activityToElements` / `elementToActivities` in-memory maps, `links$` BehaviorSubject, `loadLinks()`, `diffLinks()`, `updateInMemoryMaps()` | all removed; link rows live in DuckDB and there is no in-memory copy |
+| `checkAndWarnForExistingLinks` uses `window.confirm(...)` | uses `RelinkConfirmModal` |
+| `createLinkOperations(elementIds, activityId)` — 2 args | 3 args, takes `existingLinks` |
+| catch blocks call `await this.loadLinks()` | call `this.invalidateLinks()` |
+
+So the deployed build predates PLT-2743 (#2081, 08-07) **and** the relink-modal change. Worth
+establishing what else is missing from prod before assuming this is the only stale-build symptom on
+the board — that is a bigger question than PLT-3084.
