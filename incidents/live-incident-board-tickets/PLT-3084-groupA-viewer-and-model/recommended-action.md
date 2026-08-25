@@ -48,3 +48,21 @@ Open the viewer with the console open, filter on `LinkingService`, then:
    silent. That is D2.
 
 Step 2 on master is the cheapest confirmation of the whole diagnosis and needs no branch build.
+
+## 2026-08-24 (third pass) — corrected repro steps
+
+**Supersedes the "What Ilia can check in the browser" section above**, which asked for a model to be
+opened "after linking and before Ctrl+Z" without saying you need a model open to link in the first
+place, and which relied on judging whether a link had reverted.
+
+Use the protocol in `context.md` § "2026-08-24 (third pass)". Two things changed:
+
+- **The trigger is the model tree checkbox** (`use-node-actions.tsx:45-65`) — ticking any model on
+  or off fires `_clearHistory()`. Those are the only two call sites in the codebase, so no other
+  repro path exists.
+- **The oracle is the Edit menu, not the keyboard.** Undo and Redo are disabled straight off
+  `historyService.canUndo()`/`canRedo()` (`menu-button.tsx:257,263,275,281`) and re-render on every
+  history change. **Redo greying out after a model toggle is D1, visible, with no console and no
+  judgement call.**
+
+Nothing about the draft Jira comment changes — it does not describe the repro steps.

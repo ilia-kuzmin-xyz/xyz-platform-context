@@ -181,10 +181,15 @@ prod every model the user opens — including from the linking panel they are wo
 again, and any undo they had performed is silently re-armed while redo dies. That is why reusing
 Friday's release changes nothing: the release was never the variable.
 
-**Falsifiable, on prod, no branch build needed:** link elements → open any model from the linking
+**Falsifiable, on prod, no branch build needed:** ~~link elements → open any model from the linking
 panel's "Load model" menu → press Ctrl+Z. Predicted: the link does not revert and Ctrl+Shift+Z is
 dead. Then repeat without opening a model. Predicted: works. If both behave the same, D1 is wrong
-and the cause is D2 or the selection-on-the-same-stack behaviour.
+and the cause is D2 or the selection-on-the-same-stack behaviour.~~
+
+⚠️ **SUPERSEDED — this protocol is not executable as written.** It reads as "link with no model
+open", which cannot be done: selecting elements to link requires a loaded model. See the
+2026-08-24 third pass at the end of this file for the corrected protocol, which uses the model
+tree checkbox as the trigger and the Edit menu's Redo state as the oracle.
 
 ## 2026-08-25 — no change since the 08-24 investigation
 
@@ -193,3 +198,80 @@ recorded, newest still 110242-adjacent (08-24 08:59). No reply yet to the "why d
 posted in this file's 08-24 (later) section (that answer was written here, not posted to Jira — no
 comment has actually gone out on the ticket beyond Yash's original two). The 142 MB screen recording
 remains the one load-bearing attachment, still unopenable here. Nothing re-derived.
+
+## 2026-08-24 (third pass) — the repro protocol was not executable; corrected, and a better oracle found
+
+**Supersedes the test protocol at the end of the 08-24 "why it works on dev" section. Do not use
+that one.** Ilia's objection: it read as "link with no model open", which is impossible — you must
+select elements in the viewer to link them, and that requires a loaded model. The intent was
+"open a *second* model between the link and the Ctrl+Z", but that is not what it said, and it also
+put the burden on finding an unloaded model to open. The diagnosis is unchanged; only the
+instructions were wrong.
+
+### NEW — the trigger is the model tree checkbox, not anything exotic
+
+`model-layers/model-tree/hooks/use-node-actions.tsx:45-65` — **the checkbox next to any model in
+the model tree loads and unloads it**:
+
+```ts
+if (item.isLoaded) await viewerService.removeExtraDocument(item.id)
+else                await viewerService.addExtraDocument(item.id)
+```
+
+- tick on → `addExtraDocument` (`viewer-service.ts:840`) → `_loadModel` → `MODEL_ROOT_LOADED_EVENT`
+  → `_modelLoadedHandler` (`:423-425`) → `_clearHistory()`
+- untick → `removeExtraDocument` (`:913-922`) → `_performRemoval` → `MODEL_UNLOADED_EVENT` →
+  `_modelUnloadedHandler` (`:555`) → `_clearHistory()` (`:601`)
+
+Confirmed by grep that **`_clearHistory()` has exactly two call sites, both of them these**
+(`viewer-service.ts:424`, `:601`). There is no third trigger, so any repro must go through a model
+load or unload. Nothing else in the viewer resets the cursor.
+
+### NEW — a visual oracle that does not require pressing Ctrl+Z at all
+
+The viewer-bar menu's **Edit → Undo / Redo** items are disabled straight off the history service:
+`menu-button.tsx:257,263` (`!historyService.canUndo()`) and `:275,281`
+(`!historyService.canRedo()`).
+
+They are live, because `clearHistoryOfType` always allocates a new array
+(`history-service.ts:94`) and pushes it through `_updateHistory()` → `$setHistory` →
+`HistoryProvider`'s `useState` (`history-provider.tsx:18-21`), so every consumer re-renders even
+when the filter removed nothing.
+
+**So D1 has a symptom you can see without touching the keyboard: Redo greys out after a model
+toggle.** That removes every way to misread the result — no console, no judging whether a link
+"looks" reverted, no race with an async undo.
+
+Predicted on master, arithmetic from `clearHistoryOfType`: history `[Link]`, cursor `0`; after one
+undo cursor is `-1` and `canRedo()` is `-1 < 0` = **true**; `clearHistoryOfType(HideIsolate)`
+removes nothing but sets cursor to `length - 1` = `0`, so `canRedo()` is `0 < 0` = **false**. On
+the fix branch the cursor stays at `-1` and Redo remains enabled.
+
+### The corrected protocol
+
+Setup: a project with at least two models. Open the viewer and **wait until nothing is still
+loading** — a model still streaming fires the event by itself and contaminates the test.
+
+**Step 1 — does link-undo work at all.** Select elements → link to an activity → **do not click
+anywhere in the 3D view** → open Edit menu. Undo should be enabled. Press Ctrl+Z; the link should
+revert. Reopen Edit; **Redo should now be enabled.**
+*If the link does not revert here, D1 is not the cause and the answer is D2 or something else —
+stop and say so.*
+
+**Step 2 — the D1 test.** From step 1's end state (Redo enabled), **tick an unloaded model on in
+the model tree** (or untick a loaded one), then reopen Edit.
+**Predicted: Redo is greyed out.** A model toggle that has nothing to do with linking has silently
+discarded the pending redo. That is D1, confirmed, with no console.
+
+**Step 3 — the re-arm half, optional and more visible.** From step 2, press Ctrl+Z again.
+Predicted on master: the cursor was pushed back onto the already-undone `Link` entry, so it runs
+that undo a second time — either unlinking something already unlinked, or popping the next older
+link action and reverting a link nobody asked about.
+
+**Step 4 — separate the selection behaviour, which may be the whole of the customer's complaint.**
+Fresh: select elements → link → **click any element in the 3D view** → Ctrl+Z.
+Predicted: the first Ctrl+Z undoes the *selection*, the second reverts the link. By design
+(`selection-service.ts:456-491` pushes a global `Select` entry on every non-empty selection). If
+step 2 comes back clean but this reproduces the customer's experience, the code defects are real
+but are not what they reported, and the conversation with product is about whether selection
+belongs on the same stack as data edits.
