@@ -92,3 +92,32 @@ Re-checked at the start of the scheduled run. **No answer posted; the 08-24 anal
 
 This one is the riskier of the pair — it is `Critical` priority but needs a persistence decision
 and touches the readiness cascade app-wide. Worth raising verbally rather than waiting on Jira.
+
+### 2026-08-25 — verified the 08-24 claims independently, and one of them was too optimistic
+
+Re-read the code rather than trusting the previous run's summary. Three corrections/refinements
+that change the blast radius, all confirmed by grep on `PLT-2953` (post-merge with master):
+
+1. **The achieved rule is duplicated across two hooks, not centralised.**
+   `use-readiness-steps.ts:53-56` computes `achievedOf` (`list.length > 0 && list.every(isInstanceComplete)`),
+   and its own doc comment (`:32-35`) says it was extracted precisely so that "two copies of the
+   achieved/locked rule would [not] drift". But `use-asset-current-tag.ts:120` still has its own
+   independent copy — `statuses.every(entry => isInstanceComplete(entry.status, entry.type))`.
+   So an override has to be threaded into **both**, or the ladder and the asset card/viewer colour
+   will disagree about the same asset. The 08-24 note's "the rule was deliberately centralised in
+   the hook" is only half true — believe the grep, not the comment.
+
+2. **Two different hooks are both called `useReadinessSteps`.** `app/hooks/useReadinessSteps.ts:23`
+   takes `(projectId)` and returns the project's **tag catalogue**;
+   `assets-panel/use-readiness-steps.ts:37` takes `(projectId, assetId, assetTypeId)` and returns
+   **one asset's ladder**. `use-asset-current-tag.ts` imports the *former*. Easy to wire the wrong
+   one — check the import path, not the name.
+
+3. **The viewer legend does not add a third copy.** PLT-2990/PLT-2991 merged to master today
+   (`e296a98`) and `legend/use-legend-items.ts` only maps the tag catalogue to label+colour rows
+   (`:34-44`); it derives no achieved state. Element *colouring* goes through the
+   `use-asset-current-tag` path, so it is covered by correction 1 rather than being separate.
+
+Net effect: the override has **two** derivation sites to change, not one, and the second one feeds
+the viewer. That makes "client-only for the MVP" noticeably less attractive — two hooks reading a
+per-browser override is where drift will show up first.
