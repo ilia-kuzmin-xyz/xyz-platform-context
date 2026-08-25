@@ -677,3 +677,12 @@ Gennaro for the Staging evidence.
 
 **Branch updated:** `PLT-2874-dashboard-element-count-diagnostics`, commit `48839a8`. Both ladders,
 at warn, with `baseDataUndated` and `apiActivitiesRows` added as the rung that was invisible.
+
+## 2026-08-25 — no change
+
+Live fetch: status `Open`, priority Minor, assignee Ilia Kuzmin, 6 comments, newest still Darminder's
+08-17 14:01 "fix still ongoing following QA latest testing" — byte-identical to the 08-21 snapshot.
+Still only PR #2084 (merged 07-31) references PLT-2874 in GitHub; no frontend fix in flight found
+this run either (not re-checked against the live PR list this pass — carried forward from 08-21's
+confirmed re-check). The Gennaro ask and the Darminder sanity-check line remain unposted, now
+**8 days**. Nothing re-derived.

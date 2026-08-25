@@ -514,3 +514,10 @@ sits entirely with the client's project-delivery team. The nudge-to-Yash draft i
 Live fetch: status With Customer, priority Major, assignee Yash Patel, still 16 comments, `updated`
 still `2026-07-24T13:56:22`. **28 days** of silence. Nothing to add; the nudge-to-Yash draft remains
 correct and unposted.
+
+## 2026-08-25 — no change
+
+Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 16 comments, newest still
+2026-07-24 13:56 — byte-identical to every run since 08-18. **32 days** silence on a fix that sits
+entirely with the client's project-delivery team (correcting one model level's elevation). The
+nudge-to-Yash draft is unchanged. Nothing re-derived.

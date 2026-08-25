@@ -284,3 +284,11 @@ run. No reply from Darminder to his own 08-17 15:08 question about the schedule 
 customer's offered XER files still haven't been requested — now **11 days** since the original offer.
 Step 1 (ask Darminder about the schedule-switcher entry, see `recommended-action.md`) remains the cheapest
 unblock and is still unposted.
+
+## 2026-08-25 — no change
+
+Live fetch: status `With Customer`, priority Major, assignee Darminder Atker, 5 comments, newest
+still 08-17 15:08 — byte-identical to the 08-21 snapshot. Darminder's specific schedule-pair
+request is now **8 days** cold with no evidence it reached the customer. The free internal check
+(does the `'... - LIVE - DRAFT'` suffix show as its own schedule-switcher entry) is still the
+cheaper first move, unchanged from the 08-21 draft. Nothing re-derived.

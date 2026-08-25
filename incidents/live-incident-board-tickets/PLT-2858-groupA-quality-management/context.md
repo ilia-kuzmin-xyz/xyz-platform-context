@@ -505,3 +505,18 @@ customer or ships them an empty list. Owner: Sachin or Ali. Never asked.
 priority, customer-facing, 41 days on a one-line clarification that has been answerable verbatim
 from code since 08-14, and four ready drafts that no agent in this routine can post. This is not an
 analysis gap and no further investigation will move it.
+
+## 2026-08-25 — 23rd consecutive run unposted; live fetch confirms full comment history, not just the count
+
+Live fetch this run pulled all 27 comments directly (`getJiraIssue` with `fields:["comment"]`,
+`total: 27`) rather than trusting a search-result comment count, since the board-wide JQL pass
+returned a paginated 20 for this ticket and needed reconciling. All 27 are byte-identical to what
+this file already records; newest is still 108643 (Yash, 2026-07-31, "any update on this?"). Status
+`In Analysis`, priority Critical, assignee Mostafa Kamel Hussien, `resolution = null`.
+
+**Stall clocks as of 2026-08-25:** total silence **25 days**; Mostafa's 107320 question to Darminder
+unanswered **42 days**; customer's drop-down-or-remove request unanswered **42 days**; escalate-to-
+Pietro first recommended, never executed, **32 days**. Nothing re-derived — the diagnosis has been
+finished since 08-14, the GUID-label defect was fixed on a branch 08-24, and every run since 07-24
+has added only a larger number to this table. Still the board's only Critical-priority open item and
+its stalest loop.

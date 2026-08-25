@@ -288,3 +288,12 @@ posted. The opening this ticket's orphaned £600-anomaly question was riding on 
 Pietro thread) has itself gone quiet — see `PLT-3061-groupA-quality-management/context.md`, 2026-08-21 —
 so there is no fresher opening yet, just a slightly older one. Close-out recommendation is unaffected
 either way; it does not depend on that question being asked.
+
+## 2026-08-25 — no change
+
+Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 13 comments, newest still
+2026-07-06 (Freshdesk closed) — byte-identical to every run since 08-18. **50 days stale.** The
+close-out draft in `recommended-action.md` remains unposted across (by this folder's own running
+count) 18 consecutive runs. Its optional follow-up (the €600 Cat3/CSA/Underground-Services row) still
+has nowhere fresher to land — PLT-3061's thread, the intended landing spot, has itself gone quiet
+since 08-20. Nothing re-derived.

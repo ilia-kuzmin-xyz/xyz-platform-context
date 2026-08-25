@@ -45,6 +45,117 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-25 — 9 in-scope tickets (up from 8 on 08-21): 1 brand-new (PLT-3059, linked to PLT-3034), 1 advanced out of scope (PLT-3063 → In Code Review), all 9 Group A, board's Critical ticket now 23 runs / 25 days unposted
+
+**Board re-queried** two ways to sidestep the tool's comment-field pagination cap seen this run
+(a live per-ticket fetch of PLT-2858 returned `total: 27` against a search-result page of 20 —
+reconciled by fetching that ticket's comments directly rather than trusting the paginated count).
+First, `status NOT IN (...)` per the routine's literal exclusion list, cross-checked against the
+scope rule's fuller list (also excluding `Done`, `Archived`, `Customer Release Check`, `Ready For
+QA`, `In QA`) with a second, positive query — `status IN ("Open", "In Analysis", "With Customer",
+"Ready For Development", "Dev In Progress")` — which is unambiguous and was used as the source of
+truth. **9 tickets in scope, all Group A** — `Ready For Development`/`Dev In Progress` empty again,
+so no Group B this run either.
+
+### PLT-3059 — new this run (progress-tracking), and it's PLT-3034's twin before PLT-3034's own fork existed
+
+**"Hutto2 - Activities should be reading 100%..."**, Major, created 08-17, same Hutto2 project as
+PLT-3034 and linked to it in Jira itself (issue link, not just an in-thread mention). Nine Electrical
+activities (78%–98% in the dashboard, customer says everything's installed) — the biggest single-
+ticket cohort this board has seen for this shape. Darminder called it the same QA-model mechanism as
+PLT-3034 on the same day (08-17) and, when asked for next steps, pointed Yash at PLT-3034's
+unlink-or-mark-installed workaround (08-18) — **before** PLT-3034's own customer disputed that
+workaround's premise (08-19) and before this routine's Fork A/B mechanism existed (found 08-20,
+*after* both of these comments). Nobody has run the one-minute Fork A/B discriminator (does a linked
+element id also appear under a production model heading) on either ticket. Re-verified the shared
+code mechanism directly against the current `hc-frontend` checkout rather than trusting PLT-3034's
+folder on faith (`model-entity.ts:274-277`, `linking-service.ts:684-689`, `useGroupedLinks.ts:59-78,66`
+all still read as recorded). PLT-3034's own folder updated additively to flag the dependency. Full
+findings: `PLT-3059-groupA-progress-tracking/context.md` + `recommended-action.md`.
+
+### PLT-3063 — left scope this run
+
+| Ticket | Was | Now | What happened |
+|---|---|---|---|
+| **PLT-3063** | In Code Review (last seen 08-21) | still In Code Review | No change since 08-21; noted here only because it was Group B as of the 08-21 sweep and this is the first full sweep since. Folder kept `-groupB-` per standing precedent (advanced mid-flight, not resolved by us). |
+
+### Tickets confirmed unchanged (verified via live JQL fetch, status/priority/assignee/comment-count
+and newest-comment timestamp checked against each folder's own record — not a rubber stamp)
+
+| Ticket | Domain | Status | Last real activity | Note this run |
+|---|---|---|---|---|
+| [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | 08-24 (the requested-pass investigation itself) | 2 comments, unchanged; the "why dev vs prod" answer and the fix branch both exist only in the folder, nothing posted to Jira |
+| [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | Open | 08-20 (customer's unprompted CSA-TCB/KGE confirmation) | 6 comments, unchanged; Darminder's tag of Mostafa/Pietro now **~6 days** silent, past the 24h stall line |
+| [PLT-3034](PLT-3034-groupA-progress-tracking/context.md) | progress-tracking | With Customer | 08-19 (customer's QA-model denial) | 19 comments, unchanged; Fork A/B still undecided, now blocking two tickets instead of one (see PLT-3059 above) |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | 08-17 (Darminder's schedule-pair ask) | 5 comments, unchanged; ask now **8 days** cold, still no evidence it reached the customer |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-17 (Darminder: "fix still ongoing") | 6 comments, unchanged; Gennaro ask + sanity-check line now **8 days** unposted |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments (fetched in full this run, not just counted), byte-identical; escalate-to-Pietro still unposted across **23 consecutive runs**, now **42 days** on Mostafa's own unanswered question; board's only Critical ticket |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **50 days stale**, close-out still unposted across **18 consecutive runs** |
+| [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, unchanged; **32 days** silence on a fix owned entirely by the client's project-delivery team |
+
+### Cross-ticket notes
+
+- **A drafted workaround now has two tickets depending on it being right.** PLT-3034's Fork A/B
+  question stopped being a single-ticket unknown this run — PLT-3059 was pointed at the same
+  unverified workaround before PLT-3034's own dispute of it existed. This is the first time this
+  board has had one unresolved technical fork gating advice on two separate customer-facing tickets
+  at once; worth treating as higher-priority than either ticket's individual staleness would suggest,
+  since a wrong answer here is copyable.
+- **The comment-count pagination trap is worth remembering for future runs.** A board-wide JQL search
+  with `fields:["comment"]` returned only 20 of PLT-2858's 27 comments — apparently capped rather than
+  wrong, confirmed by a direct per-ticket fetch returning `total: 27` with the same 27 already on
+  file. Trust `total` from a direct `getJiraIssue` comment fetch over a count from a multi-issue
+  search result if the two ever disagree.
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3059** — `image-20260817-130424.png` (dashboard screenshot) and `Screenshot 2026-08-17
+  183619...png` (Yash's own linked-vs-installed count check) — neither opened. The second may show
+  the exact count mismatch Yash described in text; not load-bearing for the code-side mechanism.
+- Prior gaps on the eight confirmed-unchanged tickets stand exactly as previously documented (PLT-2858's
+  5 images, PLT-2815's 2 images + inline blobs, PLT-2649's 2 images, PLT-3034's 12 attachments including
+  the three that may settle Fork A/B directly, PLT-3084's 142 MB screen recording) — not re-listed here.
+
+### Needing a human now
+
+Ranked by tenure/urgency; unchanged items carried from 08-21 except where noted:
+
+1. **PLT-2858** — post the decision-request to Pietro (cc Mostafa) plus the short answer-Mostafa's-
+   question draft (both in `recommended-action.md`). Critical priority, **23 runs** unposted, **42
+   days** silent on a decision only product can make. Unchanged top priority.
+2. **PLT-2815** — execute the close-out (drafted, 18 runs unposted). Administrative, lowest urgency,
+   but its follow-up question is riding on PLT-3061's now-also-quiet thread.
+3. **PLT-2649** — post the nudge to Yash confirming the 07-24 hand-off carried the detail (drafted,
+   **32 days** silence).
+4. **PLT-3061** — post the decision request to Mostafa/Pietro re: CSA-TCB/CSA-KGE (drafted, now
+   **~6 days** silent past the 24h stall line — no longer fresh).
+5. **New this run — PLT-3059 / PLT-3034 jointly:** run the Fork A/B discriminator once (does a
+   linked element id also appear under a production model heading) and apply the answer to both
+   tickets. This now sits ahead of either ticket's own individual drafts in value, since it currently
+   blocks two customer-facing answers at once, not one.
+6. **PLT-2874** — send the Gennaro ask plus the Darminder sanity-check line (drafted, **8 days**).
+7. **PLT-3033** — send Darminder's specific schedule-pair request to the customer via Yash (drafted,
+   **8 days** cold).
+8. **PLT-3084** — nothing drafted needs posting yet; the falsifiable prod test (link → open a model
+   from the linking panel → Ctrl+Z) would confirm D1 without needing a build, if someone wants to run
+   it before the branch goes further.
+
+**Board assessment:** the board grew by one (8 → 9) on a ticket that turned out to matter more than
+its own content — PLT-3059 didn't add a new mechanism, it doubled the cost of leaving PLT-3034's Fork
+A/B question unresolved. Otherwise a quiet run: one ticket advanced cleanly out of scope (PLT-3063),
+nothing else moved, and the board's structural bottleneck is unchanged — analysis is not what's
+blocking this board, posting is, and PLT-2858 at 23 runs / 42 days is the clearest evidence of that.
+
+### Notification
+
+Sent: PLT-2858 crossed 42 days of silence on a Critical-priority decision at 23 consecutive unposted
+runs (standing top escalation, unchanged in kind from every prior run's notification), and the new
+finding that PLT-3034's unresolved Fork A/B question now blocks two tickets rather than one — a wrong
+workaround given once is a customer service issue, given twice because we didn't check the first
+time is a pattern. Nothing else this run rose to the bar of needing Ilia mid-flight.
+
+---
+
 ## Requested pass: 2026-08-24 — 4 tickets taken deliberately (PLT-3061, PLT-2874, PLT-3084, PLT-2858), one debugging branch pushed per ticket, PLT-3084 new and root-caused
 
 **Not the scheduled board sweep.** Ilia named four tickets and asked for each to be debugged as far

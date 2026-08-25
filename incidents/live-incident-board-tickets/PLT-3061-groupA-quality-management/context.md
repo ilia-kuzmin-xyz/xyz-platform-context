@@ -280,3 +280,11 @@ matches the generic rows exactly as before — behaviour-preserving.
 mechanism is settled to the row, the fix is 8 rows of product-owned data, and the only thing
 missing is Mostafa or Pietro answering a question that has been open 5 days on a ticket where the
 customer needs numbers every Friday morning.
+
+## 2026-08-25 — no change
+
+Live fetch: status `Open`, priority Medium, assignee Darminder Atker, 6 comments, newest still
+110058 (2026-08-20 13:33, customer's unprompted CSA-TCB/CSA-KGE confirmation) — byte-identical to
+the 08-21 run's snapshot. Darminder's tag of Mostafa and Pietro (109980, 08-19 19:48) is now
+**~6 days** silent, well past the 24h stall threshold first flagged 08-21. The decision-request
+draft in `recommended-action.md` is unchanged and still the right message. Nothing re-derived.

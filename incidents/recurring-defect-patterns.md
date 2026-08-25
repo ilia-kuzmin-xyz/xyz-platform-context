@@ -631,6 +631,13 @@ both PLT-3061 and PLT-2815 the ticket carried media that could not answer a ques
     installed" would record a genuinely uninstalled element as installed. This bit on PLT-3034: the
     customer stated flatly on 08-19 that he never links to QA models, which is fully consistent with the
     code and with the screenshots, and a workaround premised on the opposite had already gone out.
+  - **2026-08-25 addition — second ticket, same project, not yet a second project.** PLT-3059
+    (Hutto2, new ticket, nine Electrical activities) reports the identical shape and was pointed by
+    the assignee at this same ticket's unlink/mark-installed workaround, before the 08-20 fork above
+    existed. Still one project, so this does not clear the "two or more projects" promotion bar on
+    its own — but it means the unresolved fork now blocks a correct answer on two open tickets, not
+    one, and whichever way it resolves should be applied to both rather than re-derived twice. Full
+    findings: `live-incident-board-tickets/PLT-3059-groupA-progress-tracking/context.md`.
 - **Dashboard issue number is fabricated from list position, not the real field** (PLT-3063, DC5 —
   mechanism verified in code, single occurrence). The Dashboard's Quality-panel issue card renders
   `#{index + 1}` from the item's position in the currently rendered list

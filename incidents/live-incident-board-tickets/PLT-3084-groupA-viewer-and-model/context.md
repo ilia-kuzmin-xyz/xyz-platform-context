@@ -185,3 +185,11 @@ Friday's release changes nothing: the release was never the variable.
 panel's "Load model" menu → press Ctrl+Z. Predicted: the link does not revert and Ctrl+Shift+Z is
 dead. Then repeat without opening a model. Predicted: works. If both behave the same, D1 is wrong
 and the cause is D2 or the selection-on-the-same-stack behaviour.
+
+## 2026-08-25 — no change since the 08-24 investigation
+
+Live fetch: status `In Analysis`, priority Medium, assignee Ilia Kuzmin, 2 comments — same as
+recorded, newest still 110242-adjacent (08-24 08:59). No reply yet to the "why dev vs prod" answer
+posted in this file's 08-24 (later) section (that answer was written here, not posted to Jira — no
+comment has actually gone out on the ticket beyond Yash's original two). The 142 MB screen recording
+remains the one load-bearing attachment, still unopenable here. Nothing re-derived.

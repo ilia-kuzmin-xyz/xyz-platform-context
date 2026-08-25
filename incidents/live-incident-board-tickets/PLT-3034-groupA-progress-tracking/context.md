@@ -267,3 +267,18 @@ Live fetch: status `With Customer`, 19 comments, `updated = 2026-08-19T12:48:11`
 run. No new comment since Yash's relay of the customer's pushback ("As I never link anything to a QA
 model..."). Fork A/B question, the three standing drafts and the Mech.144.1260 follow-up all stand
 unchanged.
+
+## 2026-08-25 — no Jira change, but a sibling ticket now depends on this one's open fork
+
+Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 19 comments, newest still
+08-19 12:48 — byte-identical to 08-21. Fork A/B remains genuinely undecided.
+
+**New this run: PLT-3059** (`PLT-3059-groupA-progress-tracking/`, new ticket this pass, same Hutto2
+project) reports the same QA-model shape across nine Electrical activities, and Darminder pointed
+that ticket at *this* ticket's 08-18 15:50 workaround comment (unlink / mark installed) on 08-18 —
+**before** the customer here disputed the workaround's premise on 08-19, and before the Fork A/B
+mechanism in this file's own 08-20 section existed. The unresolved fork here is therefore no longer
+only this ticket's problem: whichever way it resolves almost certainly answers PLT-3059 too, and
+until it's checked, the workaround already pointed at PLT-3059 carries the same unverified risk this
+file has been flagging since 08-20. Worth running the discriminator once and applying the answer to
+both tickets rather than twice.
