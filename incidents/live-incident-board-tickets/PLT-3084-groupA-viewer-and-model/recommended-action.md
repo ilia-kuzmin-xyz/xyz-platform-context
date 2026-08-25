@@ -66,3 +66,45 @@ Use the protocol in `context.md` § "2026-08-24 (third pass)". Two things change
   judgement call.**
 
 Nothing about the draft Jira comment changes — it does not describe the repro steps.
+
+## 2026-08-24 (RESOLVED) — supersedes every draft above
+
+Root cause proven live on prod: the `HistoryType.Link` undo/redo callbacks are not registered,
+because the deployed build predates **PR #2081 / commit `4ad83a7` (PLT-2743), merged 2026-08-07**,
+which added the registration that had been lost when the V1 linking wrapper was deleted
+(`3dd76091c`, PLT-2610/2611). Full evidence in `context.md`.
+
+**Do not post the earlier drafts.** They ask about model loading and schedule saves, none of which
+is relevant.
+
+### Category
+
+Not "technical debt resolvable in a session" as first classified. It is a **release/deploy gap**:
+the fix has been on master for 17 days. Reclassify as such on the board.
+
+### Draft comment (NOT posted)
+
+> Found it, and there is nothing to build. The undo handler for element-to-activity linking is not
+> registered on the deployed build, so every link entry goes into the viewer's history with nothing
+> able to service it, and the first Ctrl+Z quietly discards them all. That is why it fails every
+> time regardless of project or model size, and why it works on dev.
+>
+> The registration was lost when the old V1 linking wrapper was deleted, and was restored on master
+> on 7 August in PR #2081. Prod is running something older than that. Confirmed on the live site by
+> reading the history service directly and by re-attaching the handler by hand, after which undo
+> worked immediately.
+>
+> So the fix is to ship a build containing #2081. The thing worth a wider look is how a release cut
+> on the 21st does not contain a commit merged on the 7th.
+
+### Second action, separate ticket
+
+Raise the release-process question with Darminder: a fix merged 08-07 was absent from a release cut
+08-21, and the incident it fixes was reported 08-24. That is the finding with the longest tail.
+
+### Third action, keep the branch
+
+`PLT-3084-undo-ctrl-z-linking` still fixes three genuine defects (D1, D2, D3). **D3 is why this
+incident was silent rather than loud** — the no-callback branch purges the entries and moves the
+cursor twice, so the user sees nothing at all. Worth landing on its own merits, described as
+hardening rather than as the fix for this ticket.

@@ -349,3 +349,89 @@ what the customer is hitting.
 per press naming cursor, depth, the whole stack by type, the type dispatched, whether it has a
 callback, and which types are registered. **Absence of that line after a Ctrl+Z press is itself the
 H-A verdict.** Warn so it survives a production build and lands in the session log.
+
+## 2026-08-24 (RESOLVED) — root cause: prod runs a build predating PR #2081. Nothing to fix in code.
+
+**Proven live on prod by Ilia, not inferred.** Every hypothesis in the sections above — D1, D2, D3,
+H-A, H-B — is superseded. They are real defects (D1/D2/D3 are still worth the fix branch) but none
+of them is this incident.
+
+### The evidence, in order
+
+Using `window.projectService` (enabled on prod by setting the `feature-flags` cookie to
+`[{"name":"enableGlobalWebViewerAPI","value":true}]` — `getFeatureFlagValue.ts` reads flags from
+that cookie, so no build is needed):
+
+```
+{ stack: "link", cursor: 0,
+  registered: ["section","status","hideIsolate","select"],
+  undoStack: 3, redoStack: 0 }
+```
+
+- **`registered` contains no `link`.** The `HistoryType.Link` callbacks are not on the history
+  service at all.
+- `undoStack: 3` and growing — the LinkingService instance is alive and recording actions.
+- `linkingService._isDisposed === false` — so `dispose()` (the only code that deregisters `Link`)
+  never ran. The registration therefore **never happened**.
+- Re-registering by hand in the console made undo work immediately:
+  `p.historyService.registerHistoryCallbacks('link', { undo: () => l.undo(), redo: () => l.redo() })`
+
+That last step converts the diagnosis into proof: the undo machinery is entirely sound, the handler
+was simply not attached.
+
+### Why: the deployed build predates the fix
+
+`git log -S "registerHistoryCallbacks(HistoryType.Link"` finds it added in **`4ad83a7`,
+PLT-2743 / PR #2081, merged 2026-08-07**. Before that commit `LinkingService`'s constructor was
+literally `constructor(private readonly projectService: ProjectService) {}`. The commit message
+describes this incident exactly, a fortnight before it was reported:
+
+> LinkingService has undo() and redo(), pushes addHistoryAction(HistoryType.Link) at three sites
+> and deregisters on dispose — but never registered. The registration lived in the V1 wrapper,
+> which registered the V2 service's methods, and went with it when that file was deleted in
+> 3dd76091c (PLT-2610/2611).
+>
+> Undo after a link operation therefore found no callback, logged an error and called
+> clearHistoryOfType('link'), silently discarding every link entry from the history.
+>
+> Pre-existing on master, not introduced by this branch.
+
+So the regression was introduced when the V1 linking wrapper was deleted (PLT-2610/2611,
+`3dd76091c`) and fixed on master on 08-07. **Prod is running something older than 08-07.**
+
+### This explains every observation that made the earlier hypotheses look wrong
+
+- **Fails 100% of the time on prod, on any project, any model size, one element or ten.** No
+  callback ever exists, so no link is ever undoable. Scale, timing and model loading are all
+  irrelevant — which is why the small-model repro falsified D1.
+- **Works on dev.** Dev runs a build containing #2081.
+- **Undo appears enabled for multi-element links, then does nothing and greys out.** The `Select`
+  entries from the selection are serviceable; the `Link` entry is not, so `undo()` hits the
+  no-callback branch and `clearHistoryOfType('link')` purges every link entry at once.
+- **Undo greyed out immediately for a single-element link.** Same purge, with no `Select` entry
+  left behind.
+
+### One-line confirmation of the deployed build, from any browser
+
+```js
+window.projectService.linkingService.constructor.toString()
+```
+
+An empty constructor body (only the parameter assignment) means the build predates #2081. Terser is
+configured without property mangling (`webpack/webpack.prod.js:65-90`), so this reads cleanly on the
+production bundle.
+
+### Action
+
+**Ship a build that includes PR #2081.** There is no code to write for this ticket. The open
+question is why a release cut on 2026-08-21 does not contain a commit merged on 2026-08-07 — that is
+a release-process question, and it is the more important finding: **a fix sat on master for 17 days
+while the bug it fixed was reported as a live incident.**
+
+### Status of the fix branch
+
+`PLT-3084-undo-ctrl-z-linking` remains valid and unmerged. D1 (cursor reset on every model load),
+D2 (orphaned Link entries after `invalidateLinks`) and D3 (double cursor move in the no-callback
+branch) are all still real on master and all still worth fixing — **D3 in particular is what turned
+this bug from a visible console error into a silent purge.** But they are a separate piece of work
+and must not be described as the fix for PLT-3084.
