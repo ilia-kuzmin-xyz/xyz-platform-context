@@ -180,3 +180,78 @@ mints. `removeTask()` deliberately does *not* throw in the same situation: creat
 so no row can exist to remove, and failing a save with nothing to do would be wrong.
 
 Landed on hc-frontend `PLT-3003` (PR #2147) — commits `f5f2cafb`, `655787ac`, `f0812cb8`, `460a8e8c`.
+
+## 2026-08-25 — census re-probed: it was stale, and `asset_readiness` already exists
+
+Re-probed both databases directly with the committed public anon keys, prompted by a design
+question on PLT-2968 ("where would an override record live?"). **Do not trust the 12 Aug census
+above — three of its table names no longer exist.**
+
+### Renames since 12 Aug (old names now 404 on `dev`)
+
+| 12 Aug census | today |
+|---|---|
+| `tag` | `readiness_step` |
+| `workflow_tag` | `workflow_step` |
+| `workflow_tag_task` | `workflow_step_task` |
+
+### Tables the 12 Aug census never listed
+
+`system` (22 rows), `system_type` (8 rows), **`asset_readiness` (0 rows)**.
+
+### `asset_readiness` — the override table already exists
+
+Columns confirmed by per-column probe (`?select=<col>&limit=1`; 200 = exists, 400 = no such
+column — this works even though the table is empty):
+
+```
+id · project_id · asset_id · readiness_step_id
+is_achieved · is_overridden · override_reason
+created_at · modified_at · modified_by
+```
+
+One row per **(asset, readiness level)**. It carries both the achieved flag *and* the override
+flag + reason + actor.
+
+**Consequences worth knowing before anyone designs against this:**
+
+1. **Do not invent a new override table.** A `asset_readiness_override` design was drafted in this
+   session and abandoned on discovering this — it would have duplicated a solved problem.
+2. **Nothing writes it.** 0 rows on `dev`; the frontend never reads or writes it. The only
+   occurrence of the string in hc-frontend is `READINESS_BUCKET = 'asset_readiness'` in
+   `workflowStepTaskService` — a `bucket` discriminator *value*, unrelated to this table.
+   Whether a trigger on `task_instance` is meant to populate `is_achieved` is **unknown and needs
+   a backend answer**.
+3. **It implies a different model from ours.** hc-frontend *computes* achievement live from
+   `task_instance` (`use-asset-current-tag.ts:117`); this table wants it *persisted*. Likely
+   written for mobile/offline. Adopting `is_achieved` wholesale would make the feature read blank
+   while the table stays empty — the low-risk path is to keep computing achievement and consult
+   the row **only** when `is_overridden` is true, falling back to today's behaviour when the row
+   is absent.
+4. **Keyed on `readiness_step_id`, not `workflow_step_id`** — an override is against the catalogue
+   level, so callers must map via `workflow_step.readiness_step_id`.
+5. **No history and no acknowledgement.** One mutable row per level: `modified_by` / `modified_at`
+   give the *last* change only. There is no `acknowledged` column, so the PLT-2968 prototype's
+   two-person acknowledgement flow is unsupported by this schema as it stands.
+
+### Schema parity is BROKEN — supersedes the "parity holds" claim above
+
+The 12 Aug section concluded "all 14 tables exist on both, so `dev` and `main` agree
+structurally". **That is no longer true.** `asset_readiness` returns 404 for every column on
+`stable` (`gpuerhiwzgnfcvrzvwgw`) while existing on `dev`. Anything built on this table cannot
+ship above `dev` until XYZ_Supabase promotes it — name that as a blocker on PLT-2968 rather than
+discovering it at deploy time.
+
+### How to re-probe (root introspection no longer works)
+
+`GET /rest/v1/` now answers `401 {"message":"Secret API key required"}` — the OpenAPI dump needs a
+secret key. Probe per table and per column instead:
+
+```bash
+KEY=<anon key from app/services/commissioningApi/supabase-config.ts>
+URL=https://ohmzwpcilvxpozljllle.supabase.co/rest/v1
+curl -s -o /dev/null -w '%{http_code}\n' "$URL/<table>?select=*&limit=1" \
+  -H "apikey: $KEY" -H "Authorization: Bearer $KEY"          # 200 exists / 404 absent
+curl -s -D- -o /dev/null "$URL/<table>?select=*&limit=1" \
+  -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Prefer: count=exact" | grep -i content-range
+```
