@@ -275,3 +275,77 @@ Predicted: the first Ctrl+Z undoes the *selection*, the second reverts the link.
 step 2 comes back clean but this reproduces the customer's experience, the code defects are real
 but are not what they reported, and the conversation with product is about whether selection
 belongs on the same stack as data edits.
+
+## 2026-08-24 (fourth pass) — D1 FALSIFIED for the reported repro; re-ranked
+
+**Ilia reproduced it on prod with a very small model that opens instantly, no model toggling.**
+That kills D1 as the explanation for *that* repro, and it should be said plainly rather than
+defended: with the model already loaded before any linking, `_clearHistory()` fired once on an
+empty history, and **nothing else in the codebase moves the cursor** — `_clearHistory()` has
+exactly two call sites (`viewer-service.ts:424`, `:601`), both model load/unload.
+
+D1 is still a real defect and the fix still stands. It is no longer the leading explanation.
+
+### Ruled out this pass, by reading rather than by argument
+
+- **Callbacks not registered.** `HistoryService` is constructed at `project-service.ts:168`,
+  `LinkingService` at `:174`, so `historyService` is defined when
+  `registerHistoryCallbacks(HistoryType.Link, …)` runs (`linking-service.ts:56`). The `?.` never
+  short-circuits. Not the cause.
+- **A hotkeys-js scope change.** Grepped `setScope` / `deleteScope` / `hotkeys.filter` across
+  `ViewerPage/` — **no occurrences**. Nothing reassigns the scope, so a scope mismatch cannot be
+  swallowing the key.
+- **`selection-service`'s catch-all binding interfering.** `hotkeys('*', …, this._manageHotkeys)`
+  (`selection-service.ts:43`) — `_manageHotkeys` (`:72-77`) only tracks Shift/Ctrl state. It does
+  not preventDefault and does not return false. Harmless.
+- **A `linkChanges$` subscriber re-selecting elements** (which would push a `Select` entry on top
+  of the `Link` one). All subscribers refresh trees, panels and element state
+  (`use-link-queries.ts:40`, `linking-provider.tsx:20`, `scene-properties.tsx:61`,
+  `useLinkedElementsTreeData.ts:29`, `ModelDetailsPanel.tsx:216`,
+  `services/element-state/element-state-changes.ts`). None touches viewer selection.
+- **A periodic sync firing `invalidateLinks`.** Already established: no `setInterval` anywhere
+  under `ViewerPage/` re-syncs links.
+
+### Re-ranked candidates for the small-model repro
+
+**H-A — the keystroke never reaches the service.** The binding goes through `hotkeys-js`
+(`hotkey-service.ts:43`), whose **default filter drops keydown originating in `INPUT`, `SELECT` or
+`TEXTAREA`**. To link on a real project you must find an activity, which generally means typing in
+a search field or clicking into the Gantt; if focus is left there, Ctrl+Z never arrives and the
+browser's own text-undo takes it instead. On dev, with few activities, you can pick one without
+typing. **This explains prod-vs-dev without needing any scale or timing difference, which is
+exactly what the small-model repro demands.** Currently the strongest candidate.
+
+**H-B — the top of the stack is `Select`, not `Link`.** Every non-empty selection change pushes a
+global entry (`selection-service.ts:456-491`), so any click in the 3D view after linking — including
+"select linked elements", the other half of this very ticket — means the first Ctrl+Z undoes the
+selection. By design, but indistinguishable from a broken undo to the user.
+
+**H-C — D2, an orphaned `Link` entry over an empty private stack.** Still live; needs a schedule
+save or a failed link earlier in the session.
+
+**D1** — demoted. Real, fixed, but not this repro.
+
+### The decision tree, no build required
+
+The viewer-bar **Edit menu** is the instrument, because its Undo item calls
+`historyService.undo()` **directly** (`menu-button.tsx:76`) and therefore **bypasses `hotkeys-js`
+entirely**. After linking, open Edit:
+
+| What you see | What it means |
+|---|---|
+| Undo **greyed out** | no entry on the stack — the link never registered one |
+| Undo enabled, **menu Undo works, Ctrl+Z does not** | **H-A confirmed** — the keystroke is being filtered, focus is in an input |
+| Undo enabled, menu Undo **changes the selection** instead of reverting the link | **H-B** — `Select` is on top |
+| Undo enabled, menu Undo **does nothing at all** | **H-C** — entry live, private stack empty |
+
+Cheapest first move: **click in empty 3D space (not on an element) to move focus out of any input,
+then press Ctrl+Z.** If it works then and not otherwise, H-A is the answer and none of D1/D2/D3 is
+what the customer is hitting.
+
+### Branch
+
+`PLT-3084-undo-ctrl-z-linking`, commit `d0c919c`. `HistoryService.undo/redo` now emit one warn line
+per press naming cursor, depth, the whole stack by type, the type dispatched, whether it has a
+callback, and which types are registered. **Absence of that line after a Ctrl+Z press is itself the
+H-A verdict.** Warn so it survives a production build and lands in the session log.
