@@ -137,3 +137,33 @@ applied on `dev` — `stable` still bare. Details in the planning doc's dated no
   stacked on xyz-supabase #16. The schema was designed in-session, no backend review
   yet — Rishi asked to look. Nobody runs the stopgap on stable.
 - Someone merged master into PLT-3003 remotely mid-evening; pulled+merged clean.
+
+## 2026-08-25 — scheduled review run over Rishi/Darminder's open PRs
+
+Reviewed all 7 non-draft PRs by Rishi and Darminder (none by Tom were open):
+
+- **Approved**: #2167 (PLT-3060 live incident, Darminder — filter/isolation fix, Forge
+  omission-vs-empty-ids semantics; Rishi had approved too), #2171 (PLT-2965 critical asset
+  toggle), #2170 (PLT-2990/91 legend by readiness tags), #2149 (PLT-2984/82/83/85 system
+  detail panel — Darminder approved 08-24 at head after his visual round), #2160
+  (PLT-2970/71/73 affects-systems — lands after #2149; Darminder's "how does blocked get
+  set" question sits with Jason).
+- **Still blocked**: #2157 (PLT-3068/70 bundle+artifact) — my 08-20 changes-requested
+  stands; Rishi fixed the logo conflict + body, but master's prettier reformat of
+  routes.tsx conflicts again (trivial: keep his Swagger comment, take master's
+  formatting), and the sign-in visual check vs the generic SSO button is unconfirmed.
+  #2158 (PLT-3069) approved but stacked on #2157; its only real risk is a deployed-env
+  ChunkLoadError pass, per the ticket's own "not verified".
+
+**New finding, verified by PostgREST probe**: `asset.critical` (PLT-2965) exists on **dev
+only** — stable answers 42703 "column asset.critical does not exist". Reads stay safe
+(`select=*` + `?? false` mapping) but creates/edits would fail on stable. Same
+deploy-lockstep class as the systems tables; must reach stable before the flag goes above
+dev. Also verified all 18 commissioning tables carry `id`, so #2171's paged `select()`
+(new `order=id.asc` tiebreak, PAGE_SIZE 1000) cannot 42703 anywhere — that pagination fix
+is the root cause of Darminder's "asset disappears" repro (project had 1999 assets against
+PostgREST's silent 1000-row cap).
+
+Note for future runs: #2171 changes `select()` to always order by `id` — previously
+unordered reads followed PostgREST's physical order, so any UI relying on insertion order
+may re-order once it merges.
