@@ -157,3 +157,10 @@ behind them:
   capture points corrected silently** (101 points on the level in total), and should re-query
   `project-levels` for `f0f4d409` expecting ~0. Baseline for the diff is
   `analysis/PA12-levels.csv`.
+
+## 2026-08-26 — verdict unchanged
+
+Still **stay With Customer; do not transition.** 33 days since the 07-24 hand-off, no reply from
+project delivery. The nudge-to-Yash draft (confirm Freshdesk #6622 actually carried the model /
+level / target-elevation detail) remains correct, still drafted, still unposted — worth sending
+now given the clock. No new technical content to add.
