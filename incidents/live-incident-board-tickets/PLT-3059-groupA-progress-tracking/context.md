@@ -142,3 +142,18 @@ per activity, that itself is worth knowing before generalising the fix.
 - **Inferred, not yet checked:** that these nine activities are actually the QA-model shape at all
   (Darminder said "it seems"); that Fork A (vs B) applies here the same way it's suspected on
   PLT-3034; that the pointed-at workaround has or hasn't already been acted on by the customer.
+
+## 2026-08-26 — no change, stall clocks updated
+
+Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 6 comments (109780,
+109784, 109843, 109878, 110171, 110172), same ids/authors/timestamps/bodies verbatim, newest still
+109878 (Darminder, 08-18 15:50) — byte-identical to the 08-25 snapshot. `updated =
+2026-08-21T15:21:39+0100` is unchanged (still the 08-21 Freshdesk auto-sync noise, not a real
+reply). Attachments unchanged, still unopened.
+
+Checked PLT-3034's folder (not re-fetched live this pass): its own 08-26 entry still records Fork
+A/B as genuinely undecided. The one-minute discriminator remains unrun on both tickets.
+
+**Clocks:** 8 days since the disputed workaround was pointed at this ticket (109878, 08-18 15:50)
+with no correction; 7 days since PLT-3034's customer disputed that workaround's premise (08-19
+12:25, still unrelayed here). Nothing re-derived.
