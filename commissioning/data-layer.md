@@ -255,3 +255,47 @@ curl -s -o /dev/null -w '%{http_code}\n' "$URL/<table>?select=*&limit=1" \
 curl -s -D- -o /dev/null "$URL/<table>?select=*&limit=1" \
   -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Prefer: count=exact" | grep -i content-range
 ```
+
+## 2026-08-25 — `asset_readiness` verified against XYZ_Supabase develop (answers to the open questions above)
+
+Ilia checked the XYZ_Supabase repo directly. Supersedes the "unknown, needs a backend answer"
+items in the 2026-08-25 census section — these are now repo facts:
+
+1. **Unique constraint exists**: `asset_readiness_key unique (project_id, asset_id, readiness_step_id)`,
+   non-deferrable → valid PostgREST `on_conflict` arbiter. Upsert works; no select-then-insert.
+   Subsets are not arbiters — `project_id` is part of the key.
+2. **DDL**: `is_achieved` and `is_overridden` are `boolean not null default false`.
+   `override_reason` is nullable but guarded by `check (not is_overridden or override_reason is not null)`
+   — the mandatory reason is DB-enforced (23514 on bypass). Both FKs (`asset`, `readiness_step`)
+   are `on delete cascade`: deleting either silently discards override records. `modified_at` has
+   NO default and is stamped only by a BEFORE UPDATE trigger → NULL on first insert; display
+   "overridden at" as `modified_at ?? created_at`. `project_id` is bare text, no FK.
+3. **Nothing writes the table** on develop — zero insert/update/merge statements; the only trigger
+   sets `modified_at`. So `is_achieved` has no writer and no rows anywhere. The clobber risk is
+   the request shape, not a competing writer.
+4. **RLS**: same permissive anon as everything else (one of 22 names in the `90_security.sql` loop).
+5. **develop only.** Not on `main`; promotion **PR #5 (develop→main) is open and its body is stale**
+   ("merging this is a no-op on the database" — written before this model landed). Until #5 merges
+   AND is applied, any code touching `asset_readiness` 404s (PGRST205) on staging/prod.
+6. **Intended writer: NOT FOUND** for `asset_readiness` (no commit/PR/doc names one; the contract
+   migration's per-client writer list omits it). Sibling `system_readiness`'s writer is "web" only
+   per **closed, unmerged PR #13** — a PR-body opinion, not repo fact.
+
+### Write-shape rule for PLT-2968 (the one implementation gotcha)
+
+Send ONLY the columns being changed. The repo's own bulk-POST convention **null-pads missing
+keys**, which turns "omitted" into "explicitly NULL" → clears `override_reason` and throws 23502
+on `is_overridden`/`is_achieved`. Build the upsert body literally
+(`project_id, asset_id, readiness_step_id, is_overridden, override_reason, modified_by`),
+never through the null-padding helper, and never send `is_achieved` (leave the default; don't
+clobber a future writer). One row per **(asset, readiness level)** — per-level, not per-asset.
+
+### ⚠️ Bigger than PLT-2968: `workflow_step_task` replacement has landed on develop
+
+Per the same check: XYZ_Supabase develop's head is now **past PR #22**, and **the target model
+that replaces `workflow_step_task` has landed there** (PR #19 needs revisiting against it).
+The dev *database* still serves `workflow_step_task` (probed 200 with rows earlier today), so the
+repo may be ahead of the applied schema — but when it is applied, `workflowStepTaskService` and
+the prerequisite/ladder-task surfaces (PLT-3003/#2147, PLT-3058/#2150) are affected.
+**Shape of the replacement not yet captured here — get table names, compat story, and applied-vs-repo
+status before building anything new on `workflow_step_task`.**
