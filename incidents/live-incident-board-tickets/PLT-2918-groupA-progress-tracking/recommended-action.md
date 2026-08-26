@@ -52,3 +52,53 @@ The smallest broken-vs-working diff (playbook move #3) — turns the hypothesis 
 - **Cohort sweep (playbook Q6):** once confirmed, enumerate **all** AUS01 activities (Precast first, then any package edited in the same window) whose WBS Location — and possibly phase/discipline/package — was wiped; remediate in bulk, don't wait for the next report.
 - **Read the 4 attachments (NEEDS HUMAN):** they disambiguate empty-column vs Sequence-values, which decides the exact fix wording.
 - **Post-close:** add a `dashboard/pitfalls.md` entry — "data-mapping Save is a destructive per-type diff: it deletes stored mappings for every category type null on the in-memory activity, and edits cascade to descendants clearing descendant types — a single edit can wipe a whole package's WBS Location." (Not editing outside this folder per task constraints — noting only.)
+
+## 2026-08-26 — recommended action: separate "old unrecovered gap" vs "new post-fix recurrence" vs "Power BI export issue" before replying to the customer
+
+**Chosen action:** post one comment (owner Ilia, @ Yash and @ Mostafa) that (1) states the fix is
+shipped and dates it, so any *new* loss after 2026-08-17 is not the same code path; (2) asks
+whether the original ~2k-mapping historic gap (Precast/Roof/Earthworks/Painting) was ever actually
+restored — that recovery-plan thread from 07-23 has no confirmed outcome on this ticket; (3) asks
+for one fresh, dated live-broken sample activity ID from Paddy (an `A4300`-style example) to tell
+old-hole vs new-loss; (4) asks Mostafa to substantiate the Power BI theory with something checkable,
+since if true this isn't a viewer/mapping-data ticket at all.
+
+**Why this and not the others:**
+- **Not a straight reply to the customer yet.** Answering "yes it's fixed" risks being wrong if
+  the historic gap was never backfilled (Paddy would still see old holes and rightly call it
+  "still an issue"); answering "we're still investigating" risks being wrong if the real fix
+  already shipped and this is a Power BI-side artifact entirely outside our code. The playbook step
+  here is the same as 07-22: get one live-broken sample before asserting a mechanism.
+- **Not "Ready For Development."** The 08-17 fix already addressed the confirmed code defect.
+  There is no second confirmed FE bug yet — routing to dev now would be guessing which of three
+  hypotheses is live.
+- **Not silently left "With Customer."** The ticket has sat without an internal data recheck since
+  08-11; a customer-facing "still weekly" claim without one is exactly the kind of open incident
+  wearing a closed label the playbook warns about.
+
+**Draft comment:**
+
+> @Yash Patel — before we reply to Paddy: the Save-bug fix (destructive category-mapping delete)
+> shipped in 26.3.4 on 2026-08-17. Any *new* WBS Location loss after that date points to something
+> other than the bug we fixed, so I don't want to guess which.
+>
+> Three things first:
+> 1. Was the original ~2k-mapping gap (Precast 19/21, Roof 37/40, Earthworks 52/196, Painting
+>    34/410, from my 07-22 numbers) ever actually restored? I don't see a confirmed outcome on this
+>    ticket for the BE-restore-via-Sachin / script-re-apply-from-export plan from my 07-23 comment.
+>    If it never ran, Paddy may simply still be looking at the original hole, not a new one.
+> 2. Can we get one fresh, dated live-broken sample from Paddy — an activity ID, like `A4300` last
+>    time — for the current "weekly" recurrence? That's the fastest way to tell old-hole vs new-loss.
+> 3. @Mostafa — what specifically points at the Power BI export rather than the underlying mapping
+>    data? If the `activity_category_mapping` rows are correct and only the export/report is wrong,
+>    this is a different team's ticket, not this one.
+>
+> I'll re-run the AUS01 WBS Location count query (same as 07-22) to see if the hole has grown,
+> shrunk, or stayed flat since the fix deployed.
+
+**Owner map:** Ilia — re-run the data count check, compare pre/post 08-17. Yash — get one dated
+fresh sample activity ID from Paddy. Mostafa — substantiate or rule out the Power BI theory.
+
+**Also flag, not actioned:** the `not_testable` label was added 08-11 based on a staging repro
+attempt that predates this recurrence report — worth a second look by Radu/Gennaro given the
+customer says it's still happening, but that's their call, not this comment's.
