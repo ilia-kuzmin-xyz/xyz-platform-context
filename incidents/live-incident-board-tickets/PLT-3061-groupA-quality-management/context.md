@@ -288,3 +288,10 @@ Live fetch: status `Open`, priority Medium, assignee Darminder Atker, 6 comments
 the 08-21 run's snapshot. Darminder's tag of Mostafa and Pietro (109980, 08-19 19:48) is now
 **~6 days** silent, well past the 24h stall threshold first flagged 08-21. The decision-request
 draft in `recommended-action.md` is unchanged and still the right message. Nothing re-derived.
+
+## 2026-08-26 — no change, 7 days silent
+
+Live fetch: status `Open`, priority Medium, assignee Darminder Atker, 6 comments (109793, 109795,
+109845, 109980, 110018, 110058), newest still 110058 (2026-08-20 13:33) — byte-identical to the
+08-25 snapshot. Darminder's tag of Mostafa and Pietro (109980, 08-19 19:48) is now **7 days**
+silent. Nothing re-derived.
