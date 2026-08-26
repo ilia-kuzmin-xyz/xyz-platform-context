@@ -112,3 +112,17 @@ to ask him. Flagging rather than proposing a transition, since this routine take
 
 **Group A, unchanged. Confidence 5/10, unchanged.** Not Ready For Development: no mechanism above 6/10
 and the two leading candidates live in backend ingest code outside this repo.
+
+## 2026-08-26 — stall clock update only, no new instruction
+
+No comments since 08-17 15:08. The 08-20 step 1 (ask Darminder whether
+`'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'` shows as its own schedule-switcher entry) and step 2 (relay
+to Yash for Matthew) remain unposted and unchanged — reproduced by reference, not rewritten.
+Darminder's question is now **9 days** cold (17→26 Aug) with zero evidence it reached the customer;
+**With Customer remains the wrong status** per the 08-20 assessment, since nothing has actually been
+asked of Matthew on the Jira thread itself.
+
+Addressing note: Jira's live `assignee` field is currently **Yash Patel**, not Darminder Atker (see
+`context.md` 2026-08-26 for the changelog trail). If step 1 is sent as an in-Jira @-mention it should
+still go to Darminder by name — he's the one who asked the open question — regardless of what the
+assignee field shows.
