@@ -292,3 +292,31 @@ still 08-17 15:08 — byte-identical to the 08-21 snapshot. Darminder's specific
 request is now **8 days** cold with no evidence it reached the customer. The free internal check
 (does the `'... - LIVE - DRAFT'` suffix show as its own schedule-switcher entry) is still the
 cheaper first move, unchanged from the 08-21 draft. Nothing re-derived.
+
+## 2026-08-26 — no comment activity; nine days cold; assignee-field correction (not a change, an error in prior entries)
+
+Live fetch: status `With Customer`, priority `Major`, 5 comments (ids 109258, 109263, 109749, 109750,
+109789) — byte-identical set to every snapshot since 08-19. Newest comment remains 109789 (Darminder
+Atker, 2026-08-17T15:08:03+0100), his schedule-pair question. **No reply from the customer or Yash
+in the 9 days since.** `updated` field unchanged at `2026-08-18T10:08:13`.
+
+Days-cold clock: Darminder's ask is now **9 days** unanswered (17 Aug → 26 Aug), up from 8 on 08-25.
+
+**Correction to this file, not a new change:** pulled `expand=changelog` this pass. The live
+`assignee` field has been **Yash Patel**, not Darminder Atker, since **2026-08-17T15:08:15** (two
+duplicate "Automation for Jira" changelog entries, ids 1525793/1525792), fired by the same automation
+rule that reassigns to Yash Patel whenever status moves to "With Technical Support" (it fired
+identically on 08-11 15:22, coinciding with the same kind of status transition made by Darminder
+himself both times). Every dated entry in this file from 08-19 through 08-25 recorded "assignee
+Darminder Atker" against a live fetch — that read was not accurate; the assignee field itself has
+shown Yash Patel throughout that whole window. Darminder remains the substantive technical owner (he
+authored the open question), so this doesn't change the recommended action's addressee, but the raw
+field should not be cited as Darminder going forward. No other assignee change since 08-17 15:08:15.
+
+Confidence and hypothesis ranking unchanged from 08-20 (overall 5/10, H1 6/10). Nothing re-derived.
+
+### Attachments still unreadable
+
+Same 4 PNGs as recorded 08-19/08-21 (attachment ids 62739, 62740, 62741, 62742, all uploaded
+2026-08-17) — this routine still cannot open image content, so what Darminder's 08-17 15:08
+hypothesis was visually based on remains unverified here. XER files still not requested/sent.
