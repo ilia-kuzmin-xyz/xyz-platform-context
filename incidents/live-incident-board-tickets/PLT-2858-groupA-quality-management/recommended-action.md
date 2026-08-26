@@ -314,3 +314,10 @@ the zone name. Worth raising **with** the product decision rather than as its ow
 If the answer to Mostafa's question plus the decision request do not land within a couple of days
 of being posted, this needs Pietro directly, in whatever channel he reads. That has been the
 recommendation since 07-24 and the bottleneck has never been the recommendation.
+
+## 2026-08-26 — restated, not re-argued
+
+Post Draft 1 (answers Mostafa in 3 sentences, unblocks him), then Draft 2 (the decision request to
+Pietro/Mostafa), then Draft 4 (customer acknowledgement via Yash). Draft 3 to Sachin/Ali is parallel
+and non-gating. Board's only Critical-priority open item, now **24 runs / 43 days** on a one-line
+question answerable from code since 08-14. No Jira action was taken by this run.
