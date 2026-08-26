@@ -94,7 +94,7 @@ legacy PowerBI; the `[NEW DASHBOARD]` framing in the title is a red herring.
 > this section is new to the durable memory.
 
 | Date | Author | Content |
-|---|---|---|
+|------|--------|---------|
 | 2026-07-13 13:53 | **Pietro Desiato** (107234) | Replies to Ilia's 06-30 ownership question — **but does not decide re-upload vs remap.** Asks *"do we already have a list of those pins?"* and pivots to a **product idea**: *"it could be interesting to have in the 360 editor a way of adjust the pin position from the editor"* — @Jason Fingland @Mostafa Kamel Hussien. *(Posted the same day as the last triage run; the 07-13 context.md captured the thread just before this landed.)* |
 | 2026-07-13 14:11 | **Jason Fingland** (107238) | Product-design pushback on user-editable pins: *"We were trying to avoid allowing the user the ability to move things about too much, as that could mess with reality on site."* Counter-proposes a **system-side validation pass**: *"If the user changes the PBP, could we do a pass on the captures and see which ones no longer match their expected position? i.e. 'These captures were taken using the Level 3 Floorplan, but now appear to be higher than Level 4?'"* Notes *"it mostly sounds like the height that keeps being off"*. Fallback if editing is wanted: expose X/Y/Z in the details panel with multi-edit, via the Editor's existing Edit pattern. |
 | 2026-07-16 17:39 | **Ilia Kuzmin** (107545) | **Diagnostic breakthrough.** @Yash: *"we should ask the project delivery to correct level f0f4d409 elevation 50.4 → 0 in the source model. We need one value change; rooms→points→captures all inherit it on re-import."* |
@@ -519,5 +519,12 @@ correct and unposted.
 
 Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 16 comments, newest still
 2026-07-24 13:56 — byte-identical to every run since 08-18. **32 days** silence on a fix that sits
+entirely with the client's project-delivery team (correcting one model level's elevation). The
+nudge-to-Yash draft is unchanged. Nothing re-derived.
+
+## 2026-08-26 — no change
+
+Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 16 comments, newest still
+2026-07-24 13:56 — byte-identical to every run since 08-18. **33 days** silence on a fix that sits
 entirely with the client's project-delivery team (correcting one model level's elevation). The
 nudge-to-Yash draft is unchanged. Nothing re-derived.
