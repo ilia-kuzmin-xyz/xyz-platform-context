@@ -361,3 +361,12 @@ Leave in `Open`. Ask Darminder to get `PLT-2874-dashboard-element-count-diagnost
 or merge it into whatever is in flight — it is log-only apart from a warn in
 `countDistinctElements`, so it is cheap to carry. Once it is there, the next dashboard load on
 Staging answers H1 vs H3 vs H4 without anyone running a query.
+
+## 2026-08-26 — drafts unchanged, now 12 days unsent
+
+Both drafts (to Gennaro: project/model name + the two date-slider screenshots; to Darminder: where
+does the fix live) remain unposted and unchanged, now **12 days** since first drafted (08-14). Status
+moved `Open` → `In Analysis` on 08-25 with no comment attached (see `context.md`) — a bookkeeping
+change, not a decision, and it does not alter the recommended action. The diagnostic branch
+(`PLT-2874-dashboard-element-count-diagnostics`) still has not been pushed to Staging; that remains
+the single move that would answer H1/H3/H4 without anyone running a manual query.
