@@ -297,3 +297,12 @@ close-out draft in `recommended-action.md` remains unposted across (by this fold
 count) 18 consecutive runs. Its optional follow-up (the €600 Cat3/CSA/Underground-Services row) still
 has nowhere fresher to land — PLT-3061's thread, the intended landing spot, has itself gone quiet
 since 08-20. Nothing re-derived.
+
+## 2026-08-26 — no change
+
+Live fetch: status `With Customer`, priority Major, assignee Yash Patel, resolution `null`,
+`updated = 2026-07-06T10:18:45+01:00`, 13 comments, newest still 106553 (Freshdesk #7126 closed
+07-06) — byte-identical to 08-25 and every run since 08-18. **51 days stale.** The close-out draft
+in `recommended-action.md` remains unposted across 19 consecutive runs. Its optional follow-up (the
+€600 Cat3/CSA/Underground-Services row) still has nowhere fresher to land — PLT-3061's thread
+(Darminder's 08-19 tag of Mostafa/Pietro) is now ~7 days unanswered, still quiet. Nothing re-derived.
