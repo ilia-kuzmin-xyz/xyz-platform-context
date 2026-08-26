@@ -174,3 +174,12 @@ the next project to invent a discipline name hits this again.
 Leave in `Open`. This is not blocked in the Jira sense — it is waiting on a product answer that has
 been asked for and not given. If there is still no reply by 08-26 (a week), it is worth raising in
 whatever channel Mostafa reads rather than a fourth Jira comment.
+
+## 2026-08-26 — the 08-26 threshold named on 08-24 has now arrived; still unposted, 7 days
+
+The 08-24 draft above is unchanged and is the message to send. The "if no reply by 08-26" condition
+that draft itself named has now been reached: Darminder's tag of Mostafa and Pietro (109980) is
+**7 days** unanswered, and the customer's weekly Friday deadline has now passed at least once since
+the decision request was posted. This is the point at which the 08-24 note's fallback ("raise it in
+whatever channel Mostafa reads rather than a fourth Jira comment") becomes the live recommendation
+rather than a contingency. No Jira action was taken by this run.
