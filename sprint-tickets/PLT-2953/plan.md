@@ -58,3 +58,19 @@ Pitfall for the next run: the edge-test rewrite left a stray `})` and a stale
 `toHaveBeenCalledTimes(1)` assertion — under the session contract a pick writes
 NOTHING (assert `pendingElementId` stability + `mockMutate` not called). If a
 test asserts mutate-on-pick anywhere else, it's asserting the pre-2953 contract.
+
+## 2026-08-26 — moved to review; everything OUR side is now done
+
+Housekeeping completed (the work had sat green and unannounced since 17 Aug):
+- **PR #2148 out of draft**, reviewers requested (TomMasdin, Darminder, Rishi, Sergiusz).
+- **Master merged in** (`7c14612` — CVE image bump + PLT-3069 lazy imports, no overlap);
+  assets-panel suite 354/354 after merge.
+- **Jira: Dev In Progress → In Code Review**, with a comment carrying the PR link and the two
+  things that genuinely need a human:
+  1. product call — session is panel-lifetime (close = abandon staged changes); the design
+     sheet's resume notice implies the opposite. Small lift if reversed.
+  2. one manual pass in a real editor — element pick is only verified against MOCKED viewer
+     selection events; the PR's "How to test" is written for that run-through.
+- Verified there is no hidden top-level review (get_reviews = [], the #2147 lesson applied).
+
+Nothing else is ours: completion now = human review + answer to 1 + manual pass 2.
