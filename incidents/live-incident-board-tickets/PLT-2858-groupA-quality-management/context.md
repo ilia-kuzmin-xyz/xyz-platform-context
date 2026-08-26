@@ -520,3 +520,12 @@ Pietro first recommended, never executed, **32 days**. Nothing re-derived — th
 finished since 08-14, the GUID-label defect was fixed on a branch 08-24, and every run since 07-24
 has added only a larger number to this table. Still the board's only Critical-priority open item and
 its stalest loop.
+
+## 2026-08-26 — 24th consecutive run unposted, no Jira movement
+
+Live fetch: status `In Analysis`, priority Critical, assignee Mostafa Kamel Hussien, resolution
+`null`, 27 comments — byte-identical to 08-25 (same ids, same newest 108643, Yash 07-31 "any update
+on this?"). **Stall clocks:** total silence 26 days; Mostafa's 107320 question to Darminder
+unanswered 43 days; customer's drop-down-or-remove request unanswered 43 days; escalate-to-Pietro
+first recommended, never executed, 33 days. Nothing re-derived — diagnosis finished since 08-14,
+GUID-label fix already on a branch since 08-24.
