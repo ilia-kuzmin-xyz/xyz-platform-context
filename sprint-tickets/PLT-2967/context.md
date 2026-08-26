@@ -74,3 +74,25 @@ effort re-deriving it.
 **Unchanged recommendation:** if the inline accordion is acceptable, this ticket is already
 delivered and should be closed; if a tag-level modal is wanted, `AssetWorkflowStepTasks.tsx` plus
 the dormant `onViewTasks?` prop make it a wiring job.
+
+## 2026-08-26 — IMPLEMENTED (most-confident subset). Draft PR hc-frontend #2187, Jira → In Code Review
+
+Supersedes "no branch and no PR" above. Ilia said "take the most confident way and implement";
+re-reading the TICKET TEXT (not the prototype) settled the accordion-vs-modal question: *"On
+clicking on this it will open up a modal with task information on the tag… users can update
+values… save with the button below."* So:
+
+- New `assets-panel/step-tasks-modal.tsx`: kebab "View tasks" now opens a **modal** listing that
+  tag's task instances (name, status chip, failed-item note); clicking one opens the existing
+  `TaskInstanceModal` editor (which carries the "update values" + Save); closing lands back on
+  the list. Row-click inline accordion unchanged — same list, two doors. The orphaned
+  `AssetWorkflowStepTasks.tsx` was the pattern source but lists ALL steps, so a single-step modal
+  was written instead of wiring it.
+- Branch `PLT-2967` is **stacked on `PLT-2968`** (they share the kebab menu); PR #2187's base is
+  the PLT-2968 branch — merge #2186 first, GitHub retargets.
+- Deliberately OUT of scope (said so on the Jira ticket): the redesigned task runner from the
+  screenshots (Preconditions / Add note / Add media / unit dropdowns / Submit & lock) — that is a
+  redesign of the shared editor, its own ticket — and "Mark as done" (needs a force-complete
+  decision). The prototype's state-dependent menu (locked → override only; done → no menu) was
+  also skipped: it conflicts with Clear-override needing a home on done steps, and the two design
+  sources contradict each other on labels.

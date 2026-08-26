@@ -121,3 +121,36 @@ that change the blast radius, all confirmed by grep on `PLT-2953` (post-merge wi
 Net effect: the override has **two** derivation sites to change, not one, and the second one feeds
 the viewer. That makes "client-only for the MVP" noticeably less attractive — two hooks reading a
 per-browser override is where drift will show up first.
+
+## 2026-08-26 — IMPLEMENTED. Draft PR hc-frontend #2186 (branch `PLT-2968`), Jira → In Code Review
+
+Supersedes the open questions above: the override lives in Supabase **`asset_readiness`** (the
+table already existed on dev — full DDL, constraint and write-shape rules in
+`commissioning/data-layer.md` §2026-08-25). No new table, no schema change.
+
+**What was built** (all in hc-frontend):
+- `services/assetReadinessService/` — `listOverrides` / `setOverride` / `clearOverride`.
+  Upsert on `project_id,asset_id,readiness_step_id` with a **literal body**; `is_achieved` is
+  NEVER sent (a test pins that); clear resets flag+reason but keeps rows.
+- `hooks/useAssetReadiness.ts` — one project-wide query (`useAssetReadinessOverrideMap` →
+  assetId → readinessStepId → override) + set/clear mutations invalidating it.
+- Both derivation sites threaded (this resolves correction 1 above — the two copies were each
+  given the same OR): `use-asset-current-tag.ts` (`overridden || tasksDone`, plus a new required
+  `overridden: boolean` on `IAssetCurrentTag`) and `assets-panel/use-readiness-steps.ts`
+  (LadderStep gains `readinessStepId` + `override` metadata).
+- UI: ladder kebab → "Override readiness level" modal (radio per level + required reason; writes
+  the target level AND every level below), "Clear override" item (whole asset, shown only while
+  one exists), yellow "Overridden" badge on step rows with reason/author tooltip.
+
+**Semantics chosen** (product defaults, flagged in the PR): any project member can override
+(UI-level only — RLS is permissive anyway); overrides roll up to systems automatically via
+`getCurrentTag`; override-DOWN is not supported by this model. "Overridden at" displays
+`modified_at ?? created_at` (modified_at is NULL until first update — trigger-stamped).
+
+**Ship blocker:** table absent on `stable` → QA above dev waits on XYZ_Supabase promotion PR #5.
+Fresh projects can't seed on dev (target-model breakage, see the re-point plan) → QA on an
+already-seeded project.
+
+**Cost of the `overridden: boolean` being required:** 5 test files carried `IAssetCurrentTag`
+literals/helpers that only the PROD BUILD typechecks (vitest does not typecheck) — two CI failures
+before all were found. Pitfall recorded in `commissioning/pitfalls.md` (2026-08-26).

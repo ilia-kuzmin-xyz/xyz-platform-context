@@ -1733,3 +1733,24 @@ JSON; grep for markers; eyeball a barrel's export list.
 | #2180 | PLT-2896 | open, draft, green, master-synced (514870f) |
 | #2148 | PLT-2953 | open, green, master-synced (beb01f8) — *still In Code Review, blocked on design for the linking-mode UX* |
 | #2145 | PLT-3056 | open, green, master-synced (e7fc79f) |
+
+## 2026-08-26 — run log (PLT-2968 + PLT-2967 implemented; Copilot wave on 3 PRs)
+
+**Shipped today:**
+| PR | Ticket | State |
+|---|---|---|
+| #2186 | PLT-2968 override on `asset_readiness` | draft, green (build+Sonar), 0 threads, In Code Review |
+| #2187 | PLT-2967 View-tasks modal — **stacked on #2186** | draft, green, 0 threads, In Code Review |
+
+**Also:** Copilot re-review wave handled on #2181 (stale comment), #2182 (measurementType
+null-guard, both call sites), #2145 (URL origin-only validation + entrypoint log userinfo
+sanitising) — all fixed, replied, resolved, green.
+
+**Knowledge landed this run:** `commissioning/data-layer.md` (asset_readiness DDL + target model +
+FE breakage — census re-verified, 12-Aug names stale), `planning/PLT-XXXX-repoint-fe-to-supabase-
+target-model.md` (URGENT, must land before XYZ_Supabase PR #5 merges), pitfalls (prod build
+typechecks tests), both ticket context files.
+
+**Waiting on Ilia:** re-point Jira ticket; `workflow_step` declared-state question (other
+session); #2187's 1 Sonar issue text; PLT-2968 product defaults sign-off (any-member override,
+system rollup).

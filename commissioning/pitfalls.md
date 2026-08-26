@@ -190,3 +190,22 @@ from the service would close an import cycle.
    own copy (`review.errorSystemLadder`).
 
 hc-frontend `PLT-3003` / PR #2147, commit `b1584834`.
+
+## 2026-08-26 — the prod build typechecks TEST files; vitest does not
+
+Adding a **required** field to a widely-fixtured interface (`IAssetCurrentTag.overridden`,
+PLT-2968/#2186) passed every vitest suite locally and still failed CI **twice**:
+
+1. Vitest does not typecheck — fixture literals missing the new field run fine.
+2. `npm run webapp:build:prod:ci` (webpack fork-ts-checker) DOES typecheck `*.test.tsx?`, and
+   failed on 5 test files across `assets-panel/`, `model-colouring/` — files the PR never touched.
+3. The first fix round grepped `tsc --noEmit` output for the error CODE (`TS2741`) and missed the
+   remaining three, which surfaced as **TS2322** (fixture helpers spreading
+   `Partial<IAssetCurrentTag>` produce "optional but required" instead of "missing").
+
+**Rules:** when changing a shared interface, run the FULL `tsc --noEmit` and grep for the *field
+name*, never an error code; expect fixture fallout in files you didn't touch; or make the new
+field optional if the domain allows (here it deliberately wasn't — an absent `overridden` should
+not read as "not overridden" silently).
+
+hc-frontend PLT-2968 / #2186, commits `0b0ba38` + `2f0dffb`.
