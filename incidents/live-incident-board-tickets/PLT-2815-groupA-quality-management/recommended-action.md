@@ -149,3 +149,11 @@ an answer; the question is about the table's content, not about this incident. D
 for it, and do not reopen the ticket if the answer comes back later.
 
 **No Jira action was taken by this run.**
+
+## 2026-08-26 — close-out unchanged (19th run unposted)
+
+Recommendation is unchanged: post the closing comment (§1, or the shorter 2026-08-14 version) and
+transition `With Customer` → `Done` with a resolution. 51 days stale, 19 consecutive runs
+recommending this without execution. §3's follow-up question still has no answer on PLT-3061's
+thread (quiet ~7 days as of 08-26) and still does not gate this close. No Jira action was taken by
+this run.
