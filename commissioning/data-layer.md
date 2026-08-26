@@ -299,3 +299,59 @@ repo may be ahead of the applied schema — but when it is applied, `workflowSte
 the prerequisite/ladder-task surfaces (PLT-3003/#2147, PLT-3058/#2150) are affected.
 **Shape of the replacement not yet captured here — get table names, compat story, and applied-vs-repo
 status before building anything new on `workflow_step_task`.**
+
+## 2026-08-25 — TARGET MODEL: `workflow_step_task` is legacy; FE is writing orphaned tables
+
+Answers verified from XYZ_Supabase develop (via Ilia's session with repo access) + live probes
+against dev. **Corrects the same-day section above**: the replacement did NOT come in PR #22
+(that's the spreadsheet-import feature); it landed in migration
+`20260819120000_target_model_expand.sql`, merged PR #19 then added `asset_type_id` — but to the
+legacy table.
+
+### The target model (live and populated on dev; all 404 on stable)
+
+| Table | Status | Rows (25 Aug) |
+|---|---|---:|
+| `asset_type_task` | NEW — replaces `workflow_step_task` for asset ladders. Keyed `(asset_type_id, workflow_id, readiness_step_id, task_template_id)`, keeps `bucket`, `position` | 249 |
+| `system_type_task` | NEW — same for system requirements, keyed on `system_type_id` | 3 |
+| `workflow_step_task` | **LEGACY-ORPHAN**: live table, in migration history, but ABSENT from `supabase/schemas/*` (declared state). Never dropped. Data was migrated out on 19 Aug | 9 |
+| `system_readiness` | NEW, sibling of `asset_readiness` + extra column `achieved_on`. HAS a live writer already (row with `is_achieved:true`, `modified_by:"Tenant1 Givmail."`) | ≥1 |
+| `readiness_step` | CHANGED: gained `workflow_id` + `position`, both NOT NULL; unique `(project_id,name)` DROPPED, replaced by `(project_id,workflow_id,name)`; new `(id,workflow_id)` unique as FK target. Steps are now workflow-owned and positioned | — |
+
+`asset_type_task` fresh `created_at` values (2026-08-24) show an active writer on the new tables —
+likely the import feature (PR #22) and/or mobile.
+
+### ⚠️ hc-frontend breakage — confirmed, not speculative
+
+1. **`readinessStepService.create` fails on dev TODAY**: upserts with arbiter `project_id,name`
+   (`readiness-step-service.ts:75`) — constraint no longer exists → 42P10; body also omits the
+   now-NOT-NULL `workflow_id`/`position` → 23502. So `defaultWorkflowSetup` seeding breaks on any
+   project without steps. Projects already seeded still read fine.
+2. **`workflowStepTaskService` (PLT-3003/#2147, PLT-3058/#2150 surfaces) reads/writes the 9-row
+   orphan** while the real catalogue links (249 rows) live in `asset_type_task`. The FE shows/edits
+   a stale subset and its writes are invisible to every consumer of the new model.
+3. **`workflow_step` is presumably legacy too** (readiness_step now carries workflow_id+position
+   itself; asset_type_task references workflow_id+readiness_step_id directly, not workflow_step).
+   NOT yet confirmed against schemas/* — verify before repointing `useAssetWorkflowSteps` /
+   `use-asset-current-tag`, which currently derive step order from `workflow_step.position`.
+
+### PLT-2968 impact
+
+The override design SURVIVES unchanged: `asset_readiness` is part of the target model, still keyed
+`(project_id, asset_id, readiness_step_id)`; readiness_step ids are what the new model links on.
+If anything the model helps — step order can come straight from `readiness_step.position`.
+But the FE re-point (below) should land first or together, or the override UI reads legacy order.
+
+### Promotion status
+
+PR #5 (develop→main) head `ac0b85807` == develop head, zero commits missing — merging it carries
+the ENTIRE target model to stable in one go. Its body ("no-op on the database") is badly stale and
+must be rewritten before merge. Until then: everything above 404s outside dev.
+
+### Action items (frontend)
+
+- [ ] NEW TICKET (urgent): re-point hc-frontend to the target model — readinessStepService
+  (arbiter + workflow_id/position), workflowStepTaskService → asset_type_task / system_type_task,
+  verify workflow_step's standing, repoint step-order derivations. Bigger than PLT-2968.
+- [ ] PLT-2968 builds on `asset_readiness` as designed; sequence after/with the re-point.
+- [ ] `system_readiness.achieved_on` exists on the system side only — mirror-check when touching either.
