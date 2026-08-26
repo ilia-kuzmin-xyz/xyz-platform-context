@@ -125,3 +125,51 @@ The Jira "Software Area" is Web Viewer, but that names the *surface*, not the do
 - `xyz-platform-context/dashboard/data-pipeline.md:46` — `activity_categories_flat` (Activity Categories API) feeds PRG filters; the flat table is rebuilt by `api-categories-loader.ts`.
 - `incidents/live-incident-board-tickets/PLT-2882-groupA-progress-tracking/context.md` — sibling in the same activity↔category domain; slug precedent.
 - `incidents/live-incident-playbook.md` — tone/pattern for the recommended reply (treat "worked last week" as a claim; get one live-broken sample; ask "why now" with an owner).
+
+## 2026-08-26 — fix shipped 2026-08-17, bug recurring post-deploy, ticket back "With Customer"
+
+Folder was stale at the 07-21/07-22 pre-analysis snapshot above; 11 comments and a shipped fix
+happened since, not previously recorded here.
+
+**07-22 (comment 107939, Ilia):** live-data check confirmed genuine deletion (not render/hydration):
+of ~10k AUS01 activities, 7,879 still carry WBS Location. Precast lost 19/21, Roof 37/40,
+Earthworks 52/196, Painting 34/410, plus some Partitions/Level-1 commissioning activities.
+Discipline/Package/Phase untouched everywhere. Theory: schedule re-upload ~Jul 12
+(`AUS01-260712-C_updated1`) left ~2,119 activities unmapped; someone then worked the mapping panel
+to fix them, triggering the destructive Save/cascade bug described in §Mechanism B/C above — also
+explains "changed into sequences" (steel-frame Sequence values bleeding onto Precast during that
+session).
+
+**07-23 (comment 107993, Ilia):** recovery plan — (1) BE restore of deleted records via Sachin,
+(2) script re-apply from Paddy's export if BE restore fails, (3) manual correction as last resort —
+plus a separate FE ticket for the Save bug. **No later comment on PLT-2918 confirms which recovery
+tier ran or that the historic gap was backfilled** — that thread is unresolved in the ticket record.
+
+**FE fix, shipped under this same ticket key:** `XYZReality/hc-frontend` PR #2078,
+*"PLT-2918: fix(mapping) only delete category mappings the user actually edited,"* merged
+2026-08-05 (commit `df09950`). Adds `getEditedCategoryTypeIds()` in
+`src/main/webapp/app/pages/organisation/ViewerPage/components/project-x/entities/schedule-entity-category-utils.ts`;
+`saveDataMapping`/`mapping-service.ts` now delete only category types present in the edit payload,
+not every null type. A same-PR follow-up fixed a Copilot-flagged undo/redo hole in
+`_captureDescendantsDepthFirst` (`mapping-service.ts`) that had snapshotted every descendant
+category type into history, making them all eligible for deletion via undo/redo. Present on
+current master (confirmed via code search). Deployed to prod in release **26.3.4**, 2026-08-17
+(matches ticket `fixVersion` + devinfo deployment record).
+
+**08-11 (109356/109363):** Ilia reported the bug "not reproducible on staging," added `not_testable`
+label; Gennaro acknowledged.
+
+**08-25 (110371–110387) — why this ticket is back in Group A today:** Freshdesk #7461 reopened.
+Yash (110374): Paddy says *"This is still an issue weekly for me"* and asks if the mapping was
+ever corrected; new screenshot attached (`Screenshot 2026-08-25 200515.png`, attachment 63303,
+unreadable — Atlassian binary auth). Mostafa Kamel Hussien (110385) floats an alternate theory:
+*"then its a issue with the power bi report they are using to export the data"* — i.e. possibly
+not the viewer/mapping data at all but a Power BI export-side artifact. Freshdesk cycled
+Open → Waiting on 3rd line → Waiting on customer same day; Jira status is now **With Customer**.
+
+**Current state:** the destructive-save code bug is fixed and deployed, but Paddy's underlying
+symptom (WBS Location apparently wrong/missing) recurs weekly *after* that fix. Three live,
+unconfirmed hypotheses: (a) residual/incomplete code fix on some other edit path, (b) the
+pre-08-05 historic Precast/Roof/Earthworks/Painting gap was never actually backfilled and this is
+the same old hole, (c) Power BI export-side issue (Mostafa), unrelated to the mapping data itself.
+Not yet distinguished against data.
