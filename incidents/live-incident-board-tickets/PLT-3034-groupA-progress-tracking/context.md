@@ -282,3 +282,17 @@ only this ticket's problem: whichever way it resolves almost certainly answers P
 until it's checked, the workaround already pointed at PLT-3059 carries the same unverified risk this
 file has been flagging since 08-20. Worth running the discriminator once and applying the answer to
 both tickets rather than twice.
+
+## 2026-08-26 — no change, 7 days silent on the discriminator
+
+Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 19 comments, newest still
+08-19 12:48:11 — byte-identical to 08-21 and 08-25. Verified the tail of the comment thread directly:
+Yash relaying the customer's denial (08-19 12:25), Darminder's capacity-based decline of the
+provenance question (08-19 12:39), and the Freshdesk "Waiting on customer" auto-note (08-19 12:48).
+No reply from Darminder or the customer since. Fork A/B remains genuinely undecided, and nobody has
+run the one-minute discriminator.
+
+**Clocks:** 7 days since the customer disputed the workaround premise (08-19 → 08-26); ticket parked
+"With Customer" on a question he cannot answer for the same 7 days; PLT-3059 has now carried the
+same unverified risk for 8 days (Darminder pointed it at this ticket's workaround on 08-18, one day
+before the dispute existed).
