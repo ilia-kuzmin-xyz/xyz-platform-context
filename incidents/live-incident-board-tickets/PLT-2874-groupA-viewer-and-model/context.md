@@ -686,3 +686,19 @@ Still only PR #2084 (merged 07-31) references PLT-2874 in GitHub; no frontend fi
 this run either (not re-checked against the live PR list this pass — carried forward from 08-21's
 confirmed re-check). The Gennaro ask and the Darminder sanity-check line remain unposted, now
 **8 days**. Nothing re-derived.
+
+## 2026-08-26 — status silently moved Open → In Analysis; comments unchanged
+
+Live fetch: status **In Analysis** (was `Open` through every entry from 08-13 to 08-25), priority
+Minor, assignee Ilia Kuzmin, 6 comments (107239, 108239, 108671, 109457, 109759, 109779), newest
+still Darminder's 08-17 14:01 "Fix still ongoing following QA latest testing." No new comment.
+`statuscategorychangedate = 2026-08-25T09:53:57+0100` — the transition happened the same day as the
+08-25 entry above, with no comment attached, so it reads as automation-driven rather than a
+deliberate decision (PLT-3033's 08-26 pass separately found an "Automation for Jira" rule firing
+silent reassignments on this board on status transitions — plausibly the same family of rule, not
+independently confirmed here). Does not change this ticket's Group A membership — `Open`,
+`In Analysis` and `With Customer` are all in-scope for this routine.
+
+**Clocks:** 9 days since the last comment (08-17); 12 days since the 08-14 drafts to Gennaro and
+Darminder went unsent. Nothing re-derived — H1/H3/H4/H5/H6 stand exactly as recorded 08-13/08-14,
+and the diagnostic branch (`PLT-2874-dashboard-element-count-diagnostics`) is still not on Staging.
