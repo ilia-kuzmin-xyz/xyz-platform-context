@@ -52,3 +52,12 @@ Rationale, per `incidents/live-incident-playbook.md`:
 - Once PLT-3034's own Fork A/B question resolves, the same answer almost certainly applies here —
   worth updating both tickets from whichever gets checked first rather than running the check
   twice.
+
+## 2026-08-26 — still unposted, urgency clock extended
+
+No Jira change since the draft above was written (see `context.md` 08-25/08-26 entries). The draft
+comment to Darminder is unchanged and still the correct action: it is now **8 days** since the
+disputed workaround (109878 → PLT-3034's 109877) was pointed at this ticket without correction, and
+**7 days** since the PLT-3034 customer's objection to that workaround's premise (08-19 12:25) went
+unrelayed here. Fork A/B still hasn't been run on either ticket. No Jira action was taken by this
+run.
