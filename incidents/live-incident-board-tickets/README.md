@@ -45,6 +45,152 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-27 — 10 in-scope tickets (up from 9 on 08-25): 1 brand-new (PLT-3091), 1 left scope (PLT-3084 → Ready For QA), 1 root-cause reopened after a field-tested fix failed (PLT-2649), all 10 Group A, board's Critical ticket now 25 runs / 44 days unposted
+
+**Backfilling an unlogged run first.** A full sweep ran 2026-08-26 (08:17-08:38, all 9 then-in-scope
+tickets re-verified/updated, PLT-3084 retagged `resolved` after leaving scope to Ready For QA) but
+never wrote a README entry or sent a notification — caught this run via `git log` on the folder,
+since every ticket's `updated` timestamp needed comparing against *something*. Folded into this
+entry rather than back-dated separately, since nothing in it is still live except what's restated
+below. No notification appears to have gone out for it either; nothing in its content would have
+crossed the bar on its own (all "no change" / stall-clock updates) except PLT-2918's write-up, which
+was itself just catching the folder up on a real event from days earlier (fix regression, see its
+own entry history) — so the miss was a process gap, not a missed escalation.
+
+**Board re-queried**, positive form: `status IN ("Open", "In Analysis", "With Customer", "Ready For
+Development", "Dev In Progress")`. **10 tickets, all Group A** (Open/In Analysis/With Customer);
+Ready For Development / Dev In Progress both empty — Group B still empty, as it has been for most of
+this board's history. Cross-checked each ticket's live `updated` timestamp against the 08-26 run's
+own commit timestamps to decide what needed re-investigation rather than re-fetching everything
+blind — 3 of 10 had moved since 08-26 08:38, the rest confirmed byte-identical.
+
+### PLT-3091 — new this run (progress-tracking)
+
+**"ATL05 - Cannot update intangible progress in the Web Viewer,"** Major, created 08-26 (after the
+08-26 sweep had already run, hence missed until today). One activity, `LS-24891`, rejects a manual
+Actual % update via the `Editor-Progress` feature flag while — per the customer — "all the rest"
+accept it. Traced the editability gate to one predicate,
+`use-actual-progress-mutation.tsx:36-41` (hc-frontend), keyed on three backend-supplied per-activity
+fields (`itemType`, `linkedElementCount`, `validForProgressCalculations`) — the flag and the user's
+authority are both project-scoped and explicitly ruled out as unable to explain one activity
+differing from its neighbours. No working comparison activity has been named yet, so the diagnosis
+stops at "which of three backend fields" rather than a confirmed cause (~5/10 on the ATL05-specific
+cause, 9/10 on the mechanism map). Also surfaced a genuine, separate FE inconsistency — the Gantt
+column's lock predicate counts *descendants'* linked elements while the click gate and detail panel
+count only the activity's own, so a parent with linked children can read locked in one surface and
+editable in the other — flagged as its own ticket, explicitly not bundled into this one. Recommended:
+stay Open, one comment asking Yash for a working comparison id and Sergey/Sachin for a six-field API
+diff. Full findings: `PLT-3091-groupA-progress-tracking/context.md` + `recommended-action.md`.
+
+### PLT-2649 — root-cause reopened: the field-applied fix did not work (360-captures)
+
+The customer executed the 07-24 remediation in full — corrected the anomalous level's elevation in
+the source model, re-uploaded — and the 360 pins are still ~50m too high (comment 110446, 08-26).
+Re-investigation finds the 07-24 diagnosis was half right and half never checked: the level really
+was wrong, but the claim that "rooms → points → captures all inherit it on re-import" has **no
+support anywhere in the FE-visible contract** — capture points are persisted rows written once and
+mutable only by PATCH (`room-capture-api.types.ts:13-34`), and nothing in the codebase re-derives
+their coordinates from level elevation. That unexamined assumption was shipped to a client as
+instruction, and cost five weeks before it was tested. Also corrected a `zMeters`/`yMeters` axis
+mislabeling that had stood in this folder since July (`swapYZ=true` puts the DB's `yMeters` on the
+viewer's vertical axis, not `zMeters` — a remediation aimed at the wrong column would have been a
+second wrong fix). Ticket's own Jira state had already moved `With Customer` → `Open`,
+assignee → Ilia — this page hadn't caught up. Verdict flips: nothing left to ask the customer: three
+falsifiable hypotheses (fix-didn't-propagate / wrong-artifact-edited / re-import re-keyed the level,
+the last of which would also explain a newly-discovered related Critical ticket, XSPCMA-868,
+"missing ground floor images") ranked and a one-question message to Sachin/Ali (api-v2) drafted —
+whether re-import re-derives stored capture coordinates at all — to run *before* any further
+client-facing message. Full findings: `PLT-2649-groupA-360-captures/context.md` (see the
+"supersedes every prior verdict" 2026-08-27 sections) + `recommended-action.md`.
+
+### PLT-3061 — the 7-day stall broke, but sideways (quality-management)
+
+Yash re-pinged Mostafa/Pietro/Darminder directly (08-26 09:29); Mostafa replied within a minute that
+Josh, the cost manager who'd supply the missing 8 rework-cost values, is on leave; Yash took
+ownership of chasing Josh directly once he's back rather than pushing product further. This isn't
+the "escalate outside Jira" fallback this folder had queued for exactly this staleness — Yash beat
+it to the punch with his own message and got a (non-substantive) reply. Stood down the standing
+Mostafa/Pietro decision-request draft for now; recommended a private check-in with Yash in ~1 week
+instead. Underlying data gap unchanged. Full update: `PLT-3061-groupA-quality-management/context.md`
++ `recommended-action.md`.
+
+### PLT-3084 — left scope (→ Ready For QA), already actioned during the unlogged 08-26 run
+
+Root-caused 08-24/08-25 (undo/Ctrl-Z not registered in the prod Link constructor), fix apparently
+progressed to QA. Folder was already retagged `PLT-3084-resolved-viewer-and-model` during the 08-26
+sweep; noted here only because this is the first README entry since that happened.
+
+### Confirmed unchanged (live JQL re-fetch each; status/priority/`updated` compared against the
+08-26 sweep's own commit record, not just against the last README entry)
+
+| Ticket | Domain | Status | Note this run |
+|---|---|---|---|
+| [PLT-3059](PLT-3059-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-21; Fork A/B (shared with PLT-3034) still undecided |
+| [PLT-3034](PLT-3034-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-19 |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | `updated` unchanged since 08-18; schedule-pair ask now 9 days cold |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07 (already captured by the 08-26 sweep); 3-way hypothesis split still undistinguished |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53 (already captured); asks now 10 days unposted |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | `updated` unchanged since 08-20; **25 consecutive runs / 44 days** unposted, board's only Critical, unchanged top priority |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | `updated` unchanged since 07-06; **52 days** stale, 20th run recommending close-out |
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3091** — 2 Jira screenshots (ids 63410, 63409), genuinely unreadable (Atlassian binary auth).
+  One-question key drafted to make opening them fast: does `LS-24891`'s Actual % cell have a bordered
+  box like its neighbours (editable) or not (locked)? See `recommended-action.md` §"one evidence step".
+- **PLT-2649** — new screenshot (attachment 63374, 912 KB) unreadable; SharePoint model link in
+  comment 110446 attempted directly, returned **HTTP 403**. Either would settle whether the pins sit
+  at the *same* wrong height as before (nothing moved) or a *new* wrong height (something moved, moved
+  wrong) — discriminates two of the three ranked hypotheses on its own.
+- Prior gaps on the confirmed-unchanged tickets stand exactly as previously documented (PLT-2858's 5
+  images, PLT-2815's 2 images + inline blobs, PLT-3034's 12 attachments) — not re-listed here.
+
+### Needing a human now
+
+Ranked by tenure/urgency:
+
+1. **PLT-2649 — run the one data-check query first** (three lookups, `recommended-action.md`), before
+   sending anything further to the customer. They already tried the fix we told them to; whichever way
+   the query answers, the next message is different, and none of the three readings is "ask them
+   again." New this run, but jumps to top of the human queue on impact: our own diagnosis went out
+   wrong to a client and cost five weeks, and a related Critical ticket (XSPCMA-868) is sitting
+   unassigned.
+2. **PLT-2858** — post the decision-request to Pietro (cc Mostafa), Critical priority, **25 runs / 44
+   days** unposted. Longest-standing item on the board; unchanged top priority by tenure.
+3. **PLT-3091** — post the analysis comment (three asks: Yash for a working comparison id, Sergey/
+   Sachin for the six-field diff, Ilia to open the two screenshots). New, but cheap and unblocks fast.
+4. **PLT-2815** — execute the close-out (drafted, 20 runs unposted, lowest urgency, purely
+   administrative).
+5. **PLT-2649 (2nd item)** — once the data check answers, send whichever of the three follow-up drafts
+   fits (`recommended-action.md` §"if confirmed").
+6. **PLT-3061** — no Jira action needed this run; a private, non-Jira check-in with Yash in ~1 week
+   (~09-02) re: Josh's return, per the new draft.
+7. **PLT-3059 / PLT-3034** — Fork A/B discriminator still unrun, still blocking two tickets' worth of
+   customer-facing answers at once.
+8. **PLT-2874** — send the Gennaro ask plus the Darminder sanity-check line (drafted, 10 days).
+9. **PLT-3033** — send Darminder's schedule-pair request to the customer via Yash (drafted, 9 days
+   cold).
+
+**Board assessment:** two structurally similar findings this run, worth naming together — PLT-2649's
+five-week-old remediation and PLT-3061's decision request both turned out to be waiting on an
+assumption nobody had verified (respectively: that re-import propagates a level fix to stored
+captures, and — less severely — that the right people were even available to answer). The board's
+chronic bottleneck is still posting, not analysis (PLT-2858 at 25 runs is the standing proof), but
+PLT-2649 adds a second, sharper lesson: an unverified assumption that reaches a customer as
+instruction is worse than a stalled draft that reaches no one, because it costs their time too, not
+just ours.
+
+### Notification
+
+Sent: PLT-2649's root cause reopened after the customer-executed fix failed in the field — the 07-24
+diagnosis shipped an unverified mechanism as fact, cost five weeks, and left a related Critical
+ticket (XSPCMA-868) sitting unassigned. Also flagged: PLT-2858 crossed 25 consecutive unposted runs /
+44 days on the board's only Critical ticket, still the longest-standing single item. New ticket
+PLT-3091 and PLT-3061's ownership shift did not independently cross the bar for a mid-flight
+notification and are covered above for the next check-in instead.
+
+---
+
 ## Run: 2026-08-25 — 9 in-scope tickets (up from 8 on 08-21): 1 brand-new (PLT-3059, linked to PLT-3034), 1 advanced out of scope (PLT-3063 → In Code Review), all 9 Group A, board's Critical ticket now 23 runs / 25 days unposted
 
 **Board re-queried** two ways to sidestep the tool's comment-field pagination cap seen this run
