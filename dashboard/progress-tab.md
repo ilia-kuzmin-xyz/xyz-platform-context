@@ -164,3 +164,40 @@ Circumstantial evidence that it **is** included: the `ActivityProgress` table is
 `calendarDate` exactly like the daily progress snapshots, and edits are gated on the BE's own
 `ValidForProgressCalculations` flag — which would be pointless if the value never reached a
 calculation. **Confirm with Sergey / the data-pipeline owner before quoting this as certain.**
+
+## 2026-08-27 — what actually makes `progressValid` false, measured (PLT-3091)
+
+The editability rule above is correct but stops at "`progressValid` is the API's
+`ValidForProgressCalculations`". What sets it was never recorded, and it is the field that decides
+whether a customer can type a number. First live measurement, read off ATL05 prod via
+`window.projectService` (see `dashboard/pitfalls.md` for the technique):
+
+| | `LS-24891` (locked) | `INT-18920` (editable) |
+|---|---|---|
+| `type` / `elements` / `calculatedElementsSum` | Activity / 0 / 0 | Activity / 0 / 0 |
+| **`progressValid`** | **false** | true |
+| **`plannedLaborUnits`** | **null** | 154.603 |
+
+Identical in every other respect. Consistent with
+`hc-frontend/docs/dashboard/api/planned-and-actual-activity-schema.md:7` — intangible progress is
+derived from planned labour units, so with none there is no denominator to be a percentage of.
+
+**One matched pair, not the backend's stated rule.** Treat as ~7/10 until api-v2 confirms. The
+question is open with Sachin/Ali: *is it exactly "no linked elements and no planned labour units"?*
+
+**Scale, on one project:** ATL05 has 3,761 activities, 2,595 of them unlinked, and **19 of those
+are `progressValid !== true`** — silently un-editable, none of them signposted. Expect this to
+recur per project rather than per activity.
+
+**The UI said nothing.** The Gantt cell attached a CSS class only for linked-elements or editable,
+so this case had no class, no box and no tooltip, indistinguishable from an editable cell ignoring
+the click; and the details panel showed *"Actual progress updates every 15 minutes"*, implying a
+value was coming when it never would. Fixed on branch `PLT-3091-explain-uneditable-progress`
+(`services/progress/progress-lock-reason.ts`, one source of copy for both surfaces). The gate itself
+is unchanged and correct.
+
+**Also unfixed, and separate:** the Gantt column paints editability using
+`task.elements || task.calculatedElementsSum > 0` (`scheduler-columns.tsx:149`) while the click gate
+and the details panel ignore the roll-up. An activity with no own links but linked children reads as
+locked in the Gantt and editable in the panel. Not in play on ATL05 (`rollup: 0`) but live
+everywhere else.

@@ -107,6 +107,55 @@ counts distinct `modelElementId`. Before diffing any two counts across these sur
 `_visible_elements` carries `modelElementId`, so the honest number is available without a
 pipeline change.
 
+## Reading live frontend state on prod, without a build (2026-08-27)
+
+The fastest way to end an argument about what the frontend actually holds. It cracked PLT-3084 and
+PLT-3091 in one paste each after days of inference.
+
+`enableGlobalWebViewerAPI` exposes `window.projectService`
+(`project-x/project-provider.tsx:91-95`). It defaults `false`, but feature flags are read from a
+**`feature-flags` cookie**, not from the bundle (`helpers/getFeatureFlagValue/getFeatureFlagValue.ts:5-15`),
+so it can be switched on against a deployed prod build with no deploy and no code change.
+
+⚠️ **Append to the cookie, never replace it.** `getFeatureFlagValue` reads the whole list from the
+cookie and only falls back to `config/constants.ts` defaults **per missing name**. Overwriting the
+cookie with a single-entry array silently reverts every other flag to its default — including the
+one the customer is using. On PLT-3091 that would have switched off `Editor-Progress`, the feature
+under test.
+
+```js
+const cur = (document.cookie.match(/(?:^|;\s*)feature-flags=([^;]*)/) || [])[1]
+const flags = cur ? JSON.parse(decodeURIComponent(cur)) : []
+document.cookie = 'feature-flags=' + encodeURIComponent(JSON.stringify(
+  [...flags.filter(f => f.name !== 'enableGlobalWebViewerAPI'),
+   { name: 'enableGlobalWebViewerAPI', value: true }])) + ';path=/'
+```
+
+Terser is configured without property mangling (`webpack/webpack.prod.js:65-90`), so private fields
+read cleanly on the production bundle: `projectService.historyService._history`,
+`linkingService.undoStack`, `activeSchedule.activities`, and so on. Reads are safe — no network, no
+mutation. `constructor.toString()` on any service tells you **which build is actually deployed**,
+which is how PLT-3084 was finally settled.
+
+## What prints on a prod build, and what does not (2026-08-27)
+
+Three independent gates, and getting them wrong wastes a round trip:
+
+- **`console.log` is replaced with a no-op on prod** unless the URL carries `?logging=true`
+  (`ViewerPage/hooks/use-logging.tsx:18-28`). `console.warn` and `console.error` are untouched.
+- **`logger.info` / `logger.debug` never reach the prod console** —
+  `CONSOLE_VERBOSE = process.env.NODE_ENV !== 'production'` (`services/logService/logger.ts:15-19`).
+  `warn` and `error` always do. **Write diagnostics at `warn`, not `info`,** or they are invisible
+  in the only environment that matters.
+- **The build strips nothing.** No `drop_console`, no `pure_funcs` (`webpack/webpack.prod.js:65-90`).
+
+Every line that passes `minLevel` is also written to an OPFS session log regardless of the console
+(`logger.ts:99-108`), uploaded periodically and on error by `log-auto-upload.ts`, and retrievable by
+the user via **Help → Sync logs**, which copies a session id to their clipboard
+(`shared/layout/appbar/components/HelpMenu/SyncLogModal.tsx`). That is where the
+`platform-web-…` session ids on incident tickets come from. It is a working diagnostic channel that
+we have mostly not been putting anything useful into.
+
 ## Dashboard service logs never print
 
 `dashboard-logger.ts:35` hardcodes `CURRENT_LEVEL = 'SILENT'` in every build, so every

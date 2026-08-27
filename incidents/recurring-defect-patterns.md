@@ -337,6 +337,14 @@ surface doesn't, the customer diffs the two, and reports the discrepancy as data
 | `dashboard-progress-tab-explained.md` §8.4 | (docs, pre-dates board) | Future-dated projects show blank/all-yellow by default | — (documented product FAQ) |
 | PLT-2945 | DUB7x | Dashboard hides elements whose planned start is later than the date-range slider's end (`dashboard-progress-service.ts:1909-1924`), fragment hidden via `dashboard-color-service.ts:488` | Editor/Web Viewer has no equivalent hide anywhere in the codebase (exhaustive `setVisibility(` grep — two call sites total, both Dashboard/Canvas) |
 | PLT-3024 | ML9 | **Model-level, not element-level:** the Dashboard loads exactly one model — the first model in the first folder whose name contains "federated" (`dashboard-project-service.ts:143-205`) — and builds `element_base_data` from that one model's `svf2_object_id_map` only (`dashboard-progress-service.ts:2548-2559`); everything outside it is absent, not merely uncoloured | Web Viewer loads whatever the user has activated, which is typically a much larger set (`viewer-y.tsx:290-294`) |
+| PLT-3091 | ATL05 | **Not a visibility gate but an *eligibility* gate, same shape:** Actual % Complete is locked when `activityItem.progressValid !== true` (`use-actual-progress-mutation.tsx:36-41`). On ATL05 that is 19 of 2,595 unlinked activities | The other 2,576 unlinked activities on the same project accept a value, so the customer diffs sibling against sibling and reports the odd one out |
+
+**2026-08-27 — fourth occurrence, and the first where the silence was worse than silence.** PLT-3091
+extends the pattern from *visibility* ("I cannot see it") to *eligibility* ("I cannot edit it"). The
+aggravating detail worth carrying: the locked field did not merely fail to explain itself, it showed
+*"Actual progress updates every 15 minutes. Values may be slightly delayed."* — telling the user a
+value was on its way when the activity was permanently ineligible. **A misleading explanation costs
+more than none**, because it converts a question into a wait.
 
 ### Mechanism
 
@@ -509,6 +517,26 @@ Full working: `live-incident-board-tickets/PLT-2649-groupA-360-captures/platform
 ---
 
 ## Candidate patterns (one occurrence, watch for a second)
+
+- **The deployed build is not the branch you are reading, 2026-08-24** (PLT-3084, AT10X). A bug that
+  reproduces 100% on prod, at any scale, and never on dev, on "the same release". Three separate
+  code-level hypotheses were built and falsified against `master` before anyone asked what prod was
+  actually running: the fix had been merged 17 days earlier (PR #2081) and was not in the deployed
+  build. **Recognition signature:** *fails every time on prod, works on dev, and no code path on
+  `master` can explain it.* **Diagnostic, cheap and decisive:** read the deployed source directly —
+  `window.projectService.<service>.constructor.toString()` (Terser does not mangle property names,
+  `webpack/webpack.prod.js:65-90`) and compare against the file. On PLT-3084 the prod constructor was
+  visibly empty where `master` registered a callback, and the bundle also still carried in-memory
+  maps and a `window.confirm` that `master` had replaced — i.e. prod was several merges behind, not
+  one. **Do this before building a mechanism**, not after. Promote if a second incident turns out to
+  be a stale deploy.
+- **Deregistration without registration, 2026-08-24** (PLT-3084). A callback registry where the
+  register call and the deregister call live in different modules, so deleting the registering module
+  leaves the `deregister` behind and nothing announces the loss. The lost handler then presents as a
+  silently ignored user action, not an error. **Diagnostic:** dump the registry's keys at runtime and
+  compare against the set of things that push into it — on PLT-3084 the history service listed
+  `section, status, hideIsolate, select` and no `link`, while `link` entries were being pushed
+  happily. Promote if a second registry does the same.
 
 - **Two sources of truth for one undo stack, 2026-08-24** (PLT-3084, AT10X). The viewer keeps a
   single global ordered history with a cursor (`history-service.ts`) *and* a private stack inside
