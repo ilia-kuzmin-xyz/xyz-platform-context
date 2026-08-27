@@ -154,3 +154,28 @@ already-seeded project.
 **Cost of the `overridden: boolean` being required:** 5 test files carried `IAssetCurrentTag`
 literals/helpers that only the PROD BUILD typechecks (vitest does not typecheck) — two CI failures
 before all were found. Pitfall recorded in `commissioning/pitfalls.md` (2026-08-26).
+
+## 2026-08-27 — Copilot round after un-draft: override-DOWN is now supported (semantics change)
+
+Supersedes the "override-DOWN is not supported by this model" line above. Copilot (on #2186,
+post-un-draft) found the reachable hole: the modal lets any level be picked, so Green-then-Yellow
+left Green's row `is_overridden=true` — the asset kept reading Green while the toast reported
+success. Fixed in `e77df8c`:
+
+- `setOverride` is now **set-then-clear**: upsert the new contiguous set, then select the asset's
+  still-overridden rows and clear any not in the set (flag+reason reset, `modified_by` records
+  who, rows kept for history — same patch shape as `clearOverride`, still never `is_achieved`).
+- Order rationale: clear-first (Copilot's literal suggestion) would leave the asset with NO
+  override if the second call failed; set-then-clear can only leave the OLD override standing,
+  and a retry converges. Client has no `not.in` op (`eq`/`in`/`is` only) — hence select + `in`.
+- Unchanged: an override still cannot un-achieve a task-complete level (derivation ORs).
+
+Same round: task-row buttons in step-tasks-modal got explicit `type='button'` (`d5366fd`;
+default is submit inside a form), and a spurious "import useEffect" finding was refuted (the
+initial-sync is deliberate render-phase adjust-during-render; no useEffect in the file).
+
+Branch note: another session merged master (incl. **PLT-3058 target-model re-point**, #2150 —
+`workflowStepTaskService` deleted) into PLT-2968 as `3a5ba9d`; my fixes merged cleanly on top
+(`6f6de2e`), 385 panel tests green on the combined tree. #2186 is un-drafted (by Ilia,
+2026-08-27) and now carries BOTH tickets — PLT-2967's #2187 was merged INTO this branch on
+2026-08-26 and #2186's body covers both.
