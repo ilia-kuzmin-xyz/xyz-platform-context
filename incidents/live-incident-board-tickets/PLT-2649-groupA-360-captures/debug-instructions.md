@@ -85,3 +85,26 @@ Requires `CAPTURE_POINT_EDIT`; `INTERNAL_ROLE` is accepted (`rooms.capturepoints
 ⚠️ **New hard prohibition: never use the bulk delete to "reset" these rows.** It cascades into the
 linked captures and deletes their image blobs from cloud storage — all 1,868 photographs,
 irreversibly (`rooms.capturepoints.service.ts:305-321`).
+
+---
+
+## 2026-08-27 (later still) — ⚠️ SETTLED ON LIVE PROD. Read the new file first.
+
+**[`prod-mcp-findings-2026-08-27.md`](prod-mcp-findings-2026-08-27.md)** — measured against live
+prod, not inferred. It answers questions 3 and 4 of `platformapi-questions.md` (no, re-import does
+not re-derive existing rows) and **contradicts §2's inference** that captures own their coordinates
+independently.
+
+**Two things changed the plan:**
+
+1. The level is now at **−50.4**, not 0. The customer's 08-06 re-upload landed and took effect; the
+   value they wrote is a sign flip of the old one. So the model still needs fixing *and* the pins
+   still need correcting — neither alone is enough.
+2. Pin-freezing is now proven six independent times, not argued: six other levels show the same
+   drift at 0.4 m, and levels whose elevation has not been edited match their pins to 0.000.
+
+Sizing confirmed exactly as this folder had it: 101 points on the bad level, 75 with photos,
+1,927 photos, 75 distinct positions. Target height for the pins is **0.0**.
+
+Still unproven, unchanged: whether the capture-point PATCH persists coordinates. The one-pin test
+is still the way to find out and is still **not run** — needs approval.

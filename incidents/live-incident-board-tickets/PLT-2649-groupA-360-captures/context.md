@@ -1040,3 +1040,29 @@ exists to make visible.
 | Delete-cascade would destroy the 1,868 images | **9/10** ✅ read directly |
 | Fixing Y also closes XSPCMA-868 | **1/10** — it does not; different mechanism (level *name* matching) |
 | Overall ticket understanding | **9/10** — up from 7.5; root cause and remedy both settled, one lookup outstanding |
+
+---
+
+## 2026-08-27 (third pass) — first live-prod session; see `prod-mcp-findings-2026-08-27.md`
+
+Supersedes the inference-based reasoning in this file's earlier 08-27 sections wherever they
+disagree with measured data. Nothing above is deleted; the deltas that matter:
+
+- **The level reads −50.400 today**, refreshed 2026-08-06, model `PA12-M3-A-9200-ZZ-DC-ZZZZ-
+  RBA_V14_R24` V2. The re-upload landed. The customer set the ground floor to −50.4 instead of 0,
+  so the model is still wrong and now wrong in the other direction. Any newly generated point on
+  that floor would be 50 m underground.
+- **Frozen-snapshot mechanism proven, not inferred.** Six further levels are adrift from their
+  pins by exactly 0.4 m; the levels not edited since generation match to 0.000. `lastModifiedOn`
+  is null on all 407 points, `createdFrom` System on all 407.
+- **The `zMeters`/`yMeters` correction made earlier this month holds.** Vertical axis is `yMeters`;
+  all 101 bad points read `yMeters` 50.4.
+- **Contradicts the `platformapi-questions.md` §2 inference.** 102 captures with no
+  `roomCapturePointId` have *null* coordinates, not coordinates — so a capture's position comes
+  from its point. Of 6,842 linked captures, zero disagree with their point's y.
+- **116 points sit in the ~50 m band, but only `f0f4d409`'s 101 matter** — the other 15 hold no
+  photos and are ordinary 0.4 m drift on a genuinely high SS structure.
+- **XSPCMA-868 confirmed**: three ground-floor DC levels exist, two spelled `DC-0G-FFL` at ≈0 and
+  the photo-bearing one spelled `DC - 0G - FFL` with stray spaces at −50.4.
+
+No write was performed. Pin correction still awaiting approval.
