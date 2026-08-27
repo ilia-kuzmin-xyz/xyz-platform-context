@@ -167,3 +167,23 @@ PostgREST's silent 1000-row cap).
 Note for future runs: #2171 changes `select()` to always order by `id` — previously
 unordered reads followed PostgREST's physical order, so any UI relying on insertion order
 may re-order once it merges.
+
+## 2026-08-27 — scheduled review pass over Rishi's open PRs
+
+- **#2183 (PLT-2948/2978, import wizard)**: CI green, all 13 review threads resolved by Rishi
+  (real fixes + reasoned no-changes). Code pass found no critical/major — classification/commit are
+  server-side RPCs (`classify_import`/`commit_import`), commit re-classifies before writing, cache
+  invalidation covers register + types + systems + readiness. Held for Ilia's visual walkthrough
+  (5-step wizard, dev Supabase env). Its own additions treat `asset.system_label` as deprecated —
+  aligned with the target model.
+- **#2150 (PLT-3058, target Cx model)**: CI green, Darminder approved, grep confirms no FE reads of
+  dropped tables (`workflow_step_task`, `readiness_task_link`, `element_task_status`,
+  `system_label`) outside negative-assertion tests. Held: blocked on xyz-supabase PR #16, and 4
+  unanswered Copilot threads — the real one is `typeTaskService.workflowOfStep` returning null for
+  an unknown step id, after which `linkAssetType`/`setForSystemTypeStep` write `workflow_id: null`
+  with a non-null `readiness_step_id` (composite FK passes on NULL member → silent bad row).
+- **#2183 vs #2150 overlap**: both touch `asset-register-service.ts`, assets-panel and
+  systems-panel; each merges clean with master but whichever lands second needs a real merge.
+- Durable fact (Copilot keeps flagging it wrong on PRs like #2184): the IAM authorities endpoint
+  `GET /account/projects/{id}/authorities` is keyed by the **mongo** project id —
+  `useEditorAuthorities` passes `projectIdForToken` (raw mongo id) by design.
