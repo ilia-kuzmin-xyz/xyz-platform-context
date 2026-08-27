@@ -127,3 +127,41 @@ collapses into that one — but don't assume it does.
   backend-supplied per activity, and the UI gives no reason when it refuses. The Gantt column additionally
   counts descendants' links, so it and the Activity-details panel can disagree."* (Not editing outside this
   folder per task constraints — noting only.)
+
+## 2026-08-27 — supersedes the drafts above; cause confirmed, ask is now narrow
+
+The prior drafts ask Yash for a working activity id and Kyriakos for screenshots. **Do not post
+them** — the console read on prod supplied both and more. See `context.md` 2026-08-27.
+
+**Category:** not a frontend bug. A correct backend gate with **no UI explanation** (Pattern 5),
+plus a backend/planning question about why this activity has no planned labour units.
+
+### Draft comment (NOT posted)
+
+> Found the cause. `LS-24891` is flagged `validForProgressCalculations = false` by the backend, and
+> it has no planned labour units, while a working sibling on the same project (`INT-18920`) has
+> 154.603 of them. Intangible progress is measured against planned labour units, so with none there
+> is nothing to be a percentage of and the field is locked. Nothing was ever sent to the server, so
+> this is not a failed save.
+>
+> The genuine fault on our side is that the viewer never says any of that. The cell simply does not
+> respond, and the details panel says progress "updates every 15 minutes", which suggests a value is
+> on its way when it is not. I have a branch that replaces that with the actual reason.
+>
+> Worth flagging: 19 of the 2,595 unlinked activities on ATL05 are in the same state, so this will
+> come back unless we look at them together.
+>
+> One question for the planners: if labour units are added to `LS-24891`, does it become editable?
+> If so that is the customer's fix and we should say so.
+
+### Route the backend question
+
+Sergey (api-v1) or Sachin/Ali (api-v2), one closed question: **what sets
+`validForProgressCalculations` to false — is it exactly "no linked elements and no planned labour
+units"?** Everything else here is settled; this is the only unknown that changes what we tell the
+customer.
+
+### Board
+
+Keep in `Open` until the labour-units question is answered. It is not blocked, and it is not ready
+for dev either: the branch is a UX fix for the silence, not a fix for the ticket's symptom.

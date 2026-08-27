@@ -432,3 +432,69 @@ other activities on ATL05 are silently un-editable and have not been reported ye
 attachments and the `validForProgressCalculations` rule question stay open, but they stop being
 blockers: they are only needed if the result comes back H2, and then the question to Sergey/Sachin
 becomes specific ("why is this row false") rather than general.
+
+## 2026-08-27 (RESOLVED to a cause) — H2 confirmed on live data. Not a frontend defect.
+
+Ilia ran the console read on ATL05 prod. Values, verbatim:
+
+| | `LS-24891` (blocked) | `INT-18920` (works) |
+|---|---|---|
+| name | OLD Alabama Road Closure - Old Alabama | MEP Trimout @ Gallery - BLDG 05 South |
+| `type` | Activity | Activity |
+| `elements` / `rollup` | 0 / 0 | 0 / 0 |
+| **`progressValid`** | **false** | true |
+| **`plannedLaborUnits`** | **null** | 154.603 |
+| `actualProgress` | "0.0000" | "1.0000" |
+| `targetPassesGate` | **false** | — |
+
+Cohort: **totalActivities 3761, intangible 2595, intangibleButBlocked 19.**
+
+### What this settles
+
+- **H2 confirmed.** `progressValid === false` alone blocks it at
+  `use-actual-progress-mutation.tsx:40`.
+- **H1 falsified** — `elements: 0`, and no linked-elements button applies.
+- **H3 falsified** — `rollup: 0`, so the Gantt-vs-panel roll-up inconsistency is not in play here.
+  (It remains a real defect; see the prior pass §C. Untouched by this ticket.)
+- **H4 falsified** — `type: 'Activity'`, not WBS.
+- **H5 falsified** — the gate returns false, so no POST was ever made. Nothing to find in the
+  network log, and the two unreadable screenshots are no longer needed.
+- **The prior pass's 4/10 guess about the backend rule is now supported by a matched pair**: the
+  blocked row has no planned labour units and the working row has 154.603. Per
+  `docs/dashboard/api/planned-and-actual-activity-schema.md:7`, intangible progress is derived from
+  planned labour units — no denominator, nothing to be a percentage of. **Still one pair, still not
+  the backend's stated rule.** Raise to ~7/10, not higher, and ask Sergey/Sachin to confirm.
+
+### The real defect, and it is ours
+
+The gate is correct; **the UI never says why.** The Gantt cell attached a class only for linked or
+editable, so an ineligible unlinked activity got **no class, no box, no tooltip** — visually a
+working cell that ignores clicks. The details panel was worse than silent: it showed *"Actual
+progress updates every 15 minutes. Values may be slightly delayed."*, which tells the user a value
+is coming when it never will. That is `recurring-defect-patterns.md` **Pattern 5** with an
+aggravating factor, exactly as the prior pass predicted.
+
+**19 activities on ATL05 are in this state.** Kyriakos found one. The rest are waiting.
+
+### Branch
+
+`PLT-3091-explain-uneditable-progress` (hc-frontend, off `origin/master`, commit `da95485`), **not
+raised as a PR.** Adds `services/progress/progress-lock-reason.ts` — a pure
+`getProgressLockReason` plus a `PROGRESS_LOCK_MESSAGES` record so the Gantt cell and the panel
+cannot drift on copy — and wires it into both surfaces. Missing planned labour units is named
+specifically (the one cause a planner can act on); every other case stays vague, because the
+frontend cannot know why the backend set the flag and must not invent a reason. Ten tests. The
+reason logic was exercised in node against the real ATL05 values above; nothing was built or run
+(`npm ci` fails on `@xyzreality/dhtmlx-gantt`).
+
+**The branch does not unblock LS-24891 and is not meant to.** It stops the product lying about why.
+
+### Still open
+
+- **Sergey / Sachin:** what sets `validForProgressCalculations` false? The pair says "no planned
+  labour units" — confirm or correct.
+- **Can a planner fix it?** If adding labour units to `LS-24891` flips the flag, that is the
+  customer's self-service answer and it should go in the reply to Kyriakos.
+- **The other 18.** Worth listing for ATL05 rather than waiting for them to be reported one by one.
+- **H3, unrelated to this ticket:** `scheduler-columns.tsx:149` uses `calculatedElementsSum`, the
+  click gate does not. Two surfaces, two answers. Own ticket.
