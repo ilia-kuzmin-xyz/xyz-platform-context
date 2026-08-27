@@ -183,3 +183,23 @@ that draft itself named has now been reached: Darminder's tag of Mostafa and Pie
 the decision request was posted. This is the point at which the 08-24 note's fallback ("raise it in
 whatever channel Mostafa reads rather than a fourth Jira comment") becomes the live recommendation
 rather than a contingency. No Jira action was taken by this run.
+
+## 2026-08-27 — superseded: Yash escalated himself same-day; stand down on posting the 08-24/08-26 draft as-is
+
+The above "escalate outside Jira" recommendation is overtaken by events (see `context.md` 08-27
+entry): Yash pinged Pietro/Mostafa/Darminder on 08-26 09:29, got a same-morning reply from Mostafa
+("Josh is on leave"), and took ownership of following up with Josh directly rather than waiting on
+product. **Do not post the standing 8-row decision-request draft to Mostafa/Pietro right now** —
+it would land on people who already said the actual decision-maker is unavailable, reads as not
+having read the thread, and Yash has already claimed the follow-up.
+
+**New recommended action:** nothing to post today. The one useful thing a human could do is a
+light, dated check-in — not on Jira, since that reopens the same "any update?" loop that already
+got a non-answer — but a private nudge to Yash in ~1 week (around 2026-09-02) asking whether Josh is
+back and whether the 8 values (or the inherit-from-CSA answer) have surfaced, since Yash owns the
+next step now and there is no visible timer on it otherwise. If Josh is back and still silent by
+then, *that* is when the Mostafa/Pietro escalation draft becomes live again — keep it on file
+unchanged, it does not need rewriting.
+
+**Verdict: stay `Open`, no Jira comment this run.** The underlying data gap (8 rows: CSA-TCB /
+CSA-KGE × Categories 1-4) is still open and still the actual blocker; only who is chasing it changed.

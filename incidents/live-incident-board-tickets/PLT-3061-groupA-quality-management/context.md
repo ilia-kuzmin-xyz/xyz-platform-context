@@ -295,3 +295,32 @@ Live fetch: status `Open`, priority Medium, assignee Darminder Atker, 6 comments
 109845, 109980, 110018, 110058), newest still 110058 (2026-08-20 13:33) — byte-identical to the
 08-25 snapshot. Darminder's tag of Mostafa and Pietro (109980, 08-19 19:48) is now **7 days**
 silent. Nothing re-derived.
+
+## 2026-08-27 — the stall broke, but not into an answer: Josh is on leave, Yash is now chasing him directly
+
+**3 new comments since the last pass, all same day (2026-08-26, after that morning's sweep already
+ran):**
+
+- **110424 (Yash, 09:29):** re-pinged Pietro, Mostafa and Darminder directly — "Any update so as to
+  how we will resolve this? Its priority for Project delivery." This is the escalation this folder
+  has been recommending since 08-20/08-24; Yash sent his own version of it independently, not the
+  drafted message above (no mention of the 8-row ask or the inherit-from-CSA option — a plainer
+  "any update" ping).
+- **110425 (Mostafa, 09:29 — one minute later):** "Josh who is the cost manager is on leave." First
+  reply this ticket has had from Mostafa/Pietro since 08-19's tag went in, but it is a scheduling
+  fact, not the decision (8 values, or inherit CSA's numbers) the ticket actually needs.
+- **110427 (Yash, 09:42):** "Thanks for help. Will talk to him directly and get this sorted when he
+  is back." Yash closes the loop himself rather than pushing Mostafa for the data now — the decision
+  routes through Josh directly, bypassing Mostafa/Pietro as intermediaries.
+
+**What this changes:** the "7 days unposted decision request" framing this folder has carried since
+08-20 is now stale in a different way — it's not that nobody answered, it's that the person who
+would supply the 8 values (Josh, cost manager) is out of office, and Yash has taken ownership of the
+follow-up once Josh is back rather than waiting on Mostafa/Pietro. This is **not** the "escalate to
+whatever channel Mostafa reads" fallback firing (the 08-24/08-26 draft's own trigger condition) —
+Yash got a reply within 13 minutes of asking, just not the substantive one. No new information on
+Josh's return date. The underlying data gap (8 rows: CSA-TCB / CSA-KGE × 4 categories) is unchanged
+and still unconfirmed — see 08-24 entry below.
+
+**Confidence unchanged (~9.5/10 on mechanism — see 08-20 entry); this is a status/ownership update,
+not a technical one.**
