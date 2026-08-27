@@ -41,3 +41,18 @@ design question. Not settleable by one person in a session.
 - Who owns a 1868-row coordinate correction, and under what approval? The runbook has no PATCH precedent.
 - Fixing pin height alone does **not** close XSPCMA-868 — the captures stay on an unpickable level.
 - XSPCMA-868 is Critical, **unassigned**, zero comments since 13 Aug, and unlinked to this ticket.
+
+---
+
+## 2026-08-27 (later) — ⚠️ next session needs `platformapi` access
+
+**Start here: [`platformapi-questions.md`](platformapi-questions.md).** It has the 30-second problem
+statement, what is confirmed vs inferred, and the five things to check in the backend repo.
+
+**Correction to this file's claim that we can fix the pins ourselves.** That rested on the
+frontend's *type definition* of the PATCH endpoint
+(`IRoomCapturePointPatch` accepting `xMeters/yMeters/zMeters`) — which is the frontend's belief
+about a contract, not proof the handler persists those fields. Our code has never sent a coordinate
+through it, only a rename. Treat it as unconfirmed until someone reads the handler.
+
+This session was scoped to `hc-frontend` + `xyz-platform-context` only and could not check.
