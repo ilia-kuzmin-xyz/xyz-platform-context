@@ -187,3 +187,48 @@ picked the wrong default. **Tag Sachin or Ali on the `validForProgressCalculatio
 
 Worth keeping as a habit: the owner of an endpoint is decidable from `baseURL` in one grep, so
 resolve it rather than carrying "v1 or v2" forward.
+
+---
+
+# ⛔ 2026-08-27 (later) — SUPERSEDED. Do not send the draft above.
+
+The three asks in it are answered. See **[`prod-answer-2026-08-27.md`](prod-answer-2026-08-27.md)**.
+
+`LS-24891` has `linkedElementCount = 0` and `validForProgressCalculations = false`, and its
+`activityType` is **`TT_LOE`** — a Primavera Level of Effort activity, whose progress P6 derives
+from the activities it spans. On ATL05 and ATL08 together, 10,961 activities, `valid=false` and
+`TT_LOE` are the same set with zero exceptions. So the lock is correct and the ticket is not a bug.
+
+All 7 of `LS-24891`'s siblings are editable, so the customer's "all the rest work" is accurate.
+
+**Revised verdict: answer the customer, and raise one small FE ticket.** Not Ready For Dev on this
+number, not Blocked, and nothing to ask the backend.
+
+## Draft — reply on the ticket (author: Ilia; @ Yash)
+
+> `LS-24891` is a Level of Effort activity in the P6 schedule, so its progress isn't something you
+> can type — P6 works it out from the activities it spans. Our editor blocks manual entry on those
+> deliberately, which is why its seven siblings all accept a value and this one doesn't.
+>
+> On ATL05 that applies to 19 activities out of 3,761, all of them Level of Effort. Nothing is
+> broken on this one and there's no data fix needed.
+>
+> The fair complaint is that the cell just sits there and says nothing. Kyriakos had no way to know
+> why, which is why this became an incident. I'm raising that separately as a UI fix — we already
+> have the activity type on screen, so it's only a matter of showing the reason.
+>
+> **Can you let Kyriakos know it's working as intended, and that we're fixing the missing
+> explanation?**
+
+## The separate FE ticket to raise
+
+**"Editor Progress: say why an Actual % cell is locked."** The gate
+(`use-actual-progress-mutation.tsx:36-41`) knows all three reasons and surfaces none. `activityType`
+is already on the same object (`scheduler-service/utils.ts:56`), so no API or backend change:
+
+- `elements > 0` → driven by linked elements
+- `activityType === 'TT_LOE'` → Level of Effort, progress comes from the activities it spans
+- `type === 'WBS'` → summary row
+
+Bundle with the Gantt/panel inconsistency already noted in `context.md` (the column's lock predicate
+counts descendants' linked elements while the click gate counts only the activity's own).
