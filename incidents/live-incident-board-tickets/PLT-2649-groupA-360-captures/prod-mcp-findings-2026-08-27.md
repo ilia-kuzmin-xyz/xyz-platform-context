@@ -493,3 +493,51 @@ multi-building coordination model… Yash's comment names the RBA model, and in 
 `DC-0G-FFL` already sits at 0.0."* Half right: the RBA model was indeed already at 0, and the
 coordination model `2210cd43` is indeed where the wrong value lives. What it could not know is that
 the coordination model *was* corrected — just twice on one level.
+
+---
+
+# 2026-08-27, addendum — the double-correction was a FILE SHIFT plus a HAND EDIT. Yash caught a bad instruction.
+
+The previous section concluded "the shift was applied twice, so tell them to raise it by 50.4."
+**Yash stopped that instruction and was right to.** In Revit the level reads 0.00, so "raise by 50.4"
+would have been carried out in Revit and put it back to +50.4 — the original bug. The −50.4 lives in
+our *export*, not in Revit, and I had collapsed the two coordinate spaces.
+
+## The model that fits every number
+
+`export = Revit value + file offset`, with a **−50.4 offset applied to the whole file**:
+
+| level | Revit before | Revit now | export now | fits |
+|---|---|---|---|---|
+| `SS - 0G - FFL` | +50.102 | unchanged | −0.298 | ✓ |
+| `GT - 0G - FFL` | +50.200 | unchanged | −0.200 | ✓ |
+| `FH-0G-FFL` | +50.400 | unchanged | 0.000 | ✓ |
+| **`DC - 0G - FFL`** | +50.400 | **0.00 (hand-edited)** | **−50.400** | ✓ |
+
+All four exact. `SS`, `GT` and `DC - 0G - FFL` share source file `2210cd43`; `FH-0G-FFL` is
+`ffba833f`, and both files moved by the same −50.4.
+
+**So the file shift alone was sufficient.** The 35 levels that moved by exactly −50.4 are that shift.
+Someone *additionally* hand-edited `DC - 0G - FFL` to 0.00, giving it the correction twice.
+
+**Consequence, counter-intuitive but correct:** in Revit that level *should* read **+50.4**, matching
+its untouched neighbours at +50.2 and +50.1. Yash's worry ("they'll just move it back to +50") turns
+out to describe the right fix, not the risk. Undoing the hand-edit is the fix.
+
+## The one check before anyone touches the model — not yet done
+
+**What do `GT - 0G - FFL` and `SS - 0G - FFL` read in that same Revit schedule today?**
+
+- ≈ **+50.2 / +50.1** → theory confirmed, `DC - 0G - FFL` should be +50.4.
+- ≈ **−0.2 / −0.3** → theory is **wrong**, the offset story collapses, nobody should touch anything.
+
+It is the same screenshot the client already sent, scrolled to include two more rows. Drafted in
+`recommended-action.md`.
+
+## Process note worth keeping
+
+Two instructions on this ticket have now been generated from an unexamined assumption. In July it was
+"the pins will follow the model" — five weeks lost. Today it was "raise it by 50.4" — caught by Yash
+before it left the building. Both share a shape: **a number measured in one coordinate space, handed
+over as an instruction to be executed in another.** Before any numeric instruction reaches a
+customer, state which space the number is in and which space they will act in.

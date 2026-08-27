@@ -507,3 +507,27 @@ Stay **Open**, assigned to Ilia — the ticket is now genuinely actionable by us
 since May. Unchanged housekeeping: **link XSPCMA-868** (still Critical, still unassigned) and note
 that this fix does **not** close it — the rooms stay on the mis-named level, so the ground floor still
 appears twice in the floor filter and half the photos still hide behind the unpicked option.
+
+---
+
+## 2026-08-27 (addendum) — hold the BIM-team instruction. One question to Yash first.
+
+Supersedes the "raise DC - 0G - FFL by 50.4" ask. See `prod-mcp-findings-2026-08-27.md` §addendum:
+the −50.4 is in our export, Revit reads 0.00, and the instruction would have been executed in Revit.
+
+> You were right to stop me, and the answer to your question is yes — about +50.4 — but not for the
+> reason it looks like.
+>
+> That export shifted the whole file down by 50.4, and the shift on its own was enough.
+> GT - 0G - FFL and SS - 0G - FFL weren't hand-edited and they came out correct. DC - 0G - FFL was
+> also edited by hand to 0.00, so it got the correction twice and ended up 50.4 below the ground.
+> The 0.00 in the screenshot is that hand-edit, and it's what broke it.
+>
+> So in Revit that level should read about +50.4, the same as its neighbours. I don't want to tell the
+> BIM team that yet though, because if I've got it wrong they'll move it 50 m the wrong way again.
+>
+> **Can you get a screenshot of that same level schedule showing GT - 0G - FFL and SS - 0G - FFL?**
+> If they read about +50.2 and +50.1 then I'm right and we can tell the team confidently. If they read
+> about −0.2, stop — my explanation is wrong and nobody should touch the model.
+>
+> The missing L0 rooms are a separate problem in the same export. I'll come back to that one.
