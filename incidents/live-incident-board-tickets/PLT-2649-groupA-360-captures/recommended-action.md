@@ -164,3 +164,143 @@ Still **stay With Customer; do not transition.** 33 days since the 07-24 hand-of
 project delivery. The nudge-to-Yash draft (confirm Freshdesk #6622 actually carried the model /
 level / target-elevation detail) remains correct, still drafted, still unposted — worth sending
 now given the clock. No new technical content to add.
+
+---
+
+## 2026-08-27 — SUPERSEDES every prior verdict in this file (DRAFT ONLY, execute nothing)
+
+### ⛔ Do not send the nudge drafts above. The customer already did their part.
+
+Every recommendation on this page up to here — the 07-30 "did the Freshdesk hand-off carry the
+detail?" message to Yash, the 08-14 client-facing chase for an ETA, and the 08-26 "verdict
+unchanged" — was built on **stay With Customer**. That verdict is dead. The BIM team applied the
+fix we asked for, re-exported the model, and **the pins are still 50 m high** (comment 110446,
+2026-08-26). Sending a chase now would ask the client to redo work they have already done, on the
+strength of a diagnosis their own attempt just falsified.
+
+Keeping them here per the additive-writing rule: they were correct when written, and the 07-30
+question in particular ("did the Freshdesk message actually name the model, the level and the
+target value?") **is still worth answering** — but as *forensics on why the fix missed*, not as a
+chase.
+
+### Verdict: **the ball is on us.** Not With Customer, not With Technical Support, not Dev.
+
+Live Jira state, 2026-08-27: status **`Open`**, assignee **Ilia Kuzmin**, Freshdesk #6622
+**"Waiting on 3rd line"**. Jira has already moved it back to us; this page just hadn't caught up.
+
+- **Not With Customer.** There is nothing left to ask of them. They changed a value and
+  re-uploaded. Asking again without first establishing *why it did not take* repeats the mistake.
+- **Not With Technical Support.** We are not missing information the customer holds. We are
+  missing information **our own backend holds** — whether model re-import re-derives capture-point
+  coordinates. Nobody has ever asked.
+- **Not Ready For Development yet.** Still no frontend fix (the FE reads the coordinate verbatim;
+  see `context.md` 2026-08-27 § mechanism). It may become a **backend/data** ticket, but not
+  before the check below says which.
+- **Not Blocked.** Nothing external is blocking; a query we can run ourselves decides it.
+
+**Group tag stays `groupA`. Domain tag stays `360-captures`.**
+
+### Chosen action: run the data check ourselves, before writing to anyone
+
+Playbook § "smallest broken-vs-working pair" and § "prefer an instance that is broken **right
+now**". We have a pre-fix baseline saved in `analysis/` and a post-fix system in production. The
+diff between them is the diagnosis, and it costs one round trip.
+
+Three lookups for PA12, in this order. Stop as soon as one answers.
+
+1. **`project-levels`** — what does level `f0f4d409-c2b4-42cf-a8a9-c9497aecb3f7`
+   ("DC - 0G - FFL") read for `elevationMeters` now? Is there a *different* level id with that
+   name? Baseline: `analysis/PA12-levels.csv` (50.4, `sourceFileLevelId
+   2210cd43-599c-4d9b-826e-4d369b8660da-00584452`).
+2. **`/api/v2/projects/{PA12}/room-capture-points` and `/360captures`** — does **`yMeters`**
+   (⚠️ **not** `zMeters` — see the axis correction in `context.md` 2026-08-27) still read **50.4**
+   for the 75 capture points listed in `analysis/PLT-2649-stale-pinpoints.csv`?
+3. **id continuity** — do the `modelLevelId` / `modelRoomId` values the captures carry still match
+   anything in the newly regenerated `project-levels` / `project-rooms`?
+
+**How to read the result:**
+
+| 1. level elevation | 2. capture `yMeters` | Reading | Then |
+|---|---|---|---|
+| still 50.4 | still 50.4 | The fix never reached our data — **wrong artifact edited** (H2), or the re-import never landed | Back to the client, but with a *much* more specific ask: the level lives in linked file `2210cd43…`, not the DC host |
+| now ~0 | still 50.4 | **H1 confirmed** — the model fix worked and the pins simply do not inherit it | Ours: a data remediation, PATCH 101 capture points. See below |
+| now ~0 | now ~0 | Fixed at source; the site engineer is seeing cache or an app-side stale read | Verify with the engineer, then close on cause + trigger + cohort |
+| id changed / level absent | either | **H3** — re-import re-keyed the ground floor | Explains XSPCMA-868 too; becomes a backend re-linking job |
+
+Only after this do we write to anyone. Everything below is drafted for that moment.
+
+### Draft (a) — to Sachin or Ali (api-v2), the question nobody has asked
+
+One owner, one closed question, answerable with yes or no. This is the highest-value message on
+the ticket and it should go **before** anything client-facing.
+
+> @Sachin — PLT-2649, PA12 360 pins. **When a model is re-uploaded and re-imported, does anything
+> re-derive the stored coordinates on existing `room_capture_points` and `360captures` rows from
+> the new level elevations, or are those coordinates written once at capture-point creation and
+> only ever changed by PATCH?**
+>
+> Context in one line: we told the client to correct a level elevation in the source model and
+> re-upload, on the assumption that rooms, capture points and pins all inherit it on re-import.
+> They did it, and the pins are still 50 m high. I can see the FE reads `yMeters` straight off the
+> capture row and never touches level elevation, so if there is no re-derivation step on your side
+> the pins were never going to move and this needs a data fix instead.
+
+### Draft (b) — to Yash, holding the client, no new ask
+
+Only after (a) has an answer, or the data check has run. Coordinator voice, no technical detail he
+cannot use, and explicitly does not ask the client for anything.
+
+> @Yash Patel — thanks, that is useful and it tells us something important: the elevation change
+> was the right thing to do but it was not sufficient on its own, so please do not go back to the
+> BIM team yet. The pin positions were saved into our database when the captures were taken, and
+> correcting the model afterwards does not appear to rewrite them. I am confirming that with the
+> backend team now and it looks like the remaining fix is on our side, not theirs.
+>
+> **One question while I do:** do you know roughly **what date the corrected model was actually
+> re-uploaded**? XSPCMA-868 was raised on 13 August and I need to know whether it came before or
+> after the re-export, because that changes whether the two are the same problem.
+>
+> Separately, XSPCMA-868 describes the ground floor 360 images being **missing**, which is a
+> different symptom from the pins being too high. It may well have the same cause, but I am
+> tracking it as its own thread so we do not fix one and assume the other went with it.
+
+### Draft (c) — if the data check confirms H1, the remediation shape
+
+Do not send as a proposal until the check has run. Recorded so the next run does not re-derive it.
+
+The write path exists and is per-point: `PATCH /api/v2/projects/{projectId}/room-capture-points/{id}`
+accepts `{ xMeters, yMeters, zMeters, modelRoomId, modelLevelId }`
+(`hc-frontend/.../services/referencePointsService/room-capture-api-service.ts:54-63`, type at
+`room-capture-api.types.ts:27-34`). The correction is **`yMeters -= 50.4`** on the 101 capture
+points on level `f0f4d409` — 75 with imagery, 26 empty — enumerated in
+`analysis/PLT-2649-phantom-level-all-points.csv`. Whether the 1868 `360captures` rows need the
+same treatment or follow their capture point is **unknown and must be established before any
+write**; `detect_stale_360.py` observed capture coords equal their capture point's exactly, which
+suggests they are stored separately and would each need patching.
+
+**Read `incidents/data-remediation-runbook.md` before proposing any of this.** Bulk-patching 101
+production records on a live customer project is exactly what that runbook exists for.
+
+⚠️ **Still do not hand `PLT-2649-stale-pinpoints.csv` to anyone as-is** — the 08-14 warning
+stands: its `correctLevelId(realL00) = 7026451f` is `GB-0G-FFL`, a **GB** building level. The
+elevation-correction branch is the safe one.
+
+### Standing items — status this run
+
+- **§ "Also worth doing" #1 (split the Pietro/Jason editor side-thread) — now stronger.** Jason's
+  07-13 proposal, a system-side pass flagging captures that no longer match their recorded level,
+  would have caught **both** this ticket and its failed fix, and `analysis/detect_stale_360.py` is
+  a working prototype. Draft (b) of the 08-14 section still reads correctly; send it.
+- **§ "Also worth doing" #2 (cross-project sweep) — unchanged and still not done.** Note the
+  scope correction: the ~44 latent levels in the 45-73 m band host no capture points, so they are
+  not part of this incident's cohort (`context.md` 2026-08-27, H4).
+- **§ "On close" — the `dashboard/pitfalls.md` entry now needs rewriting before it is added.** The
+  version drafted on 07-30 says the pin Z "is derived from the hosting room's level elevation
+  upstream", which is the exact belief this run falsified. The correct entry is: *360 pin height
+  comes from `yMeters` (not `zMeters` — `swapYZ=true` at
+  `coordinate-transforms.ts:20-22`), stored per capture point and per capture in api-v2 and
+  snapshotted from the level at creation time. Correcting a level elevation in the source model
+  does not move existing pins. The FE applies no elevation of its own and cannot compensate.*
+  **Do not add the old wording.**
+- **Housekeeping for a human:** link XSPCMA-868 to PLT-2649 (currently unlinked), assign
+  XSPCMA-868 (unassigned at Critical), and decide whether PLT-2649 should move off Major.

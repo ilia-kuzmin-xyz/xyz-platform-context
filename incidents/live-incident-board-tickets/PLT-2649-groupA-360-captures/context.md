@@ -528,3 +528,241 @@ Live fetch: status `With Customer`, priority Major, assignee Yash Patel, 16 comm
 2026-07-24 13:56 — byte-identical to every run since 08-18. **33 days** silence on a fix that sits
 entirely with the client's project-delivery team (correcting one model level's elevation). The
 nudge-to-Yash draft is unchanged. Nothing re-derived.
+
+---
+
+## 2026-08-27 — fix applied but pins still wrong; root-cause re-opened
+
+**Read this before any earlier section of this file.** The customer did the thing we asked. The
+symptom did not go away. The 07-24 diagnosis is therefore **field-falsified as stated**, and the
+half of it that failed is identifiable: not *"the level elevation is wrong"* (that part still
+looks right) but *"rooms, capture points and 360 pins will all inherit the corrected elevation on
+re-import"* (comment 108107). Nothing in the code supports that second clause.
+
+### Ticket state changed materially — the header of this file is now stale
+
+Live fetch, 2026-08-27:
+
+| Field | Was (every run 07-24 → 08-26) | **Now** |
+|---|---|---|
+| **Status** | With Customer | **`Open`** (statusCategory `To Do`) |
+| **Assignee** | Yash Patel | **Ilia Kuzmin** |
+| Comment count | 16 | **18** |
+| Attachments | 2 | **3** (`Screenshot 2026-08-26 164846.png`, id 63374, 912 KB, Yash) |
+| `updated` | 2026-07-24T13:56:22 | **2026-08-26T12:33:58** |
+| Priority | Major | Major (unchanged — arguably wrong now, see below) |
+| Issue links | none | **still none** — XSPCMA-868 is referenced only as text in a comment |
+
+The `Status: With Customer` line at the top of this file (:5) and the ownership section (:299)
+are **superseded**. The ball is back on us: Freshdesk #6622 is "Waiting on 3rd line", the Jira is
+Open, and it is assigned to the person who produced the original diagnosis.
+
+**Group tag stays `groupA`** — Open + assigned to Ilia is Group A twice over per
+`live-incident-run-instructions.md` (§ Grouping). Domain tag stays `360-captures`.
+
+### The two new comments
+
+| Date | Author | Content |
+|---|---|---|
+| 2026-08-26 12:30 | Yash Patel (110446) | *"the Bim Team changed the elevation as requested in model **PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24.** After the change in elevation and re export of the model, we received a new ticket from site engineer which has Jira XSPCMA-868. And even after the elevation change in model, the 360 pins still appear high above building."* + screenshot + a SharePoint link to the model. *"Can we look into this as this is now affecting the usability of the XYZ app on field."* |
+| 2026-08-26 12:32 | Yash Patel (110447) | Freshdesk #6622 → **"Waiting on 3rd line"** (back to us) |
+
+### ⚠️ XSPCMA-868 is NOT the same symptom — do not let this get merged by accident
+
+Fetched it. **XSPCMA-868 "Missing Ground Floor 360 Images on Dashboard and XYZ App"**, project
+PA12, **Critical**, **unassigned**, status Open, created **2026-08-13**, reporter Yash (mirroring
+Freshdesk #7620). Body, verbatim:
+
+> *"I'm trying to view the 360 images of the ground floor on both the Dashboard and the XYZ App,
+> but the entire floor plan with the images is missing. L01 and L02 are displaying correctly."*
+
+That is **images missing**, not **pins floating**. Yash's comment presents it as the follow-on
+report of the same defect, and it may well be causally downstream of the same re-export (see H3
+below, which predicts exactly this) — but it is a **different observation** and the two must be
+kept separately falsifiable. Note also the dates: XSPCMA-868 was raised **13 Aug**, thirteen days
+before Yash told us the re-export had happened. Whether the re-export predates 13 Aug is
+**unknown and is one of the two highest-value facts a human can supply** (see NEEDS HUMAN).
+
+### ⭐ Correction to every prior write-up in this file: the vertical axis is `yMeters`, not `zMeters`
+
+This is load-bearing and it has been wrong in this folder since 07-13. If we hand the backend a
+remediation instruction naming `zMeters`, it will patch the wrong column.
+
+- The transform is `transformPushPinsToViewer(dbPosition, pbp, rot, globalOffset, **true**)`
+  (`.../viewer/services/dashboard-pinpoint-base-service.ts:185`, called from `:213`).
+- With `swapYZ = true` it builds `new THREE.Vector3(position.x, position.z, position.y)`
+  (`.../ViewerPage/services/coordinate/utils/coordinate-transforms.ts:20-22`). So the **DB
+  `yMeters` becomes the viewer's up axis**; DB `zMeters` becomes a horizontal.
+- The FE passes both through unchanged — `yPosition: point.yMeters`, `zPosition: point.zMeters`
+  (`.../dashboard-panels/viewer/hooks/use-pinpoints-reactive-render.ts:41-43`, twin at
+  `use-pinpoints-initial-render.ts:63`), then `extractImageCoordinates`
+  (`ViewerPage/utils/coordinate-extractors.ts:50-52`).
+- **The folder's own artefacts already said so and nobody joined it up:** `detect_stale_360.py`
+  states *"Vertical axis in the stored coords is Y (within-level stdev of Y == 0.000) … The
+  viewer transform's swapYZ=true matches"*, and every row of `PLT-2649-stale-pinpoints.csv` reads
+  `currentY = 50.4` with `zMeters` scattered (-16.768, 7.623, 0.994 …).
+
+So the § Mechanism claim at :168-169 (*"swapYZ=true → the capture's zMeters becomes the viewer's
+vertical axis"*) is **wrong and is hereby superseded.** Everything else in § Mechanism survives:
+the FE reads the coordinate verbatim and applies no level elevation of its own.
+
+### The mechanism, re-derived — and why the customer's fix could never have worked
+
+Re-verified against the working tree (branch `claude/vigilant-franklin-3g5z09`, HEAD `cf72b43`).
+
+**1. Pin coordinates are persisted rows, not derived values.**
+`captures_360` is loaded verbatim from `GET /api/v2/projects/{id}/360captures`
+(`services/capture360Service/capture-360-api-service.ts:33-41`; DDL with `xMeters/yMeters/zMeters
+DOUBLE` at `.../dashboard-360/dashboard-360-service.ts:259-261`, bulk-inserted unmodified at
+`:274-275`). The summary query selects `c.xMeters, c.yMeters, c.zMeters` straight out of that
+table (`:599-601`, mapped at `:628-630`).
+
+**2. Capture points are themselves stored records with their own coordinates and pinned model
+foreign keys.** `IRoomCapturePoint` carries `{ roomCapturePointId, modelId, modelRoomId,
+modelLevelId, xMeters, yMeters, zMeters, createdFrom }`
+(`services/referencePointsService/room-capture-api.types.ts:13-24`). They are **written once** by
+`POST /room-capture-points` with explicit coordinates
+(`room-capture-api-service.ts:27-51`) and are mutable **only** by
+`PATCH /room-capture-points/{id}`, whose payload accepts exactly
+`xMeters/yMeters/zMeters/modelRoomId/modelLevelId` (`:54-63`, type at
+`room-capture-api.types.ts:27-34`).
+
+**3. Level elevation never touches a pin coordinate, anywhere.** A repo-wide grep for `elevation`
+outside tests hits only: level filter metadata (`dashboard-360-service.ts:385`, `:411`, `:460`),
+the room store's level lookups (`ViewerPage/services/duckdb/duckdb-room-store.ts:20, 79, 109,
+178`), and the project **base point** (`services/projectService/project-api-service.utils.ts:70`,
+`dashboard-provider/dashboard-project-provider.tsx:187`). Not one of them feeds a pin.
+
+**4. The stored number *is* the level elevation, frozen.** All 75 stale capture points in
+`analysis/PLT-2649-stale-pinpoints.csv` sit on the single level `f0f4d409` with
+`currentY` **exactly 50.4** on every row — the same value `PA12-levels.csv` records for that
+level's `elevationMeters`. `detect_stale_360.py` further notes *"Capture (x,y,z) == its
+roomCapturePoint (x,y,z) exactly for all matched rows"*. That is the signature of a value
+**snapshotted from the level at capture-point-creation time and persisted**, not one recomputed
+per render.
+
+**Conclusion:** correcting the level in Revit changes the `project-levels` parquet. It does not,
+and by this architecture cannot, rewrite `room_capture_points.yMeters` or `360captures.yMeters`.
+Ilia's *"rooms→points→captures all inherit it on re-import"* (comments 107545, 108107) asserts a
+backend re-derivation job that **no FE-visible contract implies exists**. Unless the backend runs
+one — which nobody on this ticket ever confirmed, and which was the unexamined load-bearing
+assumption of the whole 07-24 hand-off — the pins were always going to stay at 50.4.
+
+### Hypotheses, ranked, each falsifiable by one query
+
+**H1 — the remedy's second clause is false: the model fix cannot move already-stored pins.
+Confidence 7/10. Primary.**
+Mechanism above. Predicts: pins still at `yMeters = 50.4` *regardless of what the BIM team did*,
+and therefore predicts the observed outcome without needing anyone to have made a mistake.
+**Falsify by:** re-pull `/api/v2/projects/{PA12}/room-capture-points` and `/360captures`; if
+`yMeters` for the 75 points in `PLT-2649-stale-pinpoints.csv` still reads 50.4, H1 holds. Held
+back from 9 only because the backend re-derivation job is *absence-of-evidence* from the FE side
+— a human with api-v2 access can confirm or kill it in minutes, and that is the single cheapest
+thing left to do on this ticket.
+
+**H2 — the wrong artifact was edited. Confidence 5/10. Not exclusive with H1.**
+Two tells. (a) Yash's model name is `PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24`, Ilia's was
+`..._V14_R24_detached`. In a Revit workflow `_detached` is the detach-from-central copy — usually
+the thing actually uploaded — so the names may or may not denote the same artifact. (b) Far more
+telling: the level at 50.4 does **not** live in the DC model at all. `PA12-levels.csv` gives
+`f0f4d409` a `sourceFileLevelId` of **`2210cd43-599c-4d9b-826e-4d369b8660da-00584452`** — source
+file `2210cd43…`, whose **16 levels all sit at 48.1-73.4 m** (08-14 audit, above). Ilia said this
+explicitly in 108107: *"this level comes from a linked file inside the federation."* A BIM team
+opening the DC host model and "changing the elevation" edits the host's own level list; the
+linked file's level object keeps 50.4 and re-imports at 50.4. **Falsify by:** the same
+`project-levels` re-pull — if `f0f4d409` still reads 50.4, either H2 is true or the re-import
+never landed.
+
+**H3 — the re-export re-keyed the ground floor, orphaning the captures. Confidence 5/10, and it
+is the only hypothesis that also explains XSPCMA-868.**
+Captures join to rooms and levels **by id**: `LEFT JOIN rooms r ON c.modelRoomId = r.id LEFT JOIN
+levels l ON c.modelLevelId = l.id` (`dashboard-360-service.ts:610-611`, repeated at `:641-642`,
+`:665-666`, `:683-684`). `rooms.id` comes from `project_rooms_raw.modelRoomId` and `levels.id`
+from `project_levels_raw.modelLevelId` (`:356-360`, `:458-463`). The floor label is
+`COALESCE(l.name, r.levelName)` (`:43`) and the level **filter matches on that name**
+(`:558-561`). So if the edit-and-re-export minted a **new** `modelLevelId` (or re-parented the DC
+ground-floor rooms), every existing capture — still carrying the old ids — falls out of both
+joins, its `levelName` collapses to `'Unknown Level'` (`:624`), and **the ground floor disappears
+from the level filter and the room list while untouched L01/L02 keep working.** That is
+XSPCMA-868 word for word. Pins would meanwhile still render (coordinates are on the capture row,
+not the join) and still be 50.4 high — i.e. H1 + H3 together produce *both* reported symptoms
+from one cause. **Falsify by:** diff the new `project-levels` / `project-rooms` ids against the
+`currentLevelId`/`modelRoomId` values in the folder's CSVs.
+
+**H4 — multi-level: RULED OUT as the explanation for what is observed. Confidence 8/10.**
+Re-ran the numbers: all 75 stale capture points are on the one level `f0f4d409`, all `floor=L00`,
+all `currentY=50.4` — a single-valued cohort, not a spread. The 08-14 finding that ~15 source
+files / ~44 levels sit in the 45-73 m band **stands and is still worth fixing**, but those levels
+host no capture points today, so they cannot be producing the pins the site engineer is looking
+at. This is latent, not active. Do not let it broaden the current diagnosis.
+
+**H5 — frontend caching served stale parquet: RULED OUT. Confidence 8/10.**
+The OPFS parquet cache validates against `artefact.artefactHash` first and `fileSizeBytes` second
+and returns `false` on any mismatch (`ViewerPage/services/duckdb/opfs-cache-manager.ts:113-163`,
+called from `duckdb-service.ts:256-262` and through `loadParquet` at `:279-290`). A regenerated
+parquet has a new hash and is refetched. **One residual, genuinely unverified:** both parquet
+lookups take the **first** artefact whose `outputContent` matches, with no version predicate —
+`artefacts.find(a => a.outputContent === 'project-rooms' …)` (`dashboard-360-service.ts:325-328`)
+and the `project-levels` twin (`:432-435`), against
+`GET /projects/{id}/models/artefacts?includeModels=true` (`services/modelService/model-api-service.ts:81-86`).
+`IModelArtefact` exposes `models[].modelVersionId` (`model-api.service.types.ts:8-11`) and the FE
+ignores it entirely. If that endpoint can return more than one `project-levels` artefact per
+project, the FE picks arbitrarily among versions. I could not determine whether it can. Low
+probability, cheap to check, would be a real FE bug if true.
+
+### What the 07-24 diagnosis got right, and should not be re-litigated
+
+- The **class** of cause is upstream data, not dashboard code. Still holds: the FE reads the
+  coordinate verbatim and the Quality pins, which share the identical transform
+  (`dashboard-issue-service.ts:25` and `dashboard-image-service.ts:30` both extend
+  `DashboardPinpointBaseService`), render correctly on the same model with the same PBP.
+- **Level `f0f4d409` "DC - 0G - FFL" at 50.4 m is genuinely anomalous**, and the linked-file
+  origin (`2210cd43…`, 16 levels at 48.1-73.4) is confirmed from `PA12-levels.csv`.
+- The **cohort** (101 capture points, 75 with imagery, 1868 images) is confirmed arithmetic.
+- Still ruled out: a frontend fix; a viewer-transform fault; the metres-vs-millimetres PBP
+  mismatch in `hc-frontend/docs/viewerpage-vs-dashboard-pinpoint-comparison.md`; the PBP itself
+  (project-level, shared with the correct Quality pins).
+
+### Revised confidence (supersedes § "Working hypothesis + confidence", :330-346)
+
+| Claim | 07-24 / 08-14 | **2026-08-27** | Why moved |
+|---|---|---|---|
+| Class of cause is upstream data, not FE code | 10/10 | **10/10** | Untouched by the falsification; re-verified this run |
+| Level `f0f4d409` sat at 50.4 m and that is anomalous | 9/10 | **9/10** | Independently checkable in `PA12-levels.csv`; unaffected |
+| **"Correcting the level and re-uploading resolves the ticket"** | **7/10** | **2/10** | **Field-falsified.** The customer executed it and the symptom persisted. Its unexamined premise — an inheritance/re-derivation step — has no support in any contract the FE can see |
+| **"Rooms → points → captures inherit it on re-import"** (the specific mechanism) | never scored; asserted | **2/10** | Capture points are persisted rows with their own coordinates and a pinned `modelId`, writable only by POST/PATCH (`room-capture-api.types.ts:13-34`) |
+| That the *remaining* work is a data remediation on our side, not a further model change | — | **7/10** | Follows from H1; contingent on the one query below |
+| That XSPCMA-868 shares a root cause with PLT-2649 | — | **5/10** | H3 explains both elegantly, but the symptoms differ and the dates do not obviously line up |
+| Overall ticket-state assessment | 9.5/10 | **6/10** | We got the diagnosis half right and shipped the wrong remedy to a client, twice-over costing five weeks |
+
+**The precise thing I now doubt is not "which level" — it is "what re-import does".** The 07-24
+comment fused a *correct observation* (this level's elevation is wrong) with an *unverified
+mechanism* (the fix propagates to existing captures) and shipped both to a customer as one
+instruction. Playbook § "What did we expect, on whose authority?" — the authority for the second
+half was nobody's; it was never asked of the backend and never checked in code.
+
+### NEEDS HUMAN — this run's additions
+
+1. **⚠️ The one query that separates H1 / H2 / H3.** Re-pull, for PA12: (a) `project-levels` —
+   what is `f0f4d409`'s `elevationMeters` now, and is there a level named "DC - 0G - FFL" with a
+   *different* id? (b) `/api/v2/projects/{PA12}/room-capture-points` and `/360captures` — does
+   `yMeters` still read **50.4** for the 75 points in `analysis/PLT-2649-stale-pinpoints.csv`?
+   Baselines for both diffs are already in `analysis/`. This is a 10-minute job and it decides
+   everything below it.
+2. **When was the corrected model actually re-uploaded?** XSPCMA-868 was raised 2026-08-13;
+   Yash reported the re-export on 08-26. If the re-upload postdates 13 Aug, XSPCMA-868 cannot be
+   its consequence and H3 dies.
+3. **Does api-v2 re-derive capture-point coordinates on model re-import?** Straight question for
+   Sachin or Ali. A yes kills H1 outright; a no makes the remediation ours. Nobody has ever asked.
+4. **`Screenshot 2026-08-26 164846.png`** (attachment 63374, 912 KB, Yash, 08-26) — unreadable to
+   the agent, blob URL behind Atlassian auth. Would settle whether the screenshot shows pins
+   floating at ~50 m (same offset as before → nothing moved) or at some *new* wrong height
+   (→ something did move, and moved wrong). That distinction discriminates H1 from H2 on its own.
+5. **SharePoint model link** in comment 110446 — attempted, **HTTP 403**. Would settle whether the
+   uploaded artifact is the `_detached` file, and whether the level object at 50.4 lives in the
+   host or in linked file `2210cd43…` (H2).
+6. **XSPCMA-868 has no Jira link to PLT-2649** and is **unassigned at Critical**. Two separate
+   housekeeping gaps.
+7. **Priority.** PLT-2649 is still Major while its field consequence is now filed at Critical and
+   the coordinator says it is *"affecting the usability of the XYZ app on field."* Worth a human
+   deciding whether to raise it.
