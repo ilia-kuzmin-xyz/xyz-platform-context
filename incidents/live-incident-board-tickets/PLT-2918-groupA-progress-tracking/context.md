@@ -173,3 +173,10 @@ unconfirmed hypotheses: (a) residual/incomplete code fix on some other edit path
 pre-08-05 historic Precast/Roof/Earthworks/Painting gap was never actually backfilled and this is
 the same old hole, (c) Power BI export-side issue (Mostafa), unrelated to the mapping data itself.
 Not yet distinguished against data.
+
+## 2026-08-27 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-25T17:07 —
+unchanged since yesterday's pass. The three-hypothesis split (residual code gap / historic
+backfill never done / Power BI export-side per Mostafa) is still undistinguished against data.
+Nothing re-derived.

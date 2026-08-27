@@ -306,3 +306,9 @@ Live fetch: status `With Customer`, priority Major, assignee Yash Patel, resolut
 in `recommended-action.md` remains unposted across 19 consecutive runs. Its optional follow-up (the
 €600 Cat3/CSA/Underground-Services row) still has nowhere fresher to land — PLT-3061's thread
 (Darminder's 08-19 tag of Mostafa/Pietro) is now ~7 days unanswered, still quiet. Nothing re-derived.
+
+## 2026-08-27 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-07-06T10:18 —
+unchanged, **52 days** stale. Close-out recommendation still unposted, now **20 consecutive runs**.
+Nothing re-derived.

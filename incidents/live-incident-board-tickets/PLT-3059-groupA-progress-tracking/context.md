@@ -157,3 +157,10 @@ A/B as genuinely undecided. The one-minute discriminator remains unrun on both t
 **Clocks:** 8 days since the disputed workaround was pointed at this ticket (109878, 08-18 15:50)
 with no correction; 7 days since PLT-3034's customer disputed that workaround's premise (08-19
 12:25, still unrelayed here). Nothing re-derived.
+
+## 2026-08-27 — no change
+
+Live re-fetch (board sweep): status `With Customer`, priority Major, `updated` still
+2026-08-21T15:21 — unchanged since every run since 08-21, including yesterday's pass. No new
+comment. Fork A/B (does a linked element id also appear under a production model heading) still
+undecided, still gating both this ticket and PLT-3034. Nothing re-derived.

@@ -702,3 +702,9 @@ independently confirmed here). Does not change this ticket's Group A membership 
 **Clocks:** 9 days since the last comment (08-17); 12 days since the 08-14 drafts to Gennaro and
 Darminder went unsent. Nothing re-derived — H1/H3/H4/H5/H6 stand exactly as recorded 08-13/08-14,
 and the diagnostic branch (`PLT-2874-dashboard-element-count-diagnostics`) is still not on Staging.
+
+## 2026-08-27 — no change
+
+Live re-fetch: status `In Analysis`, priority Minor, `updated` still 2026-08-25T09:53 — unchanged
+since yesterday's pass, which already captured the silent Open→In Analysis move. Gennaro ask +
+Darminder sanity-check line still unposted, now **10 days**. Nothing re-derived.

@@ -296,3 +296,9 @@ run the one-minute discriminator.
 "With Customer" on a question he cannot answer for the same 7 days; PLT-3059 has now carried the
 same unverified risk for 8 days (Darminder pointed it at this ticket's workaround on 08-18, one day
 before the dispute existed).
+
+## 2026-08-27 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-19T12:48 —
+unchanged since 08-19, confirmed again after yesterday's pass. Fork A/B still undecided (see
+PLT-3059, which now depends on the same answer). Nothing re-derived.

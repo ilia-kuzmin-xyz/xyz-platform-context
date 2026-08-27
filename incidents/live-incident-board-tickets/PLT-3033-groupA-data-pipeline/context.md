@@ -320,3 +320,9 @@ Confidence and hypothesis ranking unchanged from 08-20 (overall 5/10, H1 6/10). 
 Same 4 PNGs as recorded 08-19/08-21 (attachment ids 62739, 62740, 62741, 62742, all uploaded
 2026-08-17) — this routine still cannot open image content, so what Darminder's 08-17 15:08
 hypothesis was visually based on remains unverified here. XER files still not requested/sent.
+
+## 2026-08-27 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-18T10:08 —
+unchanged since 08-18. Darminder's schedule-pair question to the customer now **9 days** cold.
+Nothing re-derived.

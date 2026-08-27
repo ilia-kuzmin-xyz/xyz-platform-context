@@ -529,3 +529,10 @@ on this?"). **Stall clocks:** total silence 26 days; Mostafa's 107320 question t
 unanswered 43 days; customer's drop-down-or-remove request unanswered 43 days; escalate-to-Pietro
 first recommended, never executed, 33 days. Nothing re-derived — diagnosis finished since 08-14,
 GUID-label fix already on a branch since 08-24.
+
+## 2026-08-27 — no change, 25th consecutive run unposted
+
+Live re-fetch: status `In Analysis`, priority Critical, `updated` still 2026-08-20T18:42 —
+unchanged since 08-20. Escalate-to-Pietro draft still unposted, now **25 consecutive runs** /
+**44 days** silent on Mostafa's own unanswered question. Board's only Critical ticket, unchanged
+top priority. Nothing re-derived.
