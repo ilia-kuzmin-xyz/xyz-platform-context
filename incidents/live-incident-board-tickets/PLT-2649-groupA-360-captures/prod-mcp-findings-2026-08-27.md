@@ -416,3 +416,80 @@ caught that way and fixed before delivery: a `=B10-B11` that pointed at the phot
 the height, a `COUNTIF(…,50.4)` that could never match the stored `50.39999771118164`, and HTTP
 codes written as text so numeric comparison failed. Totals now use `SUMPRODUCT`/`ROUND`. Worth
 remembering: an unrecalculated workbook hides exactly this class of error.
+
+---
+
+# 2026-08-27, final — the level was shifted TWICE. Correcting an unfair claim above.
+
+New inputs: Yash relayed *"BIM team changed the elevation of L0 to 0 and then we had a problem where
+the L0 is not showing up in XYZ app and dashboard"*, plus the client's email with a **Revit
+screenshot showing `DC - 0G - FFL` at 0.00 m** and a web-viewer screenshot of
+`PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24` V2 (6 Aug 5:44pm).
+
+## ⚠️ Retracting "the customer set it to −50.4 instead of 0"
+
+Earlier sections of this file say the customer "set it to the negative of the old value instead of
+zero" and call it "a plausible misreading of our instruction". **That was unfair and wrong**, and the
+drafted message to Yash built on it would have blamed the BIM team for something their own screenshot
+contradicts. It was not sent.
+
+Diffed the pre-August extract (`analysis/PA12-levels.csv`) against the current parquet. **36 levels
+moved. 35 moved by exactly −50.400. One moved by exactly −100.800.**
+
+| level | source file | before | after | delta |
+|---|---|---|---|---|
+| `GT - 0G - FFL` | `2210cd43` | 50.200 | −0.200 | −50.400 ✓ |
+| `SS - 0G - FFL` | `2210cd43` | 50.102 | −0.298 | −50.400 ✓ |
+| `FH-0G-FFL` | `ffba833f` | 50.400 | 0.000 | −50.400 ✓ |
+| **`DC - 0G - FFL`** | **`2210cd43`** | **50.400** | **−50.400** | **−100.800** ❌ |
+
+…and 32 other levels, every one of them −50.400 exactly (`RDC` 50.4→0, `Limit PLU` 70.4→20,
+`DC-Chillers` 70.76→20.36, and so on).
+
+**So the BIM team did the correction, and did it right.** A −50.4 datum shift was applied across the
+whole model and landed exactly correct on 35 of 36 levels. On `DC - 0G - FFL` — the one level this
+ticket is about — the 50.4 correction was applied **twice**. Their Revit screenshot showing 0.00 m is
+entirely consistent: they set it to 0, and the model-wide shift then took it to −50.4.
+
+One-in-36 double application, on precisely the level with 1,927 photos on it. Bad luck, not
+carelessness.
+
+## The second thing, and it is the customer's actual new complaint
+
+"L0 is not showing up in the app and dashboard" is **not** the pin-height issue. It is the room loss
+this file documented earlier from our side:
+
+- **0 rooms named `PH2-L00*`** exist in the current `project-rooms` artefact.
+- Phase 2 keeps L01 (30 rooms), L02 (32), L03 (4). `PH1-L00` keeps 11. Only Phase 2's ground floor
+  vanished.
+- All 101 capture points' `modelRoomId`s point at those missing rooms.
+
+So the 6 Aug re-export dropped the Phase 2 ground floor rooms. That is what the user is reporting,
+and it arrived in the same upload as the double-shift. **Two separate defects from one re-export.**
+
+The client's own web-viewer screenshot is consistent: the model designated "generates room
+definitions for this project" renders as 3D text reading "ROOMS" with `Linked 0 / Total 1` in the
+linked-elements panel. Not proof of the room count on its own — 297 rooms do still exist
+project-wide — but consistent with the ground-floor set being dropped from that export.
+
+## What this changes about the plan
+
+The pin correction already applied (101 points → `yMeters` 0) stands and is unaffected. It fixed the
+1,927 existing photos and nothing else, exactly as documented.
+
+What the BIM team needs is now two specific things, neither of them "set it to 0" again — they will
+rightly say they already did:
+
+1. **`DC - 0G - FFL` received the 50.4 shift twice** and now sits at −50.4. It needs +50.4, not a
+   re-zero. `GT - 0G - FFL` and `SS - 0G - FFL` in the same file are correct references.
+2. **The Phase 2 ground floor rooms are missing from the 6 Aug room export.** That is what makes L0
+   absent from the app and dashboard, and it also orphaned the capture points.
+
+## Credit where due — the July handover called this
+
+`platformapi-questions.md` § "Two things that are true regardless" predicted the file confusion:
+*"The BIM team may have edited the wrong file… `DC - 0G - FFL` belongs to source file `2210cd43`, a
+multi-building coordination model… Yash's comment names the RBA model, and in that model
+`DC-0G-FFL` already sits at 0.0."* Half right: the RBA model was indeed already at 0, and the
+coordination model `2210cd43` is indeed where the wrong value lives. What it could not know is that
+the coordination model *was* corrected — just twice on one level.
