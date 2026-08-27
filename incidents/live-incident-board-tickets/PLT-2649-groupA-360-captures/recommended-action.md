@@ -304,3 +304,120 @@ elevation-correction branch is the safe one.
   **Do not add the old wording.**
 - **Housekeeping for a human:** link XSPCMA-868 to PLT-2649 (currently unlinked), assign
   XSPCMA-868 (unassigned at Critical), and decide whether PLT-2649 should move off Major.
+
+---
+
+## 2026-08-27 (second pass) — REVISES the plan above: the data-check order changed and the remediation target changed
+
+The 08-27 verdict ("ball is on us, run the data check before writing to anyone") **stands**. Two
+things inside it are now wrong and are corrected here. See `context.md` § "2026-08-27 (second pass)".
+
+### What changed
+
+1. **The remediation target.** The plan above implied patching the **75 room-capture-points**. Pins
+   are rendered from the **1868 capture rows'** own coordinates, never from the capture points
+   (`capture-360-api.types.ts:34-36`; `dashboard-360-service.ts:598-600`; `media-service.ts:791-812`).
+   Patching the points would move **zero pins**. And no FE endpoint can write capture coordinates at
+   all — `I360CaptureUpdatePayload` is `{ xyzDisplayName?, description? }`
+   (`capture-360-api-service.ts:7-10`). **Any fix runs in api-v2/DB, not through our API.**
+2. **The decisive lookup.** Add **`lastModifiedOn` on the capture points** as check #1 — it separates
+   "no re-derivation job exists" (null) from "a job ran" (timestamped). Reading `yMeters` alone
+   cannot: the planned check would have reported "still 50.4" and mis-read it as confirmation.
+
+### Also new: XSPCMA-868 is the same bug, and it is a name collision
+
+PA12 has three DC ground-floor levels — `DC-0G-FFL` ×2 at 0.0 and `DC - 0G - FFL` (spaced) at 50.4 —
+and it is the **only** DC floor whose duplicate is spelled differently (DC-01/02/03 duplicates share
+identical names, which is why they work). The floor filter matches on the level **name string**
+(`dashboard-filter-utils.ts:97,:218`; `dashboard-360-service.ts:43,:560`), so picking the ground
+floor returns nothing while all 1868 images sit on the spaced copy. **Fixing the pin height alone
+will not close XSPCMA-868.** Say so before anyone declares victory on a Y-offset patch.
+
+### Revised action: still no client-facing message. Three reads, then one question.
+
+Order matters; stop as soon as one answers. Checks 1-3 are read-only. **Check 4 is a production
+write and needs written approval on the ticket first** (`incidents/data-remediation-runbook.md` §3).
+
+1. `lastModifiedOn` + `createdFrom` on PA12's 101 room-capture-points.
+2. `project-levels` for PA12 — is `f0f4d409` still 50.40, and has a *fourth* DC ground floor appeared?
+3. **The 2-minute one, needing no backend access:** open PA12's 360 tab, clear every filter, look at
+   the ground-floor captures. Present-but-floating ⇒ phantom-level theory. *"Unknown Level"* ⇒
+   re-keying after all. Absent ⇒ neither, escalate.
+4. *(gated)* PATCH one capture point's `yMeters` to 0, re-GET its captures, revert — settles whether
+   captures own their coordinates or join them, and therefore whether the fix is 75 rows or 1868.
+
+⚠️ Dedupe any fresh pull by id — api-v2 cursor pages overlap and inflated counts ~4.3× in prior
+reports (`agent-pipeline/pitfalls.md`, 2026-08-10). ⚠️ Prod MCP whitelists only ELN03/A015, so this
+likely needs a human with an authenticated api-v2 session.
+
+### Draft (a) — to api-v2 (Sachin or Ali), REPLACES the draft above
+
+Tone note from the notes' own base rate: closed, action-shaped questions to Ali get answered in
+minutes; broad "one to be aware of" asks go unanswered for weeks (PLT-3034's 08-17 ask, PLT-2874's
+svf2 question). Keep it to one decidable thing.
+
+> @Sachin — PA12, PLT-2649. **Two questions, both yes/no.**
+>
+> 1. On `room_capture_points`, is `lastModifiedOn` ever written by anything other than a user edit —
+>    specifically, does a model re-import re-derive `xMeters/yMeters/zMeters` on rows that already
+>    exist? For PA12's 101 points on level `f0f4d409` it currently reads null as far as I can tell.
+> 2. Does `GET /360captures` return each capture's **own** stored coordinates, or does it join them
+>    from the capture point at read time?
+>
+> Why it matters: we told the client to correct a level elevation and re-upload, expecting the pins to
+> follow. They did it; the pins are still 50.4 m high. If (1) is no and (2) is "own", then the fix is a
+> data update on 1868 capture rows and it has to come from your side — there is no endpoint on ours
+> that can write a capture coordinate.
+
+### Draft (b) — to Yash, REPLACES the draft above (do not ask the client for anything)
+
+> @Yash Patel — PLT-2649. Please **don't go back to the BIM team yet**, and please hold off telling
+> them the elevation change was wrong — it wasn't, it just couldn't have worked on its own. Two things:
+>
+> **1.** The pin positions were written into our database when the captures were taken. Correcting the
+> model afterwards doesn't rewrite them, so the existing pins were always going to stay where they are.
+> That's on us to fix, not them.
+>
+> **2.** I think the level they changed may not be the one causing this. The bad level belongs to a
+> *linked* coordination model inside the federation — the one carrying SS, GT, DC, FH and Genset levels
+> together between 48 and 73 m — not the DC architectural model. In the DC model itself, `DC-0G-FFL`
+> already reads 0.0, so there'd have been nothing to change there. Before we ask them for anything I
+> want to confirm that against the re-exported model.
+>
+> **One question, no rush:** roughly **what date was the corrected model re-uploaded**? XSPCMA-868 was
+> raised on 13 Aug and I need to know if that was before or after.
+>
+> Separately — I think **XSPCMA-868 is the same bug, not a second one**, and it's currently Critical and
+> unassigned. PA12 has the ground floor listed twice under two spellings (`DC-0G-FFL` and
+> `DC - 0G - FFL`); all the images are on one of them, so picking the other shows an empty floor. I'll
+> link the two tickets. Worth flagging that fixing the pin height won't fix that on its own.
+
+### Draft (c) — to the BIM team, ONLY once check 2 confirms `f0f4d409` is still 50.40
+
+The last instruction was ambiguous and cost five weeks. This one names the artifact by its contents,
+not by a filename we are guessing at.
+
+> The level that needs correcting is **not** in `PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24` — in that model
+> `DC-0G-FFL` already sits correctly at 0.0.
+>
+> It is in the **linked coordination model** that contributes these 16 levels to the federation:
+> `SS - 1S - FFL` 48.10, `SS - 0G - FFL` 50.10, `GT - 0G - FFL` 50.20, **`DC - 0G - FFL` 50.40**,
+> `GT - 01 - Signage` 55.50, two `Reflected Ceiling Plan FoH` levels, `SS - 02 - FFL` 59.50,
+> `Genset building_Wall Type_02` 60.80, `FH - 03 - FFL` 62.77, `GT - 03 - FFL` 66.10,
+> `FH - 04 - FFL` 66.30, **`DC - 04 - FFL` 67.81**, `Limit PLU` 70.40, `Limit PLU - Eq Tqn` 73.40.
+>
+> Note the level names in that file use **spaced** formatting (`DC - 0G - FFL`) where the rest of the
+> federation uses unspaced (`DC-0G-FFL`) — that is the quickest way to identify it.
+>
+> Its whole level set is **exactly +50.40 m** above datum (DC ground 50.40 vs 0.00; DC-04 67.81 vs
+> 17.41). The fix is to align that file's **shared coordinates** with the federation, not to edit
+> individual level elevations.
+>
+> Please note this corrects future captures only — the 360 pins already taken carry stored positions
+> that we will correct on our side separately.
+
+### Action on the board
+
+Stay `Open`, assigned to Ilia. Do **not** move to With Customer — nothing is with them. Two
+housekeeping items worth doing regardless of the checks: **link XSPCMA-868 to PLT-2649**, and get it
+assigned (Critical + unassigned + zero comments since 13 Aug).

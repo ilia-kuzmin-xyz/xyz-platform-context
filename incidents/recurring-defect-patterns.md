@@ -499,6 +499,40 @@ both PLT-3061 and PLT-2815 the ticket carried media that could not answer a ques
     until someone takes a capture there. Diagnostic that works: use a correctly-placed pin type as
     the valid vertical envelope and classify the other type against it
     (`live-incident-board-tickets/PLT-2649-groupA-360-captures/analysis/detect_stale_360.py`).
+  - *⚠️ Amended 2026-08-27 — two statements in the 08-14 text above are WRONG. Do not act on them.*
+    (1) **The axis is `yMeters`, not `zMeters`.** `swapYZ=true` builds `Vector3(x, z, y)`
+    (`ViewerPage/services/coordinate/utils/coordinate-transforms.ts:20-22`), so the DB's `yMeters`
+    is the viewer's vertical. A remediation naming `zMeters` patches a horizontal.
+    (2) **"360 capture coordinates are derived upstream from the hosting room's level" is false as
+    a live relationship.** The elevation is snapshotted into the row once, at capture-point
+    generation; nothing re-derives it afterwards. The customer corrected the model, re-uploaded,
+    and the pins did not move — this was field-falsified, not merely doubted. Corollary: the pin is
+    rendered from the **capture** row's own coordinates, never the room-capture-point's
+    (`capture-360-api.types.ts:34-36`, `dashboard-360-service.ts:598-600`), and no FE endpoint can
+    write them (`I360CaptureUpdatePayload` is `{xyzDisplayName?, description?}`).
+    (3) Minor: it is 27 source files, 14 *wholly* in band (43 levels) plus one mixed file, not "~15".
+    Full working: `PLT-2649-groupA-360-captures/context.md` § "2026-08-27 (second pass)".
+- **A customer-facing instruction shipped on a premise nobody verified — falsified by the customer's
+  own attempt or reply.** *Promoted 2026-08-27; the bar is two projects and this has two, arguably
+  three.* **PA12 / PLT-2649:** we told project delivery to correct a level elevation and re-upload,
+  asserting "rooms → points → captures all inherit it on re-import." Nobody had checked whether that
+  inheritance existed. They did the work; nothing moved; five weeks lost and a Critical sibling ticket
+  (XSPCMA-868) sat unassigned throughout. **Hutto2 / PLT-3034:** the unlink-or-mark-installed
+  workaround went to the customer 08-18 and on 08-19 the customer denied its premise outright ("I
+  never link anything to a QA model") — and it had already been copied onto PLT-3059 before the denial
+  landed. **EQX-AT10x / PLT-2884** is a weaker third: closed on "the customer's XER is bad" without
+  the competing hypothesis being tested.
+  - **Recognition signature:** the instruction contains a causal clause about a system we do not own
+    ("…on re-import", "…will propagate", "…recalculates overnight") and no message anywhere in the
+    thread shows anyone confirming that clause with the team that does own it.
+  - **The cheap habit that catches it:** before an instruction leaves for a customer, underline every
+    verb whose subject is a backend job, and ask who confirmed it. If the answer is "it's how it must
+    work", it is a hypothesis and must be labelled as one *in the message* — "we think X should fix
+    it; if it doesn't, that tells us Y" costs one sentence and keeps the customer's attempt as a
+    diagnostic instead of a dead end.
+  - **Why it recurs:** the diagnosis itself is usually right, which is what makes it dangerous — the
+    correct half ("this level's elevation is wrong") lends unearned confidence to the unverified half
+    ("and fixing it will propagate"). Both halves ship as one instruction.
 - **Name-based fallback join across an id-keyed hierarchy, 2026-08-12** (PLT-3040, CH08-Minooka).
   Two Package categories sharing a display name under different disciplines is a supported, tested
   shape (PLT-2821 keyed selection by `activityCategoryId` precisely because names repeat), but the

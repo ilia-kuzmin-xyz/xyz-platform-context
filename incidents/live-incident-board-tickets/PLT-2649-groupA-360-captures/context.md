@@ -766,3 +766,187 @@ half was nobody's; it was never asked of the backend and never checked in code.
 7. **Priority.** PLT-2649 is still Major while its field consequence is now filed at Critical and
    the coordinator says it is *"affecting the usability of the XYZ app on field."* Worth a human
    deciding whether to raise it.
+
+---
+
+## 2026-08-27 (second pass, requested) — the unified theory: one phantom level explains BOTH tickets, and the remediation shape everyone assumed is wrong
+
+**Supersedes the ranked hypotheses in the first 08-27 section above** (H1/H2/H3 stand as mechanisms
+but their ranking and — critically — the *remedy* they implied have changed). Nothing in the earlier
+sections is deleted; read this one first.
+
+**Provenance / trust warning.** Five parallel investigation lines ran; their five adversarial
+verifiers and the synthesis agent all **failed on a session limit and never executed**. So the
+findings below are *unverified by the intended second pass*. I independently re-checked the three
+claims that would drive a customer-facing instruction if wrong (marked ✅ VERIFIED below) and did the
+level-data forensics myself. Everything else is single-source and should be treated as such — this
+folder has already shipped one unverified mechanism to a client.
+
+### ⭐ Finding 1 — the planned remediation would have moved zero pins ✅ VERIFIED
+
+The prior pass concluded the fix was "PATCH the 75 room-capture-points". **That is wrong.** Both
+render paths take the pin position from the **capture row**, never from the capture-point row:
+
+- `I360Capture` declares its **own** `xMeters/yMeters/zMeters` as required fields
+  (`services/capture360Service/capture-360-api.types.ts:34-36`), alongside `roomCapturePointId`
+  (`:37`) and an optional `modelLevelId` annotated *"may not be in all API responses"* (`:39`).
+- The dashboard summary selects `c.xMeters, c.yMeters, c.zMeters FROM captures_360 c`
+  (`.../services/dashboard-360/dashboard-360-service.ts:598-600`, inside the
+  `ROW_NUMBER() … recencyRank` window at `:605-608`).
+- The editor path does the same from `representativeCapture.{x,y,z}Meters`
+  (`ViewerPage/services/media/media-service.ts:791-812`).
+
+The room-capture-point record contributes **nothing** to the rendered position. Patching 75 points
+would fix nothing visible; the **1868 capture rows** are what must change.
+
+**And the frontend cannot change them.** ✅ VERIFIED — the only capture mutation payload is
+`I360CaptureUpdatePayload { xyzDisplayName?, description? }`
+(`services/capture360Service/capture-360-api-service.ts:7-10`, sent verbatim at `:64-70`). There is
+no coordinate field. **Any remediation must be executed by api-v2 / DB directly — it cannot be
+scripted against the FE's API surface.** This is the single most actionable fact on the ticket.
+
+*Residual fork (7/10, unresolved):* capture xyz == capture-point xyz for all 1868 rows, which is
+equally consistent with (i) the capture owning a copied column, or (ii) `GET /360captures` joining
+the coordinate from the capture point at read time. Under (ii) a 75-row point patch would fix
+everything for free. The FE leans hard to (i) — a capture with **no** `roomCapturePointId` still
+carries coordinates and still renders (`media-service.ts:762-772`, `:793-800`), and a pure join
+could not survive that. Not proven.
+
+### ⭐ Finding 2 — XSPCMA-868 and PLT-2649 are one cause, and it is a NAME collision ✅ VERIFIED
+
+The dashboard's Floor filter is keyed on the level **name string**, not `modelLevelId`:
+
+- Options are the keys of a `Map<string, Set<string>>` built from level *names*
+  (`.../dashboard-panels/common/dashboard-filters/dashboard-filter-utils.ts:97`, emitted at `:218`).
+- The 360 SQL filters with `COALESCE(l.name, r.levelName) IN (...)`
+  (`dashboard-360-service.ts:43` defining `LEVEL_NAME_EXPR`, applied at `:560`).
+
+Now the PA12 data (my own grouping of `analysis/PA12-levels.csv`, 92 levels / 27 source files):
+
+| Floor | copies | names | elevations |
+|---|---|---|---|
+| DC ground | **3** | `DC-0G-FFL` ×2 **and** `DC - 0G - FFL` ×1 | 0.0, 0.0, **50.4** |
+| DC-01 | 2 | `DC-01-FFL` ×2 (identical) | 5.3, 5.3 |
+| DC-02 | 2 | `DC-02-FFL` ×2 (identical) | 10.6, 10.6 |
+| DC-03 | 2 | `DC-03-FFL` ×2 (identical) | 15.9, 15.9 |
+
+**The ground floor is the only DC floor whose duplicate is spelled differently** (spaced vs
+unspaced). All 75 capture points and 1868 images sit on the spaced 50.4 copy (`f0f4d409`); the room
+names themselves carry the spaced prefix (`DC - 0G - FFL_PH2-L00-MB-DATAHALL 1.1`).
+
+So: pick "DC-0G-FFL" in the floor filter → **zero images** (XSPCMA-868, verbatim: *"the entire floor
+plan with the images is missing. L01 and L02 are displaying correctly"*). Apply no filter → the
+images appear, floating 50.4 m up (PLT-2649). One cause, two surfaces, **and it requires nothing to
+have changed between the two reports** — which dissolves the 13-day timing problem the first 08-27
+pass flagged (XSPCMA-868 created 08-13, re-export reported 08-26).
+
+Corroborating timeline, fetched live this pass: XSPCMA-868 is in project **XSPCMA (Mobile App)**,
+**Critical, UNASSIGNED**, zero substantive comments — only six Freshdesk status mirrors: 08-13
+Waiting-on-3rd-line → **08-20 Closed → reopened the same minute** → Waiting on customer → 08-26 Open
+→ Waiting on 3rd line. Nobody has ever investigated it.
+
+### ⭐ Finding 3 — the BIM team almost certainly edited the wrong file, and would have found nothing to change
+
+My own forensics on `PA12-levels.csv`. Level `f0f4d409` belongs to source file **`2210cd43`**, whose
+16 levels are:
+
+```
+SS - 1S - FFL 48.10 | SS - 0G - FFL 50.10 | GT - 0G - FFL 50.20 | DC - 0G - FFL 50.40
+GT - 01 - Signage 55.50 | Reflected Ceiling Plan FoH 1F 55.70 | Reflected Ceiling plan FoH 2F 59.23
+SS - 02 - FFL 59.50 | Genset building_Wall Type_02 60.80 | R+2 Phase 2_Wall Type… 61.00
+FH - 03 - FFL 62.77 | GT - 03 - FFL 66.10 | FH - 04 - FFL 66.30 | DC - 04 - FFL 67.81
+Limit PLU 70.40 | Limit PLU - Eq Tqn 73.40
+```
+
+That is a **multi-building coordination / site model** (SS + GT + DC + FH + Genset), mixed
+English/French, carrying planning-constraint datums (`Limit PLU`) and reflected-ceiling-plan levels.
+It is **not** plausibly `PA12-M3-A-9200-ZZ-DC-ZZZZ-RBA_V14_R24`, which by ISO-19650 naming is a
+single-building **DC** architectural model.
+
+Its offset is exact and uniform, confirming Ilia's original shared-coordinates read:
+
+```
+DC - 0G - FFL  50.40  vs true DC-0G-FFL  0.00   = +50.40
+DC - 04 - FFL  67.81  vs true DC-04-FFL 17.41   = +50.40
+```
+
+Meanwhile the DC building's real levels exist as a clean duplicated set at datum in source files
+`ffba833f` and `cb3fe738` (0.0 / 5.3 / 10.6 / 15.9 / 17.41 / 20.0–21.52 / 23.0). **So a BIM engineer
+who opened the DC architectural model and went looking for `DC-0G-FFL` would have found it already
+reading 0.0 — nothing to change.** Whatever they changed, it was not `f0f4d409`.
+
+*Correction to the 08-14 entry:* "roughly 15 source files sit **wholly** in the 45-73 m band" is off.
+It is 27 source files total; 14 are wholly in band (43 levels) and exactly one is **MIXED** —
+`ffba833f` holds 10 datum levels **plus** `FH-0G-FFL` at 50.40. The file list was right; "wholly" and
+the two counts were not.
+
+### Revised hypothesis ranking
+
+| # | Hypothesis | Was | **Now** | Note |
+|---|---|---|---|---|
+| **A** | **Phantom duplicate ground-floor level** (`f0f4d409`, +50.40, spaced name) is the whole cause of both tickets | not stated | **8/10** | New. Explains pins-high, images-missing, and the 13-day gap, with no re-export involved |
+| **B** | Wrong artifact edited — the level lives in site model `2210cd43`, not the DC model | 5/10 | **8/10** | Upgraded on the multi-building + exact-offset evidence, and on the DC model's own DC-0G-FFL already being 0.0 |
+| **C** | Coordinates would not have propagated anyway (write-once capture rows) | 7/10 | **7/10** | Unchanged, but its *consequence* changed — see Finding 1. Still FE-side negative evidence |
+| **D** | Re-export re-keyed the level, orphaning captures | 5/10 | **3/10** | Downgraded: a dangling `modelLevelId` is masked by `COALESCE(l.name, r.levelName)` via the room's own `ownerModelLevelId` (`dashboard-360-service.ts:43` + `:477-486`), so re-keying needs BOTH ids dangling. And A explains XSPCMA-868 without it |
+| **E** | Version-blind artefact `.find()` picks a stale parquet | new | **2/10** | Real latent FE bug (no version predicate on `outputContent` match) but `project-levels`/`project-rooms` are project-wide singleton aggregates, so almost certainly not PA12's cause. File separately |
+
+**A and B and C are probably all true simultaneously.** That matters: fixing the model (B) does not
+move existing pins (C), and neither B nor C fixes the name collision that hides the floor (A).
+
+### The decisive checks — revised, in order
+
+1. **`lastModifiedOn` on PA12's 101 capture points.** *(new, and it outranks the three lookups in
+   `recommended-action.md`)* A 2026-04-27 live probe of the api-v2 endpoint documented this field as
+   *"usually null"* alongside `createdFrom: System` (`hc-frontend/docs/mcp-entity-shapes.md:154-173`).
+   Null ⇒ write-once, no re-derivation job, C confirmed **positively** rather than by FE absence.
+   Non-null and post-dating the re-export ⇒ something *did* run and C is dead. Reading `yMeters`
+   alone cannot distinguish these — the current plan would see "still 50.4" and mis-read it as C.
+2. **`project-levels` for PA12.** Does `f0f4d409` still read 50.40? Does a *fourth* DC ground-floor
+   level now exist? (Ingest appears to accumulate level rows rather than replace them — 92 levels,
+   three DC ground floors.) Still-50.40 ⇒ B.
+3. **The unfiltered 360 tab, 2 minutes, no backend access needed.** Clear every filter and look at the
+   ground-floor captures. Present-but-floating ⇒ A+C. Labelled *"Unknown Level"* ⇒ D after all.
+   Absent entirely ⇒ neither; the data is gone.
+4. **Only then**, the reversible probe for the Finding-1 fork: PATCH one capture point's `yMeters` to
+   0 and re-GET its captures. ⚠️ **This is a production write.** Per
+   `incidents/data-remediation-runbook.md` §3 it needs written approval on the ticket first — do not
+   treat it as a casual test, even though it is one PATCH and trivially revertible.
+
+### Remediation shape, conditional
+
+- **If A+C (expected):** two separate fixes, and neither alone closes both tickets.
+  (i) *Position:* 1868 capture rows need `yMeters -= 50.4`, executed by api-v2/DB — **not** the 75
+  capture points, and **not** via any FE endpoint. (ii) *Findability:* the captures must end up under
+  a level the user can pick — either reparent to `344df6bc`/`f72da41e`, or eliminate the duplicate
+  level at source. Fixing (i) alone leaves XSPCMA-868 open.
+- **If B:** the client fix must name **source file `2210cd43`** — describable unambiguously as *"the
+  linked coordination model contributing SS/GT/DC/FH/Genset levels at 48.10-73.40 including
+  `Limit PLU`, uniformly +50.40 m from datum"* — not "the DC model". But note this fixes only
+  *future* captures unless (i) also runs.
+- ⚠️ **Strike the `action` column of `PLT-2649-stale-pinpoints.csv`.** Its
+  `correctLevelId(realL00)=7026451f` is a hardcoded constant in `detect_stale_360.py`
+  (`REAL_L00="7026451f"`), and `PA12-levels.csv` names `7026451f` **`GB-0G-FFL`** — a GB-building
+  level. Following it would move 101 DC rooms into the wrong building. Also: `PLT-2649-stale-cohort.json`
+  carries keys the script never writes (`diagnosis`, `true_level_id_L00`, `floor_elevation_map_m`) —
+  those are unverified hand annotations, not computed output.
+- ⚠️ **Pagination trap for any fresh pull:** api-v2 cursor pages **overlap**; a naive walk inflated
+  counts ~4.3× in shipped reports, 360captures specifically included
+  (`agent-pipeline/pitfalls.md`, 2026-08-10). Dedupe by id and stop on the first zero-new page, or the
+  diff against this folder's baselines (1868 / 101 / 75) is meaningless.
+- ⚠️ **MCP probably cannot self-serve this.** Prod MCP carries a project whitelist of ELN03 / A015
+  only (`incidents/mcp-auth-context-investigation.md:85-87`); PA12 is not on it. Needs a human with
+  an authenticated api-v2 session.
+
+### Confidence
+
+| Claim | Confidence |
+|---|---|
+| Pin position comes from the capture row, not the capture point | **9/10** ✅ verified in code myself |
+| FE has no API that can write capture coordinates | **9/10** ✅ verified |
+| Floor filter matches by level *name* string | **9/10** ✅ verified |
+| The spaced/unspaced ground-floor name split is real in PA12 data | **10/10** ✅ computed myself |
+| `2210cd43` is a multi-building site model at a uniform +50.40 offset | **9/10** ✅ computed myself |
+| That name collision is the cause of XSPCMA-868 | **7/10** — mechanism verified, not confirmed against the live filter |
+| The BIM team edited the wrong artifact | **8/10** — strong circumstantial; the SharePoint model (403) would settle it |
+| No backend re-derivation job exists | **6/10** — still FE-side negative evidence; `lastModifiedOn` would settle it |
+| Overall ticket understanding | **7.5/10** — up from 6, and the remaining gap is three lookups, not analysis |
