@@ -4,7 +4,9 @@ First session to reach **live prod** for this ticket. Everything below is measur
 Supersedes the inference-based sections of `platformapi-questions.md` — that file's five questions
 are answered here and it should be read as history, not as an open list.
 
-Read-only throughout. No capture point was modified.
+Read-only for §1-6. **Amended later the same day:** one capture point *was* subsequently patched,
+with explicit approval — see the appended section "the one-pin test RAN" at the end of this file,
+which supersedes §4's "still unproven" and §"What this means for the next action" item 4.
 
 ---
 
@@ -116,6 +118,11 @@ necessary-and-then-some (copy). It is the right first move under both.
 
 ⚠️ Still unproven: whether `PATCH …/room-capture-points/{id}` persists coordinates at all. Our
 code has only ever sent a rename through it. Unchanged from the handover.
+
+> **Superseded the same day — do not act on the two paragraphs above.** The one-pin test settled
+> both: the PATCH *does* persist coordinates, and it *is* a read-time join (the 54 capture rows were
+> never written yet their reported height changed). See the appended section at the end of this file.
+> The fix is 101 points and it is ours.
 
 ## 5. XSPCMA-868 — confirmed, and the duplicate is now a triplicate
 
