@@ -93,6 +93,7 @@ xyz-platform-context/
 
 | Rule | Reason |
 |------|--------|
+| **Drafted replies to people are SHORT** — max 4 short paragraphs, one bolded question, no tables/bullets/jargon. Full rule: [`incidents/live-incident-run-instructions.md`](incidents/live-incident-run-instructions.md) § Drafted replies must be SHORT | A Jira comment is read on a phone between meetings. Detail goes in `context.md`, never in the message |
 | Keep descriptions schematic, not visual | Colours/layouts change; structure doesn't |
 | Include file:line references when describing behaviour | Saves grep time |
 | Note pitfalls explicitly | Debugging costs more than documenting |
