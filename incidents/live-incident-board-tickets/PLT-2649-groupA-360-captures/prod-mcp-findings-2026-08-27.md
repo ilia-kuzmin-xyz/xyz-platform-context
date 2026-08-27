@@ -241,3 +241,94 @@ Also open: the target height. 0.0 is used here because the generator sets pin y 
 exactly, and the two duplicate `DC-0G-FFL` levels both read ≈0. If DC's ground should match the
 other buildings (GT/SS/FH 0G read −0.2 to −0.298), the target is −0.2. Worth one line from whoever
 owns the datum before the remaining 100 are touched.
+
+---
+
+# 2026-08-27, later still — why the target is 0.0, and the Phase 2 ground floor rooms are GONE
+
+Triggered by Ilia asking where "≈0" came from and how we would prove it rather than assume it.
+
+## Where the original claim came from — one informal argument, never checked
+
+`context.md:336` (and Ilia's own 07-16 Jira comment, `context.md:64`): the sibling DC levels sit at
+**5.3 / 10.6 / 15.9**, forming a coherent 5.3 m floor-to-floor series "that 50.4 m plainly breaks."
+The target was written as "50.4 → 0" and as "~0" — an extrapolation, stated once, then carried
+through five weeks of this ticket unexamined. It happened to be right. It was never proven.
+
+## Now proven three independent ways — the answer is exactly 0.000
+
+**1. The ladder is exact, not approximate.** Every DC floor is an exact integer multiple of
+DC-01's elevation:
+
+| level | elevation | ratio to DC-01 |
+|---|---|---|
+| DC-0G-FFL (unspaced) | 0.000000000000000 | ×0 exactly |
+| DC-01-FFL | 5.300000065502532 | ×1 exactly |
+| DC-02-FFL | 10.600000131005064 | ×2 exactly |
+| DC-03-FFL | 15.900000196507596 | ×3 exactly |
+
+Least-squares through floors 1-3 gives floor-to-floor 5.300000065502535 and an intercept of
+**−5.9e-15** — zero to floating-point precision. (DC-04 and above break the series; the building
+changes floor height above L03, which does not affect the intercept.)
+
+**2. Physical room geometry, independent of any level field.** `project-rooms` parquet carries
+`elevationMinMeters` per room, regenerated with the model:
+
+- the 11 **PH1-L00** rooms (Phase 1 ground floor) sit at **0.000** → 5.200;
+- `datahall coté PDC 112`, the sole room on the unspaced `DC-0G-FFL`, sits at **0.000** → 3.200.
+
+Actual room floors on this project's ground level are at 0.000.
+
+**3. The room-to-level rule holds everywhere well-behaved.** `min(room.elevationMinMeters)` equals
+its level's `elevation` exactly on 8 of 11 levels (`a418671b`, `65b08248`, `6869795d`, `ac4bdbbb`,
+`83c44989`, `5998dc6a`, `f72da41e`, `a8e3fdab`). So level elevation *is* the floor plane.
+
+**Nothing anywhere in the model — no room, no level, no geometry — sits near −50.** The −50.4 now
+in the level field is not a datum, it is the error.
+
+### Retracting the −0.2 worry from the previous section
+
+The prior section flagged that `GT - 0G - FFL` / `SS - 0G - FFL` / the new `GB-0G-FFL` read −0.2 to
+−0.298 and asked whether DC's ground should match. **It should not, and no question to anyone is
+needed.** Those three are all from the 2026-08-06 upload; the *older* `GB-0G-FFL` (`7026451f`,
+2025-12-04) reads **0.000** and its rooms sit at 0.000. The datum is 0. **Target for the 101 points
+is `yMeters = 0.0`.** Settled.
+
+## ⚠️ NEW AND SERIOUS: the 101 rooms no longer exist
+
+While proving the above:
+
+- all 101 capture points on `f0f4d409` carry a `modelRoomId`;
+- **0 of those 101 rooms are present** in the current `project-rooms` parquet;
+- **0 rooms named `PH2-L00*` exist at all** — the entire Phase 2 ground floor is absent;
+- `isRemoved` is `false` on all 297 surviving rooms, so this is not a soft-delete — the rows are
+  simply not in the regenerated artefact;
+- Phase 2 still has L01 (30 rooms), L02 (32), L03 (4). Only its ground floor vanished.
+
+So the 2026-08-06 re-import **re-keyed and dropped** the Phase 2 ground floor. The 101 capture
+points now reference a `modelRoomId` and a `modelLevelId` that no longer resolve. This confirms
+hypothesis 3 from `platformapi-questions.md` ("re-import re-keyed the level") and goes further —
+the rooms went with it.
+
+### What that means for the fix
+
+Patching `yMeters = 0` still works for position — proven empirically, the pin and its photos move,
+because the render path reads the point's own coordinate and does not need the room to resolve.
+
+But it does **not** make those 1,927 photos whole:
+
+- they stay attached to a level named `DC - 0G - FFL` that exists only as an orphan at −50.4, so
+  **XSPCMA-868 is untouched** — the floor filter still offers a phantom floor and an empty real one;
+- anything keyed on room association (room-based filter/navigation for those photos) is broken and
+  patching a coordinate will not repair it.
+
+**Re-pointing the points to the correct room instead of patching the height is not currently
+possible:** the PATCH accepts `modelRoomId`/`modelLevelId` and validates the pair against the model
+(`rooms.capturepoints.service.ts:136-140`), but there is no Phase 2 ground floor room in the model
+to point at. That option only opens once the customer's model carries those rooms again.
+
+**Revised recommendation:** the model fix is now the *first* step, not the second. Get Phase 2's
+ground floor back (level at 0.0, unspaced name, rooms present), then decide between patching 101
+heights and re-pointing 101 rooms — re-pointing would fix position, floor and room in one pass.
+Patching heights now would deliver a visually-correct-but-still-orphaned result and burn the
+customer's second re-upload.
