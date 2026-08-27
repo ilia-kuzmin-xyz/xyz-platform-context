@@ -708,3 +708,30 @@ and the diagnostic branch (`PLT-2874-dashboard-element-count-diagnostics`) is st
 Live re-fetch: status `In Analysis`, priority Minor, `updated` still 2026-08-25T09:53 — unchanged
 since yesterday's pass, which already captured the silent Open→In Analysis move. Gennaro ask +
 Darminder sanity-check line still unposted, now **10 days**. Nothing re-derived.
+
+## 2026-08-27 (later) — ⭐ BOTH COUNTERS MEASURED ON LIVE PROD. See `prod-measured-2026-08-27.md`.
+
+The "one query settles it" experiment in §4 has been run against FAR01's real artefacts. The answer
+is **neither** of the two options §4 offered.
+
+- **editor** 879,931 distinct linked elements; **dashboard** 851,409 dbId entries. Net **−3.2%**,
+  dashboard *lower* — the ticket reported +10.7%, dashboard higher.
+- The gap decomposes **exactly** into two opposing terms: populations differ by −82,404 (linked vs
+  status-bearing) and dbId expansion adds +53,882. Net −28,522.
+- **That is why the sign flips.** The 2026-08-13 QA report of "Staging broken in the opposite
+  direction" is not a second defect; it is this same mechanism with the two terms rebalanced.
+- §2's dbId-expansion hypothesis is **confirmed and quantified: 1.0676× on FAR01**, real but too
+  small to be the whole story on its own.
+- §2b's worry about non-distinct row counts **does not apply inside one model** — PEL is exactly 1:1
+  there (1,389,248 rows, 1,389,248 elements, zero duplicate pairs). `activity_links` is 1:1 too, so
+  multi-activity linking contributes **zero** inflation on this project.
+- Newly named, not in any prior section: **254,581 elements sit in one surface and not the other**
+  (168,529 linked without status, 86,052 status without link). No de-duplication touches that.
+- Separate real trap found: project-wide PEL is **1.97×** inflated because every element is listed
+  under both its source model and the federation. Any "total elements" built by summing per-model
+  counts is wrong by ~2× (1,001,704 on FAR01).
+
+Verdict moves from "cannot decide between by-design and defect" to: **no arithmetic bug on either
+side, but the overlay's Total counts renderer primitives rather than elements and should be
+de-duplicated *and* relabelled** — de-duplicating alone leaves an 82,404 gap and a fresh ticket in
+six weeks.
