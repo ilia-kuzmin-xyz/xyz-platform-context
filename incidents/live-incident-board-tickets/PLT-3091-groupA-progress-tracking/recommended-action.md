@@ -165,3 +165,25 @@ customer.
 
 Keep in `Open` until the labour-units question is answered. It is not blocked, and it is not ready
 for dev either: the branch is a UX fix for the silence, not a fix for the ticket's symptom.
+
+## 2026-08-27 — CORRECTION: route the backend question to api-v2 (Sachin / Ali), not Sergey
+
+The 2026-08-27 section above says "Sergey (api-v1) or Sachin/Ali (api-v2)" and then defaults to
+Sergey in the draft. **That is wrong.** Established from code rather than the roster:
+
+- `ActivityApiService` extends `PlatformApiServiceBase`
+  (`services/activityService/activity-api-service.ts:28`).
+- `PlatformApiServiceBase` uses the shared axios instance
+  (`services/webViewerService/platform-api-service-base.ts:2,10`).
+- That instance is `baseURL: SERVER_API_URL + '/api/v2'`
+  (`services/webViewerService/api-instance.ts:43`).
+
+So the schedule/activity endpoints, including
+`POST /projects/{projectId}/activities/progress`, are **api-v2 — Sachin and Ali**.
+
+The prior pass's roster note listed both owners and said "route to whichever owns the
+schedule/activity API on ATL05" without resolving it; this run repeated the ambiguity and then
+picked the wrong default. **Tag Sachin or Ali on the `validForProgressCalculations` question.**
+
+Worth keeping as a habit: the owner of an endpoint is decidable from `baseURL` in one grep, so
+resolve it rather than carrying "v1 or v2" forward.
