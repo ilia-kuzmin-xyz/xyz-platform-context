@@ -170,3 +170,67 @@ misreading of it rather than carelessness.
 - ~~"Captures own their coordinates independently of the point."~~ No — no point means no
   coordinates at all (102 cases).
 - ~~"The fix is 1,868 capture rows."~~ It is 101 points, 75 of which carry photos.
+
+---
+
+# 2026-08-27, later — the one-pin test RAN. Fix confirmed as 101 rows, ours.
+
+Executed with Ilia's explicit per-pin approval. One row, one field.
+
+## What was done
+
+`PATCH /api/v2/projects/129a3279…/room-capture-points/00b5344c-57a1-4e87-a0fe-df1bbbf68961`
+body `{"yMeters": 0}` → **HTTP 200**.
+
+Target: `PH2-L00-MB DATAHALL 1.1 - Default Point`, 54 photos.
+
+## Result 1 — the PATCH persists coordinates, and touches nothing else
+
+| field | before | after |
+|---|---|---|
+| `yMeters` | 50.39999771118164 | **0** |
+| `lastModifiedOn` | null | 2026-08-27T14:38:19.241Z |
+| `xMeters`, `zMeters`, `modelRoomId`, `modelLevelId`, `userCapturePointId`, `createdFrom` | — | **all unchanged** |
+
+Sending only `yMeters` left the name alone, so the duplicate-name constraint is never engaged.
+**Use PATCH, not PUT** — PUT (`rooms.capturepoints.routes.ts:231`) demands `userCapturePointId` in
+the body and would re-submit the name.
+
+## Result 2 — the 54 photos followed, and `GET /360captures` JOINS at read time
+
+After the patch:
+
+- the 54 captures on that point report `yMeters` **0** (was 50.4);
+- the 1,873 captures on the level's other 100 points still report **50.4**;
+- **not one of the 54 capture rows was written** — `lastModifiedOn` identical on all 54
+  (e.g. `2026-04-01T08:22:24.770Z` before and after).
+
+Their reported coordinate changed while their own rows did not. So the capture's position is
+**joined from `room_capture_points` at read time**, not stored per photo.
+
+**This answers question 2 of `platformapi-questions.md` definitively, and its §2 inference was
+wrong.** The size of the fix is **101 capture points**, not 1,868 capture rows. And it is a data
+correction we can perform ourselves — no backend work, no release.
+
+## State of prod right now
+
+⚠️ **That one point is still at `yMeters = 0`.** Left in place deliberately so the pin can be
+eyeballed in the 360 tab. It is the only one of 101 corrected, so on PA12 today one pin sits at
+ground level and 100 sit ~50 m up. Revert with:
+
+```
+PATCH …/room-capture-points/00b5344c-57a1-4e87-a0fe-df1bbbf68961   {"yMeters": 50.39999771118164}
+```
+
+## What this does and does not close
+
+Closes: is the PATCH real (yes), does it persist (yes), do photos follow (yes), how many rows (101).
+
+Does **not** close: the model level still reads **−50.4**, so any *newly* generated capture point on
+that floor will be 50 m underground. Correcting the 101 points fixes every existing photo and
+nothing about the future. The model fix is still required and still the customer's.
+
+Also open: the target height. 0.0 is used here because the generator sets pin y = level elevation
+exactly, and the two duplicate `DC-0G-FFL` levels both read ≈0. If DC's ground should match the
+other buildings (GT/SS/FH 0G read −0.2 to −0.298), the target is −0.2. Worth one line from whoever
+owns the datum before the remaining 100 are touched.
