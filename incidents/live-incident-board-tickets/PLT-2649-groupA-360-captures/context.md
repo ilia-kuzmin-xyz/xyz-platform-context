@@ -950,3 +950,93 @@ move existing pins (C), and neither B nor C fixes the name collision that hides 
 | The BIM team edited the wrong artifact | **8/10** — strong circumstantial; the SharePoint model (403) would settle it |
 | No backend re-derivation job exists | **6/10** — still FE-side negative evidence; `lastModifiedOn` would settle it |
 | Overall ticket understanding | **7.5/10** — up from 6, and the remaining gap is three lookups, not analysis |
+
+---
+
+## 2026-08-27 (later session, WITH platformapi access) — two claims above are FALSIFIED
+
+Read `platformapi-answers.md` for the evidence. This section exists to mark what is now wrong, per
+the additive-writing rule — the rows below are **not** deleted, deliberately, because seeing what a
+past run believed and why it was wrong is the useful part.
+
+### ❌ SUPERSEDED — "Pin position comes from the capture row, not the capture point (9/10 ✅ verified in code myself)"
+
+**Wrong, and the 9/10 was the problem.** It was verified in *frontend* code, which faithfully reads
+whatever `xMeters/yMeters/zMeters` the API sends — that tells you the field name, never its origin.
+The origin is the **capture point**:
+
+- `usp_Insert360Capture` is called with 16 arguments, none a coordinate
+  (`platformapi/src/services/360capture.service.ts:75-92`); `usp_Update360Capture` likewise
+  (`:16,:50`). **No API path ever writes a capture's coordinates.**
+- The `360Capture` table's own columns are `ActualXMeters/ActualYMeters/ActualZMeters`
+  (`test/e2e/util/db-helper.ts:606`); `RoomCapturePoint`'s are plain `XMeters/YMeters/ZMeters`. The
+  360 controller maps `row.XMeters` (`360captures.controller.ts:158-160`), while the Photos
+  controller maps `row.ActualXMeters` for the same output field
+  (`photos.controller.ts:181-183`) — two controllers, one field name, different source columns.
+- `GET` returns `modelLevelId`, which the insert never writes. A field returned but never written is
+  joined.
+- **The data settles it:** the 1,868 stale captures hold exactly **75 distinct coordinate triples**,
+  one per capture point, each identical to its point's, with **zero variation across a 14-month
+  capture window** (2025-05-28 → 2026-07-15). A headset-recorded *actual* position cannot be
+  byte-identical on 52 occasions over 14 months. `Actual*` is excluded.
+
+This is a **planned-vs-actual** schema — the SP argument is literally `plannedRoomCapturePointId` —
+and the 360 tab renders the **planned** point.
+
+**Consequence: the fix is 101 capture-point rows, not 1,868 capture rows.** ~50× smaller, no backend
+change needed, and the existing PATCH endpoint does it.
+
+**Why the earlier session's counter-evidence was misread:** it cited "a capture with no
+`roomCapturePointId` still carries coordinates and still renders"
+(`media-service.ts:762-772`, `:793-800`). That code buckets point-less captures under
+`UNKNOWN_CAPTURE_POINT` and *then guards `xMeters != null`* before drawing anything
+(`media-service.ts:795-800`). It proves the frontend **tolerates** null coordinates; it never proves
+the backend **supplies** them. Defensive null-handling was read as a data shape.
+
+### ✅ UPGRADED — "No backend re-derivation job exists (6/10 — still FE-side negative evidence)"
+
+Now **9/10, from the backend side**, and with a mechanism rather than an absence. In all of
+platform-api, `RoomCapturePoint` is touched only by `POST` (insert), `PUT`, `PATCH` and
+`POST /delete` — four explicit endpoints, no import job, no Kafka consumer, no scheduled task. And
+the insert enforces a per-project unique `UserCapturePointId`
+(`rooms.capturepoints.service.ts:63`), so a generator re-run against the 101 existing
+`"<room> - Default Point"` rows would be **rejected**, not applied.
+
+**That is the mechanism for the five lost weeks.** The customer's corrected re-upload was not
+ignored by accident; no code path existed that could have applied it, and the one that comes closest
+is constraint-blocked.
+
+Residual gap, stated honestly: the generator that wrote those `createdFrom: System` rows is **not in
+platform-api** — it is an upstream model-processing service. I ruled out platform-api as the
+rewriter; I cannot rule out that service from here. It reaches capture points only through the
+INSERT endpoint, which cannot update.
+
+### Still inferred, not read
+
+`fn_GetProject360CaptureList` / `fn_GetProject360Capture` live in the separate DB-functions repo,
+not checked out here (the only submodule is `XYZGitUtils`), so **I have not literally seen the
+`LEFT JOIN`.** Every observable consequence points one way and several are near-conclusive alone,
+but the join is proven by consequence rather than by sight. Anyone with that repo closes this in 30
+seconds: open the function, see where `XMeters` is selected from. The one-pin test in
+`recommended-action.md` closes it empirically instead, for the price of one reversible row.
+
+### New trap discovered this run (not previously recorded anywhere)
+
+⚠️ **Never delete-and-recreate the capture points.** `deleteCapturePoints` returns the points'
+linked captures and then deletes their **blobs from cloud storage**
+(`rooms.capturepoints.service.ts:305-321`) — that is all 1,868 photographs, files included,
+irreversibly, and the blob deletion is not transactional with the DB commit. Delete-then-reinsert is
+the obvious-looking way to "reset" 101 bad rows and it would destroy the entire dataset this ticket
+exists to make visible.
+
+### Revised confidence
+
+| Claim | Confidence |
+|---|---|
+| Pin height is a stored value on the **capture point**, not the capture | **9/10** — five independent lines of code evidence + the 75/75 data proof |
+| Correcting the model could never have moved existing pins | **9.5/10** — no writer exists, and the insert path is constraint-blocked |
+| The fix is 101 PATCHes of `yMeters`, no code change | **9/10** — PATCH persistence proven by real-DB e2e test |
+| `fn_GetProject360CaptureList` joins the coordinate from `RoomCapturePoint` | **8.5/10** — inferred from consequence; SP not read |
+| Delete-cascade would destroy the 1,868 images | **9/10** ✅ read directly |
+| Fixing Y also closes XSPCMA-868 | **1/10** — it does not; different mechanism (level *name* matching) |
+| Overall ticket understanding | **9/10** — up from 7.5; root cause and remedy both settled, one lookup outstanding |

@@ -56,3 +56,32 @@ about a contract, not proof the handler persists those fields. Our code has neve
 through it, only a rename. Treat it as unconfirmed until someone reads the handler.
 
 This session was scoped to `hc-frontend` + `xyz-platform-context` only and could not check.
+
+---
+
+## 2026-08-27 (later, WITH platformapi access) — the correction above is now CONFIRMED, and inverted
+
+The note above said to treat "we can patch the points ourselves" as **unconfirmed** because it rested
+on a frontend type declaration rather than the handler. **It is now confirmed from the backend**, by
+an e2e test that runs against a real Postgres with the real stored procedure:
+
+```
+platformapi/test/e2e/api/rooms.capturepoints.e2e.spec.ts:406-425
+  PATCH { xMeters: 77.25 } → row.XMeters == 77.25, row.YMeters unchanged
+```
+
+So coordinates persist, and partial-patch semantics are correct (unsent fields untouched).
+
+**And the scope inverted in our favour:** the coordinate lives on the **capture point** (101 rows),
+not on each capture (1,868 rows) — so patching the points fixes every photo at once. See
+`platformapi-answers.md`. The one-pin test below is no longer needed to establish *whether* we can
+write; it remains worth doing as the cheap confirmation of the join, and as the safe first step of
+the remediation.
+
+**Body: `{"yMeters": 0.0}` only.** Not `zMeters` (wrong axis — would move pins sideways), and do not
+include `modelRoomId`/`modelLevelId` (triggers a room/level mapping validation that would reject it).
+Requires `CAPTURE_POINT_EDIT`; `INTERNAL_ROLE` is accepted (`rooms.capturepoints.routes.ts:300`).
+
+⚠️ **New hard prohibition: never use the bulk delete to "reset" these rows.** It cascades into the
+linked captures and deletes their image blobs from cloud storage — all 1,868 photographs,
+irreversibly (`rooms.capturepoints.service.ts:305-321`).

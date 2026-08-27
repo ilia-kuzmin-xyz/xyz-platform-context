@@ -453,6 +453,61 @@ both PLT-3061 and PLT-2815 the ticket carried media that could not answer a ques
 
 ---
 
+## Pattern 7 — A stored snapshot that everyone reads as a live derivation (2026-08-27, PLT-2649)
+
+**This one cost five weeks and shipped a wrong instruction to a client.** It is the most expensive
+single mistake on this board so far, and the mechanism is embarrassingly simple.
+
+**The shape:** a value *looks* derived from something upstream, because it is numerically equal to it
+and was originally computed from it. Everyone reasons about it as a live derivation. It is actually a
+**stored column, written once**, with no code path that recomputes it. So the fix everyone agrees on
+("correct the upstream value") is applied, changes nothing, and the silence gets read as "the customer
+did not do it".
+
+**PLT-2649:** 360 photo pins on PA12 render ~50 m too high. One model level sits at +50.4 m instead of
+0. We told the client to correct the level and re-upload; the pins would follow. They did it. Nothing
+moved. Five weeks passed before anyone tested the assumption, which had never been checked against a
+single line of backend code — the claim "rooms to points to captures all inherit it on re-import" was
+invented, plausible, and repeated until it looked established.
+
+The truth: pin height is a stored number on `RoomCapturePoint`, written once when the points were
+generated. In all of platform-api it is touched only by four explicit API endpoints (POST/PUT/PATCH/
+DELETE) — no import job, no consumer, no scheduled task. **And the insert path enforces a unique
+`UserCapturePointId` per project, so a generator re-run is *rejected*, not applied.** The re-upload
+was never going to work.
+
+**The tells, in order of cheapness:**
+
+1. **Zero variance where physics demands some.** 1,868 photos collapsed to exactly 75 distinct
+   coordinate triples, byte-identical across a 14-month capture window. A headset-recorded position
+   cannot repeat exactly on 52 occasions over 14 months. Frozen values do that; measured ones never
+   do. *This single query would have settled it in May.*
+2. **`lastModifiedOn` is null everywhere.** Nothing has ever rewritten the rows.
+3. **The write path does not carry the field.** Count the arguments: `usp_Insert360Capture` takes 16
+   and not one is a coordinate. If no endpoint writes it, no endpoint can refresh it.
+4. **Column naming reveals the schema's intent.** `RoomCapturePoint.XMeters` (planned) vs
+   `360Capture.ActualXMeters` (measured), and the SP argument is literally
+   `plannedRoomCapturePointId`. A planned/actual split is a snapshot design announcing itself.
+
+**The reflex:** before telling anyone to fix an upstream value, find the code that would propagate it.
+Not the code that *reads* it — frontend reads prove nothing about origin (see Pattern 2, same error in
+a different disguise: FE code was cited at 9/10 confidence to establish where a value *came from*).
+If no writer exists, the remediation is a data correction on our side and the upstream fix only helps
+future records.
+
+**Silver lining worth naming:** snapshot values are usually *fewer* than the records that display
+them. Here the fix inverted from 1,868 rows to 101, needed no code change and no release. Finding the
+snapshot is good news once you stop arguing with it.
+
+**⚠️ And the trap that comes with it:** the tempting way to "reset" a batch of bad snapshot rows is
+delete-and-recreate. On this endpoint the bulk delete cascades into linked captures and deletes their
+image blobs from cloud storage — 1,868 photographs, irreversibly, non-transactionally. Correct in
+place; never recreate.
+
+Full working: `live-incident-board-tickets/PLT-2649-groupA-360-captures/platformapi-answers.md`.
+
+---
+
 ## Candidate patterns (one occurrence, watch for a second)
 
 - **Two sources of truth for one undo stack, 2026-08-24** (PLT-3084, AT10X). The viewer keeps a

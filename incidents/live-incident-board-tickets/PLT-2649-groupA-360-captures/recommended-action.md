@@ -421,3 +421,89 @@ not by a filename we are guessing at.
 Stay `Open`, assigned to Ilia. Do **not** move to With Customer — nothing is with them. Two
 housekeeping items worth doing regardless of the checks: **link XSPCMA-868 to PLT-2649**, and get it
 assigned (Critical + unassigned + zero comments since 13 Aug).
+
+---
+
+## 2026-08-27 (later session, WITH platformapi access) — verdict changes: this is ours to fix, and it is 75 rows
+
+**Supersedes drafts (a) and the Sachin questions above.** Draft (a) asked Sachin whether the PATCH
+persists coordinates and whether `GET /360captures` joins them. **Both are now answered from the
+code — do not send it.** Full working: [`platformapi-answers.md`](platformapi-answers.md).
+
+Draft (b) to Yash **still stands and is still the right message**, with one correction to its
+wording: the pin positions were written when the *capture points were generated*, not "when the
+captures were taken". The substance — the model change could not have moved them, that is on us not
+the BIM team — is confirmed correct.
+
+**What changed:** the pin height is a stored number on the **capture point** (101 rows), not on each
+photo (1,868 rows). The captures carry no coordinate of their own; they read through to the point. So
+the fix is ~50× smaller than the last session feared, it needs **no backend change**, and the
+existing PATCH endpoint does it — proven by an e2e test that runs against a real database.
+
+Also confirmed: **nothing in platform-api ever rewrites those rows**, and the insert path is blocked
+by a unique constraint, so a re-import would be *rejected* rather than applied. That is the mechanism
+for the five lost weeks.
+
+### Chosen action: the one-pin test FIRST, then the 101-row correction
+
+Not straight to the bulk fix. One inference is still open — I could not read the stored procedure
+itself (the DB-functions repo is not checked out here), so the join is proven by consequence, not by
+sight. The one-pin test closes it for the price of one reversible row.
+
+1. **PATCH one point** — `00b5344c-57a1-4e87-a0fe-df1bbbf68961` (pin #1, 52 photos, easy to spot),
+   body `{"yMeters": 0.0}` **only**.
+2. **Reload the 360 tab.** Pin drops to ground level → the join is confirmed and all 52 of its photos
+   moved together, which is the whole theory demonstrated.
+3. **Revert** (`{"yMeters": 50.4}`) or keep, as preferred.
+4. **Then the remaining 100**, same body, with approval on the ticket first.
+
+⚠️ **Three things that would make this worse — all live traps:**
+
+- **Patch `yMeters`, never `zMeters`.** `yMeters` is the vertical axis here. This folder had it
+  backwards until yesterday; patching `zMeters` would move all 75 pins sideways on the floor plan and
+  leave the height wrong.
+- **Send only `yMeters` in the body.** Including `modelRoomId` or `modelLevelId` triggers a
+  room/level validation against the model mapping, which would reject it. This also means the
+  *"reparent the room to the real L00 level"* option in `PLT-2649-stale-pinpoints.csv` is probably
+  not executable through this endpoint at all.
+- **⚠️ Never delete-and-recreate the points.** The bulk delete endpoint cascades into the linked
+  captures and **deletes their image files from cloud storage** — 1,868 photographs, irreversibly,
+  non-transactionally. It is the obvious-looking shortcut and it is catastrophic.
+
+Per `../data-remediation-runbook.md` §3 this is the **first bulk PATCH of production rows** here, so
+it needs a written line of approval on the ticket. There is no precedent to point at.
+
+### Draft — internal comment on the ticket (for a human to post)
+
+> Update on the 360 pins, and it's better news than last week: this is ours to fix, and it's small.
+>
+> The pin height isn't read from the model. It was written into our database once, when the capture
+> points were first generated, and nothing since then ever updates it. That's why correcting the
+> level and re-uploading didn't move anything, and why it never could have. The BIM team did what we
+> asked; the instruction was wrong.
+>
+> The good part: the height lives on the 101 capture points, not on the 1,868 photos, so correcting
+> 101 values fixes every photo at once. No code change, no release. I'd like to prove it on a single
+> point first, watch its 52 photos drop into place, then do the rest.
+>
+> **Can I have the go-ahead to correct those 101 values on PA12?** It's reversible, and I'll do the
+> one-point check before anything else.
+
+### Draft — to Yash (short version of (b), if (b) hasn't gone yet)
+
+> @Yash Patel — PLT-2649. Please don't chase the BIM team on this, and please don't tell them the
+> elevation change was wrong. It wasn't. It just couldn't have worked: our pin positions were saved
+> once when the capture points were created, and re-uploading a model doesn't rewrite them. That's
+> our bug, not theirs.
+>
+> I can fix it from our side without a release. Nothing needed from the client.
+>
+> **One question when you get a chance: roughly what date was the corrected model re-uploaded?**
+> XSPCMA-868 was raised on 13 Aug and I need to know whether that was before or after.
+
+### Action on the board
+
+Stay **Open**, assigned to Ilia — the ticket is now genuinely actionable by us, which it has not been
+since May. Unchanged housekeeping: **link XSPCMA-868** (still Critical, still unassigned) and note
+that this fix does **not** close it — the rooms stay on the mis-named level, so the ground floor still
+appears twice in the floor filter and half the photos still hide behind the unpicked option.
