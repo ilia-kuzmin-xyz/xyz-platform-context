@@ -332,3 +332,87 @@ ground floor back (level at 0.0, unspaced name, rooms present), then decide betw
 heights and re-pointing 101 rooms — re-pointing would fix position, floor and room in one pass.
 Patching heights now would deliver a visually-correct-but-still-orphaned result and burn the
 customer's second re-upload.
+
+---
+
+# 2026-08-27 — ✅ EXECUTED: all 101 capture points corrected on prod
+
+Approved by Ilia ("go ahead to tweak capture points"). Before-state captured first.
+
+## What ran
+
+`PATCH /api/v2/projects/129a3279…/room-capture-points/{id}` with body `{"yMeters": 0}`, one row at
+a time, 101 rows. **101 / 101 returned HTTP 200.** No retries, no conflicts, no failures.
+
+## Verified after, against live prod
+
+| Check | Result |
+|---|---|
+| capture points on `f0f4d409` | 101, **all at `yMeters` 0** (single distinct value) |
+| `lastModifiedOn` now set | 101 / 101 |
+| 360 photos on that level | 1,927, **all now report `yMeters` 0** |
+| **other** capture points moved | **0** |
+| **other** levels' photos moved | **0** |
+| capture **rows** rewritten | **0** — re-proves the read-time join |
+| project totals | 407 points / 6,944 captures — **unchanged**, nothing created or destroyed |
+| `xMeters` / `zMeters` | untouched (100 distinct x values preserved) |
+
+## The record
+
+- **[`analysis/PLT-2649-PA12-capture-points-BEFORE.xlsx`](analysis/PLT-2649-PA12-capture-points-BEFORE.xlsx)**
+  — per-row before/after, photo counts, HTTP result, and the exact revert body for each of the 101
+  rows. Two sheets: the data, and a summary carrying the still-open items.
+- **[`analysis/PLT-2649-capture-points-before-after-2026-08-27.csv`](analysis/PLT-2649-capture-points-before-after-2026-08-27.csv)**
+  — same data, diff-friendly, so the next run can see it in `git` without opening Excel.
+
+Revert for any row: `PATCH …/room-capture-points/{id}` with `{"yMeters": 50.39999771118164}`.
+Every row was at that exact value beforehand. **Never** use the DELETE endpoint on these — it
+soft-deletes the linked photos and cleans up their blobs.
+
+## Blast radius, checked before running rather than after
+
+- **Regular photos are unaffected.** They carry their own coordinates and expose no capture-point
+  field. Of 1,882 coordinate-bearing photos, zero sat at 50.4 and zero at exactly 0 — a join would
+  have produced a 54-photo cluster at 0 after the pilot patch. Their heights are a continuous
+  measured scatter, unlike the level-snapped discrete values capture points hold.
+- **Issues** have their own `XMeters`/`YMeters` in a separate table (`issues.service.ts:61`).
+- **No parquet artefact holds capture points**, so nothing went stale and nothing needed
+  regenerating — unlike the PLT-2882/2909 family.
+- **Side effect accepted:** `lastModifiedOn` null → timestamp and `lastModifiedBy` → `ilia.kuzmin`
+  on 101 rows. The audit trail reads as a user edit. Also means the optimistic-concurrency check is
+  now live on these rows, so a stale client gets a 409 rather than clobbering — safer than before.
+- No `modifiedSince` param exists on the capture-points GET, so devices pick the new value up on
+  their next ordinary pull. No re-sync storm.
+
+## Durability — will a future model upload undo this?
+
+**No.** The 2026-08-06 upload is the experiment: it changed this very level's elevation from +50.4
+to −50.4 in place, same `modelLevelId`, and the 101 points did not move. `lastModifiedOn` was null
+on all 407 afterwards. Re-imports update levels and rooms; they never touch capture points.
+
+**One prediction to watch.** Capture points sit 1:1 with rooms on every level where rooms exist
+(102/102, 71/71, 33/33, 32/32, 16/16, 14/14, 8/8, 2/2, 1/1 — no exceptions). So if the customer
+restores the Phase 2 ground floor rooms, the generator will likely create ~101 **new** capture
+points for them, and pins may appear doubled: ours holding the 1,927 photos, the new ones empty.
+Deleting the **empty** new ones is safe. Confidence moderate — the 08-06 import only dropped rooms,
+never added any, so the generator has not been observed creating points.
+
+## Still open — this fix does not close the ticket
+
+1. **Model level still reads −50.4.** Customer action. New points on that floor would be 50 m
+   underground. This is the remaining half of the defect.
+2. **All 101 `modelRoomId`s are orphaned** — no `PH2-L00*` room exists. Room name and room filter
+   stay broken for these 1,927 photos, and a coordinate patch cannot repair that.
+3. **XSPCMA-868 untouched** — the ground floor is still listed under two spellings.
+4. **Separate thread worth raising with Sachin/Ali:** a re-import silently dropped an entire
+   floor's rooms with `isRemoved` false on every survivor. If it can do that here it can do it
+   elsewhere. Not a Revit problem — a pipeline behaviour.
+
+## Note on the workbook
+
+LibreOffice could not complete a recalculation in this environment (`recalc.py` timed out at 100s
+and 240s), so the formulas are unverified by machine and were audited by hand. Three real bugs were
+caught that way and fixed before delivery: a `=B10-B11` that pointed at the photo count instead of
+the height, a `COUNTIF(…,50.4)` that could never match the stored `50.39999771118164`, and HTTP
+codes written as text so numeric comparison failed. Totals now use `SUMPRODUCT`/`ROUND`. Worth
+remembering: an unrecalculated workbook hides exactly this class of error.
