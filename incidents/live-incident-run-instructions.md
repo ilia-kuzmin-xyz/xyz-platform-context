@@ -171,3 +171,33 @@ One line of status per ticket. Detailed pass only for the two exceptions above.
 This runs while Ilia is away. Send one only if something needs him: a ticket has gone quiet
 waiting on us, a customer is blocked, a new ticket looks severe, or the run could not complete.
 If the board is unchanged, stay silent.
+
+---
+
+## ⛔ Drafted replies must be SHORT. This is a standing rule, not a preference.
+
+**Added 2026-08-27 after Ilia had to ask more than once, across sessions.**
+
+A drafted Jira comment is a message a busy person reads on a phone between meetings. It is not a
+write-up, not an explanation of our investigation, and not a place to show working.
+
+**Hard limits for anything drafted to be posted on a ticket or sent to a person:**
+
+- **Four short paragraphs maximum.** Usually two or three is right.
+- **One closed question**, bolded. If you have three questions, you have three messages — pick the
+  one that unblocks the most and drop the rest.
+- **No tables, no bullet lists, no headings, no file:line citations, no internal jargon**
+  (`yMeters`, artefact ids, endpoint names, hypothesis labels). The recipient cannot act on any of it.
+- **No preamble and no summary of what we did.** Lead with what you want them to do or stop doing.
+
+**Where the detail goes instead:** `context.md`. That is what it is for. The draft in
+`recommended-action.md` is the message; the reasoning behind it stays in `context.md` and is never
+pasted into the message.
+
+**Assumptions:** if a draft rests on something unverified, say so in *one* line in
+`recommended-action.md` above the draft — not inside the message, and not as a table. The recipient
+does not need our confidence intervals.
+
+**Reviewing your own draft before you hand it over:** if it is longer than the Jira comments the
+team actually writes (read a few in any ticket's `context.md` — they are 2–5 sentences), it is too
+long. Cut it, do not append a note apologising for the length.
