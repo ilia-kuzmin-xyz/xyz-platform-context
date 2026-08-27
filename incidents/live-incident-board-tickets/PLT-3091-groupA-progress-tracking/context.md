@@ -358,3 +358,77 @@ first-hand evidence on the ticket is unreadable here.
   `dashboard/progress-tab.md` (the file `CLAUDE.md` calls `prg-progress.md`; on disk it is
   `progress-tab.md`) once this ticket resolves. *(Not editing outside this folder per task constraints —
   noting only.)*
+
+## 2026-08-27 — runtime-first: the three gate fields are readable on prod, no backend access needed
+
+Applying the PLT-3084 method: the prior pass mapped the mechanism correctly and then stalled waiting
+on a DB row, two unreadable screenshots and a backend answer. None of that is necessary. **All three
+fields the gate reads are already in the browser**, hydrated from the schedule API into
+`ScheduleItemDto`, and reachable through `window.projectService`.
+
+### Verified on master this run (unchanged from the prior pass)
+
+- `isActivityEditableForProgress` — `services/progress/use-actual-progress-mutation.tsx:36-41`:
+  `type !== 'WBS'` && `!(elements > 0)` && `activityItem.progressValid === true`.
+- The user-facing id `LS-24891` is `activityItem.activityId`, mapped from `item.userItemId`
+  (`components/scheduler-service/utils.ts:50`). The Map is keyed by the internal `itemId` UUID, so
+  the lookup has to scan values, not `.get()`.
+- `activeSchedule.activities` is a public `Map<string, ScheduleItemDto>`
+  (`project-x/entities/schedule-entity.ts:556`); `calculatedElementsSum` is a field on the DTO
+  (`:1072`), so H3's roll-up is readable too.
+- `Editor-Progress` default is `false` (`config/constants.ts:896`).
+
+### ⚠️ Cookie warning — do not repeat the PLT-3084 snippet verbatim here
+
+`getFeatureFlagValue` reads the whole flag list from the `feature-flags` cookie and only falls back
+to `config/constants.ts` defaults **per missing name** (`helpers/getFeatureFlagValue/getFeatureFlagValue.ts:5-15`).
+On PLT-3084 the console snippet **replaced** the cookie wholesale. Doing that here would drop
+`Editor-Progress` back to its default `false` and switch off the feature under test. The flag must be
+**appended** to the existing cookie:
+
+```js
+const cur = (document.cookie.match(/(?:^|;\s*)feature-flags=([^;]*)/) || [])[1]
+const flags = cur ? JSON.parse(decodeURIComponent(cur)) : []
+const next = [...flags.filter(f => f.name !== 'enableGlobalWebViewerAPI'),
+              { name: 'enableGlobalWebViewerAPI', value: true }]
+document.cookie = 'feature-flags=' + encodeURIComponent(JSON.stringify(next)) + ';path=/'
+```
+
+### The one paste that decides H1–H4 and answers the cohort question
+
+```js
+(() => {
+  const all = [...window.projectService.activeSchedule.activities.values()]
+  const pick = a => ({ userId: a.activityItem?.activityId, name: a.activityItem?.activityName,
+    type: a.type, elements: a.elements, rollup: a.calculatedElementsSum,
+    progressValid: a.activityItem?.progressValid,
+    plannedLaborUnits: a.activityItem?.plannedLaborUnits,
+    actualProgress: a.activityItem?.actualProgress, isUserProgress: a.activityItem?.isUserProgress })
+  const editable = a => !!a && a.type !== 'WBS' && !(a.elements > 0) && a.activityItem?.progressValid === true
+  const target = all.find(a => a.activityItem?.activityId === 'LS-24891')
+  const sibling = all.find(a => a !== target && a.elements === 0 && editable(a))
+  return { target: target ? pick(target) : 'NOT FOUND', targetPassesGate: editable(target),
+    workingSibling: sibling ? pick(sibling) : 'none', totalActivities: all.length,
+    intangible: all.filter(a => a.type !== 'WBS' && a.elements === 0).length,
+    intangibleButBlocked: all.filter(a => a.type !== 'WBS' && a.elements === 0
+      && a.activityItem?.progressValid !== true).length }
+})()
+```
+
+Decision table:
+
+| Reading | Verdict |
+|---|---|
+| `elements > 0` | **H1** — not intangible; it has links. Working as designed |
+| `progressValid !== true` | **H2** — backend says ineligible. Silent gate, Pattern 5 |
+| `elements: 0`, `rollup > 0` | **H3** — roll-up lock. **Our bug**: Gantt paints locked, panel still edits |
+| `type: 'WBS'` | **H4** — summary row |
+| all three pass, `targetPassesGate: true` | gate is fine → write path. **H5**, check the POST |
+
+`intangibleButBlocked` answers playbook Q6 in the same paste — it is the cohort size, i.e. how many
+other activities on ATL05 are silently un-editable and have not been reported yet.
+
+**No screenshots, no DB row, no backend answer needed to get this far.** The two unreadable
+attachments and the `validForProgressCalculations` rule question stay open, but they stop being
+blockers: they are only needed if the result comes back H2, and then the question to Sergey/Sachin
+becomes specific ("why is this row false") rather than general.
