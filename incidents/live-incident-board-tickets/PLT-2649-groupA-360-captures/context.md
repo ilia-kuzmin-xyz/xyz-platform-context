@@ -1066,3 +1066,68 @@ disagree with measured data. Nothing above is deleted; the deltas that matter:
   the photo-bearing one spelled `DC - 0G - FFL` with stray spaces at −50.4.
 
 No write was performed. Pin correction still awaiting approval.
+
+## 2026-08-28 — catching this file up: the fix executed, was posted, and the diagnosis kept moving after the post. Read `prod-mcp-findings-2026-08-27.md` and `recommended-action.md` in full before touching this ticket again.
+
+**This file's tail above (the "third pass" section) went stale the same afternoon it was written**
+— everything below happened later on 2026-08-27 but only ever reached
+`prod-mcp-findings-2026-08-27.md` and `recommended-action.md`, never a closing summary here. Fixing
+that gap now, chronologically, cross-checked against the live Jira comment record (`getJiraIssue`,
+20 comments, `updated` still 2026-08-27T16:25, no new comment since):
+
+1. **15:09 UTC (16:09 BST) — the fix ran.** All 101 capture points on level `f0f4d409` were PATCHed
+   `yMeters: 0` with Ilia's explicit approval, one row at a time, **101/101 HTTP 200**. Verified
+   after: all 101 points and their 1,927 photos read 0; zero other points or photos moved; zero
+   capture rows rewritten (re-proving the read-time join); project totals unchanged. Audit trail in
+   `analysis/PLT-2649-PA12-capture-points-BEFORE.xlsx` and the sibling CSV. Full detail:
+   `prod-mcp-findings-2026-08-27.md` §"EXECUTED".
+2. **16:20 BST — posted to Jira as comment 110576.** Ilia told Yash the pins are fixed, explained
+   the frozen-snapshot mechanism in plain language, and asked him to get the BIM team to **"set the
+   ground floor level to 0 and re-upload."** Yash agreed (110577, 16:24): *"Will ask for BIM team to
+   change the elevation on the model and re export."* **This is the first customer-facing message
+   this ticket has produced since 07-24, and it went out.**
+3. **After 16:24 BST, still investigating internally, not yet back on Jira:** the "why does the
+   export read −50.4 instead of the +50.4 its neighbours corrected to" question kept being worked
+   on, and the answer changed twice more (see `recommended-action.md` §"the level was shifted
+   twice" and §"file shift plus a hand edit", and `prod-mcp-findings-2026-08-27.md`'s matching
+   sections). **Final conclusion: `DC - 0G - FFL` already reads 0.00 in Revit** — the BIM team's
+   July hand-edit succeeded — **and the −50.4 in our export is a whole-file −50.4 shift applied on
+   top of that**, the same shift that correctly moved 35 other levels (including the ones this
+   ticket's own July message never checked, `GT - 0G - FFL` and `SS - 0G - FFL`). So the level was
+   corrected **twice**: once by hand in July (per our instruction), once by the file-wide shift in
+   August. In Revit terms the fix is the **opposite** of what comment 110576 asked for — it should
+   read **+50.4** to match its neighbours, not 0.
+
+**⚠️ The practical consequence, stated plainly because it is urgent: the instruction already sitting
+in Yash's hands ("set the ground floor level to 0") is the wrong instruction, worked out to be wrong
+only *after* he'd agreed to relay it, and there is no Jira comment since 16:24 BST confirming whether
+he has or hasn't sent it yet.** If it reaches the BIM team as a literal Revit instruction, the most
+likely outcome is nothing happens (the level already reads 0.00 there, so "set it to 0" looks like a
+no-op to them) — but the actual defect being asked about is the export path they don't control
+directly, and a confused or over-eager BIM team member "fixing" a level that already reads 0.00 by
+some other means is not a risk worth carrying. Yash has not been told to hold — that "hold" message exists only in this folder
+(`recommended-action.md`'s "addendum" draft), never posted, and the 08-27 README run entry predates
+this whole afternoon session by hours so it says nothing about any of this. See
+`recommended-action.md` for the exact draft that needs to go to Yash **before** anything else on
+this ticket, and the top of today's README "Needing a human now" list.
+
+**Still separately open, unaffected by any of the above:**
+- **Phase 2's entire ground floor room set (`PH2-L00*`) is missing** from the current
+  `project-rooms` artefact — dropped by the same 08-06 re-export, confirmed live. This orphans all
+  101 capture points' `modelRoomId` and is very likely what the customer's Jira comment 110446 meant
+  by wanting the pins looked at again even after the elevation change — worth checking whether it's
+  also what they'd call "L0 not showing in the app and dashboard" if asked again. **Not yet
+  mentioned to the customer at all.**
+- **XSPCMA-868** — still open, still unassigned as far as this folder knows (not independently
+  re-checked this run), still not closed by the pin fix.
+- The one remaining verification step before any second model instruction goes out: get a
+  screenshot of `GT - 0G - FFL` and `SS - 0G - FFL` in the same Revit level schedule the customer
+  already sent one of. Reading ≈+50.2/+50.1 confirms the theory; reading ≈−0.2/−0.3 kills it and
+  nobody should touch the model. Drafted in `recommended-action.md`.
+
+**Confidence this run: 9/10 on the diagnosis** (file-shift + double-edit, three independent numeric
+fits — see `prod-mcp-findings-2026-08-27.md`), **but 10/10 on the process point**: two customer-facing
+instructions have now been generated from this ticket without being checked against the coordinate
+space they'd be executed in, and the first one already reached the customer's coordinator before the
+error was caught. Worth a line in `incidents/live-incident-playbook.md` on its own, separate from
+this ticket's technical content.

@@ -9,6 +9,45 @@
   Revit-vs-Navisworks mappers). Same family as PLT-2874/2906/2923/2945/3024.
 - Triage date: **2026-08-14** (first pass, new folder).
 
+## 2026-08-28 — reappeared on the board, and it is not a new incident: H1 confirmed, fixed, shipped, QA-verified, now waiting on the customer
+
+**Correction to how this ticket reached today's sweep.** It was handed over as "brand new, no
+existing folder" — it is neither. This folder has existed since 08-14 (below), and Jira's own
+history (re-fetched live, 9 comments, full thread) shows the whole arc happened already:
+
+- **08-14, 17:11** — transitioned In Analysis → In Code Review, no comment (recorded below as the
+  08-17 "left scope" entry).
+- **08-14 comment (109705, Darminder)** — the fix, and it is **exactly H1**, confirmed: the hardcoded
+  five-category whitelist in `element-properties-service.ts` is gone. Single-element selections now
+  fetch every Forge category and build sections dynamically, excluding only Forge's internal
+  `__`-prefixed scene-graph categories and `Document` (file-path/workshare metadata, not element
+  data). This is precisely the fix this folder's 08-14 `recommended-action.md` described *before
+  Darminder posted it* ("stop hardcoding `DEFAULT_SECTION_NAMES`... build the section map from
+  whatever `displayCategory` values the model returns, keeping the five as an ordering preference").
+- **08-20** — Darminder's dev test (110066, video attached) and **Gennaro's QA verification on
+  Staging 26.3.5** (110086): *"Verified fixed... Tested using the Rewind tool."* Freshdesk →
+  Awaiting release same day.
+- **08-24** — release **26.3.5** shipped (`fixVersions` on the ticket, confirmed live).
+- **08-25** — Freshdesk → Waiting on customer.
+- **08-27, 12:20-12:21** — Freshdesk cycled **Closed → Waiting on customer** with no comment
+  attached either transition. This is what pushed the ticket's Jira status back to **With Customer**
+  and pulled it back onto this routine's board query — not a new report, a released-fix ticket
+  waiting on the customer's own confirmation, most likely an automated Freshdesk re-open or a
+  same-day "actually still checking" from Yash. No text explains which.
+
+**None of H0/H2/H3/H4 were needed** — the fix matches H1 exactly and QA confirmed it before this
+routine ever needed to distinguish the alternatives. The two attachments that were 403 in the 08-14
+pass were never needed either.
+
+**Recommended action: none.** The defect is fixed, deployed, and QA-verified. Nothing is owed to
+Darminder or Gennaro. The only open thread is Freshdesk's own state, which is the support team's
+process, not an engineering question — worth a light touch if it's still cycling in a few days, not
+a Jira comment from this routine. Confidence 9/10 this ticket needs no further code work; the 1
+point held back is not knowing why Freshdesk flipped Closed→Waiting-on-customer same-minute on
+08-27 without a visible comment.
+
+---
+
 ## 2026-08-17 — left scope (In Code Review)
 
 Transitioned **In Analysis → In Code Review** on 2026-08-14 17:11, no new Jira comment attached.

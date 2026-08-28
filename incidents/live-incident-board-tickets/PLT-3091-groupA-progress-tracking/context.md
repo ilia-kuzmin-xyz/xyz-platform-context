@@ -498,3 +498,25 @@ reason logic was exercised in node against the real ATL05 values above; nothing 
 - **The other 18.** Worth listing for ATL05 rather than waiting for them to be reported one by one.
 - **H3, unrelated to this ticket:** `scheduler-columns.tsx:149` uses `calculatedElementsSum`, the
   click gate does not. Two surfaces, two answers. Own ticket.
+
+## 2026-08-28 — posted and answered: Mostafa confirmed, ticket now waiting on the customer
+
+Live Jira re-fetch: **the 08-27 draft was posted, in substance, by Ilia directly rather than through
+this folder** (comment 110587, 17:16 BST, after this file's own 08-27 analysis had already been
+written) — same conclusion (Level of Effort activity, P6-derived progress, editor blocks manual
+entry by design), same evidence (19 of 3,761 ATL05 activities in the same state, all LOE, no
+exceptions), tagging Mostafa rather than Sergey/Sachin. **Mostafa confirmed within 2 minutes**
+(110588, 17:18): *"level of effort activities cannot have progress entered."* Ilia then asked Yash
+(110589, 17:20) to check whether the client is happy to treat this as working-as-intended so the
+ticket can close; Yash agreed to ask (110590, 17:47); Freshdesk flipped to **Waiting on customer**
+(110591, 17:49). **Status moved Open → With Customer** the same evening. No comment since.
+
+**Nothing further needed from this routine on the core question** — it is answered and confirmed by
+product (Mostafa). The only open items are the two follow-through pieces already identified and not
+yet raised as their own tickets: the missing-explanation UX fix (branch
+`PLT-3091-explain-uneditable-progress` exists, not a PR) and the Gantt-vs-panel roll-up inconsistency
+(§Mechanism C). Neither is blocking this ticket's closure.
+
+**Recommended action, updated:** no Jira action needed. Wait for Kyriakos's answer via Yash; if
+silence exceeds about a week, a light check-in with Yash is enough — there is no open technical
+question left to escalate. See `recommended-action.md` for the one-line update.

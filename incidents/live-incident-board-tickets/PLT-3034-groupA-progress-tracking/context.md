@@ -302,3 +302,10 @@ before the dispute existed).
 Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-19T12:48 —
 unchanged since 08-19, confirmed again after yesterday's pass. Fork A/B still undecided (see
 PLT-3059, which now depends on the same answer). Nothing re-derived.
+
+## 2026-08-28 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-19T12:48 —
+unchanged, confirmed via direct `getJiraIssue` fetch. No new comment. **9 days** silent on the
+discriminator (08-19 → 08-28); PLT-3059 has now carried the same unverified workaround risk for
+10 days. Fork A/B remains genuinely undecided. Nothing re-derived.

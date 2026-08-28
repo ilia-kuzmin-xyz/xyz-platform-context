@@ -45,6 +45,176 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-28 — 11 in-scope tickets (up from 10 on 08-27): 1 reappeared misdescribed as new (PLT-3051, actually an already-shipped fix), a resolved-and-posted ticket (PLT-3091), and a live, possibly-wrong instruction sitting with a customer's coordinator right now (PLT-2649) — plus backfill of an unlogged 08-27 afternoon deep-dive session
+
+**Backfilling an unlogged session first, same shape as the 08-26 gap.** A second, deliberate pass ran
+the afternoon of 2026-08-27 (roughly 13:00-18:00 BST, after that morning's board-sweep README entry
+below was already written and committed) with live prod/platformapi access, on PLT-3091, PLT-2649 and
+PLT-2874. It never got its own README entry. Folding it in here rather than back-dating separately,
+per the 08-26 precedent — nothing in it is still "new" except what this entry restates, and one part
+of it (PLT-2649) is actively urgent. What it did:
+
+- **PLT-3091 — solved.** `LS-24891` is a Primavera Level of Effort activity; P6 derives its progress
+  from the activities it spans, so the editor correctly blocks manual entry. 19 of 3,761 ATL05
+  activities are in the same state, all LOE, no exceptions. Not a bug.
+- **PLT-2649 — root cause fully resolved and a live fix executed on prod**, then the causal story for
+  the *model's* remaining defect changed twice more the same afternoon (see its own section below —
+  this is the one needing a human today).
+- **PLT-2874 — measured directly on live prod** (editor vs dashboard element counts on FAR01); feeds
+  the synthesis in today's own PLT-2874 update (see below).
+- **Shared docs gained three durable additions**, promoted out of the incident folders so the next run
+  doesn't have to re-discover them: `dashboard/pitfalls.md` gained the technique that cracked both
+  PLT-3091 and PLT-2649 (`window.projectService` is reachable against a deployed prod build via the
+  feature-flags cookie, no deploy needed — with the trap that the cookie must be *appended* to, never
+  replaced, or every other flag reverts) plus what actually reaches the prod console
+  (`console.log` is a no-op without `?logging=true`; `logger.info`/`debug` never reach it;
+  `warn`/`error` always do and land in the OPFS session log). `dashboard/progress-tab.md` gained the
+  first live measurement of what makes `validForProgressCalculations` false. `recurring-defect-
+  patterns.md` gained PLT-3091 as a fourth Pattern 5 occurrence and two new candidate patterns from
+  PLT-3084.
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status IN ("Open", "In
+Analysis", "With Customer", "Ready For Development", "Dev In Progress") ORDER BY created DESC`).
+**11 tickets, all Group A** — Ready For Development / Dev In Progress both empty, as usual. Read every
+existing folder before re-fetching Jira (playbook step 0); of the 7 previously-tracked tickets handed
+to this pass for a delta-check, 5 confirmed byte-identical via direct `getJiraIssue` fetch (not just
+the board search), and 2 (PLT-3091, PLT-2649) had real deltas already sitting in Jira and in this
+folder's own files respectively, neither of which this routine had reconciled yet. One ticket
+(PLT-3051) was handed over as brand-new; it is not — see below.
+
+### 🚨 PLT-2649 — the fix is done, but a now-superseded instruction may already be with the customer's coordinator
+
+**All 101 capture points on PA12's affected level were PATCHed and verified live** (101/101 HTTP 200,
+1,927 photos now correctly positioned, zero side effects) — the first bulk production data
+remediation this board has performed on itself, fully audited (`analysis/` xlsx + CSV in the ticket
+folder). **This was posted to Jira**: comment 110576 (16:20 BST 08-27) told Yash the pins are fixed
+and asked him to get the BIM team to "set the ground floor level to 0 and re-upload." **Yash agreed**
+(110577, 16:24 BST): "Will ask for BIM team to change the elevation on the model and re export."
+
+Investigation continued after that comment went out, off Jira, and the conclusion **reversed**: the
+level already reads 0.00 in Revit (the July fix worked), and the −50.4 seen in our export is a
+separate whole-file shift that happened to double-correct this one level. The actual fix, in Revit
+terms, is **+50.4** — the opposite of what comment 110576 asked for. **Nothing on Jira since 16:24
+BST confirms whether Yash has relayed the original instruction yet.** This is not a "post the draft"
+item like the rest of this board — it's a live instruction, already agreed to, that needs to be
+checked and very possibly stopped before it reaches a client's BIM team. Full detail and the exact
+message to send instead: `PLT-2649-groupA-360-captures/context.md` § 2026-08-28,
+`recommended-action.md` § "TOP PRIORITY."
+
+Separately and unaffected by the above: Phase 2's entire ground-floor room set is missing from the
+current model export (confirmed live), orphaning all 101 capture points' room references — not yet
+mentioned to the customer at all. XSPCMA-868 remains open and, as far as this folder knows, unassigned.
+
+### PLT-3091 — resolved and posted; now waiting on the customer
+
+The 08-27 afternoon diagnosis (Level of Effort activity, working as designed) was posted to Jira
+directly by Ilia (110587, 17:16 BST) — close in substance to this folder's own drafted comment, but
+written and sent independently of it. **Mostafa confirmed within two minutes** (110588): "level of
+effort activities cannot have progress entered." Ilia asked Yash to check whether the customer is
+happy to treat this as working-as-intended (110589); Yash agreed to ask (110590); Freshdesk flipped to
+Waiting on customer (110591). **Status moved Open → With Customer.** No Jira action needed from this
+routine — the technical question is answered and confirmed by product. Two follow-through items
+remain unfiled (a UX fix so the viewer explains why a cell is locked, and the unrelated Gantt-vs-panel
+roll-up inconsistency found along the way) but neither blocks this ticket. Full detail:
+`PLT-3091-groupA-progress-tracking/context.md` § 2026-08-28.
+
+### PLT-3051 — reappeared, and it is not new: an already-shipped, QA-verified fix, misfiled as a fresh report
+
+This ticket has a folder dating to 08-14. It left scope to In Code Review the same day; Darminder's
+fix — exactly the mechanism this folder's own 08-14 draft named before he posted it (stop hardcoding
+the five-category Forge whitelist, build sections from whatever categories the model returns) —
+shipped in release **26.3.5** (2026-08-24), QA-verified on Staging by Gennaro on 08-20. It reappeared
+on today's board query only because Freshdesk cycled **Closed → Waiting on customer** on 08-27 with no
+comment attached to either transition, which flipped the Jira status back to `With Customer`. No new
+technical work is needed; the only open question is a support-process one (has the customer actually
+confirmed the release fixed it), not an engineering one. Full detail:
+`PLT-3051-groupA-viewer-and-model/context.md` § 2026-08-28.
+
+### PLT-2874 — new quantified prod finding folded into a decision-request draft (handled earlier today, restated here for the board record)
+
+No new Jira comment, but this folder gained a substantial new `recommended-action.md` entry
+synthesizing the 08-27 live-prod measurement (`prod-measured-2026-08-27.md`: editor 879,931 vs
+dashboard 851,409 on FAR01, net −3.2%, decomposing into a −82,404 population difference plus a 53,882
+dbId-expansion effect) into a concrete decision-request draft for Mostafa/Pietro — verdict: no
+arithmetic bug, but the dashboard tile should be de-duplicated **and** relabelled — plus a small
+de-dup FE fix flagged as shippable independent of the labelling decision. `updated` unchanged since
+08-25 09:53. Full detail: `PLT-2874-groupA-viewer-and-model/context.md` + `recommended-action.md`
+§ 2026-08-28.
+
+### PLT-3061 and PLT-2858 — no change (handled earlier today, restated here for the board record)
+
+- **PLT-3061** — no change since 08-27 (Josh, the cost manager who owes the 8 rework-cost values, is
+  still on leave; Yash is chasing him directly rather than product). `updated` unchanged since 08-26.
+- **PLT-2858** — no change. Board's only Critical ticket, decision-request to Pietro/Mostafa still
+  unposted across **26 consecutive runs**, **45 days** on Mostafa's own unanswered question. `updated`
+  unchanged since 08-20.
+
+### Confirmed unchanged (live `getJiraIssue` fetch each, not the board search — comment ids/counts and
+`updated` checked verbatim against the 08-27 record)
+
+| Ticket | Domain | Status | Note this run |
+|---|---|---|---|
+| [PLT-3059](PLT-3059-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-21; Fork A/B (shared with PLT-3034) still undecided, now 9-10 days cold |
+| [PLT-3034](PLT-3034-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-19; 9 days silent on the same discriminator |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | `updated` unchanged since 08-18; Darminder's schedule-pair ask now 11 days cold |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07; 3 days since Freshdesk #7461 reopened, three-hypothesis split still undistinguished |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | `updated` unchanged since 07-06; **53 days** stale, 21st run recommending close-out |
+
+### ⚠️ Attachments needing human — this run
+
+No new attachments surfaced on any of the 7 delta-checked tickets or PLT-3051. Prior gaps stand
+exactly as previously documented (PLT-3091's 2 screenshots — now moot, the ticket resolved without
+needing them; PLT-2858's images; PLT-2815's images; PLT-3034's 12 attachments; PLT-3033's images) —
+not re-listed here.
+
+### Needing a human now
+
+Ranked by urgency, not just tenure — PLT-2649 jumps to the top this run because it is a live,
+already-agreed-to instruction that may be wrong, not a stalled draft:
+
+1. **PLT-2649 — check with Yash right now whether he has relayed "set the ground floor to 0" to the
+   BIM team yet.** If not, hold him and send the corrected ask instead (drafted,
+   `recommended-action.md` § "TOP PRIORITY"): get one more screenshot (GT-0G-FFL, SS-0G-FFL Revit
+   levels) before telling BIM anything further. If it's already been sent, find out what the BIM team
+   did with it. This is today's single highest-value human action on the board.
+2. **PLT-2858** — post the decision-request to Pietro (cc Mostafa). Critical priority, **26 runs / 45
+   days** unposted. Longest-standing item on the board.
+3. **PLT-2874** — send the new decision-request draft to Mostafa/Pietro (de-dup + relabel the
+   dashboard tile), and ship the small de-dup fix independently.
+4. **PLT-2815** — execute the close-out (drafted, 21 runs unposted, purely administrative).
+5. **PLT-3059 / PLT-3034** — Fork A/B discriminator still unrun, still blocking two tickets' worth of
+   customer-facing answers at once, now 9-10 days cold.
+6. **PLT-3033** — send Darminder's schedule-pair request to the customer via Yash (drafted, 11 days
+   cold).
+7. **PLT-3061** — no Jira action; private check-in with Yash re: Josh's return still the right move,
+   timing unchanged from 08-27 (~09-02).
+8. **PLT-3091 / PLT-3051** — no action needed from this routine on either; both are waiting on a
+   customer/support-process confirmation, not on us.
+
+**Board assessment:** two structurally similar findings this run and last, worth naming together
+again — PLT-2649's fix execution is genuinely good news (the ticket's core defect is resolved, on
+prod, verified), but the same afternoon produced a second unverified-assumption instruction on the
+very same ticket that already reached the customer's coordinator before it was caught. The playbook's
+own lesson from three weeks ago (an unverified assumption that reaches a customer as instruction is
+worse than a stalled draft that reaches no one) applies a second time, on the same ticket, within one
+week. Worth a standing rule, not just a one-off note: before any numeric or model-editing instruction
+leaves this board for a customer, state which coordinate space or environment the number is measured
+in and which one it will be acted in — both of this ticket's wrong instructions (May's and August's)
+share exactly that shape.
+
+### Notification
+
+Sent: **PLT-2649** — a customer-facing instruction already agreed to by the client's coordinator may
+ask for the wrong fix, discovered only after it was sent, with no confirmation yet of whether the BIM
+team has acted on it. This is the run's most urgent item and needs checking today, not queued behind
+routine drafts. Also flagged, from earlier today: **PLT-2874**'s new quantified prod-measurement
+finding (a concrete decision-request now ready for Mostafa/Pietro) and **PLT-2858**'s continued
+Critical-priority staleness (26 runs, 45 days). Additionally noted for the record but not
+independently escalating: PLT-3091 resolved cleanly and PLT-3051 turned out to need no work — both
+good news, not asks.
+
+---
+
 ## Run: 2026-08-27 — 10 in-scope tickets (up from 9 on 08-25): 1 brand-new (PLT-3091), 1 left scope (PLT-3084 → Ready For QA), 1 root-cause reopened after a field-tested fix failed (PLT-2649), all 10 Group A, board's Critical ticket now 25 runs / 44 days unposted
 
 **Backfilling an unlogged run first.** A full sweep ran 2026-08-26 (08:17-08:38, all 9 then-in-scope

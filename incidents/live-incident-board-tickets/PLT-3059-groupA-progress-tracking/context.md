@@ -164,3 +164,12 @@ Live re-fetch (board sweep): status `With Customer`, priority Major, `updated` s
 2026-08-21T15:21 — unchanged since every run since 08-21, including yesterday's pass. No new
 comment. Fork A/B (does a linked element id also appear under a production model heading) still
 undecided, still gating both this ticket and PLT-3034. Nothing re-derived.
+
+## 2026-08-28 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-21T15:21 —
+unchanged, confirmed via direct `getJiraIssue` fetch (not just the board-wide search). No new
+comment. **Clocks:** 10 days since the disputed workaround was pointed at this ticket (109878,
+08-18) with no correction; 9 days since PLT-3034's customer disputed that workaround's premise
+(08-19, still unrelayed here). Fork A/B discriminator still unrun on both tickets. Nothing
+re-derived.

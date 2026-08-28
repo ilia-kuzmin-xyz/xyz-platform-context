@@ -323,6 +323,15 @@ hypothesis was visually based on remains unverified here. XER files still not re
 
 ## 2026-08-27 — no change
 
+## 2026-08-28 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-18T10:08:13 —
+unchanged since 08-18, confirmed via direct `getJiraIssue` fetch (5 comments, same ids/newest
+109789 verbatim). Darminder's schedule-pair question is now **11 days** unanswered (17 Aug → 28
+Aug). Assignee field still shows Yash Patel per the 08-26 correction; Darminder remains the
+substantive technical owner. Confidence and hypothesis ranking unchanged (5/10 overall, H1 6/10).
+Nothing re-derived.
+
 Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-18T10:08 —
 unchanged since 08-18. Darminder's schedule-pair question to the customer now **9 days** cold.
 Nothing re-derived.

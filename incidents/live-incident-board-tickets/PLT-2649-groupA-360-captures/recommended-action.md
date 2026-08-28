@@ -531,3 +531,50 @@ the −50.4 is in our export, Revit reads 0.00, and the instruction would have b
 > about −0.2, stop — my explanation is wrong and nobody should touch the model.
 >
 > The missing L0 rooms are a separate problem in the same export. I'll come back to that one.
+
+## 2026-08-28 — TOP PRIORITY: check whether the wrong instruction already went to Yash before this addendum was drafted
+
+Live Jira re-fetch confirms the sequence. **Comment 110576 (16:20 BST, 08-27, already posted)** told
+Yash the pins are fixed and asked him to get the BIM team to *"set the ground floor level to 0 and
+re-upload."* **Comment 110577 (16:24 BST): Yash agreed** — *"Will ask for BIM team to change the
+elevation on the model and re export."* Nothing on Jira since.
+
+The addendum immediately above this section — reached only **after** 16:24 BST, and never posted —
+concludes the opposite: the level already reads 0.00 in Revit, and the fix is **+50.4**, not 0. So
+the instruction Yash has already agreed to relay is not just unconfirmed, it is very likely the wrong
+one, and it left this folder's hands before the correction did.
+
+**This is not a routine "post the draft" item.** It is a check on whether a customer-facing message
+already sent asked for the wrong thing, and if it hasn't reached BIM yet, it needs to be stopped
+before it does.
+
+### Action, in order
+
+1. **Ask Yash directly, out of band if faster than Jira, whether he has relayed anything to the BIM
+   team yet.** If not, hold him before he does.
+2. **If not yet sent, post this instead of "set it to 0":**
+
+> One correction before you pass anything to the BIM team — please hold off on "set it to 0" for now.
+>
+> I looked closer and the ground floor is already at 0.00 in Revit — the July fix worked. The −50.4
+> we're seeing is a separate shift affecting the whole file, the same one that correctly moved the
+> other ground floors on this building. So the actual target for this level is **+50.4**, to match
+> its neighbours, not 0.
+>
+> Before I say that with full confidence, **could you get one more screenshot of that same level
+> schedule — this time showing GT - 0G - FFL and SS - 0G - FFL as well?** If those read about +50.2
+> and +50.1, I'm confident and we can tell BIM the exact number. If they read close to 0 or negative,
+> stop, my theory doesn't hold and nobody should touch the model yet.
+
+3. **If it has already been sent** (worth asking plainly, not assuming): find out whether the BIM
+   team has acted on it. Per the theory, "set it to 0" executed in Revit on a level that already
+   reads 0.00 should be a no-op — but confirm rather than hope, and be ready to explain the correction
+   either way.
+
+### Why this jumps the queue
+
+Every other open item on this ticket is a stalled draft costing time. This one is a **live,
+already-agreed-to instruction that may be wrong**, sitting with the one person who can stop it before
+it reaches a client's BIM team. The cost of checking is one message; the cost of not checking, if it's
+already in flight, is a second wasted BIM correction on the same ticket that has already cost five
+weeks once.

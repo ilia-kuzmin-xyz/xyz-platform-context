@@ -220,6 +220,14 @@ number, not Blocked, and nothing to ask the backend.
 > **Can you let Kyriakos know it's working as intended, and that we're fixing the missing
 > explanation?**
 
+## 2026-08-28 — superseded: the substance of the draft above was posted (by Ilia directly), confirmed by Mostafa, and the ticket is now with the customer
+
+Do not post the draft comment above — a same-conclusion comment already went out (110587, 17:16
+BST 08-27), Mostafa confirmed it (110588), and Yash is now asking Kyriakos whether working-as-intended
+is an acceptable close (110589-110591). **No Jira action needed from this routine.** The two
+follow-through items (separate UX ticket for the silent lock; the Gantt/panel roll-up
+inconsistency) remain unfiled and are the only genuinely open work — see `context.md` 2026-08-28.
+
 ## The separate FE ticket to raise
 
 **"Editor Progress: say why an Actual % cell is locked."** The gate

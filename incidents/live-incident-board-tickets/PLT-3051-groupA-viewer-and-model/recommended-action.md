@@ -1,3 +1,15 @@
+## 2026-08-28 — superseded: fixed, shipped, QA-verified. No action.
+
+Everything below this line is the 08-14 draft, written before Darminder's fix. It matched H1 exactly
+and shipped in 26.3.5 (08-24), QA-verified on Staging by Gennaro (08-20). **Do not send it — there is
+nothing left to ask Darminder.** The ticket is back on this board only because Freshdesk cycled
+Closed → Waiting on customer on 08-27 with no comment; that's a support-process state, not an open
+engineering question. See `context.md` 2026-08-28 for the full reconciliation. If Freshdesk is still
+cycling in a few days, a one-line nudge to Yash asking whether the customer has actually confirmed
+the release fixed it is the only plausible next action, and even that is optional.
+
+---
+
 # PLT-3051 — recommended action (DRAFT ONLY — execute nothing)
 
 **Date:** 2026-08-14 · **Status at triage:** In Analysis, assigned to Darminder, actively being

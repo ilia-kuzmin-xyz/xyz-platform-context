@@ -312,3 +312,10 @@ in `recommended-action.md` remains unposted across 19 consecutive runs. Its opti
 Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-07-06T10:18 —
 unchanged, **52 days** stale. Close-out recommendation still unposted, now **20 consecutive runs**.
 Nothing re-derived.
+
+## 2026-08-28 — no change
+
+Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-07-06T10:18 —
+unchanged, confirmed via direct `getJiraIssue` fetch (13 comments, same ids, newest still 106553).
+**53 days** stale. Close-out recommendation still unposted, now **21 consecutive runs**. Nothing
+re-derived.
