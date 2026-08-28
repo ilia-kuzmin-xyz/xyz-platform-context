@@ -541,3 +541,55 @@ Two instructions on this ticket have now been generated from an unexamined assum
 before it left the building. Both share a shape: **a number measured in one coordinate space, handed
 over as an instruction to be executed in another.** Before any numeric instruction reaches a
 customer, state which space the number is in and which space they will act in.
+
+---
+
+# 2026-08-27, resolved — Yash supplied the Revit schedule. Prediction confirmed; instruction now anchored empirically.
+
+The falsifiable check ran. **GT - 0G - FFL reads +50.20 and SS - 0G - FFL reads +50.10 in Revit** —
+World A, exactly as predicted. The −50.4 offset is real.
+
+## Every ground level in the screenshot vs our export
+
+| level | Revit now | our export | implied offset | verdict |
+|---|---|---|---|---|
+| **DC - 0G - FFL** | **0.00** | **−50.400** | −50.40 | **50 m underground — the bug** |
+| FH-0G-FFL | 50.40 | 0.000 | −50.40 | lands at ground ✓ |
+| GT - 0G - FFL | 50.20 | −0.200 | −50.40 | ✓ |
+| SS - 0G - FFL | 50.10 | −0.298 | −50.40 | ✓ |
+| DC-0G-FFL (unspaced) | 0.00 | 0.000 | 0.00 | ✓ |
+| GB-0G-FFL | −0.20 | −0.200 | 0.00 | ✓ |
+
+## The instruction no longer depends on the offset theory
+
+**`FH-0G-FFL` is a control sitting in the same schedule:** same −50.40 offset, reads **50.40** in
+Revit, lands at **0.000**. `DC - 0G - FFL` reads 0.00 and lands at −50.400.
+
+So the ask becomes *"make DC - 0G - FFL read 50.40, exactly like FH-0G-FFL"* — a like-for-like
+comparison against a level that demonstrably works, not a number derived from a model of the
+transform. Yash's original fear ("they'll just put it back to +50") is answered: +50.40 is correct
+here, and FH-0G-FFL proves it without anyone having to trust our arithmetic.
+
+## Honest gap — the offset is NOT uniformly per source file
+
+`DC-0G-FFL` (unspaced, `344df6bc`) and `FH-0G-FFL` (`7aae581a`) share source file `ffba833f`, yet
+one carries a 0.00 offset and the other −50.40. So "the whole file is shifted" is **too simple** as
+a mechanism; something level-specific decides it. I do not know what.
+
+This does not weaken the instruction, because the instruction is now empirical (match FH), not
+derived. But it should stop anyone extrapolating the offset rule to other levels or projects
+without re-checking.
+
+## New symptom reported by Yash, same root cause
+
+*"this explains the issue why the floor plan is not shown in 360 mobile app"* — a third surface
+(after the 360 pins and XSPCMA-868's missing ground floor) failing on the same wrong level. Not
+separately investigated; expected to clear when the level is corrected.
+
+## Status
+
+- **Pins: already fixed.** The 101 capture points were corrected to `yMeters` 0 earlier today; the
+  1,927 photos render at ground level and are unaffected by anything below.
+- **Model: one value to change**, now unambiguous — `DC - 0G - FFL` → **50.40**.
+- **Rooms: still missing.** The Phase 2 ground floor rooms are absent from the 6 Aug export; that is
+  a separate ask and not fixed by the elevation.
