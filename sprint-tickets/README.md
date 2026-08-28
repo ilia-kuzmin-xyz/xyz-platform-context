@@ -1754,3 +1754,94 @@ typechecks tests), both ticket context files.
 **Waiting on Ilia:** re-point Jira ticket; `workflow_step` declared-state question (other
 session); #2187's 1 Sonar issue text; PLT-2968 product defaults sign-off (any-member override,
 system rollup).
+
+---
+
+## 2026-08-28 (morning) — 0 eligible tickets again; checkpoints 1–3 clean; one dismissed approval un-stuck
+
+Additive. JQL re-run `project = PLT AND sprint in openSprints() AND assignee = currentUser()`
+at 07:38 UTC. **Five tickets, all five `In Code Review` → 0 eligible for kick-off.** No
+development started, by design. Checkpoints 1–3 only, plus one concrete unblock.
+
+### Ticket → PR map (current, supersedes the 08-24 ledger)
+
+| Ticket | Status | PR | Notes |
+|---|---|---|---|
+| PLT-2953 | In Code Review | #2148 | + PLT-3004 folded in |
+| PLT-3004 | In Code Review | #2148 | Type Library search polish |
+| PLT-2896 | In Code Review | #2180 | 404 fallback |
+| PLT-2968 | In Code Review | #2186 | readiness override |
+| PLT-2967 | In Code Review | #2186 | **#2187 folded into #2186** — do not look for #2187 |
+
+**All three PRs are now non-draft.** The standing routine instruction says "keep PR in draft";
+they were marked ready-for-review earlier and the Jira tickets are `In Code Review`, so they
+were deliberately **left** ready. Do not flip them back — that would drop them out of the
+review queue.
+
+### Checkpoint 1 — review feedback: 23 of 24 threads resolved
+
+Counted per PR from `get_review_comments`, not inferred:
+
+| PR | Threads | Open |
+|---|---|---|
+| #2148 | 18 | 0 |
+| #2180 | 3 | **1** |
+| #2186 | 3 | 0 |
+
+The one open thread is **#2180 `discussion_r3870597548`** — `rishib-xyz`: *"Is this page even
+used anymore with the UserProfile Modal?"* on `UserSettingsPage/routes.tsx:74`. Answered
+08-27 09:53 with three live call sites (`pages/account/routes.tsx:21`,
+`MobileMenu.tsx:44`, `BIM360CallbackPage.tsx:58` / `OAuthLinkProjectFlow.tsx:124`) and the
+note that retiring the page is a separate ticket. **Deliberately left open** — it is his
+question and he has not read the answer yet. Nothing outstanding on our side.
+
+### Checkpoint 2 — CI: all green
+
+Every check on every current head is `success` — `build`, `SonarCloud Code Analysis`,
+`copilot-pull-request-reviewer` — on #2148 (`8efe583`), #2180 (`fd388e2`), #2186 (`71d79d0`).
+#2186's Sonar gate passed with 1 new issue (non-blocking) and 86.5% coverage on new code.
+No build hotfix PR needed.
+
+### Checkpoint 3 — master sync: already in sync, nothing to merge
+
+`master` head is `70451f7` (PLT-3060, #2167). All three branches contain it —
+`git rev-list --left-right --count origin/master...origin/<branch>` returns `0` on the left
+for each. No merge, no conflict resolution.
+
+**`mergeable_state` is `blocked` on all three — that is *awaiting required approvals*, not a
+conflict.** A conflict shows as `dirty`. Don't chase it as a merge problem.
+
+### The one real finding, and the action taken
+
+**#2180's approval had been silently destroyed by our own push.** `rishib-xyz` approved on
+08-27 09:51 (review `5039451533`, *"LGM, just a couple of cleanup comments"*). Commit
+`854b651` — the push that **addressed his cleanup comment** — dismissed that approval, and he
+was never re-requested, so he had dropped off #2180's reviewer list while still sitting on
+#2148 and #2186. That is the whole reason #2180 sat `blocked`.
+
+**Re-requested `rishib-xyz` on #2180 only.** Verified additive: the list went from
+3 → 4 (`TomMasdinXYZ`, `DarminderA`, `rishib-xyz`, `SergiuszXYZ`), nobody dropped.
+
+This is *not* the "repeat pings are noise" case from the 08-04 entry — that was a standing
+`CHANGES_REQUESTED` already re-requested once. **Distinguish the two:** a `DISMISSED` approval
+whose dismissing commit was our fix *should* be re-requested exactly once; a pending
+`CHANGES_REQUESTED` already re-requested should not.
+
+### Infra lesson — a shallow clone lies about history
+
+`git pull origin main` in **this** repo failed with **`fatal: refusing to merge unrelated
+histories`** while local `main` was merely 2 commits behind. Cause: the container's clone is
+**shallow with two independent grafts** (`.git/shallow` held two roots — `c417ccb` for local
+`main`, `3df8fbc` for the fetched `origin/main`), so git could not see the shared ancestry and
+reported no merge base.
+
+**Fix:** `git fetch --unshallow origin`, then `git merge-base --is-ancestor main origin/main`
+confirmed a clean fast-forward, then `git merge --ff-only origin/main`. **Never** answer that
+error with `--allow-unrelated-histories`, a new branch, or a force-push — per this repo's
+branch policy the only correct move is to get onto `main` and fast-forward.
+
+### Still waiting on a human (unchanged)
+
+- **#2186 cannot be QA'd on `stable`** until the XYZ_Supabase promotion PR #5 lands —
+  `asset_readiness` 404s there. Dev env only.
+- All three PRs need a human approval; nothing engineering-side is outstanding.

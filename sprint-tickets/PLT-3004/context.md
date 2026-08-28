@@ -43,3 +43,10 @@ that is already there. **Check `TypesTab.tsx` first.**
 
 PLT-3001 / PLT-3003 (PR #2147) also modify `TypesTab.tsx`. Any real PLT-3004 work should branch
 off **`PLT-3003`**, not master, and say so in the PR description.
+
+## 2026-08-28 — scheduled-run checkpoint
+
+Still `In Code Review`; not eligible for kick-off. Checkpoints 1–3 all clean on the PR —
+build + Sonar green, branch already contains master head `70451f7`, no conflict
+(`mergeable_state: blocked` = awaiting approvals, not a merge problem). Full run log and the
+ticket→PR map: `sprint-tickets/README.md` § 2026-08-28 (morning).

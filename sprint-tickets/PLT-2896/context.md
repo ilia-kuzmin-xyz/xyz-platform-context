@@ -84,3 +84,20 @@ anyway) and was removed, leaving one source of truth.
    gate and currently reports ~hundreds of pre-existing `TS6133` unused-symbol errors.
    CI runs `npm run lint && npm run test -- --coverage` plus a webpack build. Do not treat
    a red `check-types` as a regression you caused.
+
+## 2026-08-28 — scheduled-run checkpoint
+
+Still `In Code Review` on #2180. Build + Sonar green on `fd388e2`, branch contains master head
+`70451f7`, no conflict.
+
+**Action taken:** re-requested `rishib-xyz`. His 08-27 approval (*"LGM, just a couple of cleanup
+comments"*) was **dismissed by commit `854b651`** — the very push that addressed his cleanup
+comment — and he had never been re-requested, which is why this PR sat `blocked`. Verified
+additive (3 → 4 reviewers, none dropped).
+
+**1 open thread, deliberately:** `discussion_r3870597548` — his question *"Is this page even used
+anymore with the UserProfile Modal?"* on `UserSettingsPage/routes.tsx:74`. Answered with three
+live call sites (`pages/account/routes.tsx:21`, `MobileMenu.tsx:44`, `BIM360CallbackPage.tsx:58` /
+`OAuthLinkProjectFlow.tsx:124`). His thread to close, not ours.
+
+Full run log: `sprint-tickets/README.md` § 2026-08-28 (morning).

@@ -74,3 +74,11 @@ Housekeeping completed (the work had sat green and unannounced since 17 Aug):
 - Verified there is no hidden top-level review (get_reviews = [], the #2147 lesson applied).
 
 Nothing else is ours: completion now = human review + answer to 1 + manual pass 2.
+
+## 2026-08-28 — scheduled-run checkpoint
+
+Still `In Code Review` on #2148; not eligible for kick-off. All **18** review threads resolved,
+build + Sonar green on `8efe583`, branch already contains master head `70451f7`. No action needed.
+Full run log: `sprint-tickets/README.md` § 2026-08-28 (morning).
+
+Note: this folder has no `context.md` — the domain notes live in `plan.md` here.

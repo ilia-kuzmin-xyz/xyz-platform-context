@@ -179,3 +179,10 @@ Branch note: another session merged master (incl. **PLT-3058 target-model re-poi
 (`6f6de2e`), 385 panel tests green on the combined tree. #2186 is un-drafted (by Ilia,
 2026-08-27) and now carries BOTH tickets — PLT-2967's #2187 was merged INTO this branch on
 2026-08-26 and #2186's body covers both.
+
+## 2026-08-28 — scheduled-run checkpoint
+
+Still `In Code Review`; not eligible for kick-off. Checkpoints 1–3 all clean on the PR —
+build + Sonar green, branch already contains master head `70451f7`, no conflict
+(`mergeable_state: blocked` = awaiting approvals, not a merge problem). Full run log and the
+ticket→PR map: `sprint-tickets/README.md` § 2026-08-28 (morning).

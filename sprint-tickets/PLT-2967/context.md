@@ -96,3 +96,10 @@ values… save with the button below."* So:
   decision). The prototype's state-dependent menu (locked → override only; done → no menu) was
   also skipped: it conflicts with Clear-override needing a home on done steps, and the two design
   sources contradict each other on labels.
+
+## 2026-08-28 — scheduled-run checkpoint
+
+Still `In Code Review`; not eligible for kick-off. Checkpoints 1–3 all clean on the PR —
+build + Sonar green, branch already contains master head `70451f7`, no conflict
+(`mergeable_state: blocked` = awaiting approvals, not a merge problem). Full run log and the
+ticket→PR map: `sprint-tickets/README.md` § 2026-08-28 (morning).
