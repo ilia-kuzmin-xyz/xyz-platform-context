@@ -1,0 +1,3 @@
+# Harness-managed scratch space for isolated background-agent worktrees.
+# Nested git checkouts, not repo content — never commit these.
+.claude/worktrees/
