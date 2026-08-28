@@ -362,6 +362,38 @@ or merge it into whatever is in flight — it is log-only apart from a warn in
 `countDistinctElements`, so it is cheap to carry. Once it is there, the next dashboard load on
 Staging answers H1 vs H3 vs H4 without anyone running a query.
 
+## 2026-08-28 — supersedes the 08-24 "team discussion" framing: the numbers are now measured, not guessed. Post a decision request, not a meeting invite.
+
+**Chosen action: (a) resolve through communication — one decision-request comment to Mostafa and Pietro, with the exact prod numbers, plus a small FE fix that does not need to wait on the decision.**
+
+`prod-measured-2026-08-27.md` (same folder) replaces every hypothesis in this file with a measurement, on live prod FAR01, read-only: editor 879,931 / dashboard 851,409, net −3.2%, decomposing exactly into −82,404 (the two surfaces count different populations — linked vs status-bearing) and +53,882 (dbId expansion, confirmed and quantified at 1.0676× for the first time). Verdict: **no arithmetic bug either side.** The 08-24 "needs a team discussion" call was right in kind, wrong in scale — it does not need a meeting, it needs one comment with the numbers and a recommendation, per the playbook's decision-request shape.
+
+**Why not (b) Ready For Development as a bare ticket.** Part of this (de-duplicating `coloredDbIds`) is a small, uncontroversial FE fix and can go to dev now, independent of the label decision — see below. But the other half (relabelling, and whether "linked but no status" and "status but not linked" should both count) is a product call about what the tile should mean, not a bug to assign.
+
+**Why not (c) With Technical Support.** Nothing here needs the customer or Gennaro; every fact was pulled from prod artefacts directly (`incidents/prod-mcp-access.md` recipe). No client action pending.
+
+**Why not (d) Blocked.** Nothing blocks either action below from happening today.
+
+### Draft comment to Mostafa and Pietro — DRAFT ONLY, not posted
+
+> Pietro, Mostafa — PLT-2874, the dashboard-vs-editor element count. I finally measured both numbers on the same live project (FAR01) instead of reasoning about them, and it settles the bug question: there isn't one. The editor counts 879,931 linked elements. The dashboard's Total shows 851,409. Neither is wrong for what it's built to count.
+>
+> The gap is two things pulling in opposite directions. About 54,000 of the dashboard's number is the same physical part counted twice, because its geometry is split into more than one 3D fragment — that's a straightforward overcount and I'd like to just fix it. Separately, about 82,000 elements exist on one side and not the other, because "linked to the schedule" and "has an installation status" are genuinely different questions with different answers on this project. That second gap isn't a bug, it's two different definitions of "how many elements are there."
+>
+> I'd like to de-duplicate the dashboard count now — small, frontend-only, makes the number mean "elements" instead of "geometry pieces," no product input needed. Separately, the two tiles should say what they're actually counting rather than both saying "Elements" and looking like they disagree, because even after de-duplicating there's still an ~80,000 gap between them and it isn't going away.
+>
+> Is it fine to just rename the labels ("linked to program" vs "with a recorded status"), or is there an expectation I'm missing about why those two counts should agree?
+
+### The de-dup fix — can ship without waiting on the answer above
+
+`dashboard-color-service.ts:643` (and the `reApplyColors` call site, `:874-879` per the 08-13 entry) builds `coloredDbIds` as a flat array; the tile shows `.length`. Change to a distinct-by-source-element count (the folder's `element-count.ts`/`countDistinctElements` helper already exists and is used elsewhere on this ticket's own diagnostic branch, per the 08-24 entry). This is the same shape of fix as PR #2084's original de-dup, on the one call site PLT-2874 hasn't already covered. Worth landing as its own small PR rather than waiting on the label conversation.
+
+### What this changes about the diagnostic branch
+
+`PLT-2874-dashboard-element-count-diagnostics` (still not on Staging as of 08-27) remains useful for the *next* time a project shows a Staging/Prod split, but it is no longer the open question for FAR01 specifically — that one is now answered by direct measurement. Getting it onto Staging is still worth doing as standing infrastructure, just not gating this comment.
+
+**No Jira action was taken by this run.** Confidence: 9.5/10 on the mechanism (measured, not inferred, on live data); the residual is only which sub-models the browser actually loads for a federation view (noted as unverified in `prod-measured-2026-08-27.md`).
+
 ## 2026-08-26 — drafts unchanged, now 12 days unsent
 
 Both drafts (to Gennaro: project/model name + the two date-slider screenshots; to Darminder: where

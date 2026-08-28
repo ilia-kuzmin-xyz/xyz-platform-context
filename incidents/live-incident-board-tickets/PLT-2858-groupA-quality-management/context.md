@@ -536,3 +536,15 @@ Live re-fetch: status `In Analysis`, priority Critical, `updated` still 2026-08-
 unchanged since 08-20. Escalate-to-Pietro draft still unposted, now **25 consecutive runs** /
 **44 days** silent on Mostafa's own unanswered question. Board's only Critical ticket, unchanged
 top priority. Nothing re-derived.
+
+## 2026-08-28 — no change, 26th consecutive run unposted
+
+Live fetch: status `In Analysis`, priority Critical, assignee Mostafa Kamel Hussien, resolution
+`null`, 27 comments — byte-identical to 08-27 (newest still 108643, Yash 07-31 "any update on
+this?"). **Stall clocks:** total silence 28 days; Mostafa's 107320 question to Darminder
+unanswered **45 days**; customer's drop-down-or-remove request unanswered **45 days**;
+escalate-to-Pietro first recommended, never executed, **35 days**. Nothing to re-derive — the
+diagnosis has been finished since 08-14 and the four ready drafts in `recommended-action.md` are
+unchanged. This remains the single highest-value unposted item on the board: a Critical,
+customer-facing ticket where the only remaining step is a human pasting comments that have been
+correct for two weeks.

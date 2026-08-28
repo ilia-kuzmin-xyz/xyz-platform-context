@@ -324,3 +324,9 @@ and still unconfirmed — see 08-24 entry below.
 
 **Confidence unchanged (~9.5/10 on mechanism — see 08-20 entry); this is a status/ownership update,
 not a technical one.**
+
+## 2026-08-28 — no change
+
+Live fetch: status `Open`, priority Medium, assignee Darminder Atker, 9 comments (109793, 109795,
+109845, 109980, 110018, 110058, 110424, 110425, 110427) — byte-identical to the 08-27 snapshot.
+Nothing new since Yash took ownership of chasing Josh directly. Nothing re-derived.
