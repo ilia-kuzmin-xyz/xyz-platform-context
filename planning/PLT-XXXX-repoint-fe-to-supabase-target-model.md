@@ -63,3 +63,34 @@ them — so the middle state ends).
 
 PLT-2968 (hc-frontend #2186) builds on `asset_readiness`, which IS the target model — unaffected
 by this re-point except that its ladder inherits whatever step-order derivation §3 lands on.
+
+---
+
+## 2026-08-29 — SHIPPED as PLT-3058 (#2150). This plan is closed; do not raise a new ticket.
+
+**Supersedes the "Needs human" block above — it is stale.** The plan was drafted 08-25 as
+`PLT-XXXX` with "raise the Jira ticket" outstanding. It was in fact raised and delivered:
+`019a812` — *"PLT-3058: Move the commissioning front end onto the target data model (#2150)"* —
+is on `master` and carries all three code phases. A future run reading only the header would
+re-raise work that has already merged; that is why this amendment exists.
+
+Verified against `origin/master` (`70451f7`) this run, by reading the code, not the commit subject:
+
+| § | Claimed breakage | State on master | Evidence |
+|---|---|---|---|
+| 1 | `readinessStepService.create` upserts on the dropped `(project_id,name)` (42P10) and omits NOT-NULL `workflow_id`/`position` (23502) | **Fixed** | `readiness-step-service.ts` — the upsert row now carries `workflow_id` + `position`, and the arbiter is `'project_id,workflow_id,name'`, exactly phase 1 |
+| 2 | `workflowStepTaskService` reads/writes the orphaned `workflow_step_task` | **Fixed** | `git grep workflow_step_task origin/master -- src` returns **zero hits**. The service is gone; `typeTaskService` speaks `asset_type_task` / `system_type_task` |
+| 3 | `workflow_step` standing unverified — ladder order may read legacy | **Resolved by removal** | `git grep "'workflow_step'" origin/master -- src` returns **zero hits**. Order now derives from `readiness_step.workflow_id` + `position` (`listForWorkflow` orders by `position`), which is phase 3 |
+
+**Consequence for sequencing: hc-frontend no longer blocks XYZ_Supabase promotion PR #5.** The
+"this must land before #5 merges" warning has been satisfied — the FE on `master` speaks the
+target model, so `stable` coming up on the new schema no longer strands a deployed FE that
+cannot seed. (Unchanged and separate: PLT-2968/#2186 still cannot be QA'd on `stable` until #5
+lands, because `asset_readiness` 404s there. That is a *missing table on stable*, not this
+re-point.)
+
+**Still genuinely open — the only survivor of this plan:** §4, the one-off **data** check on dev,
+whether the 9 legacy `workflow_step_task` rows hold links absent from `asset_type_task` (rows the
+FE wrote after the 19 Aug migration copy). Code no longer reads that table, so nothing is
+actively breaking; the risk is silent loss of those 9 links. Needs someone with dev DB access —
+it cannot be settled from the frontend repo.

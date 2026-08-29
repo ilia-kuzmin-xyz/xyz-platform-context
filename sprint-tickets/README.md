@@ -1845,3 +1845,66 @@ branch policy the only correct move is to get onto `main` and fast-forward.
 - **#2186 cannot be QA'd on `stable`** until the XYZ_Supabase promotion PR #5 lands —
   `asset_readiness` 404s there. Dev env only.
 - All three PRs need a human approval; nothing engineering-side is outstanding.
+
+---
+
+## 2026-08-29 — 0 eligible tickets (5th consecutive); checkpoints 1–3 clean; one stale URGENT retired
+
+Additive. JQL re-run `project = PLT AND sprint in openSprints() AND assignee = currentUser()`.
+**Five tickets, all five `In Code Review` → 0 eligible for kick-off.** No development started, by
+design. Ticket→PR map unchanged from the 08-28 entry:
+
+| Ticket | Status | PR | Head |
+|---|---|---|---|
+| PLT-2953 + PLT-3004 | In Code Review | #2148 | `8efe583` |
+| PLT-2896 | In Code Review | #2180 | `fd388e2` |
+| PLT-2968 + PLT-2967 | In Code Review | #2186 | `71d79d0` |
+
+`search_pull_requests is:open author:ilia-kuzmin-xyz` returns exactly these three — no PR has been
+lost track of. (#2145/PLT-3056 and #2178/PLT-3081 have merged out.)
+
+### Checkpoints — nothing to do
+
+- **1 · Review feedback:** 24 threads total, **23 resolved, 1 open by choice.** #2148 18/18
+  resolved; #2186 3/3 resolved; #2180 2/3, the open one being `discussion_r3870597548` —
+  rishib-xyz's *"Is this page even used anymore with the UserProfile Modal?"*, answered 08-27
+  09:53 with three live call sites. It is his question and he has not read the answer; leaving it
+  open is correct. Nothing outstanding on our side anywhere.
+- **2 · CI:** every check on every current head `success` (`build`, `SonarCloud`,
+  `copilot-pull-request-reviewer`). No hotfix PR needed.
+- **3 · master sync:** `master` still `70451f7`; `git rev-list --left-right --count` returns `0`
+  on the left for all three branches. Nothing to merge, no conflicts.
+
+**No human has touched any PR since 2026-08-27.** rishib-xyz's re-request on #2180 (made by the
+08-28 run, after our own push dismissed his approval) has not yet been actioned. All three sit
+`mergeable_state: blocked` = awaiting required approvals, not a conflict.
+
+**The standing bottleneck, stated plainly:** the entire sprint is review-bound. #2148 in
+particular has been open since 08-17 (12 days, 39 files, 2680/1074) and has **never had a human
+review** — only Copilot passes and our replies. Nothing engineering-side is outstanding on any of
+the three; they need approvals.
+
+### The one real finding: an "URGENT, needs human" item that had already shipped
+
+`planning/PLT-XXXX-repoint-fe-to-supabase-target-model.md` (drafted 08-25) carried
+*"raise the Jira ticket"* and *"**this must land before XYZ_Supabase PR #5 merges**"*. Checked
+against the code rather than the note: **it shipped as PLT-3058 (#2150), commit `019a812`,** and
+all three phases are on `master` — `workflow_step_task` and `workflow_step` both have **zero**
+references in `src`, and `readinessStepService.create` now upserts on
+`project_id,workflow_id,name` with `workflow_id`+`position` written. Amendment appended to that
+plan file with the per-phase evidence table.
+
+So: **hc-frontend no longer blocks XYZ_Supabase PR #5.** Only §4 survives — the one-off dev **data**
+check on the 9 legacy `workflow_step_task` rows, which needs DB access and cannot be settled here.
+
+**Lesson (same family as the 08-03 branch-sprawl incident):** a planning file's header froze at
+its drafting date while the work merged under a real ticket number. Four days of runs could have
+re-raised shipped work. Re-verify a "needs human / URGENT" item against `master` before carrying
+it forward another run.
+
+### Still waiting on a human (unchanged)
+
+- Approvals on #2148, #2180, #2186 — the whole sprint is gated on this.
+- #2186 cannot be QA'd on `stable` until XYZ_Supabase promotion PR #5 lands (`asset_readiness`
+  404s there). Dev env only. Separate from the re-point above.
+- §4 data check above.
