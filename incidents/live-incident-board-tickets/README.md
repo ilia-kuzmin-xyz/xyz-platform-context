@@ -45,6 +45,133 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-08-31 — 11 in-scope tickets: 1 brand-new Critical (PLT-2651, 5th incident on the same feature), 1 reclassified back to Group A (PLT-2890), 1 "resolved" ticket from 08-28 actually reopened on a real second defect (PLT-3091), and PLT-2649's live-instruction risk resolved itself but the record still needs correcting
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status IN ("Open", "In
+Analysis", "With Customer") ORDER BY created DESC`, `Ready For Development`/`Dev In Progress` both
+still empty). **11 tickets, all Group A.** Two left scope since 08-28 (PLT-3059, PLT-3034 — both
+closed `Done` by Yash on 08-28 following a Freshdesk close, engineering question left unanswered in
+both cases). `Customer Release Check` tickets (PLT-3081, PLT-3023, PLT-2917) confirmed still excluded
+per the standing scope rule — not evaluated this run.
+
+Work was split by domain across parallel research passes, each reading its tickets' existing folders
+first (playbook step 0) before any fresh Jira fetch.
+
+### 🚨 PLT-3091 — the 08-28 "resolved" record was stale; a real second defect reopened it the same day
+
+The Level-of-Effort diagnosis (08-27/08-28) was right and the customer accepted it — but he immediately
+named a second fault on the same rows, and status is **`Open`**, not `With Customer` as this folder
+believed. Ilia found it himself in the ticket thread: 10 of the 19 LOE activities are marked Complete
+in P6 but the viewer shows 0%, because the API blanks `plannedProgress` for these but not
+`actualProgress`. Verified in code this run — one formatter (`formatters.ts:1-6`) serves both columns
+untouched from the API value, so "`-` under Planned, `0%` under Actual" is independent confirmation of
+what the API is sending. The customer confirmed "exactly this is the issue" and is waiting on us — ball
+has been on our side since 08-28 12:20 BST, over the weekend. Two messages ready to post (hold the
+customer via Yash; ask Sachin/cc Ali whether ingest carries a percent-complete for LOE activities at
+all). Full detail: `PLT-3091-groupA-progress-tracking/context.md` § 2026-08-31.
+
+### PLT-2649 — the acute risk has passed, but the Jira record is still wrong and needs correcting today
+
+Reconstructed the timeline properly this run: the `b75e490` commit (08-28, 10:44 UTC) landed *after*
+the 08-28 README entry was written, and shows Yash supplying the Revit level schedule we'd asked for —
+behaviour consistent with him holding the (now-known-wrong) "set to 0" instruction rather than relaying
+it. **No evidence the wrong instruction reached the customer's BIM team.** But the correction itself
+has never been posted anywhere the customer's side can see — the durable Jira record still ends on
+comment 110577, Yash agreeing to relay "set the ground floor level to 0." The actual, now-confirmed ask
+is the opposite: make `DC - 0G - FFL` read 50.40 to match the working control `FH-0G-FFL` in the same
+schedule. Draft ready in `recommended-action.md` (08-28's "TOP PRIORITY" draft is stale/superseded —
+it asks for a screenshot Yash already sent). Separately, the Phase 2 missing-rooms defect (XSPCMA-868)
+is still unmentioned to the customer and still unassigned, 18 days on. Full detail:
+`PLT-2649-groupA-360-captures/context.md` § 2026-08-31.
+
+### ✅ PLT-2651 — brand new to this routine, and it's the 5th incident on the same unfixed mechanism
+
+"Section box misaligned with BIM models" (ATL08), **Critical**, reopened 08-28, assigned Ilia + Rishi.
+Duplicate-screened against PLT-2906 (opposite sign — ATL08's True North is 0, so PR #2069's dead-band
+fix cannot be the cause here) and PLT-2771 (same project, same symptom, closed 07-10 with no fix).
+Root cause (6/10 on which half, 9/10 on the file): `SectionToolOrientation` computes its rotation angle
+once per service lifetime and never invalidates it on model load/unload
+(`section-tool-orientation.ts:57-63`), while the footprint unions *all* loaded models but rotates by
+that one stale first-model angle. This is the feature PLT-2651 itself originally introduced (PR #1871,
+2026-05-08) — PR #1933/PLT-2756 and PR #2069/PLT-2906 both patched around it without fixing the
+underlying memoization. One reply to Yash proposes a one-minute reload-order test that both diagnoses
+which half is broken and works as a customer-facing workaround. New folder created:
+`PLT-2651-groupA-viewer-and-model/`. Promoted to the shared docs: `dashboard/viewer-and-model.md`
+(SectionToolOrientation's incident history) and `recurring-defect-patterns.md` (Pattern 7 addendum —
+same "looks live, actually frozen" shape one layer up, in runtime memory rather than a DB column).
+
+### PLT-2890 — reclassified groupB → groupA; the original defect shipped, a new question reopened it
+
+Folder was tagged `groupB` since 07-13; live status is now `In Analysis` (explicitly Group A) and the
+most recent comment is Yash tagging Ilia with a question — both Group B exceptions fire independently
+of the status alone. History reconstructed: the original contractor-filter gap was verified fixed on
+Staging (Gennaro, 07-30, build 26.3.3) — this folder never recorded that. Freshdesk reopened 08-28 with
+a new question: the dashboard shows two filters both titled "Contractor" (one for QA, one for
+progress/schedule), and whether they can be merged. Code confirms they're genuinely different data
+sources that happen to collide on a display name (a schedule category type literally named
+"Contractor" rendering next to the built-in QA filter, same no-allow-list shape as PLT-3044) — and
+because they're AND-combined in the same query, a naive merge could silently return zero results if the
+two systems' contractor names don't match character-for-character. One question drafted for Yash.
+Folder renamed to `PLT-2890-groupA-filter-system/`.
+
+### Confirmed unchanged (live `getJiraIssue` fetch each, comment ids/counts and `updated` checked
+verbatim against the 08-28 record)
+
+| Ticket | Domain | Status | Note this run |
+|---|---|---|---|
+| [PLT-3051](PLT-3051-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Fix shipped 26.3.5 (08-24), QA-verified; still no customer confirmation, 4 days silent — Yash's process, not ours |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Decision-request draft (de-dup + relabel dashboard tile) still unposted to Mostafa/Pietro since 08-25 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07; 6 days since Freshdesk #7461 reopened, three-hypothesis split still undistinguished |
+| [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | Open | No change; Josh (owes 8 rework-cost values) still on leave, due back ~09-02 |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | 13 days cold; Darminder's schedule-pair ask relayed to nobody — now a process blocker, not a technical one |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 56 days stale, 22nd consecutive run recommending close-out; root cause settled long ago |
+
+### Left scope this run
+
+- **PLT-3059, PLT-3034** — both closed `Done` by Yash on 2026-08-28 ~14:30 BST following a Freshdesk
+  close, ~30 seconds apart. Neither closure carries an engineering comment; the Fork A/B discriminator
+  the last three runs flagged as blocking both was never run, and PLT-3034's last substantive exchange
+  (customer's unanswered "why were those linked to a QA model") was never answered. Recorded plainly
+  per the standing rule — these are administrative closes, not resolved engineering questions.
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-2651** — `Screenshot 2026-08-28 154905.png` (403, Atlassian auth). This is the decisive one:
+  Yash says it shows two example models: two *different* tilt angles confirms the footprint hypothesis,
+  the *same* wrong angle confirms the stale-session hypothesis. Settles the fork without waiting on the
+  customer. Also 403: the original `Screenshot 2026-04-07 155611.png`.
+- Prior gaps stand exactly as previously documented (PLT-2858, PLT-2815, PLT-3034, PLT-3033) — not
+  re-listed here.
+
+### Needing a human now
+
+Ranked by urgency:
+
+1. **PLT-3091 — reply to the customer (via Yash) and ask Sachin/Ali the ingest question.** The
+   customer is waiting on us since 08-28, over a weekend; both messages are drafted and ready.
+2. **PLT-2649 — post the corrected instruction to Yash today**, replacing the stale "set to 0" ask
+   still standing as the ticket's last word. Acute risk has passed but the record is wrong.
+3. **PLT-2858 — post the two ready drafts to Mostafa then Pietro.** Board's only Critical ticket,
+   **27 runs / 48 days** on Mostafa's own unanswered question — now rewritten SHORT-compliant.
+4. **PLT-2651 — reply to Yash with the reload-order test.** New Critical ticket, 5th incident on the
+   same unfixed mechanism; the test both diagnoses and works as an interim customer workaround.
+5. **PLT-2890 — send the contractor-filter question to Yash** (drafted, short).
+6. **PLT-2874 — send the decision-request draft to Mostafa/Pietro**, unposted since 08-25.
+7. **PLT-2815 — execute the close-out** (drafted, 22 runs unposted, purely administrative).
+8. **PLT-3033 — send the internal Darminder check, then the customer ask via Yash** (14 days cold).
+9. **PLT-3061 — no Jira action**; private check-in with Yash re: Josh's return, due ~09-02.
+10. **PLT-3051 / PLT-2918 — no action needed from this routine**, both waiting on the customer/support
+    process.
+
+### Notification
+
+Sent: **PLT-3091** (customer waiting on us since 08-28 with two drafts ready), **PLT-2649** (a
+customer-facing instruction record needs correcting today even though the acute risk passed), **PLT-2858**
+(board's only Critical ticket, now 48 days silent on a three-sentence answer), and **PLT-2651** (new
+Critical ticket, 5th incident on a known unfixed mechanism, with a drafted test/workaround ready).
+
+---
+
 ## Run: 2026-08-28 — 11 in-scope tickets (up from 10 on 08-27): 1 reappeared misdescribed as new (PLT-3051, actually an already-shipped fix), a resolved-and-posted ticket (PLT-3091), and a live, possibly-wrong instruction sitting with a customer's coordinator right now (PLT-2649) — plus backfill of an unlogged 08-27 afternoon deep-dive session
 
 **Backfilling an unlogged session first, same shape as the 08-26 gap.** A second, deliberate pass ran

@@ -319,3 +319,19 @@ Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-07-0
 unchanged, confirmed via direct `getJiraIssue` fetch (13 comments, same ids, newest still 106553).
 **53 days** stale. Close-out recommendation still unposted, now **21 consecutive runs**. Nothing
 re-derived.
+
+## 2026-08-31 — no change
+
+Live re-fetch (`getJiraIssue` with `fields:["comment","status","updated",...]`): status
+`With Customer`, priority Major, assignee Yash Patel, resolution `null`, `updated =
+2026-07-06T10:18:45+01:00`, 13 comments, newest still 106553 (Freshdesk #7126 closed 07-06) —
+byte-identical to 08-28. **56 days stale.** Close-out recommendation now unposted across
+**22 consecutive runs**.
+
+Per the run protocol, the technical root cause was settled many runs ago (see §2 and the 08-14
+Confluence verification) and was **not** re-investigated this run. Nothing re-derived. The only
+thing outstanding is administrative: post the close-out comment and transition with a resolution.
+
+§3's optional reference-table question (the £600 Cat3 / CSA / Underground Services row) still has
+nowhere fresher to land — PLT-3061's thread is itself parked on Josh's return (~09-02) — and still
+does not gate this close.

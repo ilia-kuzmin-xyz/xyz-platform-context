@@ -402,3 +402,19 @@ moved `Open` → `In Analysis` on 08-25 with no comment attached (see `context.m
 change, not a decision, and it does not alter the recommended action. The diagnostic branch
 (`PLT-2874-dashboard-element-count-diagnostics`) still has not been pushed to Staging; that remains
 the single move that would answer H1/H3/H4 without anyone running a manual query.
+
+## 2026-08-31 — unchanged, and now the sole blocker is sending it
+
+Delta-check only, no re-analysis. `updated` still **2026-08-25T09:53:57+0100**, 6 comments, newest
+still Darminder's 08-17 *"Fix still ongoing following QA latest testing."* Neither Mostafa nor Pietro
+has replied, **because the 08-28 draft was never posted.**
+
+**The 2026-08-28 position stands in full and is not amended.** The message to send is the one at
+§ 2026-08-28 → "Draft comment to Mostafa and Pietro", unchanged, and the de-dup FE fix at § "The de-dup
+fix" is still shippable on its own without waiting for the reply.
+
+Stall clock: the decision request is **3 days** unposted; the older Gennaro/Darminder drafts it
+supersedes are **17 days** unposted (first drafted 08-14). Ranked against the rest of this domain's
+board this run, PLT-2651 (Critical, 117 days, customer waiting since 06-03) now sits above it, but
+PLT-2874 is the cheaper of the two to clear — it is one paste and one small PR, with no further
+investigation of any kind required.

@@ -548,3 +548,37 @@ diagnosis has been finished since 08-14 and the four ready drafts in `recommende
 unchanged. This remains the single highest-value unposted item on the board: a Critical,
 customer-facing ticket where the only remaining step is a human pasting comments that have been
 correct for two weeks.
+
+## 2026-08-31 — no change, 27th consecutive run unposted; checked hard for movement, found none
+
+Checked deliberately hard this run, per the task's instruction to look for any reply from Mostafa or
+Pietro, or any comment at all. Live fetch (`getJiraIssue`, `fields:["comment","status","priority",
+"assignee","updated","resolution"]`): status `In Analysis`, priority **Critical**, assignee Mostafa
+Kamel Hussien, resolution `null`, `updated = 2026-08-20T18:42:42+01:00`, **27 comments** —
+byte-identical to 08-25/08-26/08-27/08-28. Newest is still **108643** (Yash, 2026-07-31 13:27, "any
+update on this?"). No reply from Mostafa. No reply from Pietro. No new comment from anyone. No
+attachment change. No status or priority change.
+
+**Stall clocks as of 2026-08-31:**
+
+| Clock | Since | Days |
+|---|---|---|
+| Any comment on the ticket | 108643, 2026-07-31 | **31** |
+| Mostafa's own question 107320 to Darminder, unanswered | 2026-07-14 | **48** |
+| Customer's drop-down-or-remove request (107317), unanswered | 2026-07-14 | **48** |
+| "Escalate to Pietro" first recommended by this routine, never executed | 2026-07-24 | **38** |
+| Any field change (`updated`) | 2026-08-20 | 11 |
+| Consecutive triage runs with correct drafts and nothing posted | since 2026-08-14 | **27 runs** |
+
+Nothing re-derived and nothing to re-derive. The diagnosis has been finished since 08-14, the FE
+answer to Mostafa's question is code-verified (§ 2026-08-14), and the latent GUID-label defect has
+been fixed on branch `PLT-2858-qa-issue-location-label` since 08-24. **This remains the board's only
+Critical-priority open item and its single longest-standing stall.** The bottleneck has never been
+analysis; it is that no agent in this routine can post, and no human has.
+
+**One thing did change, and it is about the drafts rather than the ticket.** The standing SHORT rule
+for drafted replies was added to `live-incident-run-instructions.md` on **2026-08-27** — after the
+08-14 drafts were written — and the 08-14 Drafts 1 and 2 predate and breach it (Draft 2 runs six
+paragraphs with no bolded closed question). No run since 08-27 had reconciled them. Done this run:
+see `recommended-action.md` § 2026-08-31 for SHORT-compliant rewrites. **The diagnosis, routing,
+owners and recommendation are all unchanged** — only the posting form of the two messages.

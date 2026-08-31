@@ -240,3 +240,67 @@ is already on the same object (`scheduler-service/utils.ts:56`), so no API or ba
 
 Bundle with the Gantt/panel inconsistency already noted in `context.md` (the column's lock predicate
 counts descendants' linked elements while the click gate counts only the activity's own).
+
+---
+
+# 2026-08-31 — SUPERSEDES "no Jira action needed". The ticket reopened on 08-28 and is waiting on us.
+
+The 08-28 entry above is stale. Six comments landed after it was written: the customer accepted the
+Level of Effort answer and then named a second problem, which is a real defect on our side —
+**Level of Effort activities that P6 has marked complete show `0%` under Actual % Complete in the
+Web Viewer.** Jira is back to `Open`, Freshdesk 7773 is on `Waiting on 3rd line`, and the customer's
+*"let me know for the best way moving forward"* (110649) has been unanswered since **08-28 12:20
+BST**. Full mechanism and evidence: `context.md` § 2026-08-31.
+
+**Verdict: stay Open, and it is ours, not the planning team's.** Two messages, two different owners,
+both sendable today. Neither has been posted.
+
+**Assumption behind both drafts:** that the API returns `actualProgress: 0` (rather than `null`) for
+these rows. Deduced from the render path — the same formatter prints `-` for `null` and `0%` for `0`
+— plus Ilia's own prod reading in 110646. Not re-measured this run; no prod credentials were
+supplied.
+
+## Draft 1 — hold the customer (author: Ilia; @ Yash). Send today.
+
+> Yash, nothing needs changing in P6 for these, and adding labour hours won't help either. Progress
+> on a Level of Effort activity is worked out by P6 from the activities it spans, so it is never
+> something you type in.
+>
+> The part that is wrong is ours. Those activities show 0% in the viewer even when P6 has them
+> complete, which is what he is actually seeing. I'm checking what we can show there instead and
+> will come back with the fix, not a question.
+>
+> **Can you tell him it's on us and ask him to leave the schedule as it is for now?**
+
+## Draft 2 — the one question that decides the fix (author: Ilia; @ Sachin, cc @ Ali). Send today.
+
+> Sachin, on the schedules API for ATL05: Level of Effort activities come back with
+> `plannedProgress` blank but `actualProgress` set to 0, so the viewer prints 0% on activities P6
+> has already completed.
+>
+> **Does the ingest carry a percent complete for Level of Effort activities anywhere, or only the
+> activity status?**
+
+That answer splits the fix cleanly and there is no point drafting the product question before it
+lands:
+
+- **It carries a percentage** → send it, and the viewer needs no change at all.
+- **Only the status** → blank `actualProgress` for LOE the way `plannedProgress` is already blanked;
+  the FE renders `-` with zero code change (`actualProgress` is already typed `number | null`,
+  `schedule-api-service.types.ts:39-40`). Then, and only then, a one-line question to Mostafa on
+  whether a dash is acceptable to show for a completed activity.
+
+## Do not send
+
+The 08-27 draft further up this file, and the 08-28 "no action needed" line. Both are answered and
+overtaken.
+
+## Follow-through, now with a customer waiting on it rather than a nice-to-have
+
+The **"say why an Actual % cell is locked"** ticket (drafted above, § "The separate FE ticket to
+raise") is still unfiled, and this run confirms it never shipped: `progress-lock-reason.ts` is not
+on `master` and the branch `PLT-3091-explain-uneditable-progress` is not in the checkout. Widen its
+scope by one line before filing — the same rows also render a misleading **"Actual progress updates
+every 15 minutes. Values may be slightly delayed."** (`activity-progress.tsx:174`,
+`gantt-tooltip.tsx:20`) next to a permanently-frozen 0%. Fixing the lock copy and leaving that
+tooltip in place would only half-fix what the customer complained about.

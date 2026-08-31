@@ -66,6 +66,23 @@ Without `applyRefPoint`, each sub-model would appear at its local origin, displa
 
 The transform is stored on the model as `data.loadOptions.refPointTransform` (a `THREE.Matrix4`). The section tool reads this transform to orient cutting planes in world coordinates.
 
+### SectionToolOrientation — a five-incident feature (2026-08-31 addition)
+
+`section-tool-orientation.ts` derives the section box's rotation angle (`_theta`) once via
+`patchIfNeeded()` and memoizes it for the life of the service (`:57-63`, `:114`); nothing resets it on
+model load/unload — the only lifecycle hook (`viewer-service.ts:597-598`, `:883-884`) fires at zero
+models and never reaches this service. Both the dead-band gate and the footprint calculation also read
+only `getVisibleModels()[0]` (`:90-93`, `:104`), while `calculateFittedBoundingBox()` unions *all*
+loaded models' fragments but rotates the union by that one stale, first-model angle (`:76-77`, `:84`).
+Net effect: whichever model was visible first when the angle was computed wins for the rest of the
+session: loading more models afterward gives a box that clips the right volume at the wrong angle.
+
+This is the fourth fix/incident on the same feature, PLT-2651 being both the original (PR #1871,
+2026-05-08) and now its own fifth occurrence: PR #1933/PLT-2756 rewrote it, PR #2069/PLT-2906 narrowed
+the dead-band 5°→0.5°, and PLT-2771 (same project as the reopened PLT-2651, no fix ever shipped) sits
+in between. Full incident detail and the live hypothesis:
+`incidents/live-incident-board-tickets/PLT-2651-groupA-viewer-and-model/context.md`.
+
 ### applyScaling
 `applyScaling: 'm'` tells Forge the model units are metres. Forge's internal unit is feet by default; without this, all coordinates are off by a factor of ~3.28.
 

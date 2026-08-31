@@ -335,3 +335,52 @@ Nothing re-derived.
 Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-18T10:08 —
 unchanged since 08-18. Darminder's schedule-pair question to the customer now **9 days** cold.
 Nothing re-derived.
+
+## 2026-08-31 — no change; 14 days cold; the ask has now never been sent for two full weeks
+
+Live re-fetch (`getJiraIssue`, fields incl. `comment`/`attachment`/`status`/`updated`), verified
+verbatim against the 08-28 snapshot:
+
+| Field | Value | vs 08-28 |
+|---|---|---|
+| `status` | `With Customer` (id 10711) | unchanged |
+| `priority` | `Major` | unchanged |
+| `assignee` | Yash Patel | unchanged (per the 08-26 correction — *not* Darminder) |
+| `updated` | `2026-08-18T10:08:13.189+0100` | unchanged — **13 days** stale |
+| `resolution` | `null` | unchanged |
+| comments | 5 — ids 109258, 109263, 109749, 109750, 109789 | unchanged, byte-identical set |
+| newest comment | 109789, Darminder Atker, `2026-08-17T15:08:03+0100` | unchanged |
+| attachments | 4 PNGs — ids 62739, 62740, 62741, 62742, all uploaded 2026-08-17 by Yash Patel | unchanged |
+
+**Zero movement in the three days since 08-28, and none in the thirteen since `updated` last
+changed.** Darminder's schedule-pair question (comment 109789) is now **14 days** unanswered
+(17 Aug → 31 Aug), up from 11 on 08-28. Still no evidence anywhere in the thread that it was ever
+relayed to Matthew: the last outward-facing message on this Jira is Yash's 08-17 10:12 relay *of the
+customer's own screenshots to us*, not a question going the other way.
+
+Nothing re-derived this pass, per instruction — the technical picture is unchanged from the 08-20
+entry (H1 multi-project XER export 6/10; H2 parent-loss on ingest; H4 investigated and mostly killed;
+overall confidence 5/10). The two lead hypotheses still live in backend XER-ingest code this repo
+cannot read, so no amount of further frontend reading advances the ticket. **The only thing that
+moves it is the schedule pair.**
+
+### The blocker is now unambiguously process, not technical
+
+Restating the 08-20 assessment because it has now held for eleven days without being acted on: the
+ticket sits in **With Customer** while nothing has actually been asked of the customer since 08-10.
+It is not parked on Matthew; it is parked on somebody sending Darminder's question to Matthew. Two
+weeks of "With Customer" on a question that never left the building is the failure mode the playbook
+names as *evidence requests without owners* — the request exists, it is correct, and it has no owner
+and no date.
+
+Per the 08-20 Step 3 (chase discipline), the relay has now failed silently **twice** (08-19 draft
+never posted, 08-26 restatement never posted). At 14 days the correct move is no longer another
+message into the same thread hoping Yash picks it up — it needs a named person and a deadline, or
+the ticket should be moved out of `With Customer` to a status that reflects who is actually holding
+it. Flagging, not transitioning; this routine takes no live action.
+
+### Attachments (unchanged, restated for completeness)
+
+Same 4 PNGs as recorded since 08-19. This routine still cannot read image content, so Darminder's
+visual basis for naming `'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'` remains unverified here. The XER
+pair the customer offered on 08-10 has still never been requested — 21 days since the offer.

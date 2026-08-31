@@ -534,6 +534,10 @@ the −50.4 is in our export, Revit reads 0.00, and the instruction would have b
 
 ## 2026-08-28 — TOP PRIORITY: check whether the wrong instruction already went to Yash before this addendum was drafted
 
+> **⛔ SUPERSEDED 2026-08-31 — do not send this section's draft.** Its ask (a screenshot of
+> `GT - 0G - FFL` and `SS - 0G - FFL`) was answered by Yash on 08-28. Kept for the record; the
+> current draft is the 2026-08-31 section at the end of this file.
+
 Live Jira re-fetch confirms the sequence. **Comment 110576 (16:20 BST, 08-27, already posted)** told
 Yash the pins are fixed and asked him to get the BIM team to *"set the ground floor level to 0 and
 re-upload."* **Comment 110577 (16:24 BST): Yash agreed** — *"Will ask for BIM team to change the
@@ -578,3 +582,63 @@ already-agreed-to instruction that may be wrong**, sitting with the one person w
 it reaches a client's BIM team. The cost of checking is one message; the cost of not checking, if it's
 already in flight, is a second wasted BIM correction on the same ticket that has already cost five
 weeks once.
+
+---
+
+## 2026-08-31 — SUPERSEDES the 08-28 "TOP PRIORITY" draft above. Do not send it: its ask was already answered.
+
+**Why the section above is stale.** It asks Yash for a screenshot of `GT - 0G - FFL` and
+`SS - 0G - FFL`. **He supplied it on 2026-08-28** (recorded in commit `b75e490`, 10:44 UTC, and in
+`prod-mcp-findings-2026-08-27.md` § "resolved"). The prediction was confirmed: +50.20 and +50.10.
+Sending that draft now would ask him for something he already gave three days ago.
+
+**What the live Jira fetch says today.** Status **With Customer**, assignee Yash, `updated` still
+**2026-08-27T16:25**, **20 comments, last is 110577**, no attachment since 08-26, `issuelinks`
+empty. So the public record on this ticket still ends with the wrong instruction ("set the ground
+floor level to 0") and Yash agreeing to relay it. **Four days, no correction posted.**
+
+**Urgency, honestly downgraded but not to zero.** The acute 08-28 fear — a wrong instruction in
+flight to a client's BIM team — has almost certainly passed: Yash was holding, not relaying. What
+remains is that the only durable record anyone can read is wrong, and the right number has never
+been written down anywhere the customer's side can see it. That is a same-day fix, not an
+emergency.
+
+**Assumption behind the draft:** that Yash has not relayed anything to BIM. Inferred from his
+supplying the schedule on 08-28, not stated by him — which is why the message ends by asking.
+
+### Draft — to Yash Patel, post on PLT-2649 (replaces the "set it to 0" ask in 110576)
+
+> Yash, one correction to what I asked you on Wednesday. Please ignore "set the ground floor level
+> to 0". That one was wrong.
+>
+> The level schedule you sent settles it. DC - 0G - FFL already reads 0.00 in Revit, and FH-0G-FFL
+> right next to it reads 50.40 and lands in exactly the right place in our system. So the ask for
+> the BIM team is to make DC - 0G - FFL read 50.40 as well, matching FH-0G-FFL in that same
+> schedule, then re-export.
+>
+> The photos are already fixed and none of this affects them. This is only so new 360s taken on
+> that floor land in the right place, and it should also bring back the floor plan that was missing
+> in the mobile app.
+>
+> **Have you passed anything to the BIM team yet?**
+
+### Second message — separate, send only after the above is answered
+
+Do not merge this into the message above; it carries its own question and would bury the
+correction. The Phase 2 ground floor rooms are still missing from the export and have **still never
+been mentioned to the customer**, and XSPCMA-868 is still Open, Critical and unassigned after 18
+days with not one substantive comment on it.
+
+> Separately, on the missing ground floor images in the app. The Phase 2 ground floor rooms are not
+> in the model export we currently hold, which is why those photos have nothing to sit in. That is
+> a different problem from the level height and the re-export above may or may not bring them back.
+>
+> **Can you ask whether the Phase 2 ground floor rooms were dropped deliberately in the 6 August
+> export?**
+
+### Housekeeping, unchanged and still not done
+
+- **Link XSPCMA-868 to PLT-2649.** `issuelinks` is still empty; recommended since 08-27.
+- **XSPCMA-868 needs an assignee.** Critical, raised 08-13, unassigned for 18 days, nine comments
+  all of which are Freshdesk status noise.
+- The pin fix does **not** close XSPCMA-868. Say so when it is linked.

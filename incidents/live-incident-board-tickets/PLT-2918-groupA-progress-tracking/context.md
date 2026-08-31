@@ -187,3 +187,13 @@ Live re-fetch: status `With Customer`, priority Major, `updated` still 2026-08-2
 unchanged, confirmed via direct `getJiraIssue` fetch. **3 days** since Freshdesk #7461 reopened
 (08-25) with no further reply from Yash, Mostafa or the customer. Three-hypothesis split still
 undistinguished. Nothing re-derived.
+
+## 2026-08-31 — no change
+
+Live `getJiraIssue`: status `With Customer`, priority Major, assignee Ilia, 13 comments, `updated`
+still **2026-08-25T17:07:52 BST** — byte-identical to the 08-28 record. **6 days** since Freshdesk
+#7461 reopened (08-25) on the customer's *"this is still an issue weekly for me"*, with Mostafa's
+one-line redirect to the Power BI export (110385) still the last technical word and nothing from
+Yash or the customer since. The three-hypothesis split (residual code gap / historic backfill never
+done / Power BI export-side) is still undistinguished against data. Nothing re-investigated, nothing
+re-derived — per the run brief, delta-check only.

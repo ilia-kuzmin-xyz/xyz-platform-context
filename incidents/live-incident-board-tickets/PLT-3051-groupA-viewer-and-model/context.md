@@ -260,3 +260,34 @@ Do not guess at their contents.
 - Whether the property DB itself is populated for these elements. That is the one thing that
   genuinely needs Forge, and it is the last branch of the §5 check, not the first.
 - Nothing in this repo was built, type-checked or executed.
+
+---
+
+## 2026-08-31 — confirmed unchanged since 08-28. The customer still has not confirmed.
+
+Live `getJiraIssue` re-fetch (fields `status`, `updated`, `comment`, `assignee`, `fixVersions`),
+checked verbatim against the 08-28 record above:
+
+| Field | 08-28 record | 08-31 live | |
+|---|---|---|---|
+| Status | With Customer | **With Customer** | unchanged |
+| `updated` | 2026-08-27T12:21:05+0100 | **2026-08-27T12:21:05+0100** | **byte-identical** |
+| Comments | 9 (`total: 9`) | **9** | unchanged, newest still 110548 |
+| Newest comment | 110548, Yash, 08-27 12:20:50, "Freshdesk → Waiting on customer" | same | unchanged |
+| Assignee / fixVersion | Yash Patel / 26.3.5 (released 08-24) | same | unchanged |
+
+**Nothing has moved in four days.** No customer confirmation, no new comment of any kind, and the
+Freshdesk flap that pulled this back onto the board (Closed 12:20:10 → Waiting on customer 12:20:50 on
+08-27, 40 seconds apart, no text on either) still has no explanation attached.
+
+**Recommended action: still none, unchanged from 08-28.** The fix shipped in 26.3.5 and Gennaro
+QA-verified it on Staging on 08-20. The only open item is whether the customer has confirmed, which is
+a support-process question owned by Yash, not an engineering one. The 08-28 entry suggested "a light
+touch if it's still cycling in a few days" — it is now a few days and it is *not* cycling, it is simply
+silent, which is the ordinary shape of a released fix awaiting a customer reply. **Still not worth a
+Jira comment from this routine.** If it is still silent at the next sweep (~09-04, a full week on
+Waiting on customer) that would be the point to ask Yash privately whether the customer has been
+chased — one line, off Jira, not a ticket comment.
+
+Confidence unchanged at 9/10 that no further code work is needed; the withheld point is still the
+unexplained same-minute Freshdesk transition on 08-27.

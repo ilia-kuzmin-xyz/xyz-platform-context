@@ -735,3 +735,37 @@ Verdict moves from "cannot decide between by-design and defect" to: **no arithme
 side, but the overlay's Total counts renderer primitives rather than elements and should be
 de-duplicated *and* relabelled** — de-duplicating alone leaves an 82,404 gap and a fresh ticket in
 six weeks.
+
+---
+
+## 2026-08-31 — confirmed unchanged since 08-28. The 08-28 decision request is still unposted.
+
+Live `getJiraIssue` re-fetch (`status`, `updated`, `comment`, `assignee`, `priority`), compared
+verbatim against the 08-28 record:
+
+| Field | 08-28 record | 08-31 live | |
+|---|---|---|---|
+| Status | In Analysis | **In Analysis** | unchanged |
+| `updated` | 2026-08-25T09:53 | **2026-08-25T09:53:57+0100** | **byte-identical** |
+| Comments | 6 | **6** (`total: 6`) | unchanged |
+| Newest comment | 109779, Darminder, 08-17 14:01, *"Fix still ongoing following QA latest testing."* | same | unchanged |
+| Assignee / Priority | Ilia Kuzmin / Minor | same | unchanged |
+
+**No reply from Mostafa or Pietro, because the decision request was never posted.** Nothing on the
+ticket has moved in 14 days (since Darminder's 08-17 line); nothing has moved in Jira at all in 6 days.
+The 08-27 prod measurement (`prod-measured-2026-08-27.md`) and the decision-request draft built from it
+(`recommended-action.md` § 2026-08-28) exist only in this folder.
+
+**Recommended action unchanged, and this is now the board's clearest "ready, just needs sending" item
+in this domain.** Two things, neither blocking the other, both drafted and both still unexecuted:
+
+1. **Post the decision request to Mostafa and Pietro** — verbatim draft at `recommended-action.md`
+   § 2026-08-28 → "Draft comment to Mostafa and Pietro". It is a finished message with measured
+   numbers and a recommendation; it needs no further work, only a human to send it.
+2. **Ship the de-dup FE fix independently** — `dashboard-color-service.ts:643` plus the `reApplyColors`
+   call site, count distinct source elements rather than `coloredDbIds.length`. Explicitly does not
+   depend on the labelling answer (`recommended-action.md` § "The de-dup fix").
+
+Nothing in the 08-28 analysis is superseded or revised by this pass; this is a delta-check only. The
+`updated` timestamp is the same value it has carried since 08-25, so the ticket has had no Jira
+activity of any kind — not a stalled conversation, an unstarted one.

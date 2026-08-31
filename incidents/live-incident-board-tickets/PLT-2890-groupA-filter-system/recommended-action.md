@@ -89,3 +89,58 @@ evidence that the filter simply does not exist in the new dashboard.
 
 **Confidence in the cross-reference/diagnosis: 8/10. Confidence in this being the right next step:
 ~7/10** (it is a product-routing/comms judgment, and depends on the product parity decision).
+
+---
+
+# 2026-08-31 — the draft above is SUPERSEDED. Do not post it.
+
+**Why:** the 07-13 draft asks product whether the QA contractor filter was dropped on purpose or
+forgotten. That question was answered by building the filter — Gennaro verified it fixed on Staging
+26.3.3 on 2026-07-30. Posting it now would ask for a decision that has already been made and
+implemented. It is kept above as the record of how the original defect was routed.
+
+**Where the ticket actually stands:** the original defect is fixed. The customer reopened Freshdesk
+#7397 on 08-28 with a *new* question — the dashboard now shows **two** filters called "Contractor",
+one driven by quality issues and one (we believe) by their own schedule mapping, and they want to
+know whether the two can be merged or must both be filled. Status went back to **In Analysis**, and
+the ticket is assigned to Ilia. Reasoning and code trace: `context.md` § 2026-08-31.
+
+**Assumption behind the draft below:** that the second Contractor control is a schedule-derived
+dynamic category section. The mechanism is verified in code; that ML9's schedule actually declares
+such a type is not. The draft is worded so the reply we get confirms or kills it.
+
+**Do not close 2890 as fixed on the 07-30 QA verification.** The original defect is genuinely done,
+but the reopen is a live customer question and closing it would drop it silently. If the merge turns
+into work, raise it as its own ticket rather than reopening the shipped one a second time.
+
+---
+
+### Draft comment — for a human to post on PLT-2890, replying to Yash (do NOT auto-post; no Jira writes were made)
+
+> Hi Yash, good to hear the QA contractor filter is working for them now.
+>
+> The two aren't duplicates. One filters quality issues by the company set on the issue itself. The
+> other looks like it comes from their own project schedule, where the activities carry a contractor
+> against them, so it filters progress. Different lists from different places, which is why filling
+> one doesn't fill the other.
+>
+> Whether we can merge them comes down to whether the two lists actually name the same companies. If
+> they do, combining them is worth looking at. If the spellings differ even slightly, a combined
+> filter would quietly return nothing, which is worse than two filters.
+>
+> **Could you send us the contractor names each of the two filters lists on ML9?**
+
+---
+
+### Owner and next step after the reply
+
+- **Yash** owns getting the two lists (he already has the customer thread open on #7397).
+- If the lists match: a product call for **Mostafa / Pietro** on whether one merged Contractor filter
+  is wanted, since merging changes what the filter reaches (quality only vs quality + progress).
+- If the lists differ: no merge is possible as-is; the honest answer to the customer is "fill both,
+  they mean different things", and the follow-up we own is that the panel shows two identically
+  titled sections with nothing distinguishing them — a labelling fix, small and separate.
+- Either way there is a standing FE gap worth a low-priority ticket independent of ML9: nothing in
+  the panel detects a dynamic category type whose name collides with a built-in filter
+  (`dashboard-filter-utils.ts:241` treats only discipline and package as core). Same no-editorial-
+  layer shape as PLT-3044.

@@ -330,3 +330,25 @@ not a technical one.**
 Live fetch: status `Open`, priority Medium, assignee Darminder Atker, 9 comments (109793, 109795,
 109845, 109980, 110018, 110058, 110424, 110425, 110427) — byte-identical to the 08-27 snapshot.
 Nothing new since Yash took ownership of chasing Josh directly. Nothing re-derived.
+
+## 2026-08-31 — no change; Josh's expected return is now ~2 days out
+
+Live fetch (`getJiraIssue`, `fields:["comment","status","updated",...]`): status `Open`, priority
+Medium, assignee Darminder Atker, resolution `null`, `updated = 2026-08-26T09:42:42+01:00`,
+**9 comments** (109793, 109795, 109845, 109980, 110018, 110058, 110424, 110425, 110427) —
+byte-identical to the 08-27 and 08-28 snapshots. Newest is still Yash's 110427 ("Will talk to him
+directly and get this sorted when he is back").
+
+Checked deliberately hard this run because 08-27/08-28 both put Josh's expected return at ~09-02 and
+today is within two days of it. **Nothing has landed early.** No comment from Josh, Mostafa, Pietro
+or the customer; no status change; no new attachment.
+
+**Stall clocks as of 2026-08-31:** `updated` 5 days cold; Darminder's substantive tag of
+Mostafa/Pietro (109980, 08-19 19:48) **12 days** without the decision it asked for; the underlying
+data gap (8 rows — `CSA-TCB` and `CSA-KGE` × Categories 1-4) unchanged and still unconfirmed since
+08-24. The customer's weekly Friday QA-report deadline has now passed twice since the decision
+request went up (08-21 and 08-28).
+
+**Nothing re-derived.** Mechanism confidence unchanged (~9.5/10, see 08-20 entry); this is a
+status-only update. The 08-27 recommendation (no Jira comment; private check-in with Yash around
+09-02) is still the right one and is now effectively due — see `recommended-action.md` 2026-08-31.

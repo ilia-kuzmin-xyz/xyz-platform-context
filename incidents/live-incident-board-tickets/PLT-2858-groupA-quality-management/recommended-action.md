@@ -321,3 +321,65 @@ Post Draft 1 (answers Mostafa in 3 sentences, unblocks him), then Draft 2 (the d
 Pietro/Mostafa), then Draft 4 (customer acknowledgement via Yash). Draft 3 to Sachin/Ali is parallel
 and non-gating. Board's only Critical-priority open item, now **24 runs / 43 days** on a one-line
 question answerable from code since 08-14. No Jira action was taken by this run.
+
+## 2026-08-31 — 27th consecutive run unposted. Drafts 1 and 2 rewritten to the SHORT rule; everything else unchanged.
+
+**Do not read this as new analysis.** The diagnosis, the owners and the recommended action are
+identical to 08-14. Zero Jira movement (`context.md` 2026-08-31: 27 comments, byte-identical since
+08-25; Mostafa's own question now **48 days** unanswered; **31 days** total silence).
+
+**Why the drafts changed at all.** The SHORT rule (`live-incident-run-instructions.md` § "Drafted
+replies must be SHORT") was added **2026-08-27**, after the 08-14 drafts were written, and Drafts 1
+and 2 breach it — Draft 2 is six paragraphs with no bolded closed question. The 08-14 text is
+**preserved above and is not wrong**; it is superseded for *posting form only*. Post the versions
+below instead. Drafts 3 and 4 above are already short and stand exactly as written.
+
+**Order matters: post Draft 1 first — it unblocks the person who says he is blocked, and it costs
+one comment.**
+
+### Draft 1 (SHORT) — answers Mostafa's 107320, on PLT-2858. Anyone can post this; it comes from the code, not from Darminder's memory.
+
+> @Mostafa, coming back on your question from 14 July. They are two different fields.
+>
+> Location is the floor, area or room the issue sits in. Nobody types it, the platform fills it in
+> from the zones set up on the model, and there is no control for it on the issue form at all. On ML9
+> it is blank on every issue because that model has no rooms set up.
+>
+> Location Detail is a plain free text box on the same form that anyone can type into. It saves and
+> displays fine on ML9 today, zones or no zones. They sit next to each other on the panel, which is
+> most of why they get confused.
+>
+> **Does that unblock you, or do you need anything else from us before the product call?**
+
+### Draft 2 (SHORT) — the decision request, to Pietro with Mostafa copied. Post after Draft 1.
+
+> @Pietro @Mostafa, PLT-2858 needs a product call and has been waiting 48 days.
+>
+> The Location on a QA issue fills itself in from the rooms and zones set up on the model. ML9 has
+> none, so it is empty on every issue there and the dashboard reads as missing data. The client has
+> told us twice they have never set rooms up and do not know how to.
+>
+> On 14 July they asked for one of two things. Either a drop down of locations they can pick from
+> when raising an issue, or take Location off the QA altogether. Both are cheap for us, so this is a
+> product call rather than a cost one. My suggestion is to hide the Location row when it is empty:
+> the client gets what they asked for, and projects that do have zones keep the field.
+>
+> **Can you confirm hide-when-empty, or would you rather we remove it outright?**
+
+*Assumption behind Draft 2, for the poster and not for the message: the drop-down branch depends on
+whether the backend location list is populated for a project with no zones. That is Draft 3's
+question and it is still unanswered, which is exactly why the recommendation steers to
+hide-when-empty rather than the drop down.*
+
+### Unchanged from 08-24, restated once
+
+- Draft 4 (customer acknowledgement via Yash) does not depend on the decision. Send it.
+- Draft 3 (to Sachin or Ali) is parallel and gates nothing.
+- Mention the `PLT-2858-qa-issue-location-label` GUID fix **with** the decision when it lands, not
+  before, for the reasons in the 08-24 section.
+- The **priority mismatch** still stands: Critical does not fit a config gap with a working manual
+  workaround, and while it stays Critical it distorts the board. Raise it when the ticket is touched.
+- If Draft 1 and Draft 2 get no answer within a couple of days of being posted, take it to Pietro
+  directly in whatever channel he reads. That has been the recommendation since 07-24.
+
+**No Jira action was taken by this run.**

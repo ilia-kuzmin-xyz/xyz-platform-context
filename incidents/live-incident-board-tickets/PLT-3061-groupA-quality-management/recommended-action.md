@@ -203,3 +203,25 @@ unchanged, it does not need rewriting.
 
 **Verdict: stay `Open`, no Jira comment this run.** The underlying data gap (8 rows: CSA-TCB /
 CSA-KGE × Categories 1-4) is still open and still the actual blocker; only who is chasing it changed.
+
+## 2026-08-31 — the 08-27 check-in window has arrived; still no Jira comment
+
+The 08-27 entry above stands unchanged and is still the recommendation: **do not post the standing
+8-row decision-request draft to Mostafa/Pietro.** They already answered that the decision-maker is
+unavailable, and Yash has claimed the follow-up.
+
+What is new is only timing. The 08-27 note put the check-in at "around 2026-09-02"; that is now two
+days out and nothing has arrived early (`context.md` 2026-08-31 — Jira byte-identical since 08-26).
+So the single useful human action is the private, off-Jira nudge to Yash, and it should be diarised
+for 09-02 rather than left open-ended.
+
+Suggested wording for that nudge — a direct message to Yash, **not** a Jira comment:
+
+> Is Josh back yet? If he is, PLT-3061 needs eight rework-cost figures from him, not one — CSA-TCB
+> and CSA-KGE across all four categories, otherwise we fix the one cell the customer named and leave
+> the rest of the discipline broken. **Can you get all eight in one go?**
+
+If Josh is back and this is still silent a few days later, *that* is when the 08-24 escalation draft
+to Mostafa/Pietro becomes live again. Keep it on file unchanged; it does not need rewriting.
+
+**No Jira action was taken by this run.** Ticket stays `Open`.

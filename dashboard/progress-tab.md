@@ -201,3 +201,35 @@ is unchanged and correct.
 and the details panel ignore the roll-up. An activity with no own links but linked children reads as
 locked in the Gantt and editable in the panel. Not in play on ATL05 (`rollup: 0`) but live
 everywhere else.
+
+## 2026-08-31 — two corrections to the section above, both from PLT-3091
+
+**1. `plannedLaborUnits` was the wrong discriminator.** The matched pair in the 08-27 table is real,
+but the causal reading hung on it ("intangible progress is derived from planned labour units, so
+with none there is no denominator") did not survive the same day's fuller prod pull. The actual
+partition is **`activityType === 'TT_LOE'`** — Primavera Level of Effort, whose progress P6 derives
+from the activities it spans. Across ATL05 and ATL08 together (10,961 activities),
+`validForProgressCalculations === false` and `TT_LOE` are the same set with zero exceptions;
+`plannedLaborUnits === null` merely travels with it. Confirmed by product the same evening (Mostafa,
+PLT-3091 comment 110588: *"level of effort activities cannot have progress entered"*). The
+practical consequence: **adding labour units does not unlock the cell** — the earlier reading
+implies it would, and telling a customer that would have been a wrong instruction. Everything else
+in the 08-27 section (the gate, the scale, the silent UI) stands. Note the mechanism computing the
+flag backend-side is still unread; the correlation is 10,961/10,961 but api-v2 has not confirmed the
+rule.
+
+**2. Planned % and Actual % are not blanked symmetrically for these rows, and that is a live
+defect.** One formatter serves both columns and both surfaces —
+`gantt-x/scheduler/utils/formatters.ts:1-6` prints `-` for `null`/`undefined` and `0%` for a numeric
+`0` — called verbatim on API-supplied values with no FE computation
+(`scheduler-columns.tsx:137`, `:159-161`; `scheduler-service/utils.ts:58-59`; detail panel
+`activity-progress.tsx:46,49`). The API blanks `plannedProgress` for LOE activities but sends
+`actualProgress: 0`, so an LOE activity **that P6 has marked complete reads `0%` in the viewer**
+while its Planned % correctly reads `-`. On ATL05 that is 10 of the 19 LOE activities. The FE
+contract already allows the honest fix with no FE change: `IScheduleActivity.actualProgress` is
+typed `number | null` (`schedule-api-service.types.ts:39-40`). Worse, the detail panel pairs that
+frozen `0%` with the tooltip *"Actual progress updates every 15 minutes. Values may be slightly
+delayed."* (`activity-progress.tsx:174`; same copy in `gantt-tooltip.tsx:20`) — a value that is
+never coming, on work that is already done. Live on `master` as of this date; the lock-reason fix
+named in the 08-27 section (`services/progress/progress-lock-reason.ts`) is **not** on `master` and
+never became a PR.

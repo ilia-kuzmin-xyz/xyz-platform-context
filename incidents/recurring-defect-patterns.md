@@ -346,6 +346,21 @@ aggravating detail worth carrying: the locked field did not merely fail to expla
 value was on its way when the activity was permanently ineligible. **A misleading explanation costs
 more than none**, because it converts a question into a wait.
 
+**2026-08-31 — the same ticket reopened, and it carries a lesson about *closing* Pattern 5 tickets.**
+PLT-3091 was resolved on 08-27 as working-as-intended and confirmed by product within two minutes.
+On 08-28 the customer accepted that explanation and immediately named a second fault on the *same
+rows*: 10 of the 19 locked Level of Effort activities are complete in P6 and the viewer prints
+**0%** for them. Mechanism is a null-vs-zero asymmetry — one formatter renders `-` for `null` and
+`0%` for numeric `0` (`gantt-x/scheduler/utils/formatters.ts:1-6`), and the API blanks
+`plannedProgress` for these rows but not `actualProgress`, so Planned % and Actual % disagree about
+the same activity. **The generalisable point: an eligibility gate that is correct is not the end of
+the ticket.** When a surface deliberately refuses to let a user edit a value, check what it *shows*
+in that field while refusing — a locked cell displaying a plausible-looking number is a second
+defect hiding behind the first, and the customer will find it the moment you explain the lock. Ask
+it as one question: *if this field can never be written, what is it currently displaying, and is
+that true?* Full working: `live-incident-board-tickets/PLT-3091-groupA-progress-tracking/context.md`
+§ 2026-08-31.
+
 ### Mechanism
 
 The Dashboard is deliberately narrower than the Editor/Web Viewer on more than one axis — by time
@@ -502,6 +517,19 @@ Not the code that *reads* it — frontend reads prove nothing about origin (see 
 a different disguise: FE code was cited at 9/10 confidence to establish where a value *came from*).
 If no writer exists, the remediation is a data correction on our side and the upstream fix only helps
 future records.
+
+**2026-08-31 addition — the same shape one layer up, in runtime memory rather than the database.**
+PLT-2651 ("Section box misaligned with BIM models", ATL08) is the fifth incident on
+`SectionToolOrientation`'s rotation angle: `patchIfNeeded()` computes it once per service lifetime and
+memoizes it (`section-tool-orientation.ts:57-63`), with nothing on the model load/unload path ever
+invalidating it. Everyone who has touched this feature (PRs #1871, #1933, #2069) reasoned about the
+angle as something recomputed per model, because it visibly changes when a *different* model is opened
+first — it is only stale, not fixed, so the mistake reads as intermittent rather than structural. Not
+promoting to its own pattern yet — the storage layer differs (in-memory memoization vs a DB column) —
+but the recognition signature is identical to Pattern 7's: **a value that changes sometimes is not
+proof it is being recomputed now; check what actually triggers the recomputation, not just whether the
+value has ever differed.** Full detail:
+`live-incident-board-tickets/PLT-2651-groupA-viewer-and-model/context.md`.
 
 **Silver lining worth naming:** snapshot values are usually *fewer* than the records that display
 them. Here the fix inverted from 1,868 rows to 101, needed no code change and no release. Finding the

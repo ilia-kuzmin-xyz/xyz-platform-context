@@ -1131,3 +1131,86 @@ instructions have now been generated from this ticket without being checked agai
 space they'd be executed in, and the first one already reached the customer's coordinator before the
 error was caught. Worth a line in `incidents/live-incident-playbook.md` on its own, separate from
 this ticket's technical content.
+
+---
+
+## 2026-08-31 — the urgent question from 08-28 is answered, but only half of it: Yash stopped in time, and the correction still is not on Jira
+
+**Fetched live** (`getJiraIssue`, full comment page, `attachment`, `issuelinks`). Definitive board
+state at the time of this run:
+
+| Field | Value |
+|---|---|
+| Status | **With Customer** (unchanged) |
+| Assignee | Yash Patel |
+| Priority | Major |
+| `updated` | **2026-08-27T16:25:21+01:00** — unchanged for 4 days |
+| Comments | **20 total. Last is 110577, 08-27 16:24 BST.** Nothing posted since. |
+| Attachments | 3, newest `Screenshot 2026-08-26 164846.png`. **Nothing added since 08-26.** |
+| `issuelinks` | **empty** — XSPCMA-868 is *still* not linked, after many runs recommending it |
+
+### The 08-28 README's urgent item, resolved on the evidence
+
+The 08-28 entry asked: *has Yash relayed "set the ground floor level to 0" to the BIM team?* The
+answer, reconstructed from `git` rather than from Jira, is **no, and he was already holding**.
+Commit `b75e490` (2026-08-28 10:44 UTC, i.e. **3.5 hours after** the 08-28 README entry `cad9509`
+at 07:17 UTC — the two are out of narrative order and this reconciles them) records that Yash
+**supplied the Revit level schedule** we had asked for. That is the behaviour of a coordinator who
+has held the instruction pending our final number, not one who has passed it on. It is consistent
+with the addendum's own note that *"Yash stopped that instruction and was right to"* and with his
+recorded worry that the BIM team *"would just put it back to +50"*.
+
+**So the acute risk from 08-28 has passed.** No BIM work is believed to have been done on the
+strength of comment 110576, and in any case "set it to 0" executed in Revit on a level that already
+reads 0.00 is a no-op.
+
+### What has NOT happened, and is the live problem today
+
+1. **The correction has never been posted.** The public, durable record on PLT-2649 still ends with
+   Ilia asking for "set the ground floor level to 0" (110576) and Yash agreeing to relay it
+   (110577). Anyone picking this ticket up cold — including Yash himself after a weekend — reads
+   the wrong instruction as the current ask. Four days have passed.
+2. **The whole 08-28 exchange happened off Jira** (channel not recorded in this folder; Teams or
+   Slack). The level schedule is not an attachment here, the confirmed numbers are not in a
+   comment, and nothing on the ticket shows the instruction changed. That is the same
+   knowledge-on-a-branch failure mode this repo's own branch policy exists to prevent, applied to
+   Jira instead of `git`.
+3. **The 08-28 "TOP PRIORITY" draft in `recommended-action.md` is now stale and must not be sent
+   as written.** It asks Yash for a screenshot of `GT - 0G - FFL` and `SS - 0G - FFL`. He supplied
+   exactly that on 08-28. Sending it would ask him for something he has already given, three days
+   late. Superseded by the 2026-08-31 draft in that file.
+
+### The instruction is now settled and needs no further verification
+
+From `b75e490` / `prod-mcp-findings-2026-08-27.md` § "resolved": `GT - 0G - FFL` reads +50.20 and
+`SS - 0G - FFL` reads +50.10 in Revit, exactly the prediction. `FH-0G-FFL` is the control — same
+−50.40 export offset, reads **50.40** in Revit, lands at **0.000**. `DC - 0G - FFL` reads 0.00 and
+lands at −50.400.
+
+**The ask is therefore: make `DC - 0G - FFL` read 50.40, the same as `FH-0G-FFL` in that same
+schedule.** It is empirical (match a level that demonstrably works), not derived from our model of
+the transform, which is why it survives the honest gap recorded in `b75e490` — the −50.40 offset is
+*not* uniformly per source file, and nobody should extrapolate it to other levels or projects.
+
+### Phase 2 rooms / XSPCMA-868 — checked live, both statements from 08-28 still true
+
+- **Still never mentioned to the customer.** No comment on PLT-2649 since 08-27 16:24, and
+  XSPCMA-868 carries **nine comments, all of them Freshdesk status-change noise and not one
+  substantive word** since it was raised 2026-08-13.
+- **XSPCMA-868: still Open, still Critical, still `assignee: null`** — 18 days unassigned. Its
+  `updated` moved to 2026-08-28T13:12 BST but only through Freshdesk cycling that afternoon
+  (Waiting on customer 12:56 → Open 12:59 → Waiting on customer 13:12). No content, no owner, no
+  progress. Current Freshdesk state: Waiting on customer.
+- **Still not linked to PLT-2649** (`issuelinks: []`), despite being recommended since 08-27.
+
+### Verified vs inferred, this run
+
+- **Verified:** every field in the table above, direct from Jira; XSPCMA-868's full comment list and
+  null assignee; the commit timestamps and the content of `b75e490`.
+- **Inferred (the one soft link):** that Yash has not relayed anything to the BIM team. It rests on
+  him supplying the requested schedule on 08-28 and on the addendum's "Yash stopped that
+  instruction", not on a statement from him. **This is exactly why the drafted message ends with
+  that question rather than assuming the answer.**
+- **Not knowable from here:** what was said in the off-Jira channel after 10:44 UTC on 08-28, and
+  whether Ilia has already given Yash the 50.40 number verbally. If he has, the drafted message is
+  a harmless restatement that also puts it on the record, which it should be either way.

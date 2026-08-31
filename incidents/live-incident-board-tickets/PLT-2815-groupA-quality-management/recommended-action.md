@@ -157,3 +157,19 @@ transition `With Customer` → `Done` with a resolution. 51 days stale, 19 conse
 recommending this without execution. §3's follow-up question still has no answer on PLT-3061's
 thread (quiet ~7 days as of 08-26) and still does not gate this close. No Jira action was taken by
 this run.
+
+## 2026-08-31 — close-out unchanged (22nd consecutive run unposted)
+
+Unchanged and not re-argued: post the closing comment and transition `With Customer` → `Done` with
+a real resolution (never an empty one). **56 days stale.** Use the short 2026-08-14 one-paragraph
+version rather than §1's long write-up — it is the SHORT-rule-compliant one and it says everything
+the record needs:
+
+> Closing this out. The two figures are correct per the Issue Rework Reference Table: Cat 3 for CSA
+> Underground Services has a package specific value of £600, and Cat 4 has no package specific row so
+> it falls back to the general CSA figure of £740, which is why Cat 4 reads higher once converted to
+> euros. Not a defect. Mostafa's call on 23 June was to leave the numbers as intended, and any
+> questions on the values themselves are best pointed at Josh in customer success. Freshdesk #7126 is
+> already closed on the customer's side.
+
+§3's follow-up question still does not gate the close. No Jira action was taken by this run.

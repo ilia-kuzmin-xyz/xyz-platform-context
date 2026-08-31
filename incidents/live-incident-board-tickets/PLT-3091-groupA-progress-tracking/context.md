@@ -520,3 +520,104 @@ yet raised as their own tickets: the missing-explanation UX fix (branch
 **Recommended action, updated:** no Jira action needed. Wait for Kyriakos's answer via Yash; if
 silence exceeds about a week, a light check-in with Yash is enough — there is no open technical
 question left to escalate. See `recommended-action.md` for the one-line update.
+
+---
+
+## 2026-08-31 — REOPENED, and into a real defect this time. The 08-28 "resolved, waiting on the customer" reading is stale.
+
+**Do not act on the 08-28 section above as the current state.** It was written on the morning of
+08-28, before six comments landed on the ticket the same day. The customer accepted the Level of
+Effort explanation, then immediately named a *second* problem underneath it — and that one is ours.
+Live `getJiraIssue` this morning: **status is back to `Open`** (not `With Customer`), `updated`
+**2026-08-28T12:51:26 BST**, assignee Yash, Freshdesk 7773 sitting on **Waiting on 3rd line** — i.e.
+the ball is explicitly in our court, and has been since 08-28 12:20 BST (three days, weekend
+included). Nothing has moved since.
+
+### What happened on 08-28 (comments 110632-110650, all after the last run's snapshot)
+
+- **110632 (09:51)** Freshdesk `Waiting on customer` → `Open`.
+- **110635 (10:17)** Yash relays the customer: *"Fully understood. However I'd like to ask if we
+  have decided how to handle those activities (assign 0 labor hours on them or change their activity
+  type in P6."* Yash routes it to Mostafa as a planning question.
+- **110646 (12:09)** Ilia answers, and in doing so **finds the actual defect**: *"10 of the 19 Level
+  of Effort activities are already marked Complete in P6, but the viewer shows 0% for all of them
+  … it's a small fix on our side and planning isn't needed, the API already blanks Planned % for
+  these activities, it just doesn't do the same for Actual %."* He also kills both customer options:
+  labour hours won't unlock anything (the lock is on activity type, not hours), and changing the type
+  in P6 would move the schedule, because LOE activities take their dates from the work they span.
+- **110649 (12:20)** Customer confirms, unprompted and precisely: *"Exactly this is the issue, and
+  for the non-completed ones we cannot assign any progress on them from the WV. Let me know for the
+  best way moving forward."*
+- **110650 (12:51)** Freshdesk → `Waiting on 3rd line`. Last activity on the ticket.
+
+So the original complaint ("one activity won't accept a value") was answered correctly and is
+closed as working-as-intended. **The complaint that replaced it is different and is a genuine
+display defect:** a Level of Effort activity that P6 says is complete reads **0%** in the Web Viewer.
+
+### Mechanism — code-verified on `master` this run, and it is a null-vs-zero asymmetry
+
+Both percentage columns render through one formatter, and that formatter is the whole story:
+
+```
+progressToPercentage(value)   // gantt-x/scheduler/utils/formatters.ts:1-6
+  null | undefined  ->  '-'
+  0                 ->  '0%'
+```
+
+- Planned % and Actual % both call it verbatim off the API-supplied fields
+  (`scheduler-columns.tsx:137` and `:159-161`), which are copied straight through with no FE
+  computation (`scheduler-service/utils.ts:58-59` — `plannedProgress: item.plannedProgress`,
+  `actualProgress: item.actualProgress`). Textbook Pattern 2: the frontend renders, it does not
+  decide.
+- The detail panel uses the same formatter (`activity-progress.tsx:46,49`), so both surfaces agree
+  on the wrong answer.
+- **Therefore the observed "`-` under Planned %, `0%` under Actual %" on the same LOE row proves the
+  API sends `plannedProgress: null` and `actualProgress: 0`** — a literal numeric zero, not an
+  absent value. This is a code-grounded confirmation of Ilia's 110646 claim, arrived at
+  independently: nothing else in the render path can produce that pair.
+- The contract already permits the fix with no FE change: `IScheduleActivity.actualProgress` is
+  typed `number | null` (`schedule-api-service.types.ts:39-40`). Send `null` and the cell renders
+  `-` today.
+- `activityStatus` is *also* already carried onto the activity object
+  (`scheduler-service/utils.ts:55`), so the completion state P6 knows about is present client-side
+  even now — which is why "show the derived value" is a live option and not a fantasy.
+
+### The aggravating detail, still shipping on `master`
+
+For a non-editable activity the detail panel renders a `StaticTextField` whose value is that `0%`
+and whose tooltip is **"Actual progress updates every 15 minutes. Values may be slightly delayed."**
+(`activity-progress.tsx:170-175`; the Gantt tooltip carries the same copy,
+`gantt-tooltip.tsx:20`). On a completed LOE activity that is two false statements stacked: the work
+is done, and no value is on its way. This is exactly the failure mode named in
+`recurring-defect-patterns.md` Pattern 5 — *a misleading explanation costs more than none* — and it
+is **still unfixed**: `services/progress/progress-lock-reason.ts` does not exist on `master`, and
+the branch `PLT-3091-explain-uneditable-progress` is not in this checkout (only `master` and the
+session branch), so it never became a PR.
+
+### What this changes about the ticket
+
+| | 08-28 reading | 08-31 reading |
+|---|---|---|
+| Status | With Customer, resolved as designed | **Open, waiting on us** |
+| Core question | answered by Mostafa | answered — but superseded by a second, real one |
+| Work needed | none (two unfiled follow-ups) | **a display fix, owner not yet decided** |
+| Who is blocked | nobody | the customer, since 08-28 12:20 BST |
+
+### Verified vs inferred
+
+**Verified this run:** the Jira comment record and status/`updated` (live `getJiraIssue`); every
+`file:line` above, read on `master` in `/home/user/hc-frontend`; that the lock-reason fix has not
+landed on `master`; that PLT-3059 and PLT-3034, the other two progress-tracking tickets this folder
+tracked, both went to `Done` on 08-28 14:30.
+
+**Inferred, not re-measured:** that the API returns `actualProgress: 0` for these 19 rows — deduced
+from the render path plus the reported screen state, and independently asserted by Ilia in 110646
+from his own prod session; no prod credentials were supplied to this session, so nothing was
+re-queried. Also unverified: whether the P6-derived LOE percentage exists anywhere in the ingest at
+all, or only the `activityStatus` = complete flag. **That is the question that decides which fix is
+possible**, and it belongs to api-v2 (Sachin / Ali), not to us.
+
+**Still unverified from earlier passes, unchanged:** whether the backend derives
+`validForProgressCalculations` from `activityType` or from something upstream that correlates with
+it (10,961/10,961 correlation, but the computing code was never read); and the two attached
+screenshots (ids 63410, 63409) remain unopenable behind Atlassian auth — still not blocking.

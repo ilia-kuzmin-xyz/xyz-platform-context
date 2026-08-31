@@ -154,3 +154,175 @@ These are non-overlapping fixes. Confirming the distinction was the point of thi
 
 ## STATUS UPDATE (2026-07-13, second pass)
 PLT-2890 was moved **Open → Ready For Development** (assignee now Ilia Kuzmin) between triage passes — so it is now a **Group B** ticket (re-filed from group-a to group-b accordingly). The analysis below stands: contractor filter is genuinely absent on the new (non-BI) dashboard = a PowerBI-migration parity gap. Dev-ready hinges on the product answer "was it dropped intentionally or forgotten?" — confirm before/at the start of dev.
+
+---
+
+## 2026-08-31 — RECLASSIFIED Group B → Group A. The original defect shipped and was QA-verified; the ticket has been reopened on a *new* question from the same customer.
+
+**Everything above is retained as the history of the original report. Two parts of it are now
+superseded — labelled below, not deleted.**
+
+### Live state (fetched directly, 2026-08-31)
+
+| Field | Value |
+|---|---|
+| Status | **In Analysis** (id 10129) — a **Group A** status per the run instructions |
+| Assignee | **Ilia Kuzmin** (unchanged since the 07-13 second pass) |
+| Reporter | Yash Patel · Project **ML9** · Priority Medium · Freshdesk **#7397** |
+| Last updated | 2026-08-28 11:53 BST |
+| Jira links | none (the 2890↔2891 "relates to" link recommended on 07-13 was never created) |
+
+### Reclassification decision: **Group A**, on two independent grounds
+
+1. **Live status is "In Analysis"**, which the run instructions name explicitly as a Group A status.
+   The `groupB` tag in this folder's name dated from 2026-07-13, when the ticket was *Ready For
+   Development*; that state no longer exists.
+2. **Even if it were still Group B, both Group B exceptions fire simultaneously** — the ticket is
+   **assigned to Ilia**, and **the most recent substantive comment is a question pointed at us**
+   (Yash, 110633: *"Can we look into this?"*, @-mentioning Ilia). Either alone would force a full
+   Group A pass.
+
+There is no documented reason to keep the `groupB` tag. **Folder renamed
+`PLT-2890-groupB-filter-system` → `PLT-2890-groupA-filter-system`.**
+
+### How the classification actually moved (reconstructed from this folder + the run README)
+
+- **2026-07-13, first pass** — Open, assignee Darminder. Filed **Group A** (`group-a/filter-system/`).
+- **2026-07-13, second pass** — moved Open → **Ready For Development**, reassigned to **Ilia**.
+  Refiled **Group B** (the "STATUS UPDATE" block above). Folder tag set to `groupB`.
+- **2026-07-22 run** — out of scope. README line 2252-2255: *"Group B is empty this run — every
+  ticket that was Group B on 07-13 (PLT-2890, PLT-2759, PLT-2742, PLT-2385) has since moved to
+  `Ready For QA` or `Done`."*
+- **2026-07-30 11:50 BST** — **Gennaro Boccia: *"Verified fixed on Staging 26.3.3."*** (comment
+  108516). The filter was built and shipped. The ticket stayed out of scope for every run from
+  07-22 through 08-28 — 20 runs — and this folder was never updated to say the fix landed.
+- **2026-08-28** — reopened by the customer, in three steps: 09:50 Freshdesk #7397 → Open (110631);
+  10:13 Yash relays the customer's follow-up and asks us to look (110633); 10:13 Freshdesk →
+  Waiting on 3rd line (110634); **11:53 Jira status → In Analysis**.
+- **Why it is absent from the 08-28 run's 11-ticket set** (inferred, but tightly): that run's JQL
+  *did* include `"In Analysis"`, so the only explanation consistent with both records is that the
+  board was queried **before 11:53 BST**, while 2890 was still sitting in a Done/QA status. This is
+  a scope-timing miss, not a classification error — but it means the reopen went unnoticed for
+  three days.
+
+### What changed, in the customer's own words (comment 110633, Yash relaying, 08-28)
+
+> "I noticed that the contractor filter is now working for QA. The only problem is that we have two
+> different contractor filters: one is related to the QA, and the other one is for the progress
+> (linked to the activities). Do you know if it is possible to merge both, or do we need to fill out
+> both of them?"
+
+So: **the original defect is resolved.** The ticket is now carrying a *different*, narrower
+question — a usability/product question about two same-named filters coexisting in one panel.
+
+### ⚠️ SUPERSEDED — §4 above ("True absence — the contractor filter does not exist anywhere…")
+
+That was correct on 2026-07-13 and is **no longer true**. A QA contractor filter now exists in the
+dashboard, end to end:
+
+- Filter state field: `dashboard-filters/dashboard-filter-service.types.ts:32` (`contractor: string[]`),
+  default at `:80`, empty-state at `dashboard-filter-utils.ts:346`.
+- Panel control: `dashboard-filters/dashboard-filter-panel.tsx:363-379` — a hardcoded `Contractor`
+  section, rendered for **both** project types, with a three-state tooltip (`:371-378`) covering
+  "issues not loaded yet" / "no contractors found" / normal.
+- Options source: the issues' own `company` field, scoped to non-Draft **Quality** issues so no
+  option can filter to zero — `dashboard-bar/filters/dashboard-filters.tsx:127-128`, sorted at
+  `:164`, threaded through `extractFilterOptions` at `:216` and
+  `dashboard-filter-utils.ts:49,224`. `null` = issues not fetched yet, `[]` = fetched and none had
+  a company (`dashboard-filters.tsx:101`).
+- Predicate: `dashboard-quality/utils/quality-sql-queries.ts:45-51` → `company IN (…)` inside
+  `buildBaseWhereClause`. Re-query gating at `dashboard-quality-service.ts:103-109`.
+- **It touches quality only.** A grep for `contractor` across the whole `ViewerPage/` tree returns
+  the files above and nothing in any progress service or progress query — verified this run.
+
+The 07-13 conclusion that this was a **PowerBI→native parity gap** (§2, §5) was right, and the gap
+was closed by building the filter. Nothing else in §1-§5 is retracted.
+
+### ⚠️ SUPERSEDED — the "STATUS UPDATE (2026-07-13, second pass)" block above
+
+It says the ticket "is now a Group B ticket". True on 07-13, false now. See the reclassification
+above.
+
+### The new question: why there are two "Contractor" filters
+
+**Leading hypothesis — mechanism verified in code, NOT yet verified against ML9's data.** The second
+Contractor control is a **dynamic category section**, not a second built-in filter.
+`buildDynamicCategoryTypes` treats only `discipline` and `package` as core
+(`dashboard-filter-utils.ts:241`) and renders every other schedule-declared category type as its own
+section, titled straight from the type name (`:281`), in the dynamic block at
+`dashboard-filter-panel.tsx:404`. So if ML9's schedule mapping declares a category type literally
+named *Contractor*, the panel renders it **directly below the hardcoded QA Contractor section at
+`:363`** — two sections, same title, in the same panel, with no code anywhere that would detect the
+collision.
+
+This is the **same mechanism as PLT-3044** (`recurring-defect-patterns.md` Pattern 2, 08-14
+addition; `dashboard/flt-filter-system.md` § 2026-08-14): dynamic category sections have no
+allow-list in either direction. PLT-3044 was "the panel shows category types we don't track"; this
+is "the panel shows a category type whose name collides with a built-in filter". Worth watching as a
+second occurrence of the *no-editorial-layer* shape.
+
+**Why they cannot simply be merged (this is the substantive answer to the customer):** the two read
+different fields, from different artefacts, and reach different things.
+
+| | QA Contractor (`:363`) | Schedule "Contractor" (dynamic, `:404`) |
+|---|---|---|
+| Value source | the quality issue's own `company` | a category tag on the *activity*, from the client's schedule mapping |
+| Where the values come from | `allIssues[].company` (`dashboard-filters.tsx:127-128`) | `activity_categories_flat` via the schedule service |
+| What it filters | quality issues only | progress/activities **and** quality issues |
+| Predicate | `company IN (…)` (`quality-sql-queries.ts:50`) | `issueId IN (SELECT … issue_categories WHERE typeName='contractor' …)` (`:65-71`, `:89-93`) |
+
+Both land in the **same** quality WHERE clause and are **AND-combined**. So the practical trap is
+sharper than "you have to fill both": **if the company strings on ML9's issues do not match the
+contractor strings in its schedule mapping character for character, selecting a value in each returns
+zero issues** — with no explanation on screen. Same class of failure as Pattern 6's unnormalised
+`===` matching, one layer up.
+
+**The falsifiable check that settles it, in one look at ML9** (needs a human — this environment
+cannot run the app): open the dashboard filter panel and compare the two lists. If the second
+section's values are schedule/activity contractor tags and the first's are the companies named on
+quality issues, the hypothesis holds. If the two lists are identical, they are not measuring
+different things and merging becomes a real option.
+
+**Sibling hypothesis not excluded:** the customer may be comparing **two different pages**, not two
+sections of one panel — there is a separate contractor multi-select on the Progress Dashboard page
+(`ProgressDashboardPage/…/Filters/Filters.tsx:33-59`, options from `reportList[].contractor`) and
+another on the portfolio filter panel (`PortfolioFilterPanel.tsx:151-160`). The two attached images'
+aspect ratios (1839×810 wide, then 344×516 narrow — a full dashboard, then a filter panel) fit the
+one-panel reading better, but the images are not viewable, so this is not settled.
+
+### Sibling tickets — the contractor cluster is otherwise closed
+
+Re-checked live this run. **PLT-2890 is now the only open ticket in the cluster.**
+
+| Ticket | Live status (08-31) | Relationship to 2890 |
+|---|---|---|
+| PLT-2759 "Contractor not showing up on all cards on portfolio" | **Done** (updated 07-17) | Still distinct — contractor **company card**, backend tenant/company association (PAPI-3344), not a filter |
+| PLT-2742 "Contractor not showing up although set" | **Done** (updated 07-17) | Twin of 2759, same backend cause |
+| PLT-2891 → **PBD-2111** | **Done** (updated 07-13) | The PowerBI-side sibling |
+
+The 07-13 §3 conclusion holds unchanged: 2759/2742 are a **backend tenant/company** defect, 2890 is
+a **frontend filter** matter, and they share only the word "contractor". Nothing in the reopened
+2890 changes that — the new question is about two *filters* colliding, still nothing to do with
+company-to-tenant association.
+
+### Unopenable media (unchanged in kind, one new item)
+
+- 60664 / 60665 (`image-20260713-112131.png`, `image-20260713-112145.png`) — the original old-vs-new
+  panel screenshots. Still binary behind Atlassian auth.
+- **New:** the two images inside comment 110633 are **external Freshdesk links** behind a signed
+  token (`eucattachment.freshdesk.com/inline/attachment?token=…`) — not fetchable. **These are now
+  the load-bearing ones:** they would settle in one glance whether the two Contractor filters sit in
+  the same panel (leading hypothesis) or on two different pages (sibling hypothesis), and what names
+  each list contains.
+
+### What remains unverified
+
+- That ML9's schedule declares a category type named "Contractor". Verified only that the code
+  *would* render one if it did.
+- That the two lists contain different names. Not verified either way.
+- Whether the customer is looking at one panel or two pages (see the sibling hypothesis).
+- Which release carried the fix. Gennaro verified on **Staging 26.3.3** (07-30); no prod release
+  version is recorded anywhere on the ticket, and `git log` in `hc-frontend` shows the contractor
+  filter files only under a single working commit on the current branch, not a merged release
+  history this checkout can see.
+- Nothing here was compiled, run or tested — this environment cannot build the app.

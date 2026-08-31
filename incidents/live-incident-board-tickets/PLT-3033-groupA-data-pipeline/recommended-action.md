@@ -126,3 +126,44 @@ Addressing note: Jira's live `assignee` field is currently **Yash Patel**, not D
 `context.md` 2026-08-26 for the changelog trail). If step 1 is sent as an in-Jira @-mention it should
 still go to Darminder by name — he's the one who asked the open question — regardless of what the
 assignee field shows.
+
+## 2026-08-31 — stall clock only. Draft unchanged, reproduced verbatim so it can be copied without scrolling.
+
+**No Jira movement since 08-18 (`updated` 2026-08-18T10:08:13, 5 comments, newest 109789 from
+08-17 15:08).** Darminder's schedule-pair question is **14 days** cold. Nothing in the 08-20 plan is
+superseded; steps 1-3 remain the plan, still unposted for the third consecutive run. Nothing below is
+new text — it is the 08-19/08-20 wording reproduced unchanged, because nothing material changed.
+
+**Assumption this rests on (one line, not for the message):** that Darminder's guess is right and the
+extra WBS node is the `'... - LIVE - DRAFT'` schedule object — unverified, which is exactly what the
+file pair would settle.
+
+### Step 1 — internal, free, send first. Owner: Darminder Atker.
+
+> Darminder, before we chase Matthew for the schedule files, one thing worth ruling out from our side:
+> does 'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT' show up in the schedule switcher on B11 as its own
+> schedule entry, or only inside the activity tree? If B11 has two schedules loaded and one of them is
+> that draft, this is a schedule management problem rather than anything to do with how the XER was
+> parsed, and we can sort it without waiting on him. If the switcher won't open, the project only has
+> the one schedule and we do need the files.
+
+### Step 2 — the customer-facing ask, to Yash. Send if step 1 comes back negative.
+
+> Hi Yash — following up on Darminder's question from 17 Aug: could you check with Matthew whether
+> he's able to share the previous B11 schedule (before 2 Aug) alongside the current 2 Aug one — or the
+> underlying XER exports for both? Darminder's working theory is that the extra WBS node is a specific
+> schedule object named "WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT" that may have ended up in the 2 Aug
+> export by mistake, and having both versions side by side is the fastest way to confirm or rule that
+> out. Thanks for getting the screenshots through, by the way — that part's unblocked now; this
+> schedule-file pair is the only open item.
+
+Do not re-ask for the screenshots; they arrived 08-17. Address step 1 to Darminder by name even
+though the assignee field reads Yash Patel (08-26 correction).
+
+### Escalation note — the relay has now failed silently twice
+
+At 14 days, sending step 2 into the same thread and hoping is no longer a plan. It needs a named
+owner and a date, or the ticket should stop being labelled `With Customer` when nothing has been
+asked of the customer since 08-10. Worth Ilia's attention on return if it is still cold: this is the
+one ticket on the board whose entire blocker is that a correct, ready, three-sentence question has
+sat unsent for two weeks.
