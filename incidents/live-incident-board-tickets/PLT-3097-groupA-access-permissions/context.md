@@ -191,3 +191,56 @@ ticket rather than being buried here.
 - Whether the button reappears without a reload for a user already sitting on the page. It will not:
   `staleTime` makes data eligible for refetch but schedules nothing, so a reload or re-typing is
   still needed.
+
+---
+
+## 2026-09-01 — Sergey answered the open IAM question. Two facts corrected.
+
+Teams thread with Sergey Kuderskiy, Pietro Desiato and Mostafa Kamel Hussien.
+
+**Correction 1 — the discovery gate is "email exists as a user record", not "invited to project".**
+Earlier notes in this folder (and my Jira draft) said IAM returns a provider only for an *invited*
+user. Wrong. Sergey pasted the code:
+
+```java
+var user = userRepository.findOneByEmailIgnoreCase(email);
+if (user.isEmpty()) {
+    log.warn("SSO provider discovery requested for an unknown email");
+    return List.of();
+}
+```
+
+Existence in the system, regardless of invitation. The **invitation** check happens later, at the
+actual SSO login attempt. Everything else in this file stands: the answer still varies per address,
+so the per-domain cache key was still the bug.
+
+**Correction 2 — the empty list is deliberate, and it does not achieve what it intends.** Sergey:
+"from outside IAM this looks as if the tenant has no SSO method configured. No error is thrown.
+This is intentional." The intent is to avoid confirming that an address exists. It fails on any
+SSO-enabled domain: a caller who knows one working address at that domain learns the domain has a
+provider, and can then distinguish existing from non-existing addresses by provider-vs-empty. So
+the enumeration oracle noted above is live today, and Pietro's domain-only proposal would
+*remove* it rather than create it. Sergey's stated concern about domain-only ("any user could
+enter a wrong email to check which SSO we have") is the weaker leak of the two: which provider a
+company uses, which Azure exposes publicly anyway via `getuserrealm`.
+
+**Correction 3 — Pietro's "I think that's already in place" is half true.** The backend does produce
+an invitation error at the SSO login attempt. The FE throws it away: `LoginForm.tsx:80` replaces
+whatever came back with the generic `hc.components.LoginForm.ssoSignInFailed`. So the message
+exists and the user never sees it. FE-only to fix.
+
+### Decision taken to close the incident
+
+Ship the FE cache fix (PR #2191) and close PLT-3097 on it. Rationale, which needs no further input
+from anyone:
+
+- Every user who can actually complete an SSO login already exists in the system, because a user
+  record is created by the invite. So after the cache fix, every user who *can* get in *does* see
+  the button.
+- The residual gap is only for addresses with no user record, and those cannot log in by SSO or by
+  password. Domain-only would change which error they see, not whether they get in. Cosmetic, not
+  functional, and therefore not this Major incident.
+
+Domain-only + surfacing the real message is the better end state and should be its own ticket
+(FE: stop swallowing the message at `LoginForm.tsx:80`; IAM: drop the existence check). Holding a
+long-running customer incident open for a cross-team design change is the wrong trade.
