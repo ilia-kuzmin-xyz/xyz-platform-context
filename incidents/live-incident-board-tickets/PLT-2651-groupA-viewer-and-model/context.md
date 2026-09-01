@@ -315,3 +315,77 @@ fields and comments only. Do not guess at contents.
    *reporting project* is not evidence about the reporting project (26.2.3 / ATL08, §3.1), and a
    customer's "still broken" reply must not be closed out by a developer's non-reproduction
    (§3.2, §6).
+
+---
+
+## 2026-09-01 — live ATL08 model data pulled. New evidence, and one investigation route closed.
+
+Read-only GETs against `cloud.xyzreality.com` with a browser token. ATL08 projectId
+`cd1bf432-92c0-43af-b482-6139f469aed3`. Ilia also supplied a live screenshot of the ATL08 Editor with
+the section tool active, which substitutes for the unfetchable attachment 63521 in part.
+
+### The screenshot names the two models, and the dates are the point
+
+Two model layers are checked in Ilia's screenshot. From `GET /api/v2/projects/{id}/models`:
+
+| model | `modelVersionInsertDate` |
+|---|---|
+| `PC-EXCEL_SWITCH_ATL8_ELEC_BracketsAndSupports_Bld1-V1` | **2026-07-08** |
+| `PC-NAP08_MEC ELEC_Bld 8.1-R23_ConduitsInternal-V1_` | **2026-08-28** |
+
+**2026-08-28 is the same day the customer reopened this ticket** (comment 110664, 14:53). So the
+reported session is a **July model and an August model open together** — two models roughly seven
+weeks apart, from two different source families (`PC-EXCEL_SWITCH_ATL8_*` vs `PC-NAP08_MEC ELEC_*`).
+
+That is a direct, dated instance of the V2 scenario: `getVisibleModels()[0]` decides `theta` for both.
+It does **not** by itself separate H1 from H2 — but it does establish that the reported case is
+multi-model, which neither the ticket nor any prior comment had confirmed.
+
+### Model census — supports V5 with data, not just code reading
+
+144 models, none deleted, **only 2 federated**. Insert dates:
+
+| month | models |
+|---|---|
+| 2026-03 | 13 |
+| 2026-04 | 33 |
+| 2026-05 | 7 |
+| 2026-06 | 13 |
+| 2026-07 | 45 |
+| 2026-08 | 33 |
+
+**91 models were imported after 26.2.3 shipped (2026-05-26).** The customer's theory is that the
+correction only reached models present at fix time; if that were how it worked, those 91 would be the
+broken cohort and the 53 earlier ones fine. Nothing in the code creates such a cohort (V5 — all three
+fixes are browser-runtime), and the continuous import cadence means almost any session mixes
+pre- and post-fix models anyway. **The premise correction in `recommended-action.md` now has data
+behind it as well as code.**
+
+### Incidental: an apparent double import on 2026-08-28
+
+`PC-NAP08_MEC ELEC_Bld 8.1-R23_ConduitsInternal-V1` and
+`PC-NAP08_MEC ELEC_Bld 8.1-R23_ConduitsInternal-V1_` — identical but for a trailing underscore, both
+inserted **2026-08-28**. Ilia's screenshot has the underscore variant enabled. Not this ticket's
+defect, and not investigated. Flagged because it is the kind of thing that confuses a repro ("which
+one did you have on?") and may be worth its own look.
+
+### Route CLOSED — do not retry: per-model footprint angles cannot be computed from artefacts
+
+Attempted, to settle H2 with data rather than a customer test. It cannot be done from any reachable
+artefact:
+
+| artefact | why it does not help |
+|---|---|
+| `project-element-list` | columns are `modelId, modelElementId, sourceFileElementId, ProjectId, RunId` — **ids only, no coordinates** |
+| `client-element-metas` (319 files, one per user file) | has `extentsX/Y/Z`, but these are element **sizes** (e.g. `0.048264`), **not positions**. No origin, no placement. |
+| `GET /api/v2/projects/{id}/models` | no `refPointTransform`, no bounding box, no transform of any kind |
+
+Element **positions** exist only inside the SVF2 geometry the browser loads, which is exactly why
+`collectFragmentXYCorners()` runs in the viewer. **So H1 vs H2 cannot be separated from the API.** The
+two discriminators named in `recommended-action.md` stand as the only options: the customer's
+load-all-then-refresh test, or reading attachment 63521.
+
+### Status unchanged
+
+Open, Critical, assigned Ilia, Waiting on 3rd line since 2026-08-28. **Still no reply from our side.**
+118 days old.
