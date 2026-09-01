@@ -334,3 +334,86 @@ company-to-tenant association.
   filter files only under a single working commit on the current branch, not a merged release
   history this checkout can see.
 - Nothing here was compiled, run or tested — this environment cannot build the app.
+
+---
+
+## 2026-09-01 — four of the open questions ANSWERED against live prod data
+
+Read-only GETs against `cloud.xyzreality.com` with a browser token. ML9 projectId
+`ceeb18bc-5782-48f4-9727-e33a38a50607`. Ilia also supplied two screenshots of the live panel this
+session, which replace the unfetchable Freshdesk images.
+
+### 1. Does ML9 declare a category type named "Contractor"? — YES
+
+`GET /api/v2/projects/{id}/category-types` returns **46** category types on ML9, including:
+
+| typeName | level | enabled | values | importedFromSchedule |
+|---|---|---|---|---|
+| **`CONTRACTOR`** | 1 | true | **2** | **false** |
+| `ML09 - Contractor` | – | true | 0 | true |
+| `TCB_CONTRACTOR` | – | true | 0 | true |
+| `ML09 - Subcontractor` | – | true | 0 | true |
+
+**A refinement of the original question:** `CONTRACTOR` has `importedFromSchedule = false`, so it was
+created in the platform, **not** imported from the P6 schedule. The prior note assumed "ML9's
+schedule declares it" — the schedule does not; the project configuration does.
+
+Only `CONTRACTOR` has any values, so only it renders. The other three are empty and invisible.
+**Worth knowing before anyone "tidies up" the config** — deleting the empty three is harmless,
+deleting `CONTRACTOR` removes the filter.
+
+### 2. Do the two lists contain different names? — DIFFERENT SOURCES, overlapping values
+
+`GET /api/v2/projects/{id}/activities/categories`:
+- `CONTRACTOR` -> **`Kirby`, `Techbau`** (matches the second group in the screenshot exactly, and
+  matches `activityCategoryCount = 2`)
+
+`GET /api/v2/projects/{id}/issues?size=500`:
+- the **only** contractor-ish field on an issue is **`company`**
+- all 500 rows read = `Techbau`. **Partial: 500 of 1,135 issues, one page.** The full issue-side
+  list is not established; the panel shows Kirby too, so Kirby probably appears later.
+
+So the two filters draw from genuinely different objects, with values that overlap rather than being
+identical.
+
+### 3. One panel or two pages? — ONE PANEL
+
+Ilia's screenshot shows both "Contractor" groups in the **same** Web Viewer filter panel, one between
+"Issue Status" and "Tracking Type", the other below "Phase". The **sibling hypothesis (two different
+pages) is dead** — the leading hypothesis was right.
+
+A second screenshot shows the **Issue Details** form carrying **both** `Company` = Techbau **and**
+`CONTRACTOR` = Techbau as separate fields on the same issue. The duplication exists at data entry,
+not only in the filter list.
+
+### 4. Which release carried the fix? — 26.3.3, released 2026-08-10
+
+From the Jira `fixVersions` field: `26.3.3`, `released: true`, `releaseDate: 2026-08-10`. This
+answers the prior run's "no prod release version is recorded anywhere on the ticket" — it is on the
+ticket, in the field rather than in a comment. Gennaro's staging verification (07-30) preceded it.
+The customer confirmed on 28 Aug that the QA contractor filter now works.
+
+### The code, re-confirmed
+
+| filter | site | mechanism |
+|---|---|---|
+| QA-side | `dashboard-filter-panel.tsx:364` | hardcoded `title='Contractor'`, items from `filterOptions.contractors`, built from `issue.company` (`dashboard-bar/filters/dashboard-filters.tsx:128`), SQL `company IN (…)` (`quality-sql-queries.ts:50`) |
+| activity-side | `dashboard-filter-panel.tsx:404` | loops `filterOptions.categoryTypes`, one `Filter` per type, `title={catType.typeName}` |
+
+### Verdict — the original ask is DONE, the ticket is open on a different one
+
+Missing contractor filter: implemented, shipped in 26.3.3, verified by QA and by the customer.
+
+The live question (28 Aug) is whether the two can be merged. **They cannot be merged as a UI change.**
+One filters quality issues, the other filters activities; merging means choosing a single source of
+truth for "contractor", and if that is the category type it is per-project configuration rather than
+code. **Class 4 — needs a product decision (Mostafa or Pietro), not a fix.** In Analysis, Medium,
+assigned Ilia, no reply from our side since 28 Aug.
+
+### Still unverified
+
+- The full issue-side option list (only 500 of 1,135 issues read).
+- Whether the first "Contractor" group in the screenshot is definitely the hardcoded one rather than
+  a fifth category type. The hardcoded one always renders and the customer's description ("one for
+  QA, one for progress") matches, so this is very likely but not proven by id.
+- Nothing was compiled or run; this environment cannot build the app.
