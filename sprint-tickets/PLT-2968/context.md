@@ -186,3 +186,19 @@ Still `In Code Review`; not eligible for kick-off. Checkpoints 1–3 all clean o
 build + Sonar green, branch already contains master head `70451f7`, no conflict
 (`mergeable_state: blocked` = awaiting approvals, not a merge problem). Full run log and the
 ticket→PR map: `sprint-tickets/README.md` § 2026-08-28 (morning).
+
+## 2026-09-01 — scheduled-run checkpoint + PR-body correction
+
+Still `In Code Review`; not eligible for kick-off. Checkpoints 1–3 clean (3/3 threads resolved,
+build + Sonar green on `71d79d0`, base already at master head `70451f7`, no conflict).
+
+**Corrected #2186's description.** It still carried #2187's "**Branched off `PLT-2968` (#2186)** —
+… Merge #2186 first; GitHub will retarget this to master" paragraph, pasted in when #2187 was
+merged into this branch on 2026-08-26. Inside #2186 all three claims are false: #2186 *is*
+`PLT-2968`, it sits directly on master (verified `git merge-base --is-ancestor origin/master
+71d79d0`, 14 commits ahead), and it carries both tickets rather than only the 2967 delta. Replaced
+with an accurate provenance note stating there is nothing to merge ahead of it. Body only — no
+code, no CI re-run, no review dismissal.
+
+Worth knowing for the next run: this PR has **never had a human review**, so a misleading
+"merge something else first" line in its own description was a live cost, not cosmetic.

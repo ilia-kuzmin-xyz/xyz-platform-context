@@ -1984,3 +1984,82 @@ in sync with master. **The entire sprint is approval-bound.**
   repo scope, so this line is carried forward on the 08-26 finding, not re-confirmed.
 - The one-off dev **data** check on the 9 legacy `workflow_step_task` rows (§4 of
   `planning/PLT-XXXX-repoint-fe-to-supabase-target-model.md`) — needs DB access.
+
+---
+
+## 2026-09-01 — 0 eligible tickets (7th consecutive); checkpoints 1–3 clean; #2186's stale "stacked PR" paragraph removed
+
+Additive. JQL re-run `project = PLT AND sprint in openSprints() AND assignee = currentUser()`.
+**Five tickets, all five `In Code Review` → 0 eligible for kick-off.** No development started, by
+design. Ticket→PR map unchanged from 08-28/29/30:
+
+| Ticket | Status | PR | Head | Base |
+|---|---|---|---|---|
+| PLT-2953 + PLT-3004 | In Code Review | #2148 | `8efe583` | `70451f7` |
+| PLT-2896 | In Code Review | #2180 | `fd388e2` | `70451f7` |
+| PLT-2968 + PLT-2967 | In Code Review | #2186 | `71d79d0` | `70451f7` |
+
+`search_pull_requests is:open author:ilia-kuzmin-xyz repo:XYZReality/hc-frontend` returns exactly
+these three. No PR lost track of. **All three heads are byte-identical to 08-30** — no human and no
+bot has pushed, reviewed or commented anywhere since **2026-08-27**. Five days.
+
+### Checkpoints
+
+- **1 · Review feedback: 24 threads, 24 resolved — zero open.** Counted per PR from
+  `get_review_comments`, not carried forward: #2148 18/18, #2180 3/3, #2186 3/3. `get_comments`
+  checked as well (a top-level ask is invisible to a thread-only sweep): only `sonarqubecloud[bot]`
+  quality-gate posts plus our own 08-24 coverage explainer on #2180. Nothing outstanding.
+- **2 · CI: all green.** Every check on every current head `success` — `build`, `SonarCloud Code
+  Analysis`, `copilot-pull-request-reviewer`. No hotfix PR needed.
+- **3 · master sync: nothing to merge.** `master` is **still `70451f7`** (PLT-3060, #2167) — now
+  unmoved for 6 days. All three PRs report `base.sha == 70451f7`. `mergeable_state: blocked` on all
+  three = awaiting required approvals, **not** a conflict (a conflict shows `dirty`).
+
+### The one action taken: #2186's description told reviewers to merge #2186 before reading it
+
+**A stale paste, not a code defect — but it lands on the PR that has never had a human review.**
+
+PLT-2967 was originally its own PR **#2187**, branched off `PLT-2968` and correctly described as
+stacked. #2187 was **merged into the `PLT-2968` branch on 2026-08-26** (`merged_at`
+`2026-08-26T23:24:39Z`, base `PLT-2968`), and its opening paragraph was carried verbatim into
+#2186's body, where all three of its claims had become false:
+
+| Claim in #2186's body | Reality |
+|---|---|
+| "Branched off `PLT-2968` (#2186)" | #2186 **is** `PLT-2968`; `git merge-base --is-ancestor origin/master 71d79d0` → based directly on master, 14 commits ahead |
+| "shows only the 2967 delta" | Carries both tickets — 25 files, +1422/−26 |
+| "Merge #2186 first; GitHub will retarget this to master" | Instructs the reviewer to merge the PR they are currently reading |
+
+Replaced with an accurate provenance note that states plainly there is **nothing to merge ahead of
+it**. The pre-existing "*folded in from #2187*" line above it was already correct and is kept.
+Everything else byte-preserved; no code touched.
+
+**Editing a PR body does not dismiss reviews or re-trigger CI** (established 08-30, re-relied on
+here). Verified after the edit: heads, check runs and thread states all unchanged.
+
+**Lesson, same family as the 08-29 stale-URGENT finding:** when a stacked PR is folded into its
+base, the folded body's *stacking* paragraph becomes a lie in its new home. Re-read a PR body
+against the PR's actual `base`/`head` after any fold-in — a reviewer who believes there is a
+dependency to chase has a free reason to close the tab.
+
+### Authorship: the container's git identity had reset to `Claude` again
+
+`git config user.name` in **hc-frontend** read `Claude <noreply@anthropic.com>` at session start,
+despite the 08-04 run setting it locally — **the container is rebuilt per run, so that fix does not
+persist.** Re-set to `ilia-kuzmin-xyz` in all four repos before doing anything. No commits were made
+to hc-frontend this run, so nothing was mis-attributed. **Treat this as a required first step of
+every run, not a one-off repair.**
+
+### Still waiting on a human (unchanged, carried forward)
+
+- **Approvals on #2148, #2180, #2186 — the entire sprint gates on this, and nothing
+  engineering-side is outstanding on any of them.** #2148 has now been open **15 days** (since
+  08-17, 39 files, +2680/−1074) with **no human review ever**. #2186 likewise has no human review.
+- **#2180's approval is still `DISMISSED`** (rishib-xyz, 08-27 09:51; dismissed by our own fix
+  commit `854b651`). Re-requested once by the 08-28 run. **Do not re-request again** — one
+  re-request on a dismissed approval is the rule; repeat pings are noise.
+- #2186 cannot be QA'd on `stable` until XYZ_Supabase promotion PR #5 lands (`asset_readiness`
+  404s there); dev env only. **Not verifiable from here** — XYZ_Supabase is outside this session's
+  repo scope; carried forward on the 08-26 finding, not re-confirmed.
+- The one-off dev **data** check on the 9 legacy `workflow_step_task` rows (§4 of
+  `planning/PLT-XXXX-repoint-fe-to-supabase-target-model.md`) — needs DB access.
