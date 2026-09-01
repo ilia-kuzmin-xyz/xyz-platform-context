@@ -67,3 +67,25 @@ rows and with `gantt.sort('text')` re-running.
 3. If the reset path is confirmed: fix is to stop replaying the `open:true` snapshot (preserve
    current `$open` across reset — e.g. capture `gantt.getState()`/task `$open` before parse and
    reapply), branch `PLT-3096`, PR per protocol.
+
+## 2026-09-01 (later) — instrumented branch pushed: `PLT-3096` on hc-frontend
+
+Code reading exhausted without a confirmed mechanism (the only caller of the
+`resetToOriginalData` replay path is the column-header 3-state sort cycle, which the chevron repro
+never touches). Per protocol, shipped **maximum debugging** instead of a speculative fix:
+
+- Branch **`PLT-3096`** (hc-frontend), commit `10db8e8bd` — adds
+  `scheduler/hooks/plt-3096-collapse-diagnostics.ts`, wired in `use-initialize-gannt-chart.tsx`.
+  DO NOT MERGE.
+- Logs, prefixed `[PLT-3096]`: `onTaskOpened`/`onTaskClosed` with stacks; which task id dhtmlx
+  resolves each expander click to; wrapped `gantt.open/close/clearAll/parse/sort` with trimmed
+  stacks (`parse` also reports how many tasks carry `open:true`).
+- **One manual repro on this branch decides between the three candidate mechanisms:**
+  1. snapshot replay (a `clearAll`+`parse` with N open:true right after the second click →
+     `scheduler-columns-sort.tsx` reset path, fix = preserve `$open` across replay);
+  2. click misrouting (expander CLICK line names a different id than the row clicked);
+  3. an explicit `gantt.open(A)` from some caller (stack names it).
+
+Run locally, open any project's schedule, collapse two WBS, copy the console block to the ticket
+(or here). Alternative that needs no local run: a fresh `access_token` captured while inside a
+project lets the headless harness in this folder do the same on prod.
