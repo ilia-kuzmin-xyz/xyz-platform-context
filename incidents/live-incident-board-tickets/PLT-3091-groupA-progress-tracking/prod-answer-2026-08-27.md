@@ -156,3 +156,24 @@ prod MCP -> xyz_get_projects_project_id_schedules            (find isCurrent rev
          -> xyz_get_projects_project_id_schedules_schedule_revision_id  (~3.4 MB, ~90s per project)
 ```
 Read-only. Nothing was modified. Recipe: `incidents/prod-mcp-access.md`.
+
+---
+
+## 2026-09-01 — WIP fix branch pushed, paused before tests at Ilia's request
+
+Branch **`PLT-3091`** on XYZPlatformApi, commit `a615455`: blanks `actualProgress` when
+`validForProgressCalculations` is false, mirroring the existing `plannedProgress`/
+`plannedLaborUnits` treatment in `schedules.service.ts` (both the parquet and no-parquet
+enrichment paths; HH path untouched).
+
+Safety checked against live data before writing it: WBS rows carry flag **null** and
+actualProgress **null** already on ATL05 (353/353) and ATL08 (993/993), so the condition is a
+strict no-op for them — the only rows that change are flag=false, i.e. exactly the 19 LOE
+activities on ATL05.
+
+**Still to do before a PR** (repo rules: mandatory): unit tests in
+`test/unit/services/schedules.service.spec.ts` (flag=false → null in both enrichment paths;
+flag=true passthrough; fixture `baseRow` at `:180` is the template) and an e2e extension in
+`test/e2e/api/schedules.e2e.spec.ts` (db-helper seeds `validForProgressCalculations = true` at
+`:1223` — add a false-flag row). Note the change also affects the **BI** device path (PowerBI
+feed) — plannedProgress already behaves this way there, but worth one line in the PR description.
