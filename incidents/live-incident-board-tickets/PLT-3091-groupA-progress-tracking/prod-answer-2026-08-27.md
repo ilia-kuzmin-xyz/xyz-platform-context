@@ -177,3 +177,35 @@ flag=true passthrough; fixture `baseRow` at `:180` is the template) and an e2e e
 `test/e2e/api/schedules.e2e.spec.ts` (db-helper seeds `validForProgressCalculations = true` at
 `:1223` — add a false-flag row). Note the change also affects the **BI** device path (PowerBI
 feed) — plannedProgress already behaves this way there, but worth one line in the PR description.
+
+## 2026-09-01 (later) — tests written, PR opened
+
+**PR: XYZPlatformApi #941** (`PLT-3091` → `master`), commits `a615455` (fix) + `68e1025` (tests).
+
+Unit tests in `test/unit/services/schedules.service.spec.ts` cover both enrichment paths and both
+device shapes. 4 of the 7 fail when `schedules.service.ts` is reverted to `484fb21`, so they pin
+the fix; the other 3 guard against over-blanking and against touching WBS rows.
+
+E2E in `test/e2e/api/schedules.e2e.spec.ts` seeds one revision with an excluded `TT_LOE` activity
+and an included `Task` activity. `createScheduleActivity` in `test/e2e/util/db-helper.ts` now takes
+an optional `overrides` argument (`activityType`, `validForProgressCalculations`) that defaults to
+the previous hard-coded values, so every existing caller is unchanged.
+
+**Limitation, stated in the PR:** nothing in platform-api writes activity `ActualProgress`, and the
+schema lives in the external `PostgreSQLDatabase` repo, so there is no way from this repo to seed a
+non-null value. The e2e therefore locks the contract but cannot reproduce the exact
+0%-instead-of-blank symptom. The unit tests do that part.
+
+### Environment notes for the next run
+
+- `npm ci` **fails on master**: the lockfile is out of sync with `package.json` (`Missing:
+  brace-expansion@1.1.18`, `Missing: concat-map@0.0.1`). Work around it with
+  `npm install --no-package-lock`, which leaves `package-lock.json` untouched. Do not "fix" the
+  lockfile as a side effect of an unrelated PR.
+- With that install, `test/unit/util/azure.util.spec.ts` fails (sinon cannot stub an immutable
+  `@azure/storage-blob` property). Pre-existing and unrelated: it reproduces with all local changes
+  stashed. CI uses `npm ci` so it should not appear there.
+- No docker daemon in the container, so the local e2e stack cannot be brought up. E2E is validated
+  by CI's `integrationTest.sh` only.
+- Node in the container is v22; `package.json` requires >= 24. Only an EBADENGINE warning, unit
+  tests run fine.
