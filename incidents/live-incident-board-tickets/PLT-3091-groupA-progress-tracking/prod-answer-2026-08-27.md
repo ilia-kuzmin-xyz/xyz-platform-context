@@ -209,3 +209,47 @@ non-null value. The e2e therefore locks the contract but cannot reproduce the ex
   by CI's `integrationTest.sh` only.
 - Node in the container is v22; `package.json` requires >= 24. Only an EBADENGINE warning, unit
   tests run fine.
+
+## 2026-09-01 (later still) — PR #941 CLOSED WITHOUT MERGING, deliberately
+
+Ilia closed it. Reason: reading the Jira thread showed the fix as built (blank the cell) may not be
+what the customer confirmed they wanted, and the PR had already been put up for review before that
+was established. Correct call — see below.
+
+**Nothing is lost.** Branch `PLT-3091` on XYZPlatformApi still holds commits `a615455` (fix),
+`68e1025` (tests) and `3eb3562` (Sonar cleanup). CI was fully green, including the e2e against the
+real Citus stack. A new PR off that branch needs no code changes once the display question is
+settled.
+
+### What the Jira thread actually asks for, which the fix does not fully deliver
+
+The customer confirmed on 28 Aug that the 10 Level of Effort activities reading **0%** while P6 has
+them complete "is exactly the issue". Blanking the cell removes the wrong number but shows nothing
+in its place, so a reviewer could reasonably say the activity still does not read as done.
+
+They also said, in the same reply: *"for the non-completed ones we cannot assign any progress on
+them from the WV"*. Nothing in the branch addresses that, and manual entry is ruled out (Mostafa,
+27 Aug: LOE activities cannot have progress entered).
+
+### The three options, and the data that bears on them
+
+Measured on ATL05's 19 LOE activities (from the 27 Aug dump, `/tmp/atl05_activities.json`):
+10 `TK_Complete`, 5 `TK_Active`, 4 `TK_NotStart`; all 19 have `actualProgress` 0 and
+`validForProgressCalculations` false; **all 10 complete ones have a real `actualFinishDate`**;
+`plannedProgress` is already null for all of them.
+
+| option | cell shows | covers the confirmed ask? | covers the unfinished ones? |
+|---|---|---|---|
+| A — as built | blank | partly, removes the wrong 0% only | no |
+| B | 100% when P6 status is Complete | yes | no |
+| C | progress derived from the activities the LOE spans | yes | yes |
+
+**Do not read B as a recommendation.** It was invented in this session and nobody in the ticket
+proposed it; when that was pointed out it was withdrawn. It is listed only because the data supports
+it cheaply.
+
+### The one thing blocking the ticket
+
+Yash asked Mostafa on 28 Aug whether handling these activities is a planning-team decision. **That
+question has never been answered.** Until it is, any code choice here is a guess. The ticket has had
+no reply from our side since 28 Aug and is Major, sitting on "Waiting on 3rd line".
