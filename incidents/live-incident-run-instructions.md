@@ -211,7 +211,9 @@ write-up, not an explanation of our investigation, and not a place to show worki
 
 **Hard limits for anything drafted to be posted on a ticket or sent to a person:**
 
-- **Four short paragraphs maximum.** Usually two or three is right.
+- **100 words maximum, and count them.** Print the count next to the draft, like `(85 words)`. If
+  it is over 100, cut before handing it over. Do not hand over a draft without a count.
+- **Six sentences maximum**, across the whole message.
 - **One closed question**, bolded. If you have three questions, you have three messages — pick the
   one that unblocks the most and drop the rest.
 - **No tables, no bullet lists, no headings, no file:line citations, no internal jargon**
@@ -229,3 +231,18 @@ does not need our confidence intervals.
 **Reviewing your own draft before you hand it over:** if it is longer than the Jira comments the
 team actually writes (read a few in any ticket's `context.md` — they are 2–5 sentences), it is too
 long. Cut it, do not append a note apologising for the length.
+
+### 2026-09-01 — why the word count replaced "four short paragraphs"
+
+Ilia had to ask again, and this time pointed out it had been asked many times. The rule was not
+being broken, it was being satisfied on a technicality: four paragraphs of three or four sentences
+each reads as an essay and still counts as "four paragraphs". "Short" is not checkable, so it got
+rationalised every time.
+
+A word count cannot be rationalised. **The count must be printed with the draft**, which is the part
+that actually forces the cut, because writing `(140 words)` next to a draft is not something you can
+talk yourself past.
+
+The same failure applies to replies in chat, not just Jira drafts: leading with caveats, tables and
+alternatives when the answer is one line. If a question has a one-line answer, the reply is one
+line.
