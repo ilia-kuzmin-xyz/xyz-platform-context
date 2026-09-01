@@ -129,3 +129,85 @@ before assuming they're unrelated. See PLT-3096's `context.md` for its own versi
   one WBS level, etc.) — would need the screenshots or the .xer file, neither opened this run.
 - Whether this is new (a recent deploy changed `fn_GetScheduleRevision` or the ingestion path) or
   has always been possible — no deploy-timeline correlation attempted.
+
+---
+
+## 2026-09-01 — ROOT CAUSE FOUND against live prod. The earlier hypothesis is DEAD.
+
+Run with a browser `access_token` against `cloud.xyzreality.com`, GET only. AUS02 projectId
+`f862c969-fb32-428a-aa34-ff83d3677b51`. Note the **prod MCP refuses AUS02**
+(`project_id_not_allowed`, not on the prod whitelist) — inviting the user to the project does not
+help; the platform API with a browser token is the working route.
+
+### The duplicate-`ItemId` hypothesis is falsified
+
+**0 duplicate `itemId`s in 1,818 rows.** The `Map.set` collision theory in the section above is
+wrong. Do not pursue it. Keeping it on the record because the reasoning was sound and the check was
+cheap; it just wasn't the cause.
+
+### What is actually wrong
+
+`GET /api/v2/projects/{id}/schedules/{revisionId}` returns 1,818 rows (1,586 Activity, 232 WBS).
+Only **1,180 are reachable** from the single root by following `parentItemId`.
+
+**638 rows (134 WBS + 504 activities, 35% of the schedule) are unreachable**, because **4 WBS rows
+are referenced as `parentItemId` but are absent from the response entirely**:
+
+| missing parent id | implied P6 path | subtree lost |
+|---|---|---|
+| `c9993475-41a8-4961-ad6f-34ab0a66b10a` | `.1.1.1` | 2 WBS + 2 activities |
+| `f0788984-97a8-44af-871f-390dd5e596ce` | `.1.1.2` | 11 WBS + 87 activities |
+| `b0b44f2f-8521-470e-9492-a7675d3f806a` | `.1.1.1.1.1` | 13 WBS + 101 activities |
+| `501f596d-5279-4110-9603-1aa9e1556799` | `.1.1.2.1.2` | 108 WBS + 314 activities |
+
+A parent that isn't in the payload can never become a tree node, so its children have nothing to
+attach to and the whole branch is invisible. No error, nothing to toggle.
+
+### The customer's reported branch, traced
+
+`Core & Shell` (id `740cb0f1`) is present in the response. Its ancestry:
+
+```
+WBS:Core & Shell  <-  WBS:Construction Milestones  <-  *** MISSING b0b44f2f ***
+```
+
+So the row exists and is still invisible. That is exactly the reported symptom.
+
+### The shape rules out a filter rule
+
+Under `.1.1` (`Procurement`), the siblings present are `.1.1.3` Parking & Landscape, `.1.1.4`
+Mechanical Yards, `.1.1.5` Electrical Yards, `.1.1.6` Interior Build-Out. **`.1.1.1` and `.1.1.2`
+are absent.** A depth limit or an empty-branch filter cannot produce "3, 4, 5, 6 present but 1 and 2
+missing" — this is a gap in the data, not a rule being applied.
+
+### Deterministic across imports
+
+Both AUS02 revisions were pulled (`9f13d821` current/baseline, and `c07665dd`). **Identical:**
+1,818 rows, 1,180 reachable, 638 unreachable, the same 4 missing parent ids, absent in both. The
+`itemId`s are stable across imports of the same source, which is why the customer's re-import
+changed nothing.
+
+### Why each of the customer's four checks was a dead end
+
+| customer check | why it could not have helped |
+|---|---|
+| toggling "Show WBS" | the rows are not in the tree at all; the toggle only filters what is |
+| WBS **codes** are unique | true and irrelevant; nothing collides, rows are missing |
+| .XER holds only AUS02 | irrelevant to a missing-parent reference |
+| re-import | deterministic, so it reproduces exactly |
+
+### What is still unknown — one question, for the backend
+
+Are those 4 WBS rows **absent from the database**, or **present but not returned** by
+`xyz."fn_GetScheduleRevision"`? That function's SQL is not in the platform-api checkout (separate
+database-functions repo), so this cannot be answered from here. The attached
+`AUS02-60-Schedule-L1-.xer` would settle the upstream half: if P6 exported those `wbs_id`s, the loss
+is ours; if it did not, the export itself is short.
+
+This is a **backend/import defect, not frontend.** The frontend renders exactly what it is given.
+
+### Supersedes
+
+- The "PRIME SUSPECT" `Map.set` collision section above — falsified, 0 duplicates.
+- The PLT-3096 link theory in that section — it rested on the shared-`id` idea, which is dead.
+  PLT-3096 has its own separate suspect (`useShowWBS.ts:33`). Treat them as unrelated.
