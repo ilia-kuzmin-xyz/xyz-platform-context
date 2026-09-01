@@ -122,3 +122,72 @@ widened alongside.
 - **FE explains why it looks inconsistent and why a fix will seem not to land.** Mechanisms 1-3.
 
 Both are real; they are answers to different questions. The ticket still needs Sergey's mapping row.
+
+---
+
+# ⛔ 2026-09-01 (later) — THE DIAGNOSIS ABOVE IS WRONG. Do not send its draft to Sergey.
+
+Ilia proposed the correct mechanism and it is confirmed. **Everything above that concludes "IAM has
+no domain mapping for customer domains" is false, and it is false because of how I measured it.**
+
+## The measurement error
+
+I probed discovery with **invented** addresses (`test.user@meta.com`, `someone@fb.com`,
+`user@hitt-gc.com`). Those are not invited users, so they return an empty list whether or not the
+domain is mapped. I then compared them against a **real** address (`ilia.kuzmin@xyzreality.com`) and
+read the difference as a per-domain mapping gap. Synthetic input on one side of a comparison, which
+is exactly what `live-incident-run-instructions.md` § Investigation discipline warns against
+("before comparing two numbers, reproduce each exactly").
+
+## What discovery actually does — per ADDRESS, not per domain
+
+```
+ilia.kuzmin@xyzreality.com     -> {"providers":["azure"]}
+pietro.desiato@xyzreality.com  -> {"providers":["azure"]}
+fakename12345@xyzreality.com   -> {"providers":[]}      <- same domain, empty
+xyzreality@meta.com            -> {"providers":["meta"]} <- meta.com IS mapped
+zzz.nobody99@meta.com          -> {"providers":[]}      <- same domain, empty
+```
+
+IAM checks whether the **address** is an invited user. **meta.com is mapped and healthy. There is
+nothing for Sergey to do.**
+
+## The real bug, entirely frontend
+
+`useSSOProvider.ts` cached the answer under `domainOf(email)`, with the comment *"Keyed on the
+domain, not the address: one lookup serves everyone at the same tenant."* That assumption is false
+for this endpoint. Consequence: the first address typed in a tab decides the button for every other
+address at that domain, for as long as the entry is cached.
+
+So a tester or user who first types an address IAM does not recognise (a typo, a colleague, a test
+address) poisons the cache for the whole domain and sees no SSO button for real users afterwards.
+**That is the "intermittently not appearing" in the ticket** — the outcome depends on which address
+happened to be typed first, which is why it looked random.
+
+It also explains Pietro hitting it internally on a mapped domain, which the mapping-gap theory could
+not explain at all (and which should have been treated as a falsification of it at the time).
+
+## Fix — branch `PLT-3097`, commit `0259f2708`
+
+Key the query on the trimmed, lowercased **address**; compare whole addresses in the debounce guard.
+Caching stays, and is now correct, because the key finally matches what the endpoint varies on. Two
+regression tests added in `LoginForm.sso.test.tsx`: a second address at the same domain gets its own
+lookup and answer; the same address is not looked up twice.
+
+The earlier commit on this branch (`5c29ed412`, `staleTime: Infinity` → 5 min) is still worth having
+but was never the fix; it only shortened how long the poisoning lasted.
+
+## Worth raising separately, carefully — user enumeration
+
+`POST /ms/iam/api/sso/providers:discover` is unauthenticated and its answer differs for a known
+versus unknown address at the same domain. That is an address-existence oracle. Pre-existing IAM
+behaviour, not introduced by this change, and not this incident — but it should get its own security
+ticket rather than being buried here.
+
+## Not verified
+
+- Whether the FE fix removes the customer-visible symptom in a browser. Cannot compile or run tests
+  in this container (`npm ci` fails on a private package); CI is first validation.
+- Whether the button reappears without a reload for a user already sitting on the page. It will not:
+  `staleTime` makes data eligible for refetch but schedules nothing, so a reload or re-typing is
+  still needed.
