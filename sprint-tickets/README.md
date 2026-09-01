@@ -2063,3 +2063,18 @@ every run, not a one-off repair.**
   repo scope; carried forward on the 08-26 finding, not re-confirmed.
 - The one-off dev **data** check on the 9 legacy `workflow_step_task` rows (§4 of
   `planning/PLT-XXXX-repoint-fe-to-supabase-target-model.md`) — needs DB access.
+
+### Amendment (same run) — the Jira integration rewrites a PR body's trailing link-refs on every save
+
+Correcting the "everything else byte-preserved" claim above: **it was not quite true, and not
+because of anything we did.** The body ends with two Jira link-reference definitions
+(`[PLT-2968]: https://…?atlOrigin=…`). On the first save they came back as
+```` ```''https://…''``` ```` — three backticks and stray apostrophes — which read exactly like a
+mangling introduced by our own edit. It is not: **the GitHub↔Jira integration rewrites those two
+lines itself whenever the body is saved**, and on the next save it re-emitted them in clean plain
+form, unprompted (we had dropped them entirely; the integration put them back).
+
+So: after editing a PR body on a Jira-linked repo, **re-read it once** — and if only the trailing
+`[PLT-XXXX]:` definitions differ, leave them alone rather than "fixing" them into a third shape.
+Final state on #2186 is clean. Head `71d79d0`, base `70451f7`, reviewers 4, CI and thread states
+all unchanged by both saves.
