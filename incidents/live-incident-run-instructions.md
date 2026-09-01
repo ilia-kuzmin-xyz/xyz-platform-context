@@ -166,26 +166,31 @@ One line of status per ticket. Detailed pass only for the two exceptions above.
 
 ### 2026-09-01 — every ticket also gets an ACTION CLASS, stated explicitly
 
-Ilia's words, given for the PLT-3095/3096/3097 batch and asked about again the same day because a
-run reported outcomes without labelling them. Group A/B says where a ticket sits on the board; the
-action class says what this run *did about it*. Both belong in the summary, and the class goes in
-the table, not buried in prose.
+Group A/B says where a ticket sits on the board. The action class says what can actually be done
+with it. Both go in the summary, and the class goes in a table, not buried in prose.
 
-| class | when | deliverable |
+**Treat each ticket as a blackbox** and put it in exactly one of these four. Ilia's wording:
+
+| class | meaning | what the run delivers |
 |---|---|---|
-| **PR** | the whole context is understood | branch `PLT-XXXX`, the change, tests, PR |
-| **not code** | no PR needed, something else needs tweaking (prod data, a config, a draft reply) | say what was tweaked, or what needs to be |
-| **not ours** | the fix belongs to another team or repo | name the owner, route it, do not start work |
-| **debug branch** | not understood well enough to fix | maximum instrumentation on a branch Ilia can run visually, plus exactly what its output would prove |
+| **1. stale, unresponded** | nobody has replied; it needs following up by a named person | say who owes what, and draft the chase |
+| **2. resolvable in-session, no visual debugging** | technical debt this session can finish alone | branch `PLT-XXXX`, change, tests, PR immediately |
+| **3. resolvable in-session, needs Ilia's visual debugging first** | the fix is within reach but must be seen in the app before it is written | a branch Ilia can run, plus exactly what to look at and what each outcome proves |
+| **4. ambiguous and global** | too hard or too wide to settle alone | say what the disagreement is, and propose the meeting or chat, with the specific question |
 
-Rules that follow from it:
+Rules that follow:
 
-- **Never report a ticket without its class.** "Investigation delivered" is not an outcome; "not
-  code, investigation delivered, no fix requested" is.
-- A **debug branch** is a real deliverable, not a failure. It must be marked DO NOT MERGE, and the
-  summary must say which console output settles which hypothesis, so one manual run is decisive.
-- Never turn "not understood" into a speculative PR. The 2026-09-01 PLT-3097 misdiagnosis (a probe
-  with invented addresses read as an IAM mapping gap) is the standing example of why.
+- **Never report a ticket without its class.** "Investigation delivered" is not an outcome;
+  "class 4, investigation delivered, needs a call to decide" is.
+- Class 3 is a real deliverable, not a failure. Mark the branch DO NOT MERGE and state which console
+  output settles which hypothesis, so one manual run is decisive.
+- Never promote a class 3 or 4 into a class 2 PR on a guess. The 2026-09-01 PLT-3097 misdiagnosis
+  (a probe with invented addresses read as an IAM mapping gap) is the standing example.
+- A ticket can have a class 2 half and a class 4 half. Split it and say so, rather than picking one.
+
+**Correction, same day:** an earlier version of this section (commit `c51fe8d`) invented a different
+four-way scheme (PR / not code / not ours / debug branch). That was my paraphrase, not Ilia's, and
+he rejected it. The table above is his actual wording. Do not reintroduce the other one.
 
 ---
 
