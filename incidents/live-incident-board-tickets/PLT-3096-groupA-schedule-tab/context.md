@@ -90,3 +90,56 @@ without needing customer involvement.
 - Whether the bug reproduces on the very first two WBS rows a user tries, or only after some other
   interaction (scroll, search, filter) — the video would answer this, not opened.
 - Any link to PLT-3095 beyond same-day/same-shape — not established.
+
+## 2026-09-01 (later) — NEW SUSPECT, and the reason one repro was not enough
+
+**`bar/hooks/useShowWBS.ts:33` force-opens EVERY task:**
+
+```ts
+gantt.eachTask(task => (task.$open = true))
+gantt.render()
+```
+
+inside a `useEffect` with deps `[gantt, showWBS]`. It therefore fires on mount, on every WBS toggle,
+and on any remount of the component that owns the hook.
+
+**On its own this produces the exact reported symptom**: the WBS collapsed by the first click
+re-expands, and the second click appears to do nothing (it did toggle, then everything was reopened).
+
+**Why the earlier instrumentation could not have caught it.** `plt-3096-collapse-diagnostics.ts`
+wrapped `gantt.open/close/parse/clearAll/sort` and listened for `onTaskOpened`/`onTaskClosed`. A
+direct `task.$open = …` assignment goes through none of those: no method call, no event. So a
+force-open-all was invisible. This is a correction to the earlier plan, which expected one manual
+repro to be decisive — it would have come back silent.
+
+Three sites write `$open` directly. All three are now logged (commit `6d688e939`, branch
+`PLT-3096`, still DO NOT MERGE):
+
+| site | trigger |
+|---|---|
+| `useShowWBS.ts:33` | effect re-run: mount, WBS toggle, or remount |
+| `use-actions.tsx` `expandAll` / `collapseAll` | context menu |
+| `activity-context-menu.tsx` | "Expand/Collapse selected" |
+
+`logOpenStateWrite(gantt, reason, nextValue)` prints the caller, the value, the branch count, how
+many branches the write actually changes, and a stack.
+
+### What the repro now answers
+
+Collapse WBS A, then click the chevron on WBS B, and read the console:
+
+- **A `[PLT-3096] $open := true via useShowWBS effect` line appears between the two clicks** →
+  confirmed. The fix is to stop force-opening on every effect run: force-open only on the first
+  parse of a new schedule, and preserve current `$open` across a WBS toggle.
+- **No such line, but `onTaskClosed B` then `onTaskOpened A`** → something else reopens A; follow the
+  stack on the `onTaskOpened`.
+- **`expander CLICK on row A` when B was clicked** → click routing, not open-state, and the sort
+  comparator/spacer rows come back into scope.
+
+Still needs one manual run (or a fresh in-project `access_token` for `repro-playwright.js`); this
+narrows what to look for, it does not remove the need for the run.
+
+**Superseded:** the earlier PRIME SUSPECT (`scheduler-columns-sort.tsx` `resetToOriginalData`
+replaying the `open:true` snapshot). Left in place above for the record, but its only caller is the
+column-header 3-state sort cycle, which the chevron repro never touches. `useShowWBS` is the better
+candidate because it needs no sort interaction at all.
