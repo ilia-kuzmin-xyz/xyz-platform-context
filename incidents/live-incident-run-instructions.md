@@ -164,6 +164,29 @@ One line of status per ticket. Detailed pass only for the two exceptions above.
 4. **Unopenable media**, per ticket, and what each would settle.
 5. **What could not be verified**, plainly.
 
+### 2026-09-01 — every ticket also gets an ACTION CLASS, stated explicitly
+
+Ilia's words, given for the PLT-3095/3096/3097 batch and asked about again the same day because a
+run reported outcomes without labelling them. Group A/B says where a ticket sits on the board; the
+action class says what this run *did about it*. Both belong in the summary, and the class goes in
+the table, not buried in prose.
+
+| class | when | deliverable |
+|---|---|---|
+| **PR** | the whole context is understood | branch `PLT-XXXX`, the change, tests, PR |
+| **not code** | no PR needed, something else needs tweaking (prod data, a config, a draft reply) | say what was tweaked, or what needs to be |
+| **not ours** | the fix belongs to another team or repo | name the owner, route it, do not start work |
+| **debug branch** | not understood well enough to fix | maximum instrumentation on a branch Ilia can run visually, plus exactly what its output would prove |
+
+Rules that follow from it:
+
+- **Never report a ticket without its class.** "Investigation delivered" is not an outcome; "not
+  code, investigation delivered, no fix requested" is.
+- A **debug branch** is a real deliverable, not a failure. It must be marked DO NOT MERGE, and the
+  summary must say which console output settles which hypothesis, so one manual run is decisive.
+- Never turn "not understood" into a speculative PR. The 2026-09-01 PLT-3097 misdiagnosis (a probe
+  with invented addresses read as an IAM mapping gap) is the standing example of why.
+
 ---
 
 ## Notification
