@@ -143,3 +143,36 @@ narrows what to look for, it does not remove the need for the run.
 replaying the `open:true` snapshot). Left in place above for the record, but its only caller is the
 column-header 3-state sort cycle, which the chevron repro never touches. `useShowWBS` is the better
 candidate because it needs no sort interaction at all.
+
+## 2026-09-01 (later) — CONFIRMED a UI bug. The data is clean. Not related to PLT-3095.
+
+Pulled ATL05's current schedule revision (`64db53d6-d6b4-4052-a36e-daf32f1e1355`) live from
+`GET /api/v2/projects/4696d14d-fbe6-4f47-b655-2015dff75b81/schedules/{rev}` with a browser token,
+read-only.
+
+| check | result |
+|---|---|
+| rows | 3,761 (3,408 Activity, 353 WBS) |
+| duplicate `itemId` | **0** |
+| `parentItemId` referencing a row not in the payload | **0** |
+| unreachable rows | **0** |
+| roots | 1 |
+
+**The payload is structurally perfect.** Nothing the API sends can explain the collapse defect, so
+this is frontend-only. Collapse state is dhtmlx's client-side `$open` flag; it is never sent to or
+read from the API.
+
+### The PLT-3095 link is dead — do not re-open it
+
+Earlier notes (both tickets) floated that 3095 and 3096 might be one defect, on the theory that two
+schedule items sharing an `id` would explain both. That theory is now falsified on **both**
+projects: AUS02 has 0 duplicate `itemId`s and ATL05 has 0. They are unrelated bugs with different
+owners — 3095 is backend/import (missing WBS parents, api-v2, Sachin), 3096 is frontend (Darminder).
+
+### Where that leaves the suspect
+
+`bar/hooks/useShowWBS.ts:33` — `gantt.eachTask(task => (task.$open = true))` inside an effect keyed
+`[gantt, showWBS]`, force-opening every branch on mount, on WBS toggle, and on any remount of the
+owning component. Still the best candidate and still unconfirmed; the instrumented branch
+`PLT-3096` (commit `6d688e939`, DO NOT MERGE) logs it and the two other direct `$open` writers.
+One repro run distinguishes them. See the dated section above for what each console outcome proves.
