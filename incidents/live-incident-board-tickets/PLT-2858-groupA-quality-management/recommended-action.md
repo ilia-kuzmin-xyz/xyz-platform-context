@@ -383,3 +383,12 @@ hide-when-empty rather than the drop down.*
   directly in whatever channel he reads. That has been the recommendation since 07-24.
 
 **No Jira action was taken by this run.**
+
+## 2026-09-01 — 28th consecutive run unposted. Flagged for human attention this run.
+
+No change to diagnosis, owners, or the drafts. Drafts 1-4 (SHORT versions, 2026-08-31 section
+above) are still exactly right and still unposted. **49 days on Mostafa's 107320 question, 28 runs
+recommending the same four messages.** Still the board's only Critical-priority ticket. Surfaced
+explicitly in this run's notification, same reasoning as PLT-2815: repeating a correct, ready
+recommendation in a file nobody re-reads is not moving it, and a human decision is needed on
+whether to post these or say why not. No Jira action was taken by this run.

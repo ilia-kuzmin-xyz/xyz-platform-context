@@ -1,5 +1,15 @@
 # PLT-2858 — "QA Issue location detail"
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **In Analysis**, assignee Mostafa. Last comment still 108643 (Yash, 07-31, "any
+update on this?") — no reply since. **The actual stuck point (re-verified this run) is comment
+107320 (Mostafa → Darminder, 07-14): "what is the difference between location and location
+details" — Darminder never answered it.** Mostafa's 107533 ("waiting on this since it was asked of
+me") makes the dependency explicit. From 07-14 to today (09-01) is **49 days** unanswered. Still
+the board's only Critical ticket open. Nothing new to investigate; see `recommended-action.md` for
+the standing draft.
+
 - **Domain slug:** quality-management
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2858
 - **Type:** Live Incident · **Priority:** Critical · **Status:** In Analysis

@@ -304,3 +304,14 @@ scope by one line before filing — the same rows also render a misleading **"Ac
 every 15 minutes. Values may be slightly delayed."** (`activity-progress.tsx:174`,
 `gantt-tooltip.tsx:20`) next to a permanently-frozen 0%. Fixing the lock copy and leaving that
 tooltip in place would only half-fix what the customer complained about.
+
+## 2026-09-01 — Draft 1 and Draft 2 above still unposted. Flagged for human attention this run.
+
+No change to diagnosis. Draft 1 (hold the customer, via Yash) and Draft 2 (the one question to
+Sachin/Ali that decides the fix shape) are both still exactly right and both still unposted. The
+customer's own question ("let me know for the best way moving forward", comment 110649, 08-28
+12:20) has now gone **3 days unanswered**, on a ticket where the ball has been confirmed on us
+since 08-28. Unlike PLT-2815/PLT-2858 this isn't a chronic multi-week backlog yet — it's fresh
+enough that posting Draft 1 today would still read as a prompt reply. Surfaced in this run's
+notification so it gets posted before it becomes another PLT-2858. No Jira action was taken by
+this run.

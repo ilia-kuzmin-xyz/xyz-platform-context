@@ -1,5 +1,14 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **In Analysis**. Comment list unchanged, still ending at 109779 (Darminder, 08-17,
+"Fix still ongoing following QA latest testing"). Note: Jira's `updated` field reads 2026-08-25,
+three days later than the last comment (109779, 08-17) — some non-comment field changed on 08-25
+(not visible in the fields fetched this run); flagging rather than guessing at it. Nothing to
+re-investigate; the Staging-vs-Prod discrepancy candidate pattern (`recurring-defect-patterns.md`
+§ calculatedOn-cap) is still unconfirmed and still the open thread.
+
 ## 2026-08-18 — two new comments since the 08-14 draft, still no data answer to the actual questions asked
 
 Two comments landed 2026-08-17, both after the 08-17 run's own snapshot (which still described the

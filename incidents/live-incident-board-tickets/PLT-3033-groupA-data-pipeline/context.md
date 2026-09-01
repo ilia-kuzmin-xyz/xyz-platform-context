@@ -1,5 +1,16 @@
 # PLT-3033 — "Extra Parent WBS on Webviewer and inflation of unmapped activity count" — triage context
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **With Customer**. Last comment still 109789 (Darminder, 08-17, asking Yash for the
+previous and current XER schedules to compare, after guessing the extra WBS parent is
+'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'). No files supplied since. **Worth flagging: this is the
+same top-level shape as PLT-3095 opened today** (an unexpected/extra/missing WBS node appearing in
+the Web Viewer after a schedule import) — different projects (B11 vs AUS02), different specific
+symptom (extra parent vs missing branches), but both point at the WBS-import path. Not established
+as the same mechanism; see PLT-3095's `context.md` for its own (unverified) hypothesis. Worth a
+human keeping both in mind together if either gets confirmed.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-3033
 - **Issue type:** Live Incident · **Software Area:** Web Viewer (not the Dashboard page)
 - **Status:** **Open** · **Priority:** Major

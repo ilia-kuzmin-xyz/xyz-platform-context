@@ -1,3 +1,12 @@
+## 2026-09-01 — ticket closed 2026-08-31 without posting the 08-31 correction below. See `context.md` top section.
+
+The 2026-08-31 draft further down this file ("Yash, one correction to what I asked you on
+Wednesday...") was never sent. The ticket then closed via Freshdesk sync on 08-31, so the last
+technical instruction of record is still the superseded "set it to 0" ask. Not reopening or
+posting anything here — flagged for a human decision, see `context.md`.
+
+---
+
 # PLT-2649 — recommended action (DRAFT ONLY — execute nothing)
 
 ## Group A verdict: **stay With Customer.** Ball is with the customer (via Yash).

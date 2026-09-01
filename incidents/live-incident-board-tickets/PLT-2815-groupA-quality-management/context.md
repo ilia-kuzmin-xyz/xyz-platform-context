@@ -1,5 +1,12 @@
 # PLT-2815 — "estimate rework cost error"
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **With Customer**. Last comment still 106553 (Yash, 07-06, Freshdesk "Closed" sync —
+the Jira status and the Freshdesk sub-status disagree, unchanged since prior runs). No activity
+since 07-06. This is the oldest silent thread on the board (nearly two months) — see this run's
+notification note.
+
 - **Domain slug:** quality-management
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2815
 - **Type:** Live Incident · **Priority:** Major · **Status:** With Customer

@@ -1,5 +1,14 @@
 # PLT-3061 — "CAT2 Rework cost not auto populating" — triage context
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **Open**, assignee Darminder. Last comment still 110427 (Yash, 08-26, "will talk to
+him [Josh] directly and get this sorted when he is back" — Josh, the cost manager who owns the
+reference-table values, was on leave per Mostafa's 110425). No update since; this is now waiting
+on Josh's return, which is an external dependency Yash is tracking directly, not something this
+run can move. Root cause (missing `CSA-TCB`/`CSA-KGE` discipline rows in `rework_reference.json`,
+Pattern 6 in `recurring-defect-patterns.md`) remains confirmed and unchanged.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-3061
 - **Status:** Open · **Priority:** Medium
 - **Reporter/relay:** Yash Patel · **Assignee:** Darminder Atker

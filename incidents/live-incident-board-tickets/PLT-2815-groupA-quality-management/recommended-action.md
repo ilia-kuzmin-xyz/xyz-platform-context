@@ -173,3 +173,14 @@ the record needs:
 > already closed on the customer's side.
 
 §3's follow-up question still does not gate the close. No Jira action was taken by this run.
+
+## 2026-09-01 — close-out unchanged (23rd consecutive run unposted). Flagged for human attention this run.
+
+Same recommendation as every run since 07-30, unchanged: post the short 2026-08-14 closing comment
+(reproduced above) and transition `With Customer` → `Done` with a real resolution. **57 days
+stale, 23 consecutive runs recommending this, zero executed.** Nothing about the diagnosis or the
+product decision has changed or needs re-checking — this is purely an unexecuted housekeeping
+action at this point, not an open investigation. Surfaced explicitly in this run's notification
+because 23 unposted recommendations is past the point where repeating it in a file nobody
+re-reads is doing any good — a decision is needed on whether to post it, or to explain why not
+(e.g. if there's a reason it's being deliberately left open that isn't recorded here).

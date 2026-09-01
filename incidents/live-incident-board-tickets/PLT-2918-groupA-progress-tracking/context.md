@@ -1,5 +1,16 @@
 # PLT-2918 — "HITT - AUS01 WBS Location Mapping Removed automatically on web viewer" — triage context
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **With Customer**. Last comment still 110387 (Yash, 08-25, Freshdesk sync after
+Mostafa's 110385 reply — "then its a issue with the power bi report they are using to export the
+data" — to the customer's "this is still an issue weekly for me" report). No further reply since.
+Worth noting for whoever picks this up next: Mostafa's reply reads as pointing at the customer's
+own PowerBI export as the cause of the *renewed* weekly complaint, which is a different claim from
+Ilia's original diagnosis (our Save bug deleting category values, "Not Testable" on staging,
+comment 109356) — those two explanations were never reconciled in-thread. Not re-investigated this
+run; flagging the gap rather than assuming either is right.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2918
 - **Issue type:** Live Incident · Software Area: **Web Viewer**
 - **Status:** **Open** (genuinely fresh — no analysis posted by the assignee yet)

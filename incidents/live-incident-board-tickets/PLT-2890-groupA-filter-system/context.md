@@ -1,5 +1,13 @@
 # PLT-2890 — "Contractor filter missing on the Dashboard Non-BI"
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **In Analysis**. Last comment still 110634 (Yash, 08-28, Freshdesk sync after
+relaying the customer's new question about two separate contractor filters — QA vs progress/
+activities — and whether they can be merged). No reply posted yet to that question. Matches last
+run's reclassification (groupB → groupA, since the original fix shipped but this new question
+reopened it). Nothing new to investigate.
+
 - **Domain slug:** filter-system
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2890
 - **Type:** Live Incident · **Priority:** Medium · **Status:** Open

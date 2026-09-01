@@ -1,5 +1,12 @@
 # PLT-3051 — "LVN BL1-2 Element metadata not showing" — triage context
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **With Customer**. Last comment still 110548 (Yash, 08-27, Freshdesk sync to "Waiting
+on customer" right after the preceding "Closed" sync). Fix was verified on Staging 26.3.5 by QA
+(110086, 08-20) and Freshdesk moved to "Awaiting release" then back to customer-facing sync states.
+No customer confirmation on production yet. Nothing new to investigate.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-3051
 - **Type:** Live Incident · **Status:** In Analysis (Group A) · **Priority:** Major
 - **Project:** LVN BL1-2 · **Reporter:** Yash Patel · **Assignee:** Darminder Atker

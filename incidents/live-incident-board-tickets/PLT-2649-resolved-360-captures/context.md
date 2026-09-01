@@ -1,3 +1,32 @@
+## 2026-09-01 — CLOSED without the correction ever being posted. Read before anything else.
+
+**Live Jira re-fetch:** status is now **Done** (transitioned via Freshdesk sync, comment 110850,
+2026-08-31 10:49 — right after the previous run's 07:20 commit). **No new substantive comment
+exists between 110577 (Yash, 08-27, agreeing to relay "set it to 0" to BIM) and the Freshdesk-bot
+closure.** The 2026-08-31 correction drafted at the bottom of `recommended-action.md` — telling
+Yash to ignore "set it to 0" and ask BIM for **+50.40** instead — was never posted. It is not
+moot: the wrong number is still the last technical instruction of record on this ticket, and the
+ticket is now closed, which makes it easy for nobody to look at it again.
+
+**Risk, concretely:** if BIM has not yet acted (the previous run judged this likely — Yash was
+holding, not relaying), a future re-export following the *stated* record would set the level to 0
+again, which is wrong (see the 08-27 addendum: it should be +50.40, matching FH-0G-FFL). New 360
+captures taken on that floor before a correct re-export would land wrong a second time.
+
+**This ticket is Done and out of Group A/B scope as of today** — excluded per the standard rule.
+But the underlying risk isn't closed by the status change, so it's flagged here rather than
+silently dropped. **This is a case for the human to decide**, not a call to reopen the ticket:
+whether to post the correction as a closing comment for the record, reopen it, or handle it purely
+out-of-band with Yash. Recommended in this run's summary as something needing attention now.
+
+Unchanged from before the close, still true, still not done:
+- **XSPCMA-868 is still unlinked to PLT-2649** and (last checked 08-27) still Critical, unassigned,
+  18+ days old with no substantive comment. That doesn't get fixed by PLT-2649 closing.
+- The Phase-2 ground-floor-rooms question (drafted as a separate message, never sent) is now
+  homeless — the ticket it was meant to be asked on is closed.
+
+---
+
 # PLT-2649 — "[NEW DASHBOARD] PA12 360 pins appear too high" — triage context
 
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2649

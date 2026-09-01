@@ -1,5 +1,16 @@
 # PLT-3091 — "ATL05 - Cannot update intangible progress in the Web Viewer" — triage context
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **Open**, assignee Yash. Last comment still 110650 (Yash, 08-28, Freshdesk sync,
+right after the customer confirmed "for the non-completed ones we cannot assign any progress on
+them from the WV" — i.e. confirming Ilia's null-vs-zero diagnosis is the real remaining problem).
+No reply posted since 08-28 with next steps for the customer. Per last run's commit message, the
+ball has been on us since 08-28 with no visible movement — three days as of today. Root cause
+(formatter renders `-` for `null` and `0%` for numeric `0`, `gantt-x/scheduler/utils/formatters.ts:
+1-6`) is confirmed; what's missing is a reply to the customer and/or a fix ticket for the
+formatter, neither posted yet.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-3091
 - **Issue type:** Live Incident · Software Area: **Web Viewer**
 - **Status:** **Open** (brand new, no analysis posted yet) · **Priority:** Major

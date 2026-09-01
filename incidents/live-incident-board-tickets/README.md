@@ -45,6 +45,108 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-01 — 12 in-scope tickets: 2 brand-new same-day WBS-tree defects (PLT-3095, PLT-3096) sharing a candidate mechanism, PLT-2649 closed via Freshdesk sync with its correction never posted, 10 confirmed unchanged including two chronic unposted-recommendation backlogs now at 23 and 28 runs
+
+**Board re-queried** (`project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, filtered
+to exclude `With Technical Support`, `With QA`/`In QA`/`Ready For QA`, `In Code Review`, `Done`,
+`Blocked`; `Customer Release Check` treated as out of scope this run — same "anyone but us owns it"
+reasoning as the excluded statuses, since it means a fix has shipped and is pending the customer's
+own release confirmation). **12 tickets, all Group A** — no ticket anywhere on the board currently
+carries `Ready to Dev` or `Dev In Progress`, so Group B remains empty, as it has been for this
+board's entire history. Read every existing folder before any fresh Jira fetch (playbook step 0).
+
+### 🆕 PLT-3095 / PLT-3096 — two new same-day WBS-tree defects, different projects, candidate shared mechanism
+
+Both created 2026-08-31 (after the prior run's commit), both reported via Yash, both traced to the
+Web Viewer's schedule/WBS tree. New domain slug introduced: `schedule-tab` (matches
+`dashboard/schedule-tab.md`), no prior tickets on this board have used it.
+
+- **PLT-3095** (AUS02, Major, assignee Ilia): several WBS branches present in the P6 `.XER` are
+  missing from the Web Viewer Schedule tab. Customer ruled out a naming collision on the WBS
+  **code**; toggling Show WBS and re-importing both did nothing.
+- **PLT-3096** (ATL05, Medium, assignee Darminder): collapsing a second WBS row re-expands the
+  first one instead of collapsing itself. Reproduced independently by Yash himself, not just the
+  customer.
+
+**Candidate mechanism (inferred from code, NOT verified against either project's data — no DB or
+authenticated API access from this environment):** `ScheduleEntity._createActivityMap()`
+(`schedule-entity.ts:292-306`, hc-frontend) keys a `Map` by `activity.id` with a plain `.set()` —
+a duplicate id silently drops the earlier entry's WBS branch (would explain 3095) and would also
+make DHTMLX gantt track one open/closed state for two rows (would explain 3096). Backend
+(`schedules.service.ts:391-419`, XYZPlatformApi) confirms WBS and Activity rows share one `ItemId`
+namespace from `fn_GetScheduleRevision`, whose SQL body isn't in this checkout. Both tickets'
+folders carry the exact falsifying query for whoever has DB/live access. Not claiming the two
+tickets are the same defect — flagging that both point at the same code path and a human working
+either should know about the other. **PLT-3033** (data-pipeline, still open, "extra parent WBS" on
+a third project) shares the same top-level shape from a third angle; also cross-linked.
+
+New folders: `PLT-3095-groupA-schedule-tab/`, `PLT-3096-groupA-schedule-tab/`.
+
+### 🔒 PLT-2649 — closed via Freshdesk sync with its own correction never posted
+
+Status is now **Done** (Freshdesk-bot transition, comment 110850, 2026-08-31 10:49 — right after
+the previous run's 07:20 commit). No engineering comment exists between 110577 (Yash, 08-27,
+agreeing to relay the now-known-wrong "set the ground floor level to 0" instruction) and the
+closure. The 08-31 correction this folder itself drafted — telling Yash to ask BIM for **+50.40**
+instead, matching the working control `FH-0G-FFL` — was never sent, and the ticket then closed
+with the wrong number as its last technical word on record. Folder renamed
+`PLT-2649-resolved-360-captures/`. This is not a re-open recommendation — it's a flag: the risk (a
+future re-export following the stale record, or a new capture landing wrong before a correct
+re-export) survives the status change, and XSPCMA-868 (same root cause, still Critical, still
+unassigned, 18+ days) isn't touched by this closing either. Full detail: `context.md` §
+2026-09-01.
+
+### Confirmed unchanged (live `getJiraIssue` fetch each, comments + `updated` checked verbatim)
+
+| Ticket | Domain | Status | Note this run |
+|---|---|---|---|
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | Open | No new comment since 08-28 14:53 |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | **57 days stale, 23rd consecutive run** recommending the same close-out; flagged below |
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | Board's only Critical ticket; **49 days, 28th consecutive run** on the same 4 ready drafts; flagged below |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Comments unchanged since 08-17; `updated` field itself moved to 08-25 for reasons not visible in the fields fetched — noted, not chased |
+| [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | In Analysis | No reply yet to the customer's two-contractor-filters question (110634, 08-28) |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | No reply since Mostafa's 08-25 PowerBI-export theory, which was never reconciled against Ilia's original Save-bug diagnosis — noted as an open gap |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Still waiting on the customer for the previous/current XER pair Darminder asked for 08-17; possible link to PLT-3095, see above |
+| [PLT-3051](PLT-3051-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Fix shipped and QA-verified 08-20; still no production confirmation from the customer |
+| [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | Open | Waiting on Josh (cost manager, on leave) per Yash's own direct follow-up |
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | Open | Customer's own question (110649, 08-28) unanswered **3 days**; 2 drafts ready since 08-31; flagged below |
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3095** — the `.xer` schedule file plus 4 screenshots. Same limitation as every prior run:
+  no authenticated path to Jira attachment bytes from this environment. The `.xer` is the one
+  artefact that could directly test the duplicate-id hypothesis above.
+- **PLT-3096** — a 36 MB screen recording plus 3 screenshots. Not essential (Yash's text description
+  plus his own repro already specify the bug precisely) but would confirm exact timing/sequence.
+- Prior gaps stand exactly as previously documented (PLT-2858, PLT-2815, PLT-3033) — not re-listed.
+
+### Needing a human now
+
+Ranked by how much longer silence costs, not just by tenure:
+
+1. **PLT-3091 — post Draft 1 (to Yash) and Draft 2 (to Sachin/Ali).** Only 3 days silent so far,
+   but this is exactly how PLT-2815 and PLT-2858 got to 23 and 28 runs — catch it now.
+2. **PLT-2858 — post the 4 SHORT drafts (Mostafa, then Pietro).** Board's only Critical ticket, 49
+   days, 28 runs unposted.
+3. **PLT-2815 — execute the close-out.** Purely administrative, 57 days, 23 runs unposted.
+4. **PLT-2649 — human decision needed**, not a routine post: whether to comment on the closed
+   ticket to correct the record, reopen it, or handle out-of-band with Yash. See `context.md`.
+5. **PLT-3095 / PLT-3096 — route the two drafted backend/dev questions** (Sachin/Ali for 3095,
+   Darminder already assigned for 3096) to test the duplicate-id hypothesis.
+6. **PLT-3033 / PLT-3033↔3095 link** — worth mentioning to whoever picks up either that the other
+   exists, given the shared WBS-import shape.
+
+### Notification
+
+Sent: **PLT-2815** and **PLT-2858** (two chronic backlogs of ready, unposted recommendations — 23
+and 28 consecutive runs respectively — crossing round numbers this run with no execution),
+**PLT-3091** (customer waiting on us, 3 days and counting, 2 drafts ready — flagged early rather
+than let it become a third chronic backlog), and **PLT-2649** (closed via Freshdesk sync while its
+own drafted correction to a wrong customer-facing instruction was never posted — a decision the
+human should make now that the ticket is out of this routine's normal scope).
+
+---
+
 ## Run: 2026-08-31 — 11 in-scope tickets: 1 brand-new Critical (PLT-2651, 5th incident on the same feature), 1 reclassified back to Group A (PLT-2890), 1 "resolved" ticket from 08-28 actually reopened on a real second defect (PLT-3091), and PLT-2649's live-instruction risk resolved itself but the record still needs correcting
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" AND status IN ("Open", "In

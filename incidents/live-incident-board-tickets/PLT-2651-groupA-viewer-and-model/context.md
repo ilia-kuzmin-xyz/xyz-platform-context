@@ -1,5 +1,11 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
+
+Status still **Open**, assignee Ilia. Last comment is still 110665 (Yash, 08-28 14:53, "Waiting on
+3rd line" Freshdesk sync) — no new comment since the 08-31 run recorded this ticket. Nothing to
+re-investigate this run.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-2651
 - **Type:** Live Incident · **Priority:** **Critical** · **Status:** **Open**
 - **Project:** SWITCH ATL08 · **Reporter:** Masum Ahmed · **Assignee:** **Ilia Kuzmin**
