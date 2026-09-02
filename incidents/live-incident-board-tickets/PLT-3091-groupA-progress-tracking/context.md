@@ -632,3 +632,31 @@ possible**, and it belongs to api-v2 (Sachin / Ali), not to us.
 `validForProgressCalculations` from `activityType` or from something upstream that correlates with
 it (10,961/10,961 correlation, but the computing code was never read); and the two attached
 screenshots (ids 63410, 63409) remain unopenable behind Atlassian auth — still not blocking.
+
+## 2026-09-02 (late) — re-raised as draft PR #944; #941 stays closed
+
+Ilia closed **#941** unmerged on 09-01 15:26, reason not recorded. Re-raised today as a **draft**
+with the identical diff, per his instruction to prepare the in-flight live incidents as draft PRs.
+
+**PR: `XYZReality/XYZPlatformApi` #944, draft, branch `PLT-3091`.** Same branch as #941; `master`
+merged in (commit `86875b3c`, 4 commits — task-library search/sort/paging and commissioning routes,
+**no overlap** with any of the 4 files this PR touches), so the diff is byte-identical to #941's:
+`schedules.service.ts` +5, and the 3 test files.
+
+Re-verified after the merge, in this environment:
+
+| check | result |
+|---|---|
+| full unit suite (`mocha ./test/unit/**/*.spec.ts --exit`) | **2418 passing, 5 pending, 1 failing** |
+| the 1 failure | `azure.util` — sinon cannot stub the immutable `generateBlobSASQueryParameters`. Pre-existing, reproduces with changes stashed, an artifact of installing without the lockfile |
+| `schedules.service.spec.ts` alone | 24 passing |
+| `tsc --noEmit` | clean |
+| `prettier --check` on all 4 files | clean |
+
+**Note for the next run:** `npm test` and a bare `npx mocha 'test/unit/**/*.spec.ts'` are not
+interchangeable. The suite leaves open handles and **hangs without `--exit`** — a run without it sat
+past 600s producing no output at all. `npm test` also runs `node scripts/patch-yargs-cjs.cjs` first.
+Use `npx mocha -r ts-node/register "./test/unit/**/*.spec.ts" --exit` to skip nyc.
+
+If #944 is closed again, do not re-raise it a third time without asking why — twice is a signal, not
+a coincidence.
