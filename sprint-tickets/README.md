@@ -2467,3 +2467,25 @@ it as *the* blocker no longer holds. `master` itself still has no entry and stil
 **Lesson: a "don't create conflict surface" decision only works if it is the shared decision.**
 With concurrent runs, the cheap move is to say where the conflict resolves (one comment, one note)
 rather than to abstain and assume others will too.
+
+### 17:37 UTC — settled: all four PRs green, nothing red anywhere
+
+`build` success on **#2180** (`2856ba5`), so the branch-local suppression works there too. Closing
+state of 09-02, all four green and every review thread resolved:
+
+| PR | Head | build | Waiting on |
+|----|------|-------|-----------|
+| #2192 | `fb437e8` | ✅ | approval — no longer blocking anything |
+| #2186 | `244a57d` | ✅ | approval |
+| #2148 | `0e9542b` | ✅ | approval |
+| #2180 | `2856ba5` | ✅ | approval |
+
+**The CVE is now suppressed on three branches and fixed properly on none of them except #2192.**
+`master` still has no entry and still carries `shortid`, so master's own next build fails until one
+of the three lands — at which point whichever lands first supplies the suppression and the other two
+conflict on `.trivyignore`. Resolution rule is in the 17:30 entry above: **take the side where
+`shortid` is removed.**
+
+Net for the sprint: **0 tickets kicked off** (all five in code review all day), **0 open review
+threads**, four green PRs, and the whole sprint still gated on human approvals — #2148 now 16 days
+open with no human review, #2180's approval still dismissed since 08-27.
