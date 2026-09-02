@@ -284,3 +284,9 @@ behaviour). The hook's own ref lifecycle is **not** covered — reviewed by read
 
 The other two `$open` writers (`use-actions.tsx` expandAll/collapseAll, `activity-context-menu.tsx`)
 are explicit user actions and are untouched. `useShowWBS` was the only implicit one.
+
+### CI outcome — GREEN
+
+`build` success and SonarCloud success (0 new issues, 0 hotspots, 22.0% coverage on new code) on
+`d5509246b`. Same Trivy story as #2194 — red on the base-branch `nanoid` CVE first, green after
+porting #2192's `.trivyignore` entry. **#2195 is a green, mergeable draft.**

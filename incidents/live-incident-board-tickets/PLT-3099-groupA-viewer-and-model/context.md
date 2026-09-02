@@ -527,3 +527,10 @@ place and CI is the first real run.
 - **No confirmation step on linking** — PLT-3100, unchanged.
 - **Ctrl+Z after linking** — unchanged.
 - Wants a visual check, not just CI.
+
+### CI outcome — GREEN
+
+`build` success and SonarCloud success (0 new issues, 0 hotspots, 27.4% coverage on new code) on
+`8155ac91d`. `npm run test-ci` runs before the Trivy step, so the 7 new tests are green in CI. The
+first run had been red on Trivy alone (`nanoid` CVE-2026-73086, base-branch, fixed by porting #2192's
+`.trivyignore` entry). **#2194 is a green, mergeable draft.** Only caveat left is the visual check.

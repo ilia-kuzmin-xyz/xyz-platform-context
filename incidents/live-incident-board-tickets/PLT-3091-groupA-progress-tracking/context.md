@@ -660,3 +660,19 @@ Use `npx mocha -r ts-node/register "./test/unit/**/*.spec.ts" --exit` to skip ny
 
 If #944 is closed again, do not re-raise it a third time without asking why — twice is a signal, not
 a coincidence.
+
+### CI outcome — build RED, and it is NOT this diff
+
+SonarCloud gate **passed** (10 new issues, same count #941 carried; the SonarCloud project is private
+so the 10 cannot be enumerated from the session — do not attempt another blind fix, the 09-01 attempt
+was built on a wrong theory and did not reduce the count).
+
+`build` **failed** on **Run Integration Tests**: 1609 passing, 17 pending, 3 failing, all
+`expected 400 to equal 409`. `NPM Test` (unit) passed first, so the 7 new unit tests are green in CI.
+Cause is the unpinned `PostgreSQLDatabase` checkout and `SystemType_Name_uidx` — full write-up in
+`incidents/live-incident-run-instructions.md` § "platform-api e2e: the DB schema is NOT pinned".
+Recorded as one comment on #944 with the proposed patch; nothing pushed, because it is unrelated to a
+5-line schedules fix and unverifiable here.
+
+**So PLT-3091's own change is as green as this environment and CI can show it.** The PR is blocked
+only by a repo-wide e2e breakage that affects every open PR.
