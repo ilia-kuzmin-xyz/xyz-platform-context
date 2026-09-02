@@ -271,3 +271,55 @@ selection/filter and **linked additional elements**". Strictly, nothing addition
 elements were **taken off `CY-1250`**. That matters for the reply, because the customer's real
 exposure is that **`CY-1250` silently lost its links**, which they have not noticed yet and which
 their own screenshot of `CY-1300` would not show.
+
+## 2026-09-02 — the Ctrl+Z half is ANSWERED: the fix exists and 26.3.6 has not been released
+
+Ilia recalled this from the AT10X incident; verified against live Jira.
+
+| ticket | status | fixVersion | released |
+|---|---|---|---|
+| **PLT-3084** — AT10X, "undo/Ctrl Z not working properly in web viewer" | Ready For QA | **26.3.6** | **false** |
+| **PLT-2743** — "Remove double source of truth for element installation/linking state in V2 viewer" (the fix) | Ready For QA | **26.3.6** | **false** |
+
+Ilia's own comment on PLT-3084 (110366, 2026-08-25): *"the issue has been resolved by PLT-2743 which
+will be a part of 26.3.6 release"*. The registration is present in `master`
+(`ViewerPage/services/linking/linking-service.ts:55-56`, `registerHistoryCallbacks(HistoryType.Link, …)`).
+
+**So Kyriakos's Ctrl+Z did nothing because ATL08 prod runs a build predating 26.3.6, which has never
+shipped.** No new defect, no investigation needed on this half — it is release-pending.
+
+### Two corrections to earlier passes in this folder
+
+1. **"Stale build" is the wrong framing.** The earlier note described AT10X as running a *stale*
+   build, implying prod had fallen behind. It has not: **the fix has never been released to anyone.**
+   Every project on prod has had non-functional linking-undo continuously since the regression.
+   PLT-3099 is therefore the **second customer incident caused by the same unreleased fix**, eight
+   days after the first.
+2. **Attribution.** This folder credited PR #2081 / commit `4ad83a7` (2026-08-07) with restoring the
+   registration. Jira attributes the resolution to **PLT-2743**. Both may be true (a restore plus a
+   wider refactor), but PLT-2743 is what the release is tracked against and is the correct reference
+   in any reply. Not reconciled further — it does not change the conclusion.
+
+### The console check in `recommended-action.md` is now unnecessary
+
+That pass proposed running `window.projectService.linkingService.constructor.toString()` against
+ATL08 to test for a missing registration. **Skip it.** The Jira release state answers the same
+question with no browser session: the code has the registration, the release carrying it is not out.
+
+### What this leaves open on PLT-3099
+
+Of the four questions the ticket really contains:
+
+| # | question | state |
+|---|---|---|
+| 1 | why did the selection hold `CY-1250`'s 1,239 links instead of the visible pick | **open** — see the 09-02 measurement section above; PLT-3100 raised for the missing guard |
+| 2 | why did Ctrl+Z not work | **answered** — 26.3.6 unreleased |
+| 2b | can undo be used to recover now | **no** — undo is browser-session state, that session is long gone; recovery is a data operation regardless |
+| 3 | can the links be restored | **yes, exactly** — 1,239 ids in `analysis/PLT-3099-ATL08-CY1300-moved-elements.csv`, no other link changes on ATL08 since |
+| 4 | what about `CY-1250`, which silently lost 1,250 links | **not asked by anyone**, not in the ticket, customer unaware |
+
+### ⚠️ Worth raising internally, not with the customer
+
+**26.3.6 has been sitting unreleased since at least 2026-08-25 and is now blocking a second customer
+incident.** That is a release-scheduling question, not an engineering one, and it is the single
+cheapest thing that would stop this recurring.

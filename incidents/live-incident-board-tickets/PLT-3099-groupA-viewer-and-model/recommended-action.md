@@ -39,3 +39,47 @@ the one detail that helps regardless of which hypothesis is right.
 > **Did the customer click anything in the model between linking and pressing Ctrl+Z?**
 
 (67 words)
+
+
+---
+
+## 2026-09-02 — revised. Two of the four questions are now answered; the draft changes accordingly.
+
+Supersedes the draft above. That draft asked Yash to find out whether the customer clicked anything
+between linking and pressing Ctrl+Z, in order to separate a real undo bug from the by-design
+selection-sharing behaviour. **That question is now moot:** PLT-2743's fix is in `master` but its
+release (**26.3.6**) has never shipped, so linking-undo is non-functional for everyone on prod. Do
+not ask it.
+
+Also do not run the `linkingService.constructor.toString()` console check — the Jira release state
+answers it.
+
+### Draft comment — to Yash Patel, on PLT-3099 — DRAFT ONLY, not posted (98 words)
+
+> @Yash Patel traced it on prod. Nothing extra was linked. 1,239 elements were **moved** off activity
+> **CY-1250** onto CY-1300, in one action at 16:55 UK on 1 September. An element holds only one
+> activity link, so linking one that already belongs elsewhere moves it, silently.
+>
+> So there is a second problem they have not seen: **CY-1250 lost 1,239 links.**
+>
+> On Ctrl+Z: that is the AT10X issue, fixed under PLT-2743 but waiting on the 26.3.6 release.
+>
+> Fully reversible, I have the exact 1,239 ids.
+>
+> **Can they confirm CY-1250 should get all 1,239 back?**
+
+### Why that question, and why not simply restore
+
+Some of the 1,239 may genuinely belong on CY-1300 — the customer *was* trying to link something.
+Restoring all 1,239 to CY-1250 would undo their intended work along with the accident. Asking is
+cheaper than doing it twice.
+
+### Before it goes out
+
+- **Line up who performs the restore.** It needs a platform-api write, so Sachin or Ali. Do not tell
+  the customer it is reversible without knowing who will do it.
+- **Do not mention PLT-3100 or the missing-confirmation defect.** That is our engineering problem,
+  not part of a reply about their data.
+- **Consider whether to volunteer the 26.3.6 delay.** Naming PLT-2743 is honest and shows the undo
+  failure is known, but it also tells the customer a fix has been sitting unreleased for over a week.
+  Ilia's call.
