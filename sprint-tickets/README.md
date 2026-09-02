@@ -2517,3 +2517,45 @@ unfixable. That is fine and unblocks master's build — but it means:
 So the order that costs least: merge #2148 (it is ready), then resolve #2192's conflict toward its
 own side and merge it as the cleanup. Merging #2192 first also works and is slightly tidier, but it
 is no longer worth holding #2148 for.
+
+### 20:42 UTC — #2148 MERGED. Two tickets done, and the follow-up pass is complete
+
+**#2148 merged** (`50711c3` on master) — **PLT-2953 and PLT-3004 are delivered.** First tickets
+off this sprint's board. Master now carries #2148's `.trivyignore` block, so **master's build is
+unblocked** and it still carries `shortid`, exactly the sequencing predicted at 20:40.
+
+Did the whole post-merge pass rather than leaving it for the next run:
+
+| Branch | Behind | Result |
+|--------|--------|--------|
+| PLT-2968 (#2186) | 4 | **clean merge** `244a57d → 1438b8a` |
+| PLT-2896 (#2180) | 1 | `.trivyignore` conflict → resolved **toward master**, `2856ba5 → 9a36c3c` |
+| fix/trivy-… (#2192) | 1 | `.trivyignore` conflict → resolved **toward the branch**, `fb437e8 → 63d9cc0` |
+
+All three now 0 behind master.
+
+**The two resolutions went opposite ways on purpose, and the rule is the same one:** keep whichever
+side leaves the tree correct.
+- **#2180** is a 404-routing change with no business owning a CVE note, so taking master's version
+  leaves its `.trivyignore` byte-identical to master — the PR stops touching the file at all.
+- **#2192** *is* the shortid removal, so its block is the one that stays true after merge (master's
+  text still defers dropping shortid). Verified after each: exactly one `CVE-2026-73086` line, no
+  duplicate block, and on #2192 that `shortid` is still absent from `package.json` **and**
+  `package-lock.json`.
+
+**PLT-2968's clean merge was checked semantically, not just textually** — #2148 rewrote 42 files
+across the same assets-panel folder. Confirmed it deleted no files, that every file PLT-2968 touches
+still exists, and that the readiness files' relative imports all still resolve. (First attempt at
+that check was wrong — `ls a b c` fails if *any* candidate is missing, so it reported seven false
+"unresolved" imports. Re-ran per-candidate. **Do not trust a multi-operand `ls` as an existence
+test.**)
+
+**#2192's description was rewritten**, because it claimed to unblock every PR in the repo and that
+stopped being true the moment #2148 merged. It is now titled and described as what it actually is:
+dropping a dead dependency. Retitled *"Drop shortid, an unused dependency holding a vulnerable
+nanoid in the tree"*. This is the same stale-PR-body trap recorded on 08-31 — a body written for
+one situation quietly becomes a lie when the situation moves, and a reviewer acting on it wastes
+their time.
+
+**Sprint scoreboard: 2 of 5 tickets delivered** (PLT-2953, PLT-3004). Remaining: PLT-2968/PLT-2967
+on #2186, PLT-2896 on #2180, both green and awaiting approval, plus #2192 as the cleanup.
