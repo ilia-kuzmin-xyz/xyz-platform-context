@@ -2337,3 +2337,24 @@ be live at once, and they will both do the obviously-correct thing to the same f
 | #2180 | `abe300e` | 🔴 | this CVE only; goes green once #2192 lands |
 
 **0 open review threads across all four PRs.** 0 tickets kicked off (all five in code review).
+
+### 13:30 UTC check-in — master moved again; #2192 still unmerged and still needed
+
+`master` advanced `ac0c63b → 7ee6b82` (three **PAPI-530** commits, `sonar-project.properties`
+only). Checked whether that made the hotfix redundant — **it did not**: master still has **no**
+`CVE-2026-73086` entry and still carries `shortid`. #2192 remains the fix, still open, still
+waiting on approval (4 reviewers requested, `merged: false`).
+
+Merged master into the hotfix branch to keep the blocker mergeable: `047f8b3 → fb437e8`, zero file
+overlap, clean. Verified after merging that the fix survived — `shortid` still absent from
+`package.json`, CVE entry still in `.trivyignore`.
+
+Deliberately did **not** re-merge master into #2186 / #2180 / #2148 this time. They cannot merge
+until #2192 lands, and once it does they each need a master merge anyway to pick up the fix — so
+merging a `sonar-project.properties`-only delta now would burn three ~19-minute CI runs to be
+re-done later. **Do it in one pass after #2192 merges**, not before.
+
+The parallel actor is still iterating PLT-2953's selection behaviour (`0e9542b` 14:17 BST,
+"opening a linked asset selects its element again", after `39f2573`). It is working Darminder's
+feedback directly; PLT-2953 still carries its own narrower CVE block and still has `shortid`, so
+the conflict resolution noted on #2148 stands.
