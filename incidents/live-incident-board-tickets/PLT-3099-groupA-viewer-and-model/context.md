@@ -484,3 +484,46 @@ State the accurate position, move to the action, and own the error internally.
 A second draft then said *"nothing needed on their side"* and immediately asked permission to remove
 the links — a contradiction Ilia caught. **The permission already existed** in comment `111085`;
 asking again was both redundant and self-contradicting.
+
+## 2026-09-02 (late) — FE fix written and raised as a draft PR
+
+**PR: `XYZReality/hc-frontend` #2194, draft, branch `PLT-3099` off `master`.**
+
+| file | change |
+|---|---|
+| `viewer-x/components/services/utils/filter-selection-by-visibility.ts` | new, 42 lines |
+| `viewer-x/components/services/utils/filter-selection-by-visibility.test.ts` | new, 7 tests |
+| `viewer-x/components/services/selection-service.ts` | one call in `_handleButtonUp`, after the section-box step, before the filter step |
+
+**The gate is `viewer.isNodeVisible(dbId, model)`, not membership of `getIsolatedNodes()`.** That
+choice matters and is the thing to re-check if the fix misbehaves: on an NWD model the isolated
+container carries no mesh and its leaf children are the geometry the user sees, but isolation records
+only the container — a strict membership test would drop exactly what was clicked. `isNodeVisible`
+stays true for those children. `issue-service.ts:856` already uses the same call for issue pins, so
+this is the repo's existing idiom rather than a new one.
+
+`isNodeVisible` also covers **hide**, not just isolate, which closes the "not verified" item the
+09-02 afternoon entry left open — *in intent*. It is still not observed against a real model: the
+Forge mechanisms differ (isolation sets nodes off, hide sets the hidden flag) and only the isolation
+half matches what the customer actually did. Tests pin the intended behaviour against a fake viewer.
+
+The per-id walk is skipped when nothing is hidden or isolated, and a test asserts `isNodeVisible` is
+never called in that case — box selections reach five figures, so this is a real cost, and the
+assertion keeps the fast path from decaying into a coincidence.
+
+**5 of the 7 tests fail when the filter is reverted to a pass-through** (verified by doing it). The 2
+that still pass are the over-filtering guards: dropping something the user *can* see would be worse
+than the bug being fixed.
+
+Validated in an isolated vitest harness in the scratchpad (`vitest 3.2.7`, 7 passed) plus
+`tsc --noEmit` on both new files. **hc-frontend still cannot be installed here** (`npm ci` → 401 on
+private `@xyzreality/dhtmlx-gantt`), so the import in `selection-service.ts` is not type-checked in
+place and CI is the first real run.
+
+### Still open after this PR — do not let it read as "3099 is done"
+
+- **The 1,239 links already on `CY-1300` are untouched.** Needs a platform-api write; no owner lined
+  up. `CY-1250` needs nothing.
+- **No confirmation step on linking** — PLT-3100, unchanged.
+- **Ctrl+Z after linking** — unchanged.
+- Wants a visual check, not just CI.
