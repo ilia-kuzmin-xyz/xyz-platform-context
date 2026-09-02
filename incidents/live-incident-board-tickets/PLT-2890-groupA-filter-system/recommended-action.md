@@ -144,3 +144,46 @@ into work, raise it as its own ticket rather than reopening the shipped one a se
   the panel detects a dynamic category type whose name collides with a built-in filter
   (`dashboard-filter-utils.ts:241` treats only discipline and package as core). Same no-editorial-
   layer shape as PLT-3044.
+
+---
+
+# 2026-09-02 — both drafts above are SPENT. The merge branch is dead.
+
+The 08-31 draft asks Yash for the contractor names each filter lists, so we could decide whether a
+merge is possible. **That is no longer needed on either side:**
+
+- Ilia answered the customer's merge question directly (`110989`, 09-01) without the lists.
+- **Mostafa closed it** (`110990`, `110992`): two different fields, keep them separate — one is the
+  issue default, one is a schedule attribute.
+
+So the "if the lists match → product call for Mostafa/Pietro" branch never has to run. Kept above as
+the record of how the merge question was worked, not as a thing to post.
+
+**The one open item is different:** the customer's new question, relayed by Yash (`111073`, 09-02
+11:01, Freshdesk → Waiting on 3rd line):
+
+> "Do you know if there is any trick/way to automatically populate all the QA issues to match between
+> the contractor and the company?"
+
+**Answer, from the code (see `context.md` § 2026-09-02): no, not today.** `company` is writable only
+on issue create and on single-issue `PATCH`; the contractor side is a separate per-issue mapping
+(`usp_UpsertIssueActivityCategoryMappings`); the only bulk issue write is `bulk-update-types`, which
+does types and not `company`. Nothing derives either field from the other — which is the same fact
+underneath Mostafa's "two different fields".
+
+**No draft written yet — deliberately.** Two things should be settled before one is:
+
+1. **Is the answer just "no", or "no, and here is the ticket"?** A bulk set-company endpoint is a
+   small, well-precedented piece of work (`bulk-update-types` is the shape), but it is a feature, and
+   2890 has already been reopened twice on top of a shipped fix. **Do not reopen it a third time —
+   raise a separate ticket** if we want the capability.
+2. **Who answers.** The mechanical answer is ours (3rd line). Whether we *offer* to build it is
+   Mostafa's or Pietro's call, since he has just said the two fields are meant to stay independent —
+   auto-populating them partly undoes that, and it is worth asking him whether matching them is even
+   desirable before offering it to the customer.
+
+**Also still open and unrelated to any of this:** the FE gap noted at the end of the 08-31 section —
+the panel renders two identically titled "Contractor" sections with nothing distinguishing them
+(`dashboard-filter-utils.ts:241` treats only discipline and package as core). Now that both filters
+are confirmed to be staying, that labelling gap is the actual remaining defect in 2890's own area, and
+it is small. Worth its own low-priority ticket.
