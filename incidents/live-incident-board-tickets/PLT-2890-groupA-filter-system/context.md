@@ -417,3 +417,68 @@ assigned Ilia, no reply from our side since 28 Aug.
   a fifth category type. The hardcoded one always renders and the customer's description ("one for
   QA, one for progress") matches, so this is very likely but not proven by id.
 - Nothing was compiled or run; this environment cannot build the app.
+
+## 2026-09-02 — ⚠️ the merge question is ANSWERED and CLOSED. §"Verdict" above is out of date.
+
+The 09-01 verdict ends *"Class 4 — needs a product decision (Mostafa or Pietro), not a fix. In
+Analysis, Medium, assigned Ilia, **no reply from our side since 28 Aug**."* All three of those are now
+wrong. Superseded, not deleted — the reasoning still stands, only the state moved.
+
+### Our side did reply, and the product decision came back
+
+**Ilia posted comment `110989` on 09-01 17:17** (from the draft this session produced): the two cannot
+be merged; the QA one reads the `Company` field on each issue, the other is ML9's `CONTRACTOR` project
+category with values Kirby and Techbau filtering **activities** not issues; the same split shows on the
+issue form where `Company` and `CONTRACTOR` are two separate fields holding the same value; so today
+both need filling. He routed one question to Mostafa: should one of these be the single source of truth?
+
+**Mostafa answered 90 seconds later** — `110990` and `110992`, 09-01 17:18 and 17:20:
+
+> "they are two different field for now. And we should keep them separate for now."
+> "one is default for issue and one of schedule attribute."
+
+**So the merge question is settled: no merge, keep both.** That is the Class 4 product decision the
+09-01 entry was waiting on. Nothing further is needed on the merge, and the "if the lists match, a
+product call for Mostafa/Pietro" branch in `recommended-action.md` is now dead — the call was made
+without needing the full list.
+
+The 500-of-1,135 issue sample is therefore **moot for the merge question**. It is still unread, and it
+now matters for a different reason (below).
+
+### Status today: Open, and the ball is on OUR side on a NEW question
+
+Freshdesk 7397 went Waiting-on-customer (09-01 17:31) → Open (09-02 09:00). Ilia asked whether the
+ticket can be closed (`111072`, 10:57). Yash relayed a new customer question 4 minutes later
+(`111073`, 11:01) and set Freshdesk to **Waiting on 3rd line**:
+
+> "Do you know if there is any trick/way to automatically populate all the QA issues to match between
+> the contractor and the company?"
+
+**Unanswered as of this entry.** This is the only thing holding 2890 open.
+
+### What the code says about auto-populating (platform-api, read 09-02)
+
+| path | what it does |
+|---|---|
+| `POST /api/v2/projects/{id}/issues` | sets `company` on create (`issues.service.ts:73`) |
+| `PATCH /api/v2/projects/{id}/issues/{issueId}` | sets `company` on one issue (`issues.service.ts:198`) |
+| `PUT /api/v2/projects/{id}/issues/bulk-update-types` | the **only** bulk issue write (`issues.routes.ts:1505`) — issue **types** only, not `company` |
+| `PUT /api/v2/projects/{id}/issues/activity-categories/{issueId}/link` | the contractor side — `usp_UpsertIssueActivityCategoryMappings`, **per issue**, gated on `ISSUE_EDIT` |
+
+**No bulk `company` write exists, and nothing derives either field from the other.** So the honest
+answer is: no trick today. `bulk-update-types` is the precedent if we want to build one — that is a
+feature ask, not a live-incident fix, and it should be its own ticket rather than a third reopen of a
+shipped one.
+
+### ⚠️ Correction to something this session claimed earlier — do not repeat it
+
+Earlier on 09-02 this session asserted that an issue's `activityCategories` is **derived from the
+activity the issue is linked to**. **That is false.** `issues.categories.service.ts:8-27` shows
+`UPSERT_ISSUE_ACTIVITY_CATEGORY_MAPPINGS = 'CALL xyz."usp_UpsertIssueActivityCategoryMappings"($1,$2,$3,$4)'`
+and `linkActivityCategories()` — it is an **explicit per-issue mapping table**, written through the
+endpoint above. A draft comment built on the derived-from-activity theory was withdrawn before it went
+anywhere. Recorded here because the theory is superficially plausible and the same wrong turn is easy
+to take twice.
+
+This also *strengthens* Mostafa's answer rather than weakening it: two independently-written fields is
+exactly why they cannot be merged, and exactly why nothing populates one from the other today.
