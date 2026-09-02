@@ -392,3 +392,95 @@ The ticket raised for the missing guard has been rewritten (summary now "Linking
 selection with no count shown and no confirmation") with both false claims removed and an explicit
 corrections section. The engineering ask is unchanged and still valid: linking writes whatever is in
 the selection with no count and no confirmation.
+
+---
+
+## 2026-09-02 (afternoon) — ROOT CAUSE FOUND in FE code. The customer named it, and the code confirms it.
+
+### First, a process failure to record
+
+The **retracted** draft was posted to the ticket as comment `111080` (09-02 11:39) before the
+falsification was found (~13:00). So the ticket publicly states that 1,239 elements were "moved off
+CY-1250", that "an element holds only one activity link", and that "CY-1250 lost 1,239 links" — **all
+three false.** Yash relayed it and the customer agreed to a "revert to CY-1250" that is not the
+operation needed. Anything written on this ticket before ~13:00 should be read against the retraction
+above.
+
+### The customer's reply is the breakthrough (comment `111085`, 09-02 11:53)
+
+Two things in it:
+
+1. They **confirmed** the elements can go back to `CY-1250`.
+2. **They described the workflow, and it is the answer:** they *"intentionally selected and linked
+   approximately **400 visible elements** while working with a **section box** and **isolated element
+   types**"*, yet 1,239 were linked. Their own hypothesis: *"the selection may have included
+   non-visible elements within the dragged selection area, even though those elements had been hidden
+   and were not intended to be linked."*
+
+1,239 − ~400 ≈ 839, against their "~800 additional". Consistent.
+
+### VERIFIED in code — drag-select honours the section box and filters, but NOT isolation
+
+`viewer-x/components/services/selection-service.ts`, `_handleButtonUp` (~`:111-153`) takes the raw
+Forge box selection and filters it **twice**:
+
+| filter | applied? | mechanism |
+|---|---|---|
+| section box / cut planes | **yes** | `getElementsInsideSectionBox(s.ids, model, viewer, false, false, 1)` — fragment world-bounds vs `viewer.getCutPlanes()` (`section-box-helper-functions.ts`) |
+| active filters | **yes** | `_filterBoxSelectionByAllowedDbIds(...)` when `filterService.getModelActiveFilterCount() > 0` |
+| **isolation / hidden elements** | **NO** | nothing in that path reads `getIsolatedNodes`, `getHiddenNodes` or `isNodeVisible` |
+
+`getElementsInsideSectionBox` is purely geometric — it never consults visibility either.
+
+**The bitter detail:** this same file *does* track isolation, at `_handleIsolationChange:156-182`,
+storing it via `selectionStore.setIsolatedElements()`. **The data is already there and this path
+never uses it.**
+
+### Why this is a bug and not by design
+
+The code already establishes the principle twice over — a drag should select only what the user has
+narrowed to (section box, filters). **Isolation is the same class of narrowing and is the one case
+missed.** That is an inconsistency, not a deliberate choice.
+
+### This SUPERSEDES the parent-node-expansion hypothesis
+
+The 09-01 pass proposed `SelectionService._handleSelectionChange()` expanding a container dbId into
+all its children (`:380-393`). That remains real code, but it is **not needed** to explain this
+incident and is not the better-evidenced cause. The isolation gap explains the exact numbers and the
+exact workflow the customer described. **Do not lead with parent-expansion again.**
+
+### Remediation, corrected
+
+**Remove the 1,239 from `CY-1300`. `CY-1250` needs no change** — it holds all 4,521 of its links
+including those 1,239. Needs a platform-api write (Sachin or Ali); **no owner lined up yet, so do not
+promise timing.**
+
+### The fix
+
+`selection-service.ts:_handleButtonUp` — apply the same treatment against the viewer's
+isolated/visible set that `_filterBoxSelectionByAllowedDbIds` already gives the filter case, one step
+after `getElementsInsideSectionBox`. Small, and mirrors a pattern two lines above.
+
+**Two things not verified:** whether hidden-by-**hide** behaves the same as hidden-by-**isolate**
+(different Forge mechanisms; only isolation was reasoned about, because that is what the customer
+used), and the fix itself — hc-frontend cannot be built or run here, and this is UI behaviour that
+wants a visual check rather than CI alone.
+
+### PLT-3100 needs its Cause section rewritten
+
+It currently names parent-node expansion as the candidate. Superseded by the above. Note that
+PLT-3100's actual ask — a confirmation before writing a large selection — **is still valid and
+independent**: even with isolation respected, a drag can select more than intended and there is no
+count or confirmation before the write.
+
+### Communication lesson, worth keeping
+
+The first corrected draft opened with *"Correction to my earlier comment, I had this wrong"* and
+Ilia rejected it: from the customer's side **nothing changed** — they want those 1,239 off `CY-1300`
+and on `CY-1250`, which is exactly what happens either way. The correction was **less damage than we
+said, not different damage.** Broadcasting our confusion into the customer channel buys them nothing.
+State the accurate position, move to the action, and own the error internally.
+
+A second draft then said *"nothing needed on their side"* and immediately asked permission to remove
+the links — a contradiction Ilia caught. **The permission already existed** in comment `111085`;
+asking again was both redundant and self-contradicting.
