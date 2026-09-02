@@ -101,3 +101,18 @@ live call sites (`pages/account/routes.tsx:21`, `MobileMenu.tsx:44`, `BIM360Call
 `OAuthLinkProjectFlow.tsx:124`). His thread to close, not ours.
 
 Full run log: `sprint-tickets/README.md` § 2026-08-28 (morning).
+
+## 2026-09-02 — master merged in; no engineering work outstanding
+
+Run found the ticket still **In Code Review** (not eligible for kick-off) and PR #2180 with **zero
+open review threads** and a **green `build`**. Only action taken: `master` had moved to
+`ac0c63b` (PLT-3022 — built-in roles remapped to the Custom Permissions authority mapping), leaving
+this branch 1 commit behind, so master was merged in (`b5c7204` → `abe300e`).
+
+The merge is clean and carries none of our own code: the file-set intersection between `ac0c63b`
+and this branch is **empty**, and a trial `merge --no-commit` reported no conflicts. PLT-3022 does
+not touch this branch's files.
+
+Still gated on **human approval only** — see the 09-02 entry in `sprint-tickets/README.md` for the
+full triage, the `copilot-pull-request-reviewer`-vs-`build` red-check trap, and the open product
+question PLT-3022 raises about authority-gating the commissioning surfaces.

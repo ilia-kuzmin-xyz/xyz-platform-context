@@ -202,3 +202,18 @@ code, no CI re-run, no review dismissal.
 
 Worth knowing for the next run: this PR has **never had a human review**, so a misleading
 "merge something else first" line in its own description was a live cost, not cosmetic.
+
+## 2026-09-02 — master merged in; no engineering work outstanding
+
+Run found the ticket still **In Code Review** (not eligible for kick-off) and PR #2186 with **zero
+open review threads** and a **green `build`**. Only action taken: `master` had moved to
+`ac0c63b` (PLT-3022 — built-in roles remapped to the Custom Permissions authority mapping), leaving
+this branch 1 commit behind, so master was merged in (`5cca6eb` → `f81c1cc`).
+
+The merge is clean and carries none of our own code: the file-set intersection between `ac0c63b`
+and this branch is **empty**, and a trial `merge --no-commit` reported no conflicts. PLT-3022 does
+not touch this branch's files.
+
+Still gated on **human approval only** — see the 09-02 entry in `sprint-tickets/README.md` for the
+full triage, the `copilot-pull-request-reviewer`-vs-`build` red-check trap, and the open product
+question PLT-3022 raises about authority-gating the commissioning surfaces.

@@ -82,3 +82,18 @@ build + Sonar green on `8efe583`, branch already contains master head `70451f7`.
 Full run log: `sprint-tickets/README.md` § 2026-08-28 (morning).
 
 Note: this folder has no `context.md` — the domain notes live in `plan.md` here.
+
+## 2026-09-02 — master merged in; no engineering work outstanding
+
+Run found the ticket still **In Code Review** (not eligible for kick-off) and PR #2148 with **zero
+open review threads** and a **green `build`**. Only action taken: `master` had moved to
+`ac0c63b` (PLT-3022 — built-in roles remapped to the Custom Permissions authority mapping), leaving
+this branch 1 commit behind, so master was merged in (`812bedd` → `0e478ea`).
+
+The merge is clean and carries none of our own code: the file-set intersection between `ac0c63b`
+and this branch is **empty**, and a trial `merge --no-commit` reported no conflicts. PLT-3022 does
+not touch this branch's files.
+
+Still gated on **human approval only** — see the 09-02 entry in `sprint-tickets/README.md` for the
+full triage, the `copilot-pull-request-reviewer`-vs-`build` red-check trap, and the open product
+question PLT-3022 raises about authority-gating the commissioning surfaces.

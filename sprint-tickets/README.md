@@ -2078,3 +2078,110 @@ So: after editing a PR body on a Jira-linked repo, **re-read it once** — and i
 `[PLT-XXXX]:` definitions differ, leave them alone rather than "fixing" them into a third shape.
 Final state on #2186 is clean. Head `71d79d0`, base `70451f7`, reviewers 4, CI and thread states
 all unchanged by both saves.
+
+---
+
+## Triage — 2026-09-02
+
+JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()`
+
+Sprint composition **unchanged again** — same five tickets, all **In Code Review**, mapping to the
+same three PRs. **0 eligible tickets for kick-off**, so checkpoints 1–3 only, as on every run since
+08-04.
+
+| Ticket | Summary | Status | PR | Eligible? |
+|--------|---------|--------|----|-----------|
+| PLT-3004 | Project Settings — Type Library add search | In Code Review | #2148 (with PLT-2953) | ❌ |
+| PLT-2968 | Asset details — readiness tag override context menu | In Code Review | #2186 | ❌ |
+| PLT-2967 | Asset details — readiness tag task context menu | In Code Review | #2186 (folded in) | ❌ |
+| PLT-2953 | Asset Details — linking mode | In Code Review | #2148 | ❌ |
+| PLT-2896 | Infinity Canvas — `/canvas/library` shows an empty page | In Code Review | #2180 | ❌ |
+
+### Checkpoint 1 — review feedback: clean, nothing outstanding
+
+**Zero open review threads across all three PRs**, verified per PR rather than inferred:
+
+| PR | Threads | State |
+|----|---------|-------|
+| #2186 | 4 | all `is_resolved: true`, each replied |
+| #2148 | 18 | all resolved, each replied |
+| #2180 | 3 | all resolved, each replied |
+
+PR-level (non-review) comments are Sonar bot only, plus our own 08-24 coverage explanation on
+#2180. **No new human feedback since the last run.**
+
+### Checkpoint 2 — builds green
+
+`build` completed **success** on all three PRs (heads as of 09-01 17:2x).
+
+One trap worth recording: **#2180 shows a red `copilot-pull-request-reviewer` check run**
+(`99952860700`, 17:16, conclusion `failure`) alongside a **green one 5 minutes later**
+(`99954515874`, 17:21). That is the *reviewer bot's own* job failing and being re-run, **not the
+build** — `build` (`99952829461`) is green on the same head. Do not read the red reviewer job as a
+CI failure and do not "fix" anything for it; check the check-run *name* before reacting.
+
+Sonar quality gate **passed** on all three. It does report open issues on new code — #2186: 1 new
+issue; #2148: 2 new issues, 9.2% duplication; #2180: 16.1% duplication — all non-blocking, none
+looked at this run. Flagged, not actioned.
+
+### Checkpoint 3 — all three branches were 1 commit behind; master merged into each
+
+`master` moved `70451f7 → ac0c63b` (**PLT-3022**, built-in roles remapped to the Custom Permissions
+authority mapping, #2184, merged 09-01 17:32 — i.e. *after* all three PRs' last CI run). All three
+branches shared merge-base `9f8c5bc` and were exactly **1 behind / N ahead**.
+
+Contemplated before merging, because PLT-3022 is a broad permissions/visibility change and #2180
+touches `app/routes.tsx` — the obvious collision candidate. It does **not** collide:
+
+- `ac0c63b` touches 39 files: `config/constants.ts`, `hooks/useProjectAuthorities.ts`, ProjectSettings
+  tabs, viewer-bar tools, issues/media/model-layers/coordinates panels, comments, gantt.
+- It does **not** touch `app/routes.tsx`, the `assets-panel/*` readiness or linking files,
+  `hooks/useAssetReadiness.ts` or `hooks/useAssetElementLink.ts`.
+- Computed file-set intersection per branch: **empty for all three**. Trial `merge --no-commit`:
+  clean, `rc=0`, zero `diff-filter=U` entries on all three.
+
+Merged and pushed (`--no-ff`, one merge commit each, no code touched):
+
+| Branch | Before | After |
+|--------|--------|-------|
+| PLT-2968 | `5cca6eb` | `f81c1cc` |
+| PLT-2953 | `812bedd` | `0e478ea` |
+| PLT-2896 | `b5c7204` | `abe300e` |
+
+**No approval was lost to these pushes** — #2186 and #2148 have never had a human review, and
+#2180's approval was already `DISMISSED` before this run. That is *why* merging was safe to do
+unprompted; on a PR carrying a live approval the trade-off would need stating first.
+
+Tests were **not** run locally: `node_modules` is absent in this container and the merges are
+textually empty of our own code, so CI on the new heads is the check that matters.
+
+### Semantic follow-up PLT-3022 raises (not actioned — needs a human call)
+
+PLT-3022 added authority gating to viewer-bar tools and several viewer panels
+(`useProjectAuthorities`, `coordinate-button`, `issues-button`, `media-button`, `menu-button`).
+Our commissioning assets-panel UI (#2148 override/linking, #2186 readiness ladder) adds **new
+interactive surfaces in the same viewer** and gates on the `Commissioning` flag only — it does
+**not** consult the new authority mapping. Nothing is broken today (flag-gated MVP, and no
+authority for it exists yet), but "should readiness override / element linking require a specific
+authority?" is a real product question that PLT-3022 has now made answerable. **Raise with the
+team; do not invent an authority unilaterally.** New work, not merge fallout.
+
+### Still waiting on a human (carried forward, all still true)
+
+- **Approvals on #2148, #2180, #2186.** The entire sprint gates on this and nothing
+  engineering-side is outstanding on any of the three. #2148 is now **16 days** open (since 08-17,
+  39 files) with **no human review ever**; #2186 likewise none.
+- **#2180's approval remains `DISMISSED`** (rishib-xyz, 08-27, dismissed by our own `854b651`).
+  Re-requested once by the 08-28 run. **Still do not re-request** — repeat pings are noise.
+- #2186 cannot be QA'd on `stable` until XYZ_Supabase promotion PR #5 lands (`asset_readiness`
+  404s there). Dev env only; XYZ_Supabase is outside this session's repo scope, so **not
+  verifiable from here** — carried on the 08-26 finding, not re-confirmed.
+- One-off dev **data** check on the 9 legacy `workflow_step_task` rows (§4 of
+  `planning/PLT-XXXX-repoint-fe-to-supabase-target-model.md`) — needs DB access.
+
+### Authorship: git identity had reset to `Claude` again — third run running
+
+`git config user.name` in **hc-frontend** read `Claude <noreply@anthropic.com>` at session start.
+The container is rebuilt per run, so the 08-04 local fix does not persist and **re-setting it is a
+required first step of every run**. Re-set to `ilia-kuzmin-xyz` *before* the three merge commits,
+so all three are correctly attributed (verified in `git log --format=%an` after pushing).

@@ -50,3 +50,10 @@ Still `In Code Review`; not eligible for kick-off. Checkpoints 1–3 all clean o
 build + Sonar green, branch already contains master head `70451f7`, no conflict
 (`mergeable_state: blocked` = awaiting approvals, not a merge problem). Full run log and the
 ticket→PR map: `sprint-tickets/README.md` § 2026-08-28 (morning).
+
+## 2026-09-02 — carried on #2148; master merged in
+
+Still **In Code Review**, still delivered by **#2148** alongside PLT-2953. No open review threads,
+`build` green. Only change this run: master (`ac0c63b`, PLT-3022) merged into the `PLT-2953`
+branch, `812bedd` → `0e478ea` — clean, empty file-set intersection, none of our code touched.
+Gated on human approval only. Full triage: 09-02 entry in `sprint-tickets/README.md`.
