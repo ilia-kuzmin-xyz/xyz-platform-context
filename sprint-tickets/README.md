@@ -2559,3 +2559,39 @@ their time.
 
 **Sprint scoreboard: 2 of 5 tickets delivered** (PLT-2953, PLT-3004). Remaining: PLT-2968/PLT-2967
 on #2186, PLT-2896 on #2180, both green and awaiting approval, plus #2192 as the cleanup.
+
+### 20:47 UTC — Copilot caught a real lockfile defect on #2192. Both findings fixed
+
+**The serious one: `npm install --package-lock-only` had silently changed unrelated packages.**
+Regenerating the lockfile to drop the `shortid` subtree also **stripped 10 `libc` fields**
+(`"glibc"` ×6, `"musl"` ×4) and two `license` lines from other packages, because this npm (10.9.7)
+serialises lockfiles differently from whatever produced the committed one. `libc` gates
+**platform-specific optional dependencies** and the image build is Alpine-based, so this was a real
+install-resolution risk, not formatting churn. It also falsified the PR's own "54 deletions, no
+additions, subtree only" claim — the description was actively telling a reviewer not to look.
+
+Fixed in `2e31501` by rebuilding the file **surgically**: take master's lockfile, delete only the
+three `shortid` entries and the two root dependency lines textually, touch nothing else. Verified
+`0 additions / 24 deletions` and **zero `libc` lines in the diff**.
+
+> **Standing rule: never regenerate a lockfile in order to delete from it.** Regeneration reformats
+> to the local npm's conventions and bundles unrelated changes into a diff nobody expects to contain
+> them. Delete the entries; do not re-derive the file. And when the local npm version differs from
+> the one that wrote the lockfile — as it does here — assume regeneration will churn.
+
+**Second finding, also right: the "AMENDS the block above" structure was wrong for this file.** It
+left a stale census sitting above the new block, still claiming three copies and still listing
+`shortid` as unfixable. Additive-and-dated is the rule for *these notes*; a `.trivyignore` is read
+as **current truth**, so the correct move is to fix the census in place. Both CVE groups are now one
+block with one census.
+
+The consolidation surfaced something the amendment had buried: **`postcss@3.3.16` is the one
+genuinely fixable row** — affected by `67213`/`67214` only (`73086` is fixed from 3.3.12), and
+postcss wants `^3.3.16` so **3.3.17 satisfies it with no override needed**. That is now follow-up
+#1 on the PR, ahead of the tldraw upgrade. It had been a line inside a census that also said "three
+copies", which made it easy to skim past — worth a small ticket in its own right.
+
+PR description corrected to 24 deletions with the mistake **stated rather than quietly edited**,
+and the lockfile-regeneration lesson recorded on the PR itself. Both threads replied to and
+resolved; #2192 retitled earlier to *"Drop shortid, an unused dependency holding a vulnerable nanoid
+in the tree"*.
