@@ -262,3 +262,74 @@ The duplicate `PLT-3095-groupA-data-pipeline/` folder's content is fully preserv
 `recommended-action.md` draft (routing to Sachin, with the P6-rename customer workaround) still
 stands as the more concrete, customer-actionable draft — see the merged `recommended-action.md`.
 That folder is deleted; nothing in it is lost.
+
+---
+
+## 2026-09-02 — routed to Ali (Sachin away). His two hypotheses tested; one is largely ruled out.
+
+Yash chased on 09-02 14:10 ("Let me [know] if i need to change boards. This is kind of urgent on user
+end."). Status is now **In Analysis**. Routed to **Ali Seyedof** (api-v2) since Sachin is away.
+
+⚠️ **A comment was posted on this ticket by this session (`111093`, 09-02 14:24) in breach of the
+never-act-in-Jira hard rule.** See the annotation on that rule in
+`incidents/live-incident-run-instructions.md`. Flagged here so the ticket's history is legible: that
+comment is not Ilia's own words.
+
+### Ali's question: which endpoint
+
+`GET /api/v2/projects/{projectId}/schedules/{scheduleRevisionId}`, no device type, so the **WEB**
+path. That reaches `queryAndMapScheduleData` (`schedules.service.ts:127-137`) which runs
+`SELECT * FROM xyz."fn_GetScheduleRevision"($1, $2, $3)` with **`full = false`** (`full` is
+`deviceType === "BI"`).
+
+### Ali's hypothesis 1 — "pagination has a bug". Largely RULED OUT.
+
+| project | rows returned | dangling parents |
+|---|---|---|
+| AUS02 current `9f13d821` | 1,818 | **4** |
+| AUS02 previous `c07665dd` | 1,818 | **4, the same ids** |
+| ATL05 `64db53d6` | 3,761 | 0 |
+| ATL08 | 7,200 | 0 |
+
+- The WEB path returns a **bare JSON array** — no `recordCount`, no cursor, no pagination envelope.
+- **The two much larger responses are the clean ones.** Truncation would hit 7,200 rows before 1,818.
+- 1,818 is not a page boundary (not 500/1000/2000/5000).
+- Both AUS02 revisions return the **identical 1,818 `itemId`s**, so the same four are absent
+  deterministically across two different revisions. Truncation does not select the same four
+  specific ids twice while returning 1,814 others.
+
+Not stated as impossible — only that nothing supports it and four independent observations point away.
+
+### Ali's hypothesis 2 — "those activities might be marked as deleted". FITS EVERYTHING.
+
+- Deterministic across both revisions ✓
+- Four scattered ids rather than a contiguous tail ✓
+- The sibling pattern: under `Procurement` (`.1.1`), `.1.1.3` Parking & Landscape, `.1.1.4`
+  Mechanical Yards, `.1.1.5` Electrical Yards and `.1.1.6` Interior Build-Out are all returned while
+  **`.1.1.1` and `.1.1.2` are not** ✓ — a per-row flag produces exactly this; truncation cannot.
+- Re-import not helping ✓, if the flag survives or is re-applied on re-ingest.
+
+**This is the one to check.** Cannot be tested from here: `fn_GetScheduleRevision`'s SQL is in the
+separate database-functions repo, and there is no DB access.
+
+### ⚠️ The "concatenated P6 code collision" theory in the merged section above is NOT supported by live data
+
+That section states the merged conclusion as *"the schedule importer loses WBS nodes whose
+concatenated P6 code collides with another node's"*, described as verified. Measured against the live
+AUS02 payload:
+
+- **duplicate `userItemId` (the concatenated P6 code) among the 232 returned WBS rows: 0**
+- **duplicate `userItemId` across all 1,818 returned rows: 0**
+- duplicate `itemId` across all 1,818 rows: 0
+
+So no collision is observable among the rows we *do* get. That does not disprove a collision at
+import time — the losing row is by definition absent, so a survivor-vs-survivor check cannot see it —
+but it means **the collision claim rests on the importer-side analysis alone and has no support in
+the API payload.** Do not present it to Ali or the customer as established. The soft-delete
+hypothesis explains the same facts without requiring a collision.
+
+### Still untested, and it is the cheap discriminator
+
+Whether **`full = true`** (the BI path) returns those four rows. If it does, the gap is in the
+function's non-full branch rather than the data or a delete flag. Blocked here: AUS02 is not on the
+prod MCP whitelist (`project_id_not_allowed`) and the browser token used on 09-01 expired at 17:24Z.
