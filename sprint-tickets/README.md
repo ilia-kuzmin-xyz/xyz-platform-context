@@ -2414,3 +2414,27 @@ criteria; raise a tldraw-upgrade ticket (2.4.6 → 5.3.2, now holding two suppre
 **After #2192 merges**, the next run should: merge master into #2186 and #2180 in one pass (they
 need it to pick up the fix), and on #2148 resolve the `.trivyignore` conflict by taking master's
 side and dropping the branch's duplicate block — otherwise `shortid` gets silently re-added.
+
+### Authorship slips this run — and the identity fix is NOT being applied by other runs
+
+Two of this run's commits to `main` are mis-attributed. Both are already pushed and are **left
+alone deliberately** — `main` here is shared with concurrently-running sessions, and force-pushing
+to rewrite history while another run is pushing is exactly how this repo lost work before. A wrong
+author email is cosmetic; a clobbered push is not. Recorded rather than repaired:
+
+- **`f349a20`** — author email typo'd as `…@users.noreply-github.com` (hyphen, not dot). Mine.
+- **`3ae010b`** — a `Merge branch 'main'` commit authored as **`Claude <noreply@anthropic.com>`**.
+  Cause: the identity was passed per-commit via `git -c user.name=… commit`, but `git pull
+  --no-rebase` creates its **own** merge commit and used the container's ambient identity.
+
+**Fix for future runs: set the identity with `git config` once, at the start, in every repo** —
+do not rely on per-command `-c` flags, because pulls, merges and rebases all author commits too.
+
+**The wider finding, which matters more than either slip:** `git log` for today shows a long run of
+commits to this repo authored as **`Claude <noreply@anthropic.com>`** that are *not* from this
+session — `a00714b` (PLT-3095), `2fc28fd` / `4260c60` / `22e52b1` (PLT-3099), `d3c0bc7` (PLT-2651),
+`bf94235` (live-incident runs), `6fabbca` (recurring-defect-patterns). So the standing instruction
+that re-setting the git identity is "a required first step of every run" is **not actually being
+honoured by the other runs**, and has not been for some time. Anyone auditing authorship in this
+repo should not read `Claude`-authored commits as suspicious — they are routine runs that skipped
+the identity step. Worth fixing at the routine/prompt level rather than re-noting it each run.
