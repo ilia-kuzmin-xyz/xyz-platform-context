@@ -45,6 +45,185 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-02 — backfilling a substantial unlogged 09-01 afternoon session (2 real code fixes shipped, 1 deliberately un-merged, 2 duplicate folders from parallel work reconciled), then 12 in-scope tickets today: 1 brand-new (PLT-3099), 2 left scope (PLT-3096, PLT-3097), the board's two chronic backlogs now at 24 and 29 runs
+
+### Backfilling an unlogged session first, same shape as 08-26/08-27/08-31's gaps
+
+`README.md` was last written at 07:19 on 09-01. **Fifteen more commits landed the same day**, 07:43
+through 16:27, none folded into a README entry — the exact pattern this file keeps recording. Folding
+it in here per standing precedent (08-31 §"Backfilling..."). What it did, by ticket:
+
+- **PLT-3097 — brand new same session, root-caused and shipped the same afternoon.** "Sign in with
+  SSO" button intermittently missing. Root cause: IAM's `providers:discover` answers **per address**,
+  not per domain, but the FE cached the answer **per domain** — so the first address typed in a tab
+  decided the SSO button for every other address at that domain until reload. An earlier read of this
+  incident (not this session's) had wrongly blamed a missing IAM domain mapping; retracted this run
+  after Sergey supplied the actual IAM code and corrected two more assumptions (the gate is "has a user
+  record", not "invited"; the empty-list response is deliberate anti-enumeration, and fails at that
+  goal today regardless). **Fix shipped:** `hc-frontend` PR **#2191**, merged to `master` 09-01 14:09
+  by Ilia, CI green (build, SonarCloud 0 new issues, 2 new regression tests, Copilot threads
+  resolved). Left scope today at `Customer Release Check`. Full detail:
+  `PLT-3097-groupA-access-permissions/context.md`.
+- **PLT-3095 / PLT-3096 — both root-caused, from two different, disconnected angles that turned out to
+  probably be the same finding.**
+  - **PLT-3095** (AUS02, missing WBS branches): one pass parsed the customer's uploaded `.xer` directly
+    and found two P6 concatenated-code collisions (`Milestones` vs `CFCI Procurement`, `Core & Shell
+    Construction` vs `OFCI/OFE Procurement`) — but wrote it into a **new, wrongly-tagged folder**
+    (`groupA-data-pipeline`) instead of the existing `groupA-schedule-tab` one, because it never read
+    that folder first. A separate, later pass **did** continue the correct folder and, working from
+    live prod data instead of the `.xer`, found **4** WBS nodes missing entirely from the served
+    schedule revision — and explicitly declared the earlier duplicate-id hypothesis (its own folder's
+    prior content) falsified, with no idea the XER-collision finding existed in a sibling folder.
+    **Reconciled this run:** the four live-prod missing-node task counts (2/87/101/314) match, one for
+    one, the four nodes named in the two XER collisions. Very likely the same defect, described from
+    two ends of one pipe — flagged as needing one confirming check (do the missing `itemId`s' P6
+    source rows match the collision participants) that neither pass could run itself. Duplicate folder
+    deleted, its content merged and preserved, `recommended-action.md` combined into one draft (91
+    words, routes to Sachin with a P6-rename workaround for Yash to give the customer today). Full
+    detail: `PLT-3095-groupA-schedule-tab/context.md` § 2026-09-02.
+  - **PLT-3096** (ATL05, WBS collapse/expand bug): same duplication shape — a second folder
+    (`groupA-progress-tracking`) opened mid-investigation instead of continuing `groupA-schedule-tab`,
+    abandoned once the correct folder's own investigation moved past it (new suspect: `useShowWBS`
+    force-open-all). Reconciled: nothing in the duplicate survived except a Playwright repro harness,
+    moved into the correct folder (still blocked on a fresh auth token). **Left scope today** — status
+    is now `With Technical Support`; Ilia's own comment (110996, 09-01 17:41) records he could not
+    reproduce it, posted a video, suspects the schedule itself was updated, and asked Yash for a fresh
+    repro if the customer still sees it.
+  - Both tickets' "possible shared mechanism" cross-link from the original 09-01 07:19 entry (below) is
+    now **dead** — PLT-3095's real cause (WBS import collision) and PLT-3096's (still unconfirmed,
+    `useShowWBS`) turned out unrelated once each was actually root-caused.
+- **PLT-2890 — 4 of the open questions answered against live ML9 data.** Confirmed: `CONTRACTOR`
+  category type exists, is platform-configured (not schedule-imported), and is the only one of 4
+  similarly-named types with any values; the two "Contractor" filters draw from genuinely different
+  objects (`company` on an issue vs. `activityCategories` on a schedule) with overlapping but
+  unconfirmed-identical values; both groups are confirmed on **one panel**, killing the two-pages
+  hypothesis; the original fix shipped in **26.3.3** (released 08-10). Verdict: the original ask is
+  done: the live question (can the two "Contractor" filters merge?) is a genuine **Class 4** product
+  decision, not a fix — the draft asking Yash for both filters' name lists (§ recommended-action.md)
+  is what actually unblocks it, still unposted.
+- **PLT-2651 — recommendation changed, and a risk on a separate ticket closed as a side effect.**
+  Ilia's own question (would the section-box tickets' history have helped here) led to finding that PR
+  #2069 (PLT-2906) had **already named this ticket's exact fork in writing in July**, as two hazards it
+  deliberately deferred: the load-order-dependent footprint (`getVisibleModels()[0]` only) and the
+  unreliable multi-building footprint estimate. Those are H1 and H2 in this ticket's own analysis.
+  **The earlier plan — ask the customer to refresh, to decide which of H1/H2 to fix — is retired: both
+  are already known-broken, so the fix is both, not a choice.** Live ATL08 model data pulled (144
+  models, 91 imported after the 26.2.3 "fix" shipped, ruling out the customer's cohort theory with data
+  as well as code) and a per-model-footprint verification route was attempted and found genuinely
+  closed (no artefact anywhere carries element positions outside the browser's own geometry load). One
+  side effect: **PLT-2906's own standing risk — that `master` might not actually contain PR #2069 — is
+  now struck**, confirmed present on `master` this run. Action class **3**: the fix is scoped to two
+  named spots in `section-tool-orientation.ts`, Ilia has a local build and can verify both hazards
+  himself using the two now-known models; still Open, still Critical, 118+ days, still no reply sent.
+- **PLT-3091 — a real backend fix was built, tested, PR'd, and then deliberately closed unmerged, for
+  the right reason.** `XYZPlatformApi` PR **#941** blanked `actualProgress` for Level-of-Effort
+  activities (mirroring the existing `plannedProgress` treatment) — unit + e2e tests written, CI fully
+  green including the real Citus e2e stack. **Ilia closed it himself without merging**: the fix removes
+  the wrong `0%` but shows nothing in its place, and the customer's own reply (110649, 08-28) — *"for
+  the non-completed ones we cannot assign any progress on them from the WV… let me know the best way
+  moving forward"* — asks for more than a blank cell would deliver. Nothing is lost: branch `PLT-3091`
+  on `XYZPlatformApi` still holds the fix, tests and a Sonar cleanup commit; a new PR needs no further
+  code once the display question is settled. **The actual blocker, unchanged since 08-28 and now 5
+  days silent:** Yash asked Mostafa whether handling these activities is a planning-team call. Nobody
+  has answered. Until that lands, shipping any of the three display options (blank / show 100% when P6
+  marks it complete / derive from spanned activities) is a guess.
+
+### Board re-queried today (2026-09-02)
+
+`project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, filtered to exclude `With
+Technical Support`, `Ready For QA`, `In Code Review`, `Done`, `Customer Release Check`, `Blocked`.
+**12 tickets in scope** — composition changed from yesterday's 12 (PLT-3096 left scope, PLT-3099
+arrived) but the count happens to match. Still no ticket at `Ready For Development`; **PLT-3091 is
+the board's first-ever `Dev In Progress` ticket**, kept in Group A under the standing exception
+(assigned to Ilia) rather than given the one-line Group B treatment.
+
+### 🆕 PLT-3099 — brand new, and its "undo did nothing" half may be a known, already-fixed mechanism
+
+"Wrong linking in the Web Viewer - SWITCH - ATL08 -X", Major, created 09-01 17:17, assignee Ilia.
+Two bundled complaints: linking a few visibly-selected pipe-insulation elements to activity CY-1300
+linked **all elements in the area** instead, and Ctrl+Z did not revert it. **The undo half has a
+strong, already-proven candidate**: `PLT-3084` (closed 08-26, same "linked fine, undo did nothing"
+symptom on a different project) root-caused this to a deployed build missing the linking-undo
+registration (fixed on `master` by PR #2081, 08-07) — settled there by one console line with no code
+change. That exact check (`window.projectService.linkingService.constructor.toString()`, feature-flag
+cookie appended not replaced) has not been run against ATL08 from here — no browser/prod access on
+this ticket. **The over-linking half is new and unexplained by PLT-3084**: traced to
+`selection-service.ts:380-393`, which silently expands a selected node with no element-id of its own
+to every one of its children — plausible if the customer's click landed on a hosting/parent node
+rather than the insulation leaf, consistent with "linked the whole area," but not verified against
+this model's actual category hierarchy. New folder: `PLT-3099-groupA-viewer-and-model/`. **Action
+class 3** for the undo half (one console check settles it); the over-linking half needs the model
+loaded against live data before anything more specific can be said. One screenshot attachment
+unopenable (Atlassian auth) — would show whether the extra-linked set is one contiguous system
+(supports the parent-node-expansion theory) or scattered (argues against it).
+
+### Confirmed unchanged (live `getJiraIssue` fetch each, `updated` timestamp checked verbatim against
+the 09-01 record — all match exactly, so none of these needed a fresh comment read)
+
+| Ticket | Domain | Status | Note this run |
+|---|---|---|---|
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | Board's only Critical ticket; **50 days, 29th consecutive run** on the same 4 ready drafts |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | **58 days, 24th consecutive run** recommending the same close-out |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53; decision-request to Mostafa/Pietro still unposted |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07; three-hypothesis split still undistinguished |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | `updated` unchanged since 08-18; still waiting on the customer's XER pair |
+| [PLT-3051](PLT-3051-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | `updated` unchanged since 08-27; fix shipped/QA-verified, still no customer confirmation |
+| [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | Open | `updated` unchanged since 08-31; **today (09-02) is Josh's expected return** — the private, non-Jira check-in Yash planned is due now |
+
+### Left scope this run
+
+- **PLT-3096** — `In Analysis`/`Open` → `With Technical Support`, per backfill above.
+- **PLT-3097** — brand-new and left scope inside the same unlogged session, per backfill above.
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3099** — one screenshot (Atlassian auth, unfetchable here). Would show whether the
+  over-linked set reads as one contiguous system/branch or a scattered set — the direct tell for the
+  selection-expansion hypothesis.
+- Prior gaps (PLT-3095's `.xer` + 4 screenshots, PLT-3096's screen recording, PLT-2858/PLT-2815's
+  images, PLT-3033's images) stand exactly as previously documented — not re-listed here.
+
+### Needing a human now — ranked by cost of continued silence, not just tenure
+
+1. **PLT-3091 — the blocking question is 5 days silent and about to become a third chronic backlog.**
+   Yash asked Mostafa on 08-28 whether the LOE-progress display is a planning-team decision; nobody
+   answered. A real, tested fix sits ready on a closed PR the moment that answer lands.
+2. **PLT-2858 — post the 4 ready drafts (Mostafa, then Pietro).** Board's only Critical, 50 days, 29
+   runs unposted.
+3. **PLT-2815 — execute the close-out.** Purely administrative, 58 days, 24 runs unposted.
+4. **PLT-3099 — run the one console check against ATL08** (`window.projectService.linkingService
+   .constructor.toString()`) before anything else on this ticket; it may close the undo half for free.
+5. **PLT-2651 — Ilia's own local-build verification** of both H1 and H2 in `section-tool-orientation.ts`,
+   using the two now-known ATL08 models; Critical, 118+ days, still no reply sent.
+6. **PLT-2890 — send the two-lists question to Yash** (drafted, short) before the Class-4 merge
+   decision can even be framed for Mostafa/Pietro.
+7. **PLT-3061 — Josh's expected return is today**; the private check-in with Yash that was queued for
+   ~09-02 should happen now.
+8. **PLT-3095 — route the merged importer finding to Sachin** (91-word draft ready) and give Yash the
+   P6-rename workaround for the customer today.
+
+### What could not be verified
+
+- **PLT-3095/PLT-3096's "shared mechanism"** — retired this run; each ticket's real cause turned out
+  unrelated to the other once actually found.
+- **PLT-3099** — whether ATL08's deployed build predates PR #2081 (no prod/browser access from here);
+  whether the customer clicked anything between linking and Ctrl+Z; whether the clicked dbId resolves
+  to a parent/grouping node in this specific model's instance tree.
+- **PLT-3095's reconciliation** — that the 4 live-prod missing `itemId`s are literally the same 4 nodes
+  the XER collision analysis named (matched here only by task count, not by a shared id).
+- Nothing was compiled, type-checked or run against a live app from this environment on any ticket
+  this run; this sandbox cannot build `hc-frontend` (`npm ci` fails on a private package).
+
+### Notification
+
+Sent: **PLT-3091** (a real, tested, CI-green fix is sitting on a closed PR, blocked for 5 days on an
+internal planning question nobody has answered — the same shape that turned PLT-2815/PLT-2858 into
+chronic backlogs, catchable now) and **PLT-3099** (new ticket, Major, and its most disruptive half —
+linking far more than intended with no undo — may already be explained and fixed elsewhere, one
+console check away from confirming).
+
+---
+
 ## Run: 2026-09-01 — 12 in-scope tickets: 2 brand-new same-day WBS-tree defects (PLT-3095, PLT-3096) sharing a candidate mechanism, PLT-2649 closed via Freshdesk sync with its correction never posted, 10 confirmed unchanged including two chronic unposted-recommendation backlogs now at 23 and 28 runs
 
 **Board re-queried** (`project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, filtered
