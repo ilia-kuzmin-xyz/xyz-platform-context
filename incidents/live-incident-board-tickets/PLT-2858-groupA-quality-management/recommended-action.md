@@ -438,3 +438,22 @@ answered it.
 
 **3. Cohort, still never swept.** Every project without named zones configured shows empty Location on
 all its issues (§ 3 q6). ML9 is a sample, not the population. Closing 2858 does not change that.
+
+### Correction, same day — the draft above quoted Mostafa verbatim. It should NOT.
+
+Ilia: *"no no, not direct quaote !!!"*. Relaying a colleague's words inside quotation marks to a
+coordinator reads as passing the buck, and it puts Mostafa's internal phrasing ("I think we need to")
+in front of the customer thread as if it were a considered external answer. Say the thing in our own
+voice and attribute the decision, without the quote marks.
+
+**Draft to use (31 words, unposted):**
+
+> Hi Yash — checked with Mostafa. Location is auto-populated from the BIM room location, so it's not
+> something to fill in. He's happy to close this one.
+>
+> **Anything outstanding on 7286 first?**
+
+**Rule worth carrying:** quote a colleague verbatim in the *notes*, where provenance matters. In a
+drafted reply, state the decision in our own words and name whose decision it is. Both instructions
+were given within a minute of each other and they are not in tension — "mostly quote Mostafa" meant
+*lean on his substance, add no context of our own*, not *paste his sentence*.
