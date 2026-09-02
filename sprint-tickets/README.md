@@ -2489,3 +2489,31 @@ conflict on `.trivyignore`. Resolution rule is in the 17:30 entry above: **take 
 Net for the sprint: **0 tickets kicked off** (all five in code review all day), **0 open review
 threads**, four green PRs, and the whole sprint still gated on human approvals — #2148 now 16 days
 open with no human review, #2180's approval still dismissed since 08-27.
+
+### 20:40 UTC — FIRST APPROVAL OF THE SPRINT: Darminder approved #2148, and it is mergeable
+
+"Nice job! Thanks for making those changes. Approved!" — **#2148 is `mergeable_state: clean`**:
+green, approved, no conflict. That is the first human approval on any of these PRs, after the PR sat
+**16 days** (opened 08-17) with no human review at all. Every run since 08-04 recorded "the entire
+sprint gates on approvals"; this is the first movement. It carries **two** sprint tickets,
+PLT-2953 and PLT-3004.
+
+The parallel run also rewrote the PR body to match the delivered behaviour (relink dialog, the
+pane-holding rule, and the previously-deferred "question 4" step now describing the relink), and
+added a CI note that ends **"Follow-up: drop `shortid`"** — independently agreeing with this run's
+finding.
+
+**Sequencing consequence, and the one thing to get right (this is now the live decision, not
+"merge #2192"):** if **#2148 merges first**, master inherits *its* `.trivyignore` block, which
+suppresses the CVE but **leaves `shortid` in the tree** and carries the note calling both copies
+unfixable. That is fine and unblocks master's build — but it means:
+
+1. `shortid` stays a declared, unused dependency on master until #2192 (or an equivalent) lands, so
+   **#2192 must not be closed as redundant** once #2148 merges. Its remaining content is the actual
+   dependency removal, which nothing else does.
+2. **#2192 will then conflict** on `.trivyignore`, as will PLT-2896. Resolution is unchanged and
+   recorded on #2180: **take the side where `shortid` is removed**, and drop the duplicate block.
+
+So the order that costs least: merge #2148 (it is ready), then resolve #2192's conflict toward its
+own side and merge it as the cleanup. Merging #2192 first also works and is slightly tidier, but it
+is no longer worth holding #2148 for.
