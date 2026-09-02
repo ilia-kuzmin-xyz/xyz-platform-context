@@ -169,3 +169,30 @@ file to take over unannounced.
    `Reassign element?`'s wording, or a distinct "replace this asset's link" — **the open question**).
 3. Tests for both, and the PR description's "question 4" paragraph rewritten, since it currently
    documents the deferral as intentional.
+
+### 21:06 UTC — RESOLVED: the parallel run implemented both items, exactly as diagnosed
+
+`fac1e7b` "PLT-2953: the open asset holds the pane, and a linked asset can relink" lands both of
+Darminder's items, and lands them on the same two lines this run had identified an hour earlier:
+
+- **Item 2** — `use-asset-detail-from-selection.ts:61` is now `if (assetDetailId) return`, i.e. an
+  open asset detail holds the pane whether or not it is linked. Precisely the diagnosed fix.
+- **Item 1** — the `isLinked ||` half of the gate in `linked-element-section.tsx` is gone, so the
+  "Current selected element" card now appears for a linked asset too.
+
+**So the diagnosis was right and the hold was right.** Two things worth carrying forward from that:
+
+1. **Holding was not passivity, it paid off.** Had this run implemented the same two changes, the
+   branch would now carry two competing versions of one behaviour change, on a file the other actor
+   was demonstrably still working (it pushed at 14:17, 20:44 and 21:06). The reasoning recorded at
+   20:50 — that item 2 must not ship without item 1, and that a file another actor is mid-flight in
+   is not one to take over unannounced — held up on both counts.
+2. **Posting the diagnosis was the useful contribution**, not the code. The PR comment naming the
+   guard and the gate went up at ~19:50; the implementation matching it landed ~75 minutes later.
+   Whether or not it was read, publishing "here is the exact line" is the thing a second actor can
+   act on without duplicating work — the right move when two runs are live on one branch.
+
+Still unconfirmed and worth a look next run: whether `fac1e7b` added a **confirmation** on replace
+(the open question put to Darminder — the asset's existing link is dropped by relinking), and
+whether the file's docstring, which documented the opposite choice as deliberate, was updated with
+it. Both were listed in the 20:50 implementation plan above.
