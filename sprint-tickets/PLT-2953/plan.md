@@ -134,3 +134,38 @@ reviewer's behaviour change (the routine's own rule is not to rush those), and
 `0e9542b` which is adjacent to item 2) — pushing over a file another actor is mid-flight in is the
 failure this repo already knows about. Said exactly this on the PR, with the diagnosis, so whoever
 picks it up starts from the cause rather than the symptom.
+
+### 20:50 UTC — nobody is working the feedback; both items still open and unclaimed
+
+Checked rather than assumed. The parallel run pushed again at 20:44 (`648d801`, "Custom
+permissions: give the Create button the theme's secondary skin") — **unrelated to Darminder's
+review**, and oddly unrelated to PLT-2953 altogether. Verified on the branch head that **both items
+are untouched**: `linked-element-section.tsx:366` still reads
+`if (isLinked || selectedElements.size !== 1) return null`, and
+`use-asset-detail-from-selection.ts:62` still reads `if (assetDetailId && !links[assetDetailId])
+return`.
+
+So the two changes are open, unclaimed, and diagnosed — the next run can start from the cause.
+
+**Why item 2 was not shipped on its own, even though it is a one-line guard change.** It is
+tempting: Darminder's wording is unambiguous, and the fix is `if (assetDetailId) return`. But
+landing it *alone* produces a worse UX than either endpoint. With the guard widened and the
+`isLinked` gate still in place, an open **linked** asset would neither navigate away when you click
+a linked element (the guard now holds the pane) nor offer a relink (the gate still suppresses the
+card) — a dead end reachable only by clicking the asset list or deselecting. The two items are one
+change with two halves, which is why the PR comment asked for the confirm wording before building
+either.
+
+Second reason, unchanged: the parallel run is still pushing to this branch (20:44), so it is not a
+file to take over unannounced.
+
+**Ready to implement, once someone answers the replace-confirm question:**
+1. `use-asset-detail-from-selection.ts` — widen the guard so an open asset detail holds the pane
+   whether or not it is linked. Note this contradicts the file's own docstring ("with … a linked
+   one, a linked element still opens its asset — that is plain navigation"); the docstring needs
+   updating in the same commit, since Darminder is deliberately overriding that choice.
+2. `linked-element-section.tsx:366` — drop the `isLinked` half of the gate so the "Current selected
+   element" card appears for a linked asset too, plus a confirmation on replace (reuse
+   `Reassign element?`'s wording, or a distinct "replace this asset's link" — **the open question**).
+3. Tests for both, and the PR description's "question 4" paragraph rewritten, since it currently
+   documents the deferral as intentional.
