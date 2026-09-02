@@ -361,3 +361,50 @@ request went up (08-21 and 08-28).
 **Nothing re-derived.** Mechanism confidence unchanged (~9.5/10, see 08-20 entry); this is a
 status-only update. The 08-27 recommendation (no Jira comment; private check-in with Yash around
 09-02) is still the right one and is now effectively due — see `recommended-action.md` 2026-08-31.
+
+## 2026-09-02 — the stall broke. Josh replied, and the ask has changed shape: route to With Technical Support.
+
+Live fetch today: status **Open**, Medium, assignee Darminder, 12 comments, `updated 11:22`.
+
+**New comment `111078` (Yash, 09-02 11:22) — Josh from project controls has answered:**
+
+> "I don't believe they need to keep this filter in this location in my opinion. If they need to filter
+> by TCB or Techbau then they should use the vendor field to do this"
+
+Josh needs to take it to the ML9 project manager before it can close. Yash: *"for time being we need
+to keep it open."* Freshdesk 7678 → **Waiting on customer** (`111077`, same minute).
+
+**What this means for our side: nothing is pending on engineering.** The diagnosis has been confirmed
+since 08-20 and re-confirmed 08-24 — the cost is blank because ML9's `CSA-TCB` / `CSA-KGE` disciplines
+are absent from the rework-cost reference table; it is reference data, not code. Josh's answer does not
+change that, it *declines the data change* and proposes the customer filter by vendor instead. Either
+way the resolution is a project-controls and project-management conversation, not a fix.
+
+### Recommended: move to **With Technical Support**
+
+Not a close — Yash is explicit that it stays open. But it should not sit in the dev queue while the
+only open action is Josh talking to the ML9 PM. `With Technical Support` is on this routine's standing
+exclusion list precisely for tickets parked on support/coordination rather than development, so the
+move also stops future sweeps re-triaging it.
+
+**Draft (68 words, unposted — the hard no-Jira-action rule stands; a human pastes it, and a human makes
+the status change):**
+
+> Hi Yash — nothing left on the engineering side here: the cost is blank because CSA-TCB and CSA-KGE
+> aren't in the rework cost table, which is reference data rather than code.
+>
+> It's now waiting on Joshua and the ML9 project manager, so it stays open as you said — but it doesn't
+> need to sit in the dev queue.
+>
+> **Shall we move it to With Technical Support while we wait?**
+
+Phrased as a proposal rather than a statement because the board move is Yash's call — he owns the
+Freshdesk thread and the coordination.
+
+### Two things that must not be lost if this closes on Josh's answer
+
+1. **The diagnostic branch** pushed 08-24 (see § 2026-08-24 § Branch) is still unmerged and unraised.
+   Check whether it is instrumentation-only before anyone assumes it is a fix waiting to land.
+2. **The cohort question is unanswered.** Any project that splits a discipline the way ML9 split `CSA`
+   will hit this identically, and the reference table is shared. Josh's "use the vendor field" answer
+   is an ML9 workflow decision; it does not make the table's coverage gap go away for anyone else.
