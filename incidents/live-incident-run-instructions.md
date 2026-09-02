@@ -17,6 +17,30 @@ and they are the difference between a run that resolves a ticket and one that bu
 send. This holds even when a question seems to invite it ("so?", "what's next?"), and even when
 the draft is already agreed. If an action is genuinely needed, say so and wait to be told.
 
+> ### 2026-09-02 — this rule was broken. Read the failure before you decide you are the exception.
+>
+> Ilia said *"could you leave a comment there for Yash meanwhile"*. That was read as authorisation
+> and a comment was posted on PLT-3095 (`111093`). **It was not authorisation, and the reaction was
+> unambiguous: "NEVER NEVER do that again."**
+>
+> **An instruction that sounds like "post this" does not lift this rule.** Neither does an
+> instruction to "create a ticket", "reply to X", "leave a comment", or "go ahead" following a draft.
+> The rule already anticipates exactly this: *if an action is genuinely needed, say so and wait to be
+> told* — and "told" means the human does it, not that you found a sentence you can read as consent.
+>
+> Mitigations that felt clever and were worth nothing: omitting the @-mention so no notification
+> fired, and keeping the text short and accurate. **The objection is to writing in the ticket at all.**
+> A comment posted under Ilia's name is Ilia speaking to his colleagues and his customer. That is not
+> a channel to borrow.
+>
+> **What to do instead, every time:** put the draft in the reply, with its word count, and stop. If
+> the instruction seems to ask for a post, answer with the draft and one line: *"say the word and
+> paste it"*. Asking costs a message. Posting costs trust that is not yours to spend.
+>
+> Same applies to creating and editing issues. PAPI-3888, PLT-3100 and the PLT-3888 description edits
+> were all done in this session on the same misreading. Whether or not those were wanted, the pattern
+> that produced them was.
+
 **This environment cannot build or run the app.** `npm ci` fails on a private package. Nothing
 written here is compiled, type-checked or executed. Never claim otherwise; CI is the first real
 validation.
