@@ -97,3 +97,40 @@ not touch this branch's files.
 Still gated on **human approval only** — see the 09-02 entry in `sprint-tickets/README.md` for the
 full triage, the `copilot-pull-request-reviewer`-vs-`build` red-check trap, and the open product
 question PLT-3022 raises about authority-gating the commissioning surfaces.
+
+## 2026-09-02 (19:40 UTC) — Darminder requested changes; the deferred "question 4" is now ANSWERED
+
+`changes_requested` review on #2148, two written items (plus another video, again unreadable by this
+routine — but this time the prose is specific enough to act on). Both reproduce, and both have a
+verified single-line cause:
+
+**1. "asset selected that is linked, select another element not related to it → no option to
+relink."** Cause: `linked-element-section.tsx:366` —
+`if (isLinked || selectedElements.size !== 1) return null` suppresses the "Current selected element"
+card whenever the asset already has an element. **This was deliberate and is the PR's own
+"question 4"**: linking there replaces the asset's existing link, so the affordance was left out
+rather than silently dropping a link. Darminder's answer settles it — **offer the option.** This
+also directly answers the clarification this run raised on the Jira ticket at 08:50; the Jira
+question can be considered resolved.
+
+**2. "selecting an element with a tag loses the asset selection; it should stay."** Cause:
+`use-asset-detail-from-selection.ts` — the guard `if (assetDetailId && !links[assetDetailId])
+return` holds the pane only when the open asset is **unlinked**. With a *linked* asset open the
+guard doesn't fire, so a pick belonging to another asset falls through to
+`setAssetDetailId(linkedAssetId)` and the panel jumps away. Fix: let an open asset detail hold the
+pane whether or not it is linked. That is also the **precondition for item 1** — the card needs a
+panel to live in.
+
+So both items are one guard plus one gate. Small in code; the *design* part is not settled:
+
+**Open question put to Darminder (do not guess it):** on confirming a replace, should it warn that
+the asset's current element will be unlinked, and does the element's previous owner matter? There is
+already a `Reassign element?` dialog for the mirror case (picking an element another asset owns), so
+either reuse that wording or add a distinct "replace this asset's link" confirm.
+
+**Not implemented this run, deliberately.** Two reasons, both worth respecting: it is a human
+reviewer's behaviour change (the routine's own rule is not to rush those), and
+`use-asset-detail-from-selection.ts` took two pushes today from the parallel run (`39f2573`, and
+`0e9542b` which is adjacent to item 2) — pushing over a file another actor is mid-flight in is the
+failure this repo already knows about. Said exactly this on the PR, with the diagnosis, so whoever
+picks it up starts from the cause rather than the symptom.
