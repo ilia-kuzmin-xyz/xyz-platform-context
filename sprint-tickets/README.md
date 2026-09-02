@@ -2389,3 +2389,28 @@ instead, naming the failing step, why it is not that PR's, and where the fix is.
 **Judgement worth reusing:** "port the existing fix into the red PR" is the right default, but not
 when the port is an append to a shared file that two other branches are already appending to. Count
 the conflicts the port creates before making it.
+
+### 13:49 UTC — final state: #2192 green on the master-merged head, awaiting only a merge
+
+`build` **success** on `fb437e8` (the merge of `7ee6b82` into the hotfix), verified step-by-step
+again: `Install dependencies`, `Lint & Run Tests` (8m22s), Sonar, `Build image`,
+**`Vulnerability scanner`**, `Scan built image` — all success, nothing skipped. So the hotfix is
+**both current with master and green**, and the only thing left on it is a human merge.
+
+Closing state of the 09-02 run:
+
+| PR | Head | build | Outstanding |
+|----|------|-------|-------------|
+| #2192 | `fb437e8` | ✅ green, master-current | **merge** (4 reviewers requested, none yet) |
+| #2148 | `0e9542b` | ✅ green | approval; conflict-resolution note on the PR for when #2192 lands |
+| #2186 | `244a57d` | ✅ green (cached Trivy DB) | approval |
+| #2180 | `abe300e` | 🔴 this CVE only | #2192; standing-down comment posted |
+
+**0 open review threads across all four PRs. 0 tickets kicked off** (all five in code review).
+
+Left for a human, in priority order: **merge #2192**; turn the PLT-2953 video into acceptance
+criteria; raise a tldraw-upgrade ticket (2.4.6 → 5.3.2, now holding two suppressed nanoid CVEs).
+
+**After #2192 merges**, the next run should: merge master into #2186 and #2180 in one pass (they
+need it to pick up the fix), and on #2148 resolve the `.trivyignore` conflict by taking master's
+side and dropping the branch's duplicate block — otherwise `shortid` gets silently re-added.
