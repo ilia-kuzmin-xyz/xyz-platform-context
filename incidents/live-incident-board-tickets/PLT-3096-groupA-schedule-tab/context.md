@@ -230,3 +230,57 @@ scope exit. GitHub: no PR exists for the `PLT-3096` branch in `xyzreality/hc-fro
 results); the branch remains unmerged, DO-NOT-MERGE instrumentation only, exactly as described
 above. `origin/cursor/duckdb-queries-examples-3096` was not separately checked for a PR (name
 suggests it is unrelated to this ticket's schedule/WBS mechanism).
+
+## 2026-09-02 (late) — back in scope (status is now Dev In Progress), and a real defect fixed
+
+Live status today is **Dev In Progress**, not "With Technical Support" as the earlier entry recorded
+— that entry is superseded on status only; everything else in it stands.
+
+**PR: `XYZReality/hc-frontend` #2195, draft, branch `PLT-3096-fix` off `master`** (deliberately NOT
+the `PLT-3096` branch, which stays as the DO-NOT-MERGE instrumentation).
+
+### The repro run did NOT reproduce the symptom. Read this before claiming 3096 is fixed.
+
+Ilia's instrumented run (15:49–15:51) collapsed two WBS rows in sequence — `Building C - Cx - First
+Floor North (C2...)` then `Building C - Cx - First Floor South (C1...)` — and both closed cleanly:
+`expander CLICK` → `onTaskClosed` for each, **nothing reopening either**. Consistent with his own
+Jira comments (110988, 110996): "It works fine on my side", "It seems schedule has been updated".
+
+So the customer symptom is currently **not reproducible**, and #2195 does not claim to fix it.
+
+### What the run DID prove, and it is worth fixing on its own
+
+Two facts from the log:
+
+1. `useShowWBS`'s force-open fired **before** `gantt.parse` on mount and reported
+   **`0 branches, 0 changing`** — on mount it is already a no-op.
+2. `gantt.parse(12380 tasks, 12377 with open:true)` — the all-expanded first render comes from the
+   **parse path**, not from `useShowWBS`. Confirmed in code:
+   `scheduler/hooks/use-load-schedule-data.tsx:58-60` sets `element.open = true` on every element
+   before parse. (The 3 remainders are the spacer rows, `open: false`, `createSpacerRows()`.)
+
+Together these mean the force-open in `useShowWBS` does nothing useful on mount and **everything it
+does do is on the path the repro never exercised**: a re-run of the effect with WBS rows shown — a
+Show-WBS toggle off and back on, or a remount of the owning component — reopened every branch the
+user had collapsed.
+
+That is a genuine defect and the leading candidate for the reported symptom. It is not a confirmed
+cause and #2195 says so in its first paragraph.
+
+### The fix
+
+- `bar/hooks/wbs-open-state.ts` (new) — `captureAndOpenAllBranches` / `restoreOpenState`.
+- `bar/hooks/useShowWBS.ts` — snapshot `$open` in a ref on the way into the flat view, restore on the
+  way out. With WBS shown and no snapshot held, the effect no longer touches `$open` at all.
+
+**The force-open is genuinely required in the flat state** and is kept there: hiding WBS rows filters
+the grid to `type === 'Activity'` with `treeColumn.tree = false`, but an activity is still a child of
+its WBS row, so a collapsed branch would render its activities nowhere. That is the case that breaks
+if the capture side ever regresses — it is in the PR's manual test steps.
+
+Extracted to a module so the state handling is testable without the viewer context and the redux
+store. 6 tests; **2 fail when `restoreOpenState` is reduced to a no-op** (i.e. reproducing the old
+behaviour). The hook's own ref lifecycle is **not** covered — reviewed by reading only.
+
+The other two `$open` writers (`use-actions.tsx` expandAll/collapseAll, `activity-context-menu.tsx`)
+are explicit user actions and are untouched. `useShowWBS` was the only implicit one.
