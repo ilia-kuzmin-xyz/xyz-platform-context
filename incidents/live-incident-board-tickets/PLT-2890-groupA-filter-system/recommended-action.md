@@ -187,3 +187,31 @@ the panel renders two identically titled "Contractor" sections with nothing dist
 (`dashboard-filter-utils.ts:241` treats only discipline and package as core). Now that both filters
 are confirmed to be staying, that labelling gap is the actual remaining defect in 2890's own area, and
 it is small. Worth its own low-priority ticket.
+
+---
+
+## 2026-09-02 (later) — draft written. Supersedes "No draft written yet — deliberately" above.
+
+Both open items from that section are resolved: **Ilia asked Mostafa, and the answer is that we are
+not expecting this feature.** So the reply is a plain no plus a close request — no ticket offered, no
+product question left hanging.
+
+**Draft (80 words, unposted — the hard no-Jira-action rule stands; a human pastes it):**
+
+> Hi Yash — no, there's no way to do that today, and we're not planning to add one.
+>
+> The two are set independently: the company on a QA issue is typed on the issue, and the contractor
+> comes from the project's activity categories. Nothing copies one to the other, and there's no bulk
+> edit for the company field either. Mostafa has confirmed we want to keep them as two separate
+> fields, so both need filling.
+>
+> **Can we close this one now?**
+
+Deliberately **not** in the draft: the `bulk-update-types` precedent and the shape of a
+bulk-set-company endpoint. Mostafa has said we do not want the capability, so naming a possible
+implementation would reopen a settled question in front of the customer. The code detail stays in
+`context.md` § 2026-09-02 in case the ask returns.
+
+**After this is posted, 2890 should close.** The remaining item in its area — the panel showing two
+identically titled "Contractor" sections — is a separate low-priority FE ticket, not a reason to hold
+this one open. Do not reopen 2890 a third time for it.
