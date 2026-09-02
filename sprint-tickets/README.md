@@ -2640,3 +2640,30 @@ is obviously broken.
 Thread **left open on purpose** (not resolved): translate-the-namespace vs. add-the-fallback vs.
 accept-tr-as-en-only-while-flag-gated is a product call. Recorded here so the next run does not
 re-derive the library behaviour — **`setDefaultLocale` is not a fallback.**
+
+### 21:12 UTC — all three post-merge builds verified GREEN. Run closed
+
+Verified per-step, not from the badge:
+
+| PR | Head | `Lint & Run Tests` | `Vulnerability scanner` | `Scan built image` |
+|----|------|---|---|---|
+| #2186 | `1438b8a` | ✅ 8m18s | ✅ | ✅ |
+| #2180 | `9a36c3c` | ✅ 8m36s | ✅ | ✅ |
+| #2192 | `5ddf92d` | ✅ 8m18s | ✅ | ✅ |
+
+Three things this confirms that were open questions rather than assumptions:
+
+1. **The PLT-2968 merge against #2148's 42-file rewrite is sound.** The import-resolution check said so; the full suite now proves it. That was the one real semantic risk of the day.
+2. **The surgically hand-edited lockfile is valid and installable** — `Install dependencies` succeeded in 49s on #2192. That was the thing that could not be checked locally (no `NPM_TOKEN`), and hand-editing a lockfile is exactly where a silent syntax or integrity error would hide.
+3. **Both `.trivyignore` resolutions behave as intended.** #2180 inherits master's suppression and scans clean without owning a CVE note; #2192 keeps its own block plus the removal and also scans clean.
+
+**Final state of 09-02:** 2 of 5 tickets delivered (PLT-2953, PLT-3004 via #2148). Three PRs open, all
+green, all current with master: #2186 (PLT-2968/2967), #2180 (PLT-2896), #2192 (the shortid
+cleanup). **1 open review thread**, on #2186, left open deliberately as a product call.
+
+**Handover — three ticket candidates found today, in order of return:**
+1. **i18n fallback** — `translate` has none; fixes 820 missing tr keys in one change. `setDefaultLocale`
+   is NOT a fallback (verified in `react-jhipster@1.0.3` source).
+2. **postcss nanoid → 3.3.17** — the one genuinely fixable CVE row, satisfies `^3.3.16`, no override.
+3. **tldraw 2.4.6 → 5.3.2** — three majors, now holding two suppressed nanoid CVEs; deletes those
+   `.trivyignore` lines.
