@@ -392,3 +392,49 @@ recommending the same four messages.** Still the board's only Critical-priority 
 explicitly in this run's notification, same reasoning as PLT-2815: repeating a correct, ready
 recommendation in a file nobody re-reads is not moving it, and a human decision is needed on
 whether to post these or say why not. No Jira action was taken by this run.
+
+---
+
+# 2026-09-02 — RESOLVED by a product decision. All earlier drafts in this file are SPENT.
+
+**Ilia asked Mostafa directly and got the decision the ticket had waited 50+ days for:**
+
+> "I think we need to close it and just say that this is auto-populated based on the BIM room location"
+
+So: **no dropdown, no removal of the field, close the ticket.** Every draft above was written to
+*extract* this decision — chasing Mostafa's 107320, escalating to Pietro, laying out dropdown vs
+remove. None of them are needed now. Kept above as the record of how it was chased, not to post.
+
+### Draft (36 words, unposted — a human pastes it; the hard no-Jira-action rule stands)
+
+> Hi Yash — checked with Mostafa. His words: *"I think we need to close it and just say that this is
+> auto-populated based on the BIM room location."*
+>
+> Closing it on that. **Anything outstanding on 7286 first?**
+
+**Deliberately short and mostly a quote, on Ilia's instruction:** *"let's avoid adding much context,
+it's better mostly to quote mostafa"*. An earlier 90-word version of this draft explained the zone
+mechanism, why ML9 is blank, and that Location Detail is the free-text field — all accurate, all in
+`context.md` § 2a, and all cut. **If a longer explanation is ever wanted, take it from § 2a rather
+than rewriting it.** The reason to keep it short: this is a product decision being relayed, and
+Mostafa's own sentence is the authority; our paraphrase around it only invites re-litigation.
+
+### ⚠️ Two things this close does NOT settle — do not let them die with the ticket
+
+**1. The GUID defect becomes live the moment anyone acts on this answer.** Telling the customer it
+auto-populates from BIM rooms points them at configuring rooms — and `issue-details.tsx:139` binds
+the Location row to the raw `locationId` with no processor, so a configured project renders a **GUID,
+not a room name** (§ 2c, re-verified on `origin/master` 08-24). ML9 only ever showed *blank* because
+it has no zones at all. **The fix is already written on branch `PLT-2858-qa-issue-location-label`
+(hc-frontend, 5 tests, `issue-location-name.ts`) and has never been raised as a PR.** It should be
+raised and landed, and it does not depend on 2858 staying open — it is a defect in its own right.
+
+**2. The customer's "it looks like missing data" complaint is declined, silently.** On 07-14 (107317)
+they asked for either a dropdown *or* removal of the Location field, because an empty Location reads
+as missing data on the dashboard. Mostafa's decision grants neither: the field stays, read-only, and
+blank until rooms are configured. That is a legitimate call, but if the customer pushes back, the
+pushback is about the *dashboard reading blank as missing*, not about the mechanism — and no one has
+answered it.
+
+**3. Cohort, still never swept.** Every project without named zones configured shows empty Location on
+all its issues (§ 3 q6). ML9 is a sample, not the population. Closing 2858 does not change that.
