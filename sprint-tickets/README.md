@@ -2266,3 +2266,35 @@ convention) asking exactly that: should the relink option appear when the target
 linked, and should it warn. **Ticket left In Code Review** — the work is done and under review, so
 moving it to In Analysis would misreport its state; the "move to In Analysis" rule is for kick-off
 triage, not for a PR awaiting approval.
+
+### Confirmation — #2192 is verified green; the fix works
+
+`build` **success** on `047f8b3` (09:10:40). Checked step-by-step rather than trusting the rollup,
+because the earlier run on `eff6a9f` was **cancelled** by the follow-up push and reported its Trivy
+steps as `skipped` — a cancelled run can look like it proved something it never reached:
+
+| Step | Result |
+|---|---|
+| `Install dependencies` | success (48s) — the pruned lockfile installs cleanly |
+| `Lint & Run Tests` | **success** (8m14s) — removing `shortid` broke nothing |
+| `Execute SonarQube Scan` | success, gate passed, 0 new issues |
+| `Build image` | success |
+| `Vulnerability scanner` | **success** — the Trivy scan ran and passed |
+| `Scan built image` | success |
+
+So the CVE entry plus the `shortid` removal genuinely clears the scan. **#2192 now needs only a
+human merge**, after which every open PR goes green on its next run.
+
+Also green: **#2186** on `244a57d` (the aria-label fix), build success 09:06:36 — and it passed
+Trivy *again*, so that runner's cached DB is still in play. Do not take #2186's green as evidence
+the CVE is handled; it is the cache, not the fix.
+
+Copilot raised one more thing on #2192 and was **right**: the new block claimed the entry
+"suppresses only the one tldraw copy", but Trivy matches on CVE id, not package path — the exact
+caveat the file already states for 67213/67214, which the new text then undercut. Reworded in
+`047f8b3` to say the single-copy scope is a fact about today's tree rather than something the line
+enforces, and to re-run the census instead of trusting the note. Replied and resolved.
+
+**Lesson for the next run:** when a `check_suite.completed` notice arrives, it explicitly does not
+cover cancelled suites. Read the job's *steps* before reporting a fix as proven — "conclusion:
+success" on a run whose scan was skipped proves nothing.
