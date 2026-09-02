@@ -2595,3 +2595,48 @@ PR description corrected to 24 deletions with the mistake **stated rather than q
 and the lockfile-regeneration lesson recorded on the PR itself. Both threads replied to and
 resolved; #2192 retitled earlier to *"Drop shortid, an unused dependency holding a vulnerable nanoid
 in the tree"*.
+
+### 20:48 UTC — i18n finding on #2186, and a repo-wide bug it uncovered
+
+Copilot: the 14 new `hc.commissioning.assetDetail.override*` keys went into `i18n/en/main.json`
+only, so the Turkish locale shows raw keys. **Mechanism verified, and my first assumption was
+wrong** — worth recording, because the wrong assumption is the reusable part.
+
+I expected `TranslatorContext.setDefaultLocale('en')` (`config/translation.ts:5`) to give an en
+fallback. It does not. From `react-jhipster@1.0.3`'s `doTranslate` (pulled the tarball rather than
+trusting memory):
+
+```js
+const currentLocale = ctx.locale || ctx.defaultLocale;
+const data = currentLocale ? translationData[currentLocale] : null;
+```
+
+`defaultLocale` is consulted only when `locale` is **unset**. With locale `tr` it reads *only* the
+tr bundle, and `setRenderInnerTextForMissingKeys(false)` makes a miss render literally
+`translation-not-found[<key>]`. **So there is no fallback anywhere in this app.**
+
+Measured the actual gap before answering:
+
+| | en | tr |
+|---|---|---|
+| `commissioning.*` | 136 | **0** |
+| `assetDetail.*` | 125 | **0** |
+| all keys | 2557 | 1743 (**820 missing**) |
+
+So tr has *none* of the commissioning namespace and is missing 820 keys overall. Translating 14 keys
+in isolation changes nothing a Turkish user sees — they hit `translation-not-found[...]` on the 124
+surrounding `assetDetail` keys as soon as the panel opens — and would mean inventing unverifiable
+Turkish commissioning terminology. **In a commissioning tool a plausible-but-wrong translation of
+"Override readiness level" is worse than a visibly missing one:** one misleads silently, the other
+is obviously broken.
+
+> ## The real finding: this app has no i18n fallback, and that is a one-change fix for 820 keys
+> Making `translate` fall back to `defaultLocale`'s bundle before emitting `translation-not-found`
+> fixes every en-only key at once and makes future en-only additions harmless. **This deserves its
+> own ticket** — far better return than hand-writing strings per PR, and it removes a whole class of
+> review comment. Note it likely needs a wrapper around `translate`/a `TranslatorContext` patch,
+> since the behaviour is inside the library.
+
+Thread **left open on purpose** (not resolved): translate-the-namespace vs. add-the-fallback vs.
+accept-tr-as-en-only-while-flag-gated is a product call. Recorded here so the next run does not
+re-derive the library behaviour — **`setDefaultLocale` is not a fallback.**
