@@ -83,3 +83,39 @@ cheaper than doing it twice.
 - **Consider whether to volunteer the 26.3.6 delay.** Naming PLT-2743 is honest and shows the undo
   failure is known, but it also tells the customer a fix has been sitting unreleased for over a week.
   Ilia's call.
+
+
+---
+
+## 2026-09-02 (later) — ⛔ the draft above is WITHDRAWN. Do not post it.
+
+It states that 1,239 elements were moved off `CY-1250` and asks the customer to confirm `CY-1250`
+should get them back. **Both are false** — see the retraction in `context.md`. `CY-1250` never lost
+anything; the 1,239 were *added* to `CY-1300`.
+
+### Corrected draft — to Yash Patel, on PLT-3099 — DRAFT ONLY, not posted (92 words)
+
+> @Yash Patel traced it on prod. One action created **1,239** links on CY-1300 at 16:55 UK on
+> 1 September, which matches what they described. Their own activities were not affected, nothing was
+> removed from anywhere, so the only thing wrong is the 1,239 extra links on CY-1300.
+>
+> On Ctrl+Z: that is the AT10X issue, fixed under PLT-2743 and waiting on the 26.3.6 release.
+>
+> We can remove those 1,239 links and put CY-1300 back to what it was.
+>
+> **Shall we go ahead and remove them?**
+
+### Why this version is better than the withdrawn one
+
+- It does not invent a second problem for the customer to worry about.
+- The question is answerable yes/no, rather than asking them to arbitrate which of 1,239 elements
+  belonged where.
+- The remediation is one operation on one activity, with no restoration step.
+
+### Still true before it goes out
+
+- **Line up who performs the removal.** It needs a platform-api write, so Sachin or Ali. Do not
+  promise it without knowing who executes.
+- **Do not mention PLT-3100.** That is our engineering problem.
+- **Naming PLT-2743 / 26.3.6 is Ilia's call** — honest, but it tells the customer a fix has sat
+  unreleased for over a week.

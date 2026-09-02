@@ -323,3 +323,72 @@ Of the four questions the ticket really contains:
 **26.3.6 has been sitting unreleased since at least 2026-08-25 and is now blocking a second customer
 incident.** That is a release-scheduling question, not an engineering one, and it is the single
 cheapest thing that would stop this recurring.
+
+---
+
+## 2026-09-02 (later) — ⛔ THE 09-02 "MOVE" FINDING ABOVE IS WRONG. Retracted, with the checks that killed it.
+
+Ilia asked for a deeper self-review. It found that the section above ("It is not over-linking. It is
+a MOVE") is **false**. Three claims retracted:
+
+| claim | verdict | evidence |
+|---|---|---|
+| "An element holds exactly one activity link, so linking moves it" | **FALSE** | **3,024 elements are currently linked to BOTH `CY-1250` and `CY-1300`.** Multiple activity links per element are normal. |
+| "1,239 elements were MOVED from `CY-1250` to `CY-1300`" | **FALSE** | All 1,239 are in **both** activities' current link lists. They were **added** to `CY-1300`; nothing left `CY-1250`. |
+| "`CY-1250` silently lost 1,239 links" | **FALSE** | `CY-1250` holds **4,521** links, all 1,239 among them. |
+| "The moved set was *exactly* the source activity's existing link set" | **FALSE** | 1,239 of 4,521 is 27%, and none were removed. The coincidence that made this theory attractive does not exist. |
+
+Verification, deliberately redundant after being wrong twice:
+
+- `CY-1250` = 4,521 links, `CY-1300` = 3,461 — **stable across two fetches at different `size` values**, identical element sets both times.
+- Set intersection: **3,024 elements in both.**
+- All 1,239 incident elements: present in `CY-1300` **and** present in `CY-1250`, 0 in neither.
+- Five individual element ids spot-checked one at a time — all in both.
+
+### So the customer was right and the correction was wrong
+
+Kyriakos reported that linking "linked all the elements in the area". That is what happened: **1,239
+links were created on `CY-1300`** that he did not intend. Nothing was taken from anything. The
+original framing on the ticket, and the prior pass's framing, were correct.
+
+### The error, named so it is not repeated
+
+**`isDeleted` rows in `xyz_get_projects_project_id_elements_activity_links` were read as domain
+deletions without checking current state.** That endpoint is a **sync change feed**, not a statement
+of truth. It emitted 1,239 `isDeleted: true` rows against `CY-1250` in the incident window while
+those links remain live today. One query against the activity's current link list would have caught
+it; it was not run until challenged.
+
+**What those `isDeleted` rows actually mean is UNKNOWN.** Candidates: the feed emits a
+supersede pair (old mapping row deleted, new one created) when an upsert rewrites a row; or the
+mapping ids changed. `usp_InsertModelElementActivityMapping` and the mark-as-inactive path are
+stored procedures whose SQL is not in the platform-api checkout. **Do not guess this again — read
+the proc or ask api-v2 (Sachin/Ali).**
+
+### What still stands, and is safe to rely on
+
+- **1,239 links created on `CY-1300`** between **2026-09-01 15:55–16:00 UTC** (16:55–17:00 UK).
+  Matches the customer's "approximately 5:00 PM UK".
+- Those 2,478 feed rows are the only activity-link changes on ATL08 from 1 Sep 00:00Z to 2 Sep 10:00Z.
+- `CY-1300` holds 3,461 links now, so **2,222 before** the incident.
+- `analysis/PLT-3099-ATL08-CY1300-moved-elements.csv` still lists the correct 1,239 element ids —
+  but its `previousActivity_*` columns are **misleading** and should be ignored; those elements were
+  not taken from `CY-1250`.
+
+### Reversal — simpler and safer than the retracted version claimed
+
+**Remove the 1,239 links from `CY-1300`. `CY-1250` needs no change at all.** No restoration, no
+arbitration about which activity should own what. Since elements can hold several activity links,
+removing these does not orphan anything.
+
+### The draft comment in `recommended-action.md` must not be posted
+
+It leads with "1,239 elements were moved off CY-1250" and asks the customer to confirm CY-1250 should
+get them back. **Both are false.** Superseded — see the dated section appended to that file.
+
+### PLT-3100 corrected
+
+The ticket raised for the missing guard has been rewritten (summary now "Linking writes a large
+selection with no count shown and no confirmation") with both false claims removed and an explicit
+corrections section. The engineering ask is unchanged and still valid: linking writes whatever is in
+the selection with no count and no confirmation.
