@@ -2438,3 +2438,32 @@ that re-setting the git identity is "a required first step of every run" is **no
 honoured by the other runs**, and has not been for some time. Anyone auditing authorship in this
 repo should not read `Claude`-authored commits as suspicious — they are routine runs that skipped
 the identity step. Worth fixing at the routine/prompt level rather than re-noting it each run.
+
+### 17:30 UTC — the third duplicate suppression landed after all; #2192's value has narrowed
+
+The other actor pushed `2856ba5` "Accept nanoid CVE-2026-73086 in Trivy, same unfixable copies as
+before" to **PLT-2896** as well (plus a master merge, `06f5f93`). So the entry the 13:36 entry
+above decided *not* to add is now there anyway, added by the parallel run.
+
+**Three branches now append the same CVE line to the end of `.trivyignore`:** PLT-2953, PLT-2896
+and #2192. Whichever merges first, the rest conflict on that file. This is the outcome the 13:36
+decision was trying to avoid — it was avoidable only if every actor made the same call, and with
+two runs live that was not in this run's gift. **Corrected the now-stale standing-down comment on
+#2180**, which told a reader the PR waits on #2192; it does not any more.
+
+**Resolution rule, recorded in one place:** when those conflicts come up, **take the side where
+`shortid` is removed.** #2192 deletes `shortid` + `@types/shortid` (zero imports; the only thing
+holding `nanoid@2.1.11`). The branch-local blocks suppress the finding and leave the dependency in
+the tree, and their comment text asserts both copies are unfixable when one demonstrably is not.
+Resolving toward a branch block silently re-adds a dead dependency *and* publishes a wrong note.
+
+**What #2192 is still for.** The suppression half will now reach master via whichever feature
+branch merges first, so #2192 is no longer the thing unblocking anyone's PR. Its remaining unique
+value is real but narrower: the **`shortid` removal**, and being the version whose `.trivyignore`
+census is accurate. It is still worth merging; it is no longer urgent, and the earlier framing of
+it as *the* blocker no longer holds. `master` itself still has no entry and still carries
+`shortid`, so master's own next build fails until one of the three lands.
+
+**Lesson: a "don't create conflict surface" decision only works if it is the shared decision.**
+With concurrent runs, the cheap move is to say where the conflict resolves (one comment, one note)
+rather than to abstain and assume others will too.
