@@ -799,3 +799,46 @@ Full working: `live-incident-board-tickets/PLT-2649-groupA-360-captures/platform
   if a second numbered-list surface (QA issues, activities, anything with a visible "#N") shows the
   same index-as-identifier substitution. Full findings:
   `live-incident-board-tickets/PLT-3063-groupA-quality-management/context.md`.
+
+## Pattern 8 — a sync/change feed read as a statement of current truth (2026-09-02, PLT-3099)
+
+**Recognition signature:** an investigation concludes that data was *removed*, *moved*, or
+*replaced*, and the only evidence is rows from a change/sync feed carrying a delete-ish flag
+(`isDeleted`, `isRemoved`, a tombstone, a `lastSyncDateTime` window). **The feed records that a
+write happened, not what the data looks like now.**
+
+**What it cost on PLT-3099.** `xyz_get_projects_project_id_elements_activity_links` accepts a sync
+window and, for the incident minute, returned 1,239 rows against `CY-1300` with `isDeleted: false`
+and 1,239 rows against `CY-1250` with `isDeleted: true`, over an identical element set. That was
+read as "1,239 elements were moved from CY-1250 to CY-1300", and from there:
+
+- a customer-facing draft claiming *"CY-1250 silently lost 1,239 links"* — a second, invented problem;
+- a Jira ticket (PLT-3100) created with that claim in its description;
+- a mechanism theory ("the selection came from CY-1250's link set") built on a coincidence that did
+  not exist;
+- an incorrect general claim that **an element holds only one activity link**.
+
+**All four were false.** One query against each activity's *current* link list showed `CY-1250` still
+holds 4,521 links including all 1,239, `CY-1300` holds 3,461, and **3,024 elements are linked to
+both activities at once**. Nothing had been removed; 1,239 links were simply *added*. The customer's
+original report ("it linked all the elements in the area") was correct and the "correction" was not.
+
+**The check that costs nothing:** before describing any change as a removal or a move, **read the
+current state of both sides.** A change feed plus a current-state read is a finding; a change feed
+alone is a hypothesis.
+
+**Second lesson, on cardinality.** "Moved rather than added" silently assumed a one-to-one
+constraint (one activity per element). That was never verified and is false here. **Do not infer a
+uniqueness constraint from a delete+insert pair in a feed** — check for overlap in current data, or
+read the constraint.
+
+**Why this is worth a pattern rather than a ticket note:** the same shape is available on every
+`lastSyncDateTime`-style endpoint on this platform (elements, activity links, issues, coordinates,
+media all expose sync windows), and the failure mode is invisible — the arithmetic is correct, the
+sets match perfectly, and the conclusion is still wrong. It also reproduces the shape already named
+in this file under *"A customer-facing instruction shipped on a premise nobody verified"*
+(PA12/PLT-2649, Hutto2/PLT-3034), with the unverified premise inside our own measurement rather than
+in a customer's message.
+
+Full retraction and the verification steps: `live-incident-board-tickets/PLT-3099-groupA-viewer-and-model/context.md`
+§ 2026-09-02 (later).
