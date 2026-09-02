@@ -2358,3 +2358,34 @@ The parallel actor is still iterating PLT-2953's selection behaviour (`0e9542b` 
 "opening a linked asset selects its element again", after `39f2573`). It is working Darminder's
 feedback directly; PLT-2953 still carries its own narrower CVE block and still has `shortid`, so
 the conflict resolution noted on #2148 stands.
+
+### 13:36 UTC — #2148 went green on its own; #2180 is the only red one left
+
+**#2148 is genuinely green** on `0e9542b`, verified step-by-step (not from the badge): `Lint & Run
+Tests` success, **`Vulnerability scanner` success**, `Scan built image` success. The other actor's
+in-branch `.trivyignore` block did unblock it, so **#2148 no longer depends on #2192**. The other
+actor also pushed `0e9542b` "opening a linked asset selects its element again" — still iterating
+Darminder's flow.
+
+Revised picture:
+
+| | needs #2192? |
+|---|---|
+| #2148 | **no** — self-suppressed on its branch |
+| #2186 | green, but only via a **cached** Trivy DB — fragile, not fixed |
+| #2180 | **yes** — still red |
+| `master` | **yes** — no CVE entry, still carries `shortid` |
+
+So #2192 is still the right permanent fix (it is the only one that removes `shortid` at the root
+and the only one that fixes *master*), but it is no longer gating #2148.
+
+**Deliberately did not port the suppression into #2180**, despite the usual rule that a fix you
+already own should be ported rather than waited on. Reason: #2148 already carries its own copy of
+the same entry, so a third would put the same CVE line at the end of the same file on three
+branches — **three hand-resolved conflicts to silence a finding #2192 removes at the root.** The
+conflict surface costs more than the red badge. Left the required standing-down comment on #2180
+instead, naming the failing step, why it is not that PR's, and where the fix is.
+
+**Judgement worth reusing:** "port the existing fix into the red PR" is the right default, but not
+when the port is an append to a shared file that two other branches are already appending to. Count
+the conflicts the port creates before making it.
