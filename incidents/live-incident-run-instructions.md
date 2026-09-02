@@ -300,3 +300,36 @@ the same run with the fix neutered, to prove the tests fail without it. This wor
 whose imports can be stubbed or are absent — it will not work for anything that pulls in
 `@xyzreality/dhtmlx-gantt` or the app's aliases, which is the reason the PLT-3096 fix was extracted
 into `wbs-open-state.ts` rather than tested through the hook.
+
+## 2026-09-02 — platform-api e2e: the DB schema is NOT pinned, so `build` can go red with no commit here
+
+`.github/workflows/build.yml` lines 43-55 check out `XYZReality/PostgreSQLDatabase` and
+`XYZReality/CitusDistributionLogic` with **no `ref:`** — always their default-branch HEAD. The
+integration-test schema therefore drifts on its own. `NPM Test` (unit) runs *before* that step, so a
+red `build` does not mean the unit tests failed; read which step failed.
+
+Hit on 09-02 on PR #944: 1609 passing, 3 failing, all `expected 400 to equal 409`:
+`asset.types.e2e.spec.ts:202` and `:363`, `system.types.e2e.spec.ts:315`. The **identical diff** had
+been fully green three hours earlier as #941 — nothing in the app changed, the schema did.
+
+**Cause (confirmed for system types, from the job log):**
+`DatabaseConstraintViolationError: Integrity constraint 'SystemType_Name_uidx' violated`.
+`system.types.service.ts:44` matches `SystemType_Name_key` and `SystemType_ProjectShardId_Name_key`
+but **not** `SystemType_Name_uidx`, so `mapError` falls through to `throw err` and the response is a
+generic 400 instead of 409. This is the third name for the same constraint and the exact fragility
+in `.claude/skills/mandatory-optional-fk-field/SKILL.md` § "duplicate unique constraints break error
+mapping".
+
+**Asset types: same shape, name NOT confirmed.** `asset.types.service.ts:44` matches only
+`AssetType_Name_key`, and both failures are duplicate-name cases — but **no `AssetType_*` constraint
+name appears anywhere in the full job log** (checked the whole 1.09 MB). Do not copy
+`AssetType_Name_uidx` by analogy; read the real message.
+
+Not fixed and not pushed: unrelated to the PR it surfaced on, and unverifiable here — the **Docker
+daemon is unavailable** in this environment (the binary exists, `docker info` fails), so the local
+e2e stack cannot run, and `PostgreSQLDatabase` is outside this session's repo access. Recorded as one
+comment on #944 with the proposed patch.
+
+**Reusable:** any 409-expected e2e failing with 400 in this repo → check `mapError`'s constraint-name
+string match against the name in the log before anything else. And when a red check names code the
+diff does not touch, check whether an *unpinned external checkout* can explain it.
