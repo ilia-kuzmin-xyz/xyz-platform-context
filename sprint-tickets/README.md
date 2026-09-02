@@ -2185,3 +2185,84 @@ team; do not invent an authority unilaterally.** New work, not merge fallout.
 The container is rebuilt per run, so the 08-04 local fix does not persist and **re-setting it is a
 required first step of every run**. Re-set to `ilia-kuzmin-xyz` *before* the three merge commits,
 so all three are correctly attributed (verified in `git log --format=%an` after pushing).
+
+### Amendment (same run, later) — the master merges turned CI red, and it was NOT the merges
+
+The three pushes above went red on `build` for **#2148** (`0e478ea`) and **#2180** (`abe300e`).
+Root cause is not the merge and not any of our code: Trivy picked up **`CVE-2026-73086`** (nanoid,
+HIGH — predictable ID generation via integer overflow) **overnight**. The *same lockfile* that
+scanned clean at 17:16 on 09-01 failed at 07:41 on 09-02, with no dependency having changed.
+
+**#2186 passed on the identical lockfile** (`f81c1cc`, build success 07:58:49 — two seconds before
+#2180 failed at 07:58:51). Its runner restored a **cached Trivy DB**. So a green build during a
+DB-refresh window is luck, not safety — do not read one green PR as evidence the others are fine.
+This is the second time a Trivy-DB refresh has produced a repo-wide red with an innocent-looking
+diff (cf. the `brace-expansion` blocker, and #2185's libssl/libcrypto CVE on 08-26).
+
+**Hotfix raised: #2192**, `fix/trivy-nanoid-cve-2026-73086`, off `master`. Branch naming follows
+the repo's own precedent (#2185 `fix/trivy-openssl-cve-2026-14456`) rather than `PLT-xxxx`, as
+there is no ticket. Opened **ready for review, not draft** — the routine's default is draft, but a
+draft cannot be merged and this blocks every PR in the repo; #2185 was likewise non-draft and
+merged in 22 minutes. Flagged to the user rather than assumed.
+
+Two flagged copies, deliberately handled differently:
+
+- **`shortid/…/nanoid` 2.1.11 — really removed.** `shortid` was a declared dependency with **zero
+  imports anywhere in the repo** (the only textual matches are an unrelated `shortId` local in a
+  dashboard test and an `issueShortId` doc mention). It was the sole thing holding nanoid 2.1.11 in
+  the tree, so it and `@types/shortid` are deleted: **54 lockfile deletions, 0 additions.** This
+  also corrects the standing `.trivyignore` note that called this copy "unfixable without replacing
+  shortid" — it never needed replacing, only removing. Worth remembering as a general lesson: check
+  whether a vulnerable transitive dep is reachable at all before accepting it as unfixable.
+- **`node_modules/nanoid` 4.0.2 — suppressed, with the census written down.** `@tldraw/{editor,
+  store,tlschema}` pin it as an **exact** `4.0.2`. Verified against the registry rather than
+  assumed: `2.4.6` **is** the newest 2.x and every 2.x up to it pins that same exact version, so
+  the only upstream fix is **tldraw 5.3.2 — three majors up**, a canvas migration. An npm
+  `override` to nanoid 5 would green the scan but put an unverified major bump under the canvas's
+  record-id generation, which is not a trade worth making for a scanner. `.trivyignore` gains the
+  CVE with the census, the reachability note (local canvas ids, not tokens) and the removal
+  condition. The postcss copy is 3.3.16 and this CVE is fixed from 3.3.12, so unlike 67213/67214
+  this entry suppresses **only** the one unfixable copy.
+
+### Local test runs are impossible in this container — establish this once, stop re-discovering it
+
+`npm ci` **cannot complete here**: `@xyzreality/dhtmlx-gantt` resolves from the private GitHub
+Packages registry (`.npmrc` → `//npm.pkg.github.com/:_authToken=${NPM_TOKEN}`) and there is no
+`NPM_TOKEN` in the environment — `npm error code E401`. So every run's "tests were not run locally"
+is a hard environment limit, not an oversight, and **CI is the only verification available.** Do not
+burn a run's budget retrying the install. `npm install --package-lock-only` *does* work (no registry
+auth needed for metadata) — which is how #2192's lockfile was regenerated.
+
+### One new review thread, addressed
+
+Copilot on #2186: the task row's `aria-label` interpolated `templateName` while the visible label
+falls back to an em dash, so a nameless task announced as "Open task " / "Open task undefined".
+Real. Fixed in `244a57d` — the name is derived once and both labels come off it, so they cannot
+drift again; missing/empty/whitespace-only announces "Open untitled task", em dash stays visible.
+Four cases added via `it.each`. Thread replied to and resolved.
+
+Process slip worth recording: **the first reply went to the wrong thread** (`3906622631`, the older
+`useAssetReadiness` thread) because the comment id was taken from the previous listing instead of
+re-fetched. Re-fetch `get_review_comments` and match on `is_resolved: false` before replying; the
+stray one-line reply on #2186 is mine and harmless, but it is noise on a resolved thread.
+
+### PLT-2953 — new feedback from Darminder that needs a human, not a guess
+
+Posted **09-01 18:30**, i.e. after the PR's last push, so no earlier run has seen it: *"See latest
+flow from Jason Fingland. The element stays selected as the user clicks in between different assets
+giving the option to relink an element to another asset."* The attachment is a **24 MB
+`Element linking example.mp4`** — **not readable by this routine**, so the flow cannot be verified
+against the video.
+
+Checked the code rather than assuming a gap: the element **already** stays selected across asset
+clicks (`use-asset-detail-from-selection.ts` — an unlinked pick deliberately does not clear an open
+asset detail, and a re-render with the same element does not undo a row click), and reassigning an
+element that belongs to another asset already goes through the **Reassign element?** dialog. The one
+case genuinely not covered is clicking an asset that *already* has its own element — no card, on
+purpose, since linking would silently drop that asset's existing link.
+
+Left a short clarification comment on the ticket (self-identified as Claude, per the run's Jira
+convention) asking exactly that: should the relink option appear when the target asset is already
+linked, and should it warn. **Ticket left In Code Review** — the work is done and under review, so
+moving it to In Analysis would misreport its state; the "move to In Analysis" rule is for kick-off
+triage, not for a PR awaiting approval.
