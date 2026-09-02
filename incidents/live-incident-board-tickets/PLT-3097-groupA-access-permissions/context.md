@@ -244,3 +244,15 @@ from anyone:
 Domain-only + surfacing the real message is the better end state and should be its own ticket
 (FE: stop swallowing the message at `LoginForm.tsx:80`; IAM: drop the existence check). Holding a
 long-running customer incident open for a cross-team design change is the wrong trade.
+
+---
+
+## 2026-09-02 — left scope (confirmed merged); left in the board query as `Customer Release Check`
+
+`hc-frontend` PR **#2191** ("PLT-3097: key SSO discovery on the address, not the domain") is
+**merged** to `master` (merged 2026-09-01T14:09 by Ilia; CI green — build, SonarCloud quality gate
+passed 0 new issues, Copilot review threads resolved; 2 new regression tests in
+`LoginForm.sso.test.tsx`). Live Jira status today: `Customer Release Check` — excluded from this
+routine's scope (fix has shipped, pending only the customer's own release confirmation). No further
+engineering action needed from this routine; the domain-only follow-up ticket proposed above
+remains unfiled.

@@ -211,3 +211,54 @@ This is a **backend/import defect, not frontend.** The frontend renders exactly 
 - The "PRIME SUSPECT" `Map.set` collision section above — falsified, 0 duplicates.
 - The PLT-3096 link theory in that section — it rested on the shared-`id` idea, which is dead.
   PLT-3096 has its own separate suspect (`useShowWBS.ts:33`). Treat them as unrelated.
+
+---
+
+## 2026-09-02 — folder duplication reconciled; the two findings are probably the SAME defect, not competing ones
+
+A second folder, `PLT-3095-groupA-data-pipeline/`, existed since 08-51 on 09-01 — created by a parallel
+pass that parsed the customer's uploaded `.xer` directly instead of continuing this folder, the exact
+mistake `xyz-platform-context/.claude/CLAUDE.md` warns about. Its finding (call it the **XER-collision
+finding**, written *before* the live-prod check above) was never reconciled against the live-prod
+finding above (call it the **missing-parent finding**, written *after*, at 15:28) — the two sat in
+separate folders describing what look like different mechanisms.
+
+**They are very likely the same defect, read from two ends of the same pipe.** The XER-collision
+finding parsed the actual uploaded schedule and found two concatenated-code collisions
+(`.1.1.1`: **Milestones** 101 tasks vs "CFCI Procurement" 2 tasks; `.1.1.2`: **Core & Shell
+Construction** 314 tasks vs "OFCI/OFE Procurement" 87 tasks), naming Milestones and Core & Shell as
+the "losers" — i.e. missing. The live-prod finding independently found **4** missing-parent
+`itemId`s, by task/WBS count: one with 2 activities, one with 87, one with 101, one with 314. **Every
+one of those four counts matches a name from the XER analysis** — the 101 and 314 match the
+XER-named "losers" (Milestones, Core & Shell) exactly; the 2 and 87 match the XER-named "winners"
+(CFCI Procurement, OFCI/OFE Procurement). That is: **all four nodes involved in the two XER
+collisions are absent from the live schedule-revision API response**, not just the two the
+concatenated-code theory called losers.
+
+**What this means, stated as what's actually verified vs still guessed:**
+- **Verified (XER, 09-01 08:51):** the uploaded schedule contains exactly two concatenated-code
+  collisions, and they involve exactly these four named nodes with these exact task counts.
+- **Verified (live prod, 09-01 15:28):** the live schedule revision is missing exactly four WBS
+  nodes, at these exact task/WBS counts, unreachable from the tree root.
+- **Not yet verified:** that these are literally the *same* four nodes (matched here only by task
+  count, not by a shared id — the XER analysis never captured `wbs_id`/`ItemId`, and the live-prod
+  analysis never re-derived concatenated codes). **A human with both artefacts side by side (the
+  `.xer` file and the schedule-revision API dump, both already in this folder's provenance) could
+  confirm this in minutes by checking whether the 4 missing `itemId`s' P6 source rows are exactly the
+  4 collision participants.** I could not do this myself this run — no live AUS02 access.
+- **Revised mechanism, if the match holds:** the importer's WBS de-dup doesn't cleanly keep one
+  "winner" per colliding code the way the XER analysis assumed — it appears to drop **both**
+  participants of a colliding pair (or something in the import pipeline distinct from a simple
+  Map/dict-collision produces the same four-node gap). This is a nuance worth giving to whoever owns
+  the fix, not a reason to distrust either finding.
+
+**Do not treat these as two competing theories needing a tie-breaker.** Both are independently
+verified against real data; they just weren't held up against each other until now. The merged
+picture: **the schedule importer loses WBS nodes whose concatenated P6 code collides with another
+node's**, and the live system confirms those specific nodes are absent end to end, not merely
+mis-rendered.
+
+The duplicate `PLT-3095-groupA-data-pipeline/` folder's content is fully preserved above and its
+`recommended-action.md` draft (routing to Sachin, with the P6-rename customer workaround) still
+stands as the more concrete, customer-actionable draft — see the merged `recommended-action.md`.
+That folder is deleted; nothing in it is lost.

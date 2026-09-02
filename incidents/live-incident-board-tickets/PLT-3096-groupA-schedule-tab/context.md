@@ -176,3 +176,57 @@ owners — 3095 is backend/import (missing WBS parents, api-v2, Sachin), 3096 is
 owning component. Still the best candidate and still unconfirmed; the instrumented branch
 `PLT-3096` (commit `6d688e939`, DO NOT MERGE) logs it and the two other direct `$open` writers.
 One repro run distinguishes them. See the dated section above for what each console outcome proves.
+
+## 2026-09-02 — folder duplication reconciled
+
+A second folder, `PLT-3096-groupA-progress-tracking/`, existed briefly under the wrong domain tag.
+It was created 09-01 09:17 and touched again at 09:37 the same morning by an uninstructed parallel
+pass that did not read this folder first (this one already existed since 07:19 that day and was
+updated further at 12:32 and 15:43, all *after* the duplicate's last touch). Exactly the failure
+`xyz-platform-context/.claude/CLAUDE.md` warns about. Reconciled today by reading both in full:
+
+- **Symptom description, "verified from code" findings (native dhtmlx, no custom handlers), and
+  the instrumented-branch commit lineage** were all consistent with, and superseded by, what is
+  already recorded here — no new facts. The duplicate's commit `10db8e8bd` (wraps
+  `gantt.open/close/parse/clearAll/sort`, listens for `onTaskOpened`/`onTaskClosed`) is the direct
+  predecessor of this folder's `6d688e939` (extends logging to catch direct `$open` writes,
+  because `10db8e8bd`'s method-wrapping couldn't see `useShowWBS.ts`'s plain `task.$open = true`
+  assignment) — same branch, same DO NOT MERGE status, nothing to reconcile.
+- **The duplicate's PRIME SUSPECT** (`scheduler-columns-sort.tsx` `resetToOriginalData` replaying
+  an `open:true` snapshot) is the same one already marked **Superseded** in this folder's own
+  09-01 (later) entry above (its only caller — the column-header sort cycle — is never touched by
+  the plain chevron repro). No change needed.
+- **Unique and preserved:** `repro-playwright.js`, moved into this folder unmodified. A headless
+  Playwright harness that reaches the viewer from this environment (routes all page traffic
+  through Playwright's Node-side `fetch` to dodge the egress proxy resetting Chromium's TLS
+  ClientHello; sets `access_token` + `feature-flags` cookies to enable
+  `enableGlobalWebViewerAPI`), clicks two WBS expanders in sequence, and dumps each row's
+  open/closed DOM state at +300ms/+1800ms. Not superseded — the `useShowWBS` diagnosis above is
+  still the *best candidate*, not confirmed, and this is the only tool in either folder that can
+  independently observe the DOM-level symptom (rather than the instrumented branch's console logs)
+  once run. It is still blocked exactly as the duplicate folder left it: `GET
+  .../authorities` returns 403 `scopeNotValid` (empty `scope` claim) on the current JWT — needs a
+  fresh `access_token` cookie captured from inside a live project's viewer. **Caveat:** its console
+  filter (`t.includes('[3096]')`) will not match the instrumented branch's actual log prefix
+  `[PLT-3096]` (confirmed above) — that substring never occurs inside `[PLT-3096]`, so update the
+  filter before relying on it to surface the diagnostic logs; the DOM state dump itself doesn't
+  depend on that filter and is usable as-is.
+
+Duplicate folder deleted after this merge — nothing left behind unread.
+
+## 2026-09-02 — left scope: With Technical Support
+
+Live `getJiraIssue` fetch today: status is **With Technical Support** (moved there via Freshdesk
+sync, comment 110927, 2026-08-31 17:11, right after the ticket was raised — same day as creation).
+Out of scope for Group A/B under this routine's standing exclusion list; no further investigation
+done this run. Newest comments (all after this folder's 09-01 15:43 entry, not yet reflected
+anywhere): Ilia tried to reproduce himself (110988, 09-01 17:00) and could not — "It works fine on
+my side" — and after Yash described his own repro steps (110993, 09-01 17:26), Ilia posted a video
+of it working and noted "It seems schedule has been updated," asking Yash to record a new video if
+it still occurs (110996, 09-01 17:41, the newest comment). Folder tag kept as `-groupA-schedule-tab`
+per this routine's standing precedent of keeping the last in-scope tag rather than relabelling on a
+scope exit. GitHub: no PR exists for the `PLT-3096` branch in `xyzreality/hc-frontend` (checked via
+`search_pull_requests`/`list_pull_requests` for both `PLT-3096` text and `head:PLT-3096` — zero
+results); the branch remains unmerged, DO-NOT-MERGE instrumentation only, exactly as described
+above. `origin/cursor/duckdb-queries-examples-3096` was not separately checked for a PR (name
+suggests it is unrelated to this ticket's schedule/WBS mechanism).
