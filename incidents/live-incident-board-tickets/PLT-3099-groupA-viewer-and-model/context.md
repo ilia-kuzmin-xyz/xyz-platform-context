@@ -192,3 +192,82 @@ element id, so the expansion branch never triggers).
   screenshot would likely settle this and is unopenable here.
 - Exact scale of the over-link (how many elements actually got linked to CY-1300) — not stated by
   the customer, not deducible from the ticket text alone.
+
+---
+
+## 2026-09-02 — MEASURED ON LIVE PROD. It is not over-linking. It is a MOVE, and it is exactly reversible.
+
+The prior pass listed "exact scale of the over-link" as unverified and had no prod access. Measured
+now via the prod MCP (ATL08 is on the prod whitelist, so no browser token is needed — the platform-API
+token route is not required for this). **Read-only throughout; no write tool exists on the prod MCP.**
+
+### What actually happened
+
+`CY-1300` = activityId `9136f5b1-735c-47de-9fd8-00c325acfdbd` (stable across all schedule revisions).
+
+`xyz_get_projects_project_id_elements_activity_links` accepts a `lastSyncDateTime`/`endSyncDateTime`
+window, which isolates the event precisely:
+
+| finding | value |
+|---|---|
+| link changes, 2026-09-01 15:00–18:00 UTC | **2,478 rows** |
+| distinct activities touched | **exactly 2** |
+| `CY-1300` rows | 1,239, **all `isDeleted = false`** (created) |
+| `CY-1250` rows (`eb5a58bf-306e-4501-ad5e-2633599d2f28`) | 1,239, **all `isDeleted = true`** (removed) |
+| are the two element sets identical? | **YES — 1,239/1,239 overlap, 0 only-in-either** |
+
+**So 1,239 elements were MOVED from `CY-1250` to `CY-1300`.** Not new links on unlinked elements —
+a re-link of an already-linked set. An element holds one activity link, so linking a
+previously-linked element to a new activity moves it.
+
+### Timing — matches the customer's account exactly
+
+Bisected: **all 2,478 rows fall in 2026-09-01 15:55:00Z–16:00:00Z**, i.e. **16:55–17:00 UK (BST)**.
+The customer said "approximately 5:00 PM UK time". Confirmed.
+
+### Nothing has happened since. The state is clean to reverse.
+
+Widened to **2026-09-01 00:00Z → 2026-09-02 10:00Z: still exactly 2,478 rows.** Those 1,239 moves
+are the *only* activity-link changes on ATL08 in that whole period. No later edits sit on top, so a
+reversal today restores the exact prior state with no arbitration needed.
+
+### Current totals
+
+`CY-1300` now holds **3,461** linked elements (`recordCount`, not a page count). 1,239 of those
+arrived in the incident, so it held **2,222** before. `CY-1250` lost 1,239.
+
+### Reversal is precise, and the list is committed
+
+`analysis/PLT-3099-ATL08-CY1300-moved-elements.csv` — all 1,239 `modelElementId`s with source and
+destination activity ids. Reversal = unlink those 1,239 from `CY-1300`, relink to `CY-1250`. Nothing
+else is affected.
+
+**Not executed.** Standing instruction for this session was GET-only, and the prod MCP exposes no
+write tool for activity links regardless — remediation has to go through platform-api, as recorded in
+`incidents/prod-mcp-access.md`.
+
+### This reframes the over-linking mechanism
+
+The prior pass's leading theory was parent-node expansion in
+`SelectionService._handleSelectionChange()` (a container dbId with no element id of its own pulling in
+all children). **The data points elsewhere:** the moved set is *exactly* `CY-1250`'s existing link
+set, no more and no less. A parent-expansion would pull in whatever sits under one tree node — there
+is no reason that would coincide precisely with another activity's link set.
+
+The far better fit: **the selection at the time contained `CY-1250`'s linked elements** — e.g. the
+customer had used "Select linked elements" on `CY-1250`, or isolated them — and then linking to
+`CY-1300` moved every one of them. `linkSelectedElements()` (`linking-service.ts:365-415`) links
+whatever is in `selectionStore.selectedElements` with **no count confirmation and no comparison
+against what is visibly highlighted**, which is exactly the missing guard.
+
+**Do not drop the parent-expansion theory entirely** — it may still explain how the customer's
+*visible* click became a large selection — but the 1,239 == `CY-1250` coincidence is the stronger
+signal and should be checked first.
+
+### Correction to the ticket's framing
+
+Yash's comment asks us to investigate "why the linking operation ignored the current visible
+selection/filter and **linked additional elements**". Strictly, nothing additional was linked: 1,239
+elements were **taken off `CY-1250`**. That matters for the reply, because the customer's real
+exposure is that **`CY-1250` silently lost its links**, which they have not noticed yet and which
+their own screenshot of `CY-1300` would not show.
