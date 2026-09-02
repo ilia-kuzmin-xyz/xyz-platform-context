@@ -270,3 +270,33 @@ talk yourself past.
 The same failure applies to replies in chat, not just Jira drafts: leading with caveats, tables and
 alternatives when the answer is one line. If a question has a one-line answer, the reply is one
 line.
+
+## 2026-09-02 — hc-frontend CI: the Trivy scan can be red before you touch anything
+
+`pr-check.yaml` runs `npm run test-ci` (line 73) **before** the Trivy `Vulnerability scanner` step
+(line 173, `exit-code: "1"`, blocking). So a red `build` check does **not** mean your tests failed —
+read which step failed before assuming the diff is at fault.
+
+On 09-02 both new FE PRs (#2194, #2195) went red on Trivy alone: `nanoid` **CVE-2026-73086**, HIGH,
+in `package-lock.json`. The CVE entered Trivy's DB overnight, so the same lockfile that scanned clean
+on 09-01 failed on 09-02 with no dependency change. **PR #2192** ("Unblock CI: drop unused shortid,
+accept the tldraw-pinned nanoid CVE") is the fix for master and was already open.
+
+Handled by porting #2192's `.trivyignore` entry into each branch rather than waiting on it to merge.
+Only the ignore entry — **the lockfile cannot be regenerated in this environment** (`npm ci` and
+`npm install` both 401 on the private `@xyzreality/dhtmlx-gantt`), and unrelated lockfile churn does
+not belong in a feature PR. Each PR carries one comment saying so, and both entries are redundant
+once #2192 merges.
+
+**Reusable:** when a red check names a dependency or a file your diff does not touch, look for an
+existing "unblock CI" PR before debugging your own change.
+
+### Running FE tests without being able to install the repo
+
+Both PRs' tests were validated before pushing by copying the module and its spec into a throwaway
+vitest project in the scratchpad (`npm install vitest typescript`, a 6-line `vitest.config.ts` with
+`globals: true`, and a minimal `declare namespace Autodesk` stub for the type-only references). Then
+the same run with the fix neutered, to prove the tests fail without it. This works for any module
+whose imports can be stubbed or are absent — it will not work for anything that pulls in
+`@xyzreality/dhtmlx-gantt` or the app's aliases, which is the reason the PLT-3096 fix was extracted
+into `wbs-open-state.ts` rather than tested through the hook.
