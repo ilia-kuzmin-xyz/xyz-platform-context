@@ -77,6 +77,24 @@ loaded models' fragments but rotates the union by that one stale, first-model an
 Net effect: whichever model was visible first when the angle was computed wins for the rest of the
 session: loading more models afterward gives a box that clips the right volume at the wrong angle.
 
+### 2026-09-01 — the causal chain, and one design fact that keeps getting lost
+
+The five incidents are not independent sightings; each fix caused the next report:
+
+`PLT-2651 ATL08 → fix in 26.2.3 (05-26) → regressed ATL5/6/7 → PLT-2756 (06-02, Critical) → rewrite
+PR #1933 → PLT-2906 FAR01 → PR #2069 tunes the dead-band, ships 26.3.4 (08-17) → PLT-2651 reopens (08-28)`
+
+**On ATL08 a tilted section box is the INTENDED output.** ATL08 is a diagonal building and PR #1933's
+acceptance criteria (Rishi, PLT-2756 comment 104360, 06-05) were explicitly: ATL07 axis-aligned,
+**ATL08 "orients to the building's diagonal footprint as a tight oriented box"**. Any change that
+makes ATL08's box axis-aligned re-breaks #1933. Check this before treating "the box is tilted" as the
+defect — the defect is the box being tilted to the *wrong* thing.
+
+PR #2069 explicitly deferred two hazards that are now the live symptom on PLT-2651: the footprint
+comes from `getVisibleModels()[0]` only, and the compound-footprint min-area-rect estimate is
+unreliable on multi-building sites. **Neither shipped fix touched them**, which is why the feature
+keeps reopening on new projects.
+
 This is the fourth fix/incident on the same feature, PLT-2651 being both the original (PR #1871,
 2026-05-08) and now its own fifth occurrence: PR #1933/PLT-2756 rewrote it, PR #2069/PLT-2906 narrowed
 the dead-band 5°→0.5°, and PLT-2771 (same project as the reopened PLT-2651, no fix ever shipped) sits

@@ -389,3 +389,83 @@ load-all-then-refresh test, or reading attachment 63521.
 
 Open, Critical, assigned Ilia, Waiting on 3rd line since 2026-08-28. **Still no reply from our side.**
 118 days old.
+
+---
+
+## 2026-09-01 (later) — REPRODUCED ON PROD, and PLT-2756 read directly for the first time
+
+### PLT-2756 is causally linked, not merely thematically. Read in full (10 comments).
+
+`PLT-2756` "Scope Box Alignment Issue Switch ATL5–7", created 2026-06-02, Critical, assignee Rishi,
+status **Done**, **`fixVersions: []`**, `resolution: null`. Links to PLT-2651 as `relates to`.
+**No notes folder existed for it** — this is the first time its content has been read into this repo.
+
+Yash's opening comment (104050, 06-02):
+
+> **Following the release 26.2.3**, user have experienced the misaligned section box on SWITCH ATL5,
+> SWITCH ATL6, SWITCH ATL7.
+
+26.2.3 is **PLT-2651's own fix** (released 05-26). The customer added: *"Previously, the scope boxes
+were aligned with the model orientation, but they are now offset at an angle."* So **PLT-2651's fix
+regressed three sibling projects seven days after it shipped.** The chain is:
+
+`fix ATL08 (26.2.3) → break ATL5/6/7 (PLT-2756) → rewrite (PR #1933) → tune for FAR01 (PR #2069,
+26.3.4) → ATL08 reopens (08-28)`
+
+### ⚠️ The design fact that was not in this repo: on ATL08 a tilted box is INTENDED
+
+Rishi's comment 104360 (06-05) is the acceptance criteria for the PR #1933 rewrite:
+
+> **Switch ATL07 (regression):** the box is aligned with the building, not tilted a few degrees.
+> **Switch ATL08 (diagonal building):** the box orients to the building's **diagonal footprint as a
+> tight oriented box**.
+
+ATL08 is a diagonal building and the feature **deliberately** rotates the box to hug it. That was
+signed off in June. **Any "fix" that makes ATL08's box axis-aligned re-breaks what #1933 delivered.**
+This must be stated in any reply, and it was missing from every prior pass on this ticket.
+
+### Prod reproduction — Ilia, 2026-09-01. First reproduction in 118 days.
+
+Two screenshots from prod ATL08 with the section tool active. **This ends the non-repro history**
+(Rishi 06-03 on this ticket, 06-15 on PLT-2771, both treated as resolution).
+
+What they show:
+
+- The box edges sit roughly on **world axes** while the geometry runs **diagonally inside**, with a
+  large empty margin. **The box is not hugging the diagonal footprint.** So #1933's intended ATL08
+  behaviour is *not* occurring on prod.
+- **Box orientation looks identical across two different element counts (5,037 and 12,922).** If the
+  angle tracked the visible model set it should have changed. Suggestive of a frozen or near-zero
+  `theta`, not of a per-model angle.
+
+**This kills the "expectation mismatch" reading** raised earlier the same day: the customer is not
+complaining about an intentional diagonal box, because there isn't one.
+
+**Caveat, stated because it matters:** both screenshots are **perspective** views, not top-down
+orthographic. Apparent angles are distorted, so the tilt was **not** measured, only judged as
+"clearly not hugging". Two things still outstanding: whether the two shots were one session or two
+page loads (one session ⇒ H1 confirmed), and a top view.
+
+### Revised reading of the mechanism
+
+`theta` is either **~0°** (the patch is not firing at all on prod) or **~17°** (firing, per the
+feature's own verified-cases table, but wrong for this federation). **These need different fixes**,
+and one console line separates them. Guessing between them would be the fifth guess on this feature.
+
+Next step: an instrumented branch off `master` logging `theta` in degrees, which model was
+`getVisibleModels()[0]`, that model's `refPointTransform` rotation, the min-area-rect tightness, and
+whether the memo short-circuited. **Not yet written.** No PLT-2651 branch exists; only
+`origin/PLT-2906-section-box-true-north` and `origin/bug/PLT-2756-scope-box-alignment-switch-atl`.
+
+### Deployment status — both fixes ARE live, verified
+
+| fix | version | released |
+|---|---|---|
+| PLT-2651 workaround | 26.2.3 | **2026-05-26** |
+| PLT-2906 / PR #2069 | 26.3.4 | **2026-08-17** |
+
+Both `released: true` in Jira; PLT-2906 is Done. Master carries #2069
+(`ORIENTATION_MISMATCH_THRESHOLD_RAD = 0.5 * (Math.PI / 180)`, `compose` at `:123`). PLT-2651
+reopened **11 days after 26.3.4 shipped**, so nothing is pending deployment — this is an unfixed
+defect needing new code. **PLT-2756's release is unrecorded** (no fixVersion), so which build carried
+PR #1933 is still unknown.
