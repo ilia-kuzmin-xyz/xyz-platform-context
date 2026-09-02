@@ -2298,3 +2298,42 @@ enforces, and to re-run the census instead of trusting the note. Replied and res
 **Lesson for the next run:** when a `check_suite.completed` notice arrives, it explicitly does not
 cover cancelled suites. Read the job's *steps* before reporting a fix as proven — "conclusion:
 success" on a run whose scan was skipped proves nothing.
+
+### A parallel run reached the same diagnosis on PLT-2953 — and it will conflict with #2192
+
+At 08:58 UTC a second actor (same git identity, so another run of this routine or the user) pushed
+`f479cdb` to **PLT-2953**: *"Accept nanoid CVE-2026-73086 in Trivy, same two unfixable copies as
+before"* — a 7-line `.trivyignore` addition. Earlier the same actor pushed `39f2573`
+*"keep the asset and element selections independent"* (08:21) — i.e. it is working Darminder's
+09-01 feedback while this run was raising the clarification question on the ticket.
+
+Read its commit rather than assuming a clash of judgement: **it agrees on the diagnosis.** Its body
+explicitly says `shortid` "is a direct dependency with no usages left in the repo, so the real fix
+is to drop shortid", deferred as a follow-up. Only the commit *subject* says "unfixable", which
+undersells its own body. So the difference is **scope, not correctness**: it suppresses now inside
+the feature branch; #2192 does the removal on master.
+
+**The collision is textual and certain:** both append `CVE-2026-73086` at the end of
+`.trivyignore` with different comment text, so merging master into PLT-2953 after #2192 lands will
+conflict on that file. Recorded the intended resolution as a comment on #2148: **take #2192's side
+and drop the branch's block** — #2192 has the same CVE line plus the removal plus the corrected
+census. Keeping both duplicates the entry; keeping only the branch's silently re-adds `shortid`.
+
+Did **not** touch PLT-2953 — another actor is mid-flight on it, and its own `build` red was only
+ever this CVE (tests and webpack passed on `0f85654`). Coordinating by comment, not by pushing over
+someone's branch, is the right move when two runs land on the same file.
+
+**Standing lesson: check for a parallel actor on the branch before pushing.** `git log --format=%an
+%ad` on the PR head, and look for commits you did not make this run. Two runs of this routine can
+be live at once, and they will both do the obviously-correct thing to the same file.
+
+### Final state of the 09-02 run
+
+| PR | Head | build | Notes |
+|----|------|-------|-------|
+| #2192 (hotfix) | `047f8b3` | ✅ **verified green** | Trivy scan ran and passed; `mergeable_state: blocked` on approvals |
+| #2186 | `244a57d` | ✅ green | aria-label fix; passed Trivy on a cached DB, not on the fix |
+| #2148 | `f479cdb` | pending | other actor's head; carries its own CVE suppression |
+| #2180 | `abe300e` | 🔴 | this CVE only; goes green once #2192 lands |
+
+**0 open review threads across all four PRs.** 0 tickets kicked off (all five in code review).
