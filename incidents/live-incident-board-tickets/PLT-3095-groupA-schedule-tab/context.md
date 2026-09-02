@@ -333,3 +333,26 @@ hypothesis explains the same facts without requiring a collision.
 Whether **`full = true`** (the BI path) returns those four rows. If it does, the gap is in the
 function's non-full branch rather than the data or a delete flag. Blocked here: AUS02 is not on the
 prod MCP whitelist (`project_id_not_allowed`) and the browser token used on 09-01 expired at 17:24Z.
+
+## 2026-09-02 — Ali asked for DB identifiers to run a direct query
+
+Ali: *"requires direct db access, please share the project id and schedule rev id, I check if we can
+run a query"*. Everything he needs is already above; collected here so the next run does not re-derive it.
+
+| what | value |
+|---|---|
+| AUS02 projectId | `f862c969-fb32-428a-aa34-ff83d3677b51` |
+| current revision (isCurrent, isBaseline) | `9f13d821-12c6-455b-8604-1eec2452050e` |
+| previous revision (same four missing) | `c07665dd-418d-474c-b3c2-ef5bd4631eb8` |
+| call | `SELECT * FROM xyz."fn_GetScheduleRevision"(projectId, revisionId, false)` |
+
+**What to ask him to check:** do the four `parentItemId`s (table at §"the four missing parents")
+exist as rows, and do they carry a deleted/inactive flag? That is hypothesis 2 above, the one that
+fits every observation.
+
+**Flag to Ali alongside it:** `full = true` (BI path) is still untested from here. If the non-full
+branch is the culprit, a DB row check comes back clean and reads as a dead end — so the query should
+cover both branches, or he should run the function with `full = true` and diff the row count.
+
+Draft handed to Ilia (48 words, unposted — the hard no-Jira-action rule stands; comment 111093 from
+09-01 was a breach and is still live on the ticket in Ilia's name).
