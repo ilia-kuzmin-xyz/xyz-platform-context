@@ -764,3 +764,121 @@ rather than riding along on an incident. Note our own `getSchedule` hardcodes `d
 
 Also: **Mostafa asked Sachin to use Claude** (13:25) and Sachin's read was *"Seems like we are missing
 some WBS code"* — consistent with everything above.
+
+## 2026-09-03 (XER analysed) — ⭐ ROOT CAUSE PROVEN. Concatenated WBS-path collision. Both colliding rows are dropped.
+
+Ilia supplied the source export (`AUS02-60-Schedule-L1-10-08`, 1,044,967 bytes, cp1252, P6 v15.1,
+exported 2026-08-10 by Javid Samad). Parsed locally — no token, no DB, no permissions needed.
+
+### The arithmetic, first
+
+| | count |
+|---|---|
+| `PROJWBS` rows in the file | **236** |
+| WBS rows the API returns | **232** |
+| difference | **4** — the four missing parents |
+| `TASK` rows in the file | **1,586** |
+| Activity rows the API returns | **1,586** — every activity survived |
+
+**Only WBS rows are lost, and exactly four of them.**
+
+### The four, now with names — and `16793` is confirmed as Sachin's row
+
+| wbs_id | wbs_short_name | wbs_name | parent |
+|---|---|---|---|
+| **16793** | `1.1` | **Milestones** | 16792 |
+| **16811** | `1.2` | **Core & Shell Construction** | 16792 |
+| **17012** | `1` | **CFCI Procurement** | 17011 |
+| **17015** | `2` | **OFCI / OFE Procurement** | 17011 |
+
+`16793` = *Milestones*, so **Sachin's `SourceFileWbsId 16793` IS one of the four missing nodes**, not
+its parent. That ambiguity is closed. And `16811` is literally *"Core & Shell Construction"* — the
+branch the customer named in the original report.
+
+### ⭐ The mechanism — the platform keys WBS on the concatenated short-name path, and that path is not unique
+
+Building each row's identity by walking up the tree and joining `wbs_short_name` with dots:
+
+| | count |
+|---|---|
+| file `PROJWBS` rows | 236 |
+| **distinct** concatenated paths | **234** |
+| **colliding** paths | **2**, covering **4 rows** |
+
+```
+AUS02-60-Schedule-L1-.1.1.1   <-  16793 Milestones          AND  17012 CFCI Procurement
+AUS02-60-Schedule-L1-.1.1.2   <-  16811 Core & Shell Constr. AND  17015 OFCI / OFE Procurement
+```
+
+**Nothing else in 236 rows collides.** The 2 colliding paths cover exactly the 4 missing rows.
+
+**Cross-checked against the API payload, and it matches perfectly:**
+
+| check | result |
+|---|---|
+| file paths present in the API's `userItemId` | **232 of 234** |
+| file paths absent from the API | **2** — the two colliding ones |
+| API `userItemId`s with no corresponding file path | **0** |
+
+So `userItemId` **is** the concatenated path, and the only rows missing are the ones whose path is not
+unique. This is conclusive.
+
+### Why the collision exists — the customer's short names mix two conventions
+
+```
+16792  'AUS02 - 60% Milestone Schedule'   short '1'          -> ...-.1
+ ├ 16793  'Milestones'                    short '1.1'        -> ...-.1.1.1   ← collides
+ ├ 16811  'Core & Shell Construction'     short '1.2'        -> ...-.1.1.2   ← collides
+ ├ 16920  'Parking & Landscape'           short '1.3'        -> ...-.1.1.3   ok
+ ├ 16926  'Mechanical Yards'              short '1.4'        -> ...-.1.1.4   ok
+ ├ 16930  'Electrical Yards'              short '1.5'        -> ...-.1.1.5   ok
+ ├ 16934  'Interior Build-Out'            short '1.6'        -> ...-.1.1.6   ok
+ ├ 16807  'Change Management'             short '2'          -> ...-.1.2     ok
+ └ 17011  'Procurement'                   short '1'          -> ...-.1.1
+    ├ 17012  'CFCI Procurement'           short '1'          -> ...-.1.1.1   ← collides
+    └ 17015  'OFCI / OFE Procurement'     short '2'          -> ...-.1.1.2   ← collides
+```
+
+Compound short names (`1.1`, `1.2`) at one level, simple ones (`1`, `2`) at the next. Concatenation
+cannot tell `1` + `1.1` apart from `1` + `1` + `1`. **The schedule itself is valid** — `wbs_id` is
+unique for every row (16793 ≠ 17012). Only the platform's derived key is ambiguous.
+
+This also explains the sibling pattern that puzzled us on 09-01: `.1.1.3/.4/.5/.6` present while
+`.1.1.1/.2` absent. Those are the two paths that happen to collide.
+
+### ⚠️ BOTH colliding rows are dropped — not "last one wins"
+
+236 − 4 = 232, and all four are gone. So ingest is not overwriting one with the other (which would
+lose 2 and keep 2); it discards every member of a colliding set. Whoever fixes this needs to know
+that — it points at a unique-key rejection or a dedup step, not a `Map.set`-style overwrite.
+
+### ✅ This VINDICATES the "concatenated P6 code collision" theory, and corrects my own note
+
+The 09-02 entry flagged that theory as *"NOT supported by live data"* on the grounds of 0 duplicate
+`userItemId` and 0 duplicate `itemId` among the 1,818 returned rows. **That reasoning was right and
+the conclusion was wrong.** The note even said why: *"the losing row is by definition absent, so a
+survivor-vs-survivor check cannot see it."* With the file, both sides of each collision are visible.
+**The theory was correct all along; the API payload simply could never confirm it.**
+
+Lesson worth keeping: when a theory predicts that evidence is *removed*, absence of that evidence in
+the surviving data is not counter-evidence. Go to the source artefact.
+
+### Fix directions — for whoever owns ingest
+
+1. **Key WBS rows on `wbs_id`** (unique per file, already carried as `SourceFileWbsId`) rather than the
+   concatenated short-name path. The path is a display code, not an identity.
+2. **At minimum, fail loudly.** A schedule that publishes with 4 rows dropped and 638 descendants
+   orphaned should be rejected at upload with the colliding paths named, not shipped with 35 % of the
+   tree dark and no error anywhere.
+3. **A referential check at ingest** — every `parent_wbs_id` must resolve — would have caught this
+   regardless of the keying decision.
+
+### 🟢 There is a same-day customer workaround
+
+Because the collision comes from the derived path, **renaming any one of the four `wbs_short_name`
+values in P6 breaks it.** e.g. change *Milestones* from `1.1` to `1.0`, or renumber Procurement's two
+children. Re-upload and all 236 rows should ingest.
+
+**This is worth offering immediately** — it unblocks the customer today without waiting for an
+ingest fix, and it is a two-minute edit on their side. It also serves as a live confirmation of the
+diagnosis: if the rename fixes it, the mechanism is proven end to end in their own environment.
