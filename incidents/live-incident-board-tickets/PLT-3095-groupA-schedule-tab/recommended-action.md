@@ -155,3 +155,63 @@ They reported *Core & Shell*. Three more whole branches are invisible — the **
 **long-lead MEP procurement**, and **structural procurement**. 638 rows, 35 % of the schedule. They
 will find this themselves the moment they look, and it is better coming from us. No draft yet — it
 needs a line on timing, which depends on the ingest owner.
+
+---
+
+# 2026-09-03 (post-XER) — the reply that closes the diagnosis. All earlier drafts are spent.
+
+## Draft to the thread — 74 words, UNPOSTED
+
+> Found it — it's in the file, and it explains all versions.
+>
+> 236 WBS rows in the XER, 232 in the DB. The 4 lost are the only ones whose concatenated short-name
+> path isn't unique:
+>
+> ```
+> AUS02-60-Schedule-L1-.1.1.1  ->  16793 Milestones  +  17012 CFCI Procurement
+> AUS02-60-Schedule-L1-.1.1.2  ->  16811 Core & Shell Construction  +  17015 OFCI / OFE Procurement
+> ```
+>
+> Nothing else in 236 rows collides, and `userItemId` matches that path for all 232 survivors. Both
+> members of each pair are dropped, not one.
+>
+> Quick unblock: rename one short name in P6 and re-upload.
+>
+> **Should we key on `wbs_id` instead?**
+
+Why this shape:
+
+- **Leads with "it's in the file"** because Sachin's last message was *"parent-child relationship is
+  missing for each version"* — the file explains the "each version" part exactly, so it lands as an
+  answer to what he just said.
+- **Gives the two colliding paths, not a theory.** He can verify both in one query.
+- **States "both members are dropped"** because it rules out an overwrite and points at a unique-key
+  rejection or dedup step. That is the detail that changes where he looks.
+- **Ends on the design question**, not on a fix instruction — the keying decision is api-v2/ingest's
+  to make, not ours.
+- **Does not mention the deleted-revision confusion** or which file he downloaded. Both are now moot
+  and raising them costs goodwill for nothing.
+
+## Then, in order
+
+1. **Offer the customer the workaround today.** Rename any one of the four `wbs_short_name` values in
+   P6 — e.g. *Milestones* from `1.1` to `1.0` — and re-upload. Two-minute edit, unblocks them without
+   waiting for an ingest fix, and it confirms the mechanism in their own environment. **This is the
+   only thing on this ticket that helps the customer this week.**
+2. **Answer Yash's board question** (open since 09-02 14:10, flagged urgent). The defect is in
+   schedule ingest — the ticket belongs on the board that owns it.
+3. **Tell the customer the full scope.** They reported Core & Shell. Also invisible: the entire
+   **Milestones** group, **CFCI Procurement**, and **OFCI / OFE Procurement** — 638 rows, 35 % of the
+   schedule.
+4. **Get an ingest owner named.** Sachin asked "who can check upload mechanism, Kuba?" and nobody has
+   answered.
+5. **Raise the ingest ticket** with the three fix directions (key on `wbs_id`; fail the upload loudly;
+   add a parent-reference check at ingest). Not ours to implement — the importer is outside this
+   session's repo scope.
+
+## One correction to carry into that ticket
+
+The **"concatenated P6 code collision" theory was right**, and this folder recorded it as unsupported
+on 09-02. The reasoning then was sound — 0 duplicate `userItemId` among returned rows — but the
+theory predicts the duplicates are *removed*, so their absence was never counter-evidence. Say so
+plainly if the theory's earlier dismissal comes up.

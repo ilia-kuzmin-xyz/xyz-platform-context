@@ -882,3 +882,17 @@ children. Re-upload and all 236 rows should ingest.
 **This is worth offering immediately** — it unblocks the customer today without waiting for an
 ingest fix, and it is a two-minute edit on their side. It also serves as a live confirmation of the
 diagnosis: if the rename fixes it, the mechanism is proven end to end in their own environment.
+
+### 2026-09-03 14:41 — Sachin: *"for all of them … parent-child relationship is missing for each version"*
+
+Asked (14:39) whether his downloaded file came from `d505f075`, noting two revisions share the name
+`AUS02-60-Schedule-L1-10-08` (one active, one deleted). His answer sidesteps the question and is
+better than an answer: **the parent-child gap is present in every revision.**
+
+**That independently corroborates the collision finding from the DB side.** The collision lives in the
+source file's `wbs_short_name` values, so it is deterministic — every import of that file, and of its
+near-identical predecessors, reproduces it. Which is exactly what we measured from the API across
+`9f13d821`, `c07665dd` and now `d505f075`: 638 unreachable, every time.
+
+It also retires the "which file did you download" worry entirely: **any** of these revisions'
+exports demonstrates the defect, because they all carry the same short-name scheme.
