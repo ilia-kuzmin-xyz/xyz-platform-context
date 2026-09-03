@@ -896,3 +896,49 @@ Stopped it for two reasons, in order of weight:
 Nothing for an agent to push. The branch needs a **quiet window** — one ~20-minute gap with no push —
 before it can be called verified. Last head verified fully green: **`07474a1`** (17:58). Everything
 after it is unverified, including the fix for tonight's TS2741.
+
+## 2026-09-03 23:40 — MERGE BLOCKER: `SCHEMA_PREVIEW` is committed as `true`
+
+**The most important finding of the session. `7cfd9e0` sets `SCHEMA_PREVIEW = true` deliberately
+("turn the schema preview on while the MVP is reviewed"). It must go back to `false` before merge.**
+
+The constant's own docstring says the preview *"changes what is DRAWN, never what is sent"*. **That
+understates it.** `TaskInstanceModal.tsx:423-444`:
+
+```ts
+if (preview && split.preconditions.length === 0) {
+  return { preconditions: PREVIEW_PRECONDITIONS, rest: split.rest }
+}
+const preconditionsMet = preconditions.every(item => isAnswered(...))
+const itemsReadOnly = !editMode || !preconditionsMet
+```
+
+Stand-in preconditions are injected for any template lacking real ones, and they feed
+`preconditionsMet` → `itemsReadOnly`. So a user must confirm **invented** preconditions before the
+real items become editable, and those confirmations persist nowhere. That is a change to what someone
+can DO, not merely what they see. No bad data is written — the write gating is genuinely sound — but
+"display only" is the wrong mental model to merge on.
+
+Scope: bounded by the `Commissioning` flag (off by default), so it cannot reach a general user. But
+flag-on users are exactly the commissioning pilots, i.e. the people most likely to mistake a stand-in
+gate for the real thing.
+
+**Deliberately NOT flipped.** It was turned on on purpose, the PR is under review right now, and the
+preview is what reviewers are meant to be looking at. Switching it off mid-review would remove that
+and silently undo the author's intent. Flagged on the thread as a merge blocker instead — a one-line
+change that is very easy to lose in a 34-file diff, whose post-merge failure mode is quiet.
+
+## Same review — O(n²) row numbering, and why the suggested fix is wrong
+
+`number={rest.indexOf(item) + 1}` is O(n) per row → O(n²) per render. Real, but the suggested
+replacement (`item.position`) is **not equivalent**: `position` orders across ALL items, `rest`
+excludes preconditions, so with 3 preconditions the first runner item would renumber 1 → 4.
+*Verified the field exists and then checked what it means — a bot's suggested fix is a hypothesis,
+not a patch.*
+
+Correct O(n) fix preserving the numbering:
+```ts
+const numberByItemId = useMemo(() => new Map(rest.map((i, n) => [i.id, n + 1])), [rest])
+```
+Severity is low (tens of items, not thousands). Deferred to the same `TaskInstanceModal.tsx` quality
+sweep as the i18n work — four commits landed in that file in the last half hour.
