@@ -335,3 +335,16 @@ rendered title — data, not a literal).
 
 **Third collision on this repo in two days.** The habit that keeps working: fetch before assuming a
 push will land, and when it is rejected read *their* commit before merging, never force.
+
+### 08:19 UTC — merged head green; i18n fix and the parallel gating change coexist
+
+`build` **success** on `f814c78`, verified per-step: `Install dependencies`, `Lint & Run Tests`
+(8m29s), Sonar (gate passed, 1 pre-existing issue), `Build image`, `Vulnerability scanner`,
+`Scan built image` — all green, nothing skipped.
+
+That confirms the two things the merge put at risk: the reworked `translate` mock still lets the
+accessible-name cases pass (they assert `<key> <interpolated value>` now), and the parallel run's
+non-nullable `step` gating sits fine alongside the three `translate()` calls.
+
+**#2186 state:** green, current with master, **1 open review thread** — the i18n-fallback product
+call, left open on purpose. Awaiting human approval.
