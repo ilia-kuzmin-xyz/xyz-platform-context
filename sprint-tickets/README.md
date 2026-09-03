@@ -2667,3 +2667,88 @@ cleanup). **1 open review thread**, on #2186, left open deliberately as a produc
 2. **postcss nanoid → 3.3.17** — the one genuinely fixable CVE row, satisfies `^3.3.16`, no override.
 3. **tldraw 2.4.6 → 5.3.2** — three majors, now holding two suppressed nanoid CVEs; deletes those
    `.trivyignore` lines.
+
+## Run 2026-09-03 — 0 eligible tickets; the run's value was a review-reading gap
+
+JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()`
+
+**The sprint shrank from five tickets to three.** PLT-2953 and PLT-3004 left the board after
+#2148 merged on 09-02, leaving:
+
+| Ticket | Summary | Status | PR | Eligible? |
+|--------|---------|--------|----|-----------|
+| PLT-2968 | Asset details — readiness tag override context menu | In Code Review | #2186 | ❌ |
+| PLT-2967 | Asset details — readiness tag task context menu | In Code Review | #2186 (same PR) | ❌ |
+| PLT-2896 | `/canvas/library` shows an empty page | In Code Review | #2180 | ❌ |
+
+**0 eligible for kick-off**, so no new branch and no new development. Checkpoints 1–3 only.
+
+### Checkpoint 1 — the finding of the run: suppressed comments are invisible to a thread listing
+
+Open threads were, as on 09-02, exactly **one** (#2186's i18n/tr thread, open by design as a
+product call). But **`get_reviews` bodies carried three findings that never became threads** —
+Copilot files some as *suppressed comments* inside the review body. Every prior run on #2186
+read the thread list, saw everything resolved, and moved on. Two of the three were real.
+
+> **Standing rule added:** on every PR, read `get_reviews` **bodies** as well as
+> `get_review_comments`. A clean thread list is not a clean review. Full mechanism and both
+> fixes in `sprint-tickets/PLT-2968/context.md` § 2026-09-03.
+
+Fixed and pushed as `7017211` on #2186:
+1. `StepTasksModal` rendered on a step **id** that can stop resolving (panel isn't keyed by
+   asset; `steps` re-derives on every readiness refetch) → untitled dialog saying "No tasks yet"
+   for a tag that no longer exists. Now renders on the resolved step — the guard
+   `TaskInstanceModal` **already uses on the next line**. `step` made non-nullable.
+2. **`common/modal/modal.tsx` gives every dialog a dangling `aria-labelledby`** — it generates
+   `useId()` and points the label at it, but nothing ever renders that id. **64 call sites pass
+   `title`.** Fixed locally in the two new modals via the passthrough `Modal` already exposes;
+   the systemic fix (thread the id through `ModalProvider` → `ModalTitle`) is left as a ticket
+   rather than widening a green PR across the whole app.
+
+### Checkpoint 2 — CI green on all three sprint PRs before the push
+
+Read per check run, not from a badge. `master` = `50711c3`.
+
+| PR | Head | build | SonarCloud |
+|----|------|-------|-----------|
+| #2186 | `1438b8a` | ✅ | ✅ |
+| #2180 | `9a36c3c` | ✅ | ✅ |
+| #2192 | `5ddf92d` | ✅ | ✅ |
+
+`7017211` on #2186 re-triggers the build; CI is the first run against the real config because
+`npm ci` cannot complete here (no `NPM_TOKEN` for the private `@xyzreality` registry).
+
+### Checkpoint 3 — three PRs already current; **two draft PRs were not, and had a real conflict**
+
+#2186, #2180 and #2192 all sit on base `50711c3` — current. But the two draft PRs from the
+live-incident routine (**#2194** PLT-3099, **#2195** PLT-3096) were still based on the
+pre-#2148 `7ee6b82` and **both conflicted with master on `.trivyignore`**.
+
+Worth noting *what didn't* conflict: #2194 changes `selection-service.ts`, which #2148's
+42-file rewrite also touched — and that merged cleanly. `.trivyignore` was the only clash.
+
+Resolution took **master's block**, on two grounds that agreed:
+- master now carries its own `CVE-2026-73086` entry, and a `.trivyignore` is read as *current
+  truth*, so the branches' ported note ("ported from #2192… expect a conflict if #2192 lands
+  first") is stale prose the moment master carries the entry;
+- **each branch's own note says the resolution is to defer to the canonical block.**
+
+Merged and pushed: `dcc5f37` (#2194), `ca87564` (#2195). Verified after each commit that
+`.trivyignore` is byte-identical to master's, not merely conflict-free.
+
+### State at close
+
+- **1 open review thread** across all five of my open PRs — #2186's i18n/tr thread, open on
+  purpose (product call: translate the namespace vs. add the missing `translate` fallback vs.
+  accept tr as en-only while the feature is flag-gated).
+- **0 approvals.** #2180 still carries rishib-xyz's **DISMISSED** review ("LGM, just a couple of
+  cleanup comments") — both his comments were addressed on 08-27. Every sprint PR is waiting on
+  a human, not on us. **Do not re-request again** — repeat pings are noise.
+
+**Handover — ticket candidates, updated order:**
+1. **i18n fallback** — `translate` has none; fixes 820 missing tr keys in one change.
+   `setDefaultLocale` is NOT a fallback (verified in `react-jhipster@1.0.3` source).
+2. **`Modal` → `ModalTitle` label id** — 64 dialogs with a dangling `aria-labelledby` and no
+   accessible name. One change in the shared component, no caller changes. **New on 09-03.**
+3. **postcss nanoid → 3.3.17** — the one genuinely fixable CVE row, satisfies `^3.3.16`.
+4. **tldraw 2.4.6 → 5.3.2** — three majors, holding two suppressed nanoid CVEs.

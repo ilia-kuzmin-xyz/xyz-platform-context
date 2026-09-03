@@ -217,3 +217,66 @@ not touch this branch's files.
 Still gated on **human approval only** — see the 09-02 entry in `sprint-tickets/README.md` for the
 full triage, the `copilot-pull-request-reviewer`-vs-`build` red-check trap, and the open product
 question PLT-3022 raises about authority-gating the commissioning surfaces.
+
+## 2026-09-03 — the review bot's *suppressed* comments were never being read
+
+Sprint run found **0 eligible tickets** (PLT-2968, PLT-2967, PLT-2896 all In Code Review),
+so the whole run was checkpoints 1–3. Checkpoint 1 turned up something structural.
+
+> ### Standing lesson: `get_review_comments` does NOT show everything Copilot found
+> Copilot files some findings as **suppressed comments** — they live inside the *review body*
+> (`get_reviews`) and never become review threads. So they are invisible to a thread listing,
+> invisible to the "open threads" count, and every prior run on this PR reported "all threads
+> resolved" while three real findings sat unread. **Read `get_reviews` bodies, not just the
+> thread list.** The 08-04 run already learned to call `get_reviews` for `CHANGES_REQUESTED`;
+> the same call carries the suppressed findings and that half was being skipped.
+
+Three suppressed findings on #2186. Two were real and are fixed in `7017211`:
+
+**1. `StepTasksModal` could open for a tag that no longer exists.** It rendered on
+`tasksModalStepId` alone (`readiness-ladder.tsx`), and the kebab stores only an id:
+- `AssetDetailPanel` is **not keyed by `asset.id`** (`asset-detail-right-panel.tsx:96`), so
+  `ReadinessLadder` keeps its state across an asset selection change;
+- `steps` re-derives on every readiness refetch — and the override mutations invalidate it.
+
+So the id can stop resolving while the modal is open → `title = step?.label ?? ''` and a
+disabled query → **untitled dialog reporting "No tasks yet" for a tag that isn't there.**
+Fixed by resolving the step in a `useMemo` and rendering on that — which is exactly what
+`TaskInstanceModal` **on the next line** already does with `openInstance`, so this was an
+inconsistency, not a design choice. `StepTasksModalProps.step` is now non-nullable, making the
+invariant a compile error rather than a convention.
+
+**2. Neither new dialog had an accessible name — and this one is repo-wide.**
+`common/modal/modal.tsx:19,27` generates `const titleId = useId()` and sets
+`aria-labelledby={title ? titleId : props['aria-labelledby']}`. **Nothing ever renders an
+element with that id** — `modal-title.tsx` neither receives nor applies it. So every caller
+that passes `title` gets a dangling `aria-labelledby` and a dialog a screen reader announces
+with no name at all. **64 call sites pass `title`.**
+
+Fixed *locally only*: each new modal owns its own `useId()`, passes it as `aria-labelledby`,
+and lands it on the rendered title via `ModalTitle TypographyProps={{ id }}`. That uses the
+passthrough `Modal` already exposes, so zero blast radius.
+
+> **Follow-up worth a ticket (candidate #4, ahead of the tldraw upgrade):** wire the generated
+> id down through `ModalProvider` and have `ModalTitle` apply it — fixes all 64 dialogs with no
+> caller changes. Deliberately NOT done on #2186: it touches every modal in the app and that PR
+> is green and waiting on approval. Recorded on the PR too.
+
+**3. setState-during-render in `override-readiness-modal`** — already answered on a thread on
+08-27 (deliberate compare-and-set during render, React's documented alternative to an effect
+for derived-state resets). Copilot re-suppresses it on every review. **No change; do not
+"fix" it on a future run.**
+
+### Verification constraint (unchanged from 09-02)
+`npm ci` cannot complete here — `@xyzreality/dhtmlx-gantt` is on the private GitHub Packages
+registry and there is no `NPM_TOKEN`. **No `node_modules`, so no local vitest.** Two
+consequences that shaped the diff:
+- CI is `npm run test-ci` = `eslint` + `vitest run`, plus the docker image build (webpack prod,
+  which typechecks). **Prettier is NOT in CI** — `prettier:check` exists but nothing calls it.
+  Formatting cannot turn the build red; eslint can, and `eslint.config.mjs` has **no
+  `import/order` and no `max-len`**, and `lint` runs without `--max-warnings 0`.
+- The new label assertions are written at DOM level (does some `aria-labelledby` resolve to an
+  element carrying the title?) rather than with `toHaveAccessibleName` on a testid, because
+  **MUI Dialog destructures `aria-labelledby` out of props and applies it to the Paper, not to
+  the root that carries `data-testid`** — an assertion on the testid node would have failed and
+  there was no way to catch that locally.
