@@ -215,3 +215,37 @@ The **"concatenated P6 code collision" theory was right**, and this folder recor
 on 09-02. The reasoning then was sound — 0 duplicate `userItemId` among returned rows — but the
 theory predicts the duplicates are *removed*, so their absence was never counter-evidence. Say so
 plainly if the theory's earlier dismissal comes up.
+
+## Draft to Yash (Jira comment) — 96 words, UNPOSTED
+
+Written for relay: Yash pastes into Freshdesk 7800, so no GUIDs, no `userItemId`, no table names.
+
+> Root cause found, and it's fixable on their side today.
+>
+> Four WBS branches are dropped on import because two pairs end up with the same generated code:
+> **Milestones** and **CFCI Procurement** both become `1.1.1`; **Core & Shell Construction** and
+> **OFCI / OFE Procurement** both become `1.1.2`. Our importer can't tell them apart, so it drops all
+> four — 638 rows, a third of the schedule.
+>
+> Ask them to change one WBS code in P6, e.g. Milestones from `1.1` to `1.0`, and re-upload.
+>
+> **Also happy to move this to the backend board — it's an import issue, not viewer.**
+
+Three deliberate choices:
+
+- **Names the other three branches.** Yash and the customer only know about Core & Shell. They will
+  find the rest themselves the moment the tree comes back, and it is better said now.
+- **Leads with the workaround, not the diagnosis.** They have been blocked since 08-31 and have
+  already tried four things that could not have worked. The one thing that helps them is a two-minute
+  edit in P6.
+- **Answers his board question in the last line** — open since 09-02 14:10 and flagged urgent. He
+  asked; it costs one sentence.
+
+Deliberately absent: `wbs_id`s, `SourceFileWbsId`, `userItemId`, the deleted-revision confusion, and
+the "both members are dropped" detail. All correct, none of it useful to a coordinator or a customer —
+that material belongs in the ingest ticket.
+
+**Caveat to state if he asks how sure we are:** the workaround is inferred from the mechanism, not yet
+observed working. It is high-confidence (renaming provably breaks the collision) but the re-upload is
+the confirmation. Worth framing to the customer as "this should fix it, tell us either way" rather
+than a guarantee.
