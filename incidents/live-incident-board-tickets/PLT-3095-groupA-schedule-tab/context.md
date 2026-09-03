@@ -896,3 +896,26 @@ near-identical predecessors, reproduces it. Which is exactly what we measured fr
 
 It also retires the "which file did you download" worry entirely: **any** of these revisions'
 exports demonstrates the defect, because they all carry the same short-name scheme.
+
+### 2026-09-03 (later) — Sachin independently confirms the two codes are absent
+
+> *"strange things is none of the userItemId AUS02-60-Schedule-L1-.1.1.1 and AUS02-60-Schedule-L1-.1.1.2 available"*
+
+**Not strange — it is the prediction.** Both members of each colliding pair are dropped, so neither
+code lands in the DB. He read it as a contradiction because the intuitive failure mode for a
+duplicate key is last-write-wins, where one of the two would survive.
+
+**His check is the discriminator, and it is worth having:** it independently confirms, from the DB
+side, that exactly the two ambiguous codes are missing while the other 232 are present. That rules
+out an overwrite and narrows the mechanism to one of:
+
+- a dedup / group-by that discards groups with count > 1,
+- an insert keyed on the derived code that errors on the second row and loses both,
+- a validation that rejects rows whose derived key is not unique.
+
+Which of those it is, is his to determine — the question put back to him is whether the import groups
+or upserts on that code anywhere.
+
+**Two independent confirmations of the mechanism now exist:** ours from the XER (236 file rows, 2
+colliding paths, exactly the 4 missing), and his from the DB (those 2 codes absent, the other 232
+present).
