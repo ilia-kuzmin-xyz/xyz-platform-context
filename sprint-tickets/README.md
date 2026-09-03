@@ -2784,3 +2784,24 @@ same conclusion recorded on 09-02 — so candidate #1 in the handover has indepe
 
 **1 open review thread across all five PRs, 0 approvals, all green.** Everything is waiting on a
 human.
+
+### 15:57 UTC (09-03) — #2180 approved and mergeable. Second approval of the sprint
+
+Darminder: *"Looks good from my side. Approved!"* — **#2180 is `mergeable_state: clean`** on
+`9a36c3c` (green, approved, base `50711c3`). **PLT-2896 is ready to merge.**
+
+Sprint movement over two days, after weeks of nothing:
+
+| PR | Ticket(s) | State |
+|----|-----------|-------|
+| #2148 | PLT-2953, PLT-3004 | **MERGED** 09-02 |
+| #2180 | PLT-2896 | **approved + mergeable** — ready |
+| #2186 | PLT-2968, PLT-2967 | green, build running on `192156d`, awaiting approval |
+| #2192 | — (shortid cleanup) | green, Copilot recommends approval, awaiting approval |
+
+So **1 of 5 tickets delivered, 1 ready to merge, 2 awaiting approval.** The "entire sprint gates on
+approvals" note carried since 08-04 has finally broken — two humans approvals in two days, both from
+Darminder.
+
+Note #2180's `.trivyignore` resolution held up under review: taking master's side left the file
+byte-identical, so a 404-routing PR carries no CVE note and the reviewer had nothing to query there.
