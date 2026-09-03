@@ -450,3 +450,79 @@ above, whose sole caller is a debug path.
 
 So: no deletion, no runbook run, no approval request. The § "Steps" plan in
 `recommended-action.md` dated 09-03 is **superseded** — it was built on the retracted premise.
+
+## 2026-09-03 (verification pass) — every claim re-tested from primary sources. One more error caught.
+
+Ilia, after two retractions in one session: *"that sounds nuts… What will on the next step, a 3rd
+completely alternative opinion"* and asked for a sustained review before anything else reaches the
+client. Fair. This section is that review. **Nothing new was concluded; everything was re-tested.**
+
+### VERIFIED — holds under independent re-test
+
+| # | claim | how it was verified |
+|---|---|---|
+| 1 | activity is `CH08-MY-41` / `65c1c3fd…`, `linkedElementCount` **835** | schedule revision payload; `itemName` matches the ticket verbatim |
+| 2 | **835 live / 2,200 deleted** mappings | full feed page-through, 372,903 rows; **independently corroborated** because `declared == live` on all 6 linked activities in the package, from a different endpoint |
+| 3 | `/activities/{id}/links` returns **3,035 = 835 + 2,200 exactly** | four page sizes incl. one **unpaginated** call, 0 duplicates, endpoint confirmed activity-scoped |
+| 4 | status enum has **only** `INSTALLED_ACCURATELY` and `NOT_SET` | `XYZPlatformApi/src/types/model.elements.ts:14-17`. **No third "not installed" status was missed** |
+| 5 | `/elements/status` with no sync params is a **complete snapshot, not a change feed** | validated **both ways** against the independent single-element path (`fn_GetElementInstallationStatus`, which takes no sync params): **14/14** elements absent from the snapshot → `NotFoundError`; **6/6** present → exact status match |
+| 6 | **83.8 %** of CH08's 616,251 elements have no status row | `project-element-list` parquet vs the 99,577-row snapshot. This is what killed the ghost-link reading |
+| 7 | all **39** never-checked elements are real | present in `project-element-list` **and** resolved **39/39** in `client-element-metas` with handle, name, category, level |
+| 8 | their models are live | 7 models, all `isDeleted: false`, current versions, CSA |
+
+**Item 5 was the biggest risk to the current conclusion** and the reason for this pass: `/elements/status`
+accepts `lastSyncDateTime`/`endSyncDateTime`, which is exactly the Pattern 8 shape. If it had been a
+change feed, "no status row" would have been meaningless and the answer would have flipped a third
+time. It is not a change feed when those params are omitted, and that is now tested rather than
+assumed.
+
+### ⛔ CAUGHT IN THIS REVIEW — a wrong number that was one step from the customer
+
+The 09-03 (third pass) draft offered the customer **"Revit ids 6268822 and 6268823"**, derived by
+reading the trailing hex of `sourceFileElementId` (`…-005fa796` → `0x5fa796` = 6268822) as a Revit
+ElementId. **That is wrong.**
+
+`client-element-metas` carries an authoritative `handle` column, and it says **6272803** and
+**6272804** — off by 3,981. The trailing segment of `sourceFileElementId` is not the handle. **Never
+decode it; read `handle`.** Had that draft gone out, site would have searched for an id that does not
+exist and come back empty, which is precisely the pain this review was called to prevent.
+
+### What the two elements actually are — verified identification
+
+| modelElementId | handle | name | category | level |
+|---|---|---|---|---|
+| `12398bf3-dae3-4c29-8275-a97e1cb64d5c` | **6272803** | `TMH_R23` (`TMH_BASE DESIGN_R25` in one model's metas) | **Electrical Equipment** | LEVEL 01 |
+| `cad330b0-27b4-4b61-9bfe-1e80271775a5` | **6272804** | same family | **Electrical Equipment** | LEVEL 01 |
+
+Extents ≈ 2.9 × 3.3 × 2.3 m, adjacent handles, same family — two neighbouring pieces of electrical
+equipment on Level 01. A findable physical thing, not debris. Full 39 with handles:
+`analysis/PLT-3101-CH08-package-never-checked-IDENTIFIED.csv`. Note the other activities' elements are
+mostly `Parts` (MY-161/191/211, handles 7983180-7983434) and unnamed `Generic Models` (MY-881, handles
+290226-290510).
+
+### NOT verifiable from here — stated as a limit, not a guess
+
+- **Geometry presence.** Pattern 1's oracle (`svf2-object-id-map`) is **Navisworks-path only** and is
+  absent on all three models involved. The Revit equivalent is `runtime_id_mapping`, and it is built
+  **in the browser from the loaded viewer** (`dashboard-model-mapping-service.ts:219-268`) — it is not
+  a downloadable artefact. **So whether these elements exist in the translated geometry can only be
+  tested in a live viewer session.** That is the single remaining unknown and it is the one that
+  decides the ticket.
+- **Whether `/activities/{id}/links` is *meant* to filter `isDeleted`.** Its SQL is
+  `xyz."fn_GetModelElementsForAnActivity"` (`activities.service.ts:21,196-199`), in the
+  PostgreSQLDatabase repo, outside this session's access. The 835+2,200=3,035 arithmetic is
+  empirically airtight; the intent is not confirmed.
+
+### Scoreboard of this session's claims, for the next run
+
+| claim | fate |
+|---|---|
+| the 2 are ghost/dead links | **RETRACTED** — 83.8 % of elements have no status row |
+| remediation blocked on a write owner | **RETRACTED** — the runbook exists |
+| links endpoint over-reports by 2,200 | **stands**; severity overstated at first (only caller is a debug path) |
+| Revit ids 6268822 / 6268823 | **RETRACTED in review** — authoritative handles are 6272803 / 6272804 |
+| 39 never-checked elements across 5 activities, all real, all in live models | **stands**, verified three ways |
+
+**The single root cause of all four errors: reading a number before establishing its denominator or
+its authority.** "2 have no status row" needed "how many normally do". "6268822" needed "is there a
+field that already states this". Both were one query away.
