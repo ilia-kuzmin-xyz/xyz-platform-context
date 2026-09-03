@@ -204,3 +204,73 @@ geometry rather than the element list, which is the preventive one and is owned 
 
 **10. PLT-3099 carries the same false blocker** and the same correction now applies: it needs approval
 plus a runbook run for its 1,239, not a new owner. See that folder's 09-03 entry.
+
+---
+
+# 2026-09-03 (third pass) — everything above is SUPERSEDED. No deletion. No runbook run.
+
+The 09-03 comment and 7-step plan were built on "the 2 are dead links". **They are not** — see
+`context.md` § 2026-09-03 (third pass). Deleting them would remove real, un-installed work from a
+live model, which is the exact failure mode the runbook's first section warns about.
+
+## Comment to post on PLT-3101 — 76 words, UNPOSTED
+
+> Not ghost links — these are real elements in current models that have simply never been marked
+> installed.
+>
+> On CH08-MY-41 there are 2, with Revit ids **6268822** and **6268823** (source file
+> `fa820000-bb28-475e-860e-422b67b2455b`). 833 of 835 are installed.
+>
+> Package-wide it's 39 across five activities, so MY-41 alone won't complete Subgrade Yard Work:
+> MY-881 has 14, MY-211 12, MY-191 8, MY-161 3, MY-41 2.
+>
+> **Can site find Revit id 6268822? If yes it's outstanding work, not a data problem.**
+
+Why this shape:
+
+- **Leads with the retraction of the ticket's own premise**, because Yash's comment asks us to find
+  stale links and the honest answer is that these are not stale. Better to say so in the first line
+  than bury it.
+- **Gives a Revit ElementId, not a GUID.** `modelElementId` is useless to a site engineer;
+  `6268822` is searchable in the source file. This is the single most actionable thing in the whole
+  investigation.
+- **Reframes the package.** The customer said the package is blocked; MY-41 carries 2 of 39. Clearing
+  MY-41 alone would not complete Subgrade Yard Work and they would be back.
+- **Ends on the one test that separates the two remaining explanations.** If site finds 6268822, this
+  is outstanding work and the ticket closes as "not a defect". If they cannot find it *with the handle
+  in hand*, we are in Pattern 1's metadata-vs-geometry divergence, which is untestable from artefacts
+  here (Revit-path models, no `svf2-object-id-map`) and needs the editor diagnostic — Pattern 1 § step
+  3, branch `PLT-linked-selection-diagnostics`, `window.__linkDiagnose()`.
+- **Says nothing about the 2,200 deleted mappings.** They are correctly excluded everywhere the
+  customer looks and need no action.
+
+**Not asserted, worth asking separately:** `CH08-MY-161` has exactly **3** never-checked elements
+while the customer said 3 and named MY-41. Might be coincidence, might be a misread row. Do not put
+that in the comment as a theory — ask Ilia whether to raise it.
+
+## Revised next steps
+
+1. **Post the comment.** The answer is a question, and it is cheap for them to run.
+2. **If site finds the elements** → outstanding work, close the ticket. No data change, no approval,
+   no runbook.
+3. **If site cannot find them** → Pattern 1 geometry divergence. Editor diagnostic
+   (`window.__linkDiagnose`) with the correct schedule selected and those three models loaded, or the
+   console geometry harvest. Only *then* does remediation come into scope, and only after the runbook
+   § "is deletion even the right fix?" gate.
+4. **Independent of the outcome — the FE transparency fix** (`use-linked-element-actions.ts:43`,
+   `linking-service.ts:688`, `collectSelectableDbIds.ts:20`). Still worth doing, still needs no data.
+5. **Low priority** — the endpoint that neither filters nor exposes `isDeleted`, debug-only caller.
+
+## What this episode should teach the next run
+
+Three conclusions were drawn and two retracted inside one session:
+
+| claim | fate |
+|---|---|
+| the links endpoint over-reports by 2,200 | **stands**, but severity overstated (debug-only caller) |
+| the 2 are dead/ghost links | **retracted** — 83.8 % of CH08 elements have no status row |
+| remediation is blocked on a write owner | **retracted** — the runbook exists |
+
+The common thread: **a number was interpreted before its denominator was known.** "2 elements have no
+status row" only means something once you know how many elements normally have one. The fix is
+mechanical — before reading absence as evidence, measure how common absence is.
