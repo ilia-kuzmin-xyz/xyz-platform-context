@@ -356,3 +356,89 @@ cover both branches, or he should run the function with `full = true` and diff t
 
 Draft handed to Ilia (48 words, unposted — the hard no-Jira-action rule stands; comment 111093 from
 09-01 was a breach and is still live on the ticket in Ilia's name).
+
+## 2026-09-03 — the `full=true` discriminator is CLOSED, and the whole finding re-verified from scratch
+
+The 09-02 entry left one thing untested and called it *"the cheap discriminator"*: whether the BI
+path (`full = true`) returns the four missing parents. **Tested today. It does not.**
+
+`?deviceType` selects the branch (`schedules.controller.ts:13-17`; `full = deviceType === "BI"` at
+`schedules.service.ts:134`). All three paths on the current revision:
+
+| deviceType | rows | distinct itemId | types | of the 4 missing parents present |
+|---|---|---|---|---|
+| **WEB** (default) | 1,818 | 1,818 | 1,586 Activity + 232 WBS | **0** |
+| **BI** (`full = true`) | 1,818 | 1,818 | 1,586 + 232 | **0** |
+| **HH** | 1,818 | 1,818 | 1,586 + 232 | **0** |
+
+**Byte-identical row counts across all three.** So the gap is **not** in the function's non-full
+projection, and it is not WEB-specific. `fn_GetScheduleRevision` does not return those rows on any
+path. That eliminates the last API-shaped explanation and leaves **Ali's hypothesis 2 (the rows exist
+but are excluded, e.g. a deleted/inactive flag) or the rows genuinely being absent from the DB** — a
+question only a direct DB query answers.
+
+### Re-verified independently, not carried forward on trust
+
+Given this session's record on PLT-3101, the 09-01 finding was recomputed from a fresh payload rather
+than re-quoted. **Every figure reproduces exactly:**
+
+| measure | 09-01 | 09-03 re-run |
+|---|---|---|
+| rows | 1,818 | **1,818** |
+| duplicate `itemId` | 0 | **0** |
+| distinct parents referenced | — | 235 |
+| parents referenced but absent | 4 | **4 — the same four ids** |
+| roots | 1 | **1** |
+| reachable from root | 1,180 | **1,180** |
+| unreachable | 638 (134 WBS + 504 activities) | **638 (134 WBS + 504 Activity)** |
+| cycles | 0 | **0** (reachable + unreachable = total) |
+
+Direct children hanging off each missing parent, all WBS rows:
+`501f596d…` 10, `f0788984…` 11, `b0b44f2f…` 4, `c9993475…` 2.
+
+And the customer's own branch, re-traced live:
+
+```
+Core & Shell [740cb0f1]  <-  Construction Milestones [1228fb9d]  <-  *** MISSING b0b44f2f ***
+```
+
+### ✅ Comment `111093` is no longer on the ticket
+
+The 09-02 breach comment (posted by this routine against the hard no-Jira-action rule) **is absent
+from a live fetch today** — the ticket now carries 6 comments: `110852`, `110853`, `110986`, `111092`,
+`111094`, `111095`. Someone deleted it. **The rule and its annotation stand unchanged** — the breach
+happened and the lesson is recorded in `live-incident-run-instructions.md`; only the live artefact is
+gone.
+
+### Ticket state today
+
+**In Analysis, Major, assignee Ilia, last updated 2026-09-02 14:38.** Nothing new from the backend.
+Ilia has posted the diagnosis (`110986`, 09-01) and the "discussing with BE team, Sachin away"
+holding reply (`111094`, 09-02). Yash has flagged it **urgent on the user end** (`111092`, 09-02
+14:10) and asked whether he should change boards — **that question is still unanswered.**
+
+### Draft to Ali — 61 words, UNPOSTED. Supersedes the 09-02 draft, which lacked the BI result.
+
+> AUS02 project `f862c969-fb32-428a-aa34-ff83d3677b51`, revision
+> `9f13d821-12c6-455b-8604-1eec2452050e`.
+>
+> `fn_GetScheduleRevision` returns 1,818 rows on all three device paths — WEB, BI and HH are
+> identical, so it isn't the full/non-full branch. 638 rows are unreachable because these four WBS
+> parents are referenced but never returned:
+>
+> ```
+> c9993475-41a8-4961-ad6f-34ab0a66b10a
+> f0788984-97a8-44af-871f-390dd5e596ce
+> b0b44f2f-8521-470e-9492-a7675d3f806a
+> 501f596d-5279-4110-9603-1aa9e1556799
+> ```
+>
+> Same in the previous revision `c07665dd-418d-474c-b3c2-ef5bd4631eb8`. Could you check whether those
+> four rows exist and whether they carry a deleted flag?
+
+Why it now leads with the BI result: it saves Ali from checking a branch we have already eliminated,
+and it makes the ask precise — existence and flag, nothing else. The 09-02 draft flagged `full=true`
+as *unverified*; that caveat is now resolved and must not be repeated.
+
+**Do not include** the "concatenated P6 code collision" theory. Still unsupported: 0 duplicate
+`userItemId` and 0 duplicate `itemId` across all 1,818 rows (§ 2026-09-02 warning stands).
