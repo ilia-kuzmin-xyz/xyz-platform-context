@@ -444,3 +444,39 @@ read by whoever edits next; a note in these docs is only read by a run that thin
 > **Lesson: fixing a review finding can introduce a worse defect than the one it fixes.** Re-read
 > your own diff after satisfying a reviewer, not just before. "The reviewer's point is addressed" is
 > not the same as "the code is better than it was."
+
+### 16:20 UTC — three more findings on `27e62be`: two real (one a regression), one false
+
+**A correction to this run's own earlier report first:** I told the user `192156d` was "green". It
+was **cancelled** — only `Lint & Run Tests` completed; `Build image` was killed at 16:01 by my own
+`27c52ed` push. `27c52ed` was then cancelled too, during `Lint & Run Tests`, by the parallel run's
+`27e62be`. **Neither had typechecked.** Two cancelled runs in a row, both of which the
+`check_suite.completed` notice described as nothing-failed.
+
+> **This is now three times in two days that a rollup or a suite notice would have let this routine
+> report an unverified commit as green.** The step list is the only trustworthy source. Also worth
+> knowing: `Lint & Run Tests` does NOT typecheck (eslint + vitest only) — the typecheck lives in the
+> prod webpack run inside `Build image`. A green test step proves nothing about TypeScript.
+
+**1. `React.InputHTMLAttributes` "will fail compilation" — FALSE.** Rejected, with the argument
+*rebuilt* rather than reused: the 08-27 answer to a similar claim leaned on builds having already
+passed with the file unchanged, and that leg was gone (the line arrived in `78c1726` today, and both
+subsequent runs cancelled before typechecking). New evidence instead — **23 files in this repo
+reference `React.<Type>` in type positions with no React import**, including `Button.tsx`,
+`LoginForm.tsx`, `CheckBox.types.ts`, `header-components.tsx`, `project-private-route.tsx`, all
+shipping on this exact tsconfig (`"jsx": "react-jsx"`, no `allowUmdGlobalAccess`). `TS2686` fires on
+**value** uses only. Said on the thread that if `f63236e` does fail on it, I add the import and say
+so.
+
+**2. Glyph `aria-label` hardcoded — RIGHT, and a REGRESSION.** `assetDetail.overriddenBadge` =
+"Overridden" existed from `c238d94` (08-26); `78c1726` replaced the translated badge with a glyph,
+**deleted the key**, and hardcoded `'Overridden'`. Localisation that previously worked stopped.
+*Design changes that swap one component for another are a soft spot for silently dropping a
+translation — worth checking the key census when a component is retired.*
+
+**3. "View tasks" menu label hardcoded — RIGHT**, no key existed.
+
+Fixed in `f63236e`: `stepAchieved` **reused** (already existed), `stepOverridden` added (named for
+the glyph, not resurrecting the retired badge key), `viewTasks` added. Test updated for the glyph's
+accessible name, and the suite's key strings now derive from one `KEY_PREFIX`. All three threads
+replied to and resolved.
