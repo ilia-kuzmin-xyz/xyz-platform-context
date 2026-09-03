@@ -110,3 +110,19 @@ Still **In Code Review**, still delivered by **#2186** (folded in from the retir
 review threads, `build` green. Only change this run: master (`ac0c63b`, PLT-3022) merged into the
 `PLT-2968` branch, `5cca6eb` → `f81c1cc` — clean, empty file-set intersection, none of our code
 touched. Gated on human approval only. Full triage: 09-02 entry in `sprint-tickets/README.md`.
+
+## 2026-09-03 — no separate work; both fixes of the day landed on the shared PR
+
+PLT-2967 rides on **#2186** together with PLT-2968. Still In Code Review, so nothing kicked off.
+
+Two Copilot **suppressed** findings were fixed on that PR in `7017211`, and **one of them is
+PLT-2967's own surface**: `StepTasksModal` — the "View tasks" modal this ticket adds — could
+open for a tag whose id no longer resolves, showing an untitled dialog reporting "No tasks yet".
+The other was the dangling `aria-labelledby` on both new dialogs.
+
+Mechanism, the repo-wide `Modal` label defect behind it, and the reason the systemic fix was
+deliberately left out of this PR: `sprint-tickets/PLT-2968/context.md` § 2026-09-03.
+
+> **Key process lesson, applies to every ticket:** Copilot files some findings as *suppressed
+> comments* inside the review **body**, where a `get_review_comments` thread listing never sees
+> them. Read `get_reviews` bodies too — a clean thread list is not a clean review.
