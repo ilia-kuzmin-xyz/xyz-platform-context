@@ -677,3 +677,36 @@ Severity for prioritisation: needs two engineers overriding the same asset insid
 override is a deliberate act with a written reason, and the damage is a visibly wrong readiness level
 that repeating the action corrects. Real, low-likelihood. **Thread left open deliberately** — the fix
 is not in this PR and should not vanish from the reviewer's view on my say-so.
+
+## 2026-09-03 17:42 — missing-relation leniency: a convention I'd missed, for the second time
+
+Fixed in `07474a1`. `listOverrides` threw when `asset_readiness` was absent, and the table is not
+promoted to every env — it 404s on `stable`, which this PR's own description says. That read backs
+`useAssetReadinessOverrideMap` → asset chips, filters, model colouring, so one unpromoted migration
+became a **retried failing query behind several viewer surfaces at once**.
+
+**`isMissingRelation` already existed** — `commissioningApi/commissioning-request-error.ts`, with
+`UNDEFINED_TABLE` (`42P01`) / `POSTGREST_MISSING_TABLE` (`PGRST205`) and its own tests. Only one
+production caller before this (`CreateAssetTypePage/CreateAssetTypeContent.tsx:81`), which is why it
+was easy to miss.
+
+> **This is the same mistake as the `noTasks` i18n key, and that makes it a pattern, not an
+> accident.** Both times I wrote a new file, checked *that file*, and never looked at how its
+> neighbours handle the same condition. The earlier lesson was recorded as "infer a convention from
+> the folder, not the file you're editing" — it clearly wasn't operationalised. **Concrete practice
+> for a new service against an existing client: grep the client's own error module for exported
+> helpers BEFORE writing the first method, and check who calls them.** One `grep -rn isX --include
+> '*.ts'` would have caught both.
+
+Three deliberate limits, because "degrade gracefully" over-applies easily:
+- **Reads only.** Writes still throw — a silent no-op write would show a success toast and record
+  nothing, worse than an error.
+- **Missing relation only.** A 500 still propagates; swallowing it would render a broken read as
+  "no overrides", indistinguishable from the truth, hiding an outage behind plausible UI.
+- **Not the `select` inside `setOverride`** — it runs after the upsert, which would already have
+  thrown, and continuing a half-done write would be wrong.
+
+Tests: empty on missing relation, still throws on anything else, and writes don't inherit the
+leniency. Used `vi.spyOn(client, 'select')` rather than subclassing `InMemoryCommissioningClient`
+**specifically because an override-signature error is the kind of mistake I cannot catch without a
+local run** — verified `select`/`upsert` exist as real async methods first.
