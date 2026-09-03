@@ -628,3 +628,52 @@ better than learning it later. Watch that run.
 reviewers and several completed review rounds, so a human (or the parallel run) marked it ready.
 Converting it back would withdraw it from reviewers already engaged and undo someone's deliberate
 action — reported to the ticket owner instead of reverted.
+
+## 2026-09-03 17:35 — two more review findings: one fixed, one ticketed
+
+### `sx` forwarded onto a DOM node in the menu test stub — FIXED (`2c9678d`)
+
+The nested-menu `MenuItem` stub spread every prop onto a `<div>`, and the real items do carry `sx`
+(the override item's colour, the view-tasks item's icon rule), so an object was reaching a DOM
+attribute on every render. Dropped by name (`sx: _sx, ...props`) so a future DOM-valid prop still
+passes through without editing the stub.
+
+*Honesty note worth keeping:* the finding quoted a specific React warning string. I could not
+reproduce it (no local install — see the `401` above), so I confirmed the **mechanism** and said on
+the thread that I hadn't seen the message rather than echoing it as if I had. Don't restate a
+reviewer's observed output as your own verification.
+
+Lint check before pushing: `@typescript-eslint/no-unused-vars` is `'warn'` in `eslint.config.mjs:66`,
+not `'error'`, and `ignoreRestSiblings` defaults true — so destructure-to-omit cannot fail the build.
+Checked rather than assumed, because a lint failure is a wasted CI cycle.
+
+### `setOverride` read-modify-write race — REAL, ticketed, NOT fixed here
+
+`setOverride` is upsert → select → conditional update, three round trips, no transaction. Verified
+interleaving: X overrides to Yellow `[red,yellow]`, Y to Green `[red,yellow,green]`; X's select sees
+all three, computes `stale={green}`, clears it — **final state is X's intent though Y acted last**,
+and reversing the order flips the winner, so it is nondeterministic rather than last-writer-wins.
+
+**This PR introduced it.** The read-modify-write arrived in `e77df8c`, the fix for the earlier
+finding about lower levels not being retracted. Fixing that one created this one — the same
+"a review fix can introduce a worse defect" pattern already recorded above, now twice on this branch.
+
+Why it is a follow-up and not a change here:
+- `client.rpc()` **does** exist (`postgrest-client.ts:211`, typed + tested) — but **no production
+  code calls it**; this would be the feature's first Postgres function.
+- The applied schema is not in this repo. `docs/commissioning/PLT-2862-supabase-schema.sql` states in
+  its header that the service `*_TABLE` constants are the source of truth and the file merely reflects
+  them. The function must be created in the Supabase project.
+- That path is already blocked: the table 404s on `stable` until XYZ_Supabase promotion PR #5 lands.
+
+**Cheap alternative evaluated and rejected** — replace select-then-update with a server-evaluated
+`readiness_step_id NOT IN (kept)` update (3 round trips → 2, no stale read). Rejected for two
+reasons: the client filter union is `eq | in | is` only
+(`commissioning-data-client.types.ts:21-23`), so the client needs extending too; and **it does not
+fix the bug** — X's clear still wipes Y's green, because the predicate is still X's intent. *It would
+have looked like a fix while leaving the race.* Only atomicity closes it.
+
+Severity for prioritisation: needs two engineers overriding the same asset inside one round trip; an
+override is a deliberate act with a written reason, and the damage is a visibly wrong readiness level
+that repeating the action corrects. Real, low-likelihood. **Thread left open deliberately** — the fix
+is not in this PR and should not vanish from the reviewer's view on my say-so.
