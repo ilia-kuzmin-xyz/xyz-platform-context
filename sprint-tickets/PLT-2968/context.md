@@ -864,3 +864,35 @@ A `tsc --noEmit` step placed next to `Lint & Run Tests` would surface these in ~
 ~18, and would survive the cancellation pattern that repeatedly starved step 15. That is a small CI
 change with a large feedback-loop payoff, and it is the third distinct problem today traceable to
 this gap.
+
+## 2026-09-03 23:35 — branch is currently unverifiable; local-typecheck attempt abandoned deliberately
+
+**Push cadence now exceeds the build.** `87b9c82` 23:09, `a4eb1ea` 23:26, `e990fd3` 23:28,
+`7cfd9e0` 23:30 — roughly every 2 minutes against an ~18-minute job. `a4eb1ea`'s run was cancelled
+at 23:29:17 during `Lint & Run Tests`. So the head that FIXED tonight's type error has itself never
+been verified, and neither has anything after it.
+
+### The local-typecheck attempt, and why I stopped it
+
+Idea: `npm ci` fails only on `@xyzreality/dhtmlx-gantt` (401). It is the **only** private dependency,
+and only **7 files import it**, all under `gantt-x/` and `dashboard-panels/gantt/` — completely
+disjoint from the commissioning work. So: drop that one dep, install from the public registry, stub
+the module, `tsc --noEmit`, and ignore errors from those 7 files. **The approach is sound and worth
+keeping for a future run** (imports needed: default `Gantt`, named `GridColumn`, `GanttStatic`, and a
+`/codebase/dhtmlxgantt.css` subpath).
+
+Stopped it for two reasons, in order of weight:
+1. **The head changes every ~2 minutes.** A typecheck of `7cfd9e0` would describe an already-
+   superseded commit by the time it finished. *Racing a branch under active development is the same
+   mistake I twice declined today (PLT-2953 this morning, the runner i18n at 23:16) — declining it
+   there and then doing it here would have been inconsistent.*
+2. **It dirties a tracked file.** Removing the dep edits `package.json`, which tripped the
+   uncommitted-changes stop hook. Manifests were restored from backup immediately and the tree
+   verified clean; `node_modules` removed. **If a future run tries this, do it on a copy of the tree
+   in the scratchpad, never in the checkout.**
+
+### What this leaves
+
+Nothing for an agent to push. The branch needs a **quiet window** — one ~20-minute gap with no push —
+before it can be called verified. Last head verified fully green: **`07474a1`** (17:58). Everything
+after it is unverified, including the fix for tonight's TS2741.
