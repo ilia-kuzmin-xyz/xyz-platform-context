@@ -249,3 +249,55 @@ that material belongs in the ingest ticket.
 observed working. It is high-confidence (renaming provably breaks the collision) but the re-upload is
 the confirmation. Worth framing to the customer as "this should fix it, tell us either way" rather
 than a guarantee.
+
+---
+
+# 2026-09-03 — THE CONSOLIDATED COMMENT. Every earlier draft in this file is dead.
+
+Ilia: *"that's awful that you overlap self's replies every time, that's why earlier I haven't posted
+that draft"*. Fair. Four drafts went out on this ticket in one day and one of them carried a **wrong
+fix**. This is the single one, verified before writing.
+
+**The error that must not repeat:** the earlier draft said "rename Milestones `1.1` → `1.0`". Simulated
+against the file, that resolves **one of two** collisions and leaves *Core & Shell Construction* — the
+branch the customer actually reported — still dropped. Verified fix table:
+
+| rename | outcome |
+|---|---|
+| Milestones `1.1` → `1.0` | ❌ `1.1.2` still collides |
+| Core & Shell `1.2` → `1.7` | ❌ `1.1.1` still collides |
+| both of the above | ✅ resolved |
+| **Procurement `1` → `3`** (or `9`, `PROC`) | ✅ **both resolved, one edit** |
+
+## The comment to post — 128 words, UNPOSTED
+
+> **What's wrong**
+>
+> Our importer identifies each WBS row by joining the parent codes with dots. Two pairs in this
+> schedule produce the same result:
+>
+> - Milestones (`1.1`) and CFCI Procurement (`1`+`1`) → both `1.1.1`
+> - Core & Shell Construction (`1.2`) and OFCI / OFE Procurement (`1`+`2`) → both `1.1.2`
+>
+> It can't tell them apart, so it drops all four. Their children lose their parent, which hides 638
+> rows — a third of the schedule.
+>
+> **Fix on the customer side (works today)**
+>
+> Rename **Procurement** from `1` to an unused code, e.g. `3`, and re-upload. That one change clears
+> both clashes. Renaming only Milestones would fix just one, leaving Core & Shell still missing.
+>
+> **Fix on our side**
+>
+> Key WBS rows on the file's own id, which we already store, instead of the generated code — and
+> reject an upload that would drop rows rather than importing it silently.
+
+**Confidence:** diagnosis ~97 % (236 file rows vs 232 imported; exactly 2 colliding paths covering
+exactly the 4 missing rows; 232 of 234 paths match `userItemId` 1:1 with none unaccounted). The
+**rename is inferred from that mechanism, not from reading the importer** — which is outside this
+session's repos. Simulated against the file, so it is sound arithmetic; the re-upload is the proof.
+If asked, frame it as "this should fix it, tell us either way".
+
+**Deliberately absent:** `wbs_id`s, `SourceFileWbsId`, `userItemId`, revision GUIDs, the deleted-revision
+episode, and "both members of each pair are dropped". All true; none of it helps a coordinator or a
+customer. That material belongs in the ingest ticket.
