@@ -534,3 +534,28 @@ place and CI is the first real run.
 `8155ac91d`. `npm run test-ci` runs before the Trivy step, so the 7 new tests are green in CI. The
 first run had been red on Trivy alone (`nanoid` CVE-2026-73086, base-branch, fixed by porting #2192's
 `.trivyignore` entry). **#2194 is a green, mergeable draft.** Only caveat left is the visual check.
+
+## 2026-09-03 — ⚠️ CORRECTION: "no owner lined up for the write" was wrong. The runbook exists.
+
+Both the 09-02 entries say removing the 1,239 links from `CY-1300` "needs a platform-api write" with
+"no owner lined up, so do not promise timing". **That overstated the blocker.**
+`incidents/data-remediation-runbook.md` is an 8-step procedure for exactly this, already used
+successfully on ELN03 (PLT-2931), where it moved five activities to 100%:
+
+```
+POST /api/v2/projects/{postgresProjectId}/elements/activity-links/delete
+[{ modelElementId, activityId }, ...]     // max 500 per batch, soft delete
+```
+
+Steps that matter before anyone runs it: export the exact rows as CSV and attach to the ticket
+**before** deleting; check progress side-effects; **get approval in writing on the ticket**; snapshot
+the project's live links and record the count; delete; verify the live count fell by exactly the
+number sent; restore from the snapshot if not.
+
+So what PLT-3099 actually needs is **approval on the ticket and someone to run the runbook** — not a
+new capability and not a backend owner to build anything. Surfaced while reviewing PLT-3101, which
+carried the same false blocker.
+
+The 1,239 ids are already exported: `analysis/PLT-3099-ATL08-CY1300-moved-elements.csv` (ignore its
+misleading `previousActivity_*` columns, per the 09-02 retraction). The runbook wants
+`userItemId, activityId, modelElementId` — that CSV needs reshaping to match before use.
