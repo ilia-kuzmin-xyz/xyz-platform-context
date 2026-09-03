@@ -2816,3 +2816,17 @@ site.
 Still open at that moment: **#2192** (drop `shortid`; green, waiting on a required approval) and
 **#2186** (PLT-2968/PLT-2967; active, parallel run pushing). When #2192 merges, its `.trivyignore`
 collision with master resolves **toward the branch** — the side where `shortid` is removed.
+
+## 2026-09-03 17:39 — #2192 re-verified green on current master
+
+The flagged risk did **not** materialise. Syncing #2192 to master re-ran Trivy, which was the one
+volatile check (a new nanoid CVE entering the DB overnight is what turned the whole repo red on
+09-02). Full run on `6a19bf8` is green **by step**, Trivy included: `Vulnerability scanner` success
+17:38:03→17:38:29, `Scan built image` success 17:38:29→17:38:44, `Build image` success
+17:32:17→17:38:03.
+
+So #2192 remains merge-ready, now on post-#2180 master, and **still needs only a required approval**
+— four reviewers requested, none has approved. Nothing further for an agent to do on it.
+
+*Recording the resolution and not just the risk: the earlier note said "watch that run", and a flagged
+risk that is never closed out reads to the next run as still open.*
