@@ -349,3 +349,38 @@ branch green for a day) and then cleanly disappeared, which is what a ported bas
 
 **Reusable:** when porting a fix that exists on another branch, say *what the fix is* rather than
 *which PR carries it* — several PRs may land the same line, and naming one of them dates the note.
+
+## 2026-09-03 — the denominator rule. Written after four wrong claims in one session.
+
+PLT-3101 produced three conclusions and retracted three of them inside a single session, and one
+had already been relayed toward a customer. Ilia's response is the standard to hold: *"could you take
+non-stop 20 min of reviewing double check anything, so we could reduce leaving a pain on the client
+until we 100% confident what the issue is about."*
+
+Every one of the four errors had the same shape.
+
+| wrong claim | what was missing | cost of checking |
+|---|---|---|
+| "2 elements have no status row, so they are dead links" | how many elements *normally* have one — **83.8 % of CH08 elements have none** | one parquet read |
+| "remediation needs a write owner we don't have" | `data-remediation-runbook.md` already existed and had been used | one `ls` |
+| "the links endpoint over-reporting is a strong candidate for the customer's symptom" | who actually calls it — **only a `_debugMode` path** | one grep |
+| "Revit ids are 6268822 / 6268823" (hex-decoded) | `client-element-metas.handle` states it: **6272803 / 6272804** | one column read |
+
+**The rule: before reporting that something is absent, missing, stale, orphaned or dead, measure how
+common that absence is in the same dataset.** An absence is only evidence when presence is the norm.
+And **before deriving an identifier, grep for a field that already carries it** — a decoded value is a
+guess wearing a number's clothes.
+
+Two supporting habits, both cheap:
+
+- **A number the customer will act on gets a second, independent source before it is sent.** The
+  status snapshot was only trustworthy once the single-element endpoint agreed on 14 absences and 6
+  presences. The handle was only trustworthy once it came from a column rather than arithmetic.
+- **Check `recurring-defect-patterns.md` before investigating, not after.** PLT-3101 is Pattern 1's
+  fourth occurrence. The mechanism, the decisive arithmetic test, the remediation runbook and the
+  likely root cause were all in that file before the investigation started.
+
+**And on sequencing:** do not put a causal claim in front of a customer while the test that would
+falsify it is still unrun. State what is measured, hand them what they can act on, and ask for the
+one observation that settles it. On PLT-3101 that is "can site find handle 6272803" — everything else
+was ours to determine and we determined it.
