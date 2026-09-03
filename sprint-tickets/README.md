@@ -2752,3 +2752,35 @@ Merged and pushed: `dcc5f37` (#2194), `ca87564` (#2195). Verified after each com
    accessible name. One change in the shared component, no caller changes. **New on 09-03.**
 3. **postcss nanoid → 3.3.17** — the one genuinely fixable CVE row, satisfies `^3.3.16`.
 4. **tldraw 2.4.6 → 5.3.2** — three majors, holding two suppressed nanoid CVEs.
+
+### 09-03 close-out — everything verified green, and the new rule paid for itself twice
+
+Verified per **step**, not from a badge:
+
+| PR | Head | `Lint & Run Tests` | `build` overall | SonarCloud |
+|----|------|---|---|---|
+| #2186 | `b9313e3` | ✅ 8m38s | ✅ | ✅ |
+| #2194 | `dcc5f37` | ✅ | ✅ | ✅ |
+| #2195 | `ca87564` | ✅ | ✅ | ✅ |
+| #2180 | `9a36c3c` | ✅ (unchanged) | ✅ | ✅ |
+| #2192 | `5ddf92d` | ✅ (unchanged) | ✅ | ✅ |
+
+Two things worth carrying forward:
+
+1. **The suppressed-comment rule paid off twice in one run** — once to find the two original
+   findings, once when the review of my *own* fix filed a third suppressed comment on the very
+   line I had just written (the armed-modal reopen). Had I only read the thread list, both
+   rounds would have looked clean. **This is now the first thing to check on any PR.**
+2. **A parallel session was working #2186 at the same time.** It pushed `bc7e9cc` (routing the
+   step-tasks modal's three hardcoded strings through `translate`) at 07:58, merged my
+   `7017211` in as `f814c78`, and cancelled my in-flight run. No damage — the merge was clean
+   and I verified my changes byte-present at the new head before continuing — but **check
+   `origin` before assuming your push is the head**, and re-verify your own diff survived.
+
+Final review state on #2186: the newest bot review on `b9313e3` reports **0 new comments** and
+its only suppressed item is the **i18n/tr** one, i.e. a restatement of the thread already open
+by design. It now names "implement a fallback-to-en behavior" as an option itself, which is the
+same conclusion recorded on 09-02 — so candidate #1 in the handover has independent support.
+
+**1 open review thread across all five PRs, 0 approvals, all green.** Everything is waiting on a
+human.
