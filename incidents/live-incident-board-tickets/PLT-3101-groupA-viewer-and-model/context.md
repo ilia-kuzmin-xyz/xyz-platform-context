@@ -367,3 +367,86 @@ This folder was written, and a full prod measurement run, before anyone checked
 a ticket smells like links, counts, or "can't find the element".** The measurement was still worth
 doing — it named the 2 elements — but the mechanism, the arithmetic test, the remediation procedure
 and the likely root cause were all sitting in one file the whole time.
+
+## 2026-09-03 (third pass) — ⛔ FINDING 2 IS WRONG. The 2 are NOT ghost links. Retracted with the test that killed it.
+
+Re-reading Yash's comment `111090` closely — *"preventing the **package** from reaching
+completion"* — prompted two checks that overturn the earlier conclusion. **Read this before acting on
+anything above.**
+
+### The inference that was wrong
+
+The 09-03 entry treated "no installation-status record" as evidence the element no longer exists.
+**It is not.** The project element list holds **616,251 distinct elements** (1,179,208 rows,
+`project-element-list` parquet, 21.6 MB) and only **99,577** have a status row — so **83.8 % of
+elements on CH08 have no status record at all.** No row means *never install-checked*. Nothing more.
+
+### The decisive test, run
+
+All 39 package-wide never-checked elements — including MY-41's 2 — were checked against the element
+list:
+
+| set | present in `project-element-list` |
+|---|---|
+| MY-41 live 835 | **835 / 835** |
+| the 39 never-checked (package) | **39 / 39** |
+| MY-41's 2 | **2 / 2** |
+| MY-41 deleted 2,200 | 506 / 2,200 |
+
+They exist. And they sit in **live, current, non-deleted models** — MY-41's two are in
+`PC-EQIX-CHx-8-ALDG-E-T_R23_Conduits_CRP-V75`, `…_Manholes_CRP-V64` and `…_ElectricalEquipment` (V64),
+all `isDeleted: false`, all CSA discipline. Each carries a real Revit handle:
+
+| modelElementId | sourceFileElementId | Revit ElementId |
+|---|---|---|
+| `12398bf3-dae3-4c29-8275-a97e1cb64d5c` | `fa820000-bb28-475e-860e-422b67b2455b-005fa796` | **6268822** |
+| `cad330b0-27b4-4b61-9bfe-1e80271775a5` | `fa820000-bb28-475e-860e-422b67b2455b-005fa797` | **6268823** |
+
+Consecutive ids in the same source file — two neighbouring objects, not scattered debris.
+
+**So these are most likely genuinely un-installed work, not stale links.** The ticket's premise
+("stale/ghost links contributing to the discrepancy") does not hold for *these* elements, and
+**deleting them would be wrong** — precisely the trap `data-remediation-runbook.md` § "Before
+anything: is deletion even the right fix?" describes, and how PLT-2909 differed.
+
+### Package-wide, which is what the customer actually said
+
+Parent WBS `7beaf46f-5447-4ba1-bbb9-757714c7a237` — **Subgrade Yard Work**, 15 activities, 6 carrying
+links. Full feed re-paged (372,903 rows) and split per activity:
+
+| activity | declared | live | deleted | installed | never checked |
+|---|---|---|---|---|---|
+| CH08-MY-41 | 835 | 835 | 2,200 | 833 | **2** |
+| CH08-MY-881 | 65 | 65 | 6 | 51 | **14** |
+| CH08-MY-211 | 15 | 15 | 4 | 3 | **12** |
+| CH08-MY-191 | 17 | 17 | 4 | 9 | **8** |
+| CH08-MY-161 | 17 | 17 | 4 | 14 | **3** |
+| CH08-MY-71 | 12 | 12 | 40 | 12 | 0 |
+
+**39 never-checked elements block the package, not 2 and not 3.** `declared == live` on all six, so
+`linkedElementCount` is reliable throughout. Not one of the 39 is `NOT_SET` — all are no-row.
+
+**`CH08-MY-161` has exactly 3.** The customer said 3 and named MY-41. That is worth asking about and
+**not worth asserting** — it may be coincidence, or they may have been reading a different row. All 39
+with handles: `analysis/PLT-3101-CH08-package-never-checked-elements.csv`.
+
+### What still cannot be tested, and why that matters
+
+Pattern 1's geometry oracle needs `svf2-object-id-map`, which is emitted for **Navisworks-path models
+only**. All three models holding MY-41's two elements carry only `floor-plan`, `xyz-model`,
+`client-element-metas`, `view-element-mapping` — **Revit path, no svf2 map**. So a
+metadata-present/geometry-absent divergence is **not excluded**; it is merely untestable from
+artefacts, exactly the caveat Pattern 1 records. If the customer still cannot find element 6268822 in
+the viewer with the handle in hand, that becomes the live hypothesis and needs the editor diagnostic
+(Pattern 1 § step 3), not more API reading.
+
+### Where that leaves the ghost-link question
+
+**There is a real ghost population, and it is already soft-deleted.** MY-41 carries 2,200 deleted
+mappings, of which only 506 still exist in the element list — 1,694 point at elements purged with
+superseded model versions. They are correctly excluded from `linkedElementCount` and from everything
+the customer sees. **Nothing needs remediating there.** The only place they leak is the endpoint noted
+above, whose sole caller is a debug path.
+
+So: no deletion, no runbook run, no approval request. The § "Steps" plan in
+`recommended-action.md` dated 09-03 is **superseded** — it was built on the retracted premise.
