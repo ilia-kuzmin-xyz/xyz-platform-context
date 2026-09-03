@@ -654,3 +654,46 @@ either — it is presumably 3 of the 16 that they happened to notice.
    `data-remediation-runbook.md` procedure).
 3. Product question: the federation rebuild silently orphans links. That is the systemic bug
    and it is not CH08-specific — 99 elements dropped in this one source model alone.
+
+### 2026-09-03 (correction to the section immediately above)
+
+The section above says the 16 were *"deleted from the source Revit file"* and that the links
+are *"dead"*. **That is wrong — corrected here, within the hour, before it reached the ticket.**
+
+All three models holding the 16 are live, undeleted, and the **only version of their ACC
+lineage** in the project:
+
+| model | version | isDeleted |
+|---|---|---|
+| `PC-EQIX-CHx-8-ALDG-E-T_R23_Conduits_CRP-V75` (all 16) | V75, 29 Jul — sole version | False |
+| `…_Manholes_CRP-V64` (the 2) | V64, 2 Jun — sole version | False |
+| `…_ElectricalEquipment_CRP-V64` (the 2) | V64, 2 Jun — sole version | False |
+
+Nothing was superseded and nothing was removed by the customer. The links point at elements
+that still exist in current models.
+
+**The defect is a lossy federation build.** The project has exactly **one** live federated
+model (`EQX - CH08 - Building_20260821` V19, 21 Aug; 76 live models total, 1 federated).
+Conduits *is* included in it — 10,263 of 10,362 elements made it — but **99 did not**.
+16 of those 99 are linked to CH08-MY-41. So this is an ingest loss, not a model change.
+
+**Also correcting the "the 2 were a red herring" framing.** Both numbers are real, at
+different layers:
+
+- **16** — why nothing can be selected in the viewer (mechanism: absent from the federation).
+- **2** — what actually blocks the package. The other 14 are already `INSTALLED_ACCURATELY`
+  and hold nothing up.
+
+That reconciles the customer's "3": the 2 blocking elements plus the 1 they later located.
+
+**Remediation — do NOT delete the links.** Deleting 16 valid links destroys real records to
+hide a federation defect and does not stop it recurring (99 affected in this source model
+alone). Correct order:
+
+1. Repair / re-run the federated model build so all 10,362 Conduits elements are included.
+   The 2 then become selectable and the customer marks them installed — no write from us.
+2. Interim only if (1) is slow: mark the 2 installed. Never delete the 16.
+3. Raise the lossy-federation ingest bug as its own ticket.
+
+**Still open:** *why* the ingest dropped the 99. Needs the model-ingest owner — the same
+unanswered ownership question tracked elsewhere in this folder.
