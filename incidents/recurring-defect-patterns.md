@@ -876,3 +876,32 @@ in a customer's message.
 
 Full retraction and the verification steps: `live-incident-board-tickets/PLT-3099-groupA-viewer-and-model/context.md`
 § 2026-09-02 (later).
+
+### 2026-09-03 candidate — the artefact you measured was replaced underneath you (PLT-3095)
+
+**One occurrence. Watch for a second.**
+
+PLT-3095 was diagnosed on 09-01 against schedule revision `9f13d821`, then re-verified on 09-03 and
+reported to the backend with that id. **Both revisions we had analysed were soft-deleted on 09-02
+13:04, and a fresh one uploaded at 13:06** — nobody told us, and nothing in our own re-verification
+caught it, because `GET /schedules/{revisionId}` **still served the deleted revision in full** (1,818
+rows, on all three device paths, at 11:20 on 09-03).
+
+The cost: the backend engineer ran a query against a dead id, got `count(*) = 0` from a
+`sr."IsDeleted" = FALSE` join, and was one step from concluding the rows were fine.
+
+**Recognition signature**
+
+- A ticket that has been open for days while someone customer-side is "trying things".
+- You hold an id that you obtained more than a few hours ago.
+- The listing endpoint and the by-id endpoint disagree about what exists (here: `GET /schedules`
+  correctly omits deleted revisions; `GET /schedules/{id}` returns them regardless).
+
+**The habit that prevents it: re-resolve the id from the listing endpoint before every measurement,
+and again before quoting it to anyone.** One extra call. On PLT-3095 it would have saved a wasted DB
+query and an apology.
+
+**And when it does happen, the re-import is a gift:** the new revision reproduced the defect with new
+GUIDs and an identical child-count fingerprint (2/4/10/11) and identical 638 unreachable rows. That is
+far stronger evidence than determinism across two revisions of the same import — it proves a fresh
+upload of the same source reproduces it.

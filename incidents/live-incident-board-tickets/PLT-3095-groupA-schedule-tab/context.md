@@ -657,3 +657,22 @@ REV=d505f075-ebe8-4840-98de-59222f11cfff   # active as of 2026-09-03; re-check G
 ```
 
 **Check `GET /schedules` first every time.** Ours went stale in 48 hours.
+
+### What the four missing parents actually ARE — read from their children's names
+
+The GUIDs hide the impact. The children name it:
+
+| missing parent | its children | what the branch is |
+|---|---|---|
+| `94cce902` (4) | Budgeting & Price Modeling, **Construction Milestones**, Design Milestones, Permitting | **the entire Milestones group** — and Core & Shell sits under Construction Milestones |
+| `49d1ce1e` (11) | CRAC Units, Chiller, CDU, E-Houses, Fan Coil Assembly, Generator, Hot Aisle Containment, MV Switchgear (CBGS-0), Switchboards (Mech), TES Tanks, Transformers | **long-lead MEP equipment procurement** |
+| `a673c5f2` (10) | Building Pad, Building Pad Concrete, Exterior Doors & Storefronts, Joint Sealant – Precast Walls, Precast Concrete, Precast Wall Paint & Finish, Preliminary Activities, Roofing Installation, Structural Steel, Utilities | **the Core & Shell construction work packages** |
+| `78a3bf1a` (2) | Precast, Steel | structural procurement |
+
+So the 638 invisible rows are not an arbitrary third of the schedule — they are **milestones, long-lead
+equipment procurement, and core & shell construction**. On a data-centre programme those are the
+branches a client tracks most closely, which is why this reads as urgent to them and why "some WBSs
+are missing" understates it.
+
+**Useful for the conversation:** the customer named *Core & Shell* because it is the one they noticed.
+There are three more whole branches gone. Worth telling them before they find out themselves.
