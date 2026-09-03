@@ -710,3 +710,37 @@ Tests: empty on missing relation, still throws on anything else, and writes don'
 leniency. Used `vi.spyOn(client, 'select')` rather than subclassing `InMemoryCommissioningClient`
 **specifically because an override-signature error is the kind of mistake I cannot catch without a
 local run** — verified `select`/`upsert` exist as real async methods first.
+
+## 2026-09-03 17:53 — Sonar new-issue count moved 2 → 5, and I cannot see which
+
+`Lint & Run Tests` passed on `07474a1` (Sonar runs at step 12, so reaching it proves step 7 succeeded)
+— the three new `asset-readiness-service` tests are green. But Sonar now reports **5 new issues**,
+up from 2, and Quality Gate still passes.
+
+**The delta is partly mine.** Commits between the 2-reading (`73560fb`) and the 5-reading
+(`07474a1`): `3a494f2` (master merge, no code), `2c9678d` (sx stub, mine), `3eba287` (parallel run),
+`07474a1` (missing-relation, mine). Two of four are mine.
+
+*Process note against myself:* the run started at 17:40:49 and I first reasoned "that predates my
+push, so these issues aren't mine". Then I checked the head sha — `07474a1`, pushed 17:39:47. **The
+convenient inference was wrong and one call disproved it.** Check the sha; do not date-reason about
+which commit a run covers.
+
+**Could not enumerate them.** SonarCloud's API refuses anonymous reads for this project —
+`api/components/show` returns `"Project doesn't exist"`, i.e. private. Note that
+`api/issues/search` did NOT error for the same request: it returned `{"total":0}`. **A private
+project yields a false-empty rather than a 403 on that endpoint**, so a zero from it is not evidence
+of zero issues. Anyone re-treading this needs a token.
+
+Ranked hypotheses for the three, from reading my own diff (unverified):
+1. `console.warn` in `listOverrides` — a new `console` use in a service. Matches the existing
+   precedent (`CreateAssetTypeContent.tsx` uses warn+error), but precedent code is outside the leak
+   period while mine is inside it.
+2. `sx: _sx` unused destructured binding in the menu test stub.
+3. Cognitive complexity / try-catch shape on the touched functions.
+
+**Deliberately did NOT guess-push a fix.** The gate passes, all three candidates are intentional
+choices (2 was the reviewer's own suggested form; 1 matches area convention), and a speculative push
+costs a CI cycle and risks a real defect — the exact pattern that already bit this branch twice
+today (the i18n fix that took Sonar 1→3, and the review fix that introduced the `setOverride` race).
+Flagged for whoever has SonarCloud access instead; one click resolves what I cannot.
