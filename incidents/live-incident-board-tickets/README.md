@@ -103,6 +103,62 @@ Prod MCP still refuses **CH08** and **AUS02** (`project_id_not_allowed`) while l
 route; all use this session was **GET only** (`/tmp/get.sh` hardcodes `-X GET`) and the token was never
 committed.
 
+### Added later the same day — PLT-3095 reopened and re-diagnosed against live prod
+
+Appended after the block above, which was written before this work happened.
+
+**The diagnosis changed owner.** PLT-3095 was recorded as an api-v2 problem (four WBS parents
+referenced but never returned, 638 of 1,818 rows unreachable). Three things landed on 09-03:
+
+1. **Closed the last open discriminator.** `?deviceType=WEB|BI|HH` all return byte-identical 1,818
+   rows and none contains the four parents, so it is not the `full`/non-full projection branch.
+2. **Ali confirmed the endpoint filters deleted rows** — the one thing this session could not read,
+   since `fn_GetScheduleRevision` lives in the PostgreSQLDatabase repo.
+3. **Sachin's DB query invalidated our ids, then reframed the defect.** Both revisions we had analysed
+   were soft-deleted on **09-02 13:04**, with a fresh one uploaded at **13:06**. His `count(*) = 0`
+   was a false negative caused by that, not a finding. The **active** revision `d505f075` is broken
+   **identically** — new GUIDs, same child-count fingerprint 2/4/10/11, same 1,180 reachable / 638
+   unreachable. And **DB 232 WBS = API 232 WBS**, so nothing is filtered on the way through: the four
+   parents do not exist as rows. **This is an ingest defect, not an API one.**
+
+**What the missing branches are** (read from their children, because the GUIDs hide it): the whole
+**Milestones** group, **long-lead MEP procurement**, the **Core & Shell construction packages**, and
+structural procurement. The customer named Core & Shell because it is the one they noticed — three
+more whole branches are gone.
+
+Evidence is saved so it survives token expiry: `analysis/PLT-3095-AUS02-d505f075-missing-parents.csv`
+and `…-unreachable-rows.csv` (638 rows), plus Ali's and Sachin's messages verbatim and the exact
+reproduction commands.
+
+**New candidate pattern** in `recurring-defect-patterns.md`: *the artefact you measured was replaced
+underneath you.* `GET /schedules` filters deleted revisions; `GET /schedules/{id}` does not, so a stale
+id keeps returning a full payload and nothing warns you. Re-resolve the id from the listing endpoint
+before every measurement and before quoting it to anyone.
+
+### ⏳ Waiting on Ilia — drafts written, none sent
+
+Nothing in this list has been posted. Word counts are the drafts' own.
+
+| # | ticket / person | what is waiting |
+|---|---|---|
+| 1 | **PLT-3095 → Sachin** | Corrected ids for the **active** revision + the API sequence he asked for (79 words). The earlier draft is **withdrawn — its ids are dead.** `recommended-action.md` § 2026-09-03 (later) |
+| 2 | **PLT-3095 → Yash** | He asked on 09-02 whether to change boards and flagged it **urgent on the user end**. **Still unanswered.** No draft written — needs a board decision first |
+| 3 | **PLT-3095 → customer** | They know about Core & Shell. They do not know three more branches are missing. Worth telling them before they find out |
+| 4 | **PLT-3101 → Yash** | Post-verification comment (77 words) + the identified-elements CSV. Customer already confirmed 2 and authorised remediation; hand over handles `6272803`/`6272804` **before** anything is deleted |
+| 5 | **PLT-2890 → Yash** | Closing reply after Mostafa confirmed no auto-population feature (80 words) |
+| 6 | **PLT-2858 → Yash** | Close-out relaying Mostafa's decision, in our own voice, no verbatim quote (31 words) |
+| 7 | **PLT-3061 → Yash** | Proposal to move it to **With Technical Support** while Josh talks to the ML9 PM (68 words) |
+
+### 🔧 Waiting on Ilia — code, not comments
+
+| # | what | why it is not done |
+|---|---|---|
+| 1 | **platform-api `mapError` constraint-name fix** | Unraised, and it is red-lighting **every open PR** in that repo (`SystemType_Name_uidx`). Proposed patch is on #944 |
+| 2 | **PLT-2858 GUID branch → PR** | `PLT-2858-qa-issue-location-label`, 5 tests, never raised. Becomes user-visible the moment anyone configures rooms |
+| 3 | **PLT-3099 remediation** | Needs approval on the ticket + a runbook run for the 1,239 links. Not a new capability |
+| 4 | **FE transparency fix** | Unresolvable linked elements dropped silently at three points; nothing shows them to the user. Needs no data — can start any time |
+| 5 | **Visual checks** | #2194 and #2195 are green drafts; both want a look in the real app. Test steps are in each PR body |
+
 ---
 
 ## Run: 2026-09-03 — backfilling PLT-3101's unlogged 09-02 investigation (class 2/3 split, mechanism verified in code), 12 in-scope tickets: 1 left scope (PLT-3099 → In Code Review), 11 of 12 confirmed unchanged in substance, PLT-2858's close-out already delivered live by Ilia outside this routine
