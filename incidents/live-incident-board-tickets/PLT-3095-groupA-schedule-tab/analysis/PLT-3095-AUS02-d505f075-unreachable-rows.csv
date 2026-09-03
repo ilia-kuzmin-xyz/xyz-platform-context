@@ -1,0 +1,639 @@
+itemId,itemType,userItemId,itemName,parentItemId,parentPresent
+008c755e-e2e6-4a3e-bb50-9f78b85c17cc,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.2,Area A,de505be5-3a40-4235-bc55-0896500b7460,yes
+00df955e-6ead-49d3-890a-ee1d10ca301a,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.11,Area J,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+01579e6d-96c7-469a-9b1a-2547ef1addcb,Activity,CS-ROOF-M-1000,Roofing - Area M - Vapor Retarder,1a66f3e2-2b16-4aba-9180-0b66232179cb,yes
+015bd7c0-0ad3-411d-a89e-a575e1d43684,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.4,Area C,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+0194d2ec-7c1a-439d-9328-06dd55d7c06d,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6,Precast Concrete,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+02561794-fd92-4847-8055-1f58b41421c8,Activity,CS-STL-D-1020,Structural Steel - Area D - Roof Framing,a08def4a-c71e-43f5-b5bd-295bf78bb2e7,yes
+028d4dc6-a0a0-4a08-abec-4f7278377865,Activity,CS-ROOF-R-1020,Roofing - Area R - Composite Insulation,8e26bd0f-a4cd-4be7-924e-3b193640c564,yes
+02ed3bc0-4e93-4e7b-a6a8-ce45703f6a3f,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.7,Area G,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+03b64129-1e09-45b6-9ec0-4eaaabadeaf6,Activity,CS-PNT-1080,Precast Wall - Paint and Finish - Area O - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+03f951e0-0fc4-48c3-bf97-f9bf664a03fc,Activity,BUD-1120,100% Final GMP Pricing - Owner's Review & Approval (TI),43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+04f634c5-bcc1-45e3-b3ac-fd03d157cc4b,Activity,MI-DES-1030,30% Page Turn Review,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+05518a55-2f0b-498f-a6b9-46edaa609e8a,Activity,CS-PNT-1140,Precast Wall - Paint and Finish - Area C - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+05bc29fb-1b61-4559-b919-ec45ca146052,Activity,CS-PAD-H-1070,Building Pad Concrete - Area H - Slab on Grade,62e32c09-0f62-4576-978c-08d33a1617b7,yes
+05c94e80-7a17-4cf5-b615-d88f323b0eb1,Activity,CS-PAD-E1-1000,"Building Pad - Zone 6 Sitework (Pad Cut, Moisture Conditioning & Import Select Fill/Compaction)",91f31b3c-11ca-43a5-8290-315fbc219988,yes
+05f3d20a-a49e-4b4a-ae8f-2fc6ab1b75e0,Activity,OFCI-CHI-1100,Delivery of Air Cooled Chiller - #51 - 55 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+061edde6-3cbc-4300-bf01-e33ebf61f907,Activity,CS-SEAL-1000,Joint Sealant - Precast Walls - Area A - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+0626bdd4-49b4-4152-8dd9-8c8e0987bd72,Activity,CS-PAD-Q-1100,Building Pad - Zone 7 Install Piers,faa18795-b25a-4d86-998a-b0a055c6c5f3,yes
+0631331b-fd7a-4947-8adc-954e64176923,Activity,MI-CON-1080,MYD 3 - Foundations Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+067e6323-f0be-4833-8fe2-29dd6774f30c,Activity,CS-SEAL-1050,Joint Sealant - Precast Walls - Area F - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+06dca0ce-c2e8-4c24-9574-f155f92bd9b2,Activity,CS-PCST-R-1010,Precast Concrete - Area R - Grout & Patch,53bdc32c-b865-4ad2-9b5a-2690c9620578,yes
+071318cc-b84c-4fbe-8201-66b99cc00ff5,Activity,CS-PAD-K-1040,Building Pad - Zone 3 Underslab Utilities - Dry,dafad857-fedc-4eac-9944-8383e7da8130,yes
+077ed7dc-e54f-48b0-bd4f-181e54614933,Activity,CS-ROOF-O-1010,Roofing - Area O - Intermediate Ply,bcac896e-30eb-42d6-8e6a-4a48bf7b15c4,yes
+07d7f17b-a848-41a5-a1f6-a8c772a3fc0f,Activity,CS-PAD-A-1060,Building Pad Concrete - Area A - Grade Beams,59a3f73a-9e18-4808-b9e1-b62f7934ff35,yes
+0802dd31-b748-4afb-97b5-517991546ad2,Activity,CS-PCST-I-1010,Precast Concrete - Area I - Grout & Patch,0e25410d-0241-44ba-ad28-d8ab3c7af9d9,yes
+0892b21b-6bed-4a4e-a972-0f5a04da94f5,Activity,CS-STL-J-1000,Structural Steel - Area J - Columns,75370f04-9eeb-4576-a97b-a0e55d213066,yes
+089dfc6e-ef12-4e93-b40f-f00d404d1ee1,Activity,CS-ROOF-O-1030,Roofing - Area O - Coping,bcac896e-30eb-42d6-8e6a-4a48bf7b15c4,yes
+0946a829-d655-48eb-b10b-677473d3611a,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.11,Area K,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+0977e57a-cd85-4bce-b564-9c5f551e387c,Activity,CS-ROOF-E-1030,Roofing - Area E - Coping,f0480e4e-b415-4943-9bcc-d2241ebdb1bd,yes
+09793439-4d5c-46f8-bbbb-71c205c9d3bc,WBS,AUS02-60-Schedule-L1-.1.1.2.OFEMVSW,MV Switchgear (CBGS-0),49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+0983238e-5465-42ef-8950-267ee8a291f3,Activity,CS-PCST-P-1000,Precast Concrete - Area P - Set Panels,27dcef65-baa9-4496-a784-b65fa1caa086,yes
+098e2c66-957e-48de-a508-a0ed2883b4be,Activity,CS-PCST-A-1000,Precast Concrete - Area A - Set Panels,48135af5-99c9-4b9d-90be-205a8198d4ca,yes
+0a04d950-5154-4112-a1a4-4881e772ccfe,Activity,MI-DES-1080,60% TFO Design,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+0b2cbcf4-60ed-4196-8a15-ac1bba6910b1,Activity,CFCI-STL-1000,Steel Procurement - Order based on 30% Design,e1aea6a0-b78b-4072-8c9a-87e516a43334,yes
+0bb6d51f-e81e-44f2-937f-0caed0b53dbf,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.4.1.1.4.3,Substation (By Owner),1228fb9d-976b-43f3-bd0f-1227d8a94342,yes
+0c885080-4a50-475c-b29a-98ba32b46bda,Activity,CS-PCST-GEN-1000,Precast Concrete - Crane 1 Mobilization for Precast Concrete Installation,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+0d69b47e-c4aa-4e09-9648-dcaedb391655,Activity,OFCI-CHI-1120,Delivery of Air Cooled Chiller - #61 - 65 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+0e25410d-0241-44ba-ad28-d8ab3c7af9d9,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.10,Area I,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+0e57d5d9-7aed-4967-bd0a-50ea759a821f,Activity,CS-ROOF-R-1030,Roofing - Area R - Coping,8e26bd0f-a4cd-4be7-924e-3b193640c564,yes
+0e58d244-68d6-42b8-9414-9f118b1c060f,Activity,CS-PAD-K-1170,Building Pad - Zone 5 Import Select Fill/Compaction,ea8c6245-c4c4-4cc5-99ee-e2caf537592e,yes
+0e6e6bd3-7354-4cf2-a0e7-4290eb302212,Activity,CS-PAD-E-1050,Building Pad - Zone 2 Underslab Utilities - Wet,1cb66fd6-2989-4d9a-97c0-9abf5695077a,yes
+0f74fb90-67f2-4387-b29c-025139abf0d4,Activity,CS-SEAL-1080,Joint Sealant - Precast Walls - Area H - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+1070ab77-ff6e-46c8-81e8-cafec538f043,Activity,CS-STL-Q-1020,Structural Steel - Area Q - Roof Framing,66db9d0b-b722-415c-a072-2b348678df93,yes
+10b7613d-2646-4ca7-ba23-6d097a9485d9,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4,Utilities,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+10c24fed-d9b2-4017-a1dc-11d316e7ce14,Activity,MI-1180,Low Voltage / Telecommunications,45992aec-2219-4aeb-8bca-3a38aea51a3f,yes
+1166f4c2-3a8b-4f23-9ad3-e67d3ed6091c,Activity,CS-PNT-1130,Precast Wall - Paint and Finish - Area B - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+1192f5cb-821b-4ec0-baaf-b7ddf47b7604,Activity,CS-ROOF-I-1030,Roofing - Area I - Coping,edffb33d-402b-43d3-ad74-e7e1619ed937,yes
+11a3549a-e8da-4cfe-a37a-011f34ff7977,Activity,CIV-WL-1030,Water Line - Install Fire & Water Domestic Line - East,2756a942-40a2-466d-9df8-3a2c1b448761,yes
+11b47c1d-d935-40c1-a242-7d49ca32b3ef,Activity,OFCI-FCA-1020,Delivery of FCAs - #49 - 72 (24nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+11ba89ad-7ef7-4f0c-afee-af572619b3b1,WBS,AUS02-60-Schedule-L1-.1.1.2.4,Coolant Distribution Unit (CDU),49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+120451e4-8af2-451f-83bb-951ad866e2f9,Activity,CS-STL-N-1010,Structural Steel - Area N - Braced Frames,18a29868-132a-4f8b-8261-cf88ac79cef5,yes
+1228fb9d-976b-43f3-bd0f-1227d8a94342,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.4,Construction Milestones,94cce902-c576-4149-a03b-5b0f2fbf8a61,NO
+13023c24-2aca-4b2a-bf18-79fa4be7c76f,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6,Building Pad Concrete,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+13c06bce-63e6-4a01-86db-2dcf7c46cd03,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.6,Area E,de505be5-3a40-4235-bc55-0896500b7460,yes
+140e4c2a-6250-4a3f-b3a7-2608b97ed298,Activity,MI-CON-1320,Building Dry In - Server Hall 5 (Areas M - N),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+141a1a41-4640-48d8-a150-1b3f8a73620d,Activity,MI-CON-1140,Server Hall 1 - 24MW Turnover Date (15-Feb-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+143f7d3b-03c1-4db8-83d0-0e27479dddf0,Activity,OFCI-FCA-1060,Delivery of FCAs - #36 - 73 (38nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+14ff9bb2-6fea-4e4b-9cdc-15975e448f56,Activity,CS-ROOF-M-1010,Roofing - Area M - Intermediate Ply,1a66f3e2-2b16-4aba-9180-0b66232179cb,yes
+15624c82-239d-4203-990c-1439ab12d1c5,Activity,MI-CON-1130,Server Hall 5 - 24 MW Turnover Date (15-May-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+15ef05a6-5c5f-41ab-91ba-a4f59091029f,Activity,CIV-STORM-1040,Storm Line - Install Storm Drain Line C - West,4c42ea37-db6a-4569-ba04-6135fb15c25e,yes
+1644e3bb-0a92-467c-abb2-f7922a0ee553,Activity,OFCI-EHSE-1020,Delivery of E-Houses - MYD3 (4nr.),7b1b9598-6438-4cb0-bf26-89217ee157ac,yes
+1652a9cb-38e0-4c51-b3a5-33a6d25d2dd7,Activity,CS-STL-GEN-1000,Structural Steel - Crane 1 Mobilization for Structural Steel Erection,de505be5-3a40-4235-bc55-0896500b7460,yes
+16638108-9a49-448c-b27c-941bdfc4fb60,Activity,CS-ROOF-A-1020,Roofing - Area A - Composite Insulation,704cf504-85fa-468a-ae3c-a94c52d981fa,yes
+167018ab-9a7d-454b-b8b2-3ddaecad047c,Activity,CS-PCST-J-1010,Precast Concrete - Area J - Grout & Patch,00df955e-6ead-49d3-890a-ee1d10ca301a,yes
+183a84d7-0382-469e-bb68-83350744017b,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.8,Precast Wall - Paint and Finish,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+18a29868-132a-4f8b-8261-cf88ac79cef5,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.15,Area N,de505be5-3a40-4235-bc55-0896500b7460,yes
+19a4e239-41d8-4526-ace7-1bbbf8c9d9e5,Activity,OFCI-TRA-1200,Delivery of MV Transformers - E-House (2nr.),298cf454-4aec-42ea-a32b-3cee857acbbf,yes
+19bb3b08-8288-4880-8424-86a18a653a9e,Activity,CS-ROOF-H-1000,Roofing - Area H - Vapor Retarder,c016b33a-52fd-496f-ad93-cfa88f17e0ad,yes
+1a63afb4-dfec-4add-a7e7-a3dc98a20e31,Activity,CS-PAD-K-1030,Building Pad - Zone 3 Install Piers,dafad857-fedc-4eac-9944-8383e7da8130,yes
+1a66f3e2-2b16-4aba-9180-0b66232179cb,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.13,Area M,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+1ad5bb5a-9ce2-476c-9abd-06be69dca0ad,Activity,MI-DES-1070,"60% TI Design (MEP, Interior Buildout)",386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+1adc38df-7c92-4ec6-ad47-f3966271efec,Activity,MI-CON-1020,Foundation Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+1ae28b37-5d9c-44a7-9160-7cf8baed9fe0,Activity,CS-STL-J-1010,Structural Steel - Area J - Braced Frames,75370f04-9eeb-4576-a97b-a0e55d213066,yes
+1b168302-3be9-4aea-be0a-982889fcd230,Activity,CS-PAD-Q-1040,Building Pad - Zone 5 Underslab Utilities - Dry,ea8c6245-c4c4-4cc5-99ee-e2caf537592e,yes
+1b199707-f991-44a2-822e-5c79161ab407,Activity,MI-DES-1160,100% TFO Deisgn (IFC),386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+1c8d6c92-d1ea-4ddc-b58d-1485ac53cf83,Activity,CS-PAD-K-1000,Building Pad - Zone 3 Sitework (Pad Cut & Moisture Conditioning),dafad857-fedc-4eac-9944-8383e7da8130,yes
+1cb66fd6-2989-4d9a-97c0-9abf5695077a,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.5,"Zone 2 (Areas E, F, G, H, J, I)",428f8f37-2485-4f9e-8a22-5f829920002b,yes
+1cd8c329-7dba-4ad5-99d1-2baaa6b08994,Activity,CS-ROOF-B-1030,Roofing - Area B - Coping,1dcb7bb9-49b4-440a-88d9-1bd51281db9b,yes
+1cf3a8f5-04fb-416c-ba92-0fedde8a450f,Activity,MI-CON-1280,Utilities Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+1d76e902-5acc-4e54-9c01-990ae488e6d2,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.14,Area M,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+1d87e0b8-bb56-49b3-a2ca-ca7958c58770,Activity,OFCI-CHI-1040,Delivery of Air Cooled Chiller - #21 - 25 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+1d8ee0b3-f944-4db0-bb31-7d222811f4e5,Activity,CS-STL-K-1010,Structural Steel - Area K - Braced Frames,d97c9a82-c47f-4a80-a3ca-04d1ef568769,yes
+1d910dc9-822d-44f6-96ee-37b2e15edc7e,Activity,CS-PCST-P-1010,Precast Concrete - Area P - Grout & Patch,27dcef65-baa9-4496-a784-b65fa1caa086,yes
+1d954eb1-94bb-4979-ab4d-41938ef63d6c,Activity,MI-DES-1130,90% TFO Design,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+1db7bd79-114d-4b04-a98d-b82f3e16a519,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.15,Area N,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+1dcb7bb9-49b4-440a-88d9-1bd51281db9b,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.2,Area B,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+1e01a591-6129-485a-a553-0c62d7df6bae,WBS,AUS02-60-Schedule-L1-.1.1.2.1,Fan Coil Assembly (FCA),49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+1ecce4f2-cc2a-4bfe-ac14-5d7325d04284,WBS,AUS02-60-Schedule-L1-.1.1.2.OFETES,TES Tanks,49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+1ed846bc-c721-44ed-a0ba-3d94b0bb2e96,Activity,CS-DOOR-W-1000,Exterior Doors - West - Install Temp Doors - 1nr.,309b7b5a-0d28-495f-b6e8-5f88af415abf,yes
+1ee48089-af2a-493f-9c39-f077d634f358,Activity,CS-PAD-E-1030,Building Pad - Zone 2 Install Piers,1cb66fd6-2989-4d9a-97c0-9abf5695077a,yes
+1f4aef15-e5d2-4231-8c8b-ea87fa40d2da,Activity,MI-1140,Coiling Doors & Grilles,45992aec-2219-4aeb-8bca-3a38aea51a3f,yes
+1f4e8f3c-dc98-464e-8d67-a6c2979dd510,Activity,MI-DES-1110,100% Core & Shell (IFC),386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+1f6a76d2-0f9d-49b2-8a02-e359e48b226f,Activity,MI-1170,Security,45992aec-2219-4aeb-8bca-3a38aea51a3f,yes
+2040903a-0de4-4f9d-af7e-c87020d365d2,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.16,Area P,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+204fbf12-ed95-41c6-8a8f-88dc93518d0d,Activity,MI-1160,Drywall,45992aec-2219-4aeb-8bca-3a38aea51a3f,yes
+207c15be-9a1d-46b7-8944-683475283d29,Activity,CS-ROOF-E-1020,Roofing - Area E - Composite Insulation,f0480e4e-b415-4943-9bcc-d2241ebdb1bd,yes
+20d7993a-1583-4c97-8acb-bd8307f1e369,Activity,CS-ROOF-B-1000,Roofing - Area B - Vapor Retarder,1dcb7bb9-49b4-440a-88d9-1bd51281db9b,yes
+20edf006-abbb-42df-8fbb-5adbadd4ddf6,Activity,CS-STL-M-1000,Structural Steel - Area M - Columns,64a364b9-443f-46f6-9c2a-aa5140f3b2c4,yes
+22341d30-483d-4b65-ad19-ddb83fa0f4f0,Activity,MI-CON-1240,Landscape Complete,4570a7c0-5fbe-45ac-8536-1050ddb23cfc,yes
+2283480f-50ba-4e4c-aea2-7930baa64728,Activity,CS-PNT-1090,Precast Wall - Paint and Finish - Area P - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+250f0c33-bea5-4dab-ac25-e2c78692b6fc,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.10,Area J,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+26a562e3-ccef-4479-bb9e-37d0b7788a17,Activity,CS-PAD-L-1070,Building Pad Concrete - Area L - Slab on Grade,8725e477-71e6-4c75-8597-ea6a48dfbca8,yes
+26a764b9-5b54-4a0f-9be9-977a929a8de7,Activity,BUD-1040,90% Pricing - Prepare & Submit GMP (C&S),43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+26fe5eca-0594-4003-ae29-92ff710e61b2,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.7,Area F,de505be5-3a40-4235-bc55-0896500b7460,yes
+2726e32a-e8ec-4169-aba4-99cd57ea914f,Activity,OFCI-CRAC-1000,Delivery of CRAC Units - DH1 (7nr.),4df42408-4d4f-4b68-8f88-1a21d8acaea9,yes
+2756a942-40a2-466d-9df8-3a2c1b448761,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.1.2,Water Line,434a0d7b-d608-47f0-9954-6bcf47478658,yes
+27dcef65-baa9-4496-a784-b65fa1caa086,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.17,Area P,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+27e1f091-e8e9-4ed5-a4a8-57ba313c12c7,Activity,BUD-1010,30% Budget Exercise - Prepare & Submit,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+28407e07-f5b8-4b39-b1a8-c2886f40c847,Activity,CS-PAD-M3A-1000,"Building Pad - Zone 9 Sitework (Pad Cut, Moisture Conditioning & Import Select Fill/Compaction)",4c4c111e-6be8-40dc-aa5c-81c867cb0648,yes
+2889be0d-167f-414e-8498-ef39965d29b5,Activity,CS-PCST-M-1010,Precast Concrete - Area M - Grout & Patch,1d76e902-5acc-4e54-9c01-990ae488e6d2,yes
+297606e0-c8a2-4c38-b8f1-22691de32fa6,Activity,MI-DES-1170,Anticipated Notice to Proceed,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+298cf454-4aec-42ea-a32b-3cee857acbbf,WBS,AUS02-60-Schedule-L1-.1.1.2.5,Transformers,49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+29c31110-1c33-41c1-95a6-ab64432d594d,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.3.1.1.3.61.2,2nd Tier,7bf12957-83db-4502-ada6-0be60a736b27,yes
+29c430c8-14c5-4c7d-a324-4786c7e1be88,Activity,CS-DOOR-E-1020,Exterior Doors - East - Install Storefront Window System - 1nr.,69249ff3-7d08-467f-ba8d-a8f591fdc89b,yes
+2a83af4f-3c00-428f-b207-aa3b096efbf4,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.13,Area L,de505be5-3a40-4235-bc55-0896500b7460,yes
+2ad0e93e-4c6e-4046-8395-0d69e8896377,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.14,Area N,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+2b38fd98-0490-41c0-a75a-d901eca166fe,Activity,MI-1020,Mechanical/Plumbing,f4a35525-523a-424f-a294-3069f5bd1436,yes
+2c271017-ee26-4d42-837f-f53a11b895d5,Activity,CS-ROOF-E-1010,Roofing - Area E - Intermediate Ply,f0480e4e-b415-4943-9bcc-d2241ebdb1bd,yes
+2c50d66f-210f-4292-845b-b5a088aa3818,Activity,CS-PCST-C-1000,Precast Concrete - Area C - Set Panels,015bd7c0-0ad3-411d-a89e-a575e1d43684,yes
+2d28f56b-7e27-4ce3-a873-8ffcc5083007,Activity,MI-CON-1100,EYD 2 - Foundations Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+2d7d5c10-0a45-41af-b94b-3bdd908d91fb,Activity,CS-STL-O-1000,Structural Steel - Area O - Columns,7f853545-2489-48f8-88bb-4d1f2661726f,yes
+2d937ab7-0251-4a1d-9132-b0125d9b6f24,Activity,MI-CON-1150,Server Hall 6 - 24 MW Turnover Date (15-Jun-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+2dad50f1-286d-4d37-a598-6b70fbf4ee07,Activity,OFCI-MVSW-1000,Delivery of MV Switchgear - MYD2 (2nr.),09793439-4d5c-46f8-bbbb-71c205c9d3bc,yes
+2dad6a22-0da8-40ed-ac64-32926ce74aa9,Activity,MI-1070,Site Utilities,f4a35525-523a-424f-a294-3069f5bd1436,yes
+2ddfc075-41fa-4ad0-a3b2-20ce17496f7a,Activity,CIV-MV-1000,Medium Voltage - Install Ductbanks - 1B & 1R (2500ft per line),59b2d053-fec6-4167-b5ef-66da3a65d8fd,yes
+2e83e040-c1f9-4e69-a23d-f2e2371e6b86,Activity,CS-PAD-F-1060,Building Pad Concrete - Area F - Grade Beams,c568574a-778c-4324-83a8-3d005d667c3f,yes
+2ed23483-8076-40eb-92ff-b2f423e1ea85,Activity,MI-1210,Landscaping,29c31110-1c33-41c1-95a6-ab64432d594d,yes
+2f31e576-0435-437d-9e08-cfaa220656f6,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.10,Exterior Doors & Storefronts,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+2f3b8125-00f8-4d5b-924e-5e78d46efcb6,Activity,CS-ROOF-I-1020,Roofing - Area I - Composite Insulation,edffb33d-402b-43d3-ad74-e7e1619ed937,yes
+2f6bb2d9-b1b4-4e68-8c74-fb2ccfe24e94,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.2,Permitting,94cce902-c576-4149-a03b-5b0f2fbf8a61,NO
+2f87f84f-7f9d-4841-b53c-c5f3549ea88b,Activity,CS-ROOF-E-1000,Roofing - Area E - Vapor Retarder,f0480e4e-b415-4943-9bcc-d2241ebdb1bd,yes
+2ff658c7-ad25-4e9f-aaa5-6ca1bd73f3cf,Activity,OFCI-CRAC-1010,Delivery of CRAC Units - DH2 (7nr.),4df42408-4d4f-4b68-8f88-1a21d8acaea9,yes
+3034dda5-1e41-4f26-99bd-a4596844488d,Activity,CS-PAD-E-1060,Building Pad Concrete - Area E - Grade Beams,5636c431-fb78-4336-9a47-e362efc53684,yes
+3043d80e-4fb2-43ad-ae0a-73a98140df74,Activity,OFCI-EHSE-1030,Delivery of E-Houses - EYD2 (2nr.),7b1b9598-6438-4cb0-bf26-89217ee157ac,yes
+3068ae7d-56b8-4f36-9f7c-b72e37f89843,Activity,CS-PAD-C-1060,Building Pad Concrete - Area C - Grade Beams,ecebed32-e788-4e32-8c5f-c6a2bb77b124,yes
+30810b91-8e56-437b-9813-6928ac02b7d7,Activity,CS-STL-A-1010,Structural Steel - Area A - Braced Frames,008c755e-e2e6-4a3e-bb50-9f78b85c17cc,yes
+309b7b5a-0d28-495f-b6e8-5f88af415abf,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.10.1.2.10.1,"West Elevation (Areas A, B, C & D)",2f31e576-0435-437d-9e08-cfaa220656f6,yes
+30eec2e2-823a-49cf-ad4b-369ba5390f30,Activity,CS-PAD-Q-1030,Building Pad - Zone 5 Install Piers,ea8c6245-c4c4-4cc5-99ee-e2caf537592e,yes
+3123e8cd-04cc-44c8-a891-da3a3a355a57,Activity,CS-ROOF-R-1010,Roofing - Area R - Intermediate Ply,8e26bd0f-a4cd-4be7-924e-3b193640c564,yes
+319dee74-5aa0-4d2f-a8f5-99a6c6fc59b7,Activity,CS-STL-R-1000,Structural Steel - Area R - Columns,623818e7-be5a-46f4-a1f5-2319662ac2b3,yes
+3256ac4b-ce0a-4d1b-b63f-8e27739b524e,Activity,CS-ROOF-L-1020,Roofing - Area L - Composite Insulation,470dc016-5c04-4cf4-98d3-a13412641d71,yes
+330c8da4-5fd0-4771-8b2f-457baa14ddfc,Activity,CS-ROOF-P-1010,Roofing - Area P - Intermediate Ply,ff62b231-d8b5-4d44-bb44-5e1e6c8d2f9c,yes
+34b11855-e2cf-4343-8a26-89d1d1885de8,Activity,CS-PAD-Q-1060,Building Pad Concrete - Area Q - Grade Beams,7f56698e-0060-44de-9e02-97eb4523df71,yes
+34b88afe-ee44-43c8-87c4-49cc76fedf7d,Activity,CS-PCST-J-1000,Precast Concrete - Area J - Set Panels,00df955e-6ead-49d3-890a-ee1d10ca301a,yes
+356f8480-3cba-435d-83d0-f0ea91f4b7f7,WBS,AUS02-60-Schedule-L1-.1.1.2.3,Chiller,49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+35b29a78-3591-42a4-9934-8ffc9711abb2,Activity,CS-PNT-1120,Precast Wall - Paint and Finish - Area A - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+35be34db-0478-425a-946f-b6a993b1ee72,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.6,Area E,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+362028f0-8280-4d09-b7b7-79149535f0e4,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.11,Area K,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+367a0967-9b5b-4291-9b7d-cfc680b08ba7,Activity,CS-STL-F-1020,Structural Steel - Area F - Roof Framing,26fe5eca-0594-4003-ae29-92ff710e61b2,yes
+36df312a-a21c-4dc6-bec4-2fb5337c9f23,Activity,CS-PCST-H-1000,Precast Concrete - Area H - Set Panels,37da95ef-4e74-40a9-8bec-c7d9a8844882,yes
+37da95ef-4e74-40a9-8bec-c7d9a8844882,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.9,Area H,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+384071d3-0c33-473c-95ff-d3ab5d02ea5b,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9,Roofing Installation,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.1,Design Milestones,94cce902-c576-4149-a03b-5b0f2fbf8a61,NO
+3907b5b5-f956-419b-8853-2603abc7ad41,Activity,CS-STL-L-1000,Structural Steel - Area L - Columns,2a83af4f-3c00-428f-b207-aa3b096efbf4,yes
+39083b4f-6c3b-40c6-afb6-0019f3d2131b,Activity,CS-SEAL-1030,Joint Sealant - Precast Walls - Area D - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+39925cee-2b7f-4331-befc-2b5315cb47bd,Activity,CS-PAD-P-1070,Building Pad Concrete - Area P - Slab on Grade,2040903a-0de4-4f9d-af7e-c87020d365d2,yes
+3a6d9eed-d903-4c35-bc7d-e2da08e1b6b0,Activity,OFCI-GEN-1070,Delivery of 480V Mech Gens (13nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+3adae775-60b3-4771-b193-00de9ec95466,Activity,MI-1150,"Entrances, Storefront & Curtain Walls",45992aec-2219-4aeb-8bca-3a38aea51a3f,yes
+3adc23e7-ba50-441f-9b06-a1d04fedc3c3,Activity,OFCI-TRA-1120,Delivery of Mech Transformers - MYD3 (13nr.),298cf454-4aec-42ea-a32b-3cee857acbbf,yes
+3b519d3f-2d86-4687-b239-9a596f990d89,Activity,MI-CON-1250,Site Parking/Signage Complete,4570a7c0-5fbe-45ac-8536-1050ddb23cfc,yes
+3b5a6aa5-873c-4e29-96c2-0ccc9379ff9a,Activity,OFCI-TES-1000,Delivery of TES Tanks - MYD1 (3nr.),1ecce4f2-cc2a-4bfe-ac14-5d7325d04284,yes
+3c668cef-fb14-40a1-9618-a35926f4050a,Activity,MI-CON-1000,Mobilization,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+3cf0e48a-223d-424f-bcab-9914a4ed3aec,Activity,PER-1030,Building Permit - Core & Shell (Inc Underground Slab Utiilties),2f6bb2d9-b1b4-4e68-8c74-fb2ccfe24e94,yes
+3d13e8d0-0d06-48a9-8b30-1e2aa0b4eab3,Activity,CS-STL-R-1020,Structural Steel - Area R - Roof Framing,623818e7-be5a-46f4-a1f5-2319662ac2b3,yes
+3db77740-dac5-4c17-8874-cdedfce5a902,Activity,MI-1010,Precast Concrete,f4a35525-523a-424f-a294-3069f5bd1436,yes
+3dc6a668-88e1-4b9f-a245-a73570f293a8,Activity,MI-CON-1380,Substation AUS101 - Temporary Construction & Commissioning Power,0bb6d51f-e81e-44f2-937f-0caed0b53dbf,yes
+3e5329e3-2eda-4a9c-81a5-adf5490239e1,Activity,CS-PAD-P-1060,Building Pad Concrete - Area P - Grade Beams,2040903a-0de4-4f9d-af7e-c87020d365d2,yes
+3e713b93-1d80-4efb-9a7b-b2ee4b54a580,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.16,Area O,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+3f15df60-e784-4908-a253-6155c9a62972,Activity,OFCI-CDU-3040,Delivery of CDUs - #97 - 112 (16nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+3f5ee8bd-c9de-4f02-af24-2052abcf1b08,Activity,CS-PAD-M-1010,Building Pad - FRAG - Zone 4 - RFI#1 - 3' x 5' Rock Import,5903bfb6-fcc3-4d38-8356-a38b917cff99,yes
+3fbcfdf5-a088-4702-b3d1-edcc9a924588,Activity,OFCI-FCA-1010,Delivery of FCAs - #25 - 48 (24nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+4087c34f-fbd1-4ad9-a531-1e70e08f5c79,Activity,CS-DOOR-S-1000,Exterior Doors - South - Install Final Doors - 4nr.,4f792bb5-4e22-4963-ac6e-471b2e9e9879,yes
+40d6f2f5-490d-473f-b7af-bad314f12c12,Activity,CS-PNT-1150,Precast Wall - Paint and Finish - Area D - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+4108ae49-6b64-42d2-8380-9bb231116e48,Activity,CIV-MV-1090,Medium Voltage - Install Ductbanks - 3B & 3R (1100ft per line),8e0fe0c3-937b-4036-a1f5-66dffc6bff79,yes
+4133da65-c849-4594-b578-0644d0b98fdc,Activity,CS-STL-O-1020,Structural Steel - Area O - Roof Framing,7f853545-2489-48f8-88bb-4d1f2661726f,yes
+418197b5-c6f3-4e58-92c5-d22f7ac1028d,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.15,Area O,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+419c3405-fd92-439a-a2f7-841f03f58869,Activity,MI-1130,Metal Wall Panels,45992aec-2219-4aeb-8bca-3a38aea51a3f,yes
+41e96ce1-1d57-4bca-b929-693d9dc414c7,Activity,CS-PAD-K-1050,Building Pad - Zone 3 Underslab Utilities - Wet,dafad857-fedc-4eac-9944-8383e7da8130,yes
+4217b034-cca3-40f6-8e0a-4f3a46c1affd,Activity,CS-PNT-1040,Precast Wall - Paint and Finish - Area K - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+4233cf9c-8cb9-44b8-bfd2-df6feaeb078e,Activity,OFCI-FCA-1050,Delivery of FCAs - #1 - 35 (35nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+428f8f37-2485-4f9e-8a22-5f829920002b,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3,Building Pad ,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+429499c8-ca16-4cbb-9864-8b15a5dea919,Activity,CS-ROOF-P-1020,Roofing - Area P - Composite Insulation,ff62b231-d8b5-4d44-bb44-5e1e6c8d2f9c,yes
+42eedb11-48cd-472e-8bef-b00d9270211f,Activity,PER-1040,Building Permit - TI,2f6bb2d9-b1b4-4e68-8c74-fb2ccfe24e94,yes
+4347fa65-6e0a-48c5-b707-d399ad862a79,Activity,MI-CON-1340,Building Dry In - Server Hall 7 (Areas Q - R),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+434a0d7b-d608-47f0-9954-6bcf47478658,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.1,Wet Utilities,10b7613d-2646-4ca7-ba23-6d097a9485d9,yes
+4357ef13-95d3-49bf-b217-2f6f8af21ac7,Activity,CS-ROOF-Q-1000,Roofing - Area Q - Vapor Retarder,c1c05231-0682-4495-8413-9db558e24339,yes
+4366b934-1fa6-479b-a06e-934f9ca39fff,Activity,CS-PAD-Q-1010,Building Pad - FRAG - Zone 5 - RFI#1 - 3' x 5' Rock Import,ea8c6245-c4c4-4cc5-99ee-e2caf537592e,yes
+43a86178-5f95-4780-bb5c-7e38edcd6cc2,Activity,CS-ROOF-A-1010,Roofing - Area A - Intermediate Ply,704cf504-85fa-468a-ae3c-a94c52d981fa,yes
+43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.3,Budgeting & Price Modeling,94cce902-c576-4149-a03b-5b0f2fbf8a61,NO
+45675c9d-a204-4a0f-8b4b-f6268a892144,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.1,"Zone 1 (Areas D, C, B, A)",428f8f37-2485-4f9e-8a22-5f829920002b,yes
+4570a7c0-5fbe-45ac-8536-1050ddb23cfc,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.4.1.1.4.4,Site,1228fb9d-976b-43f3-bd0f-1227d8a94342,yes
+4590d62b-b9fc-4a34-8f7a-0c57d9b2b818,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.6,Area F,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+45992aec-2219-4aeb-8bca-3a38aea51a3f,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.3.1.1.3.61.1,1st Tier,7bf12957-83db-4502-ada6-0be60a736b27,yes
+45ba5c75-b47c-444d-8185-04d8f16bc5bd,Activity,CS-PCST-L-1010,Precast Concrete - Area L - Grout & Patch,68d187e3-ae7b-4998-9a09-cf71d78d75a8,yes
+470dc016-5c04-4cf4-98d3-a13412641d71,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.12,Area L,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+47ac8076-f07c-48d3-bba5-6b75195b0bca,Activity,OFCI-CHI-1020,Delivery of Air Cooled Chiller - #11 - 15 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+47dfc0c4-a739-4194-ae8b-884b8fff7158,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.10.1.2.10.2,"North Elevation (Areas A, B, E, K, M, O & Q)",2f31e576-0435-437d-9e08-cfaa220656f6,yes
+48135af5-99c9-4b9d-90be-205a8198d4ca,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.2,Area A,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+48abb169-0fea-40e5-a1b1-94ac94663e0b,Activity,CS-ROOF-L-1010,Roofing - Area L - Intermediate Ply,470dc016-5c04-4cf4-98d3-a13412641d71,yes
+48b4a08f-db47-4218-8efa-93c66e82d6b7,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.4,Area D,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+49eec6b4-2c9b-454f-81ca-83d3ec2d7ea8,Activity,OFCI-CDU-1020,Delivery of CDUs - #41 - 60 (20nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+4a00534b-af5f-4d54-baeb-fab3c6c76e79,Activity,CIV-SAN-1010,Sanitary - Install Force Main Line - South & West,99c4b4fd-8f58-40c2-b455-8657c8fe96bd,yes
+4a8d8802-ce63-45a7-a9dc-546dcdb1f6ef,Activity,CS-ROOF-A-1000,Roofing - Area A - Vapor Retarder,704cf504-85fa-468a-ae3c-a94c52d981fa,yes
+4a93162d-06e2-4edf-81e9-27fe9ac33a66,Activity,MI-CON-1040,Building Dry In - Server Hall 3 (Areas I - J),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+4b01da2d-d976-4663-ba3d-5a0edce56fa2,Activity,MI-CON-1160,Server Hall 2 - 24 MW Turnover Date (15-Feb-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+4bb0259c-2d0a-4007-9b49-f5a55bd46e33,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.13,Area M,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+4bd5f253-d676-4995-99ee-aa3618912851,Activity,OFCI-CDU-1040,Delivery of CDUs - #81 - 96 (16nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+4c2d4b6f-1d09-42ae-9feb-5c35ad91b601,Activity,CS-PAD-G-1070,Building Pad Concrete - Area G - Slab on Grade,02ed3bc0-4e93-4e7b-a6a8-ce45703f6a3f,yes
+4c42ea37-db6a-4569-ba04-6135fb15c25e,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.1.1.2.4.2,Storm Line,434a0d7b-d608-47f0-9954-6bcf47478658,yes
+4c4968c7-699d-4ecb-8b80-af8b9c55a237,Activity,CS-PAD-D-1000,Building Pad - Zone 1 Sitework (Pad Cut & Moisture Conditioning),45675c9d-a204-4a0f-8b4b-f6268a892144,yes
+4c4c111e-6be8-40dc-aa5c-81c867cb0648,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.18111,Zone 9 (MYD3),428f8f37-2485-4f9e-8a22-5f829920002b,yes
+4ce61df9-c3b7-45e7-b08d-9ef14f5cae32,Activity,MI-DES-1060,"60% Core & Shell (Civil, Shell, Building Power)",386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+4d19662c-435f-40b0-91b0-395c8aa4c1d7,Activity,CS-STL-GEN-1010,Structural Steel - Crane 2 Mobilization for Structural Steel Erection,de505be5-3a40-4235-bc55-0896500b7460,yes
+4d412b43-9bf2-40dc-8aaa-d7eff164f9e5,Activity,OFCI-SWB-1020,Delivery of Mech Switchboards - MYD3 (12nr.),de8c67c6-5b01-4b9d-b597-0817cf2e0ee8,yes
+4d8327eb-d51d-4477-8d2e-1423e994502c,Activity,MI-CON-1410,Foundation Start,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+4d9af21f-ddf6-4566-baba-db20c62c89e7,Activity,OFCI-CDU-3030,Delivery of CDUs - #73 - 96 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+4df42408-4d4f-4b68-8f88-1a21d8acaea9,WBS,AUS02-60-Schedule-L1-.1.1.2.OFECRAC,CRAC Units,49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+4e192fdf-e9af-4fcc-a656-beb69ed1cb77,Activity,CS-PAD-C-1070,Building Pad Concrete - Area C - Slab on Grade,ecebed32-e788-4e32-8c5f-c6a2bb77b124,yes
+4e45cd25-60d3-42e8-b1fc-b6272a8862c8,Activity,CIV-LV-1030,Low Voltage Vaults /Fiber Line - Install 96 Conduit Fiber Ductbanks (4600ft),e585e4c0-3a13-45e2-9199-faec7c13be0b,yes
+4f2baff2-42cb-458b-8857-f44644467122,Activity,MI-CON-1420,Enclosure Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+4f792bb5-4e22-4963-ac6e-471b2e9e9879,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.10.1.2.10.3,"South Elevation (Areas C, D & H)",2f31e576-0435-437d-9e08-cfaa220656f6,yes
+4fbda2e4-1f8a-4053-88cb-42ff912ccef9,Activity,CS-PCST-GEN-1010,Precast Concrete - Crane 2 Mobilization for Precast Concrete Installation,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+4fdcf0e7-ea63-4221-8624-c81f9aed37a1,Activity,CS-PAD-H-1060,Building Pad Concrete - Area H - Grade Beams,62e32c09-0f62-4576-978c-08d33a1617b7,yes
+503a0f63-5894-45ea-900b-8e8345a54171,Activity,CIV-WL-1000,Water Line - Install Fire & Water Domestic Line - North,2756a942-40a2-466d-9df8-3a2c1b448761,yes
+51190591-634d-4b3f-b707-37623751695f,Activity,MI-CON-1400,Break Ground,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+51eb05ce-e4dc-40fe-ae45-2394e03f6524,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.10.1.2.10.4,"South Elevation (Areas J, L, N, P, & R)",2f31e576-0435-437d-9e08-cfaa220656f6,yes
+51f0b9d0-fc1f-4fcb-8ec5-215520ffabf4,Activity,CS-ROOF-F-1020,Roofing - Area F - Composite Insulation,4590d62b-b9fc-4a34-8f7a-0c57d9b2b818,yes
+52a3a7e0-ebe9-48cf-a3d1-fb561c88ab75,Activity,MI-1030,Structural Steel,f4a35525-523a-424f-a294-3069f5bd1436,yes
+52d3c2b1-6b26-44b6-bf99-a92d849acbc0,Activity,OFCI-TRA-1020,Delivery of IT Transformers - EYD3 (20nr.),298cf454-4aec-42ea-a32b-3cee857acbbf,yes
+5342e07c-9b41-4587-8c5b-20c34b8def48,Activity,CS-PRE-1010,Preliminary Activities - Mobilize HITT Personnel,a5585c36-1c0a-4d29-987a-9364dfc0c7b1,yes
+53bdc32c-b865-4ad2-9b5a-2690c9620578,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.19,Area R,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+53e3738a-fabc-4037-8f3a-f5991db2b8be,Activity,MI-CON-1310,Building Dry In - Server Hall 4 (Areas K - L),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+53e82438-a05e-43b7-8de8-2f10a0f4dbf5,Activity,OFCI-GEN-1020,Delivery of 480V Mech Gens (9nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+54041e77-0d4f-4e91-b2bf-e0b164e66a17,Activity,MI-DES-1140,100% TI Design (IFC),386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+54112ec8-ab04-4ff9-a50f-858d5490bfb1,Activity,CS-STL-P-1020,Structural Steel - Area P - Roof Framing,9a7d7342-8cdf-4d4e-845d-57372208b316,yes
+544f4222-47ce-4e1e-be46-13e4a3995e2d,Activity,OFCI-HAC-1050,Delivery of HAC System - SH6 (1nr.),e248ea36-4232-4689-856f-1476b1d1c036,yes
+555df787-5521-4585-9b7a-0a2e4c2cc65b,Activity,OFCI-CRAC-1050,Delivery of CRAC Units - DH6 (7nr.),4df42408-4d4f-4b68-8f88-1a21d8acaea9,yes
+558e0eb5-0cdd-4dc2-8d10-a0f4ab4209d5,Activity,CS-ROOF-L-1000,Roofing - Area L - Vapor Retarder,470dc016-5c04-4cf4-98d3-a13412641d71,yes
+55afbaed-6727-42f3-aa79-252a59f29312,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.181111,Zone 10 (MYD3),428f8f37-2485-4f9e-8a22-5f829920002b,yes
+55c8d27b-f3d8-4c49-b59a-04a738782df6,Activity,CS-ROOF-N-1000,Roofing - Area N - Vapor Retarder,b17a97bd-8b4c-4e43-ba41-676007cde940,yes
+55e4d836-db74-46c2-8476-da2e9a23bdf0,Activity,CS-SEAL-1040,Joint Sealant - Precast Walls - Area E - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+5614f290-e3f6-40e0-9d58-2a68c11b2093,Activity,OFCI-MVSW-1020,Delivery of MV Switchgear - EYD2 (2nr.),09793439-4d5c-46f8-bbbb-71c205c9d3bc,yes
+5636c431-fb78-4336-9a47-e362efc53684,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.5,Area E,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+567cfb79-deda-449e-a19a-2579c38515f9,Activity,OFCI-CRAC-1060,Delivery of CRAC Units - DH7 (7nr.),4df42408-4d4f-4b68-8f88-1a21d8acaea9,yes
+57e4027e-b183-4dbb-9899-afb4da40f0bc,Activity,CS-PCST-O-1000,Precast Concrete - Area O - Set Panels,3e713b93-1d80-4efb-9a7b-b2ee4b54a580,yes
+581aebfd-931c-41bb-bafd-c2a2fe936858,Activity,OFCI-SWB-1010,Delivery of Mech Switchboards - MYD2 (9nr.),de8c67c6-5b01-4b9d-b597-0817cf2e0ee8,yes
+58251d70-895d-439e-94d9-c3c5234f0799,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.3,Area B,de505be5-3a40-4235-bc55-0896500b7460,yes
+58486f66-63c0-4f46-9938-348bc2416ab2,Activity,CS-SEAL-1100,Joint Sealant - Precast Walls - Area I - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+585e25c1-a953-43a4-8ab7-b61f53df89ba,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.4.1.1.4.2,Data Hall Turnover,1228fb9d-976b-43f3-bd0f-1227d8a94342,yes
+58829629-e3af-4cad-a522-225c0973c322,Activity,CS-PNT-1170,Precast Wall - Paint and Finish - Area F - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+5903bfb6-fcc3-4d38-8356-a38b917cff99,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.13,"Zone 4 (Areas M/2, N/2, O, P)",428f8f37-2485-4f9e-8a22-5f829920002b,yes
+59a3f73a-9e18-4808-b9e1-b62f7934ff35,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.1,Area A,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+59b2d053-fec6-4167-b5ef-66da3a65d8fd,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3.7.1,1B & 1R,6ec7e649-67bb-43a7-aa0d-952050ac61b1,yes
+5a766c99-3dfa-44b6-b2cc-f2bc01163a4e,Activity,OFCI-CDU-3010,Delivery of CDUs - #25 - 48 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+5ae03ebc-ce23-4679-8077-533747a024a3,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.9,Area I,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+5af6383e-3a11-468f-8c6b-62e7b2d0da44,Activity,MI-CON-1090,EYD 1 - Foundations Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+5b05c43b-7d08-4a5a-aa4f-b747856aeb36,Activity,OFCI-EHSE-1040,Delivery of E-Houses - EYD3 (2nr.),7b1b9598-6438-4cb0-bf26-89217ee157ac,yes
+5b0f11c3-ff7f-4ecc-9f54-f775b2b495ed,Activity,CS-PAD-Q-1090,Building Pad - Zone 6 Install Piers,91f31b3c-11ca-43a5-8290-315fbc219988,yes
+5b18e6fc-1f92-4a2f-9bb4-5fd0b872f349,Activity,CS-PCST-Q-1010,Precast Concrete - Area Q - Grout & Patch,8d167210-7bb8-44a3-a142-22fde105d230,yes
+5b49b041-ce81-4818-a86b-2382c6b32958,Activity,OFCI-TES-1010,Delivery of TES Tanks - MYD2 (3nr.),1ecce4f2-cc2a-4bfe-ac14-5d7325d04284,yes
+5b93213b-7109-45dc-bae6-cfb65afd84dc,Activity,CS-STL-N-1000,Structural Steel - Area N - Columns,18a29868-132a-4f8b-8261-cf88ac79cef5,yes
+5be3e4c1-c8c3-4937-9966-1725d5ba6886,Activity,CS-PAD-D-1050,Building Pad - Zone 1 Underslab Utilities - Wet,45675c9d-a204-4a0f-8b4b-f6268a892144,yes
+5cf78d24-affd-47f5-9dcf-94f1240c5fb2,Activity,CS-PNT-1110,Precast Wall - Paint and Finish - Area R - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+5d1bdb65-eb82-4251-83b3-87f5b7c58b44,Activity,CS-ROOF-H-1030,Roofing - Area H - Coping,c016b33a-52fd-496f-ad93-cfa88f17e0ad,yes
+5d6b28fb-d58b-4e7e-b682-e889ef12830d,Activity,CS-PCST-H-1010,Precast Concrete - Area H - Grout & Patch,37da95ef-4e74-40a9-8bec-c7d9a8844882,yes
+5ddf4b79-0537-4130-aaa8-8a8ba3620f01,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.3,Area B,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+5e93844a-fa49-420f-8ae5-7f7e88359f53,Activity,MI-CON-1260,Office Space - 5MW Turnover Date (15-Feb-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+5eeefdc9-c632-47fe-95b1-fc930999ec7d,Activity,CS-ROOF-D-1030,Roofing - Area D - Coping,8bacffc5-fc9f-4fb7-9d65-c44ea30117c0,yes
+5f52440e-65b6-4ae7-b92b-5b90b9ce7950,Activity,OFCI-EHSE-1010,Delivery of E-Houses - MYD2 (3nr.),7b1b9598-6438-4cb0-bf26-89217ee157ac,yes
+5f6320ae-2e02-40fb-aaac-f123312030f7,WBS,AUS02-60-Schedule-L1-.1.1.1.2,Precast,78a3bf1a-3591-4935-b7ee-9b00a58d7098,NO
+5f6c1a75-db3e-426a-b40f-b5bc05448ce0,Activity,CS-ROOF-J-1010,Roofing - Area J - Intermediate Ply,250f0c33-bea5-4dab-ac25-e2c78692b6fc,yes
+5fb95cc9-5abe-4c3c-a7dd-b5c75bf21969,Activity,MI-CON-1430,Fit-Out Start,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+6038423b-9e67-4d20-8ba5-a206d9785840,Activity,CS-STL-L-1010,Structural Steel - Area L - Braced Frames,2a83af4f-3c00-428f-b207-aa3b096efbf4,yes
+60f2e94a-1396-4fcc-8459-b455454cf4d5,Activity,MI-DES-1020,30% TFO Design,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+6116c770-35ea-47c3-9765-b12be8e0f862,Activity,OFCI-CHI-1000,Delivery of Air Cooled Chiller - #1 - 5 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+611d555e-1ca1-4ed6-891e-ad89af27d683,Activity,CS-ROOF-P-1000,Roofing - Area P - Vapor Retarder,ff62b231-d8b5-4d44-bb44-5e1e6c8d2f9c,yes
+6140a880-a48f-4f15-9cb7-97a0191574ff,Activity,CS-DOOR-S-1040,Exterior Doors - South - Install Temp Doors - 10nr.,51eb05ce-e4dc-40fe-ae45-2394e03f6524,yes
+618207f4-8081-49c6-bbf7-4dbf65daacb8,Activity,MI-CON-1330,Building Dry In - Server Hall 6 (Areas O - P),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+618f81be-f7ee-441b-ba39-d76c652e0869,Activity,CS-PCST-C-1010,Precast Concrete - Area C - Grout & Patch,015bd7c0-0ad3-411d-a89e-a575e1d43684,yes
+61ff4ddc-cb21-48a9-8537-dd83bb29a774,Activity,CS-PAD-K-1100,Building Pad - FRAG - Zone 3 - RFI#1 - 3' x 5' Rock Import,dafad857-fedc-4eac-9944-8383e7da8130,yes
+623818e7-be5a-46f4-a1f5-2319662ac2b3,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.19,Area R,de505be5-3a40-4235-bc55-0896500b7460,yes
+6258f602-65c5-4ef1-a447-06e64f535ee0,Activity,BUD-1130,100% Final GMP Pricing - Owner's Review & Approval (TFO),43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+6260dc20-a082-47d2-ad46-09267e147ce0,Activity,CS-STL-J-1020,Structural Steel - Area J - Roof Framing,75370f04-9eeb-4576-a97b-a0e55d213066,yes
+6264b36b-8d11-4b5f-9d31-03371e1d1bcd,Activity,CS-ROOF-J-1030,Roofing - Area J - Coping,250f0c33-bea5-4dab-ac25-e2c78692b6fc,yes
+628562f3-af85-48d8-a61d-b896b27abc8a,Activity,CS-ROOF-C-1010,Roofing - Area C - Intermediate Ply,d813a228-5b47-4d2e-b6a6-6219c41599d3,yes
+62e32c09-0f62-4576-978c-08d33a1617b7,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.8,Area H,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+64392172-6380-4429-a663-c0d8df1ba405,Activity,MI-1190,Painting & Coating,29c31110-1c33-41c1-95a6-ab64432d594d,yes
+644cf9da-93f1-4225-9a53-1a11441f3721,Activity,CS-STL-P-1010,Structural Steel - Area P - Braced Frames,9a7d7342-8cdf-4d4e-845d-57372208b316,yes
+64a364b9-443f-46f6-9c2a-aa5140f3b2c4,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.14,Area M,de505be5-3a40-4235-bc55-0896500b7460,yes
+6534acba-3537-4c43-8205-be909a382465,Activity,OFCI-CHI-1010,Delivery of Air Cooled Chiller - #6 - 10 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+6617b49f-24a2-4cd1-9a94-deb212f078f7,Activity,CS-ROOF-N-1030,Roofing - Area N - Coping,b17a97bd-8b4c-4e43-ba41-676007cde940,yes
+6619d97e-bd45-44c4-baa2-c2c79fbcdf1a,Activity,OFCI-FCA-1000,Delivery of FCAs - #1 - 24 (24nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+6660477b-4954-43a4-b945-1a8b298a293c,Activity,MI-CON-1440,Steel Erection Start,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+66db9d0b-b722-415c-a072-2b348678df93,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.18,Area Q,de505be5-3a40-4235-bc55-0896500b7460,yes
+674fbf3e-2802-4823-bf97-b05ca5068872,Activity,CIV-LV-1020,Low Voltage Vaults /Fiber Line - Pull Wire and Terminate,e585e4c0-3a13-45e2-9199-faec7c13be0b,yes
+678399d7-7762-435d-9510-5857edc49427,Activity,CS-PAD-D-1030,Building Pad - Zone 1 Install Piers,45675c9d-a204-4a0f-8b4b-f6268a892144,yes
+68822149-5ca5-435c-bb71-34f04bcb2ddd,Activity,BUD-1020,60% Budget Exercise - Prepare & Submit,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+68d187e3-ae7b-4998-9a09-cf71d78d75a8,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.13,Area L,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+68dfec64-7675-469d-95d2-33387c95ca2a,Activity,OFCI-FCA-1030,Delivery of FCAs - #73 - 96 (24nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+69024f87-e51e-498b-95e9-fc7200d99815,Activity,OFCI-TRA-1110,Delivery of Mech Transformers - MYD2 (9nr.),298cf454-4aec-42ea-a32b-3cee857acbbf,yes
+69249ff3-7d08-467f-ba8d-a8f591fdc89b,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.10.1.2.10.5,"East Elevation (Areas E, F, Q & R)",2f31e576-0435-437d-9e08-cfaa220656f6,yes
+693f3e38-6873-4f52-9231-058218d3c052,Activity,CS-PCST-L-1000,Precast Concrete - Area L - Set Panels,68d187e3-ae7b-4998-9a09-cf71d78d75a8,yes
+6986e814-49db-4652-89b2-1c0968905943,Activity,CS-STL-R-1010,Structural Steel - Area R - Braced Frames,623818e7-be5a-46f4-a1f5-2319662ac2b3,yes
+69b2dc7a-8444-4e66-9f31-3156d58f36af,Activity,CS-SEAL-1150,Joint Sealant - Precast Walls - Area P - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+6a594095-489e-422e-b3d8-ffc899b3c371,Activity,CS-PCST-K-1010,Precast Concrete - Area K - Grout & Patch,e5847f02-0bce-4ef7-89ad-d3ebf3349230,yes
+6ab77e4f-5e27-437f-a788-7c619ac20d95,Activity,CS-PCST-D-1000,Precast Concrete - Area D - Set Panels,bf9863f4-a7a1-4510-83f0-b8180e203a7d,yes
+6abc1a8f-f974-48eb-bc58-129202f94bfd,Activity,MI-1000,Earthwork,f4a35525-523a-424f-a294-3069f5bd1436,yes
+6b150e25-d704-4d56-836e-6b43d01150ea,Activity,OFCI-GEN-1030,Delivery of 480V IT Gens (10nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+6b343831-21ef-4ee3-beec-b1f715744970,Activity,CS-STL-M-1010,Structural Steel - Area M - Braced Frames,64a364b9-443f-46f6-9c2a-aa5140f3b2c4,yes
+6b511828-fcd3-4504-bb96-b4c92601e2a8,Activity,CS-PAD-A-1070,Building Pad Concrete - Area A - Slab on Grade,59a3f73a-9e18-4808-b9e1-b62f7934ff35,yes
+6bc644bb-e45f-410d-9417-5b377e640c4a,Activity,CS-ROOF-H-1020,Roofing - Area H - Composite Insulation,c016b33a-52fd-496f-ad93-cfa88f17e0ad,yes
+6beebfd0-38ad-4fed-baa6-9d38251fab53,Activity,CS-PCST-E-1000,Precast Concrete - Area E - Set Panels,35be34db-0478-425a-946f-b6a993b1ee72,yes
+6c242ffa-2003-4cec-9c0d-33b97531b889,Activity,OFCI-HAC-1020,Delivery of HAC System - SH3 (1nr.),e248ea36-4232-4689-856f-1476b1d1c036,yes
+6c292636-077c-41c1-98ef-79c5fa6bf68b,Activity,OFCI-FCA-1070,Delivery of FCAs - #74 - 112 (39nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+6c66c572-5ce2-45f6-8049-4f9a16756d15,Activity,CIV-SAN-1000,Sanitary - Install Sanitary Sewer Line 1,99c4b4fd-8f58-40c2-b455-8657c8fe96bd,yes
+6d70b983-a24e-488e-b3f2-751b45c13b2e,Activity,CS-SEAL-1010,Joint Sealant - Precast Walls - Area B - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+6e0cd99d-8d90-4b46-9b24-c4cc211b9c0e,Activity,MI-1050,CIP Concrete,f4a35525-523a-424f-a294-3069f5bd1436,yes
+6e1a0248-fc01-4fe0-874a-7e872fccdab9,Activity,BUD-1060,90% Pricing - Prepare & Submit GMP (TFO),43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+6e37e794-e98d-4043-947d-4fafa36c9755,Activity,OFCI-MVSW-1010,Delivery of MV Switchgear - MYD3 (2nr.),09793439-4d5c-46f8-bbbb-71c205c9d3bc,yes
+6e5849e5-fde4-4c60-bece-904b32c7174f,Activity,CS-STL-A-1000,Structural Steel - Area A - Columns,008c755e-e2e6-4a3e-bb50-9f78b85c17cc,yes
+6e62109a-d682-4cba-8aaf-46c2b6145633,Activity,BUD-1080,100% Final GMP Pricing - TI - Prepare & Submit,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+6ec7e649-67bb-43a7-aa0d-952050ac61b1,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3.7,Medium Voltage (MV),aa07f35e-cbac-444a-b1e2-cb18ef988a6f,yes
+6ee16240-3da0-44e5-a5af-512dcd5795a1,Activity,CS-ROOF-N-1010,Roofing - Area N - Intermediate Ply,b17a97bd-8b4c-4e43-ba41-676007cde940,yes
+6f808aec-7843-4a7d-9298-d4a31733098c,Activity,CS-STL-F-1010,Structural Steel - Area F - Braced Frames,26fe5eca-0594-4003-ae29-92ff710e61b2,yes
+704cf504-85fa-468a-ae3c-a94c52d981fa,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.1,Area A,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+710573bf-5619-4904-bdb4-1ba4bb9fbeaa,Activity,CIV-MV-1010,Medium Voltage - Pull Wire and Terminate - 1B & 1R (2500ft per line),59b2d053-fec6-4167-b5ef-66da3a65d8fd,yes
+740cb0f1-d536-4a17-adf3-d9b03ddd016c,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.4.1.1.4.1,Core & Shell,1228fb9d-976b-43f3-bd0f-1227d8a94342,yes
+74af4860-bb29-4780-89bc-347839f394c2,Activity,OFCI-SWB-1000,Delivery of Mech Switchboards - MYD1 (9nr.),de8c67c6-5b01-4b9d-b597-0817cf2e0ee8,yes
+75370f04-9eeb-4576-a97b-a0e55d213066,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.11,Area J,de505be5-3a40-4235-bc55-0896500b7460,yes
+75f283f0-ba35-403a-932a-ab7d9b1ff8de,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.4,Area C,de505be5-3a40-4235-bc55-0896500b7460,yes
+7678b893-3216-4489-a5fe-0bec0b080005,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.10,Area J,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+76e7a229-07b4-4361-9df6-457e16a9f52b,Activity,CS-PCST-N-1000,Precast Concrete - Area N - Set Panels,1db7bd79-114d-4b04-a98d-b82f3e16a519,yes
+77355763-c498-420b-8b87-823fd7182a88,Activity,CS-DOOR-N-1010,Exterior Doors - North - Install Final Doors - 8nr.,47dfc0c4-a739-4194-ae8b-884b8fff7158,yes
+77525ed7-d3fb-4bd0-a440-55478d9bf246,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.10,Area I,de505be5-3a40-4235-bc55-0896500b7460,yes
+77d2cd53-395d-4645-b07d-48b5898c0cfe,Activity,OFCI-GEN-1000,Delivery of 480V House Gen (1nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+7806a9f5-1647-4778-9261-013886604c95,Activity,CS-ROOF-P-1030,Roofing - Area P - Coping,ff62b231-d8b5-4d44-bb44-5e1e6c8d2f9c,yes
+78860a6f-6ebb-4178-b7b9-a9a85b44cdc9,Activity,CS-DOOR-E-1000,Exterior Doors - East - Install Final Doors - 4nr.,69249ff3-7d08-467f-ba8d-a8f591fdc89b,yes
+789572e2-371e-4c4b-98db-b2d2172f7487,Activity,CS-PAD-K-1070,Building Pad Concrete - Area K - Slab on Grade,0946a829-d655-48eb-b10b-677473d3611a,yes
+79fb1815-5247-4221-a27e-a801f2cd03f9,Activity,CS-PAD-G-1060,Building Pad Concrete - Area G - Grade Beams,02ed3bc0-4e93-4e7b-a6a8-ce45703f6a3f,yes
+7a722fcd-37f6-4167-bf1d-ca9cce89c8a7,Activity,OFCI-CHI-1060,Delivery of Air Cooled Chiller - #31 - 35 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+7a9beba3-7ed6-401d-b4d1-c3b779af7445,Activity,CS-SEAL-1160,Joint Sealant - Precast Walls - Area Q - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+7b06ae12-799b-452c-b584-6266fa236bab,Activity,CS-PAD-B-1060,Building Pad Concrete - Area B - Grade Beams,96fc3341-615f-4e41-8345-80790bbd1070,yes
+7b1b9598-6438-4cb0-bf26-89217ee157ac,WBS,AUS02-60-Schedule-L1-.1.1.2.OFEEHSE,E-Houses,49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+7b359369-441c-4e80-8351-0f5ccc5f20e5,WBS,AUS02-60-Schedule-L1-.1.1.2.2,Generator,49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+7b57bc07-890f-4cc4-9223-b605e147e45b,Activity,OFCI-CRAC-1020,Delivery of CRAC Units - DH3 (9nr.),4df42408-4d4f-4b68-8f88-1a21d8acaea9,yes
+7bec3d7c-7126-46f3-91e4-d43a30e579ec,Activity,CIV-MV-1040,Medium Voltage - Pull Wire and Terminate - 4B & 4R (2400ft per line),cce524f8-faef-4add-8203-23c12fc11fc2,yes
+7bf12957-83db-4502-ada6-0be60a736b27,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.3.1.1.3.61,90% Budget Subcontractor Authorization to Release,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+7cc9bee2-6026-4bc3-a8a1-bca715c62f29,Activity,CS-PAD-M-1040,Building Pad - Zone 4 Underslab Utilities - Dry,5903bfb6-fcc3-4d38-8356-a38b917cff99,yes
+7d18e85b-1708-4dfb-aa4a-610f31b1dfc0,Activity,CS-PAD-M-1050,Building Pad - Zone 4 Underslab Utilities - Wet,5903bfb6-fcc3-4d38-8356-a38b917cff99,yes
+7e207e10-cd3e-4c13-a0a9-9199873a33b6,Activity,CS-STL-G-1000,Structural Steel - Area G - Columns,b470a427-1b8c-41a1-a119-ecf28de02760,yes
+7ee3e9fe-6301-4528-8fc3-e8da83cbd938,Activity,CS-PNT-1010,Precast Wall - Paint and Finish - Area H - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+7f026600-ebd1-4c68-aaad-eccdc34f359d,Activity,CS-PAD-M-1030,Building Pad - Zone 4 Install Piers,5903bfb6-fcc3-4d38-8356-a38b917cff99,yes
+7f319635-a7c6-4beb-bc9e-190818567103,Activity,OFCI-CHI-1070,Delivery of Air Cooled Chiller - #36 - 40 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+7f56698e-0060-44de-9e02-97eb4523df71,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.17,Area Q,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+7f853545-2489-48f8-88bb-4d1f2661726f,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.16,Area O,de505be5-3a40-4235-bc55-0896500b7460,yes
+7f933f7b-2ce7-4c83-82d5-e0339a97f3b6,Activity,OFCI-GEN-1080,Delivery of 480V IT Gens (10nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+8039a0ec-d322-49a9-8c99-77645f544756,Activity,CS-ROOF-J-1000,Roofing - Area J - Vapor Retarder,250f0c33-bea5-4dab-ac25-e2c78692b6fc,yes
+810683e0-eb83-498b-bcd4-2fa86cf3b4ed,Activity,CS-ROOF-O-1000,Roofing - Area O - Vapor Retarder,bcac896e-30eb-42d6-8e6a-4a48bf7b15c4,yes
+81c64952-1a75-42a8-b500-5073d02ea275,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3.7.5,Future Duct Banks,6ec7e649-67bb-43a7-aa0d-952050ac61b1,yes
+82078b1c-176e-488b-9ce9-26e607d82f2b,Activity,CS-STL-D-1010,Structural Steel - Area D - Braced Frames,a08def4a-c71e-43f5-b5bd-295bf78bb2e7,yes
+827ed8a8-578b-4077-8882-e91d97bf7ad4,Activity,MI-1040,Piers & Foundations,f4a35525-523a-424f-a294-3069f5bd1436,yes
+838fa003-77c9-4025-9c93-7c745531501e,Activity,CS-SEAL-1070,Joint Sealant - Precast Walls - Area K - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+83eb0137-ca3e-430e-8213-fe2fbc2da6eb,Activity,CS-STL-C-1000,Structural Steel - Area C - Columns,75f283f0-ba35-403a-932a-ab7d9b1ff8de,yes
+843f3b3e-68a6-48be-aa2f-c64ad76a6420,Activity,CS-STL-K-1000,Structural Steel - Area K - Columns,d97c9a82-c47f-4a80-a3ca-04d1ef568769,yes
+852c5e81-b047-40c4-8f59-1df66f62b379,Activity,BUD-1030,60% Budget Exercise - Owner's Review & Approval,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+859e331b-31b2-4c27-ab8d-f75b2983a948,Activity,CS-STL-Q-1000,Structural Steel - Area Q - Columns,66db9d0b-b722-415c-a072-2b348678df93,yes
+862174b5-894a-4b2f-a32a-7ac620564262,Activity,MI-CON-1060,MYD 1  - Foundations Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+866c7f02-9852-4e1c-83f2-823e60ea00f3,Activity,CS-ROOF-B-1010,Roofing - Area B - Intermediate Ply,1dcb7bb9-49b4-440a-88d9-1bd51281db9b,yes
+871acffc-0737-4c86-a66f-33ab37012449,Activity,CS-ROOF-D-1010,Roofing - Area D - Intermediate Ply,8bacffc5-fc9f-4fb7-9d65-c44ea30117c0,yes
+8725e477-71e6-4c75-8597-ea6a48dfbca8,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.12,Area L,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+875ce5a8-b074-4143-a137-9d9d1fdb3b1d,Activity,CS-ROOF-Q-1010,Roofing - Area Q - Intermediate Ply,c1c05231-0682-4495-8413-9db558e24339,yes
+8801b2f2-cd67-47fe-aa78-396e28597730,Activity,CS-PAD-Q-1080,Building Pad - Zone 10 Install Piers,55afbaed-6727-42f3-aa79-252a59f29312,yes
+882775c5-c2c9-4b12-b448-cdecfb2315ff,Activity,CS-ROOF-M-1030,Roofing - Area M - Coping,1a66f3e2-2b16-4aba-9180-0b66232179cb,yes
+882a60c6-aa7a-4ee1-ae4e-6e0a503365c6,Activity,CS-PAD-R-1070,Building Pad Concrete - Area R - Slab on Grade,8897f32c-9d3a-44e4-b3a9-98e382060836,yes
+8897f32c-9d3a-44e4-b3a9-98e382060836,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.18,Area R,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+88aefe91-8a71-422f-8fa5-a6d124097e20,Activity,OFCI-EHSE-1000,Delivery of E-Houses - MYD1 (1nr.),7b1b9598-6438-4cb0-bf26-89217ee157ac,yes
+89bc5ef4-ff77-417b-b44e-01c3a66da21b,Activity,MI-CON-1230,Site Lighting Complete,4570a7c0-5fbe-45ac-8536-1050ddb23cfc,yes
+89d7be22-2b95-4515-8031-72d56567ee56,Activity,OFCI-CDU-3000,Delivery of CDUs - #1 - 24 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+8b582483-ddab-4d55-9df6-f58beec289b7,Activity,CS-PNT-1070,Precast Wall - Paint and Finish - Area N - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+8b69bdd5-1381-4549-9134-624184a87a22,Activity,CS-ROOF-O-1020,Roofing - Area O - Composite Insulation,bcac896e-30eb-42d6-8e6a-4a48bf7b15c4,yes
+8bacffc5-fc9f-4fb7-9d65-c44ea30117c0,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.4,Area D,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+8bb02620-de80-4755-9673-8d842797b0b7,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.7,Area F,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+8d167210-7bb8-44a3-a142-22fde105d230,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.18,Area Q,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+8dec0cd2-1cff-49c9-b120-bfa2bfa39e15,Activity,CS-PAD-J-1060,Building Pad Concrete - Area J - Grade Beams,7678b893-3216-4489-a5fe-0bec0b080005,yes
+8dec4fe7-9da7-43f3-9a97-909a6e6d884d,Activity,MI-DES-1090,60% Page Turn Review,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+8e0fe0c3-937b-4036-a1f5-66dffc6bff79,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3.7.4,3B & 3R,6ec7e649-67bb-43a7-aa0d-952050ac61b1,yes
+8e147f79-a5f0-430c-a345-3b06a48603e7,Activity,CS-ROOF-C-1020,Roofing - Area C - Composite Insulation,d813a228-5b47-4d2e-b6a6-6219c41599d3,yes
+8e22246e-05f2-4b74-9fda-8b7ea431afaf,Activity,CS-PAD-D-1070,Building Pad Concrete - Area D - Slab on Grade,48b4a08f-db47-4218-8efa-93c66e82d6b7,yes
+8e26bd0f-a4cd-4be7-924e-3b193640c564,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.18,Area R,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+8e621d26-5226-4fef-b76f-a56958a843e3,Activity,CS-SEAL-1110,Joint Sealant - Precast Walls - Area M - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+8e76a32d-7e6e-4685-961f-a4714e5cf12d,Activity,CS-PAD-M-1000,Building Pad - Zone 4 Sitework (Pad Cut & Moisture Conditioning),5903bfb6-fcc3-4d38-8356-a38b917cff99,yes
+8eabbc21-ba56-48f7-9109-092d729bfea5,Activity,CS-PAD-M-1070,Building Pad Concrete - Area M - Slab on Grade,4bb0259c-2d0a-4007-9b49-f5a55bd46e33,yes
+8f83fc09-c24b-4e65-bbd1-40fbfd563152,Activity,CS-STL-I-1010,Structural Steel - Area I - Braced Frames,77525ed7-d3fb-4bd0-a440-55478d9bf246,yes
+90a57fc5-8b6f-443d-a2a3-7299fa53f1d5,Activity,OFCI-CDU-1010,Delivery of CDUs - #21 - 40 (20nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+90ac29f3-5036-4508-a122-70a15606a78c,Activity,CS-STL-E-1020,Structural Steel - Area E - Roof Framing,13c06bce-63e6-4a01-86db-2dcf7c46cd03,yes
+90b6b6df-7519-4511-b4fe-4df138e02cc9,Activity,OFCI-CHI-1130,Delivery of Air Cooled Chiller - #66 - 70 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+911b2eee-50fd-42c3-b992-8328cd26c53e,Activity,MI-DES-1150,90% Page Turn Review,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+91428734-5328-4bd4-ba58-1d7358d076fb,Activity,CS-PCST-A-1010,Precast Concrete - Area A - Grout & Patch,48135af5-99c9-4b9d-90be-205a8198d4ca,yes
+915f3d08-38bc-44ad-bd4b-b742d0d2ade0,Activity,CS-DOOR-W-1030,Exterior Doors - West - Install Storefront Window System - 1nr.,309b7b5a-0d28-495f-b6e8-5f88af415abf,yes
+91f31b3c-11ca-43a5-8290-315fbc219988,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.18,"Zone 6 (MYD1, EYD1)",428f8f37-2485-4f9e-8a22-5f829920002b,yes
+9375e6ba-dabe-412d-90be-f3833d899972,Activity,CS-PRE-1040,Preliminary Activities - Installation Site Fencing and Barriers,a5585c36-1c0a-4d29-987a-9364dfc0c7b1,yes
+9426f683-4d79-498c-8855-b6629ba35205,Activity,CS-STL-H-1000,Structural Steel - Area H - Columns,daf64ff3-884c-4861-b1d1-4afe651fa933,yes
+944cb761-d6fe-4539-b35c-ccefd6d18156,Activity,CS-PAD-E-1040,Building Pad - Zone 2 Underslab Utilities - Dry,1cb66fd6-2989-4d9a-97c0-9abf5695077a,yes
+94a282b9-71c9-4039-bb2c-1404a0952255,Activity,BUD-1050,90% Pricing - Owner's Review & Approval (C&S),43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+94c0920f-b715-43d6-aa9e-480d682cb2e3,Activity,CS-ROOF-K-1020,Roofing - Area K - Composite Insulation,362028f0-8280-4d09-b7b7-79149535f0e4,yes
+95756cce-7a8f-4e08-94ab-bc2bbbdda47d,Activity,CS-DOOR-S-1030,Exterior Doors - South - Install Final Doors - 10nr.,51eb05ce-e4dc-40fe-ae45-2394e03f6524,yes
+9612e61c-89e3-482d-b62d-b7d5cfd7dbc2,Activity,CS-PAD-L-1060,Building Pad Concrete - Area L - Grade Beams,8725e477-71e6-4c75-8597-ea6a48dfbca8,yes
+96c08b0a-0dba-4324-98a2-d39c6c6bbc4a,Activity,CS-STL-H-1020,Structural Steel - Area H - Roof Framing,daf64ff3-884c-4861-b1d1-4afe651fa933,yes
+96fc3341-615f-4e41-8345-80790bbd1070,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.2,Area B,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+9753fa94-1c9e-46a8-963e-9e71eb706b3c,Activity,CS-ROOF-K-1010,Roofing - Area K - Intermediate Ply,362028f0-8280-4d09-b7b7-79149535f0e4,yes
+978abc9b-bec4-444b-bef5-24fa7ac782b8,Activity,CS-DOOR-E-1010,Exterior Doors - East - Install Temp Doors - 4nr.,69249ff3-7d08-467f-ba8d-a8f591fdc89b,yes
+98d5a5ad-1ed3-4aef-be79-4ebc5261e2eb,Activity,CS-STL-B-1010,Structural Steel - Area B - Braced Frames,58251d70-895d-439e-94d9-c3c5234f0799,yes
+9925a890-3425-49a9-8a42-7c2f94d6f5c6,Activity,CS-STL-P-1000,Structural Steel - Area P - Columns,9a7d7342-8cdf-4d4e-845d-57372208b316,yes
+99899f5e-32de-435f-a4aa-0c727e4e8e02,Activity,CFCI-PRCST-1000,Precast Procurement,5f6320ae-2e02-40fb-aaac-f123312030f7,yes
+99c4b4fd-8f58-40c2-b455-8657c8fe96bd,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.1.1,Sanitary,434a0d7b-d608-47f0-9954-6bcf47478658,yes
+99e4f5f4-cf1e-4369-8dec-a7ce3009b4d6,Activity,OFCI-CDU-1000,Delivery of CDUs - #1 - 20 (20nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+9a0888a5-6798-40ed-b5b4-6cb085e8e335,Activity,BUD-1090,90% Pricing - Owner's Review & Approval (TFO),43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+9a2a1694-b70a-4174-8252-e6d164e53456,Activity,CS-STL-O-1010,Structural Steel - Area O - Braced Frames,7f853545-2489-48f8-88bb-4d1f2661726f,yes
+9a7d7342-8cdf-4d4e-845d-57372208b316,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.17,Area P,de505be5-3a40-4235-bc55-0896500b7460,yes
+9af75a4d-db09-40b3-97fe-17501599ba1a,Activity,OFCI-CDU-1050,Delivery of CDUs - #97 - 112 (16nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+9b52a5ca-39eb-4e9a-9299-7d7fdcdc2665,Activity,OFCI-HAC-1030,Delivery of HAC System - SH4 (1nr.),e248ea36-4232-4689-856f-1476b1d1c036,yes
+9c272f2f-6cff-478a-bf38-e40e1dbccd4d,Activity,CS-STL-I-1000,Structural Steel - Area I - Columns,77525ed7-d3fb-4bd0-a440-55478d9bf246,yes
+9e1d7d6b-0024-46a7-96ea-eb4de85c0be8,Activity,CS-PNT-1020,Precast Wall - Paint and Finish - Area I - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+9ebdf44a-d6eb-4b5d-b38f-b0bbf0e11938,Activity,CS-PNT-1030,Precast Wall - Paint and Finish - Area J - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+9edd0140-a799-48b6-bcdd-91cb254364d0,Activity,MI-CON-1370,Substation AUS301 Phase 3 Complete (By Owner),0bb6d51f-e81e-44f2-937f-0caed0b53dbf,yes
+9eef02f3-ed7e-42b5-8909-c228d1fc5d97,Activity,CS-STL-B-1000,Structural Steel - Area B - Columns,58251d70-895d-439e-94d9-c3c5234f0799,yes
+9efc05e6-158e-4def-b9bc-64fc705b175c,Activity,OFCI-CDU-2010,Delivery of CDUs - #25 - 48 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+9f5d3775-5c4f-49fe-a6bb-801266e63221,Activity,OFCI-GEN-1010,Delivery of 480V IT Gens (10nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+9f77cd44-ef93-4ab0-9889-74ef440505b8,Activity,CS-PCST-F-1010,Precast Concrete - Area F - Grout & Patch,8bb02620-de80-4755-9673-8d842797b0b7,yes
+9f8b3d6a-c3c6-4acd-a070-38f9838b2d50,Activity,MI-CON-1050,Sitework Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+9fdd07d7-0035-4979-ab59-a5d4523d7fcd,Activity,CS-PAD-M-1060,Building Pad Concrete - Area M - Grade Beams,4bb0259c-2d0a-4007-9b49-f5a55bd46e33,yes
+a023efc0-ec19-4a98-9d25-581b013cb009,Activity,CS-PAD-K-1160,Building Pad - Zone 4 Import Select Fill/Compaction,5903bfb6-fcc3-4d38-8356-a38b917cff99,yes
+a023fc32-f8da-4922-8dbd-8659971d3bcf,Activity,CS-STL-A-1030,Structural Steel - Area A - Install Stairs,008c755e-e2e6-4a3e-bb50-9f78b85c17cc,yes
+a0866f57-c3ed-4b4a-be58-6dfa2ebd78e4,Activity,CS-PNT-1060,Precast Wall - Paint and Finish - Area M - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+a08def4a-c71e-43f5-b5bd-295bf78bb2e7,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.5,Area D,de505be5-3a40-4235-bc55-0896500b7460,yes
+a1312cb7-6257-4c4e-988f-4cfd6b21b076,Activity,CS-ROOF-Q-1020,Roofing - Area Q - Composite Insulation,c1c05231-0682-4495-8413-9db558e24339,yes
+a2964256-f69b-4b48-b7a8-b02cfb5b453a,Activity,CS-ROOF-Q-1030,Roofing - Area Q - Coping,c1c05231-0682-4495-8413-9db558e24339,yes
+a33c676a-924b-4e70-a343-e9615503fc42,Activity,CS-PAD-I-1060,Building Pad Concrete - Area I - Grade Beams,5ae03ebc-ce23-4679-8077-533747a024a3,yes
+a3b1a38b-604c-4ef4-9d60-7e1740af4a79,Activity,CS-ROOF-J-1020,Roofing - Area J - Composite Insulation,250f0c33-bea5-4dab-ac25-e2c78692b6fc,yes
+a3eef9bd-1792-4b1c-a339-19126b952655,Activity,CS-PAD-D-1040,Building Pad - Zone 1 Underslab Utilities - Dry,45675c9d-a204-4a0f-8b4b-f6268a892144,yes
+a40333b0-b213-4db2-bb75-cae445735d59,Activity,CS-ROOF-G-1010,Roofing - Area G - Intermediate Ply,b8874d2c-dc1d-4767-96dc-a2fac054f0a1,yes
+a49e0898-728a-4fe4-9a76-c3e7abdb616f,Activity,CS-PAD-Q-1120,Building Pad - Zone 9 Install Piers,4c4c111e-6be8-40dc-aa5c-81c867cb0648,yes
+a4ff585b-6630-498f-b1fb-c866db13b0e6,Activity,CS-ROOF-L-1030,Roofing - Area L - Coping,470dc016-5c04-4cf4-98d3-a13412641d71,yes
+a52b3b7f-3b5b-4196-9667-a34a8ec2de3b,Activity,CIV-SAN-1020,Sanitary Connection,99c4b4fd-8f58-40c2-b455-8657c8fe96bd,yes
+a5585c36-1c0a-4d29-987a-9364dfc0c7b1,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.1,Preliminary Activities,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+a57d9067-8701-4fc1-8e11-26fc71101887,Activity,CS-PCST-N-1010,Precast Concrete - Area N - Grout & Patch,1db7bd79-114d-4b04-a98d-b82f3e16a519,yes
+a58cc2b1-aa7c-4826-b572-a7cb9e52fff5,Activity,CS-ROOF-K-1000,Roofing - Area K - Vapor Retarder,362028f0-8280-4d09-b7b7-79149535f0e4,yes
+a7166871-dd41-422d-8cf5-2e70172e603d,Activity,MI-CON-1170,Server Hall 7 - 24MW Turnover Date (15-Jul-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+a74b893f-7883-4ec5-9dfa-0dab453a9c10,Activity,OFCI-GEN-1060,Delivery of 480V IT Gens (10nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+a7804f80-8773-4657-8d66-bd96980710ad,Activity,OFCI-TRA-1010,Delivery of IT Transformers - EYD2 (40nr.),298cf454-4aec-42ea-a32b-3cee857acbbf,yes
+a825cada-7fca-4332-bf0c-7d1f23498eaa,Activity,CS-PAD-N-1060,Building Pad Concrete - Area N - Grade Beams,2ad0e93e-4c6e-4046-8395-0d69e8896377,yes
+a88187e1-e6b1-480a-9362-a5e9a3e438fb,Activity,CS-PAD-I-1070,Building Pad Concrete - Area I - Slab on Grade,5ae03ebc-ce23-4679-8077-533747a024a3,yes
+a8a21803-080d-49f1-a105-f67e252915b6,Activity,CIV-MV-1060,Medium Voltage - Install Ductbanks - 2B & 2R (600ft per line),cded7575-8ede-41c3-8e4b-dbe76d07c4fb,yes
+a8da11bd-c5b1-46c8-af30-759bedeec9d3,Activity,CIV-LV-1010,Low Voltage Vaults /Fiber Line - Install Telecom Line 1 (4700ft),e585e4c0-3a13-45e2-9199-faec7c13be0b,yes
+a9b7d228-55c1-470f-a795-3c64de96e252,Activity,CS-STL-A-1020,Structural Steel - Area A - Roof Framing,008c755e-e2e6-4a3e-bb50-9f78b85c17cc,yes
+aa07f35e-cbac-444a-b1e2-cb18ef988a6f,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3,Dry Utilities,10b7613d-2646-4ca7-ba23-6d097a9485d9,yes
+aa786885-6a95-49bf-8046-5ecacc46aa2f,Activity,CS-STL-G-1020,Structural Steel - Area G - Roof Framing,b470a427-1b8c-41a1-a119-ecf28de02760,yes
+aaf0fe26-01b5-4473-9b4a-d822c19ac301,Activity,CS-ROOF-D-1020,Roofing - Area D - Composite Insulation,8bacffc5-fc9f-4fb7-9d65-c44ea30117c0,yes
+ab29f1a1-e07e-45e9-9d24-1e663a78cda2,Activity,MI-CON-1110,EYD 3 - Foundations Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+ab50e3c2-eeec-4ef4-b3e4-d704240d6b2b,Activity,PER-1010,Deep Foundations Permit,2f6bb2d9-b1b4-4e68-8c74-fb2ccfe24e94,yes
+abaca468-4a35-45b8-8697-4e8fe7386530,Activity,CS-PAD-Q-1000,Building Pad - Zone 5 Sitework (Pad Cut & Moisture Conditioning),ea8c6245-c4c4-4cc5-99ee-e2caf537592e,yes
+ac244d76-b3da-487d-919e-30990b689c60,Activity,MI-DES-1000,"30% Core & Shell (Civil, Shell, Building Power)",386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+ac918e7b-f5f8-4613-8ce3-abca2a0d06c2,Activity,CS-STL-E-1010,Structural Steel - Area E - Braced Frames,13c06bce-63e6-4a01-86db-2dcf7c46cd03,yes
+ad41a8eb-4d05-486c-a39f-0134373003e3,Activity,CS-STL-B-1020,Structural Steel - Area B - Roof Framing,58251d70-895d-439e-94d9-c3c5234f0799,yes
+ad54fd71-c596-48eb-a5ee-aa83fa0960f8,Activity,CS-ROOF-I-1010,Roofing - Area I - Intermediate Ply,edffb33d-402b-43d3-ad74-e7e1619ed937,yes
+ada473bb-90f2-43f6-9203-6ffcb147960f,Activity,CS-PAD-B-1070,Building Pad Concrete - Area B - Slab on Grade,96fc3341-615f-4e41-8345-80790bbd1070,yes
+adf48793-0eca-49a1-8977-d01d10ac43aa,Activity,CS-DOOR-S-1010,Exterior Doors - South - Install Temp Doors - 4nr.,4f792bb5-4e22-4963-ac6e-471b2e9e9879,yes
+af03d1d3-7c51-4686-a5d9-c4bab91f2430,Activity,MI-DES-1120,"90% TI Design (MEP, Interior Buildout)",386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+af317194-d821-4864-9fd5-f51008d98f87,Activity,OFCI-CDU-3020,Delivery of CDUs - #49 - 72 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+afaa367e-045e-4ae3-867c-3d2451fc03af,Activity,CS-PCST-B-1000,Precast Concrete - Area B - Set Panels,5ddf4b79-0537-4130-aaa8-8a8ba3620f01,yes
+afec446e-98e3-4992-8bcc-8584e5aaf6c1,Activity,PER-1020,Site Utilities Permit,2f6bb2d9-b1b4-4e68-8c74-fb2ccfe24e94,yes
+b1217545-d6a2-4403-8105-ab6fde135a4f,Activity,CS-ROOF-M-1020,Roofing - Area M - Composite Insulation,1a66f3e2-2b16-4aba-9180-0b66232179cb,yes
+b153546b-6998-4e08-bde8-74cb955dd368,Activity,CS-ROOF-A-1030,Roofing - Area A - Coping,704cf504-85fa-468a-ae3c-a94c52d981fa,yes
+b17a97bd-8b4c-4e43-ba41-676007cde940,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.14,Area N,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+b1893d94-d474-49e2-bf29-c4869c472611,Activity,PER-1000,Early Grading Permit,2f6bb2d9-b1b4-4e68-8c74-fb2ccfe24e94,yes
+b1cd63c1-8ac4-4b90-8c4c-f282aa16cd83,Activity,MI-1120,Roofing,d286d4c8-6907-4b1d-bead-982fb5383832,yes
+b2984cf9-a8bb-4e0a-9b28-92789dca06da,Activity,CS-PCST-I-1000,Precast Concrete - Area I - Set Panels,0e25410d-0241-44ba-ad28-d8ab3c7af9d9,yes
+b3e6475e-fc87-4aa6-95b0-316f958df976,Activity,OFCI-CHI-1030,Delivery of Air Cooled Chiller - #16 - 20 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+b470a427-1b8c-41a1-a119-ecf28de02760,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.8,Area G,de505be5-3a40-4235-bc55-0896500b7460,yes
+b4a7f11e-f99a-405c-9fb9-a8d986b696c3,Activity,CS-STL-N-1020,Structural Steel - Area N - Roof Framing,18a29868-132a-4f8b-8261-cf88ac79cef5,yes
+b645e109-2462-4eae-9703-d7b08e382a74,Activity,CIV-MV-1070,Medium Voltage - Pull Wire and Terminate - 2B & 2R (600ft per line),cded7575-8ede-41c3-8e4b-dbe76d07c4fb,yes
+b6601331-f641-4500-85e6-fec7a7e487d8,Activity,MI-CON-1350,Substation AUS301 Phase 2 Complete (By Owner),0bb6d51f-e81e-44f2-937f-0caed0b53dbf,yes
+b6d5f08f-b34d-48dd-8499-cdecb9399aca,Activity,CS-PAD-Q-1050,Building Pad - Zone 5 Underslab Utilities - Wet,ea8c6245-c4c4-4cc5-99ee-e2caf537592e,yes
+b7b9111f-5af3-40ad-b325-ca785288e6e1,Activity,CS-PCST-D-1010,Precast Concrete - Area D - Grout & Patch,bf9863f4-a7a1-4510-83f0-b8180e203a7d,yes
+b7decd29-f9ad-4b69-886a-8fd5c267515a,Activity,CS-DOOR-W-1020,Exterior Doors - West - Install Roll Up Doors - 5nr.,309b7b5a-0d28-495f-b6e8-5f88af415abf,yes
+b8262517-5ade-4796-99c4-fc0f6fbd92a3,Activity,CS-ROOF-B-1020,Roofing - Area B - Composite Insulation,1dcb7bb9-49b4-440a-88d9-1bd51281db9b,yes
+b8874d2c-dc1d-4767-96dc-a2fac054f0a1,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.7,Area G,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+b8e4e2b8-32a5-40eb-8487-fe8eb127fb05,Activity,CS-SEAL-1130,Joint Sealant - Precast Walls - Area N - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+b98ac54f-f145-4be8-9bde-9a951e151384,Activity,CS-STL-L-1020,Structural Steel - Area L - Roof Framing,2a83af4f-3c00-428f-b207-aa3b096efbf4,yes
+b9ac3e49-4473-4be6-9c54-b8b8fca4f5f0,Activity,MI-CON-1010,Site Access & Roadways Ready,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+b9cbe143-3c10-462d-9c53-da10db0272fa,Activity,CS-SEAL-1140,Joint Sealant - Precast Walls - Area O - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+ba48c597-e791-4f41-a9cb-0941d9a8f6ed,Activity,BUD-1110,100% Final GMP Pricing - Owner's Review & Approval (C&S),43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+ba584ab5-cf58-462d-93e5-af454bbb67a4,Activity,CS-DOOR-E-1030,Exterior Doors - East - Install Roll Up Doors - 4nr.,69249ff3-7d08-467f-ba8d-a8f591fdc89b,yes
+ba96a7dc-3575-48c6-b72c-62f551a67014,Activity,MI-CON-1290,Building Dry In - Server Hall 1 (Areas E - F),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+bbc3e5b3-52c3-43f8-b448-9e68a3e4fb6d,Activity,CS-STL-I-1020,Structural Steel - Area I - Roof Framing,77525ed7-d3fb-4bd0-a440-55478d9bf246,yes
+bc0dc133-6766-4230-b21a-e2c38a0ac9ba,Activity,OFCI-CDU-2020,Delivery of CDUs - #49 - 72 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+bc26484c-64f1-4ef8-9479-76f21157f060,Activity,CS-STL-F-1000,Structural Steel - Area F - Columns,26fe5eca-0594-4003-ae29-92ff710e61b2,yes
+bc6f6fdb-8cb2-41b7-afd4-6b898d0eea4c,Activity,CS-PAD-D-1080,Building Pad - Zone 1 Mobilization & Pier Layout,45675c9d-a204-4a0f-8b4b-f6268a892144,yes
+bcac6092-340b-44df-99b3-6ca7515c36c3,Activity,CS-ROOF-N-1020,Roofing - Area N - Composite Insulation,b17a97bd-8b4c-4e43-ba41-676007cde940,yes
+bcac896e-30eb-42d6-8e6a-4a48bf7b15c4,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.15,Area O,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+bccf549b-38d4-4058-8114-a4dd8f0b6cdb,Activity,OFCI-CHI-1050,Delivery of Air Cooled Chiller - #26 - 30 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+bd1b65ab-bc21-4f34-8f61-e9dc6330f64a,Activity,OFCI-FCA-1040,Delivery of FCAs - #97 - 112 (16nr.),1e01a591-6129-485a-a553-0c62d7df6bae,yes
+bd3b2eae-ad8a-4b59-a9fc-cd8a8e0af9ce,Activity,MI-CON-1220,Storm Basin Complete,4570a7c0-5fbe-45ac-8536-1050ddb23cfc,yes
+bd866288-3aa7-4dc3-9619-01ff30d50817,Activity,CIV-STORM-1030,Storm Line - Install Storm Drain Line B - North & East,4c42ea37-db6a-4569-ba04-6135fb15c25e,yes
+bdf909fb-d766-48c8-a480-8d5d7f423367,Activity,CS-PAD-M3B-1000,"Building Pad - Zone 10 Sitework (Pad Cut, Moisture Conditioning & Import Select Fill/Compaction)",55afbaed-6727-42f3-aa79-252a59f29312,yes
+be2ba5d1-d87c-4024-8f7e-8ebff0a48c02,Activity,MI-1200,Fences & Gates,29c31110-1c33-41c1-95a6-ab64432d594d,yes
+be5c2db1-c64c-48fe-bff8-010664b10ab9,Activity,CS-PAD-M1-1000,"Building Pad - Zone 7 Sitework (Pad Cut, Moisture Conditioning & Import Select Fill/Compaction)",faa18795-b25a-4d86-998a-b0a055c6c5f3,yes
+bee7aff0-3180-4d50-8a6e-c0a73cd3b3e7,Activity,CS-PCST-Q-1000,Precast Concrete - Area Q - Set Panels,8d167210-7bb8-44a3-a142-22fde105d230,yes
+befdaec1-eeae-4092-ba92-85e5fc38972a,Activity,MI-DES-1010,"30% TI Design (MEP, Interior Buildout)",386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+bf9863f4-a7a1-4510-83f0-b8180e203a7d,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.5,Area D,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+bfe39931-fe89-4071-ba16-cab6089859c8,Activity,CS-PCST-R-1000,Precast Concrete - Area R - Set Panels,53bdc32c-b865-4ad2-9b5a-2690c9620578,yes
+c016b33a-52fd-496f-ad93-cfa88f17e0ad,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.8,Area H,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+c026bc4a-1960-45ca-ba93-a9b1c45ee37b,Activity,OFCI-CDU-2040,Delivery of CDUs - #97 - 112 (16nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+c0e5ffee-c863-4c09-942b-b95a8c90dbe4,Activity,OFCI-CDU-2030,Delivery of CDUs - #73 - 96 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+c1649a03-4504-4c4a-bcee-5d73094c460a,Activity,CS-PAD-O-1070,Building Pad Concrete - Area O - Slab on Grade,418197b5-c6f3-4e58-92c5-d22f7ac1028d,yes
+c166d20b-8afb-45c3-82ee-5cfcd2ff28ec,Activity,CS-STL-C-1020,Structural Steel - Area C - Roof Framing,75f283f0-ba35-403a-932a-ab7d9b1ff8de,yes
+c19a5e30-4645-44dc-af6c-2fc991179675,Activity,OFCI-CDU-1030,Delivery of CDUs - #61 - 80 (20nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+c1c05231-0682-4495-8413-9db558e24339,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.17,Area Q,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+c25f780b-9ad5-420f-b76f-e047446a2028,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.1811,Zone 8 (MYD2),428f8f37-2485-4f9e-8a22-5f829920002b,yes
+c277bf3f-8ee5-4530-92c2-98bcf9f950df,Activity,CS-STL-Q-1010,Structural Steel - Area Q - Braced Frames,66db9d0b-b722-415c-a072-2b348678df93,yes
+c363a529-4bfd-411c-b07b-02fc393205d0,Activity,MI-CON-1180,Server Hall 3 - 24MW Turnover Date (15-Mar-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+c568574a-778c-4324-83a8-3d005d667c3f,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.6,Area F,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+c5d39e74-8690-4c54-8ce6-ff3e135ed70d,Activity,MI-DES-1100,"90% Core & Shell (Civil, Shell, Building Power)",386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+c5dee367-8d29-4baf-bac8-10f29b71361a,Activity,CS-PAD-E-1000,Building Pad - Zone 2 Sitework (Pad Cut & Moisture Conditioning),1cb66fd6-2989-4d9a-97c0-9abf5695077a,yes
+c6a3735d-2228-4126-bdc8-338861674775,Activity,OFCI-GEN-1050,Delivery of 480V IT Gens (10nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+c7c55911-3891-4be6-8118-b1120f9e3374,Activity,CS-DOOR-W-1010,Exterior Doors - West - Install Final Doors - 1nr.,309b7b5a-0d28-495f-b6e8-5f88af415abf,yes
+c932d070-862e-46e2-8af7-f89fed27cf9e,Activity,OFCI-CRAC-1030,Delivery of CRAC Units - DH4 (9nr.),4df42408-4d4f-4b68-8f88-1a21d8acaea9,yes
+c9ec1153-7a03-446d-b576-a39e96d23d11,Activity,OFCI-GEN-1040,Delivery of 480V Mech Gens (9nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+ca2f089e-e92a-4b15-976e-cf7f57c0f4cd,Activity,CS-PCST-K-1000,Precast Concrete - Area K - Set Panels,e5847f02-0bce-4ef7-89ad-d3ebf3349230,yes
+cac0800c-b437-4100-8d24-eff725d1a8ae,Activity,CS-STL-G-1010,Structural Steel - Area G - Braced Frames,b470a427-1b8c-41a1-a119-ecf28de02760,yes
+cadf61db-a34d-4c38-a84c-e7af90b23c8f,Activity,MI-CON-1450,Steel Erection Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+caf74d5a-3395-4f04-9c99-47c90abf0b0c,Activity,CS-PAD-R-1060,Building Pad Concrete - Area R - Grade Beams,8897f32c-9d3a-44e4-b3a9-98e382060836,yes
+cafda1cb-4108-4b02-aa90-b797d731caeb,Activity,CS-STL-E-1000,Structural Steel - Area E - Columns,13c06bce-63e6-4a01-86db-2dcf7c46cd03,yes
+cb6d8dfe-ff87-440b-95ef-bd5d0ae8d472,Activity,CS-ROOF-G-1020,Roofing - Area G - Composite Insulation,b8874d2c-dc1d-4767-96dc-a2fac054f0a1,yes
+cce524f8-faef-4add-8203-23c12fc11fc2,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3.7.2,4B & 4R,6ec7e649-67bb-43a7-aa0d-952050ac61b1,yes
+cdca7f88-9c15-4123-8c9f-64e38cd127cc,Activity,CS-PAD-O-1060,Building Pad Concrete - Area O - Grade Beams,418197b5-c6f3-4e58-92c5-d22f7ac1028d,yes
+cded7575-8ede-41c3-8e4b-dbe76d07c4fb,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3.7.3,2B & 2R,6ec7e649-67bb-43a7-aa0d-952050ac61b1,yes
+ce9844ac-586f-4b8c-9303-b67ac2ab4ae3,Activity,MI-1060,MV Electrical,f4a35525-523a-424f-a294-3069f5bd1436,yes
+cfea7b67-d992-44b7-b001-e2f2f9255a7a,Activity,OFCI-MVSW-1030,Delivery of MV Switchgear - EYD3 (2nr.),09793439-4d5c-46f8-bbbb-71c205c9d3bc,yes
+d00f89f9-7007-4684-b1a4-bee2761b04d6,Activity,CS-PNT-1100,Precast Wall - Paint and Finish - Area Q - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+d0914484-b977-460b-a072-ab113a856648,Activity,CS-ROOF-R-1000,Roofing - Area R - Vapor Retarder,8e26bd0f-a4cd-4be7-924e-3b193640c564,yes
+d140d9bc-1fad-4d7c-a62b-eed75c38d489,Activity,CS-STL-H-1010,Structural Steel - Area H - Braced Frames,daf64ff3-884c-4861-b1d1-4afe651fa933,yes
+d19bcb5f-74e2-43b9-a569-58a9385f62be,Activity,MI-CON-1300,Building Dry In - Server Hall 2 (Areas G - H),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+d1dd78bf-a9d5-4dba-882f-1cf936a0fe44,Activity,CIV-MV-1100,Medium Voltage - Pull Wire and Terminate - 3B & 3R (1100ft per line),8e0fe0c3-937b-4036-a1f5-66dffc6bff79,yes
+d1ec74bf-4400-48cd-819b-e4e6d1bc39a7,Activity,MI-CON-1030,Building Dry In - Office Space (Areas A - D),740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+d286d4c8-6907-4b1d-bead-982fb5383832,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.3.1.1.3.6,60% Budget Subcontractor Authorization to Release,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+d2e1fe71-52bd-49cb-84d7-3c5222c3d415,Activity,CS-PNT-1160,Precast Wall - Paint and Finish - Area E - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+d2e45f0e-d86a-4f26-8734-92a05e9ee17d,Activity,CS-PAD-M2-1000,"Building Pad - Zone 8 Sitework (Pad Cut, Moisture Conditioning & Import Select Fill/Compaction)",c25f780b-9ad5-420f-b76f-e047446a2028,yes
+d3051153-bdc2-4c7d-b172-0da3bdf1b26e,Activity,OFCI-GEN-1100,Delivery of 480V IT Gens (10nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+d3b90764-e3f8-48c7-91c7-7b807c4a3cb7,Activity,CS-PAD-E-1070,Building Pad Concrete - Area E - Slab on Grade,5636c431-fb78-4336-9a47-e362efc53684,yes
+d4494cf1-c60b-44f4-b0f6-83cf912bab35,Activity,CS-PCST-E-1010,Precast Concrete - Area E - Grout & Patch,35be34db-0478-425a-946f-b6a993b1ee72,yes
+d5e8d79e-3ef9-428d-ae33-73186f0497dd,Activity,MI-CON-1460,Enclosure Start,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+d6e3025c-8e84-487e-89a7-44908afdcb3e,Activity,CS-ROOF-F-1000,Roofing - Area F - Vapor Retarder,4590d62b-b9fc-4a34-8f7a-0c57d9b2b818,yes
+d7015030-49e8-46f0-9da4-b570ea65cbd9,Activity,CIV-MV-1030,Medium Voltage - Install Ductbanks - 4B & 4R (2400ft per line),cce524f8-faef-4add-8203-23c12fc11fc2,yes
+d813a228-5b47-4d2e-b6a6-6219c41599d3,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.3,Area C,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+d82171a2-69f8-493b-8c6c-89643744e5db,Activity,CS-PAD-D-1010,Building Pad - FRAG - Zone 1 - RFI#1 - 3' x 5' Rock Import,45675c9d-a204-4a0f-8b4b-f6268a892144,yes
+d84e5bd0-e556-4a91-ac7a-cdf5bc2762b5,Activity,MI-CON-1270,Project Completion,4570a7c0-5fbe-45ac-8536-1050ddb23cfc,yes
+d97c9a82-c47f-4a80-a3ca-04d1ef568769,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.12,Area K,de505be5-3a40-4235-bc55-0896500b7460,yes
+d9e83b8b-67f1-45ba-8956-9b40e359382e,Activity,OFCI-TES-1020,Delivery of TES Tanks - MYD3 (4nr.),1ecce4f2-cc2a-4bfe-ac14-5d7325d04284,yes
+da21f35c-7943-4c0d-91e7-6ec22175046d,Activity,CIV-STORM-1000,Storm Line - Install Storm Drain Line A - South,4c42ea37-db6a-4569-ba04-6135fb15c25e,yes
+dab4ad45-11d0-4ba6-9fe1-bec5c0687ab8,Activity,OFCI-HAC-1060,Delivery of HAC System - SH7 (1nr.),e248ea36-4232-4689-856f-1476b1d1c036,yes
+daf64ff3-884c-4861-b1d1-4afe651fa933,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5.1.2.5.9,Area H,de505be5-3a40-4235-bc55-0896500b7460,yes
+dafad857-fedc-4eac-9944-8383e7da8130,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.9,"Zone 3 (Areas K, L, N/2, M/2,)",428f8f37-2485-4f9e-8a22-5f829920002b,yes
+db1b1759-8f22-4667-952f-814451ebca2a,Activity,OFCI-GEN-1090,Delivery of 480V IT Gens (10nr.),7b359369-441c-4e80-8351-0f5ccc5f20e5,yes
+db977228-ebb7-43da-bba5-b790ba6fee77,Activity,CS-DOOR-N-1000,Exterior Doors - North - Install Temp Doors - 8nr.,47dfc0c4-a739-4194-ae8b-884b8fff7158,yes
+dbd3f7f6-cfa2-46e0-b994-b138279b4b17,Activity,CS-ROOF-C-1030,Roofing - Area C - Coping,d813a228-5b47-4d2e-b6a6-6219c41599d3,yes
+dc6bdb89-ce14-40fd-8336-50376e0ffc7e,Activity,CS-PCST-B-1010,Precast Concrete - Area B - Grout & Patch,5ddf4b79-0537-4130-aaa8-8a8ba3620f01,yes
+dcb39f03-bb20-4c62-9651-1e996fed485a,Activity,CS-PCST-M-1000,Precast Concrete - Area M - Set Panels,1d76e902-5acc-4e54-9c01-990ae488e6d2,yes
+dd50c960-60ac-4452-8549-29d7f2060371,Activity,CS-ROOF-D-1000,Roofing - Area D - Vapor Retarder,8bacffc5-fc9f-4fb7-9d65-c44ea30117c0,yes
+de009c5f-944f-4fb4-9386-aaccd6658f4e,Activity,CS-SEAL-1090,Joint Sealant - Precast Walls - Area L - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+de3171f0-f9f3-4df3-8e03-8d1cbd4347d2,Activity,CS-ROOF-H-1010,Roofing - Area H - Intermediate Ply,c016b33a-52fd-496f-ad93-cfa88f17e0ad,yes
+de505be5-3a40-4235-bc55-0896500b7460,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.5,Structural Steel,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+de619c3a-f9b2-40bb-97df-90ea0b0d270d,Activity,CS-STL-M-1020,Structural Steel - Area M - Roof Framing,64a364b9-443f-46f6-9c2a-aa5140f3b2c4,yes
+de8c67c6-5b01-4b9d-b597-0817cf2e0ee8,WBS,AUS02-60-Schedule-L1-.1.1.2.OFESWB,Switchboards (Mech),49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+dec1a4e6-d35e-435a-ac9a-213123f5a187,Activity,MI-1100,Fire Protection / Alarm,d286d4c8-6907-4b1d-bead-982fb5383832,yes
+df2372ce-11f5-4500-a666-fba9c6d4e8dd,Activity,CS-ROOF-F-1010,Roofing - Area F - Intermediate Ply,4590d62b-b9fc-4a34-8f7a-0c57d9b2b818,yes
+df2e0a62-de71-4143-a834-47d519b8e338,Activity,CS-STL-C-1010,Structural Steel - Area C - Braced Frames,75f283f0-ba35-403a-932a-ab7d9b1ff8de,yes
+df9656e1-18a3-4399-b8f0-77692e4236c4,Activity,OFCI-CHI-1080,Delivery of Air Cooled Chiller - #41 - 45 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+e0190fc6-24c0-4cfb-a4d7-b407d125287f,Activity,MI-CON-1360,Substation - Natural Gas Pipeline (East - Cyclone and South - Bartlett),0bb6d51f-e81e-44f2-937f-0caed0b53dbf,yes
+e19a9f59-c6bc-4524-8c7e-0bcb643986a6,Activity,OFCI-TRA-1100,Delivery of Mech Transformers - MYD1 (9nr.),298cf454-4aec-42ea-a32b-3cee857acbbf,yes
+e1aea6a0-b78b-4072-8c9a-87e516a43334,WBS,AUS02-60-Schedule-L1-.1.1.1.1,Steel,78a3bf1a-3591-4935-b7ee-9b00a58d7098,NO
+e1bac9a6-1744-44ed-9ae9-5bb44cc0dad6,Activity,BUD-1100,100% Final GMP Pricing - TFO - Prepare & Submit,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+e1be6e79-2c60-42b3-9c13-dfd500db1297,Activity,MI-CON-1120,Server Hall 4 - 24 MW Turnover Date (15-Apr-2028),585e25c1-a953-43a4-8ab7-b61f53df89ba,yes
+e23c81c8-1830-4bd6-926c-ebf5e618241a,Activity,CS-PCST-F-1000,Precast Concrete - Area F - Set Panels,8bb02620-de80-4755-9673-8d842797b0b7,yes
+e248ea36-4232-4689-856f-1476b1d1c036,WBS,AUS02-60-Schedule-L1-.1.1.2.OFEHAC,Hot Aisle Containment (HAC),49d1ce1e-3acc-4124-b1ef-d3778dadcb85,NO
+e2f42d92-718b-46d1-881c-a0afed3b3672,Activity,PER-1050,Building Permit - IFP,2f6bb2d9-b1b4-4e68-8c74-fb2ccfe24e94,yes
+e31c0e66-c539-4a8f-930e-3aec896affb0,Activity,CS-PAD-E-1150,Building Pad - Zone 2 Import Select Fill/Compaction,1cb66fd6-2989-4d9a-97c0-9abf5695077a,yes
+e3325f10-a0b1-4123-ab7d-cf9180672169,Activity,CS-PCST-O-1010,Precast Concrete - Area O - Grout & Patch,3e713b93-1d80-4efb-9a7b-b2ee4b54a580,yes
+e344a8d6-1f91-4f8a-8062-35f00e65b6f4,Activity,CS-PAD-Q-1110,Building Pad - Zone 8 Install Piers,c25f780b-9ad5-420f-b76f-e047446a2028,yes
+e361ebd0-13a4-44a6-a76a-51f0c5495e1c,Activity,OFCI-CHI-1110,Delivery of Air Cooled Chiller - #56 - 60 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+e3b6b9b6-2ef6-4fca-9c0c-17c48ab93737,Activity,CS-PAD-F-1070,Building Pad Concrete - Area F - Slab on Grade,c568574a-778c-4324-83a8-3d005d667c3f,yes
+e52f8b8c-17c6-443d-851f-c4b7317efcfd,Activity,CS-PAD-Q-1070,Building Pad Concrete - Area Q - Slab on Grade,7f56698e-0060-44de-9e02-97eb4523df71,yes
+e5683880-f442-421a-ac65-2b8e79c8114b,Activity,OFCI-TRA-1000,Delivery of IT Transformers - EYD1 (10nr.),298cf454-4aec-42ea-a32b-3cee857acbbf,yes
+e5755312-8783-4158-b6b0-945f5cbe44e7,Activity,BUD-1070,100% Final GMP Pricing - Core & Shell - Prepare & Submit,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+e5847f02-0bce-4ef7-89ad-d3ebf3349230,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.6.1.2.6.12,Area K,0194d2ec-7c1a-439d-9328-06dd55d7c06d,yes
+e585e4c0-3a13-45e2-9199-faec7c13be0b,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.1.2.4.3.1.2.4.4,Low Voltage Vaults /Fiber Line,aa07f35e-cbac-444a-b1e2-cb18ef988a6f,yes
+e72a4aee-3f83-4ab1-ba49-37cc55a82a94,Activity,CS-PNT-1050,Precast Wall - Paint and Finish - Area L - Paint & Finish to Precast Walls,183a84d7-0382-469e-bb68-83350744017b,yes
+e743e00f-d052-4004-b519-b80c35109ffa,Activity,OFCI-CHI-1140,Delivery of Air Cooled Chiller - #71 - 75 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+e7feb117-32b4-4a34-a305-28006325c86d,Activity,MI-1090,"Doors, Frames & Hardware",d286d4c8-6907-4b1d-bead-982fb5383832,yes
+e8f391f3-eb50-475e-be21-fdabedc8cd30,Activity,MI-DES-1040,Final Geotech Report Due,386fdd5e-97fe-4e9a-ae97-44e22ae3c1a9,yes
+ea03431c-7a3c-46f8-b7ca-080f737cd6b0,Activity,CS-STL-D-1000,Structural Steel - Area D - Columns,a08def4a-c71e-43f5-b5bd-295bf78bb2e7,yes
+ea6e14f1-aecb-4036-b01a-e1167258361e,Activity,CS-PAD-J-1070,Building Pad Concrete - Area J - Slab on Grade,7678b893-3216-4489-a5fe-0bec0b080005,yes
+ea8c6245-c4c4-4cc5-99ee-e2caf537592e,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.17,"Zone 5 (Areas R, Q)",428f8f37-2485-4f9e-8a22-5f829920002b,yes
+ea99c6a7-fce3-4c35-a4f5-c7c963f27fbf,Activity,OFCI-HAC-1010,Delivery of HAC System - SH2 (1nr.),e248ea36-4232-4689-856f-1476b1d1c036,yes
+eab63a61-d84a-41b1-9bea-74776c621efa,Activity,CS-PAD-N-1070,Building Pad Concrete - Area N - Slab on Grade,2ad0e93e-4c6e-4046-8395-0d69e8896377,yes
+eb192eb0-878e-45e0-9c74-e2280c5de3ae,Activity,OFCI-CHI-1090,Delivery of Air Cooled Chiller - #46 - 50 (5.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+ecebed32-e788-4e32-8c5f-c6a2bb77b124,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.4.6.1.2.4.6.3,Area C,13023c24-2aca-4b2a-bf18-79fa4be7c76f,yes
+ed595248-c4ae-480e-abf6-a9245fb494d2,Activity,CS-PAD-E-1110,Building Pad - FRAG - Zone 2 - RFI#1 - 3' x 5' Rock Import,1cb66fd6-2989-4d9a-97c0-9abf5695077a,yes
+eda547b9-e691-43ac-b802-239bae3747ea,Activity,CS-PAD-K-1150,Building Pad - Zone 3 Import Select Fill/Compaction,dafad857-fedc-4eac-9944-8383e7da8130,yes
+edf37e31-14d1-4c21-a556-8f06fdaaec58,Activity,CS-ROOF-K-1030,Roofing - Area K - Coping,362028f0-8280-4d09-b7b7-79149535f0e4,yes
+edffb33d-402b-43d3-ad74-e7e1619ed937,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.9,Area I,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+ee467060-f6f7-4bf9-8871-827bd0073c3e,Activity,CS-ROOF-I-1000,Roofing - Area I - Vapor Retarder,edffb33d-402b-43d3-ad74-e7e1619ed937,yes
+ef99068b-a276-41bd-b95a-49619de9c7f0,Activity,CS-SEAL-1120,Joint Sealant - Precast Walls - Area J - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+ef9932b7-14ad-40b2-8d54-a6f18fa2961a,Activity,BUD-1000,Early Release - Sitework Price Set,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+f0480e4e-b415-4943-9bcc-d2241ebdb1bd,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.5,Area E,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes
+f0c27afb-eb87-4672-87b1-d886ba793532,Activity,MI-CON-1070,MYD 2 - Foundations Complete,740cb0f1-d536-4a17-adf3-d9b03ddd016c,yes
+f2caff6f-d9d8-45bf-af50-71d7bdc6c17f,Activity,CIV-WL-1020,Water Line - Install Fire & Water Domestic Line - South,2756a942-40a2-466d-9df8-3a2c1b448761,yes
+f3431052-3fba-4e9c-af72-9defd974413e,Activity,CIV-MV-1120,Medium Voltage - Install Future Ductbanks - (8 runs of 1450ft each),81c64952-1a75-42a8-b500-5073d02ea275,yes
+f395b42d-bcc4-4060-bd03-5351673d58a2,Activity,OFCI-CDU-2000,Delivery of CDUs - #1 - 24 (24nr.),11ba89ad-7ef7-4f0c-afee-af572619b3b1,yes
+f3ed2803-1e17-498c-aa34-10ed6ef1c4f9,Activity,OFCI-CRAC-1040,Delivery of CRAC Units - DH5 (7nr.),4df42408-4d4f-4b68-8f88-1a21d8acaea9,yes
+f403c073-1ba1-4412-ba9d-24789e557e2b,Activity,CS-STL-K-1020,Structural Steel - Area K - Roof Framing,d97c9a82-c47f-4a80-a3ca-04d1ef568769,yes
+f490c0c5-1869-4d8b-9dcb-c54ec9ed4519,Activity,OFCI-HAC-1040,Delivery of HAC System - SH5 (1nr.),e248ea36-4232-4689-856f-1476b1d1c036,yes
+f4a35525-523a-424f-a294-3069f5bd1436,WBS,AUS02-60-Schedule-L1-.1.1.1.1.1.3.1.1.3.3,30% Early Release Package - Authorization to Release,43e7d33e-89ae-4d42-ac5f-5d7ccc8a6c15,yes
+f4ddc394-d408-4bd1-9804-69022bcee1f3,Activity,CIV-WL-1010,Water Line - Install Fire & Water Domestic Line - West,2756a942-40a2-466d-9df8-3a2c1b448761,yes
+f5b13f85-c4b3-4abe-8342-1511f5cb0168,Activity,CS-SEAL-1020,Joint Sealant - Precast Walls - Area C - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+f649a357-8634-49a0-a55e-7e122be293d7,Activity,MI-1080,Base Electrical,f4a35525-523a-424f-a294-3069f5bd1436,yes
+f68fad54-2c3c-4aca-a9bb-5c1c6d2d27e5,Activity,CS-PAD-D-1060,Building Pad Concrete - Area D - Grade Beams,48b4a08f-db47-4218-8efa-93c66e82d6b7,yes
+f7d9da1f-b34a-4c50-b9da-61ef01d8123d,Activity,CS-PAD-D-1020,Building Pad - Zone 1 Import Select Fill/Compaction,45675c9d-a204-4a0f-8b4b-f6268a892144,yes
+f8992e6c-5cc5-46e2-8eba-2a565baca4d5,Activity,OFCI-HAC-1000,Delivery of HAC System - SH1 (1nr.),e248ea36-4232-4689-856f-1476b1d1c036,yes
+f98421d2-3c4b-4864-8350-aaa93c9446e6,Activity,CS-PAD-K-1060,Building Pad Concrete - Area K - Grade Beams,0946a829-d655-48eb-b10b-677473d3611a,yes
+f9926380-6afd-4053-a9a0-538db63ad47d,Activity,CS-ROOF-C-1000,Roofing - Area C - Vapor Retarder,d813a228-5b47-4d2e-b6a6-6219c41599d3,yes
+fa3861ac-e451-4251-9218-84de820c6fe4,Activity,OFCI-CHI-1150,Delivery of Air Cooled Chiller - #76 (1.nr),356f8480-3cba-435d-83d0-f0ea91f4b7f7,yes
+fa69483a-3798-42b3-9de3-739855e2e90e,Activity,CS-ROOF-G-1000,Roofing - Area G - Vapor Retarder,b8874d2c-dc1d-4767-96dc-a2fac054f0a1,yes
+faa18795-b25a-4d86-998a-b0a055c6c5f3,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.3.1.2.3.181,"Zone 7 (MYD1, EYD1)",428f8f37-2485-4f9e-8a22-5f829920002b,yes
+fbfbf00d-5a75-451e-926f-c2974952470c,Activity,CS-ROOF-F-1030,Roofing - Area F - Coping,4590d62b-b9fc-4a34-8f7a-0c57d9b2b818,yes
+fca58ce4-67f6-4b7f-b6eb-1e71c1514cbb,Activity,CS-ROOF-G-1030,Roofing - Area G - Coping,b8874d2c-dc1d-4767-96dc-a2fac054f0a1,yes
+fd1608f8-4077-43c9-8820-f4ba41cb59a1,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.7,Joint Sealant - Precast Walls,a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5,NO
+fdfbca06-ee7e-4c26-a0e6-b28e90521b4a,Activity,CS-SEAL-1170,Joint Sealant - Precast Walls - Area R - Joint Sealant to Precast Walls,fd1608f8-4077-43c9-8820-f4ba41cb59a1,yes
+ff62b231-d8b5-4d44-bb44-5e1e6c8d2f9c,WBS,AUS02-60-Schedule-L1-.1.1.2.1.2.9.1.2.9.16,Area P,384071d3-0c33-473c-95ff-d3ab5d02ea5b,yes

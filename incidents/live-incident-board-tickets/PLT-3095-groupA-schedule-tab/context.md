@@ -605,3 +605,55 @@ but sits elsewhere: **`GET /schedules` filters deleted revisions, while `GET /sc
 not.** Proven today — at 11:20 that endpoint returned all 1,818 rows for `9f13d821`, a revision
 deleted since 09-02 13:04. Harmless for the viewer (it only ever asks for the id the list gave it) but
 worth fixing, and it is exactly what made his count-0 confusing.
+
+### Verbatim messages — 2026-09-03, relayed by Ilia from chat (not on the Jira ticket)
+
+**Ali (api-v2), routing it to Sachin:**
+> "Hi Everyone
+> Got a potential new bug reported, Ilia is looking into FE side, Sachin Badoni could please check if
+> sth is wrong in BE or DB side
+>
+> I would suggest checking that particular schedule id directly in a db query to see if the activities
+> in question have the IsDeleted flag set to TRUE?
+> endpoint just filters deleted activities in response"
+
+**Sachin (api-v2), first reply:**
+> "Ilia Kuzmin, do u have any of the id which is missing?"
+
+**Sachin, after querying the DB (with the two screenshots recorded above):**
+> "only one active schedule revision is available in DV
+>
+> and when check again this active version d505f075-ebe8-4840-98de-59222f11cfff WBS schedule has total
+> 232 item
+>
+> having said, it doesn't mean API is returning it, there is no check in this DB query which is
+> suggesting only return activities for non-deleted schedule
+>
+> u can see here when deleted flag filter out result there nothing returned from it
+>
+> Ilia Kuzmin can you please let me know the sequence of API used for this to populate, seems like we
+> have DELETE filter enabled in of the API which doesn't return any data when Scheule is requested and
+> one API doesn't have filter which return all the data"
+
+Kept verbatim because two details in it are load-bearing and easy to paraphrase away: **"only one
+active schedule revision"** (which is what invalidated our ids) and **"total 232 item"** (which, set
+against the API's 232, is what moves this from an API filter to an ingest defect).
+
+### Durable evidence — saved so this survives the token expiring
+
+| file | contents |
+|---|---|
+| `analysis/PLT-3095-AUS02-d505f075-missing-parents.csv` | the 4 missing parents on the **active** revision, with direct-child counts and child names |
+| `analysis/PLT-3095-AUS02-d505f075-unreachable-rows.csv` | all **638** unreachable rows — itemId, itemType, userItemId, itemName, parentItemId, and whether that parent is present |
+
+Reproduction, for whoever next has a token:
+
+```bash
+PID=f862c969-fb32-428a-aa34-ff83d3677b51
+REV=d505f075-ebe8-4840-98de-59222f11cfff   # active as of 2026-09-03; re-check GET /schedules first
+/tmp/get.sh "/api/v2/projects/$PID/schedules"                          # -> the one live revision
+/tmp/get.sh "/api/v2/projects/$PID/schedules/$REV?deviceType=WEB"      # -> 1,818 rows
+# then: parents referenced but absent from the payload; reachability from the single root
+```
+
+**Check `GET /schedules` first every time.** Ours went stale in 48 hours.
