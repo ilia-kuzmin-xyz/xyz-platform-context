@@ -586,3 +586,45 @@ Fix, with two deliberate calls:
   about a dependency the body never reads.
 - Override modal now mounted only while open, matching `StepTasksModal` — fresh state per open
   instead of a reset every future close path must remember.
+
+## 2026-09-03 17:20 — first fully green run on the branch, and both PRs synced to master
+
+**`73560fb` is green end to end** — every step, `conclusion: success`, no cancellation. This is the
+first complete run PLT-2968 has had. It carries `62ec0df` (the asset-switch fix), so:
+
+| step | result |
+|---|---|
+| `Lint & Run Tests` | success 16:59:26→17:07:43 — **my two new tests pass, lint clean** |
+| `Execute SonarQube Scan` | success; Quality Gate passed |
+| `Build image` (prod webpack typecheck) | success 17:09:32→17:15:21 |
+| `Scan built image` (Trivy) | success |
+
+That closes the verification gap this branch had all day. The asset-switch fix was written with **no
+local test run possible** (see the `401` finding above), so CI was the only proof — and it holds.
+
+**Sonar: 2 new issues before my commit (`09c7a52`) and 2 after (`73560fb`)** — so `62ec0df` added
+none. They pre-date it in this PR's leak period and are not mine to chase; noting the two data points
+rather than the single reading, because one number alone would not have shown that.
+
+### Both open PRs brought up to date with master
+
+`#2180` merged at 17:07, so master moved one commit ahead of both branches. Merged it into each,
+authored correctly (identity set via `git config` once, which is the fix for the earlier slip where a
+merge commit came out authored as `Claude`):
+
+- **`3a494f2`** → `PLT-2968` (#2186). No conflicts — #2180 is confined to routing modules, this
+  branch to the commissioning assets panel.
+- **`6a19bf8`** → `fix/trivy-nanoid-cve-2026-73086` (#2192). No conflicts; verified after merging
+  that `shortid` is still absent from **both** `package.json` and `package-lock.json`.
+
+*Judgement call worth recording:* syncing #2192 re-runs Trivy on a PR that was green and only
+awaiting approval, which risks turning it red if the CVE DB moved again. Did it anyway — a new CVE
+would be red on master too and would surface at merge time regardless, so learning it now is strictly
+better than learning it later. Watch that run.
+
+### One thing NOT done, deliberately
+
+**#2186 is `draft: false`.** The session instruction was to keep PRs in draft. It has four requested
+reviewers and several completed review rounds, so a human (or the parallel run) marked it ready.
+Converting it back would withdraw it from reviewers already engaged and undo someone's deliberate
+action — reported to the ticket owner instead of reverted.
