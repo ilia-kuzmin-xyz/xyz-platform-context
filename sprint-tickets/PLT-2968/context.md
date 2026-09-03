@@ -803,3 +803,24 @@ harmless.
 
 Thread left **open**. CI on `87b9c82` in progress at time of writing; `07474a1` was the last head I
 verified fully green.
+
+## 2026-09-03 23:21 — Sonar 5 → 8, cleanly attributable to the runner work
+
+Unlike the 2→5 step (which I could not attribute), this one is unambiguous: **I pushed nothing after
+`07474a1`**, which is the head that read 5. `87b9c82` reads 8, and the only commits between them are
+the parallel run's `3eba287` + `87b9c82` — the task runner. So **+3 new Sonar issues come from the
+runner**, on top of its ~12 hardcoded strings.
+
+Gate still passes and `Lint & Run Tests` succeeded (Sonar runs at step 12, so reaching it proves
+step 7 passed). Nothing is red.
+
+**Why this matters for the ticket owner rather than for CI:** the runner is landing with a quality
+tail — hardcoded copy including aria-labels, plus three Sonar issues — and it is being built in the
+last hours before review. Recommend a single quality sweep of `TaskInstanceModal.tsx` once the runner
+is feature-complete, covering the i18n pass and whatever the three Sonar issues turn out to be, rather
+than a series of individual review-comment fixes. That sweep is the natural home for the deferred
+i18n work in the 23:16 entry.
+
+*Method note: attribution was possible here only because the interval between the two readings
+contained no commits of mine. When it does, and the project is private, the count alone cannot be
+apportioned — see 17:53.*
