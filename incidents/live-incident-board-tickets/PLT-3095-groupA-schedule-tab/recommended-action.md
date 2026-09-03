@@ -53,3 +53,60 @@ checking himself (whether the 4 missing live `itemId`s are exactly the 4 collisi
 **Status suggestion unchanged:** stays with us until Sachin confirms ownership; customer gets the
 workaround now via Yash.
 
+
+---
+
+# 2026-09-03 (later) — the draft to Sachin. The earlier one is WITHDRAWN, its ids are stale.
+
+The 09-03 draft gave `9f13d821` and four ids from it. **That revision was deleted on 09-02 13:04**, so
+those ids resolve to nothing — which is exactly the `count(*) = 0` Sachin reported back. Do not send it.
+
+## Draft to Sachin — 79 words, UNPOSTED
+
+> My ids were from revisions you've since deleted — that's why your count came back 0, not because the
+> rows are missing. Sorry.
+>
+> The active revision `d505f075` is broken the same way. Four WBS parents referenced by children but
+> never returned:
+>
+> ```
+> 78a3bf1a-3591-4935-b7ee-9b00a58d7098    (2 WBS children)
+> 94cce902-c576-4149-a03b-5b0f2fbf8a61    (4 — this is Core & Shell's branch)
+> a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5    (10)
+> 49d1ce1e-3acc-4124-b1ef-d3778dadcb85    (11)
+> ```
+>
+> Sequence the viewer uses: `GET /schedules` → pick `isCurrent` → `GET
+> /schedules/{id}?deviceType=WEB`. That's all, no unfiltered variant.
+>
+> Your 232 matches what the API returns, so nothing's being filtered. Could you check those four ids
+> in `ScheduleWbs` with no filters at all?
+
+Owns the stale-id mistake in the first line, because he spent a query on it and will otherwise assume
+the rows are fine. Answers his question exactly. Ends on the one query that separates "never written"
+from "written and flagged".
+
+## Optional additions — only if he asks, they are not needed to unblock him
+
+- **`GET /schedules/{id}` does not filter deleted revisions**, while `GET /schedules` does. Proven at
+  11:20 today: 1,818 rows returned for `9f13d821`, deleted since 09-02 13:04. Harmless for the viewer
+  (it only requests the id the list handed it) but it is what made his count-0 confusing, and it is a
+  small real inconsistency worth a ticket of its own.
+- **A fresh re-upload reproduced the defect exactly** (new GUIDs, identical child-count fingerprint
+  2/4/10/11, identical 638 unreachable). Stronger evidence than the two-revision determinism we had.
+
+## If his query confirms the rows do not exist
+
+Then this is an **importer defect**, not an API one, and the owner changes. The importer wrote child
+WBS rows whose parent it never wrote — and it did so again on a brand-new upload yesterday. Two things
+worth raising then:
+
+1. **A ticket against schedule ingest**, not api-v2. It will recur on any schedule with whatever shape
+   AUS02 has at those four positions (all four are mid-tree WBS nodes, 2-11 WBS children each, none a
+   root).
+2. **The importer should not publish a revision whose parent references do not resolve.** 35 % of this
+   schedule has been invisible since 08-31 and every surface downstream trusted the payload. A
+   referential check at ingest would have failed the upload instead of shipping a third of it dark.
+
+**Still unanswered from 09-02:** Yash asked whether he should change boards and flagged it urgent on
+the user end.
