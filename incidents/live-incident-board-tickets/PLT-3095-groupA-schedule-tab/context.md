@@ -442,3 +442,70 @@ as *unverified*; that caveat is now resolved and must not be repeated.
 
 **Do not include** the "concatenated P6 code collision" theory. Still unsupported: 0 duplicate
 `userItemId` and 0 duplicate `itemId` across all 1,818 rows (§ 2026-09-02 warning stands).
+
+## 2026-09-03 (later) — Ali CONFIRMS the endpoint filters deleted rows. Sachin is back and asking for the ids.
+
+Two messages relayed by Ilia (chat, not on the Jira ticket):
+
+**Ali:**
+> "I would suggest checking that particular schedule id directly in a db query to see if the
+> activities in question have the IsDeleted flag set to TRUE? **endpoint just filters deleted
+> activities in response**"
+
+**Sachin:**
+> "Ilia Kuzmin, do u have any of the id which is missing?"
+
+### Why Ali's second sentence matters more than the suggestion
+
+It closes the one thing this session could not verify from code. `fn_GetScheduleRevision` lives in the
+**PostgreSQLDatabase** repo, outside this session's access, so the `IsDeleted` filter was inferred
+from behaviour only. **Ali states it as fact from the owning team.** Combined with what is measured:
+
+| evidence | reading |
+|---|---|
+| the endpoint filters deleted rows (Ali) | a deleted row is invisible by design |
+| 4 WBS rows referenced as parents, never returned, on **all three** device paths | consistent with those 4 being flagged deleted |
+| identical across both revisions | a persisted flag, not an import race |
+| `.1.1.3/4/5/6` present, `.1.1.1/2` absent | per-row, not a rule — matches a per-row flag |
+
+**Ali's hypothesis 2 is now the only surviving candidate and it has a stated mechanism.** The DB query
+is the confirmation step, not an exploration.
+
+### ⚠️ One thing to make sure Sachin does not trip on
+
+Ali says *"the activities in question"* and *"filters deleted **activities**"*. **All four missing rows
+are `itemType: WBS`, not Activity.** If Sachin filters his query to activity-type rows he will find
+nothing and may report the rows as absent. The draft below says "four WBS rows" in its first line for
+exactly that reason.
+
+### Draft to Sachin — 55 words, UNPOSTED
+
+> Yes — four WBS rows, referenced as parents but never returned:
+>
+> ```
+> c9993475-41a8-4961-ad6f-34ab0a66b10a
+> f0788984-97a8-44af-871f-390dd5e596ce
+> b0b44f2f-8521-470e-9492-a7675d3f806a
+> 501f596d-5279-4110-9603-1aa9e1556799
+> ```
+>
+> Project `f862c969-fb32-428a-aa34-ff83d3677b51`, schedule revision
+> `9f13d821-12c6-455b-8604-1eec2452050e` (same four missing in the previous revision
+> `c07665dd-418d-474c-b3c2-ef5bd4631eb8`).
+>
+> Ali's read fits: WEB, BI and HH all return the identical 1,818 rows and none includes these, so it
+> isn't the full/non-full branch. If IsDeleted is TRUE on those four, that's it.
+
+Answers exactly what was asked, hands over both revisions so he can see it is not a one-off import,
+and confirms Ali's direction without asserting it as settled — the DB query is still what decides it.
+
+### If IsDeleted comes back TRUE, the next question is the real one
+
+**Why were four WBS rows soft-deleted while their children were not?** Nothing the customer did
+explains it: they re-imported and the flag persisted identically. That is an import/ingest question
+and it will recur on the next project that hits it. Worth its own ticket rather than a one-off
+un-delete on AUS02 — and worth asking whether an un-delete is even the remediation, or whether the
+importer should be rejecting a parent-less subtree instead of publishing one.
+
+**If IsDeleted comes back FALSE**, the rows exist and are being dropped for another reason inside the
+function, and that is a straightforward api-v2 defect with a reproducible case attached.
