@@ -217,3 +217,170 @@ not touch this branch's files.
 Still gated on **human approval only** — see the 09-02 entry in `sprint-tickets/README.md` for the
 full triage, the `copilot-pull-request-reviewer`-vs-`build` red-check trap, and the open product
 question PLT-3022 raises about authority-gating the commissioning surfaces.
+
+## 2026-09-03 — the review bot's *suppressed* comments were never being read
+
+Sprint run found **0 eligible tickets** (PLT-2968, PLT-2967, PLT-2896 all In Code Review),
+so the whole run was checkpoints 1–3. Checkpoint 1 turned up something structural.
+
+> ### Standing lesson: `get_review_comments` does NOT show everything Copilot found
+> Copilot files some findings as **suppressed comments** — they live inside the *review body*
+> (`get_reviews`) and never become review threads. So they are invisible to a thread listing,
+> invisible to the "open threads" count, and every prior run on this PR reported "all threads
+> resolved" while three real findings sat unread. **Read `get_reviews` bodies, not just the
+> thread list.** The 08-04 run already learned to call `get_reviews` for `CHANGES_REQUESTED`;
+> the same call carries the suppressed findings and that half was being skipped.
+
+Three suppressed findings on #2186. Two were real and are fixed in `7017211`:
+
+**1. `StepTasksModal` could open for a tag that no longer exists.** It rendered on
+`tasksModalStepId` alone (`readiness-ladder.tsx`), and the kebab stores only an id:
+- `AssetDetailPanel` is **not keyed by `asset.id`** (`asset-detail-right-panel.tsx:96`), so
+  `ReadinessLadder` keeps its state across an asset selection change;
+- `steps` re-derives on every readiness refetch — and the override mutations invalidate it.
+
+So the id can stop resolving while the modal is open → `title = step?.label ?? ''` and a
+disabled query → **untitled dialog reporting "No tasks yet" for a tag that isn't there.**
+Fixed by resolving the step in a `useMemo` and rendering on that — which is exactly what
+`TaskInstanceModal` **on the next line** already does with `openInstance`, so this was an
+inconsistency, not a design choice. `StepTasksModalProps.step` is now non-nullable, making the
+invariant a compile error rather than a convention.
+
+**2. Neither new dialog had an accessible name — and this one is repo-wide.**
+`common/modal/modal.tsx:19,27` generates `const titleId = useId()` and sets
+`aria-labelledby={title ? titleId : props['aria-labelledby']}`. **Nothing ever renders an
+element with that id** — `modal-title.tsx` neither receives nor applies it. So every caller
+that passes `title` gets a dangling `aria-labelledby` and a dialog a screen reader announces
+with no name at all. **64 call sites pass `title`.**
+
+Fixed *locally only*: each new modal owns its own `useId()`, passes it as `aria-labelledby`,
+and lands it on the rendered title via `ModalTitle TypographyProps={{ id }}`. That uses the
+passthrough `Modal` already exposes, so zero blast radius.
+
+> **Follow-up worth a ticket (candidate #4, ahead of the tldraw upgrade):** wire the generated
+> id down through `ModalProvider` and have `ModalTitle` apply it — fixes all 64 dialogs with no
+> caller changes. Deliberately NOT done on #2186: it touches every modal in the app and that PR
+> is green and waiting on approval. Recorded on the PR too.
+
+**3. setState-during-render in `override-readiness-modal`** — already answered on a thread on
+08-27 (deliberate compare-and-set during render, React's documented alternative to an effect
+for derived-state resets). Copilot re-suppresses it on every review. **No change; do not
+"fix" it on a future run.**
+
+### Verification constraint (unchanged from 09-02)
+`npm ci` cannot complete here — `@xyzreality/dhtmlx-gantt` is on the private GitHub Packages
+registry and there is no `NPM_TOKEN`. **No `node_modules`, so no local vitest.** Two
+consequences that shaped the diff:
+- CI is `npm run test-ci` = `eslint` + `vitest run`, plus the docker image build (webpack prod,
+  which typechecks). **Prettier is NOT in CI** — `prettier:check` exists but nothing calls it.
+  Formatting cannot turn the build red; eslint can, and `eslint.config.mjs` has **no
+  `import/order` and no `max-len`**, and `lint` runs without `--max-warnings 0`.
+- The new label assertions are written at DOM level (does some `aria-labelledby` resolve to an
+  element carrying the title?) rather than with `toHaveAccessibleName` on a testid, because
+  **MUI Dialog destructures `aria-labelledby` out of props and applies it to the Paper, not to
+  the root that carries `data-testid`** — an assertion on the testid node would have failed and
+  there was no way to catch that locally.
+
+## 2026-09-03 (07:55 UTC) — i18n review finding, and a reasoning error worth not repeating
+
+Copilot on #2186: `step-tasks-modal.tsx` had three hardcoded English strings — "Loading tasks…",
+"No tasks yet", and the two aria-labels added on 09-02. **Correct, and it exposed a bad inference
+rather than just a missing call.** Fixed in `bc7e9cc`.
+
+**The reasoning error:** when adding the aria-label on 09-02 I checked *that file*, found no i18n
+imports, and concluded "hardcoded English is the local convention here". I inferred a convention
+from the single file I was editing. The siblings in the same folder say the opposite:
+
+| File | `translate()` calls |
+|---|---|
+| `linked-element-section.tsx` | 20 |
+| `asset-systems-section.tsx` | 18 |
+| `readiness-ladder.tsx` | 6 |
+| `asset-open-issues-section.tsx` | 5 |
+| `step-tasks-modal.tsx` | **0** |
+
+> **Rule: infer a convention from the folder, never from the one file you are editing.** The file
+> you are in is exactly as likely to be the outlier as the norm, and if it is the outlier you will
+> copy the defect and then defend it.
+
+Worse: **`hc.commissioning.assetDetail.noTasks` already existed with the exact string "No tasks
+yet"** — so the empty state duplicated a key rather than reusing it, directly against the
+reuse-what-exists instruction. Now reused; `loadingTasks`, `openTaskLabel` and
+`openUntitledTaskLabel` added.
+
+**Test-mock trap worth remembering:** the suite mocks `translate` as `key => key`. Routing the
+aria-labels through `translate` would have left `toHaveAccessibleName` assertions *passing* while
+no longer proving a task's name reaches the label — the whole point of those cases. The mock now
+appends interpolated values. **A key-only translate mock silently voids any assertion about
+interpolated content.**
+
+**Scope call — same class of defect left alone, on purpose.** `readiness-ladder.tsx` has hardcoded
+"No tasks yet" (201, 231) and `` aria-label={`Open task ${instance.templateName}`} `` (240) — the
+exact empty-name bug fixed in the modal on 09-02 — and `tasks-panel.tsx` has both too (222, 281).
+Verified with `git diff origin/master...HEAD` that **all of them pre-exist on master and are not
+introduced by this PR**, so fixing them would widen a readiness-override PR into unrelated i18n
+debt. Flagged on the PR with an offer to take it if the reviewer prefers. *Checking whether a
+neighbouring defect is yours before fixing it is the difference between a ported fix and scope
+creep.*
+
+### Parallel run collided again — merged, not forced
+
+`7017211` (07:49, parallel run: "gate the tasks modal on a resolved step, and name both new
+dialogs") landed while this was being written, so the push was rejected. **Merged rather than
+force-pushed** — `f814c78`, clean, no conflicts. The changes are compatible: their gating makes
+`step` non-nullable so the modal reads `step.label` directly, and the three `translate()` calls sit
+unchanged around it. Verified after merging that `en/main.json` has no duplicate keys and that their
+commit added no new hardcoded strings (their dialog "naming" is `aria-labelledby` pointed at the
+rendered title — data, not a literal).
+
+**Third collision on this repo in two days.** The habit that keeps working: fetch before assuming a
+push will land, and when it is rejected read *their* commit before merging, never force.
+
+### 08:19 UTC — merged head green; i18n fix and the parallel gating change coexist
+
+`build` **success** on `f814c78`, verified per-step: `Install dependencies`, `Lint & Run Tests`
+(8m29s), Sonar (gate passed, 1 pre-existing issue), `Build image`, `Vulnerability scanner`,
+`Scan built image` — all green, nothing skipped.
+
+That confirms the two things the merge put at risk: the reworked `translate` mock still lets the
+accessible-name cases pass (they assert `<key> <interpolated value>` now), and the parallel run's
+non-nullable `step` gating sits fine alongside the three `translate()` calls.
+
+**#2186 state:** green, current with master, **1 open review thread** — the i18n-fallback product
+call, left open on purpose. Awaiting human approval.
+
+### Second round the same day — the bot came back on my own fix, and was right (`b9313e3`)
+
+Applying the new rule immediately paid: the review of `7017211` filed **another suppressed
+comment**, on the very line I had just written.
+
+Gating the render on a resolved step **hides** the modal but leaves `tasksModalStepId` set —
+and hidden is not closed. I had considered clearing it and waved it off, reasoning a tag
+realistically never comes back. **Wrong, and the mechanism is one hook away:**
+
+`useAssetWorkflowSteps` → `useWorkflowSteps(projectId, workflowId)`, and **the query key
+includes `workflowId`**, which is resolved from `assetTypeId`. So:
+
+1. open View tasks on tag X for an asset of type 1;
+2. select an asset of type 2 → new query key → `workflowSteps` is `[]` while loading →
+   `steps.length === 0` → the ladder returns null **but stays mounted**, id still set;
+3. select an asset of type 1 again → the key returns to a **cached** entry → steps resolve
+   instantly → **the modal pops open on its own, showing tag X's tasks for a different asset.**
+
+That is *more* reachable than the untitled-modal path the first commit fixed. Fixed with an
+effect that clears the id whenever it stops resolving; the test walks the full open → other
+type → back path rather than just asserting the guard.
+
+> **Two lessons, both about my own reasoning rather than the code:**
+> 1. "This state can't realistically come back" is a claim about a **query key**, not a
+>    feeling — go read the key before dismissing it. `useWorkflowSteps` is keyed on the
+>    workflow, so a type switch empties it and a switch back restores it *from cache*.
+> 2. Hooks run before `if (steps.length === 0) return null`, so a component rendering null is
+>    still mounted and still holding all its state. An early return is not an unmount, and
+>    "the ladder disappeared" never resets anything.
+
+**Related, deliberately not done:** `ReadinessLadder` is mounted without a `key`, so
+`expandedId`, `openInstanceId`, `overrideForStepId` and `kebab` all survive an asset change too.
+`key={asset.id}` at `asset-detail-panel.tsx:150` would reset the whole class in one line — but it
+also discards the accordion `open` state and changes behaviour well beyond the reported finding,
+so it belongs in its own ticket, not in a PR waiting on approval.

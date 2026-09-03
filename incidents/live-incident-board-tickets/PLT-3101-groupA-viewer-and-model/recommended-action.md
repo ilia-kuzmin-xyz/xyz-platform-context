@@ -71,3 +71,262 @@ Once the cause is known:
 **Independent of all of the above**, raise the silent-drop fix (class 2 above). It is small, it is
 right under any of the three causes, and it is the difference between a customer filing this ticket
 and a customer seeing "16 linked elements could not be found in the loaded models".
+
+---
+
+# 2026-09-03 — measured. Two drafts, both UNPOSTED. The blocker on § What is needed is cleared.
+
+The access blocker in the 09-02 section is gone (fresh token) and the 16-vs-3 arithmetic is resolved
+in favour of **2**, both named. Reclassify: the CH08 half is no longer class 3 waiting on access — it
+is a **data fix needing a write owner**, plus one question for the customer.
+
+## Draft A — to Yash, customer-facing (70 words)
+
+> Hi Yash — found them. Of the 835 linked elements, 833 are installed and 2 have no installation
+> record at all, which is why nobody can see them:
+>
+> `12398bf3-dae3-4c29-8275-a97e1cb64d5c`
+> `cad330b0-27b4-4b61-9bfe-1e80271775a5`
+>
+> They can't be marked installed or removed from the customer's side — with no element record there's
+> nothing to select. We'll need to strip the two links our end.
+>
+> **The customer said 3 — can you check whether there's a third, or was that approximate?**
+
+Does **not** promise timing on the removal: it needs a platform-api write and no owner is lined up.
+Does **not** mention the 2,200 deleted mappings — that is our bug to fix, not the customer's problem,
+and raising it invites a question we cannot yet answer.
+
+## Draft B — to Sachin / Ali, the API bug (64 words)
+
+> Hi — `GET /api/v2/projects/{projectId}/activities/{activityId}/links` looks like it ignores
+> `isDeleted`.
+>
+> On CH08 activity CH08-MY-41 it returns 3,035 elements. The project feed `/elements/activity-links`
+> gives 835 live and 2,200 deleted for the same activity — 835 matches `linkedElementCount` on the
+> schedule row. Not pagination: same 3,035 unpaginated.
+>
+> CH08 has 258 soft-deleted models of 334, so the churn is real.
+>
+> **Can you confirm the endpoint should be filtering deleted mappings?**
+
+Leads with the falsification (not pagination) because that is the first thing Ali asked on PLT-3095,
+and states the corroborating number that makes 835 the trustworthy side.
+
+## Order of operations
+
+1. **Draft B first, or at least alongside A.** Until we know whether that endpoint is meant to filter,
+   we do not know whether anything the customer reads is being fed the 3,035. It is also the cheapest
+   thing to be wrong about.
+2. **Draft A** — answers the customer, and the count question needs asking before we touch data.
+3. **Then the write** to remove the 2 stale mappings, once an owner exists.
+4. **Independently, the class-2 FE fix**: surface the elements that could not be resolved instead of
+   dropping them at three separate points (`use-linked-element-actions.ts:43`,
+   `linking-service.ts:688`, `collectSelectableDbIds.ts:20`). Nothing in the app shows the customer
+   these elements today, in any surface. That is the defect that generated this ticket.
+
+## Still unmeasured, and say so if asked
+
+**Yash's 819.** 835 − 819 = 16 lives inside the live 835; the 2 account for part of it and the other
+14 have not been reproduced from this side. Ask him to re-read the number before anyone tries to
+explain it — the mechanism in `context.md` § Mechanism covers it, but the figure itself is one
+observation.
+
+---
+
+# 2026-09-03 (later) — REDRAFTED on the Pattern 1 basis. Drafts A and B above are SUPERSEDED.
+
+Both earlier drafts were written before `recurring-defect-patterns.md` § Pattern 1 was consulted.
+What changed: remediation is a **known procedure with a runbook**, not a blocked write; and the
+endpoint finding is **not urgent** and not the customer's problem (§ context.md 09-03 later).
+
+## Comment to post on PLT-3101 — 84 words, UNPOSTED
+
+> Found them. Of the 835 linked elements, 833 are installed and 2 have no installation record at all —
+> that's why nobody can see them:
+>
+> `12398bf3-dae3-4c29-8275-a97e1cb64d5c`
+> `cad330b0-27b4-4b61-9bfe-1e80271775a5`
+>
+> The customer can't fix these: with no element record there's nothing to select, so they can't be
+> marked installed or unlinked. This is the dead-links pattern we've cleared before on ELN03 and
+> FAR01, and we have a procedure for it.
+>
+> **Can the customer confirm CH08-MY-41 is otherwise complete — they mentioned 3, we find 2 — so we
+> can remove these links?**
+
+Changes from draft A: says a procedure exists rather than "we'll need to strip them our end" (which
+read as an unowned promise); drops the endpoint finding entirely; and folds the 3-vs-2 question into
+the approval question, because the runbook needs written approval on the ticket anyway and asking
+twice wastes a round trip. The question is deliberately *"otherwise complete"* — that is the runbook's
+own § "Before anything: is deletion even the right fix?" gate, which caught PLT-2909 where deleting
+would have unlinked working elements.
+
+## Steps, in order, with the runbook step numbers
+
+**1. Post the comment. Get the reply.** Two things must come back: confirmation the activity is
+otherwise complete, and whether there is a third element. **Do not proceed on 2 if they say 3** — we
+would remediate and leave them blocked.
+
+**2. Confirm the 2 are genuinely unreachable** — runbook § "Before anything". Both already return
+`NotFoundError` from `/elements/{id}/status`, which is strong; the remaining check is that they are
+not present in a sibling model, which is exactly how PLT-2909 differed. Cheapest confirmation is the
+customer failing to find them with the ids in hand.
+
+**3. Produce the CSV** — runbook § 1. Format is `userItemId, activityId, modelElementId`, plain LF, no
+BOM, no duplicates, well-formed UUIDs. Here that is 2 rows:
+`CH08-MY-41, 65c1c3fd-32a5-4f29-ab25-888c619259c5, <each of the two element ids>`.
+Attach to the ticket **before** deleting.
+
+**4. Check progress side-effects** — runbook § 2. Expect CH08-MY-41 to move 99.76% → 100%. Say so in
+the approval request; it is user-visible.
+
+**5. Get approval in writing on the ticket** — runbook § 3. Count, project, what changes, what does
+not, and that it is reversible.
+
+**6. Snapshot, delete, verify** — runbook § 4-6. Snapshot the project's live links and record the
+count; `POST /api/v2/projects/{postgresProjectId}/elements/activity-links/delete` with the 2 rows;
+re-measure and confirm the live count fell by **exactly 2**.
+
+**7. Confirm the user-visible fix after the parquet regenerates** — runbook § 7. Not immediate.
+
+## Separate work, not blocking the above
+
+**8. Report the endpoint gap to api-v2** — low priority, re-scoped: `/activities/{activityId}/links`
+neither filters nor exposes `isDeleted` (3,035 = 835 live + 2,200 deleted on this activity), and its
+only current caller is a debug path. Frame it as a trap for the next consumer, not an incident.
+
+**9. The FE transparency fix** — surface the linked elements that could not be resolved instead of
+dropping them silently at three points (`use-linked-element-actions.ts:43`, `linking-service.ts:688`,
+`collectSelectableDbIds.ts:20`). Independent of CH08, no data needed. Describe it as *transparency*,
+not as the fix — Pattern 1's own highest-value fix is making the unlink-on-upload step compare against
+geometry rather than the element list, which is the preventive one and is owned elsewhere.
+
+**10. PLT-3099 carries the same false blocker** and the same correction now applies: it needs approval
+plus a runbook run for its 1,239, not a new owner. See that folder's 09-03 entry.
+
+---
+
+# 2026-09-03 (third pass) — everything above is SUPERSEDED. No deletion. No runbook run.
+
+The 09-03 comment and 7-step plan were built on "the 2 are dead links". **They are not** — see
+`context.md` § 2026-09-03 (third pass). Deleting them would remove real, un-installed work from a
+live model, which is the exact failure mode the runbook's first section warns about.
+
+## Comment to post on PLT-3101 — 76 words, UNPOSTED
+
+> Not ghost links — these are real elements in current models that have simply never been marked
+> installed.
+>
+> On CH08-MY-41 there are 2, with Revit ids **6268822** and **6268823** (source file
+> `fa820000-bb28-475e-860e-422b67b2455b`). 833 of 835 are installed.
+>
+> Package-wide it's 39 across five activities, so MY-41 alone won't complete Subgrade Yard Work:
+> MY-881 has 14, MY-211 12, MY-191 8, MY-161 3, MY-41 2.
+>
+> **Can site find Revit id 6268822? If yes it's outstanding work, not a data problem.**
+
+Why this shape:
+
+- **Leads with the retraction of the ticket's own premise**, because Yash's comment asks us to find
+  stale links and the honest answer is that these are not stale. Better to say so in the first line
+  than bury it.
+- **Gives a Revit ElementId, not a GUID.** `modelElementId` is useless to a site engineer;
+  `6268822` is searchable in the source file. This is the single most actionable thing in the whole
+  investigation.
+- **Reframes the package.** The customer said the package is blocked; MY-41 carries 2 of 39. Clearing
+  MY-41 alone would not complete Subgrade Yard Work and they would be back.
+- **Ends on the one test that separates the two remaining explanations.** If site finds 6268822, this
+  is outstanding work and the ticket closes as "not a defect". If they cannot find it *with the handle
+  in hand*, we are in Pattern 1's metadata-vs-geometry divergence, which is untestable from artefacts
+  here (Revit-path models, no `svf2-object-id-map`) and needs the editor diagnostic — Pattern 1 § step
+  3, branch `PLT-linked-selection-diagnostics`, `window.__linkDiagnose()`.
+- **Says nothing about the 2,200 deleted mappings.** They are correctly excluded everywhere the
+  customer looks and need no action.
+
+**Not asserted, worth asking separately:** `CH08-MY-161` has exactly **3** never-checked elements
+while the customer said 3 and named MY-41. Might be coincidence, might be a misread row. Do not put
+that in the comment as a theory — ask Ilia whether to raise it.
+
+## Revised next steps
+
+1. **Post the comment.** The answer is a question, and it is cheap for them to run.
+2. **If site finds the elements** → outstanding work, close the ticket. No data change, no approval,
+   no runbook.
+3. **If site cannot find them** → Pattern 1 geometry divergence. Editor diagnostic
+   (`window.__linkDiagnose`) with the correct schedule selected and those three models loaded, or the
+   console geometry harvest. Only *then* does remediation come into scope, and only after the runbook
+   § "is deletion even the right fix?" gate.
+4. **Independent of the outcome — the FE transparency fix** (`use-linked-element-actions.ts:43`,
+   `linking-service.ts:688`, `collectSelectableDbIds.ts:20`). Still worth doing, still needs no data.
+5. **Low priority** — the endpoint that neither filters nor exposes `isDeleted`, debug-only caller.
+
+## What this episode should teach the next run
+
+Three conclusions were drawn and two retracted inside one session:
+
+| claim | fate |
+|---|---|
+| the links endpoint over-reports by 2,200 | **stands**, but severity overstated (debug-only caller) |
+| the 2 are dead/ghost links | **retracted** — 83.8 % of CH08 elements have no status row |
+| remediation is blocked on a write owner | **retracted** — the runbook exists |
+
+The common thread: **a number was interpreted before its denominator was known.** "2 elements have no
+status row" only means something once you know how many elements normally have one. The fix is
+mechanical — before reading absence as evidence, measure how common absence is.
+
+---
+
+# 2026-09-03 (post-verification) — THE draft. Every earlier draft in this file is dead.
+
+Written after the verification pass (`context.md` § 2026-09-03 verification pass). **Contains only
+measured facts and one question.** No cause is asserted, because the test that would falsify a cause
+has not been run and can only be run in a live viewer.
+
+## Comment to post on PLT-3101 — 77 words, UNPOSTED. Attach the CSV.
+
+> CH08-MY-41 has 835 linked elements: 833 marked installed, 2 with no installation record. Those 2 are
+> handles **6272803** and **6272804** — Electrical Equipment, family TMH_R23, LEVEL 01.
+>
+> Across the package it's 39 elements in the same state, so MY-41 alone won't complete Subgrade Yard
+> Work: MY-881 14, MY-211 12, MY-191 8, MY-161 3, MY-41 2. Full list attached.
+>
+> **Can site locate handle 6272803 in the viewer? That tells us whether this is outstanding work or a
+> model issue.**
+
+Attach `analysis/PLT-3101-CH08-package-never-checked-IDENTIFIED.csv` — 39 rows, activity + handle +
+name + category + level.
+
+### Every sentence traced to its evidence
+
+| statement | source |
+|---|---|
+| 835 linked | `linkedElementCount` on the schedule row **and** the live-mapping count from the feed |
+| 833 installed / 2 no record | status snapshot, validated both ways against the single-element endpoint |
+| handles 6272803 / 6272804, category, family, level | `client-element-metas.handle` — a column, not a derivation |
+| 39 across five activities, per-activity counts | full feed re-paged, `declared == live` on all six |
+
+### Deliberately absent, each for a reason
+
+- **No "ghost", "stale" or "dead" links.** Retracted; 83.8 % of CH08 elements have no status row, so
+  absence of a record is not evidence of a missing element. Saying it would be the third version of
+  the same story in front of the same customer.
+- **No decoded Revit id.** The hex-derived 6268822 was wrong by 3,981. Only `handle` goes out.
+- **No mention of the 2,200 soft-deleted mappings.** Correctly excluded everywhere the customer looks,
+  needs no action, and raising it invites a question we cannot answer.
+- **No promise of a fix, a deletion, or a timeline.** Nothing should be deleted: these are real
+  elements in live models.
+- **Not framed as an answer to Yash's "stale/ghost links" premise.** The comment simply reports what
+  is there. Arguing the premise costs a round trip and risks another correction.
+
+### Why the question is the right one
+
+It is the only thing left that we cannot determine ourselves, and it takes site under a minute:
+
+- **They find it** → the record is simply un-checked. Outstanding work; ticket closes as not-a-defect.
+- **They cannot find it, holding the handle** → metadata-present / geometry-absent, i.e. Pattern 1
+  proper. Then, and only then, the editor diagnostic (Pattern 1 § step 3,
+  `window.__linkDiagnose`) with those three models loaded, and only after that does remediation come
+  into scope — via the runbook's "is deletion even the right fix?" gate.
+
+Both branches are already written up, so whichever answer comes back needs no fresh investigation.

@@ -145,6 +145,40 @@ Related but separate: model deletion does not remove links unless a user ticks a
 plain delete path hardcodes it off (`confirm-model-deletion.tsx:103-112`), which is an independent
 source of orphans that we own.
 
+### 2026-09-03 — fourth occurrence: PLT-3101, CH08. A new surface, same pattern.
+
+**Surface:** *"Elements reported as not installed but can't be found in web viewer."* Activity
+`CH08-MY-41` (*UG Electrical - North - Mechanical Yard*), 835 live links, of which **833
+`INSTALLED_ACCURATELY` and 2 with no element-status record at all** — both confirmed individually as
+`NotFoundError`, not `NOT_SET`. Those 2 are the customer's blocker. 833/835 = **99.76%**, so the
+arithmetic test in § Recognition signature holds here too.
+
+**New to the pattern, and the reason to keep this entry:**
+
+- **A fifth surface to add to the recognition list:** *"a handful of elements on an otherwise-complete
+  activity have no installation-status record at all, and site cannot find them to mark or unlink."*
+  The count is small (2 of 835) rather than the wholesale failures of 2882/2909/2931, so it presents
+  as a data-entry mystery rather than a broken feature.
+- **Nothing in the app shows the user these elements — in any surface.** Verified three drop points:
+  `use-linked-element-actions.ts:43` (select/isolate filter on `elementId2ModelId`),
+  `linking-service.ts:688` (`.filter(Boolean)` against the loaded element map, which also kills the
+  **list** panel, so § Mechanism's "counts and model lists come from metadata" is not universally
+  true post-refactor), and `collectSelectableDbIds.ts:20` (requires a numeric `dbId`).
+- **Volume corroborates the model-deletion trigger** named at the end of this pattern: CH08 carries
+  **258 soft-deleted models out of 334** — the heaviest churn recorded in these notes — against a
+  delete path that leaves links behind unless a checkbox is ticked.
+- **`GET /api/v2/projects/{id}/activities/{activityId}/links` does not filter or expose `isDeleted`.**
+  It returned 3,035 for this activity = 835 live + 2,200 deleted exactly, verified at four page sizes
+  including one unpaginated call. Its only frontend caller is debug-only
+  (`schedule-service.tsx:217`, inside `if (this._debugMode)`), so this is a latent trap for the next
+  consumer rather than a live defect — but note the § Diagnostic recipe's endpoint
+  (`/elements/activity-links`) is the one that carries the flag, and this one is not a substitute.
+
+**Process cost worth recording:** the folder was written and a full prod measurement run before
+anyone opened this file. The mechanism, the arithmetic test, the remediation runbook and the likely
+root cause were all already here. Check this file first on anything involving links, counts, or
+"can't find the element".
+
 ---
 
 ## Pattern 2 — The frontend is a faithful renderer, so "wrong number" is usually upstream
@@ -842,3 +876,32 @@ in a customer's message.
 
 Full retraction and the verification steps: `live-incident-board-tickets/PLT-3099-groupA-viewer-and-model/context.md`
 § 2026-09-02 (later).
+
+### 2026-09-03 candidate — the artefact you measured was replaced underneath you (PLT-3095)
+
+**One occurrence. Watch for a second.**
+
+PLT-3095 was diagnosed on 09-01 against schedule revision `9f13d821`, then re-verified on 09-03 and
+reported to the backend with that id. **Both revisions we had analysed were soft-deleted on 09-02
+13:04, and a fresh one uploaded at 13:06** — nobody told us, and nothing in our own re-verification
+caught it, because `GET /schedules/{revisionId}` **still served the deleted revision in full** (1,818
+rows, on all three device paths, at 11:20 on 09-03).
+
+The cost: the backend engineer ran a query against a dead id, got `count(*) = 0` from a
+`sr."IsDeleted" = FALSE` join, and was one step from concluding the rows were fine.
+
+**Recognition signature**
+
+- A ticket that has been open for days while someone customer-side is "trying things".
+- You hold an id that you obtained more than a few hours ago.
+- The listing endpoint and the by-id endpoint disagree about what exists (here: `GET /schedules`
+  correctly omits deleted revisions; `GET /schedules/{id}` returns them regardless).
+
+**The habit that prevents it: re-resolve the id from the listing endpoint before every measurement,
+and again before quoting it to anyone.** One extra call. On PLT-3095 it would have saved a wasted DB
+query and an apology.
+
+**And when it does happen, the re-import is a gift:** the new revision reproduced the defect with new
+GUIDs and an identical child-count fingerprint (2/4/10/11) and identical 638 unreachable rows. That is
+far stronger evidence than determinism across two revisions of the same import — it proves a fresh
+upload of the same source reproduces it.
