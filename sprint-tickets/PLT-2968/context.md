@@ -744,3 +744,28 @@ choices (2 was the reviewer's own suggested form; 1 matches area convention), an
 costs a CI cycle and risks a real defect — the exact pattern that already bit this branch twice
 today (the i18n fix that took Sonar 1→3, and the review fix that introduced the `setOverride` race).
 Flagged for whoever has SonarCloud access instead; one click resolves what I cannot.
+
+## 2026-09-03 18:00 — `07474a1` fully green; all three fixes CI-validated
+
+Every step success on `07474a1` (still the head — no further parallel push): `Lint & Run Tests`
+17:41:49→17:50:18, `Execute SonarQube Scan` success, `Build image` 17:52:06→17:57:51,
+`Vulnerability scanner` + `Scan built image` success. So all three of this session's fixes are
+verified by CI despite no local test run being possible:
+
+| commit | fix | verified by |
+|---|---|---|
+| `62ec0df` | asset-switch closes the ladder's modals (the wrong-write) | green on `73560fb` and again here |
+| `2c9678d` | `sx` no longer forwarded onto a DOM node in the menu stub | green here |
+| `07474a1` | missing `asset_readiness` reads as no overrides | green here, incl. its 3 new tests |
+
+`state` from the combined-status endpoint reads `"pending"` with `total_count: 0` — that is **no
+legacy commit statuses at all**, not a pending check. This repo reports via check-runs; do not read
+that endpoint as PR health.
+
+### Open on #2186 at hand-off
+- **One review thread open by design**: the `setOverride` concurrency race (needs an RPC + Supabase
+  deployment; see the 17:35 entry).
+- **Sonar 5 new issues, gate passing, unattributable without a token** (17:53 entry).
+- **`draft: false`** despite the session instruction to keep PRs in draft — flagged, not reverted,
+  because reviewers are engaged (17:20 entry).
+- Waiting on **approval** — four reviewers requested, none has approved.
