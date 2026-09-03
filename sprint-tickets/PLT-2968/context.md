@@ -527,3 +527,62 @@ reading the rollup instead of the steps would have let an unverified commit be c
 Neither problem is mine to fix from here: I must not push an empty commit to kick CI, and I cannot
 stop the parallel pushes. Flagged on the PR thread and to the ticket owner instead — the branch
 needs one quiet window with no push for ~20 min before it merges.
+
+## 2026-09-03 (evening) — `Build image` finally ran; and the asset-switch state bug
+
+### The React UMD question is now settled twice over
+
+**`Build image` PASSED on `09c7a52`** (16:40:21→16:46:03) — the first time that step has completed
+on this branch. It runs the production webpack build, i.e. the real typecheck, over
+`override-readiness-modal.tsx` with the bare `React.InputHTMLAttributes` still at line 171. Combined
+with the controlled repro recorded above, the rejection stands on both a measured local result and a
+real CI run. *Supersedes the "unverified" framing in the earlier entry — that was accurate when
+written and is no longer.*
+
+Note the job still reported `cancelled` overall, because `Scan built image` (step 20) was killed at
+16:46:41 by the next push. **A job conclusion of `cancelled` does not mean nothing useful ran** — 19
+of 21 steps had already succeeded. Reading only the conclusion would have thrown away the exact
+evidence I had been waiting all day for. Read the steps.
+
+### The npm-install blocker, tested rather than assumed
+
+`GITHUB_TOKEN`/`GH_TOKEN` **are** present in this environment, so `NPM_TOKEN="$GITHUB_TOKEN" npm ci`
+looked like the unlock for local test runs. It is not: GitHub Packages returns
+`401 unauthenticated: User cannot be authenticated with the token provided` for
+`@xyzreality/dhtmlx-gantt`. So no local vitest or `tsc` for the whole of this branch's work, and CI
+stays the only verifier. Worth retrying if a real `NPM_TOKEN` ever appears — but don't re-derive
+this; it's tested.
+
+### Asset-switch state bug — two findings that were one bug from two ends
+
+Copilot on `09c7a52`, both correct, fixed in `62ec0df`.
+
+`ReadinessLadder` is not keyed by asset. **The guard I wrote earlier only catches a step id that
+stops resolving, which requires the new asset to be of a DIFFERENT type** (`useAssetWorkflowSteps` is
+keyed on the type's workflow). A same-type switch keeps every `readinessStepId` valid, so the
+override modal, tasks modal, expanded tag and task editor all stayed open while `assetId` changed
+underneath them.
+
+For the override modal that is a **wrong write**: it takes `assetId` as a prop and `submit()` writes
+with it, so a reason typed for asset A records the override against asset B, with a success toast.
+
+*Lesson, and it is about my own work: a fix that is narrower than the bug can read as general.* I
+wrote that resolution guard with a comment explaining the asset-change case, which made it look
+handled. It only ever covered the cross-type half.
+
+**The two findings are ordered, not independent.** The second (modal resets `reason`/`acknowledged`/
+`formError` only in its local `close()`) was *latent* — the only parent close path went through
+`close()`. The asset-change reset is a close that skips it, so **fixing finding 1 makes finding 2
+live.** Copilot had filed 2 as a suppressed "previously missed" note; taking 1 alone would have
+shipped a new bug. *Check whether a review comment you're deferring is a prerequisite of one you're
+acting on.*
+
+Fix, with two deliberate calls:
+- Reset all selection-scoped state on `assetId` change — **not** `key={assetId}`, which would also
+  reset `open` (the accordion state), a panel-level user preference rather than per-asset state.
+- **During render** (React's "adjusting state when a prop changes"), not in an effect: an effect runs
+  after commit, so the modal paints one frame already carrying the new `assetId`. The first draft was
+  the effect; the render-phase form has no such window and avoids an `exhaustive-deps` complaint
+  about a dependency the body never reads.
+- Override modal now mounted only while open, matching `StepTasksModal` — fresh state per open
+  instead of a reset every future close path must remember.
