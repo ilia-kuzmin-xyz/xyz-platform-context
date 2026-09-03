@@ -280,3 +280,58 @@ consequences that shaped the diff:
   **MUI Dialog destructures `aria-labelledby` out of props and applies it to the Paper, not to
   the root that carries `data-testid`** — an assertion on the testid node would have failed and
   there was no way to catch that locally.
+
+## 2026-09-03 (07:55 UTC) — i18n review finding, and a reasoning error worth not repeating
+
+Copilot on #2186: `step-tasks-modal.tsx` had three hardcoded English strings — "Loading tasks…",
+"No tasks yet", and the two aria-labels added on 09-02. **Correct, and it exposed a bad inference
+rather than just a missing call.** Fixed in `bc7e9cc`.
+
+**The reasoning error:** when adding the aria-label on 09-02 I checked *that file*, found no i18n
+imports, and concluded "hardcoded English is the local convention here". I inferred a convention
+from the single file I was editing. The siblings in the same folder say the opposite:
+
+| File | `translate()` calls |
+|---|---|
+| `linked-element-section.tsx` | 20 |
+| `asset-systems-section.tsx` | 18 |
+| `readiness-ladder.tsx` | 6 |
+| `asset-open-issues-section.tsx` | 5 |
+| `step-tasks-modal.tsx` | **0** |
+
+> **Rule: infer a convention from the folder, never from the one file you are editing.** The file
+> you are in is exactly as likely to be the outlier as the norm, and if it is the outlier you will
+> copy the defect and then defend it.
+
+Worse: **`hc.commissioning.assetDetail.noTasks` already existed with the exact string "No tasks
+yet"** — so the empty state duplicated a key rather than reusing it, directly against the
+reuse-what-exists instruction. Now reused; `loadingTasks`, `openTaskLabel` and
+`openUntitledTaskLabel` added.
+
+**Test-mock trap worth remembering:** the suite mocks `translate` as `key => key`. Routing the
+aria-labels through `translate` would have left `toHaveAccessibleName` assertions *passing* while
+no longer proving a task's name reaches the label — the whole point of those cases. The mock now
+appends interpolated values. **A key-only translate mock silently voids any assertion about
+interpolated content.**
+
+**Scope call — same class of defect left alone, on purpose.** `readiness-ladder.tsx` has hardcoded
+"No tasks yet" (201, 231) and `` aria-label={`Open task ${instance.templateName}`} `` (240) — the
+exact empty-name bug fixed in the modal on 09-02 — and `tasks-panel.tsx` has both too (222, 281).
+Verified with `git diff origin/master...HEAD` that **all of them pre-exist on master and are not
+introduced by this PR**, so fixing them would widen a readiness-override PR into unrelated i18n
+debt. Flagged on the PR with an offer to take it if the reviewer prefers. *Checking whether a
+neighbouring defect is yours before fixing it is the difference between a ported fix and scope
+creep.*
+
+### Parallel run collided again — merged, not forced
+
+`7017211` (07:49, parallel run: "gate the tasks modal on a resolved step, and name both new
+dialogs") landed while this was being written, so the push was rejected. **Merged rather than
+force-pushed** — `f814c78`, clean, no conflicts. The changes are compatible: their gating makes
+`step` non-nullable so the modal reads `step.label` directly, and the three `translate()` calls sit
+unchanged around it. Verified after merging that `en/main.json` has no duplicate keys and that their
+commit added no new hardcoded strings (their dialog "naming" is `aria-labelledby` pointed at the
+rendered title — data, not a literal).
+
+**Third collision on this repo in two days.** The habit that keeps working: fetch before assuming a
+push will land, and when it is rejected read *their* commit before merging, never force.
