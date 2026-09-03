@@ -2805,3 +2805,14 @@ Darminder.
 
 Note #2180's `.trivyignore` resolution held up under review: taking master's side left the file
 byte-identical, so a 404-routing PR carries no CVE note and the reviewer had nothing to query there.
+
+## 2026-09-03 17:07 — PLT-2896 shipped
+
+**#2180 MERGED** (404 instead of a blank page for unmatched nested routes). Closes the loop on the
+PLT-2896 investigation: the fallback lives in `ErrorBoundaryRoutes` (covering all six `<Routes>`
+modules) plus a direct catch-all in `UserSettingsPage/routes.tsx`, the app's only `useRoutes` call
+site.
+
+Still open at that moment: **#2192** (drop `shortid`; green, waiting on a required approval) and
+**#2186** (PLT-2968/PLT-2967; active, parallel run pushing). When #2192 merges, its `.trivyignore`
+collision with master resolves **toward the branch** — the side where `shortid` is removed.
