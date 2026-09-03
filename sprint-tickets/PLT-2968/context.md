@@ -942,3 +942,32 @@ const numberByItemId = useMemo(() => new Map(rest.map((i, n) => [i.id, n + 1])),
 ```
 Severity is low (tens of items, not thousands). Deferred to the same `TaskInstanceModal.tsx` quality
 sweep as the i18n work — four commits landed in that file in the last half hour.
+
+## 2026-09-03 23:49 — `7cfd9e0` fully green; the local-typecheck attempt did NOT work
+
+**The branch got its quiet window and used it.** No push between 23:30 and 23:49, so the run on
+`7cfd9e0` finally completed: every step success, `Lint & Run Tests` 23:32:26→23:40:42, **`Build image`
+23:42:27→23:48:12**, Trivy success. The current head typechecks, and tonight's TS2741 is confirmed
+resolved. Sonar steady at 8 new issues, gate passing.
+
+**The local typecheck I attempted did not succeed — stating that plainly rather than leaving the plan
+looking like a result.** The approach was sound and worth recording for next time: only **7 files**
+import the sole private dep (`@xyzreality/dhtmlx-gantt`, all in `gantt-x/` and
+`dashboard-panels/gantt/`, disjoint from commissioning), so removing it from `package.json`,
+installing from the public registry and stubbing that one module would give a `tsc --noEmit` the
+branch could not otherwise get. In practice the `npm install` was **killed** before finishing and
+`node_modules` is empty. It also became unnecessary the moment CI completed.
+
+*If retried:* the plan is right, but budget for the install being long, and back up
+`package.json` + `package-lock.json` first — which was done here, and mattered, because the
+manifests must not be left modified. Both are restored and verified identical to HEAD; the gantt
+dependency is back; the working tree is clean.
+
+### Where PLT-2968 / #2186 stands at end of session
+
+- **Green on the current head** (`7cfd9e0`), verified by step list.
+- **MERGE BLOCKER outstanding:** `SCHEMA_PREVIEW = true` must go back to `false` (23:40 entry).
+- **Two threads open by design:** the `setOverride` concurrency race, and the runner i18n +
+  O(n²) numbering, both belonging to the single `TaskInstanceModal.tsx` quality sweep once the
+  runner is feature-complete.
+- **Waiting on humans:** approval on #2186 and #2192; and whether #2186 should return to draft.
