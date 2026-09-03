@@ -676,3 +676,91 @@ are missing" understates it.
 
 **Useful for the conversation:** the customer named *Core & Shell* because it is the one they noticed.
 There are three more whole branches gone. Worth telling them before they find out themselves.
+
+## 2026-09-03 (Teams thread, 12:43-13:57) — ROOT CAUSE LOCALISED TO INGEST. The row is in the XER and not in the DB.
+
+Thread between Ilia, Sachin Badoni and Ali Seyedof after the corrected ids were sent. Three things
+are now settled and one owner question is open.
+
+### 1. ✅ My outstanding caveat is CLOSED — there is no soft-delete on WBS rows at all
+
+**Sachin, 12:51:** *"there is no column in `ScheduleWbs` which mark them as deleted"*
+**Sachin, 12:52:** *"only ScheduleRevision Table has this column"*
+
+The 09-03 entry flagged one thing to confirm: whether his count of 232 might have excluded
+soft-deleted WBS rows. **It cannot — the column does not exist on that table.** So DB 232 = API 232
+stands unconditionally, and **`IsDeleted` is irrelevant to this defect.** Ali's *"endpoint just filters
+deleted activities"* is true of activities and simply not the mechanism here.
+
+**Sachin, 13:02:** *"none of these `WbsId` exist in DB and used as `ParentWbsId` as u confirmed"* →
+*"this data is broken, i am not sure where it will be fixed, can it be the schedule file which is
+uploaded?"*
+
+### 2. ⭐ Sachin found the row IN THE XER. It is absent from the DB.
+
+He downloaded the source file (`AUS02-60-Schedule-L1-10-0…`) and reported, **13:32:**
+
+> *"no no — it's in the file missing in the DB"*
+> `"SourceFileWbsId" = '16793'`
+> *"i not in the DB which is parent to `94cce902-c576-4149-a03b-5b0f2fbf8a61`"*
+
+**So the parent WBS node exists in the customer's P6 export and was never written to the database.**
+That is the root cause, and it is **schedule ingest** — not api-v2, not the FE, not the customer's
+schedule configuration. `SourceFileWbsId 16793` is the first hard link between a missing DB row and a
+real row in the source file.
+
+**Sachin, 13:57:** *"who can check upload mechanism, Kuba?"* — **the owner question is open.**
+
+### 3. ⛔ Ali's "just re-upload it" suggestion is already disproven — say so before a cycle is spent
+
+**Ali, 13:06:** *"I'm not sure, if it's broken during ingest or afterwards then re-uploading same
+schedule file should resolve it"*
+
+**It does not.** The revision now live, `d505f075`, **is** a fresh re-upload — done 2026-09-02
+13:06:24, minutes after the three previous revisions were deleted. It reproduced the defect exactly:
+new GUIDs, identical child-count fingerprint **2/4/10/11**, identical **1,180 reachable / 638
+unreachable**. A second re-upload of the same file will reproduce it a third time. **This rules out a
+transient ingest failure and points at something deterministic about those rows.**
+
+Also relevant to any remediation plan — **Ali, 13:12:** *"this is a customer proj so be careful not
+uploading things to it"*. A re-upload is not a free diagnostic here.
+
+### 4. Ali's live hypothesis, and the sharpest way to test it
+
+**Ali, 13:15:** *"in some past similar incidents, problem was from xer file itself, it had some
+abnormal activity name or whatever which our ingestion was skipping (just a possibility)"*
+
+That is now the leading hypothesis and Sachin has the file. **The tightest possible diff, from our
+structural data:** every one of the four missing nodes has **siblings that ingested fine**. Under
+`Procurement`, `.1.1.3` Parking & Landscape, `.1.1.4` Mechanical Yards, `.1.1.5` Electrical Yards and
+`.1.1.6` Interior Build-Out are all present while `.1.1.1` and `.1.1.2` are not.
+
+So in `PROJWBS`, **compare row `16793` field-by-field against its sibling rows in the same file.** The
+file contains near-identical rows that ingest accepted and rejected, which bounds the difference to
+whatever those fields disagree on — most likely `wbs_short_name`/`wbs_name` content (an encoding
+character, a delimiter, a leading/trailing space, a length) rather than anything structural.
+
+**Worth getting the other three `SourceFileWbsId`s too.** Four instances beat one for spotting the
+shared trait, and Sachin can pull them by looking up the parents of `78a3bf1a`, `a673c5f2` and
+`49d1ce1e` the same way he found 16793.
+
+### 5. Structural hypothesis TESTED AND FALSIFIED — do not re-run it
+
+Before offering it, I checked whether the missing nodes were distinguished by having **only WBS
+children** (all four do: 2, 4, 10, 11 WBS children, no direct activities).
+
+**Falsified. 26 WBS nodes that ingested fine share exactly that trait** — Mechanical Yards, Utilities,
+Wet Utilities, Server Hall #3 and #4, Medium Voltage, Parking & Landscape, Exterior Doors &
+Storefronts, and 18 others. Only-WBS-children is not the discriminator, so the answer is in the file's
+field values, not in the tree shape. Recorded so nobody spends the query again.
+
+### Spun off, not part of this defect
+
+**`deviceType` naming.** Ali (13:02, 13:04-13:06) wants it renamed — *"device type we need to
+refactor"*, proposing `WEBEDITOR` / `HOLOSITE` / `MOBILEAPP` and calling `WEB` *"too general"*;
+Sachin prefers acronyms and is relaxed either way. Unrelated to PLT-3095 and worth its own ticket
+rather than riding along on an incident. Note our own `getSchedule` hardcodes `deviceType: 'WEB'`
+(`schedule-api-service.ts:51`), so a rename is a coordinated FE+BE change.
+
+Also: **Mostafa asked Sachin to use Claude** (13:25) and Sachin's read was *"Seems like we are missing
+some WBS code"* — consistent with everything above.
