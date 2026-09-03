@@ -2,6 +2,85 @@
 
 New ticket, created 2026-08-31 12:17, no prior folder. First pass 2026-09-01.
 
+---
+
+# ⭐ READ THIS FIRST — the answer, as of 2026-09-03
+
+Added on top rather than rewriting the file below, per this repo's additive rule. **This file is 900+
+lines of a day's worth of theories, most of them superseded.** Everything you need is here; the dated
+sections below are the working record, not the conclusion.
+
+## The defect, in five lines
+
+1. The importer identifies each WBS row by **joining the parent `wbs_short_name` codes with dots** —
+   the value the API returns as `userItemId`.
+2. AUS02's schedule mixes compound codes (`1.1`, `1.2`) at one level with simple ones (`1`, `2`) at
+   the next, so **two pairs of rows produce the same joined code**.
+3. `1` + `1.1` is indistinguishable from `1` + `1` + `1`. Both come out `…-.1.1.1`.
+4. **All four rows are dropped** — not one of each pair. Their children are orphaned, hiding **638
+   rows, 35 % of the schedule**.
+5. The schedule is valid: the file's `wbs_id` is unique for every row. Only our derived key is not.
+
+```
+wbs_name                         wbs_id   code   userItemId
+AUS02 - 60% Milestone Schedule    16792      1   AUS02-60-Schedule-L1-.1
+  Milestones                      16793    1.1   AUS02-60-Schedule-L1-.1.1.1   <-- clash
+  Core & Shell Construction       16811    1.2   AUS02-60-Schedule-L1-.1.1.2   <-- clash
+  Parking & Landscape             16920    1.3   AUS02-60-Schedule-L1-.1.1.3
+  Procurement                     17011      1   AUS02-60-Schedule-L1-.1.1
+    CFCI Procurement              17012      1   AUS02-60-Schedule-L1-.1.1.1   <-- clash
+    OFCI / OFE Procurement        17015      2   AUS02-60-Schedule-L1-.1.1.2   <-- clash
+```
+
+## Evidence — two independent confirmations
+
+| source | finding |
+|---|---|
+| **the XER** (parsed locally) | 236 `PROJWBS` rows → 234 distinct joined codes. **2 collide, covering exactly the 4 missing rows.** Nothing else in the file collides. `TASK` 1,586 = API 1,586, so only WBS is affected |
+| **the API** | 232 of 234 codes present as `userItemId`; the 2 absent are the colliding pair; **0** API codes unaccounted for |
+| **Sachin, in the DB** | those same 2 codes are absent while the other 232 are present — which also rules out last-write-wins |
+
+## The fix — VERIFIED BY SIMULATION AGAINST THE FILE
+
+| rename | outcome |
+|---|---|
+| Milestones `1.1` → `1.0` | ❌ only 1 of 2 clashes cleared — **Core & Shell still missing** |
+| Core & Shell `1.2` → `1.7` | ❌ only the other one cleared |
+| both of the above | ✅ |
+| **Procurement `1` → `3`** (or `9`, `PROC`) | ✅ **both cleared in one edit — 0 collisions, 236/236 import** |
+
+**An earlier draft advised renaming Milestones alone. That was wrong** and would have left the very
+branch the customer reported still missing. Do not repeat it.
+
+Platform-side fix: key WBS rows on the file's `wbs_id` (already stored as `SourceFileWbsId`) rather
+than the derived code, and reject an upload that would drop rows instead of importing silently.
+
+## Confidence
+
+**Diagnosis ~97 %** — the arithmetic is exact and confirmed from two sides. **The rename is inferred**
+from that mechanism, not from reading the importer (which is outside this session's repos), and is
+simulated against the file rather than observed. Frame it to the customer as *"this should fix it,
+tell us either way"*.
+
+## ⛔ Claims below that are SUPERSEDED — do not act on them
+
+| claim | section | status |
+|---|---|---|
+| duplicate `itemId` / `Map.set` collision in the FE | § Hypothesis (09-01) | **falsified** — 0 duplicate `itemId`s |
+| "ROOT CAUSE FOUND" | § 2026-09-01 | that section describes the **symptom** (4 unreachable parents), not the cause |
+| the rows exist but are filtered by `IsDeleted` | § 09-02, § 09-03 (later) | **dead** — `ScheduleWbs` has no such column (Sachin) |
+| the concatenated-code collision is "NOT supported by live data" | § 09-02 warning | **wrong, and now proven correct** — the API could never show it, because the theory predicts the duplicates are *removed* |
+| the four ids `c9993475` / `f0788984` / `b0b44f2f` / `501f596d` | § 09-01, § 09-02 | **stale** — from revisions deleted on 09-02. Current ids are in the table above |
+| remediation is blocked on a write owner | § various | **wrong** — but moot here; this needs no data remediation, only a re-upload |
+
+## Open, not blocked on us
+
+- **Ingest owner unnamed.** Sachin asked "who can check upload mechanism, Kuba?" — unanswered.
+- **Yash's board question** (09-02 14:10, flagged urgent) — unanswered. It is an ingest defect.
+- **The customer only knows about Core & Shell.** Three more branches are invisible.
+
+---
+
 ## Ticket
 
 - **Project:** AUS02. **Reporter:** customer, via Yash. **Assignee:** Ilia. **Priority:** Major.
