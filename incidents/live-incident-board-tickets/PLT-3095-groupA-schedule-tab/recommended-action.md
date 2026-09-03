@@ -110,3 +110,48 @@ worth raising then:
 
 **Still unanswered from 09-02:** Yash asked whether he should change boards and flagged it urgent on
 the user end.
+
+---
+
+# 2026-09-03 (Teams thread) — next reply. The 12:43 draft was sent and did its job.
+
+Root cause is localised (ingest drops a WBS row present in the XER). Two things need correcting or
+answering in the thread, and Yash's board question is now answerable.
+
+## Draft to the thread (Sachin + Ali) — 90 words, UNPOSTED
+
+> Re-uploading won't fix it — `d505f075` is already a fresh upload from yesterday 13:06, and it
+> reproduced the same four missing parents with new ids. Same 638 rows unreachable.
+>
+> Best diff: in `PROJWBS`, compare row `16793` against its siblings in the same file. The siblings
+> ingested fine — Parking & Landscape, Mechanical Yards, Electrical Yards, Interior Build-Out are all
+> there — so whatever differs is in the field values, not the structure.
+>
+> Worth pulling the other three parent ids too, four samples beat one.
+>
+> **Who owns schedule ingest — is Kuba the right person?**
+
+Leads with the re-upload correction because Ali suggested it at 13:06 and it would cost a cycle on a
+**customer project** he himself flagged at 13:12 as one not to upload to. Then hands over the tightest
+available test, then answers Sachin's 13:57 question by asking it back to the room, since neither of
+us owns that call.
+
+**Do not offer the only-WBS-children theory** — tested and falsified, 26 nodes that ingested fine
+share the trait (`context.md` § 5).
+
+## ⏳ Yash's board question is now answerable — and it has been open since 09-02 14:10
+
+He asked whether to change boards and flagged it **urgent on the user end**. Two days ago. The answer
+was unavailable then and is available now: **the defect is in schedule ingest**, not FE and not
+api-v2. So the ticket should move to whichever board owns the data pipeline / ingest, with the owner
+named once Sachin's question is resolved.
+
+**That is the oldest unanswered thing on this ticket and it is a coordinator waiting on us, not a
+customer.** Worth clearing in the same pass.
+
+## What the customer still has not been told
+
+They reported *Core & Shell*. Three more whole branches are invisible — the **Milestones** group,
+**long-lead MEP procurement**, and **structural procurement**. 638 rows, 35 % of the schedule. They
+will find this themselves the moment they look, and it is better coming from us. No draft yet — it
+needs a line on timing, which depends on the ingest owner.
