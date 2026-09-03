@@ -824,3 +824,43 @@ i18n work in the 23:16 entry.
 *Method note: attribution was possible here only because the interval between the two readings
 contained no commits of mine. When it does, and the project is private, the count alone cannot be
 apportioned — see 17:53.*
+
+## 2026-09-03 23:27 — first real CI failure, and it proves the typecheck gap
+
+`87b9c82` failed at **`Build image`** (step 15) with exactly one error:
+
+```
+TS2741: Property 'supports' is missing in type '{...}' but required in type 'IChecklistInstance'
+  systems-panel/edit-system-modal.test.tsx:65
+```
+
+The runner work made `IChecklistInstance.supports` **required**, and a test fixture in an unrelated
+panel didn't set it. **`Lint & Run Tests` passed on that same commit** (23:10:41→23:18:56) — vitest
+does not typecheck, so the error could only surface in the prod webpack build, ~10 minutes later in
+the job.
+
+**Already fixed at the current head, not by me.** `a4eb1ea` makes it `supports?: TaskColumnSupport`
+again, with a comment explaining why optional is right (an instance can reach a consumer without one
+— a cached row from before the probe existed, or a list assembled without its items). Verified by
+diffing the declaration across the two heads: required at `87b9c82:123`, optional at `a4eb1ea:144`.
+The run on `a4eb1ea` was already in flight, so the correct action was to verify, not to push — and
+not to comment on the PR about a failure that had already been resolved.
+
+*Method note: my local checkout was NOT at the failing head when I first read the type — it had
+already fast-forwarded to `a4eb1ea`, and the file said "optional", contradicting the CI error. I
+noticed the contradiction and checked `git show 87b9c82:<file>` rather than assuming CI was stale or
+that I was reading the right thing. **When local source contradicts a CI error, suspect the checkout
+first.***
+
+### The systemic finding, worth a ticket
+
+**This repo typechecks only inside `Build image`, at step 15 of an ~18-minute job.** Consequences seen
+today on one branch:
+- A type error survives a fully green-looking `Lint & Run Tests` and is reported ~10 minutes later.
+- **Five consecutive runs were cancelled before reaching step 15**, so between roughly 16:19 and
+  17:15 the branch had NO typecheck at all while looking healthy on the fast steps.
+
+A `tsc --noEmit` step placed next to `Lint & Run Tests` would surface these in ~1 minute instead of
+~18, and would survive the cancellation pattern that repeatedly starved step 15. That is a small CI
+change with a large feedback-loop payoff, and it is the third distinct problem today traceable to
+this gap.
