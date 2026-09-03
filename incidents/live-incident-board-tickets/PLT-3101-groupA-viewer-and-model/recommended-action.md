@@ -131,3 +131,76 @@ and states the corroborating number that makes 835 the trustworthy side.
 14 have not been reproduced from this side. Ask him to re-read the number before anyone tries to
 explain it — the mechanism in `context.md` § Mechanism covers it, but the figure itself is one
 observation.
+
+---
+
+# 2026-09-03 (later) — REDRAFTED on the Pattern 1 basis. Drafts A and B above are SUPERSEDED.
+
+Both earlier drafts were written before `recurring-defect-patterns.md` § Pattern 1 was consulted.
+What changed: remediation is a **known procedure with a runbook**, not a blocked write; and the
+endpoint finding is **not urgent** and not the customer's problem (§ context.md 09-03 later).
+
+## Comment to post on PLT-3101 — 84 words, UNPOSTED
+
+> Found them. Of the 835 linked elements, 833 are installed and 2 have no installation record at all —
+> that's why nobody can see them:
+>
+> `12398bf3-dae3-4c29-8275-a97e1cb64d5c`
+> `cad330b0-27b4-4b61-9bfe-1e80271775a5`
+>
+> The customer can't fix these: with no element record there's nothing to select, so they can't be
+> marked installed or unlinked. This is the dead-links pattern we've cleared before on ELN03 and
+> FAR01, and we have a procedure for it.
+>
+> **Can the customer confirm CH08-MY-41 is otherwise complete — they mentioned 3, we find 2 — so we
+> can remove these links?**
+
+Changes from draft A: says a procedure exists rather than "we'll need to strip them our end" (which
+read as an unowned promise); drops the endpoint finding entirely; and folds the 3-vs-2 question into
+the approval question, because the runbook needs written approval on the ticket anyway and asking
+twice wastes a round trip. The question is deliberately *"otherwise complete"* — that is the runbook's
+own § "Before anything: is deletion even the right fix?" gate, which caught PLT-2909 where deleting
+would have unlinked working elements.
+
+## Steps, in order, with the runbook step numbers
+
+**1. Post the comment. Get the reply.** Two things must come back: confirmation the activity is
+otherwise complete, and whether there is a third element. **Do not proceed on 2 if they say 3** — we
+would remediate and leave them blocked.
+
+**2. Confirm the 2 are genuinely unreachable** — runbook § "Before anything". Both already return
+`NotFoundError` from `/elements/{id}/status`, which is strong; the remaining check is that they are
+not present in a sibling model, which is exactly how PLT-2909 differed. Cheapest confirmation is the
+customer failing to find them with the ids in hand.
+
+**3. Produce the CSV** — runbook § 1. Format is `userItemId, activityId, modelElementId`, plain LF, no
+BOM, no duplicates, well-formed UUIDs. Here that is 2 rows:
+`CH08-MY-41, 65c1c3fd-32a5-4f29-ab25-888c619259c5, <each of the two element ids>`.
+Attach to the ticket **before** deleting.
+
+**4. Check progress side-effects** — runbook § 2. Expect CH08-MY-41 to move 99.76% → 100%. Say so in
+the approval request; it is user-visible.
+
+**5. Get approval in writing on the ticket** — runbook § 3. Count, project, what changes, what does
+not, and that it is reversible.
+
+**6. Snapshot, delete, verify** — runbook § 4-6. Snapshot the project's live links and record the
+count; `POST /api/v2/projects/{postgresProjectId}/elements/activity-links/delete` with the 2 rows;
+re-measure and confirm the live count fell by **exactly 2**.
+
+**7. Confirm the user-visible fix after the parquet regenerates** — runbook § 7. Not immediate.
+
+## Separate work, not blocking the above
+
+**8. Report the endpoint gap to api-v2** — low priority, re-scoped: `/activities/{activityId}/links`
+neither filters nor exposes `isDeleted` (3,035 = 835 live + 2,200 deleted on this activity), and its
+only current caller is a debug path. Frame it as a trap for the next consumer, not an incident.
+
+**9. The FE transparency fix** — surface the linked elements that could not be resolved instead of
+dropping them silently at three points (`use-linked-element-actions.ts:43`, `linking-service.ts:688`,
+`collectSelectableDbIds.ts:20`). Independent of CH08, no data needed. Describe it as *transparency*,
+not as the fix — Pattern 1's own highest-value fix is making the unlink-on-upload step compare against
+geometry rather than the element list, which is the preventive one and is owned elsewhere.
+
+**10. PLT-3099 carries the same false blocker** and the same correction now applies: it needs approval
+plus a runbook run for its 1,239, not a new owner. See that folder's 09-03 entry.
