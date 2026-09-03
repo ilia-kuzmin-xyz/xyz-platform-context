@@ -421,3 +421,26 @@ the same empty-name bug fixed in the modal — and belong to the follow-up ticke
 
 **Both #2186 threads replied to and resolved.** Fifth parallel push on this branch today; this one
 required no merge (remote had not moved at push time).
+
+### 16:01 UTC — self-review: the i18n fix had made the code worse to read
+
+`192156d` completed **green** (full suite passed in 8m15s, so the five reworked task-count
+assertions and the interpolating mock all hold). But reviewing my own diff afterwards, routing that
+label through `translate()` had left a **ternary nested inside a ternary, inline in JSX** — arguably
+worse than the hardcoded string it replaced. Sonar's new-issue count on this PR also went **1 → 3**
+on that commit; treated as corroborating, not proof (the gate passed, and the issue list is not
+queryable from here).
+
+Extracted in `27c52ed` to a flat module-level `stepTaskCountLabel(done, total)` with an early return
+for the zero case: one ternary, no nesting. Behaviour identical, so the existing assertions still
+cover it — no test churn.
+
+**Documented in the code why `components/WorkflowStep/task-count.ts` is not reused:** it renders a
+bare count ("4 tasks") from the `AssetTypePage.readiness` keys, not the done/total pair these rows
+need. Put that in the comment rather than only here, because *twice today* this run wrote something
+before checking for an existing helper (the `noTasks` duplication, then this). A note in the file is
+read by whoever edits next; a note in these docs is only read by a run that thinks to look.
+
+> **Lesson: fixing a review finding can introduce a worse defect than the one it fixes.** Re-read
+> your own diff after satisfying a reviewer, not just before. "The reviewer's point is addressed" is
+> not the same as "the code is better than it was."
