@@ -769,3 +769,37 @@ that endpoint as PR health.
 - **`draft: false`** despite the session instruction to keep PRs in draft — flagged, not reverted,
   because reviewers are engaged (17:20 entry).
 - Waiting on **approval** — four reviewers requested, none has approved.
+
+## 2026-09-03 23:16 — fourth i18n finding, deferred on timing not merit
+
+A parallel run built a **task runner** into `TaskInstanceModal.tsx` after 18:00 (`3eba287` 18:31,
+`87b9c82` 23:09). Copilot flagged its copy as hardcoded English. **Verified in scope** —
+`git diff origin/master...HEAD` shows every one as an ADDED line (filter array 124-128,
+`placeholder='Search items'` 732, `aria-label='Search items'` 744, empty state 771). *Checked rather
+than assumed: "it was already like that" has been wrong on this PR in both directions.*
+
+Wider than the comment listed. The file is at **1 `translate()` call** against ~12 added literals,
+including `aria-label='Back'|'Close'|'Filter items'|'Loading task'` and `label='Complete'` — the
+aria-labels being the ones a screen-reader user actually depends on and the easiest to miss.
+
+**Deliberately not fixed now.** `87b9c82` landed ~7 minutes before the review and its subject
+("preconditions, units, notes and the overall verdict") says more runner copy is still coming. An
+i18n pass now would cover a subset, collide with in-flight edits to the same file, and need redoing.
+Right moment is one sweep once the runner is feature-complete. *This is the same call as the morning
+PLT-2953 decision — publish the diagnosis rather than race a mid-flight file — which was validated
+when the parallel run implemented it identically an hour later.*
+
+### The pattern is the finding
+
+**Four i18n findings on this branch**, each fixed individually: modal loading/empty states, ladder
+task counts, glyph + menu labels, now the runner. That is not four mistakes; it is new commissioning
+UI being written with literals and caught afterwards in review, every time.
+
+Restating the systemic half, because it keeps being the better answer: **the app has no i18n
+fallback at all.** A key missing from `tr` renders the literal `translation-not-found[...]` — 820
+keys today. Adding runner keys to `en` alone does not make the runner work in Turkish, it only moves
+the failure. One change to how a miss resolves fixes all 820 and makes every future en-only addition
+harmless.
+
+Thread left **open**. CI on `87b9c82` in progress at time of writing; `07474a1` was the last head I
+verified fully green.
