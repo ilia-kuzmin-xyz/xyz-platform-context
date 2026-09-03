@@ -71,3 +71,63 @@ Once the cause is known:
 **Independent of all of the above**, raise the silent-drop fix (class 2 above). It is small, it is
 right under any of the three causes, and it is the difference between a customer filing this ticket
 and a customer seeing "16 linked elements could not be found in the loaded models".
+
+---
+
+# 2026-09-03 — measured. Two drafts, both UNPOSTED. The blocker on § What is needed is cleared.
+
+The access blocker in the 09-02 section is gone (fresh token) and the 16-vs-3 arithmetic is resolved
+in favour of **2**, both named. Reclassify: the CH08 half is no longer class 3 waiting on access — it
+is a **data fix needing a write owner**, plus one question for the customer.
+
+## Draft A — to Yash, customer-facing (70 words)
+
+> Hi Yash — found them. Of the 835 linked elements, 833 are installed and 2 have no installation
+> record at all, which is why nobody can see them:
+>
+> `12398bf3-dae3-4c29-8275-a97e1cb64d5c`
+> `cad330b0-27b4-4b61-9bfe-1e80271775a5`
+>
+> They can't be marked installed or removed from the customer's side — with no element record there's
+> nothing to select. We'll need to strip the two links our end.
+>
+> **The customer said 3 — can you check whether there's a third, or was that approximate?**
+
+Does **not** promise timing on the removal: it needs a platform-api write and no owner is lined up.
+Does **not** mention the 2,200 deleted mappings — that is our bug to fix, not the customer's problem,
+and raising it invites a question we cannot yet answer.
+
+## Draft B — to Sachin / Ali, the API bug (64 words)
+
+> Hi — `GET /api/v2/projects/{projectId}/activities/{activityId}/links` looks like it ignores
+> `isDeleted`.
+>
+> On CH08 activity CH08-MY-41 it returns 3,035 elements. The project feed `/elements/activity-links`
+> gives 835 live and 2,200 deleted for the same activity — 835 matches `linkedElementCount` on the
+> schedule row. Not pagination: same 3,035 unpaginated.
+>
+> CH08 has 258 soft-deleted models of 334, so the churn is real.
+>
+> **Can you confirm the endpoint should be filtering deleted mappings?**
+
+Leads with the falsification (not pagination) because that is the first thing Ali asked on PLT-3095,
+and states the corroborating number that makes 835 the trustworthy side.
+
+## Order of operations
+
+1. **Draft B first, or at least alongside A.** Until we know whether that endpoint is meant to filter,
+   we do not know whether anything the customer reads is being fed the 3,035. It is also the cheapest
+   thing to be wrong about.
+2. **Draft A** — answers the customer, and the count question needs asking before we touch data.
+3. **Then the write** to remove the 2 stale mappings, once an owner exists.
+4. **Independently, the class-2 FE fix**: surface the elements that could not be resolved instead of
+   dropping them at three separate points (`use-linked-element-actions.ts:43`,
+   `linking-service.ts:688`, `collectSelectableDbIds.ts:20`). Nothing in the app shows the customer
+   these elements today, in any surface. That is the defect that generated this ticket.
+
+## Still unmeasured, and say so if asked
+
+**Yash's 819.** 835 − 819 = 16 lives inside the live 835; the 2 account for part of it and the other
+14 have not been reproduced from this side. Ask him to re-read the number before anyone tries to
+explain it — the mechanism in `context.md` § Mechanism covers it, but the figure itself is one
+observation.
