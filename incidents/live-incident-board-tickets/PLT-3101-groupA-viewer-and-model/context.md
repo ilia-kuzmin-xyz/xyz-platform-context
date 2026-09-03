@@ -268,3 +268,102 @@ The 2 stale mappings should be removed from CH08-MY-41. Needs a platform-api wri
 and no owner lined up, same gap as PLT-3099's 1,239. The customer cannot do it themselves (§ The
 customer CANNOT do what they asked). Marking them installed is not an option either: with no element
 record there is nothing to attach a status to.
+
+## 2026-09-03 (later) — ⚠️ THIS IS PATTERN 1, OCCURRENCE #4. Read that before anything above.
+
+Ilia asked whether we had seen ghosted linking before. **We had, extensively**, and this folder was
+written without checking. `recurring-defect-patterns.md` § **Pattern 1 — Dead activity links
+(element metadata diverges from model geometry)** — *"the most expensive pattern found so far:
+roughly two weeks of investigation across three tickets before it was recognised as one thing."*
+
+| Ticket | Project | Presented as |
+|---|---|---|
+| PLT-2882 | FAR01 | select/isolate does nothing, panel still shows 418 |
+| PLT-2909 | ATL08 | activity lists models containing none of its elements |
+| PLT-2931 | ELN03 | progress capped below 100%, package stuck at 97% |
+| **PLT-3101** | **CH08** | **elements reported not installed, cannot be found in the viewer** |
+
+Pattern 1's recognition signature already covers this ticket almost verbatim: *"Select or isolate
+linked elements appears to do nothing, while a non-zero count is displayed"*.
+
+### What I re-derived that was already written down
+
+The § Mechanism section above traces the intersection gate at `model-mapping-service.ts:226-230`
+(`hasExternalIdInCloud`) as though it were new. **Pattern 1 states the same thing** — *"`model.elementId2dbId`
+is the intersection of loaded geometry externalIds and the metadata parquet
+(`model-mapping-service.ts:372-384`)"* — with different line numbers because the file has moved
+since. Same gate, same consequence. The § Mechanism analysis is correct; it is just not new.
+
+**Pattern 1's decisive arithmetic test, which I did not run and should have:** *"if the displayed
+percentage equals installed ÷ linked to two decimals, the denominator is the bug."*
+For CH08-MY-41: **833 / 835 = 99.76%**. Consistent with the measured finding, and it would have got
+there in one query.
+
+### ⚠️ CORRECTION — "needs a write and no owner is lined up" is WRONG. A runbook exists.
+
+Both this folder and PLT-3099's say remediation needs a platform-api write with no owner. **There is
+an established, already-used procedure:** `incidents/data-remediation-runbook.md`, 8 steps — produce
+the CSV with an audit trail, check progress side-effects, **get approval in writing on the ticket**,
+snapshot the live links, delete, verify the live count dropped by exactly the number sent, restore if
+needed. The delete call is:
+
+```
+POST /api/v2/projects/{postgresProjectId}/elements/activity-links/delete
+[{ modelElementId, activityId }, ...]      // max 500 per batch, soft delete
+```
+
+It has been run successfully — on ELN03 it moved five activities to 100% and cleared the Containment
+package, exactly as predicted. **This correction applies to PLT-3099's 1,239 as well**, where the same
+false blocker is recorded.
+
+Also from the runbook, and directly relevant here: *"Before anything: is deletion even the right
+fix?"* On PLT-2909 the elements existed in a sibling building and deleting would have unlinked working
+elements. **Confirm the 2 are genuinely unreachable before treating them as dead.**
+
+### ⚠️ CORRECTION — Finding 1 (the links endpoint) is REAL but I OVERSTATED it
+
+Two things were wrong in how it was written up.
+
+**1. Soft-deleted link history is not news.** PLT-2882's investigation log, line 176:
+*"10,316 rows total → 9,898 `isDeleted` (link/unlink history) → 418 live"* and line 178: *"always
+filter `!isDeleted`, and paginate"*. The runbook says the same: *"Always filter `!isDeleted` or your
+counts will be nonsense."* FAR01's ratio was 24×; CH08's 2.6× is mild by comparison. What is
+genuinely unremarked is narrower: **`/activities/{activityId}/links` returns only `modelElementId`
+with no `isDeleted` field at all**, so a caller cannot filter even knowing to — while
+`linkedElementCount` on the schedule row gets it right. No prior note mentions that endpoint.
+
+**2. RETRACTED: "a strong candidate for the customer's 3 reading differently in different surfaces."**
+Checked, and it is not. The endpoint's **only** frontend caller is
+`serviceProvider.Activity.getSelectedActivityLinks`, invoked from
+`scheduler-service/schedule-service.tsx:217` — **inside `if (this._debugMode)`**, feeding a
+duplicate-link debug check. No production surface reads the unfiltered 3,035. The FE's real link data
+comes from `Element.getActivityLinks` → `/elements/activity-links`, which carries `isDeleted`.
+
+So the endpoint issue is a latent trap for the next consumer plus a corrupted debug diagnostic —
+worth reporting, **not** urgent, and not this customer's problem. Draft B should be re-scoped
+accordingly.
+
+### Likely root cause of CH08's 2 dead live links — already named in Pattern 1
+
+Pattern 1's closing note: *"model deletion does not remove links unless a user ticks a checkbox, and
+the plain delete path hardcodes it off (`confirm-model-deletion.tsx:103-112`), which is an independent
+source of orphans that we own."*
+
+**CH08 has 258 soft-deleted models out of 334.** That is the highest-volume model churn seen on any
+project in these notes, against a delete path that leaves links behind by default. It fits without
+requiring anything new.
+
+Pattern 1's own view of the highest-value fix is also worth quoting, because it is not the fix this
+folder proposed: *"the highest-value fix is not the cleanup but making the unlink step on upload
+compare against **geometry** rather than the element list, which would make the whole family
+self-correcting."* The class-2 FE fix proposed in `recommended-action.md` (surface what could not be
+resolved) is complementary — transparency, not prevention — and should be described that way rather
+than as *the* fix.
+
+### Process note, for the run instructions
+
+This folder was written, and a full prod measurement run, before anyone checked
+`recurring-defect-patterns.md`. The pattern file exists precisely to stop that. **Check it first when
+a ticket smells like links, counts, or "can't find the element".** The measurement was still worth
+doing — it named the 2 elements — but the mechanism, the arithmetic test, the remediation procedure
+and the likely root cause were all sitting in one file the whole time.
