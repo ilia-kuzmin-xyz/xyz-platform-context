@@ -333,3 +333,19 @@ comment on #944 with the proposed patch.
 **Reusable:** any 409-expected e2e failing with 400 in this repo → check `mapError`'s constraint-name
 string match against the name in the log before anything else. And when a red check names code the
 diff does not touch, check whether an *unpinned external checkout* can explain it.
+
+### 2026-09-03 — correction and outcome on the Trivy port
+
+The `.trivyignore` entry reached `master` via **#2148**, not #2192. #2192's own rewritten description
+says so: *"#2148 merged its own `CVE-2026-73086` entry to master, so master's build is no longer
+failing and this PR is not blocking anything."* #2192 is still open and now only deletes the dead
+`shortid` dependency. The 09-02 note above credited #2192 for the unblock — wrong PR, right mechanism.
+
+The predicted conflict happened and was resolved by hand: Ilia merged `master` into `PLT-3099` and
+`PLT-3096-fix` at 07:51 on 09-03 (commit `dcc5f37e` on 2194, *"Merge branch 'master' into PLT-3099 /
+# Conflicts: # .trivyignore"*), resolving toward master. **Both PRs' diffs are now the code changes
+only** — 2194 is 3 files / 177 additions with no `.trivyignore`. So the port did its job (kept the
+branch green for a day) and then cleanly disappeared, which is what a ported base-branch fix should do.
+
+**Reusable:** when porting a fix that exists on another branch, say *what the fix is* rather than
+*which PR carries it* — several PRs may land the same line, and naming one of them dates the note.
