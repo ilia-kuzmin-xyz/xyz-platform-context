@@ -45,6 +45,132 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-03 — backfilling PLT-3101's unlogged 09-02 investigation (class 2/3 split, mechanism verified in code), 12 in-scope tickets: 1 left scope (PLT-3099 → In Code Review), 11 of 12 confirmed unchanged in substance, PLT-2858's close-out already delivered live by Ilia outside this routine
+
+### Backfilling PLT-3101 — investigated 09-02 17:33–17:35, one hour after that day's README entry was written, never folded in
+
+Same recurring gap this file keeps recording (08-26/08-27/08-31/09-02 all had one). The folder
+(`PLT-3101-groupA-viewer-and-model/`) already holds a full first pass; nothing has changed on the live
+ticket since (`updated` still 09-02 14:07, no new comments) so this is a pure fold-in, not new work.
+
+**"Elements reported as not installed but can't be found in web viewer."** Customer (via Yash,
+`111090`), project CH08 — Minooka: activity CH08-MY-41 has 3 elements it cannot mark installed, delete,
+or locate. Yash's own read is sharp: the activity shows 835 linked elements but only 819 are
+visible/selectable — a 16-element gap — and he names "ghost elements" as the likely shape.
+
+**Mechanism verified in code, not yet in CH08's data.** 835 is link-table rows
+(`use-link-queries.ts:16-29`); 819 is link rows that additionally resolve to *loaded Forge geometry*
+(`use-linked-element-actions.ts:42-45,77-80`), which silently drops anything absent from
+`elementId2ModelId`/`elementId2DbId` — no warning, no count shown. Three candidate causes produce the
+identical symptom (stale link rows / a whole model skipped on load / a sub-model not yet loaded), and
+**none is ruled out yet** — both CH08 data routes are blocked here (prod MCP whitelist refuses the
+project; the browser token had expired), so the actual 16 elements were never named. Do not present
+"ghost elements" as confirmed; that is the exact mistake PLT-3099 made and had to retract a day later.
+
+**The customer's literal ask has no route today, and that is a code fact, not an opinion:**
+unlinking only works off the *viewer selection* (`linking-service.ts:504-508`), and an unresolved
+element cannot be selected — so it cannot be marked, deleted, or unlinked by anyone, including us,
+without a platform-api write. One partial mitigation worth telling them: the linked-elements *list*
+panel (unlike the 3D view) doesn't consult `elementId2DbId`, so it should still list all 835 by name —
+unverified in a running app.
+
+**Action class: 2 and 3, split.** Class 2 (PR-able now, no CH08 access needed): `use-linked-element-
+actions.ts` discards unresolvable elements with no surfaced count — fix that regardless of what CH08
+turns out to be. Class 3 (needs access before more can be said): a fresh browser `access_token` or CH08
+added to the prod MCP whitelist, plus one free 30-second step — open CH08 in the viewer and check the
+browser console for `model-mapping-service.ts`'s two skip/error warnings, which alone could explain all
+16 with zero data work.
+
+**Draft to Yash (92 words, UNPOSTED)** — corrects nothing, asserts nothing about cause, asks one
+closed question:
+
+> Hi Yash — your read is right, and the gap isn't cosmetic. The activity count is the link rows; the
+> viewer can only select elements it can match to loaded model geometry, and it drops the rest
+> silently. So 835 vs 819 is 16 links the viewer can't reach.
+>
+> They can't be unlinked either — unlinking works off the viewer selection, so an element you can't
+> select can't be removed. Nothing the customer can do themselves.
+>
+> Before we say why: **can someone open CH08 and send the browser console when the model finishes
+> loading?**
+
+Related, not duplicate: PLT-2874 (same "two surfaces count different populations" shape, project-wide
+rather than one activity); PLT-3099 (the mirror-image defect — over-linking instead of under-resolving).
+Full detail: `PLT-3101-groupA-viewer-and-model/context.md`.
+
+### Board re-queried today (2026-09-03)
+
+`project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, filtered to exclude `With
+Technical Support`, `Ready For QA`, `In Code Review`, `Customer Release Check`, `Done`, `Blocked`.
+**12 tickets in scope** — same count as 09-02, composition changed: **PLT-3099 left scope** (advanced
+Open → In Code Review, FE fix + draft PR #2194 per the 09-02 backfill) and **PLT-3101 arrives**, backfilled
+above rather than freshly investigated today since nothing on it has moved. Still no ticket at `Ready
+For Development`; PLT-3091 stays in Group A under the standing exception (assigned to Ilia). Group B
+is empty.
+
+### Confirmed unchanged (live `getJiraIssue` + comments fetched for every ticket below; `updated`
+compared verbatim against the last folder commit — three showed a later `updated` than their folder,
+each checked by reading the actual new comments rather than trusted on timestamp alone)
+
+| Ticket | Domain | Status | Note this run |
+|---|---|---|---|
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | With Customer | **Resolved 09-02, not by us.** Status auto-flipped In Analysis → With Customer by the Freshdesk sync bot (`111106`) after Ilia posted Mostafa's close decision himself (`111104`, 09-02 18:24, no @-mention) — nothing left in our queue but watching for the customer's confirmation |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Board's longest-unposted item: **59 days, 25th consecutive run** on the same close-out draft |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53; decision-request to Mostafa/Pietro still unposted |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 09-01 17:30; Critical, 119+ days; Ilia's own local-build verification of H1+H2 still the open action, no reply sent |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07; three-hypothesis split still undistinguished |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | `updated` unchanged since 08-18; still waiting on the customer's XER pair |
+| [PLT-3051](PLT-3051-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | `updated` unchanged since 08-27; fix shipped/QA-verified, still no customer confirmation |
+| [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | With Customer | New comment, no new substance: Josh (via Yash, `111078`, 09-02) declined the filter-location change pending PM sign-off; Ilia asked Yash (`111105`, 09-02 18:28, no @-mention) to move it to With Technical Support while they wait — **that move has not actually happened**, status here is still `With Customer` |
+| [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | New comment, no new substance: the "no, not adding it" answer in the drafted reply was already posted by Ilia directly (`111102`, 09-02); only the one-line "can we close this?" follow-up is still unposted — see folder's 09-03 addendum |
+| [PLT-3095](PLT-3095-groupA-schedule-tab/context.md) | schedule-tab | In Analysis | `updated` unchanged since 09-02 14:38; 91-word draft to Sachin (P6-rename workaround for Yash) still unposted |
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | Dev In Progress | `updated` unchanged since 09-01; Yash's 08-28 question to Mostafa (is LOE-progress display a planning-team call) now **6 days silent**, tested fix still sitting on a closed, unmerged PR |
+
+### Left scope this run
+
+- **PLT-3099** — `Open` → `In Code Review`. FE fix + draft PR #2194, per the 09-02 backfill entry.
+
+### ⚠️ Attachments needing human — this run
+
+No new ones today. Standing gaps, not re-verified: PLT-2651's `Screenshot 2026-08-28 154905.png`
+(403 here — would settle H1-vs-H2 from one image, see the ticket's own recommended-action.md), PLT-
+3033/PLT-2858/PLT-2815's images, PLT-3095's `.xer` + screenshots, PLT-3096's screen recording.
+
+### Needing a human now — ranked by cost of continued silence
+
+1. **PLT-2815 — execute the close-out.** Purely administrative, 59 days, 25 runs unposted. The
+   longest-standing item on this board by a wide margin.
+2. **PLT-3091 — the blocking question is 6 days silent.** Yash asked Mostafa on 08-28 whether the
+   LOE-progress display is a planning-team decision; a real, CI-green, tested fix is one answer away
+   from a new PR.
+3. **PLT-2651 — Ilia's own local-build verification** of both H1 and H2 in `section-tool-orientation.ts`,
+   using the two now-known ATL08 models (see the ticket's recommended-action.md for the exact
+   3-step repro). Critical, 119+ days, still no reply sent to the customer.
+4. **PLT-3101 — route the 92-word draft to Yash** (above), and separately, the one free 30-second
+   console check on CH08 that could close the "why 16 elements" question without any data access.
+5. **PLT-2890 — one line to close it out**: "Can we close this one now?" — everything else in that
+   ticket is already settled and posted.
+6. **PLT-3061 — Ilia's own question to Yash** ("let's move this to With Tech Support?") is still
+   unanswered/unactioned three-plus hours later; worth a nudge or just doing it.
+7. **PLT-3095 — route the merged importer finding to Sachin** (91-word draft, unchanged since 09-02).
+
+### What could not be verified
+
+- **PLT-3101** — whether CH08's deployed build predates the linking-undo fix is not in question here
+  (that was PLT-3099's issue); what's unverified is which of the three causes (a/b/c) explains the 16,
+  and whether the reported 3 "not installed" elements are even among those 16 — nobody has shown that,
+  it does not follow from the numbers, and assuming it would repeat PLT-3099's mistake.
+- Nothing was compiled, type-checked or run against a live app from this environment this run; this
+  sandbox cannot build `hc-frontend` (`npm ci` fails on a private package).
+
+### Notification
+
+Sent: a summary covering PLT-2815 (now the single longest-unposted item on the board, 59 days/25 runs),
+PLT-3091 (tested fix blocked 6 days on an unanswered internal question), and PLT-3101 (the backfilled
+ticket Ilia has not yet seen a summary of, with its ready-to-send draft and the one free console check).
+
+---
+
 ## Run: 2026-09-02 — backfilling a substantial unlogged 09-01 afternoon session (2 real code fixes shipped, 1 deliberately un-merged, 2 duplicate folders from parallel work reconciled), then 12 in-scope tickets today: 1 brand-new (PLT-3099), 2 left scope (PLT-3096, PLT-3097), the board's two chronic backlogs now at 24 and 29 runs
 
 ### Backfilling an unlogged session first, same shape as 08-26/08-27/08-31's gaps

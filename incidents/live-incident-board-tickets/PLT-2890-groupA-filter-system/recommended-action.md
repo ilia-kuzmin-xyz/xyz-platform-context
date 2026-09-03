@@ -215,3 +215,17 @@ implementation would reopen a settled question in front of the customer. The cod
 **After this is posted, 2890 should close.** The remaining item in its area — the panel showing two
 identically titled "Contractor" sections — is a separate low-priority FE ticket, not a reason to hold
 this one open. Do not reopen 2890 a third time for it.
+
+---
+
+## 2026-09-03 — the substance above was already posted, by Ilia directly, same day
+
+Live Jira check: comment `111102` (09-02 18:18:53, Ilia, no @-mention) reads *"confirmed with Mostafa,
+Currently there's no way to do that today, and we're not planning to add one."* — the "no" half of the
+80-word draft above, posted in his own words minutes after this file was written. This was not us
+posting; Ilia was live in the ticket at the same time this session was.
+
+**Not posted:** the "**Can we close this one now?**" question. Freshdesk flipped the linked ticket to
+"Waiting on customer" (`111103`, 18:21:32) right after, but nobody has actually asked the customer to
+confirm closing PLT-2890 in Jira. That one line is still worth sending — draft, unposted, one
+sentence: "Can we close this one now?" — everything else in the file above is spent.
