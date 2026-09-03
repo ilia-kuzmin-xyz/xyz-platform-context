@@ -480,3 +480,50 @@ Fixed in `f63236e`: `stepAchieved` **reused** (already existed), `stepOverridden
 the glyph, not resurrecting the retired badge key), `viewTasks` added. Test updated for the glyph's
 accessible name, and the suite's key strings now derive from one `KEY_PREFIX`. All three threads
 replied to and resolved.
+
+## 2026-09-03 (late afternoon) — the `React.` question, settled locally; and a CI blind spot
+
+**Supersedes the "if `f63236e` fails on it" wager above — that build never ran.** It was cancelled
+at 16:29 when a parallel run pushed `09c7a52`, with `Build image` **skipped**. So the empirical leg
+I promised did not arrive, and waiting again would not have produced it.
+
+### `React.InputHTMLAttributes` with no React import — MEASURED, not asserted
+
+Built a minimal repro instead (`typescript@5.7.3` + `@types/react@18.0.18`, this repo's flags:
+`jsx: react-jsx`, `moduleResolution: bundler`, no `allowUmdGlobalAccess`), in a file with no React
+import alongside a sibling module that does import react:
+
+| use | result |
+|---|---|
+| `… as React.InputHTMLAttributes<HTMLInputElement>` (type position) | compiles, **exit 0** |
+| `React.createElement('div')` (value position) | **`error TS2686`**, exit 2 |
+
+**The second row is the whole point: it is the positive control.** A clean run on the first row
+alone proves nothing — it is indistinguishable from a repro too weak to catch anything. The value
+case firing the *exact* predicted error shows the setup is capable, so the type case not firing is a
+real negative. Copilot's finding is wrong; the line stands. Confirmed still present at line 171 on
+`09c7a52`.
+
+*Rule worth keeping: when disproving a predicted compile error, always include a case that MUST
+fail. A green result without a positive control is not evidence, it is an untested harness.* This
+also replaces a bad habit from earlier today — rejecting the same finding by citing 23 files that do
+the same thing. That is good corroboration but it is inference from precedent; it would not have
+caught a config difference specific to this file's directory.
+
+### `Build image` has never run on PLT-2968 — four pushes in a row
+
+`192156d`, `27c52ed`, `f63236e` cancelled; `27e62be` likewise. Pushes land faster than the job's
+~18 min, so the workflow concurrency group kills each run before step 15.
+
+**Consequence: this branch's prod build is unverified.** `Lint & Run Tests` keeps passing (it did on
+`f63236e`, 16:20:41→16:28:52) and that is genuine signal for the test changes — but **it does not
+typecheck**. The webpack production build in `Build image` does, and it has not completed once.
+
+*Rule: on a branch with parallel actors, "nothing failed" is not "it passed". Read the step list.
+A cancelled run reports no failures and skips everything after the kill point, so a rollup or a
+check-suite-completed webhook will present it as unremarkable.* This is the fourth time today that
+reading the rollup instead of the steps would have let an unverified commit be called green.
+
+Neither problem is mine to fix from here: I must not push an empty commit to kick CI, and I cannot
+stop the parallel pushes. Flagged on the PR thread and to the ticket owner instead — the branch
+needs one quiet window with no push for ~20 min before it merges.
