@@ -509,3 +509,99 @@ importer should be rejecting a parent-less subtree instead of publishing one.
 
 **If IsDeleted comes back FALSE**, the rows exist and are being dropped for another reason inside the
 function, and that is a straightforward api-v2 defect with a reproducible case attached.
+
+## 2026-09-03 (Sachin's DB query) — ⛔ THE IDS I SENT ARE STALE, and the diagnosis moves from API filter to INGEST
+
+Sachin queried the DB and shared two screenshots. They change two things and invalidate one.
+
+### What his `ScheduleRevision` query shows
+
+| ScheduleName | ScheduleRevisionId | IsDeleted | DeletedOn |
+|---|---|---|---|
+| AUS02-60-Schedule-L1- | `9f13d821-…` | **true** | 2026-09-02 13:04:44 |
+| AUS02-60-Schedule-L1-10-08 | **`d505f075-ebe8-4840-98de-59222f11cfff`** | **false** | null |
+| AUS02-60-Schedule-L1-10-08-26 | `faf0d632-…` | true | 2026-09-02 13:03:59 |
+| AUS02-60-Schedule-L1-10-08 | `c07665dd-…` | true | 2026-09-02 13:04:32 |
+
+**Both revisions this folder analysed (`9f13d821`, `c07665dd`) were soft-deleted at revision level on
+2026-09-02 13:03-13:04**, and a fresh revision `d505f075` was uploaded at **13:06:24** the same
+afternoon. Nobody told us; the re-upload happened after our 09-01 measurement.
+
+### ⛔ Consequence 1 — the four ids in the 09-03 draft are from deleted revisions. DO NOT SEND THAT DRAFT.
+
+And **Sachin's `count(*) = 0` is a false negative, not a finding.** His second screenshot joins
+`ScheduleWbs` to `ScheduleRevision` with `sr."IsDeleted" = FALSE` for `ScheduleRevisionId =
+'9f13d821…'`. That revision **is** deleted, so the join eliminates every row by construction. The zero
+says "this revision is deleted", not "these WBS rows are missing". He half-spotted this himself:
+*"it doesn't mean API is returning it"*.
+
+### Consequence 2 — the ACTIVE revision is broken IDENTICALLY. Verified live today.
+
+`GET /schedules` now returns **exactly one** revision — `d505f075`, `isCurrent: true`,
+`isBaseline: true`, uploaded 13:06:24. **So the list endpoint does filter deleted revisions correctly.**
+Fetched and analysed it:
+
+| measure | old `9f13d821` (deleted) | **active `d505f075`** |
+|---|---|---|
+| rows | 1,818 | **1,818** |
+| WBS / Activity | 232 / 1,586 | **232 / 1,586** |
+| distinct parents referenced | 235 | **235** |
+| parents referenced but absent | 4 | **4** |
+| roots | 1 | **1** |
+| reachable | 1,180 | **1,180** |
+| unreachable | 638 (134 WBS + 504 Activity) | **638 (134 WBS + 504 Activity)** |
+
+The ids differ because a re-import mints new GUIDs, but the **child-count fingerprint is identical**,
+so these are the same four structural positions:
+
+| WBS children | old id | **new id (use these)** |
+|---|---|---|
+| 2 | `c9993475-41a8-4961-ad6f-34ab0a66b10a` | **`78a3bf1a-3591-4935-b7ee-9b00a58d7098`** |
+| 4 | `b0b44f2f-8521-470e-9492-a7675d3f806a` | **`94cce902-c576-4149-a03b-5b0f2fbf8a61`** |
+| 10 | `501f596d-5279-4110-9603-1aa9e1556799` | **`a673c5f2-f51f-4dbd-a7aa-cd5218b12ab5`** |
+| 11 | `f0788984-97a8-44af-871f-390dd5e596ce` | **`49d1ce1e-3acc-4124-b1ef-d3778dadcb85`** |
+
+Core & Shell re-traced on the active revision:
+`Core & Shell <- Construction Milestones <- *** MISSING 94cce902 ***`. Same symptom, new ids.
+
+**A fresh re-upload reproduced the defect exactly.** That is much stronger than "deterministic across
+two revisions of the same import" — it is deterministic across a *new* import too.
+
+### ⭐ Consequence 3 — the diagnosis moves from "API filters them" to "the rows were never written"
+
+Sachin: *"when check again this active version `d505f075` WBS schedule has total **232** item"*, and he
+notes his WBS query carries no schedule-deletion filter.
+
+**The API also returns exactly 232 WBS rows for `d505f075`.** DB 232 = API 232. **So nothing is being
+filtered out on the way through** — the API returns every WBS row the DB holds. The four parents are
+referenced by child rows and **do not exist as rows at all**.
+
+That reframes it: **not an API/`IsDeleted` defect — an ingest defect.** The importer wrote 232 WBS
+rows including children whose `parentItemId` points at four WBS nodes it never wrote. Ali's
+"endpoint filters deleted" is true of the endpoint and is simply **not what is happening here**.
+
+**Caveat to confirm with Sachin, not to assume:** that his 232 is a total row count on `ScheduleWbs`
+for `d505f075` with no delete filter on the WBS rows themselves. If his 232 excluded soft-deleted WBS
+rows, then rows could still exist flagged deleted and the filter story returns. **One query settles
+it** — the four ids, in `ScheduleWbs`, with no filters at all. It is in the draft.
+
+### Answering Sachin's actual question — the FE's API sequence
+
+He asked: *"can you please let me know the sequence of API used for this to populate"*. Traced in
+`hc-frontend`:
+
+1. `GET /api/v2/projects/{projectId}/schedules`
+   — `schedule-api-service.ts:37` (`listSchedules`), called from `schedule-service.tsx:131`.
+2. Pick the revision with **`isCurrent === true`**
+   — `schedule-service.tsx:322` (`getCurrentSchedule`); the dashboard path does the same at
+   `dashboard-schedule/loaders/api-activities-loader.ts:64`.
+3. `GET /api/v2/projects/{projectId}/schedules/{scheduleRevisionId}?deviceType=WEB`
+   — `schedule-api-service.ts:51` (`getSchedule`), called from `schedule-service.tsx:203`. **The FE
+   always sends `deviceType: 'WEB'`, hardcoded.**
+
+**There is no third endpoint and no unfiltered variant in the FE path**, so his hypothesis of "one API
+with the filter, one without" does not describe what the viewer does. The asymmetry he sensed is real
+but sits elsewhere: **`GET /schedules` filters deleted revisions, while `GET /schedules/{id}` does
+not.** Proven today — at 11:20 that endpoint returned all 1,818 rows for `9f13d821`, a revision
+deleted since 09-02 13:04. Harmless for the viewer (it only ever asks for the id the list gave it) but
+worth fixing, and it is exactly what made his count-0 confusing.
