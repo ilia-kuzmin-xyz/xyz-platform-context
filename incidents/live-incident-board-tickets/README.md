@@ -45,6 +45,66 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Session: 2026-09-03 (interactive, Ilia-driven) — 3 draft PRs raised, PLT-3101 measured on prod, and FOUR of this session's own claims retracted
+
+Appended after the scheduled 09-03 run below, which it does not replace. This was a hands-on session,
+not a sweep.
+
+### Delivered
+
+| ticket | outcome |
+|---|---|
+| **PLT-3099** | FE fix written and raised: **hc-frontend #2194**, draft, `build` + Sonar **green**. Drag-box selection now excludes hidden/isolated elements via `viewer.isNodeVisible`. 7 tests, 5 fail without the fix. |
+| **PLT-3096** | **hc-frontend #2195**, draft, **green**. `useShowWBS` no longer discards the user's collapse state. 6 tests. Branch `PLT-3096-fix`, deliberately **not** the DO-NOT-MERGE diagnostics branch. States plainly that the customer symptom does not reproduce. |
+| **PLT-3091** | **XYZPlatformApi #944**, draft, re-raise of the closed #941 with `master` merged in. Unit suite 2418 passing. `build` **red** on a repo-wide e2e breakage that is not this diff — see below. |
+| **PLT-3101** | Measured on live prod. New folder + 4 analysis CSVs. Customer has since independently confirmed the count. |
+| PLT-2890, PLT-2858, PLT-3061, PLT-3095 | drafts prepared, all unposted, all recorded in their folders |
+
+### Standing corrections made this session — carry these forward
+
+1. **Remediation is NOT blocked on a write owner.** `data-remediation-runbook.md` exists and has been
+   used (ELN03). Both PLT-3101 and **PLT-3099** carried that false blocker; both corrected.
+2. **PLT-3101 is Pattern 1, occurrence #4** — added to `recurring-defect-patterns.md`. The folder was
+   written before that file was read; the mechanism, the arithmetic test, the runbook and the likely
+   root cause were all already there.
+3. **The denominator rule** — new section in `live-incident-run-instructions.md`, written after four
+   wrong claims in one session. Before reporting something absent/stale/dead, measure how common that
+   absence is. Before deriving an identifier, grep for a field that already carries it.
+4. **Two CI facts worth knowing** (both in the run instructions): hc-frontend's Trivy scan runs
+   **after** `npm run test-ci`, so a red `build` need not be your tests; and platform-api checks out
+   `PostgreSQLDatabase` **with no `ref:`**, so its e2e schema drifts on its own — which is what reddened
+   #944 (`SystemType_Name_uidx` unmatched by `mapError`).
+
+### What is live on tickets and is NOT fully ours
+
+**PLT-3101 comment `111156`** (posted 10:49 by Ilia from an early draft of this session) states *"This
+is the dead-links pattern we've cleared before on ELN03 and FAR01"*. **That characterisation was
+subsequently retracted** — the 2 elements are real, named elements in live models. No harm landed and
+the customer's reply does not contradict it, but do not build on that sentence.
+
+### Open, in priority order
+
+1. **PLT-3101** — customer confirmed the activity complete, found 1 of 3, **2 unlocatable (matches our
+   measurement exactly)**, and authorised remediation. Draft ready. They searched **without** the
+   handles, so hand over `6272803` / `6272804` before deleting anything.
+2. **PLT-3091 / #944** — the `mapError` constraint-name fix is unraised and blocks every open PR in
+   platform-api. Proposed patch is on the PR.
+3. **PLT-2858** — GUID fix sits on branch `PLT-2858-qa-issue-location-label`, never raised as a PR, and
+   becomes user-visible the moment anyone configures rooms.
+4. **PLT-3099** — 1,239 links still on `CY-1300`; needs approval + a runbook run, nothing more.
+5. **The FE transparency fix** — linked elements that cannot be resolved are dropped silently at three
+   points (`use-linked-element-actions.ts:43`, `linking-service.ts:688`,
+   `collectSelectableDbIds.ts:20`). Nothing in the app shows them to the user. Needs no data.
+
+### Access notes
+
+Prod MCP still refuses **CH08** and **AUS02** (`project_id_not_allowed`) while listing them in
+`user_projects` — the whitelist/user-access split holds. A browser `access_token` (2 h) is the working
+route; all use this session was **GET only** (`/tmp/get.sh` hardcodes `-X GET`) and the token was never
+committed.
+
+---
+
 ## Run: 2026-09-03 — backfilling PLT-3101's unlogged 09-02 investigation (class 2/3 split, mechanism verified in code), 12 in-scope tickets: 1 left scope (PLT-3099 → In Code Review), 11 of 12 confirmed unchanged in substance, PLT-2858's close-out already delivered live by Ilia outside this routine
 
 ### Backfilling PLT-3101 — investigated 09-02 17:33–17:35, one hour after that day's README entry was written, never folded in
