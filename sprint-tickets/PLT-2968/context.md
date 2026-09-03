@@ -348,3 +348,39 @@ non-nullable `step` gating sits fine alongside the three `translate()` calls.
 
 **#2186 state:** green, current with master, **1 open review thread** — the i18n-fallback product
 call, left open on purpose. Awaiting human approval.
+
+### Second round the same day — the bot came back on my own fix, and was right (`b9313e3`)
+
+Applying the new rule immediately paid: the review of `7017211` filed **another suppressed
+comment**, on the very line I had just written.
+
+Gating the render on a resolved step **hides** the modal but leaves `tasksModalStepId` set —
+and hidden is not closed. I had considered clearing it and waved it off, reasoning a tag
+realistically never comes back. **Wrong, and the mechanism is one hook away:**
+
+`useAssetWorkflowSteps` → `useWorkflowSteps(projectId, workflowId)`, and **the query key
+includes `workflowId`**, which is resolved from `assetTypeId`. So:
+
+1. open View tasks on tag X for an asset of type 1;
+2. select an asset of type 2 → new query key → `workflowSteps` is `[]` while loading →
+   `steps.length === 0` → the ladder returns null **but stays mounted**, id still set;
+3. select an asset of type 1 again → the key returns to a **cached** entry → steps resolve
+   instantly → **the modal pops open on its own, showing tag X's tasks for a different asset.**
+
+That is *more* reachable than the untitled-modal path the first commit fixed. Fixed with an
+effect that clears the id whenever it stops resolving; the test walks the full open → other
+type → back path rather than just asserting the guard.
+
+> **Two lessons, both about my own reasoning rather than the code:**
+> 1. "This state can't realistically come back" is a claim about a **query key**, not a
+>    feeling — go read the key before dismissing it. `useWorkflowSteps` is keyed on the
+>    workflow, so a type switch empties it and a switch back restores it *from cache*.
+> 2. Hooks run before `if (steps.length === 0) return null`, so a component rendering null is
+>    still mounted and still holding all its state. An early return is not an unmount, and
+>    "the ladder disappeared" never resets anything.
+
+**Related, deliberately not done:** `ReadinessLadder` is mounted without a `key`, so
+`expandedId`, `openInstanceId`, `overrideForStepId` and `kebab` all survive an asset change too.
+`key={asset.id}` at `asset-detail-panel.tsx:150` would reset the whole class in one line — but it
+also discards the accordion `open` state and changes behaviour well beyond the reported finding,
+so it belongs in its own ticket, not in a PR waiting on approval.
