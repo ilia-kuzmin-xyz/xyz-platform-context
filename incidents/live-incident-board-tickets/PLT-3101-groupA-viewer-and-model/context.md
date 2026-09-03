@@ -581,3 +581,76 @@ The customer offered three; two are real and they are **not** equivalent.
 into the clean test, and protects against the PLT-2909 failure mode where deleting would have unlinked
 working geometry. If they still cannot find them, either remediation is defensible and the choice is
 the customer's.
+
+---
+
+## 2026-09-03 (later) — ROOT CAUSE FOUND: the 16 are elements dropped from the federated model
+
+**This supersedes the "2 elements with no status record" framing earlier in this file.**
+That finding was real but was *not* the answer to the customer's problem — it was a subset
+of the real population and it pulled the whole thread off course. Ilia challenged it:
+*"why do we talk about 3 or even 2 elements if there's a gap of 16"*. He was right.
+
+### What the 16 actually are
+
+`835` links on `CH08-MY-41`, all 835 distinct (no duplicate link rows), all 835 present in
+the project element list. The gap is **model membership**, not link integrity:
+
+| model | id | elements of the 835 it contains |
+|---|---|---|
+| `EQX - CH08 - Building_20260821` V19 (**federated**, 21 Aug) | `e1794743-…` | **819** |
+| `PC-EQIX-CHx-8-ALDG-E-T_R23_Conduits_CRP-V75` (29 Jul) | `06492519-…` | **834** |
+| `QA-EQIX-CHx-8-ALDG-E-T_R23_CRP-V78` (27 Aug) | `310b61e7-…` | 818 |
+| `…_Manholes_CRP-V64` | `563177d1-…` | 5 |
+| `…_ElectricalEquipment_CRP-V64` | `de888b24-…` | 2 |
+
+**819 is exactly the federated model's membership** — it reproduces Yash's viewer count on
+the nose. The 16 he could not select are precisely the 835 minus the federated model's 819.
+
+Decisive check — the federation is **not** a superset of the Conduits model it was built from:
+
+```
+Conduits V75 total elements   : 10362
+  also in federated model     : 10263
+  NOT in federated model      :    99   ← dropped between 29 Jul and 21 Aug
+```
+
+16 of those 99 are linked to CH08-MY-41. So: elements were deleted from the source Revit
+file, the federation was rebuilt without them on 21 Aug, and **the activity links to the
+deleted elements were left behind.**
+
+The 14 `INSTALLED_ACCURATELY` ones all carry the same Revit document GUID
+(`eff6278e-830f-4310-8cdc-c2a84af73fbe-…`, the Conduits file). The 2 `NO_STATUS_ROW` ones
+carry a different document GUID (`fa820000-bb28-475e-860e-422b67b2455b-…`) and still exist
+in 3 non-federated models. Full list: `analysis/PLT-3101-CH08-MY-41-the-16-not-in-federated.csv`.
+
+### Yash was right in his first comment
+
+Comment `111090` proposed *"elements that were removed during model updates but still retain
+activity mappings"*. That is exactly what this is. Our reply `111156` steered away from it
+toward a status-record anomaly and cost a day.
+
+### Superseded claims in this file — do not reuse
+
+| claim | status |
+|---|---|
+| "the 2 with no status record are why nobody can see them" | **superseded** — they are 2 of 16; the cause is federation membership, not the status row |
+| "this is the dead-links pattern cleared on ELN03 / FAR01" (posted as `111156`) | **retracted** — needs walking back on the ticket |
+| "83.8% have no status row, so the 2 are just never-checked" | still true as a fact, but irrelevant to the gap |
+
+### Why 3 ≠ 2 ≠ 16 (the number confusion)
+
+- **3** = the customer's own count in the ticket description (their UI, their screen).
+- **16** = link count − viewer-selectable count. The real defect signal.
+- **2** = links with no installation status row. A subset of the 16, unrelated to why they can't be seen.
+
+The 2 sit inside the 16 (confirmed). The customer's 3 has still never been reconciled with
+either — it is presumably 3 of the 16 that they happened to notice.
+
+### Next
+
+1. Walk back `111156` on the ticket and give Yash the real cause + the CSV of 16.
+2. Decide the remediation: unlink the 16 dead links (data fix, needs a write owner and the
+   `data-remediation-runbook.md` procedure).
+3. Product question: the federation rebuild silently orphans links. That is the systemic bug
+   and it is not CH08-specific — 99 elements dropped in this one source model alone.
