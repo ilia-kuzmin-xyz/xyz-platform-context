@@ -274,3 +274,59 @@ Three conclusions were drawn and two retracted inside one session:
 The common thread: **a number was interpreted before its denominator was known.** "2 elements have no
 status row" only means something once you know how many elements normally have one. The fix is
 mechanical — before reading absence as evidence, measure how common absence is.
+
+---
+
+# 2026-09-03 (post-verification) — THE draft. Every earlier draft in this file is dead.
+
+Written after the verification pass (`context.md` § 2026-09-03 verification pass). **Contains only
+measured facts and one question.** No cause is asserted, because the test that would falsify a cause
+has not been run and can only be run in a live viewer.
+
+## Comment to post on PLT-3101 — 77 words, UNPOSTED. Attach the CSV.
+
+> CH08-MY-41 has 835 linked elements: 833 marked installed, 2 with no installation record. Those 2 are
+> handles **6272803** and **6272804** — Electrical Equipment, family TMH_R23, LEVEL 01.
+>
+> Across the package it's 39 elements in the same state, so MY-41 alone won't complete Subgrade Yard
+> Work: MY-881 14, MY-211 12, MY-191 8, MY-161 3, MY-41 2. Full list attached.
+>
+> **Can site locate handle 6272803 in the viewer? That tells us whether this is outstanding work or a
+> model issue.**
+
+Attach `analysis/PLT-3101-CH08-package-never-checked-IDENTIFIED.csv` — 39 rows, activity + handle +
+name + category + level.
+
+### Every sentence traced to its evidence
+
+| statement | source |
+|---|---|
+| 835 linked | `linkedElementCount` on the schedule row **and** the live-mapping count from the feed |
+| 833 installed / 2 no record | status snapshot, validated both ways against the single-element endpoint |
+| handles 6272803 / 6272804, category, family, level | `client-element-metas.handle` — a column, not a derivation |
+| 39 across five activities, per-activity counts | full feed re-paged, `declared == live` on all six |
+
+### Deliberately absent, each for a reason
+
+- **No "ghost", "stale" or "dead" links.** Retracted; 83.8 % of CH08 elements have no status row, so
+  absence of a record is not evidence of a missing element. Saying it would be the third version of
+  the same story in front of the same customer.
+- **No decoded Revit id.** The hex-derived 6268822 was wrong by 3,981. Only `handle` goes out.
+- **No mention of the 2,200 soft-deleted mappings.** Correctly excluded everywhere the customer looks,
+  needs no action, and raising it invites a question we cannot answer.
+- **No promise of a fix, a deletion, or a timeline.** Nothing should be deleted: these are real
+  elements in live models.
+- **Not framed as an answer to Yash's "stale/ghost links" premise.** The comment simply reports what
+  is there. Arguing the premise costs a round trip and risks another correction.
+
+### Why the question is the right one
+
+It is the only thing left that we cannot determine ourselves, and it takes site under a minute:
+
+- **They find it** → the record is simply un-checked. Outstanding work; ticket closes as not-a-defect.
+- **They cannot find it, holding the handle** → metadata-present / geometry-absent, i.e. Pattern 1
+  proper. Then, and only then, the editor diagnostic (Pattern 1 § step 3,
+  `window.__linkDiagnose`) with those three models loaded, and only after that does remediation come
+  into scope — via the runbook's "is deletion even the right fix?" gate.
+
+Both branches are already written up, so whichever answer comes back needs no fresh investigation.
