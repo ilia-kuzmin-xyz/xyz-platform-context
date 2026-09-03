@@ -526,3 +526,58 @@ mostly `Parts` (MY-161/191/211, handles 7983180-7983434) and unnamed `Generic Mo
 **The single root cause of all four errors: reading a number before establishing its denominator or
 its authority.** "2 have no status row" needed "how many normally do". "6268822" needed "is there a
 field that already states this". Both were one query away.
+
+## 2026-09-03 11:11 — CUSTOMER FEEDBACK. It independently confirms 2, and it is approval.
+
+Comment `111160`, Yash relaying:
+
+> "Customer has confirmed that activity **CH08-MY-41 – UG Electrical - North - Mechanical Yard -
+> CH08** is complete and that the remaining elements should either be **marked as installed, have
+> their activity links removed, or be deleted** if they are no longer valid.
+>
+> Further investigation by the customer identified **one of the three originally missing elements**
+> within the models, leaving **two unresolved elements** that cannot be located."
+
+Freshdesk 7819 → Waiting on 3rd line (`111161`). Status still Open, Major, assignee Ilia.
+
+### What this settles
+
+1. **The 3-vs-2 discrepancy is closed, in favour of 2.** The customer found one of their three; two
+   remain. **That matches the measurement exactly** (833 installed + 2 with no installation record =
+   835). Two independent routes — our data and their site search — now agree on the same number. This
+   is the first externally corroborated figure on the ticket.
+2. **The activity is confirmed complete.** That is the substance the runbook § 3 approval needs, and
+   it came from the customer rather than being assumed.
+3. **The customer has explicitly authorised remediation**, and named three acceptable outcomes: mark
+   installed, remove the links, or delete.
+
+### What it does NOT settle — do not over-read it a second time
+
+**The customer searched without the handles.** They were never given `6272803` / `6272804`, the
+category or the level. So *"cannot be located"* is strong but is **not** the clean test the 09-03
+(third pass) plan called for, which was specifically "can site find it **with the handle in hand**".
+Reading their search as proof of geometry absence would be the same mistake this ticket has already
+made three times. It is corroborating evidence, not confirmation.
+
+### ⚠️ Note on what is live on the ticket
+
+Comment `111156` (Ilia, 10:49) is the **earlier, retracted draft**. It states *"This is the dead-links
+pattern we've cleared before on ELN03 and FAR01"* — a characterisation that the later element-list
+test does not support (the 2 are real elements in live models with names, handles and extents). The
+customer's reply does not contradict it and no harm has landed, but **the ticket currently carries a
+cause we have not proven.** Do not build on that sentence; do not repeat it.
+
+### Remediation options, now that approval exists
+
+The customer offered three; two are real and they are **not** equivalent.
+
+| option | mechanism | trade-off |
+|---|---|---|
+| **Mark installed** | `PUT /api/v2/projects/{id}/elements/{modelElementId}/status` (`elements.status.routes.ts:232`, `ELEMENT_EDIT`) → `usp_UpdateElementInstallationStatus` | Non-destructive and reversible. Completes the activity. **Leaves the link in place**, so if the element really is absent from geometry the dead link survives and keeps inflating future denominators. **Unverified:** whether the proc creates a row where none exists — it is named "Update", and its FK error path references `ElementInstallationStatus_ModelElement_fkey`, which our 2 elements satisfy (they are valid ModelElements), but the proc body is in PostgreSQLDatabase, outside this session. |
+| **Remove the links** | `POST /api/v2/projects/{postgresProjectId}/elements/activity-links/delete`, per `data-remediation-runbook.md` | Soft delete, reversible from the snapshot, clears them from `linkedElementCount` permanently. Runbook's § "is deletion even the right fix?" gate applies — and that gate is exactly what the handle check would close. |
+| ~~Delete the elements~~ | — | Not ours to do and not appropriate: they are valid elements in live, current models. Do not offer this. |
+
+**Recommendation: hand over the handles first.** It costs one message, converts the customer's search
+into the clean test, and protects against the PLT-2909 failure mode where deleting would have unlinked
+working geometry. If they still cannot find them, either remediation is defensible and the choice is
+the customer's.
