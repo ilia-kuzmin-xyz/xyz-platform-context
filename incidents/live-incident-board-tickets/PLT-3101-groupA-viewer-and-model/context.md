@@ -154,3 +154,117 @@ and an `undefined` would go straight into `setAggregateSelection` / `aggregateIs
 3. **Whether the 3 "not installed" are among the 16.** Yash has not said so and it does not follow —
    835-vs-819 is a 16-element gap; the blocking 3 are a separate claim. **Do not assume they are the
    same set.** This is exactly the arithmetic error PLT-3099 made.
+
+## 2026-09-03 — MEASURED ON LIVE PROD. The 2 blocking elements are named, and a separate API bug found.
+
+Ilia supplied a fresh browser `access_token` (2 h validity). Read-only GETs against
+`cloud.xyzreality.com` with `xyz-execution-context: api2`. **The § Access section above is now
+superseded** — the token route works; the prod MCP whitelist still refuses CH08 and that is unchanged.
+
+### Identifiers, all confirmed against live data
+
+| what | value |
+|---|---|
+| projectId | `8a00ce8b-4f84-4559-87cc-fb052da09803` |
+| current revision (isCurrent + isBaseline) | `7574b43e-2264-4634-a146-65ab8ae00ac3` — `CHx-GC-18-R0-2026-07-29_updated`, dataDate 2026-07-29 |
+| activity **CH08-MY-41** itemId | `65c1c3fd-32a5-4f29-ab25-888c619259c5` |
+| its `itemName` | `UG Electrical - North - Mechanical Yard - CH08` — matches the ticket exactly |
+| its `linkedElementCount` | **835** — matches what Yash and the customer see |
+| activityStatus / type | `TK_Active` / `TT_Task`, `validForProgressCalculations: true`, `plannedProgress: 1`, `actualProgress: null` |
+
+The revision holds 3,974 schedule rows. Note `CH08-MY-41` and `CH08-MY-411` are different activities —
+`CH08-MY-411` carries 3,500 links. Do not confuse them.
+
+### ⭐ FINDING 1 — `GET /activities/{activityId}/links` returns SOFT-DELETED mappings. Backend bug.
+
+| measure | value |
+|---|---|
+| `/api/v2/projects/{pid}/activities/{aid}/links` returns | **3,035** distinct `modelElementId` |
+| project feed `/elements/activity-links`, rows with `isDeleted: false` for this activity | **835** |
+| same feed, `isDeleted: true` for this activity | **2,200** |
+| 835 + 2,200 | **3,035 exactly** |
+| elements holding both a live and a deleted row | **0** |
+
+**So the per-activity links endpoint ignores `isDeleted` and over-reports by 3.6× on this activity.**
+
+Ruled out before claiming it:
+- **Not pagination.** Re-counted at `size=500` (7 pages), `1000` (4), `2000` (2) and `5000`
+  (**1 page, unpaginated**) — 3,035 every time, 0 duplicates. Also note `recordCount` is the count of
+  *that page*, not the total; reading it as a total is how a first pass wrongly stopped at 1,000.
+- **Not an unscoped endpoint.** Two other activities return entirely different id sets, and
+  `linkedElementCount` differs per activity (835 / 3,500 / 12).
+- **The feed was read in full**, not sampled: 372,903 rows over 75 pages of 5,000, no sync-window
+  parameters. (One page returned an empty body mid-run; retried and completed.)
+
+**Why there are so many deleted mappings — confirmed, not inferred:** CH08 has **334 models, of which
+258 are soft-deleted** (`GET /models?includeDeleted=true` vs `false` → 76 live). They are superseded
+versions — `…STRU_R23_Vertical structure-V35`, `…PLMB_PipesCHW-V66`, and so on. Heavy model-version
+churn, exactly the customer's "elements removed during model updates". Superseding a model version
+soft-deletes its elements' activity mappings; `linkedElementCount` honours that and this endpoint
+does not.
+
+**Blast radius:** any consumer of `/activities/{id}/links` sees the union. On this activity that is
+1,218 elements that look un-installed (748 `NOT_SET` + 470 with no status row) but are all attached to
+superseded model versions. **This is a strong candidate for the customer's "3 not installed"** reading
+differently in different surfaces, and it is worth checking what else calls that endpoint before
+assuming it is only cosmetic.
+
+### ⭐ FINDING 2 — the customer's blocker is **2** elements, not 3. Both named.
+
+Of the **835 live** linked elements:
+
+| installation status | count |
+|---|---|
+| `INSTALLED_ACCURATELY` | **833** |
+| **no status record at all** | **2** |
+
+Everything else on the activity is installed. The two are:
+
+```
+12398bf3-dae3-4c29-8275-a97e1cb64d5c
+cad330b0-27b4-4b61-9bfe-1e80271775a5
+```
+
+Both confirmed individually: `GET /elements/{id}/status` →
+`NotFoundError: No modelElement status found for modelElementId '…' in project '…'`. Not `NOT_SET` —
+**no row exists.** Nothing to install-check and nothing to render, which is precisely why the customer
+and their site engineers cannot find them.
+
+**The customer says 3, the data says 2. Do not silently reconcile this — ask.** Plausible readings:
+their count is approximate, or the third is one of the 2,200 deleted mappings still being counted in
+whatever surface they are reading. Both are checkable and neither should be assumed. This is the
+arithmetic discipline PLT-3099 was retracted for missing.
+
+Full sets saved: `analysis/PLT-3101-CH08-MY-41-live-links.csv` (835 rows, with status) and
+`analysis/PLT-3101-CH08-MY-41-deleted-links.csv` (2,200 rows, with status).
+
+### FINDING 3 — Yash's 16 is NOT explained by any of the above
+
+835 − 819 = 16 sits **entirely inside the live 835**, so the deleted mappings do not explain it and
+neither do the 2. The § Mechanism section's code analysis still stands as the explanation (an element
+in the platform's list but not resolvable to loaded Forge geometry), and 2 of the 16 are now
+accounted for. **The other 14 are unmeasured** — 819 is Yash's observation and has not been reproduced
+here, so it should be re-read before anyone tries to explain it.
+
+### Correction to § Mechanism — the linked-elements LIST does not show unresolvable elements either
+
+That section says the list panel "should list all 835 including the 16" because `useGroupedLinks.ts:52`
+calls `getElementsForActivity`. **Wrong.** `linking-service.ts:684-689`:
+
+```ts
+const elementIds = await this.getElementIdsForActivity(activityId)
+return Array.from(elementIds)
+  .map(elementId => this.projectService.elements.get(elementId))
+  .filter(Boolean)          // drops every id absent from the loaded element map
+```
+
+`.filter(Boolean)` discards them at the source, so the list drops them too. **There is no surface in
+the app that shows the customer these elements.** That makes the class-2 fix (surface the count that
+could not be resolved) more important, not less.
+
+### Remediation
+
+The 2 stale mappings should be removed from CH08-MY-41. Needs a platform-api write — read-only here,
+and no owner lined up, same gap as PLT-3099's 1,239. The customer cannot do it themselves (§ The
+customer CANNOT do what they asked). Marking them installed is not an option either: with no element
+record there is nothing to attach a status to.
