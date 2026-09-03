@@ -384,3 +384,40 @@ type → back path rather than just asserting the guard.
 `key={asset.id}` at `asset-detail-panel.tsx:150` would reset the whole class in one line — but it
 also discards the accordion `open` state and changes behaviour well beyond the reported finding,
 so it belongs in its own ticket, not in a PR waiting on approval.
+
+### 15:45 UTC — the same line became in-scope, because the branch moved
+
+Copilot escalated the i18n finding to `readiness-ladder.tsx:227` — **the exact line ruled
+out-of-scope at 07:55 that same morning.** The reversal is correct and the reason is worth keeping:
+
+- At 07:55 the literal was a **context** line — it existed on master, this PR did not add it, so
+  fixing it would have widened a readiness-override PR into unrelated i18n debt.
+- Since then the parallel run's `7017211` and `b9313e3` rewrote that block, so
+  `git diff origin/master...HEAD` now shows it as an **added** line.
+
+> **Rule: an in-scope/out-of-scope call has a shelf life on a branch other actors are pushing to.**
+> Re-run `git diff origin/master...HEAD -- <file> | grep '^+'` before reusing an earlier scope
+> answer. "I checked this morning" is not a check.
+
+Fixed in `192156d` with **no new keys** — all three already existed and are used elsewhere:
+`assetDetail.noTasks` (also in `AssetWorkflowStepTasks.tsx`), `assetDetail.taskCount`
+(`{{done}}/{{total}} tasks`) and `assetDetail.taskCountOne`. Singular keyed on the total, matching
+`asset-systems-section.tsx:502`. **Searching for an existing key before writing one paid off twice
+today** — this morning's `noTasks` duplication was the same mistake caught by the same check.
+
+**Reuse exposed a latent plural bug the literal was hiding:** `` `${step.done}/${step.total} tasks` ``
+rendered *"1/1 tasks"* for a single-task step; `taskCountOne` gives "1/1 task". The existing test
+asserted `'1/1 tasks'`, i.e. it **encoded the bug** — so that expectation changed meaning, not just
+format. Worth flagging as a pattern: *a test asserting a hardcoded string can be pinning a defect
+rather than a contract.*
+
+Also upgraded this suite's `translate` mock to append interpolated values (same as
+`step-tasks-modal.test.tsx`) — key-only would have left four task-count assertions green while no
+longer proving `done`/`total` reach the label.
+
+**Still out of scope, each re-verified as a context line:** the second `No tasks yet` (now 258) and
+`` aria-label={`Open task ${instance.templateName}`} ``. Both are real defects — the aria-label is
+the same empty-name bug fixed in the modal — and belong to the follow-up ticket.
+
+**Both #2186 threads replied to and resolved.** Fifth parallel push on this branch today; this one
+required no merge (remote had not moved at push time).
