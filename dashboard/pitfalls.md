@@ -322,3 +322,49 @@ who clicks only "Select all" expecting the model to highlight sees nothing happe
 reports it as broken — this is the leading (unconfirmed — video unopenable) hypothesis for PLT-3084's
 09-03 reopen. If this class of report recurs, check which "Select all" was used before assuming a
 regression.
+
+### 2026-09-04 amendment to the entry above — one claim in it is wrong, plus the three real defects
+
+The entry above says the panel menu's "Select all" *"only checks tree rows"*. Half right: it does not
+touch the viewer, but it also **does not check every row**. Two reusable gotchas came out of fixing
+this (hc-frontend draft PR #2197):
+
+**1. `react-arborist`'s `selectAll()` and `visibleNodes` exclude collapsed subtrees.** Verified in
+`react-arborist@3.4.3` source: `selectAll()` selects `Object.keys(idToIndex)`, `idToIndex` is built
+from `visibleNodes`, and `createList` → `flattenTree` descends only `if (node.isOpen)`. So after
+"Collapse all", "Select all" selects the group rows only.
+
+And you cannot patch around it by writing the missing ids into `setSelection`: consumers read
+`tree.selectedNodes`, which resolves ids via `TreeApi.get()`, and that returns `null` for anything
+outside `idToIndex`. **A selection of collapsed rows is stored and then silently dropped on read.**
+The tree has to be opened for the selection to exist as far as the library is concerned — and
+`openAll()` only marks nodes open, with `visibleNodes` rebuilt in `TreeApi.update()` on the next
+render, so a dependent `selectAll()` must wait a frame (`requestAnimationFrame`).
+
+**2. Passing `someRef.current` *into a hook during render* captures `null` and never recovers.**
+This was the actual headline bug: the panel called
+`useElementSelection({ treeApi: treeRef.current })`. `treeRef.current` is `null` until `<Tree>`
+mounts, and **populating a ref does not trigger a re-render**, so the hook memoised `null` and
+"Select all" was a silent no-op on a freshly opened panel — until some unrelated state change
+(search, sort, a toggle) happened to re-render and hand it a live tree. Pass the **ref**, read
+`.current` at call time.
+
+That intermittency is worth remembering on its own: it makes a bug look like user error. This
+ticket's *first* symptom ("not selecting all the elements linked with the activity") was closed on
+08-24 as "works once all relevant models are open" — and opening models is precisely what
+re-renders the panel and un-sticks it. Probably the right close-out for the wrong reason.
+
+Checked and clean: `grep` for the same render-time-capture shape
+(`use[A-Z]...(...Ref.current...)`) finds **no other instance** in `src/main/webapp/app`, so this
+was a one-off rather than a house habit.
+
+**3. A ref read during render cannot drive `disabled`.** The same menu gated "Show selected in 3D
+view" / "Unlink selected" on `treeRef.current?.hasNoSelection`. Selecting mutates react-arborist's
+own store without re-rendering the panel, so both stayed greyed out right after "Select all" until
+the menu was closed and reopened. Mirror the selection into React state via `onSelect` instead —
+and record it *before* any empty-selection early-return, or "Deselect all" never clears it.
+
+**4. Changing `<Tree data>` does not clear the selection.** `TreeApi.update()` rebuilds
+root/visibleNodes/idToIndex and leaves `state.nodes.selection` alone, so after switching activity the
+old ids linger, resolve to nothing, and the selection actions look available while doing nothing.
+Clear explicitly on the id that identifies the content.
