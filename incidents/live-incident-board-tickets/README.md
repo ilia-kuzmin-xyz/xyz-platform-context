@@ -96,8 +96,19 @@ removed 0% is not decided.
 
 ### Jira actions taken — and the limits on them
 
-Both tickets transitioned to **In Code Review**. **No comment, reply, @-mention or description edit
-was made anywhere**, on either ticket or either PR.
+**PLT-3091 transitioned to In Code Review** (transition 31, "Dev Complete and Ready for Review")
+once its PR was draft + CI-green + locally verified. **PLT-3084 was held** until its own CI went
+green — moving it earlier would have made "In Code Review" a claim the checks had not yet supported.
+
+**No comment, reply, @-mention or Jira description edit was made anywhere**, on either ticket. The
+two PR *descriptions* were written/updated, which is the PRs' own content, not a message to anyone.
+No reviewers were requested either: a review request pings a person, which is close enough to a
+message to stay on the wrong side of the line he drew. The Jira column is the signal.
+
+**Workflow note for the next run:** "In Code Review" is **not reachable from `Ready For
+Development`**. The transition (id **31**) exists only from `Dev In Progress`. PLT-3084 therefore
+needs two hops — id **21** ("Dev Work Started") then **31** — which is also the honest history:
+dev work did start, then it went to review.
 
 This departs from the standing "never take an action in Jira" rule, on an explicit live instruction
 naming the action, the target state and the scope, with an explicit carve-out for comments. The
