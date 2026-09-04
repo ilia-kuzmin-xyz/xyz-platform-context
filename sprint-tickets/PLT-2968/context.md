@@ -1035,3 +1035,46 @@ module-scope `translate()` trap are on the PR thread, which is where they are us
 | Approvals | **still none** on #2186 or #2192; four reviewers requested on each |
 
 Nothing further an agent can drive here without a human decision.
+
+## 2026-09-04 11:15 — logger reuse miss (mine, fixed); two runner nits deferred
+
+### `console.warn` → `createLogger` — FIXED (`d620568`)
+
+Copilot flagged the `console.warn` I added in `listOverrides`. Right, and **`createLogger` from
+`app/services/logService` is used in 51 files** with a module-scope
+`const log = createLogger('Name')` convention. A bare `console.warn` kept the line out of the OPFS
+session logs — exactly where someone asking "why does this env show no overrides" would look — and
+dumped the whole error object.
+
+Verified before pushing, since no local test run is possible:
+- `createLogger` is a **pure factory**, no import-time side effects → safe at module scope in tests.
+- `warn`/`error` always reach the console, so **nothing is lost from DevTools**; the session log is
+  additive.
+- Its OPFS append is wrapped in `void chain.catch(() => {})`, so a jsdom env without OPFS **cannot
+  throw** — the three tests that hit this path need no change.
+- Payload trimmed to `{ table, projectId }`: `isMissingRelation` already established the error kind.
+
+> **This is the FOURTH reuse miss this session** (i18n `noTasks`, `isMissingRelation`, the folder's
+> `labelKey` pattern, now `createLogger`). The rule I wrote at 17:42 was too narrow — "grep the
+> client's error module before writing a service". **Generalised: before writing any cross-cutting
+> call — logging, i18n, error mapping, formatting — grep for the app's existing helper first. The
+> tell is that the thing you're about to write by hand is infrastructure, not domain logic.**
+
+### Not fixed, deliberately
+
+- **"Your username" label** shows `firstName lastName` (`override-readiness-modal.tsx:209-210`).
+  Mismatch is real, but the copy may come from the design and the PR already carries an open
+  design-questions list — reworded silently, it would be an unreviewed design change. Flagged in the
+  commit message; needs the design owner.
+- **O(n²) numbering, new form** at `TaskInstanceModal.tsx:762`. **My earlier advice is now obsolete
+  and I said so on the thread:** the group refactor replaced `rest` with `group.items`, so the `Map`
+  I proposed no longer fits, and Copilot's "carry the index through from where the visible list is
+  built" is the better fix. *A superseded suggestion left standing on a thread is worse than none —
+  it sends the next reader the wrong way.*
+- **Orphaned JSDoc** at `checklist-instance-service.types.ts:58-69`. Two doc blocks in a row, so the
+  first attaches to nothing — and `TaskColumnSupport` has since moved below `ITaskSignature`, so the
+  prose now sits above the wrong interface. Worth keeping, not deleting: it records that column
+  presence is inferred from the keys of fetched rows (PostgREST returns every column, so a missing
+  key IS a missing column) — the reasoning that stops someone "fixing" the probe with a catalogue
+  query. Location given on the thread; it should ride the author's next commit rather than earn a
+  conflict for a comment move.
