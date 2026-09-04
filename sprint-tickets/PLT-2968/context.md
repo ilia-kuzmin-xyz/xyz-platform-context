@@ -1078,3 +1078,39 @@ Verified before pushing, since no local test run is possible:
   key IS a missing column) — the reasoning that stops someone "fixing" the probe with a catalogue
   query. Location given on the thread; it should ride the author's next commit rather than earn a
   conflict for a comment move.
+
+## 2026-09-04 11:34 — `d620568` COMPLETE clean run; PLT-2968 work is green and handed off
+
+First fully-green, uncancelled, end-to-end run on a head carrying every fix from this session.
+Verified by step list, not by the rollup: `Lint & Run Tests` 11:17:04→11:25:26, Sonar success,
+**`Build image` 11:27:13→11:33:04 — ran, not skipped** — `Vulnerability scanner` and `Scan built
+image` both success. Only `Download fixtures` skipped (conditional on a cache hit). All three checks
+green: build, SonarCloud, Copilot reviewer.
+
+*Why the step list still mattered here:* a job conclusion of `success` would also be reported if
+`Build image` were **skipped** rather than run — the same blind spot that hid the typecheck for an
+hour yesterday. Checking cost one call and is the difference between "nothing failed" and "the
+typecheck passed".
+
+### Fixes shipped this session, all CI-verified
+
+| commit | what |
+|---|---|
+| `62ec0df` | asset-switch closes the ladder's modals — the wrong-write bug |
+| `2c9678d` | `sx` no longer forwarded onto a DOM node in the menu stub |
+| `07474a1` | missing `asset_readiness` reads as no overrides (+3 tests) |
+| `d620568` | that skip logs via `createLogger`, not `console` |
+| `3a494f2`, `6a19bf8` | master merged into both open PRs after #2180 landed |
+
+### Handed off — nothing further an agent can drive
+
+- **Approvals**: #2186 and #2192 both green, four reviewers requested each, **none approved**.
+- **#2186 draft status**: `draft: false` against the session instruction — flagged, not reverted.
+- **Open by design, fully specified on their threads**: the `setOverride` concurrency race (Postgres
+  RPC, cross-repo, Supabase deploy); the runner i18n sweep (site list + the module-scope
+  `translate()` trap + the `labelKey` pattern to reuse); the O(n²) numbering (Copilot's
+  carry-the-index fix, which supersedes my earlier `Map` advice); the orphaned `TaskColumnSupport`
+  JSDoc (needs moving below `ITaskSignature`, not deleting).
+- **Tickets worth raising**: the i18n fallback (820 keys, one change); `tsc --noEmit` beside
+  `Lint & Run Tests` so type errors surface in ~1 min rather than at step 15 of 18; postcss nanoid
+  → 3.3.17; the tldraw 2.4.6 → 5.x upgrade holding two suppressed CVEs.
