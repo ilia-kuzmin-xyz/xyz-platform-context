@@ -1114,3 +1114,40 @@ typecheck passed".
 - **Tickets worth raising**: the i18n fallback (820 keys, one change); `tsc --noEmit` beside
   `Lint & Run Tests` so type errors surface in ~1 min rather than at step 15 of 18; postcss nanoid
   → 3.3.17; the tldraw 2.4.6 → 5.x upgrade holding two suppressed CVEs.
+
+## 2026-09-04 17:40 — master merged again; it RESTORED a fix the branch had reverted
+
+`#2200` (PLT-2992 hotfix: task-template item inserts omit the template id) merged to master.
+Merged into PLT-2968 as **`4e1c70b`**, and this was **not** routine hygiene:
+
+**`66e0120` on this branch had deliberately reverted its own copy of that fix** ("it ships as its
+own hotfix") — correct, since shipping it twice would collide. But it means the branch had been
+carrying the bug since, and **would have merged without it**. The master merge restores it from the
+canonical source.
+
+*Git reported no conflict — and that was not sufficient evidence.* Both sides had modified
+`checklist-library-service.ts`, which is exactly where a clean textual merge can drop a fix. So the
+merged result was checked against the hotfix's three specific changes rather than trusted:
+
+| hotfix change | present after merge |
+|---|---|
+| `draftItemRows` takes `templateId: string` | yes |
+| item rows carry `task_template_id: templateId` | yes |
+| both call sites pass it (create + new version) | 2 of 2 |
+
+> **Rule worth keeping: "no conflict markers" is not "the merge is correct."** When both sides
+> touched the same file — especially when one side reverted something — verify the specific change
+> you expect to be there, by name. Git merges text; it does not know what a fix is.
+
+## Same window — #2192 has a second Claude session driving it
+
+**#2192's description was rewritten by a different session** (`session_01PAGxsQHRAC6ZSXjgCp8rKg`)
+and its head moved `6a19bf8` → `c6acf12`. Checked rather than assumed: **my `6a19bf8` is still an
+ancestor**, `shortid` is still absent from **both** `package.json` and `package-lock.json`, and the
+only new commit is that session merging master (#2200) in — the same thing I would have done. The
+rewritten description also preserves the `.trivyignore` census work.
+
+So nothing was lost, and nothing there needs me. **Recording it so a future run does not assume sole
+ownership of #2192** — two sessions pushing one branch is how the collisions in this repo's history
+started. It remains `mergeable_state: blocked`, Sonar 0 new issues, waiting only on a required
+approval.
