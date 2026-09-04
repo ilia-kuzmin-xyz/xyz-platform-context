@@ -697,3 +697,76 @@ alone). Correct order:
 
 **Still open:** *why* the ingest dropped the 99. Needs the model-ingest owner — the same
 unanswered ownership question tracked elsewhere in this folder.
+
+## 2026-09-03 (final) — CONFIRMED IN THE BROWSER: element list vs geometry divergence
+
+Ilia ran a console diagnostic against the live project with **all 5 relevant models loaded and
+finished loading**. This is measured, not inferred, and it settles the ticket.
+
+```
+linkedTotal 835 | resolved 819 | noElementRecord 0 | noModels 0 | modelsNotLoaded 0 | noGeometry 16
+```
+
+**All 16 land in `NO_GEOMETRY`, zero in every other bucket.** Same 16 identified from the
+element-list parquet. The elements are attributed by the platform element list to
+`PC-EQIX-CHx-8-ALDG-E-T_R23_Conduits_CRP-V75` (2 of them also to Manholes V64 and
+ElecEquip V64) — **all of which were loaded** — yet `model.getDbIdForElement(handle)`
+returns nothing for any of them.
+
+### Root cause
+
+**The platform element list contains elements that the translated model geometry does not.**
+The viewer builds `elementId → dbId` as the intersection of the two, so these elements are
+silently dropped from selection, isolation and the linked-element panel. No warning, no count,
+no error — the user just sees fewer elements than the activity says it has.
+
+### Both earlier root causes in this file are WRONG — superseded
+
+| version | claim | why it's wrong |
+|---|---|---|
+| 1st | "the 2 with no status record are why nobody can see them" | they are 2 of 16; status is unrelated to selectability |
+| 2nd | "elements deleted from the Revit file; links left behind" | the models are live, undeleted, sole version of their lineage |
+| 3rd | "missing from the federated model" | **Conduits V75 was loaded and still has no geometry for them** — this is intra-model, not federation |
+
+Keep the pointers: each was published in good faith and each was disproved by the next
+measurement. The lesson is recorded in `recurring-defect-patterns.md`.
+
+### The loss clusters by linked source document, not by element
+
+`sourceFileElementId` is `<sourceDocumentGuid>-<hex element id>`. The 16 come from exactly
+two documents:
+
+| document GUID | elements it contributes to Conduits V75 | unresolved |
+|---|---|---|
+| `fa820000-bb28-475e-860e-422b67b2455b` | 16 | ≥2 confirmed |
+| `eff6278e-830f-4310-8cdc-c2a84af73fbe` | 15 | ≥14 confirmed |
+
+Both documents contribute *only* these handfuls, and both are also 100% absent from the
+federated model (16/16 and 15/15). That points at whole linked documents entering the
+metadata ingest but never reaching the geometry translation — not scattered element loss.
+
+Pending confirmation: `plt-3101-doc-check.js` (console) groups every element by source
+document and counts resolution, to show whether the loss is whole-document.
+
+### Remediation — still NOT link deletion
+
+The links are valid: they point at real element-list rows. What is broken is that those rows
+describe geometry the delivered model does not contain. So:
+
+1. **Re-ingest / re-translate** Conduits V75 (and check Manholes/ElecEquip V64) so the element
+   list and the geometry agree. If the geometry then appears, the customer marks the 2
+   installed themselves and nothing needs deleting.
+2. **Only if re-ingest still yields no geometry** are the element-list rows spurious — and
+   *then* removing the links is the right call, because the elements genuinely do not exist.
+3. **FE bug, separate:** the viewer drops unresolvable linked elements silently
+   (`use-linked-element-actions.ts:42-45`, `linking-service.ts:684-689` `.filter(Boolean)`).
+   It should surface "N of M linked elements are not present in the loaded models". Without
+   that, every recurrence of this looks to the customer like missing work rather than a data
+   fault. This is the change that would have saved the whole ticket.
+4. **Ingest bug:** whole source documents present in the element list, absent from geometry.
+   Needs the model-ingest owner — still unnamed.
+
+### Scale
+
+99 elements in Conduits V75 alone are absent from the federated model, across 17 source
+documents. This is not one activity's problem and not CH08-specific until proven otherwise.
