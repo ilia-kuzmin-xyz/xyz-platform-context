@@ -96,9 +96,11 @@ removed 0% is not decided.
 
 ### Jira actions taken — and the limits on them
 
-**PLT-3091 transitioned to In Code Review** (transition 31, "Dev Complete and Ready for Review")
-once its PR was draft + CI-green + locally verified. **PLT-3084 was held** until its own CI went
-green — moving it earlier would have made "In Code Review" a claim the checks had not yet supported.
+**Both transitioned to In Code Review**, each only after its own CI went green — PLT-3091 first
+(transition 31, "Dev Complete and Ready for Review"), PLT-3084 once its `build` completed
+(run 33858129984: every step success, both Trivy scans included, SonarCloud Quality Gate passed with
+0 new issues). Holding PLT-3084 back in the interim was deliberate: moving it earlier would have
+made "In Code Review" a claim the checks had not yet supported.
 
 **No comment, reply, @-mention or Jira description edit was made anywhere**, on either ticket. The
 two PR *descriptions* were written/updated, which is the PRs' own content, not a message to anyone.
