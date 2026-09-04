@@ -770,3 +770,69 @@ describe geometry the delivered model does not contain. So:
 
 99 elements in Conduits V75 alone are absent from the federated model, across 17 source
 documents. This is not one activity's problem and not CH08-specific until proven otherwise.
+
+### 2026-09-03 — document-level confirmation + project-wide scale
+
+Second console run (`plt-3101-doc-check.js`), all 5 models loaded, grouping every element the
+FE knows about by its source-document GUID:
+
+```
+documents 2800 | elements 353617 | resolved 353514 | unresolved 103 | docsFullyMissing 10
+```
+
+**The two documents behind our 16 are 0% resolved:**
+
+| document | elements | resolved | models claiming it |
+|---|---|---|---|
+| `fa820000-bb28-475e-860e-422b67b2455b` | 20 | **0** | Conduits V75, ElecEquip V64, Manholes V64 |
+| `eff6278e-830f-4310-8cdc-c2a84af73fbe` | 15 | **0** | Conduits V75 |
+
+**Perfect correlation across the whole project:** every document that is *absent from the
+federated model* resolves 0%; every document *present in* it resolves >0% (99%, 89%, 87%,
+50%, 15%, 8%). No exceptions in the 17 documents with any unresolved elements.
+
+Cross-checked against the element-list parquet: the 10 fully-unresolved documents appear
+**only** in the three PC- source models (56 + 21 + 20 = 97 rows) and in **none** of the
+project's other 76 models — **zero rows in the federated model.**
+
+So the loss is mixed, not purely per-document: 10 documents lose everything (60 elements in
+the loaded set), 7 more lose a subset (43 elements). 103 unresolved out of 353,617.
+*Corrects the "whole linked documents" framing in the section above — true for our two docs,
+not true project-wide.*
+
+### What this means, and what is still inferred
+
+**Proven by measurement:**
+- The 16 have no geometry in any loaded model, and the models claiming them were loaded.
+- Their source documents have no geometry anywhere in the project.
+- Only the element list carries these rows. Four independently translated models
+  (federated + 3 source) all lack them.
+
+**Not yet distinguished** — needs the ingest owner or a BIM check of the Conduits Revit file:
+- (a) a linked Revit document that failed to translate, so geometry was lost everywhere; or
+- (b) element-list rows for elements that were never delivered in any geometry.
+
+The evidence does not separate these: a linked document that failed to translate would be
+absent from the source model *and* from a federation built on it. Both roads lead to the same
+next step — **have the ingest owner check whether those source documents translated.**
+
+### Remediation — the decision tree, replacing earlier advice in this file
+
+1. **Ingest owner checks** whether `eff6278e-…` and `fa820000-…` translated for
+   Conduits V75 / ElecEquip V64 / Manholes V64.
+2. **If they should be there** → re-translate. Geometry appears, the customer marks the 2
+   installed themselves, nothing is deleted.
+3. **If they were never real** → the element-list rows are phantom; remove them *and* the
+   links. This is the only branch where deletion is correct, and it needs (1) first.
+4. **Interim, to unblock the package only:** mark the 2 installed, or remove those 2 links.
+   Whichever — that is the customer's record and their call, not ours to pick unilaterally.
+
+Either way the customer **cannot** resolve this themselves: there is nothing on screen to
+select. Earlier advice on this ticket that implied they could is wrong.
+
+### The frontend bug is the one that cost the week
+
+`use-linked-element-actions.ts:42-45` and `linking-service.ts:684-689` (`.filter(Boolean)`)
+drop unresolvable linked elements with no signal. Had the viewer said *"16 of 835 linked
+elements are not present in the loaded models"*, this ticket would have been a one-line
+answer on day one instead of site engineers hunting for elements that were never there.
