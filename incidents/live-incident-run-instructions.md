@@ -384,3 +384,53 @@ Two supporting habits, both cheap:
 falsify it is still unrun. State what is measured, hand them what they can act on, and ask for the
 one observation that settles it. On PLT-3101 that is "can site find handle 6272803" — everything else
 was ours to determine and we determined it.
+
+## 2026-09-04 — Console scripts: the deployed bundle is NOT the repo
+
+Writing a browser console script from `hc-frontend` source is unsafe without checking the
+deployed build first. On PLT-3101 (CH08, prod) the repo and the running bundle diverged:
+
+| repo `main` | deployed prod |
+|---|---|
+| `installationStatusService.setInstallationStatus(status, explicitElementIds)` | **does not exist** — the method is `setElementStatus` |
+| `elementStore.getElementStatuses(ids)` | **does not exist** — it is `getAllElementStatuses` |
+
+**Why this is dangerous, not just annoying.** The current-source API takes an explicit element
+id list. Older status-write APIs in this codebase fall back to **the current selection** when no
+ids are given. At the moment the write would have run, `selectionStore.selectedElements.size`
+was **819** — the activity's linked elements, selected by the operator's own earlier UI click.
+A script written from source, calling a selection-based method on the deployed build, would
+have marked **819 elements installed instead of 2**.
+
+Nothing was written. Two independent barriers held:
+1. the script's preflight called the source-named read method, it threw, the `try/catch`
+   recorded a problem, and `apply()` returned before the write line;
+2. the source-named write method was `undefined` on the deployed build, so it would have
+   thrown locally before any request.
+
+Verified after the fact: `undoStack: 0`, no `--- result ---` output, `apply()` resolved
+`undefined` consistent with the early return. Network tab is the conclusive check.
+
+### Rules for any console script that writes
+
+1. **Introspect the deployed object before writing a line of write-code.** Dump
+   `Object.getOwnPropertyNames(Object.getPrototypeOf(obj))` and read the real method names and
+   `fn.length` / `String(fn)` for the real signature. Never assume repo source matches prod.
+2. **Check `selectionStore.selectedElements.size` and require 0** before any status write.
+   Any selection-fallback API turns a 2-element fix into a mass update.
+3. **Dry run by default.** Pasting the script must change nothing; committing must be a second,
+   explicit call.
+4. **Pin identity, not just ids.** Cross-check each target id against an independent field (here
+   the `sourceFileElementId` handle) and abort on mismatch.
+5. **Prefer the raw endpoint over a service method** when the service might read ambient state.
+   `PUT /projects/{projectId}/elements/{modelElementId}/status` per element cannot touch
+   anything but the element named in its own URL.
+6. **A caught exception must fail closed.** The preflight here treated a thrown read as a
+   blocking problem rather than a warning. That is what saved it.
+
+### Also: the operator's console was hiding output
+
+Only `console.table` rendered; every plain `console.log` was suppressed by the console's
+**Default levels** filter (Info unticked). Status lines, "Preflight OK" and the abort reason
+were all invisible, which made a clean abort look like a silent success. **Put anything a
+decision depends on into `console.table` or a returned object, never a bare `console.log`.**
