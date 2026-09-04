@@ -469,3 +469,144 @@ Both `released: true` in Jira; PLT-2906 is Done. Master carries #2069
 reopened **11 days after 26.3.4 shipped**, so nothing is pending deployment — this is an unfixed
 defect needing new code. **PLT-2756's release is unrecorded** (no fixVersion), so which build carried
 PR #1933 is still unknown.
+
+---
+
+## 2026-09-04 — MEASURED ON PROD. H1, H2 and V2 all confirmed. The fix is named.
+
+**First hard measurement in 120 days.** Method: `enableGlobalWebViewerAPI` set as a **browser
+cookie** on prod, then a read-only console script. Script:
+`scratchpad/plt-2651-diagnose.js` (this session).
+
+### ⚡ The method matters as much as the result — no branch, no build, no deploy
+
+The 09-01 next step recorded here was *"an instrumented branch off `master` logging theta …
+**not yet written**"*. **That was unnecessary.** Feature flags in hc-frontend are resolved from
+a **cookie**, not a server-side rollout (`helpers/getFeatureFlagValue/getFeatureFlagValue.ts`):
+
+```ts
+const cookie: string = cookies.get('feature-flags')
+const flagsFromCookie = cookie ? JSON.parse(cookie) : featureFlags
+// flags absent from the cookie fall back to the compiled defaults
+```
+
+So it is per-browser and self-service. One line, then reload:
+
+```js
+document.cookie = 'feature-flags=' + encodeURIComponent(JSON.stringify(
+  [{ name: 'enableGlobalWebViewerAPI', value: true }]
+)) + ';path=/'
+```
+
+That exposes `window.projectService` (`project-x/project-provider.tsx:91-95`). The whole chain
+to the angle is reachable, and `theta` has a **public getter**:
+
+`window.projectService` → `.viewerService` → `.sectionToolService` (**public field**,
+`viewer-service.ts:73`) → `._orientation` → `.theta` (**public getter**,
+`section-tool-orientation.ts:47-49`)
+
+**Generalise this:** any viewer-internals question on prod is a cookie and a console paste, not
+a build. Recorded in `live-incident-run-instructions.md`.
+
+### Result 1 — theta IS firing and IS applied. The "patch not firing" branch is dead.
+
+```
+thetaRad -0.4372627309507484   thetaDeg -25.053
+patchHasRunThisSession true    sectionActive true
+```
+
+Cut planes measured independently via `viewer.getCutPlanes()`:
+
+| plane | nx | ny | nz | yaw |
+|---|---|---|---|---|
+| 0 | 0.9059 | −0.4235 | 0 | **−25.053°** |
+| 1 | 0.4235 | 0.9059 | 0 | 64.947° |
+| 3 | −0.9059 | 0.4235 | 0 | 154.947° |
+| 4 | −0.4235 | −0.9059 | 0 | −115.053° |
+
+The four vertical planes are a clean orthogonal set offset by exactly **−25.053°** — agreeing
+with `theta` to three decimals. **Our computed angle is the box's actual orientation.**
+
+> **This corrects the 09-01 screenshot reading in this file.** That pass judged the box to be
+> "roughly on world axes with geometry diagonal inside", while flagging that the shots were
+> perspective views so the tilt was *"not measured, only judged"*. It is measured now: the box
+> **is** rotated, by 25°. The caveat was right to be there; the judgement was wrong.
+
+### Result 2 — H2 confirmed. The angle comes from a single-discipline sub-model.
+
+Only **one** model was visible, and it drove the angle:
+
+```
+getVisibleModels()[0] = 1  PC-EXCEL_SWITCH_ATL8_ELEC_BracketsAndSupports_Bld1-V1
+  fragments 6605 · refPointTransform present · refPointYawDeg −25.053
+```
+
+An **electrical brackets-and-supports sub-model of Building 1** set the orientation for the
+whole session. The feature's design doc records ATL08's off-axis as **~17°**; in force is
+**−25.05°** — roughly **42° out**.
+
+`refPointYawDeg` equalling `theta` exactly is consistent with `_doPatch` composing its computed
+angle into that model's `refPointTransform` (`:123`), i.e. the value is ours, not the model's.
+
+### Result 3 — H1 confirmed, bit-identical, and V2's asymmetry measured
+
+Second run after loading another model **without reloading the page**:
+
+```
+thetaRad -0.4372627309507484   ← IDENTICAL to the first run, to the last digit
+```
+
+Not "about the same" — the same double. Meanwhile every plane distance moved:
+
+| plane | run 1 `d` | run 2 `d` |
+|---|---|---|
+| 0 | −139.676 | −326.803 |
+| 1 | −215.306 | +44.424 |
+| 3 | −103.123 | −94.162 |
+| 4 | −257.518 | −497.753 |
+| z pair | −15.059 / −15.059 | −12.65 / +3.825 |
+
+**The box grew to cover the new model and kept the old model's angle.** That is exactly the
+asymmetry V2 predicted from code reading — extent unions all visible models, rotation is the
+first model's `theta`. Now measured rather than inferred.
+
+*Caveat: the `d` changes are consistent with extent tracking but a manual box nudge between
+runs cannot be excluded. The bit-identical `theta` is the load-bearing proof and needs no such
+assumption.*
+
+### ⚠️ Retracted same-day: "hard-refresh is a workaround the customer can use today"
+
+Stated in the 08-31 recommendation and repeated by me this session. **Do not offer it yet.**
+A refresh gives a *fresh* angle, not a *correct* one — `getVisibleModels()[0]` is load-order
+dependent, and if the brackets sub-model still lands first, the refresh changes nothing. The
+clean-load test below decides whether it is offerable at all.
+
+### The fix — named from measurement, not guessed
+
+Both changes are in `components/section-tool/section-tool-orientation/section-tool-orientation.ts`:
+
+1. **Compute the footprint across every visible model, not `getVisibleModels()[0]`** (`:90-114`).
+   This is the deferred item from PR #2069, quoted in `../PLT-2906-.../context.md`:
+   *"the compound-footprint min-area-rect estimate is unreliable on multi-building/site
+   footprints"* and *"load-order-dependent on multi-model sessions"*. Both are now the measured
+   live defect.
+2. **Invalidate the memo when the visible model set changes** (`:57-63`). Nothing resets
+   `_patchPromise` / `_theta` today except a patch failure; there is no model-lifecycle listener
+   anywhere near this service.
+
+**Guard rail for whoever writes it:** Rishi's acceptance criteria for PR #1933 (comment 104360,
+06-05) state that on ATL08 — a diagonal building — the box is *supposed* to hug the diagonal
+footprint as a tight oriented box, while ATL07 must stay axis-aligned. **A fix that makes
+ATL08 axis-aligned re-breaks what #1933 delivered and will reopen PLT-2756.** The target is the
+right angle for the federation, not zero.
+
+### Still outstanding — two console lines
+
+1. **Clean-load test.** Hard-refresh, load **every** model, *then* switch the box on, and record
+   `thetaDeg`. Decides whether the refresh workaround is offerable, and gives the federation's
+   angle for comparison against −25.05° and the documented ~17°.
+2. **V4 / H3.** `typeof window.projectService.viewerService.viewer.get3DModels`. The run showed
+   `all3dCount: 0` while one model was visible — but the script does `?? []`, so a **missing
+   method looks like an empty list**. If it reports `"function"`, Forge genuinely sees no 3D
+   models and V4 is worse than divergent; if `"undefined"`, ignore that row. **Do not cite the
+   `all3dCount: 0` reading until this is answered.**

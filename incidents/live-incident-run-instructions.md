@@ -472,3 +472,50 @@ signal to reviewers, and would be worse than not moving it.
 
 **Do not generalise this into "transitions are fine now."** The default remains: draft it, put it in
 the summary, stop. This entry exists to describe one authorised exception, not to widen the rule.
+
+## 2026-09-04 — Viewer internals on prod: it's a cookie, not a build
+
+**Before writing an instrumented branch to answer a viewer question, stop.** Feature flags in
+hc-frontend resolve from a **browser cookie**, falling back to compiled defaults
+(`helpers/getFeatureFlagValue/getFeatureFlagValue.ts`):
+
+```ts
+const cookie: string = cookies.get('feature-flags')
+const flagsFromCookie = cookie ? JSON.parse(cookie) : featureFlags
+let cookieValue = flagsFromCookie?.find(flag => flag.name === name)
+if (cookieValue === undefined) cookieValue = featureFlags?.find(flag => flag.name === name)
+```
+
+So flags are **per-browser and self-service**. There is no rollout, no deploy, and no other user
+is affected. Set one and reload:
+
+```js
+document.cookie = 'feature-flags=' + encodeURIComponent(JSON.stringify(
+  [{ name: 'enableGlobalWebViewerAPI', value: true }]
+)) + ';path=/'
+```
+
+`enableGlobalWebViewerAPI` exposes `window.projectService`
+(`project-x/project-provider.tsx:91-95`), from which the whole service tree is reachable.
+
+**This cost PLT-2651 real time.** Its 09-01 next step was recorded as *"an instrumented branch
+off master logging theta … not yet written"* on a **Critical ticket already 118 days old**. The
+same answer turned out to be one cookie and one console paste, and it confirmed three hypotheses
+in a single session.
+
+### Rules
+
+1. **Ask "is this readable from `window.projectService`?" before proposing a branch.** Private
+   TS fields are plain runtime properties, so `_theta`-style internals are reachable.
+2. **Read, never call.** On PLT-2651, calling `patchIfNeeded()` would have re-patched the
+   transform and reloaded the extension — destroying the state being measured. Same discipline
+   as the write-script rules above.
+3. **Measure, don't judge from screenshots.** PLT-2651 sat for three months partly on a
+   perspective-view screenshot judged as "box on world axes". `viewer.getCutPlanes()` gives the
+   plane normals; `atan2(n.y, n.x)` is the yaw in degrees, undistorted. The measurement
+   contradicted the judgement.
+4. **`?? []` hides a missing method.** A count of `0` from `viewer.get3DModels?.() ?? []` may
+   mean "no such method", not "empty". Check `typeof` before drawing a conclusion from a zero.
+5. **Prefer a public getter over a private field** where one exists — `theta` has one
+   (`section-tool-orientation.ts:47-49`), so the reading does not depend on property names
+   surviving the bundle.
