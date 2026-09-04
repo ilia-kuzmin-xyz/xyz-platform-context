@@ -245,3 +245,82 @@ for a re-click — and always ask explicitly, because the dismissal is silent.
 **zero imports**, so safe. Merged clean → `bccd37c`; **22 tests / 4 files green** on the merged tree
 (GeneralTabEdit, portfolio-weighting-guard, usePortfolioWeightings), run under **vitest**, not jest.
 CI green (`build` + SonarCloud).
+
+## 2026-09-04 — Radu's "i can see it included": it's the BADGE, and the message is wrong for that state
+
+Reported from QA with a screenshot: the **mixed-weightings** message rendered directly under a
+**ticked** "Included in Portfolio Dashboard" checkbox. Radu: *"i can see it included"*.
+
+**He is right, and the guard is behaving exactly as written.** What he is looking at is the inline
+conflict **badge**, not a failed enable — three independent confirmations:
+
+1. **DOM order.** The screenshot reads: checkbox → message box → "Included in portfolio metrics.
+   Access permissions still apply." → "Updates may take up to 15 minutes" (clipped). That is the
+   JSX order in `GeneralTabEdit.tsx` exactly (checkbox → spinner → `<Badge variant='warning'>` →
+   the two helper `Typography` lines). A toast would not sit inside that stack.
+2. **The badge's render condition REQUIRES the project to be enabled** —
+   `GeneralTabEdit.tsx:139-142`: `liveWeightingConflict = isPortfolioEnabledLive &&
+   portfolioMembers ? getPortfolioWeightingConflict(...) : null`. So a ticked box is a
+   *precondition* of the badge, not a contradiction with it.
+3. The enable path cannot produce this: `onChange` shows a **toast** and returns *without*
+   `field.onChange(true)`, so a blocked tick leaves the box **unticked**.
+
+### The actual defect: one message serving two different states
+
+`getPortfolioWeightingConflict` (`portfolio-weighting-guard.ts:57-64`) is phrased for the **add**
+path — *"This project **can't be added** to the Portfolio Dashboard…"* — and the badge reuses it
+**verbatim** for the **already-added** state. Hence "can't be added" printed next to a ticked box.
+Not a logic bug; a state-wording bug. The badge needs its own copy, e.g. *"This project is in the
+Portfolio Dashboard, but the portfolio contains projects with mixed progress weightings … aggregate
+figures may be inconsistent until they are aligned."*
+
+### The data is confirmed BY THE MESSAGE — no API call needed
+
+The rendered string is a faithful serialisation of the lookup result, so it can be read backwards:
+
+| Evidence in the string | What it proves |
+|---|---|
+| 5 project names, **no "and N more"** | exactly **5** readable other members (`MAX_NAMED_PROJECTS = 5`; 6+ would print "and N more") |
+| `"Budgeted labour units vs Model element count"` — from `distinctWeightings.map(label).join(' vs ')` | **both** weightings present among those 5 ⇒ `distinctWeightings.length === 2` ⇒ the mixed branch fired |
+
+So the portfolio in that tenant genuinely holds 5 members spanning both weightings. **This is the
+branch the code itself labels "Legacy state from before this guard"** — those projects were
+portfolio-enabled before #2071 merged (2026-08-07), and the guard is frontend-only, so it never had
+a chance to prevent them. Expected on any environment with pre-existing portfolio members.
+
+### ⚠️ The consequence that matters more than the wording: Save is blocked for the WHOLE tab
+
+While that badge shows, `onSubmit` (`GeneralTabEdit.tsx:199-216`) re-runs the guard on **any** save
+where `isPortfolioEnabled` is true and aborts on conflict. So the user cannot save **name, country,
+timezone — anything** on that project's General tab. The only escape is to **untick Portfolio and
+save** (unticking is never guarded, so that path works), or align/remove the 5 legacy members.
+
+This is the dead end flagged as a "latent design question" on 08-07. **It is no longer latent — QA
+has hit it.** Two follow-ups, and the first is Pietro's call not ours:
+1. **Product:** should an already-mixed portfolio hard-block every project? Pietro's 08-05
+   reframing never covered the already-mixed case; the hard block was our reading of it.
+2. **Engineering, independent of (1):** give the badge its own already-in wording, and narrow the
+   submit guard so a pre-existing portfolio conflict doesn't block unrelated field edits.
+
+### Test steps did not cover this, on purpose — the precondition was never met
+
+Both my Jira steps (09-02) and the PR's "How to test" **require the portfolio to start empty**
+("No other project in the tenant portfolio-enabled — untick any that are"). Radu's tenant had 5
+enabled with mixed weightings, so he never entered the scripted path at all — he landed straight in
+the legacy-mixed branch, which **none of the 6 steps exercises**. Worth adding a step 7 for it.
+
+### API verification was blocked at the network edge (for the record)
+
+Tried to confirm the 5 members' weightings with a QA bearer token via
+`GET /api/v2/projects/user-projects` + `GET /api/v2/projects/{postgresProjectId}`:
+- `cloud.xyzreality.com` (prod) → genuine platform-api **401 "The attached token was not valid"** —
+  the token is for a non-prod environment.
+- `staging.xyzreality.com` → **403 `RBAC: access denied`, `server: istio-envoy`** — the staging
+  cluster's own Istio authorization policy rejects it **at the edge, before platform-api sees the
+  token**, because this sandbox isn't on an allowed source network. Not a token problem.
+- `dev.*` / `cloud-dev.*` / `cloud-qa.*` etc. → no DNS.
+
+**So the token cannot be used from this environment**, and the message-serialisation reasoning above
+is what settles the data question instead. To confirm by hand from an allowed network:
+`curl -H "Authorization: Bearer $TOK" $HOST/api/v2/projects/user-projects | jq '[.[]|select(.isPortfolioEnabled)]|map({name,postgresProjectId})'`
+then `GET /api/v2/projects/<postgresProjectId>` per row and read `progressWeightingMethod`.
