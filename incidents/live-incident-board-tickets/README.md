@@ -45,6 +45,76 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Requested pass: 2026-09-04 — Ilia's two dev-stage tickets given complete draft PRs (PLT-3084 new PR #2197, PLT-3091 unblocked), both tickets moved to In Code Review
+
+Not the scheduled sweep. Ilia asked for the tickets **assigned to him** in `Ready For Development`
+or `Dev In Progress` to each end up with a PR that is created, organised and complete — kept in
+**draft** — and then for the tickets to be moved to **In Code Review**, with **no comment anywhere**.
+Exactly two tickets qualified.
+
+### PLT-3084 — three code defects found, fixed, draft PR #2197
+
+Reopened 09-03 14:52 by Radu (QA) on a symptom the ticket had never covered: *"Select All ... in the
+linked panel is not working as expected"*. **No PR existed.** A parallel run earlier the same day
+reached a naming-collision hypothesis; this pass found three genuine code faults underneath it and
+corrected one factual claim in that entry. Both are preserved — see
+`PLT-3084-groupA-viewer-and-model/context.md` § 2026-09-04 (later).
+
+1. The panel passed `treeApi: treeRef.current` — the ref's **value** at render time. Null until
+   `<Tree>` mounts, and filling a ref does not re-render, so "Select all" was a **silent no-op on a
+   freshly opened panel** until an unrelated state change re-rendered it. This retro-explains the
+   ticket's *first* symptom, closed 08-24 as "works once all relevant models are open" — opening
+   models is what re-renders the panel.
+2. `TreeApi.selectAll()` only covers **open** rows (`createList` → `flattenTree` descends
+   `if (node.isOpen)`), so after "Collapse all" it selected group rows only. Cannot be patched via
+   `setSelection`: `TreeApi.get()` returns null outside `idToIndex`, so a collapsed selection is
+   stored then dropped on read. Fixed by opening first, selection deferred a frame.
+3. The follow-up items were disabled off `treeRef.current?.hasNoSelection`, read during render — so
+   they stayed greyed out right after "Select all". Plus a fourth found on self-review: swapping
+   activity leaves the old selection ids behind, so the same items look enabled and do nothing.
+
+17 tests, each fix pinned by reverting it (1/2/3/1 red respectively). All 40 specs in that directory
+pass. Reusable gotchas written up in `dashboard/pitfalls.md`.
+
+### PLT-3091 — the red build was never this diff; master already had the fix
+
+#944 had sat `blocked` with `build` red since 09-02. Confirmed from the job log: three
+`expected 400 to equal 409` in Commissioning task-library e2e, nothing to do with
+`schedules.service.ts` — the unpinned-schema breakage this file already documents. **Master has
+since fixed it**, and in doing so confirmed `AssetType_Name_uidx`, the name the 09-02 note
+deliberately refused to guess by analogy. Merged master into the branch and pushed; nothing ported
+by hand, the PR was not widened, and its diff against master is still exactly 4 files / 187
+insertions.
+
+Verified locally this pass rather than taken on trust: `tsc --noEmit` clean, **2572 unit tests
+passing, 0 failing** (the PR body's "1 failing" azure.util note is now stale), and reverting the
+5-line service change turns exactly 4 tests red — matching the PR's own claim.
+
+**Its real blocker is unchanged and is not CI:** Yash asked Mostafa on 08-28 whether the LOE-progress
+display is a planning-team call. 7 days, no answer. The code is ready; what to show in place of the
+removed 0% is not decided.
+
+### Jira actions taken — and the limits on them
+
+Both tickets transitioned to **In Code Review**. **No comment, reply, @-mention or description edit
+was made anywhere**, on either ticket or either PR.
+
+This departs from the standing "never take an action in Jira" rule, on an explicit live instruction
+naming the action, the target state and the scope, with an explicit carve-out for comments. The
+four-part test for when that counts as authorisation — and the fact that it **never** extends to
+anything communicative — is written up in
+`live-incident-run-instructions.md` § 2026-09-04. **Do not read this entry as "transitions are fine
+now."**
+
+### What could not be verified
+
+- **Radu's video on PLT-3084** (Atlassian auth). Falsifiable prediction for whoever opens it: on a
+  freshly opened panel the first click of a row-menu "Select all" does nothing in the viewer.
+- **Whether prod carries the current panel implementation** — if the deployed bundle predates the
+  `useElementSelection` split, this is a stale-build story again, as the Ctrl+Z half turned out to be.
+- **PLT-3084's e2e/visual behaviour** — nothing was run against a real app; `hc-frontend` still
+  cannot `npm ci` here (`@xyzreality/dhtmlx-gantt` 401s). Defect 4 has no unit test and the PR says so.
+
 ## Run: 2026-09-04 (scheduled) — 12 in-scope tickets, 1 REOPENED with a new symptom (PLT-3084), 2 resolved-outside-the-routine (PLT-3095 posted, PLT-2858 closed and now out of scope), 9 confirmed unchanged, zero Jira actions taken
 
 Board re-queried: `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, filtered to

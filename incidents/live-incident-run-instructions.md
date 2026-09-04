@@ -434,3 +434,41 @@ Only `console.table` rendered; every plain `console.log` was suppressed by the c
 **Default levels** filter (Info unticked). Status lines, "Preflight OK" and the abort reason
 were all invisible, which made a clean abort look like a silent success. **Put anything a
 decision depends on into `console.table` or a returned object, never a bare `console.log`.**
+
+## 2026-09-04 — a status transition was performed, on an explicit live instruction. Read the limits.
+
+The hard rule above says "no comments, no transitions". On 09-04 Ilia asked, in a live session:
+
+> "once it's done move all tickets to in code review. But Do not leave any messages or comments !!!!"
+
+**The transitions were performed. The comment ban was not touched.** Both halves matter, and the
+reasoning is recorded here so the next run neither repeats the 09-02 failure nor freezes on a direct
+order.
+
+**Why this was not the 09-02 mistake.** That one was a *comment*, posted off an instruction that
+could be read two ways ("could you leave a comment there for Yash meanwhile"). The objection was
+recorded as being about writing in the ticket at all: *"A comment posted under Ilia's name is Ilia
+speaking to his colleagues and his customer. That is not a channel to borrow."* That rationale is
+about **speech**. A status transition is not speech — it moves a board column, it says nothing to
+anyone in Ilia's name, and it is undone by one click.
+
+**What made it authorisation, and the test to apply next time.** Not that a sentence *could* be read
+as consent — that is exactly the trap. All four of these held:
+
+1. it named the **action** ("move"), the **target state** ("in code review") and the **scope** ("all
+   tickets") — nothing was inferred;
+2. it was **unsolicited** — not a "go ahead" harvested from a reply to a draft;
+3. it came with an **explicit carve-out** for the thing that is actually forbidden ("do not leave any
+   messages or comments"), i.e. he was drawing the same speech/state line himself;
+4. the action is **non-communicative and reversible**.
+
+**If any of those four is missing, the answer is still no.** In particular: an instruction to comment,
+reply, @-mention, create an issue or edit a description is **never** covered, however explicit —
+those are all speech, and the rule already anticipates them by name.
+
+**Precondition, and it was load-bearing:** he said *"once it's done"*. The transitions happened only
+after each ticket had a complete draft PR. A transition ahead of the work it claims is a false
+signal to reviewers, and would be worse than not moving it.
+
+**Do not generalise this into "transitions are fine now."** The default remains: draft it, put it in
+the summary, stop. This entry exists to describe one authorised exception, not to widen the rule.
