@@ -1151,3 +1151,39 @@ So nothing was lost, and nothing there needs me. **Recording it so a future run 
 ownership of #2192** — two sessions pushing one branch is how the collisions in this repo's history
 started. It remains `mergeable_state: blocked`, Sonar 0 new issues, waiting only on a required
 approval.
+
+## 2026-09-04 17:50 — real numbering bug in `groupItems` — FIXED (`e9ca3ca`)
+
+`groupItems` numbered a group `groups.length + (header ? 1 : 0)`. Items appearing **before any
+header** build a leading group — it has to hold them — which carries no number of its own but still
+lands in `groups`, so it advanced the count. **Wherever such items existed, the first HEADED group
+was numbered 2 and its items read `2.1.1`.** Confirmed in both paths: `byParent` opens the loose
+group via `if (loose.length > 0) open(null)`, the positional branch via `current ?? open(null)`.
+
+Fixed with a dedicated `headed` counter — the thing `groups.length` could not express. Leading group
+keeps `number: 0`, already inert because `itemNumber` renders an unheaded group's items as a bare
+index.
+
+**Pushed into an actively-moving file, unlike the O(n²) and i18n nits on the same file.** The
+distinction that justified it: this produces *wrong output a user sees*, the fix is two lines, and no
+restructuring is involved.
+
+### Two checks that could each have gone the other way
+
+**1. Did the suite encode the bug?** It asserts `1.1.2` and `2.1.1`. If those described a *first*
+headed group, the fix would have had to change them — the signature of a test written around a
+defect (exactly what happened with `'1/1 tasks'` yesterday). **It didn't:** the `GROUPED` fixture
+opens with a header and gives every item a `parentItemId`, so no leading group is built and
+`groups.length` coincidentally agrees. Those assertions describe a genuine second group and are
+untouched. *Read the fixture before concluding either way — the same assertion text can mean
+"correct" or "bug enshrined".*
+
+**2. My own new test was initially worthless.** I first wrote
+`expect(getByTestId('task-group-h1')).toHaveTextContent('1')`, mirroring the suite's style. But the
+header also renders an item count, so with one item in the group **that assertion passes off the
+"(1)" even with the number wrong** — a regression test that proves nothing. Changed to assert
+`1.1.1` on the *item*, which cannot pass with the bug present.
+
+> **Rule: for an off-by-one, assert on a value that changes when the bug is present.** A substring
+> assertion against a string that contains other numbers is not a test, it is decoration. Ask "would
+> this fail on the unfixed code?" — and if you cannot answer yes immediately, it wouldn't.
