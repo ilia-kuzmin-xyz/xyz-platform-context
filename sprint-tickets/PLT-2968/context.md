@@ -971,3 +971,40 @@ dependency is back; the working tree is clean.
   O(n²) numbering, both belonging to the single `TaskInstanceModal.tsx` quality sweep once the
   runner is feature-complete.
 - **Waiting on humans:** approval on #2186 and #2192; and whether #2186 should return to draft.
+
+## 2026-09-04 10:50 — MERGE BLOCKER RESOLVED; and the i18n sweep de-risked
+
+**`SCHEMA_PREVIEW` is now `false`** — `fb67dcc` ("schema preview off — the columns are real now").
+Verified at head rather than trusting the subject line: `task-runner.preview.ts:17` reads `false`. So
+the stand-in preconditions can no longer be injected and the `preconditionsMet` → `itemsReadOnly`
+path is gone. Thread replied to and resolved.
+
+*Caveat stated on the thread:* the commit claims the migration has landed. **The Supabase repo is
+outside this session's access scope**, so that is taken at face value, not checked. If the columns
+are NOT actually live, turning the preview off is still safer than leaving it on, but the previewed
+parts simply stop drawing — a quieter wrong outcome. Flagged for a reviewer.
+
+### The runner i18n sweep: specified, de-risked, still not pushed
+
+Both deferred items remain at head (1 `translate()` call vs ~12 literals; `rest.indexOf(item)` at
+716). Two findings from working it out properly:
+
+**1. The obvious fix is a worse bug.** `FILTERS` is a module-level `const`. Putting `translate()`
+inside it evaluates once at import — react-jhipster resolves `TranslatorContext` at CALL time, so the
+label freezes at the import-time locale, and if the bundle isn't loaded yet it is permanently
+`translation-not-found[…]`. **That looks localised and isn't**, which is worse than visible English.
+
+**2. This folder already has the answer.** Line 520 does
+`translate(TASK_TYPE_BY_ID[...]?.labelKey)`, and `task-status.config.ts` / `task-type.config.ts` both
+store a `labelKey` rendered via `translate(config.labelKey)`. So `FILTERS` carries `labelKey`,
+resolved at the render site (795), namespaced `hc.pages.TaskRunner.*` to match
+`hc.pages.TaskStatus.*` / `hc.pages.TaskType.*`. *Third time this session that the answer was already
+in the folder — and the first time I looked for it BEFORE writing anything.*
+
+**3. Cost is lower than I assumed.** `TaskInstanceModal.test.tsx:35` already mocks
+`translate: (key) => key` and asserts on none of the English strings, so **no test changes needed**.
+I had been treating test churn as the reason it was expensive; it isn't.
+
+Not pushed: two commits landed in that file within the hour, and a build was in flight — pushing
+would cancel it, the exact anti-pattern recorded at 23:27. Full site list is on the PR thread so the
+sweep can be done in one pass by whoever gets there first.
