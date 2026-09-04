@@ -142,3 +142,38 @@ running app per this routine's hard rule against unverified visual claims.
 
 **No draft to Radu.** Nothing to tell QA yet that isn't already implied by "we're looking into it" —
 premature until one of the two branches above is confirmed.
+
+## 2026-09-04 (later) — class **2** delivered: draft PR #2197. Supersedes "class 3, no draft" above for what to do next.
+
+The entry above is not withdrawn — its 3-step repro is still the right thing to run, and its
+"stop and re-investigate" branch is still the right instinct. But its premise was that no fix was
+within reach without seeing the app. That premise was wrong: **three code defects were found by
+reading current master and the pinned react-arborist source, and they are fixed and tested.** Full
+mechanism in `context.md` § 2026-09-04 (later).
+
+So the class moves 3 → 2 for the code, while staying 3 for *confirming this is what Radu saw*.
+
+**Prediction change, and it matters for step 1 of the repro above.** That entry predicts step 1
+leaves the 3D view unchanged but *"only the tree rows show as checked"*. Two corrections:
+
+- On a **freshly opened panel**, a **row right-click → "Select all"** does nothing at all — that is
+  defect 1 (the panel handed the hook a null tree ref), and it is the branch the entry above calls
+  *"a different, real regression"*. It is real, and it is now fixed.
+- The `...` menu's "Select all" only checks rows that are **open**. With everything expanded
+  (the default) it looks complete; after "Collapse all" it silently misses collapsed children.
+
+**Revised repro, for whoever has the app** — same three steps, plus:
+
+0. Open the panel **fresh** (select an activity for the first time), right-click a row, choose
+   "Select all". If nothing highlights in the model, defect 1 is confirmed. Then change the search
+   box or the sort order and try again — if it now works, that is conclusive.
+
+**No draft to Radu, and no draft to anyone.** Still nothing to say that a merged fix will not say
+better, and the routine's no-Jira-comment rule stands regardless. The ticket was moved to
+**In Code Review** (see the run log for why that transition was authorised and why comments were not).
+
+**What a reviewer of #2197 should push back on, if anything:** "Select all" now expands the tree,
+which the user did not ask for. The alternative leaves `unlinkSelected` broken after a collapse,
+because react-arborist cannot hold a selection of collapsed rows — the trade-off is argued in the
+PR body. And defect 4 (stale selection across an activity switch) has no unit test; it needs the
+panel rendered with its providers, which no spec in that directory does.
