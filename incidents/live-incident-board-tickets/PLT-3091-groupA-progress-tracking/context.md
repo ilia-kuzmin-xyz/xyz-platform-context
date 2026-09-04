@@ -676,3 +676,38 @@ Recorded as one comment on #944 with the proposed patch; nothing pushed, because
 
 **So PLT-3091's own change is as green as this environment and CI can show it.** The PR is blocked
 only by a repo-wide e2e breakage that affects every open PR.
+
+## 2026-09-04 — PR #944's red build was never this PR's; master already carries the fix, merged in
+
+Requested pass (Ilia: make sure the Ready-For-Dev / Dev-In-Progress tickets assigned to him each
+have a complete draft PR). #944 was sitting at `mergeable_state: blocked` with `build` red since
+09-02, and that red was **not** this diff.
+
+**Confirmed from the job log** (`100309790164`): three failures, all `expected 400 to equal 409` —
+`asset.types.e2e.spec.ts:202`, `:363`, `system.types.e2e.spec.ts:315`. Commissioning task-library
+e2e, nothing to do with `schedules.service.ts`. This is the unpinned-schema breakage recorded in
+`live-incident-run-instructions.md` § "platform-api e2e: the DB schema is NOT pinned".
+
+**The fix has since landed on master, by someone else, and it names the constraint the 09-02 note
+could not confirm.** Both services now match a list instead of two hard-coded strings:
+
+```ts
+// src/services/system.types.service.ts:44 on master
+const NAME_UNIQUE_VIOLATIONS = ["SystemType_Name_uidx", "SystemType_Name_key", "SystemType_ProjectShardId_Name_key"];
+// src/services/asset.types.service.ts:43 on master
+const NAME_UNIQUE_VIOLATIONS = ["AssetType_Name_uidx", "AssetType_Name_key"];
+```
+
+So `AssetType_Name_uidx` **is** the real asset-type name. The 09-02 note deliberately refused to
+assume it by analogy from the system-type name and said "read the real message" — that caution was
+right, and the answer is now on the record rather than guessed.
+
+**Action taken: merged `origin/master` into `PLT-3091` and pushed** (merge `eaaeb9c`, clean, no
+conflicts). Nothing was ported by hand and this PR was not widened — the branch was simply behind.
+Verified after the merge that the PR's own diff against master is still exactly the 4 files /
+187 insertions the PR describes.
+
+**The blocking question is unchanged and is still the only thing in the way of merging:** Yash asked
+Mostafa on 08-28 whether the LOE-progress display is a planning-team call, and nobody has answered.
+Now 7 days. The code is ready; what to *show* in place of the removed 0% is not decided, and that is
+a product answer, not a code one. The PR stays a draft for that reason, not because of CI.

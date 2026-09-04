@@ -555,3 +555,111 @@ the Ctrl+Z symptom; nothing here can repeat it for this symptom).
 The code reading is complete and cheap; committing to a fix without watching the video risks
 "fixing" a working-as-designed two-step flow, or missing a real regression. See
 `recommended-action.md` for the specific repro steps that would resolve it without the video.
+
+## 2026-09-04 (later, requested pass) — three code defects found and fixed; draft PR #2197. Corrects one claim in the entry above.
+
+Requested by Ilia: take the Ready-For-Dev / Dev-In-Progress tickets assigned to him, make sure each
+has a complete draft PR. This entry is a **parallel run to the one above** and reaches a different
+conclusion — the two are complementary, and where they disagree the disagreement is settled below
+from react-arborist's own source rather than by argument.
+
+### CORRECTION to the table above: `selectAll()` does NOT check every row in the tree UI
+
+The entry above says the panel menu's "Select all" *"checks every row in the **tree UI**"*. That is
+wrong, and it matters, because it is the second of the three defects.
+
+Read from the pinned dependency (`react-arborist@3.4.3`, extracted from the npm tarball since this
+environment has no `node_modules`):
+
+```js
+// dist/module/interfaces/tree-api.js:357
+selectAll() { this.setSelection({ ids: Object.keys(this.idToIndex), ... }) }
+// :35,42
+this.visibleNodes = createList(this); this.idToIndex = createIndex(this.visibleNodes);
+// dist/module/data/create-list.js
+function collect(node) {
+  if (node.level >= 0) list.push(node)
+  if (node.isOpen) node.children?.forEach(collect)   // ← descends into OPEN nodes only
+}
+```
+
+So `selectAll()` selects exactly `visibleNodes`, and `visibleNodes` **excludes anything inside a
+collapsed group**. "Collapse all" sits two items above "Select all" in the same menu. The rest of
+that entry's reasoning stands; this one line does not.
+
+**Also settled, and it closes off the obvious fix:** you cannot repair this by pushing the missing
+ids into `setSelection`. Every consumer reads `tree.selectedNodes`, which resolves ids through
+`TreeApi.get()` (`tree-api.js:130-137`), and that returns `null` for any id outside `idToIndex`. A
+selection of collapsed rows is stored and then silently dropped on the way out. The tree has to be
+*opened* for the selection to be real.
+
+### The three defects, all verified by reading current master
+
+1. **The panel handed the hook the ref's *value*, not the ref.** `activity-linking-list.tsx:36-38`
+   passed `treeApi: treeRef.current`. That is `null` until `<Tree>` mounts, and filling a ref does
+   not re-render — so `useElementSelection` held `null`, `selectAllElements` read
+   `treeApi?.visibleNodes ?? []` → `[]`, and `selectElements` bailed on `dbIdsByModel.size === 0`.
+   **"Select all" was a silent no-op on a freshly opened panel** and only began working once an
+   unrelated state change (search / sort / unloaded-models toggle / new tree data) re-rendered the
+   panel. This is the biggest of the three and the entry above did not find it.
+
+   It also retro-explains symptom (1) on this ticket — *"not selecting all the elements linked with
+   the activity"* — which was closed 08-24 as user error ("works once all relevant models are
+   open"). Opening models re-renders the panel, which is exactly what un-sticks this bug. That
+   close-out may have been right for the wrong reason.
+
+2. **`selectAll()` misses collapsed rows** — per the correction above.
+
+3. **The follow-up actions stayed greyed out.** `useActivityMenu.ts:139,145` disabled "Show selected
+   in 3D view" and "Unlink selected" off `treeRef.current?.hasNoSelection`, read during render.
+   Selecting mutates react-arborist's store without re-rendering the panel; `onSelect` →
+   `handleSelect` only called `setIsListOpened(true)`, which React bails out of when already true,
+   and `ghostHighlight` holds a ref not state. "Select all" is also the one menu item that does not
+   close the menu. So: click "Select all", and the two actions you would then want are still
+   disabled until you close and reopen the menu.
+
+### On the entry above's naming-collision hypothesis
+
+It is real and I have not retracted it — two menu items share the label "Select all" and one reaches
+the viewer while the other does not. It is called out in PR #2197 as a design question for Jason /
+Mostafa rather than fixed, because renaming a menu item is a product call. But it is **not
+sufficient** as an explanation: all three defects above are genuine code faults in the same feature,
+independent of the labelling, and #3 in particular means the documented two-click sequence
+("Select all" → "Show selected in 3D view") was *unavailable* on the first try.
+
+### The fix — hc-frontend draft PR #2197, branch `PLT-3084`
+
+| file | change |
+|---|---|
+| `hooks/useElementSelection.ts` | take `treeRef`, read `.current` at call time; ref now optional |
+| `hooks/useActivityMenu.ts` | `selectAllRows` = `openAll()` then `selectAll()` next frame; `disabled` from `hasSelection` |
+| `activity-linking-list.tsx` | pass the ref; track `hasSelection`; feed the menu |
+| `components/linked-node.tsx` | stop passing a tree handle it never used |
+
+`openAll()` only marks nodes open — `visibleNodes` is rebuilt in `TreeApi.update()` on the next
+render — so the selection is deferred one `requestAnimationFrame`, the sequencing the existing
+"Expand all" item already used (`useActivityMenu.ts:112`).
+
+**Tests: 17, and each fix is pinned.** Reverting them one at a time turns red: 1 test (ref read at
+call time), 2 tests (open-then-select), 3 tests (disabled-from-state), 1 test (optional-ref guard —
+a bug introduced by making `treeRef` optional and caught on self-review, not in the original code).
+`useActivityMenu` had no spec at all before this.
+
+Run in a throwaway vitest project in the scratchpad with the hook modules and both specs copied in
+and type-only imports stubbed — this repo still cannot `npm ci` (`@xyzreality/dhtmlx-gantt` 401s).
+**Nothing was built or run against the real app.**
+
+### Still unverified
+
+- **Radu's video** — unopenable here (Atlassian auth). If it shows something outside these three
+  defects, #2197 is not the whole of it. Falsifiable prediction for whoever watches it: on a freshly
+  opened panel, the *first* click of a row-menu "Select all" does nothing at all in the viewer.
+- **Whether prod carries the current implementation.** The entry above's point stands: if the
+  deployed build predates the `useElementSelection`/`collectSelectableDbIds` split, its "select all"
+  is a different implementation and this could again be a stale-build story. Nothing here can read
+  the deployed bundle.
+- **"Select all" then "Unlink selected" on a collapsed tree still unlinks nothing.**
+  `activity-linking-list.tsx:55` filters `selectedNodes` on `node.data.elementId` and container rows
+  have none. Defect 2's fix makes it moot in practice (the tree is open by then), but the
+  non-recursive filter is deliberate and documented as such in `useContextMenu.ts:66-68` — making
+  unlink recursive is a product decision, deliberately not touched.
