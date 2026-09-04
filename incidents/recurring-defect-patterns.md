@@ -905,3 +905,68 @@ query and an apology.
 GUIDs and an identical child-count fingerprint (2/4/10/11) and identical 638 unreachable rows. That is
 far stronger evidence than determinism across two revisions of the same import — it proves a fresh
 upload of the same source reproduces it.
+
+---
+
+## Pattern 9 — a duplicated helper that silently drops the original's error handling (2026-09-04, PLT-3104)
+
+**Shape.** Two surfaces do the same job. One delegates to a shared helper; the other has a
+hand-rolled copy. They look equivalent in a diff, and the copy is missing a property that was
+never written down — usually error handling. The surface with the copy breaks; the surface with
+the helper does not. **"Works in the editor, broken in the dashboard" is the tell.**
+
+**PLT-3104.** Downloading a QA issue image.
+
+| surface | implementation | on a 403 |
+|---|---|---|
+| Web Viewer | `useBlobDownload` → **axios** | axios rejects on non-2xx → caught, logged, no file |
+| Dashboard | hand-rolled → **`fetch`**, `response.ok` never checked | `fetch` resolves → storage's error XML saved as `<name>.jpg`, reported as success |
+
+The copy also lost the `isDownloading` re-entrancy guard and the documented cross-origin
+`download`-attribute workaround (PAPI-3385) that the hook carries in a comment.
+
+**Why it recurs.** `fetch` not rejecting on HTTP errors is the single most common footgun in a
+hand-rolled port from axios. Nothing in review flags it, because the code reads as correct and
+the happy path is identical.
+
+**How to catch it.** When two surfaces disagree and one of them is "the new one", **diff the
+implementations, not the symptoms** — and specifically ask what the shared helper does that the
+copy does not. Grep for `fetch(` in a codebase whose service layer is axios; each hit is a
+candidate.
+
+**Fix direction.** Delete the copy, use the helper. Do not "add an `ok` check" to the copy and
+leave two implementations to drift again.
+
+---
+
+## Pattern 10 — two id spaces for the same entity, and only one is on the context (2026-09-04, PLT-3104)
+
+**Shape.** An entity carries a legacy id and a canonical id. Some layers take one, some take the
+other, and the conversion is an **explicit helper rather than an interceptor**. A new call site
+picks whichever id is nearest to hand, gets the wrong space, and 404s — presenting as "the
+feature doesn't work" with nothing in the UI to explain it.
+
+**hc-frontend, project ids:**
+
+| where | which id |
+|---|---|
+| `useDashboardProject().projectId` | **mongo** (`projectId: mongoProjectId \|\| null`) |
+| `useDashboardProject().projectIdForToken` | mongo (Forge token) |
+| `DashboardQualityService`, all api-v2 calls | **postgres** (`_postgresProjectId`) |
+| conversion | `getProjectId()` in `api-instance.ts` — an **explicit helper**, not a URL rewrite |
+
+Caught pre-merge on PLT-3104: the re-sign was first wired to `.projectId` and would have 404'd
+on every retry. The postgres id was provider-local state with no getter on the service, so the
+fix exposed `postgresProjectId` on the context (dep array included).
+
+**Trap inside the trap.** `getProjectId()` looks like the obvious conversion, but on a cache
+miss it **POSTs `create-project`**. Fine at bootstrap, far too much side effect for something
+like an image retry. Prefer plumbing the resolved id over re-resolving it.
+
+**How to catch it.** Never take an id from the nearest hook. Find the **working** call to the
+same endpoint and copy where *it* gets its id from. On PLT-3104 that was one grep:
+`new DashboardQualityService(` → `this._postgresProjectId`.
+
+**Watch for.** The same split exists for tenant ids (`mongoTenantId` vs postgres) — see
+`issues.service.ts:402` passing `projectDetails.mongoTenantId`. Assume any id in this codebase
+may have two spaces until checked.

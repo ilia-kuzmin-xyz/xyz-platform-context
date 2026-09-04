@@ -3169,3 +3169,57 @@ Rishi's transcription). Corroborative-only on the rest (2874, 2879, 2882, 2815,
 
 - **Masum Ahmed** — reporter/assignee on 2649, 2619, 2385 (support/Freshdesk agent).
 - **David Webb** — BE/data-pipeline/dagster owner (commenter on 2385).
+
+---
+
+## 2026-09-04 session log
+
+Ticket work this run, newest first. Full detail in each ticket folder.
+
+### PLT-3104 — Dashboard issue images vanish after Download (PA18, #0024) — **fix built**
+
+New folder: `PLT-3104-dashboard-issue-image-download/`. Draft **PR #2198** on hc-frontend.
+
+Root cause: the dashboard's hand-rolled download used `fetch` and never checked
+`response.ok`, so a failed request saved storage's error XML as the image file; failed loads
+then latched a permanent error until page refresh. The Web Viewer was fine because it uses the
+shared `useBlobDownload` (axios, which rejects on non-2xx). Fix reuses that hook, adds a
+re-sign on load failure, and gives thumbnails an error placeholder.
+
+Two reusable patterns promoted from this: **Pattern 9** (duplicated helper drops the original's
+error handling — "works in the editor, broken in the dashboard") and **Pattern 10** (mongo vs
+postgres project id; the conversion is an explicit helper, not an interceptor). Pattern 10
+nearly shipped as a bug — read it before writing any dashboard api-v2 call.
+
+**Awaiting Ilia:** the requested "Code Review" status does not exist in this workflow;
+recommended **Dev In Progress**. Not transitioned.
+
+### PLT-3101 — Elements reported not installed but not findable (CH08-MY-41) — **resolved for the customer**
+
+The two blocking elements were marked `INSTALLED_ACCURATELY` against prod, authorised by Ilia
+after reviewing the exact request payload. Verified three ways, the decisive one being the
+server's own change feed: `recordCount: 2` for CH08 that day, both ours.
+
+Root cause (measured in the browser with all 5 models loaded): **835 linked, 819 resolved, 16
+with no geometry in any delivered model** — the platform element list carries rows the
+translated models do not. Two earlier root causes recorded in that folder were wrong and are
+labelled superseded, not deleted.
+
+The 835-vs-819 mismatch **remains** and is routed to **PLT-2874** as the same pattern — with an
+explicit warning in the notes that FAR01's gap (~67,000) and CH08's (103 of 353,617) differ by
+two orders, so same-cause must not be claimed.
+
+**Near-miss worth knowing:** the deployed `installationStatusService.setElementStatus(status)`
+has **arity 1** and writes to `selectionStore.selectedElements`, which held **819** elements at
+the time. A service-based fix would have marked all 819 installed. Rules now in
+`live-incident-run-instructions.md` § "Console scripts: the deployed bundle is NOT the repo".
+
+### Waiting on Ilia
+
+| ticket | what |
+|---|---|
+| PLT-3104 | choose a status (recommended Dev In Progress); PR #2198 review |
+| PLT-3101 | post the drafted reply to Yash (walks back comment 111156) |
+| PLT-3101 | name an owner for the geometry/ingest divergence; raise that ticket |
+| PLT-3104 | raise the BE `minRemainingMs` ticket for issue attachments (logs already do 24h) |
+| PLT-3104 | check session `platform-web-f90ceddc-…` logs for a 403 to confirm the trigger |
