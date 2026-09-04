@@ -1008,3 +1008,30 @@ I had been treating test churn as the reason it was expensive; it isn't.
 Not pushed: two commits landed in that file within the hour, and a build was in flight — pushing
 would cancel it, the exact anti-pattern recorded at 23:27. Full site list is on the PR thread so the
 sweep can be done in one pass by whoever gets there first.
+
+## 2026-09-04 11:07 — `0ee00ef` typecheck green; runner still under active development
+
+`0ee00ef`: `Lint & Run Tests` success, **`Build image` success 10:59:52→11:05:34**, `Vulnerability
+scanner` success. Only `Scan built image` (step 20) was cancelled at 11:06:05 by the next push, so
+the job conclusion reads `cancelled` while **19 of 21 steps, including the typecheck, passed.** Same
+reading trap as 23:27 — the conclusion is not the story; read the steps.
+
+**The i18n sweep stays deferred, and that is now clearly right rather than cautious.** `c2a42a7`
+(11:06) touched `TaskInstanceModal.tsx` *again*, plus `task-runner.parts.tsx` and both
+`checklist-instance-service` files — so the runner is still being built, and its service types are
+still moving. A sweep landing now would conflict and be partly obsolete. The full site list and the
+module-scope `translate()` trap are on the PR thread, which is where they are useful.
+
+### Session close-out for PLT-2968 / #2186
+
+| item | state |
+|---|---|
+| `SCHEMA_PREVIEW = true` merge blocker | **RESOLVED** (`fb67dcc`), verified at head, thread resolved |
+| Typecheck / tests / Trivy | green on the last three heads by step list |
+| `setOverride` concurrency race | open by design — needs a Postgres RPC + Supabase deploy |
+| Runner i18n + O(n²) numbering | open by design — one sweep once the runner settles; spec on thread |
+| Sonar | 8 new issues, gate passing, unattributable without a token |
+| #2186 draft status | `draft: false` against the session instruction — flagged, not reverted |
+| Approvals | **still none** on #2186 or #2192; four reviewers requested on each |
+
+Nothing further an agent can drive here without a human decision.
