@@ -836,3 +836,69 @@ select. Earlier advice on this ticket that implied they could is wrong.
 drop unresolvable linked elements with no signal. Had the viewer said *"16 of 835 linked
 elements are not present in the loaded models"*, this ticket would have been a one-line
 answer on day one instead of site engineers hunting for elements that were never there.
+
+### 2026-09-04 — RESOLVED for the customer: the 2 blocking elements marked installed
+
+Remediation ran against prod, authorised by Ilia after reviewing the exact request payload.
+Route taken: **direct API, not the frontend service.**
+
+**Why not the frontend service.** The deployed bundle's `installationStatusService.setElementStatus(status)`
+has **arity 1** — no element-id parameter. It derives its targets from
+`selectionStore.selectedElements`. At the moment of the attempt that map held **819** elements
+(the operator's own earlier "select linked elements" click), so a service call would have
+marked 819 installed. Verified from the deployed function source:
+
+```
+async setElementStatus(e){ ... const t=this.projectService.selectionStore.selectedElements;
+  if(t&&0!==t.size) ... const i=Array.from(t.values()).map(({mongoId:e})=>e) ...
+```
+
+The API route bounds the blast radius structurally instead of relying on a guard: the element
+id is a path segment, so one request can only ever reach one element. It is also rehearsable —
+`GET` and `PUT` share the path, so a control read proves URL, project-id form, auth and headers
+before anything is written.
+
+**What was sent** (script: `plt-3101-put.sh`, dry-run by default, `--commit` to send):
+
+| # | method | path | result |
+|---|---|---|---|
+| 1 | GET | `/projects/8a00ce8b…/elements/006b8d9e…/status` (control, read-only) | 200 |
+| 2 | PUT | `/projects/8a00ce8b…/elements/12398bf3…/status` | 204 |
+| 3 | PUT | `/projects/8a00ce8b…/elements/cad330b0…/status` | 204 |
+
+Body: `{"installationStatus":"INSTALLED_ACCURATELY","installationCheckDate":"<now>","lastModifiedBy":"ilia.kuzmin@xyzreality.com"}`
+
+**Verification — three independent checks:**
+
+1. **Server-side change feed.** `GET /projects/{id}/elements/status?lastSyncDateTime=2026-09-04T00:00:00Z`
+   returns `recordCount: 2` — both our elements, both `INSTALLED_ACCURATELY`, both attributed to
+   ilia.kuzmin@. **Nothing else on CH08 changed that day, by anyone.** This is the check that
+   matters: it is the server's account, not the script's self-report.
+2. **Control element untouched** — still `lastModifiedBy: cameron.chester@xyzreality.com`,
+   `lastModifiedOn: 2026-09-01T13:02:56Z`. A stray write would have rewritten that field.
+3. **Code path is single-row by construction:** `PUT /:modelElementId/status` →
+   `updateSingleElementStatus()` → `CALL xyz."usp_UpdateElementInstallationStatus"($1..$5)`
+   (`src/services/model.elements.status.service.ts:64-67`). The element is a scalar parameter;
+   no set, list or filter anywhere in the path.
+
+**Residual unknown, stated for the record:** the stored procedure body lives in the
+`PostgreSQLDatabase` repo, out of session scope, so the *call* is confirmed single-element but
+the proc's internals were not read. The change feed is strong evidence against side effects on
+`ElementInstallationStatus` itself.
+
+**Status of the ticket now**
+
+- Customer-facing: **resolved.** 835/835 install-checked, package unblocked.
+- The 835-vs-819 selectability mismatch **remains** and is NOT dead links. Routed to
+  **PLT-2874** ("differences between fed file linked elements and dashboard elements number",
+  FAR01, In Analysis, Minor, Ilia) — same pattern.
+  ⚠️ Magnitudes differ by two orders: FAR01's gap is ~67,000; CH08's is 103 of 353,617. So CH08
+  is plausibly *a* contributor to PLT-2874, not established as its explanation. Do not claim
+  same cause.
+- Still open: the 14 other affected elements here (already installed, blocking nothing), ~103
+  project-wide, the ingest question (did `eff6278e…` / `fa820000…` translate?), and the FE
+  transparency fix.
+
+Draft reply prepared for Yash (unposted, Ilia to send): fix landed; correction that these were
+not dead links; the count mismatch remains and belongs in PLT-2874; asks him to confirm the
+activity now reads complete.
