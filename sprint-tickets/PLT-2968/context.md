@@ -1187,3 +1187,27 @@ header also renders an item count, so with one item in the group **that assertio
 > **Rule: for an off-by-one, assert on a value that changes when the bug is present.** A substring
 > assertion against a string that contains other numbers is not a test, it is decoration. Ask "would
 > this fail on the unfixed code?" — and if you cannot answer yes immediately, it wouldn't.
+
+## 2026-09-04 18:07 — `e9ca3ca` fully green: numbering fix + master merge verified
+
+Complete uncancelled run, verified by step list: `Lint & Run Tests` 17:49:34→17:58:22, Sonar
+success, **`Build image` 18:00:14→18:06:08 (ran, not skipped)**, `Vulnerability scanner` and `Scan
+built image` success. All three checks green. Sonar steady at 8 new issues.
+
+Two things this confirms specifically, beyond "it's green":
+- **The existing `1.1.2` / `2.1.1` assertions still pass** — evidence for the reading that they
+  describe a genuine second headed group, rather than the bug enshrined. Had that reading been
+  wrong, this step would have gone red.
+- **The new leading-group test passes**, so the fix corrects the case it was written for.
+
+`4e1c70b` (master merge restoring the #2200 hotfix) is inside this head, so that is verified too.
+
+### Cumulative session tally on #2186 — all CI-verified
+
+`62ec0df` asset-switch wrong-write · `2c9678d` `sx`-on-DOM stub · `07474a1` missing-relation read
+(+3 tests) · `d620568` `createLogger` reuse · `3a494f2` + `4e1c70b` master merges (the second
+restoring a reverted hotfix) · `e9ca3ca` `groupItems` numbering (+1 test).
+
+Still open by design and specified on their threads: `setOverride` race, runner i18n sweep, O(n²)
+numbering, orphaned JSDoc. Still waiting on humans: approvals on #2186 and #2192, and the #2186
+draft-status decision.
