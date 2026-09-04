@@ -308,3 +308,17 @@ If a future edit drops the `linked.` qualifier, or swaps `USING` for an `ON` + `
 ids, **every element carrying a status row derives Planned** — the whole model paints yellow. The
 branch table catches it (the 4 unlinked-and-not-installed rows fail), so that test is load-bearing,
 not decorative. Do not "simplify" it away.
+
+## Two "Select all"s in the activity-linking-list panel do different things (found on PLT-3084, 2026-09-04)
+
+`activity-linking-list/hooks/useActivityMenu.ts:126-129` (the panel's `...` menu) and
+`hooks/useContextMenu.ts:78-81` (a row's right-click menu, backed by `useElementSelection.ts:55-62`)
+are both labelled **"Select all"** but do different things: the menu version calls react-arborist's
+own `treeRef.current?.selectAll()`, which only checks tree rows — it never touches the 3D viewer.
+The row-menu version resolves visible nodes to dbIds (`collectSelectableDbIds.ts`) and calls
+`viewer.setAggregateSelection(...)`, which does. Reaching the 3D view from the panel menu needs a
+second, separate click on **"Show selected in 3D view"** (`useActivityMenu.ts:136-140`). A user
+who clicks only "Select all" expecting the model to highlight sees nothing happen and reasonably
+reports it as broken — this is the leading (unconfirmed — video unopenable) hypothesis for PLT-3084's
+09-03 reopen. If this class of report recurs, check which "Select all" was used before assuming a
+regression.

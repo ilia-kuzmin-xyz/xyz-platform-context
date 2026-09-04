@@ -477,3 +477,81 @@ rather than any new code, and that appears to now be in the release pipeline beh
 retagged `groupA` → `resolved` per the README's standing convention for tickets that advance out of
 scope with a fix identified. No further action needed from this routine unless it re-enters scope
 (e.g. QA reopens it).
+
+## 2026-09-04 — REOPENED by QA on a different symptom; folder retagged resolved → groupA
+
+Live fetch: status is now **Ready For Development** (not Ready For QA/Done), assignee still Ilia
+Kuzmin. Radu Vulpe (QA) commented 09-03 14:52 (id not captured — fetched via JQL, no explicit
+comment id in this response): *"Reopened because the 'Select All' functionality for elements in the
+linked panel is not working as expected. Please refer to the attached video."* One video attachment,
+unopenable here (see Attachment gap below).
+
+**This is not the Ctrl+Z symptom.** The original two symptoms on this ticket were (1) select-linked-
+elements incomplete — closed 08-24 as user error (not all models open) — and (2) Ctrl+Z not
+undoing a link — root-caused 08-24 to a stale prod build missing PR #2081, still the RESOLVED
+finding above and not retracted. Radu's report names a *third* action, "Select All" in the linked
+panel, not previously investigated on this ticket.
+
+### Two "Select all" actions exist in this panel, and they do different things — VERIFIED by reading current master
+
+`hooks/useActivityMenu.ts:126-129` (panel's `...` menu) and `hooks/useContextMenu.ts:78-81` (a row's
+right-click menu, wired to `useElementSelection.ts:55-62`'s `selectAllElements`) are **two separate
+code paths**, both labelled "Select all":
+
+| | `useActivityMenu.ts` "Select all" | `useContextMenu.ts` "Select all" |
+|---|---|---|
+| calls | `treeRef.current?.selectAll()` — react-arborist's own tree API | `selectAllElements()` → `useElementSelection.ts:55-62` |
+| effect | checks every row in the **tree UI** | resolves `treeApi.visibleNodes` to dbIds (`collectSelectableDbIds.ts`) and calls `viewer.setAggregateSelection(...)` — actually selects in the **3D viewer** |
+| does it touch the 3D view? | **no** | yes |
+
+**The panel menu's own next item is "Show selected in 3D view"** (`useActivityMenu.ts:136-140`,
+`showSelectedIn3D` at `:42-53`), which is the action that actually calls `selectElements` on
+`tree.selectedNodes`. So making a tree "Select all" reach the 3D viewer is a **two-click sequence**
+(Select all, then Show selected in 3D view) — clicking only "Select all" checks every row and
+changes nothing visible in the model.
+
+**Hypothesis (INFERRED, not verified against the video): the reported defect is this naming
+collision, not a regression.** A user who clicks the panel's "Select all" expecting the model to
+highlight, sees the tree rows tick but the 3D view sit still, and reports it as broken. Falsifiable
+prediction: the video shows tree-row checkboxes filling in while the viewer selection stays
+unchanged, with no second click on "Show selected in 3D view".
+
+**Second-order check, also unverified: does tree "Select all" pick up rows `collectSelectableDbIds.ts`
+would silently drop?** `treeRef.current?.selectAll()` is react-arborist's own API and is not routed
+through `collectDbIdsByModel` at all, so it will check container rows and any element row lacking a
+resolved `dbId` (the exact silent-drop shape already documented on PLT-3101/PLT-2874). If the
+customer's next step *is* "Show selected in 3D view", the two selection counts (tree-checked vs.
+viewer-selected) can legitimately disagree — same family as PLT-3101, one layer up in this panel
+rather than in the linking write path.
+
+**Not checked this run, and would settle which of the above is live:** whether prod is still running
+the stale build identified in the 08-24 RESOLVED section. If PR #2081's era of changes also carried
+the current `useElementSelection.ts`/`collectSelectableDbIds.ts` split (git blame only resolves to
+`f150a2b`, 08-12, in this shallow clone — the actual introduction date is invisible here), a build
+predating it would have an *older* "select all" implementation altogether, and this could be a third
+instance of "ship a build that includes recent master" rather than a code defect at all. No tool in
+this environment can read the deployed bundle (that check was done live on prod by Ilia on 08-24 for
+the Ctrl+Z symptom; nothing here can repeat it for this symptom).
+
+### VERIFIED vs INFERRED, stated explicitly
+
+- VERIFIED (read directly from current `hc-frontend` master, branch `claude/loving-ramanujan-5t55vz`
+  at commit `42eec82`): the two distinct "Select all" code paths exist as described, one touches the
+  viewer and one does not, and a separate explicit action is required to bridge them.
+- INFERRED: that this UX gap is what Radu's video shows. Not confirmed — the video is unopenable
+  here.
+- UNVERIFIED: which build is deployed to the environment QA tested against, and whether that
+  changes which of the two hypotheses above applies.
+
+### Attachment gap
+
+- ⚠️ **Radu's video (09-03)** — not fetchable, no tool for authenticated Jira/Freshdesk media in
+  this environment. **Load-bearing**: 10 seconds of it (does the 3D view change when "Select all" is
+  clicked, and is a second action taken afterwards) decides between the UX-naming-collision
+  hypothesis above and a genuine regression in `collectSelectableDbIds`/tree "select all".
+
+### Action class: 3 — needs Ilia's visual debugging before more can be said
+
+The code reading is complete and cheap; committing to a fix without watching the video risks
+"fixing" a working-as-designed two-step flow, or missing a real regression. See
+`recommended-action.md` for the specific repro steps that would resolve it without the video.

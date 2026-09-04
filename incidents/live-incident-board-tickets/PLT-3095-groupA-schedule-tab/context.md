@@ -4,6 +4,18 @@ New ticket, created 2026-08-31 12:17, no prior folder. First pass 2026-09-01.
 
 ---
 
+# ⭐ UPDATE 2026-09-04 — the customer-facing explanation and workaround were posted, outside this routine
+
+Live fetch: Ilia posted comment `111180` (09-03 15:11:59, to Yash/customer) stating the mechanism in
+plain language — the same "join collision" explanation and rename workaround this file had already
+drafted (see "The fix" table below) — matching this folder's diagnosis almost verbatim, then adding
+the Procurement-code screenshot. Yash's Freshdesk-sync bot flipped the ticket to **"Waiting on
+customer"** (`111183`, 15:18) immediately after. **Nothing left in our queue right now** — the
+recommended-action.md draft this routine had prepared is superseded (posted, not by this routine, but
+the content matches), and the open item is the customer's re-upload test, not anything on our side.
+No new comment since. If the customer reports the rename did not fix it, re-open the DB-side dedupe
+theory in "Evidence" below rather than re-deriving the collision from scratch.
+
 # ⭐ READ THIS FIRST — the answer, as of 2026-09-03
 
 Added on top rather than rewriting the file below, per this repo's additive rule. **This file is 900+

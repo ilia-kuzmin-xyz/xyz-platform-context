@@ -301,3 +301,13 @@ If asked, frame it as "this should fix it, tell us either way".
 **Deliberately absent:** `wbs_id`s, `SourceFileWbsId`, `userItemId`, revision GUIDs, the deleted-revision
 episode, and "both members of each pair are dropped". All true; none of it helps a coordinator or a
 customer. That material belongs in the ingest ticket.
+
+## 2026-09-04 — POSTED (not by this routine); nothing left to draft right now
+
+Comment `111180` (09-03 15:11:59, Ilia to Yash) carries this same explanation and workaround almost
+verbatim, plus a screenshot of the Procurement code to rename. Ticket flipped to Freshdesk "Waiting
+on customer" straight after (`111183`). **No outstanding draft** — the ball is with the customer's
+re-upload test. Only follow-up if they report back negative: re-open the DB-side dedupe question
+(who drops the row — group-by, upsert-key error, or a uniqueness validator) that was still open with
+Sachin as of 09-03, since the rename only fixes the reported symptom, not the underlying importer
+behavior that silently drops colliding rows.

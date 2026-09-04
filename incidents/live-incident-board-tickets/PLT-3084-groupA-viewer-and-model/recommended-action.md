@@ -114,3 +114,31 @@ hardening rather than as the fix for this ticket.
 Status moved In Analysis → Ready For QA. Consistent with the 08-24 RESOLVED finding (ship a build
 containing PR #2081); the fix is presumably now in the release pipeline behind QA rather than
 requiring new code. Nothing further to draft — see `context.md` 2026-08-26 for the scope note.
+
+## 2026-09-04 — REOPENED, class 3: repro steps for Ilia, no draft to Radu yet
+
+**Category:** class 3 — the fix (if any) is within reach but must be seen in the app first. Do not
+draft a Jira reply yet; a reply now would either restate the obvious (asking to see the video, which
+Radu already offered) or guess at a fix for a two-step flow that may be working as designed.
+
+**What would resolve it without the video** (three-step repro, no build needed beyond current
+master or whatever environment QA used):
+
+1. Open the activity-linking-list panel for any activity with several linked elements. Open the
+   panel's `...` menu and click **"Select all"**. Watch the 3D view. Predicted: nothing changes
+   there; only the tree rows show as checked.
+2. From that state, open the menu again and click **"Show selected in 3D view"**. Predicted: this
+   is the step that actually selects elements in the model.
+3. If step 1 alone was expected (by Radu, or by the customer in the video) to select in 3D, this is
+   a naming/UX gap, not a functional regression — the fix is either renaming "Select all" to
+   something like "Check all" to stop implying a 3D effect, or folding "Show selected in 3D view"
+   into it as one click. **If step 1 already does nothing at all — no tree rows check, an error, or
+   the app doesn't update the checked count — this is a different, real regression** and the
+   hypothesis in `context.md` is wrong; stop and re-investigate rather than proposing the rename.
+
+**If it needs a nudge to the right person instead:** none yet. Watching the video (or running the
+3-step repro above once) is the only thing that unblocks this, and it needs Ilia's own eyes on the
+running app per this routine's hard rule against unverified visual claims.
+
+**No draft to Radu.** Nothing to tell QA yet that isn't already implied by "we're looking into it" —
+premature until one of the two branches above is confirmed.

@@ -45,6 +45,82 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-04 (scheduled) — 12 in-scope tickets, 1 REOPENED with a new symptom (PLT-3084), 2 resolved-outside-the-routine (PLT-3095 posted, PLT-2858 closed and now out of scope), 9 confirmed unchanged, zero Jira actions taken
+
+Board re-queried: `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, filtered to
+exclude `With Technical Support`, `Ready For QA`/`In QA`, `In Code Review`, `Customer Release Check`,
+`Done`/`Archived`, `Blocked`. **12 tickets in scope**, same count as 09-03. Composition changed: **PLT-2858
+left scope** (→ `Done`, consistent with the 09-03 note that its close-out had already been delivered
+live by Ilia outside this routine) and **PLT-3084 re-entered scope** (`Ready For QA` → `Ready For
+Development`, reopened by QA — folder retagged `resolved` → `groupA`; kept in Group A rather than given
+a one-line Group B note because it is assigned to Ilia, the standing exception).
+
+Every comment on every in-scope ticket was fetched live (`comment` field via JQL) and diffed against
+each folder's last-recorded comment id/timestamp — not just the `updated` field, per the 09-03 run's
+own lesson that `updated` alone had already produced three false "unchanged" verdicts that week.
+
+### Group A (10)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Ready For Development (**reopened**) | QA (Radu Vulpe, 09-03 14:52) reopened on a **new, third symptom** — "Select all" in the linked-elements panel "not working as expected" per an unopenable video. Not the Ctrl+Z defect this ticket was closed on. Read current master: the panel has **two different code paths both labelled "Select all"** — one (`useActivityMenu.ts`) only checks tree rows via react-arborist, the other (`useElementSelection.ts`, via a row's context menu) actually selects in the 3D viewer; reaching the viewer from the panel menu needs a second click on "Show selected in 3D view". Leading hypothesis: a naming/UX collision, not a regression — unconfirmed, the video would settle it in seconds | **3** — repro steps written, no video, needs Ilia's eyes |
+| [PLT-3101](PLT-3101-groupA-viewer-and-model/context.md) | viewer-and-model | Open | No new comments since 09-03 11:11 (already fully captured: customer found 1 of 3 missing elements themselves, 2 confirmed unlocatable, authorised remediation, Freshdesk now "Waiting on 3rd line" — ball is ours). 92-word draft to Yash from 09-03 still unposted | 2/3 split, unchanged |
+| [PLT-3095](PLT-3095-groupA-schedule-tab/context.md) | schedule-tab | With Customer | **Resolved outside this routine.** Ilia posted the join-collision explanation + rename workaround directly (`111180`, 09-03 15:12) — matches this folder's own drafted text almost verbatim — and Freshdesk flipped to "Waiting on customer" (`111183`). No outstanding draft; only follow-up is if the customer's re-upload doesn't fix it | resolved-pending-confirmation |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. Board's longest-unposted item, now **60 days, 26th consecutive run** on the same close-out draft | 1 — stale, unresponded (on us) |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-25; decision-request to Mostafa/Pietro still unposted | 1 |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 09-01; Critical, 120+ days; Ilia's own local-build verification of H1/H2 still the open action | 3 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 08-25; three-hypothesis split still undistinguished | 1 |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged since 08-18 (comments); still waiting on the customer's XER pair | 1 |
+| [PLT-3051](PLT-3051-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 08-27; fix shipped/QA-verified, still no customer confirmation | 1 |
+| [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged since 09-02; Ilia's own ask to move this to With Technical Support is still unactioned | 1 (on us) |
+| [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | Unchanged since 09-02; one-line "can we close this?" follow-up still unposted | 1 (on us) |
+
+### Group B (2) — one line each, per this run's instruction to skip detailed work; PLT-3091 kept a status-only line despite its standing Ilia-assignment exception, since nothing moved
+
+| Ticket | Status | Note |
+|---|---|---|
+| PLT-3084 | *(see Group A above — re-entered on the reopen)* | |
+| PLT-3091 | Dev In Progress | Unchanged since 09-01; tested fix still on a closed, unmerged PR; Yash's 08-28 question to Mostafa now 7 days silent |
+
+### Left scope this run
+
+- **PLT-2858** — `With Customer` → `Done`. Already flagged 09-03 as resolved outside this routine; now formally closed.
+
+### ⚠️ Attachments needing human — this run
+
+- **PLT-3084** (new) — Radu Vulpe's screen recording (09-03), unopenable, no tool for authenticated
+  Jira/Freshdesk media in this environment. **Load-bearing**: settles in ~10 seconds whether "Select
+  all" alone was clicked (naming-collision hypothesis) or the tree itself fails to check rows/errors
+  (real regression). See `PLT-3084-groupA-viewer-and-model/context.md` for the 3-step repro that
+  substitutes for it if the video stays unavailable.
+- Standing, not re-verified this run: PLT-2651's screenshot (403), PLT-3033/PLT-2815's images,
+  PLT-3096's screen recording (now out of scope but still relevant if it resurfaces).
+
+### Needing a human now — ranked by cost of continued silence
+
+1. **PLT-2815 — execute the close-out.** 60 days, 26 runs unposted. Unchanged top item.
+2. **PLT-3084 — watch Radu's video**, or run the 3-step repro in `recommended-action.md`. Cheapest
+   open item on the board; likely resolves in one look.
+3. **PLT-3091 — the blocking question is now 7 days silent** (Yash → Mostafa, 08-28).
+4. **PLT-2651 — Ilia's own local-build verification** of H1/H2, Critical, 120+ days.
+5. **PLT-3101 — send the 92-word draft to Yash**; ball is confirmed ours per Freshdesk's own status.
+6. **PLT-2890 / PLT-3061 — one-line closes**, both already fully drafted, sitting idle.
+
+### What could not be verified
+
+- Whether the PLT-3084 "Select all" hypothesis matches Radu's video — genuinely unknown, stated as
+  such in the folder rather than rounded up to a confidence score.
+- Nothing was compiled, type-checked or run against a live app from this environment; this sandbox
+  cannot build `hc-frontend` (`npm ci` fails on a private package) and has no browser/prod access.
+
+### Notification
+
+Sent: PLT-3084's reopen with a likely one-look resolution, plus a reminder that PLT-2815 is now 60
+days/26 runs unposted. No Jira action taken by this routine — hard rule, see `live-incident-run-
+instructions.md`.
+
+---
+
 ## Session: 2026-09-03 (interactive, Ilia-driven) — 3 draft PRs raised, PLT-3101 measured on prod, and FOUR of this session's own claims retracted
 
 Appended after the scheduled 09-03 run below, which it does not replace. This was a hands-on session,
