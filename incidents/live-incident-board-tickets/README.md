@@ -3178,7 +3178,9 @@ Ticket work this run, newest first. Full detail in each ticket folder.
 
 ### PLT-3104 — Dashboard issue images vanish after Download (PA18, #0024) — **fix built**
 
-New folder: `PLT-3104-dashboard-issue-image-download/`. Draft **PR #2198** on hc-frontend.
+New folder: `PLT-3104-dashboard-issue-image-download/`. Draft **PR #2199** on hc-frontend,
+branch `PLT-3104`. (#2198 was the same commit on the auto-generated branch name; closed and
+superseded so the branch carries the ticket key.)
 
 Root cause: the dashboard's hand-rolled download used `fetch` and never checked
 `response.ok`, so a failed request saved storage's error XML as the image file; failed loads
@@ -3218,7 +3220,7 @@ the time. A service-based fix would have marked all 819 installed. Rules now in
 
 | ticket | what |
 |---|---|
-| PLT-3104 | choose a status (recommended Dev In Progress); PR #2198 review |
+| PLT-3104 | choose a status (recommended Dev In Progress); PR #2199 review |
 | PLT-3101 | post the drafted reply to Yash (walks back comment 111156) |
 | PLT-3101 | name an owner for the geometry/ingest divergence; raise that ticket |
 | PLT-3104 | raise the BE `minRemainingMs` ticket for issue attachments (logs already do 24h) |

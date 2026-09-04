@@ -128,10 +128,17 @@ checkable from logs by anyone with access to the session id above.
 
 ---
 
-## 2026-09-04 (later) — FIX BUILT: draft PR #2198
+## 2026-09-04 (later) — FIX BUILT: draft PR #2199
 
-**PR** https://github.com/XYZReality/hc-frontend/pull/2198 (draft)
-**Branch** `claude/loving-ramanujan-m3io10`, cut fresh from `origin/master` @ `42eec82df`
+**PR** https://github.com/XYZReality/hc-frontend/pull/2199 (draft)
+**Branch** `PLT-3104`, cut fresh from `origin/master` @ `42eec82df`, head `7e91e35df`
+
+> Re-raised as **#2199** on the `PLT-3104` branch. **#2198 is closed** — it carried the
+> identical commit on the session's auto-generated branch name (`claude/loving-ramanujan-m3io10`),
+> which did not include the ticket key. No review had happened, so nothing was lost.
+> The old remote branch could not be deleted (every branch in hc-frontend is protection-flagged,
+> and the delete fails as a sideband disconnect); it is the same commit and is now orphaned.
+> **Any earlier reference to #2198 in these notes means #2199.**
 
 ### What shipped in the PR
 
