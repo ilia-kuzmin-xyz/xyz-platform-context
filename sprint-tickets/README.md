@@ -2964,3 +2964,35 @@ evidence rather than hope — and #2186 will pick it up from master anyway if it
 
 Also commented on #2186 naming the failing check and why it is not its diff, so nobody debugs the
 wrong thing.
+
+### 08:30 (09-05) — a second Trivy DB event, and a divergence worth checking
+
+`build` went red on **#2186** at `a9baf04`, and it is **not that PR's failure**. Tests passed (Sonar's
+gate is green, which only runs after vitest). The failing step is `Scan built image`:
+
+```
+frontend:7cefcda (alpine 3.24.1)      Total: 7 (HIGH: 7, CRITICAL: 0)
+libuuid 2.42.1-r0 → fixed 2.42.3-r0
+CVE-2026-53612 · 53613 · 53614 · 76642 · 78408 · 78409 · 78410   (util-linux)
+```
+
+All seven are **OS packages in the Alpine base image**; `a9baf04` changed two `.ts` files and one
+`.json`. Same shape as the 09-02 nanoid event — the CVEs entered Trivy's DB, so an image that
+scanned clean yesterday fails today with nothing in the repo changed.
+
+**A fix was already open: #2205**, raised at 08:30 by a parallel session (upgrade `libuuid` in the
+final stage, mirroring the existing `libssl3`/`libcrypto3` line). **No duplicate hotfix PR was
+raised**, per the routine's own rule. It was also deliberately **not ported into #2186**: #2205's own
+description says it only works if the base image's apk index already carries `2.42.3-r0`, and its CI
+had not finished — porting an unverified Dockerfile change into a feature PR widens it for no
+established gain.
+
+**The divergence someone should resolve:** #2205 states the scan is red on *every* PR, but **#2203
+passed the identical scan three minutes after #2186 failed it**, off the same base image and the same
+workflow. Both cannot be true of a uniform DB-driven failure. The likeliest explanation is a **stale
+cached base layer on the #2186 runner** rather than a repo-wide break. The one sanctioned re-run was
+spent on that job to settle it, and a comment on #2186 records the reasoning.
+
+> **Carry forward:** when a Trivy failure names only OS packages, check a sibling PR's scan from the
+> same hour before concluding "repo-wide". Two runs minutes apart disagreeing points at the base
+> image layer, not the CVE database.
