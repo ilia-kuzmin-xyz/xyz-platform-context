@@ -2923,3 +2923,44 @@ for its author, not a branch to push a merge commit into. Asked on PLT-3086.
    `Modal` → `ModalTitle` label id (64 dialogs), postcss nanoid → 3.3.17, tldraw 2.4.6 → 5.3.2.
 5. New candidate: **`achieved_on` on `asset_readiness`**, mirroring `system_readiness` — it would turn
    PLT-2966's derived completion timestamp into a stored one. See `PLT-2966/context.md`.
+
+## 2026-09-05 08:30 — repo-wide CI blocker #2: alpine libuuid, 7 HIGH util-linux CVEs
+
+**Second time in three days that a Trivy DB update reddened every PR in hc-frontend.** Diagnosed
+from #2186's failure and raised as **#2205**.
+
+`Scan built image` (step 20) fails; everything before it passes, including `Build image`. The npm
+side is clean — the whole finding is the OS layer:
+
+```
+frontend (alpine 3.24.1)   Total: 7 (HIGH: 7)
+libuuid 2.42.1-r0  ->  fixed 2.42.3-r0
+CVE-2026-53612 / -53613 / -53614 / -76642 / -78408 / -78409 / -78410  (util-linux)
+```
+
+Master and all ten open PRs are affected. No dependency changed.
+
+**Fix (#2205): `RUN apk --no-cache upgrade libuuid` in the Dockerfile's final stage.** This is not
+invention — the file *already* does exactly this one package over
+(`RUN apk --no-cache upgrade libssl3 libcrypto3`, added for CVE-2026-14456) with a comment saying
+"the base image lags the fixed version until its next weekly rebuild; drop once it catches up". Kept
+as its own layer so the two can be dropped independently.
+
+**Deliberately NOT a `.trivyignore` entry.** These are *fixable* HIGH findings with a published fix,
+unlike the tldraw nanoid copy. And Trivy matches on **CVE id, not package path** — the trap already
+documented in that file's census — so suppressing would silence the next image carrying them too.
+
+**Caveat stated in the PR rather than discovered later:** the upgrade only helps if the base image's
+apk index already carries 2.42.3-r0. If #2205 is still red, the answer is a base-image bump in
+`xyz-base-nginx`, outside this repo. CI decides.
+
+### A sequencing decision worth recording
+
+The drive-to-green rules say to **port an existing fix into a red PR rather than wait for the fix PR
+to merge**. Held off deliberately: **the fix is unproven until #2205's scan runs.** Porting an
+unverified one-line Dockerfile change into a 38-file feature PR would be speculative churn, and if
+the apk index has not caught up it achieves nothing. Once #2205 is green the port is justified by
+evidence rather than hope — and #2186 will pick it up from master anyway if it merges first.
+
+Also commented on #2186 naming the failing check and why it is not its diff, so nobody debugs the
+wrong thing.
