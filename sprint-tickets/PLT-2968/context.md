@@ -1376,3 +1376,70 @@ directly beside `isItemComplete` as its documented inverse so the two cannot dri
 Four findings, one review round, three of them the same "two representations of the same fact allowed
 to disagree" shape: type says optional / write says required (×2), panel says confirmed / derivation
 says unanswered. Worth a deliberate sweep for the pattern rather than waiting for a fifth.
+
+## 2026-09-05 09:5x — I was wrong about #2205, and the way I was wrong is the lesson
+
+**Correction, publicly posted on #2205 and on the #2186 Dockerfile thread.** Earlier today I wrote,
+in this file and on a PR thread, that the libuuid upgrade "cleared all seven findings" and that
+#2205's green `Scan built image` proved it. **It does not, and it did not.**
+
+### The facts, verified directly
+
+`apk --no-cache upgrade libuuid` upgrades **nothing** in this image:
+
+| branch | libuuid / util-linux / libblkid / libmount |
+|---|---|
+| **v3.24** (image is `alpine 3.24.1`) | **2.42.1-r0** — the only version published |
+| edge | 2.42.3-r0 |
+
+Two independent lines of evidence agree: the v3.24 `APKINDEX` has no 2.42.3-r0 to install, **and** the
+Trivy scan of the built image reports `2.42.1-r0` *installed* after the RUN line has executed. The
+image is unchanged by the line.
+
+**Why Trivy flags it anyway, and why `ignore-unfixed: true` doesn't cover it.** Alpine's *v3.24
+secdb* already carries the advisory — `util-linux -> {'2.42.3-r0': [CVE-2026-53612, -53614,
+-78410, …]}` — published **ahead of the package**. Trivy reads secdb, sees a fixed version, sees
+2.42.1-r0 installed, reports `Status: fixed`. apk reads the index and finds nothing newer. Advisory
+says fixed; repo says nothing to install.
+
+**Why #2205 went green.** Date-keyed Trivy DB cache. #2205's run: `Cache hit occurred on the primary
+key cache-trivy-2026-09-05` (snapshot saved before the advisory landed). #2186's run 30 minutes
+later: `Cache hit for restore-key: cache-trivy-2026-09-04` → `Need to update DB` → downloaded a fresh
+110.94 MiB DB → 7 HIGH. **Same Dockerfile, same base image, opposite verdicts, decided entirely by
+which DB snapshot the cache handed back.** (Index and secdb: verified. This last step: inference from
+the two logs — but nothing else differs.)
+
+### The lesson, which is not "check alpine versions"
+
+> **A green check proves the check passed. It does not prove your change is why.** I had a
+> *mechanism* claim ("upgrading libuuid removes these findings") and I accepted a *correlation*
+> (the job went green after I changed that line) as proof of it. The scanner's Library column told
+> me which package was being flagged; I read it as also telling me a fixed version was installable.
+> Those are two different facts and I merged them.
+
+The tell was available and I walked past it: **I wrote the disproof myself.** #2205's description
+says *"if the scan is still red on this PR, the index hasn't caught up and the answer is a base-image
+bump instead."* I had the failure mode exactly right, then treated one green run as having ruled it
+out — when a single green run is precisely what a stale-DB false negative looks like.
+
+> **Corollary, for CI evidence specifically: a date-keyed cache makes two runs of the same commit
+> non-comparable.** Before concluding anything from "it passed here and failed there", check whether
+> the two runs used the same scanner DB / fixture / index snapshot. Here the entire difference was a
+> cache key.
+
+### Where it stands
+
+#2205 moved back to **draft** and retitled `[does not work — see comment]`, so nobody approves a
+no-op described as unblocking the repo. Three options written up on it: wait for v3.24 to publish
+(line starts working with no code change); time-boxed `.trivyignore` for the seven CVEs (**this is
+the nanoid "no reachable fix" case after all — the exact bar that file already sets, and the opposite
+of what I argued in the description**); or bump `xyz-base-nginx`, which is `hc-infrastructure` and
+outside this session's repo scope. Did **not** push the suppression: seven HIGH CVEs is a person's
+call.
+
+Mitigating fact for whoever decides: the runtime ships only `libuuid`, no `mount`/`nsenter` binaries,
+so real exploitability is ~nil — which also makes this a candidate for a VEX statement rather than an
+ignore list.
+
+**PLT-2968 / #2186 is red on this repo-wide blocker, not on its own diff** — its lint, full test
+suite and image build all passed.
