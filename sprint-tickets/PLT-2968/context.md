@@ -1326,3 +1326,53 @@ symlink `node_modules` into the repo. **Two traps found doing it:**
    the same mismatch fails unrelated component suites. *So the whole-project signal is worthless in
    this setup;* filtering to the touched paths (clean) and running the service suites (417 pass, 29
    files) is the real one. Do not read a red full-suite here as a repo problem.
+
+## 2026-09-05 09:3x — the precondition vocabulary bug (the most serious finding of the review round)
+
+Fourth finding of the same review round, and the only one that broke user-visible behaviour outright
+rather than only on an un-migrated environment.
+
+**The defect.** `ChecklistCreatePage.addPrecondition` creates preconditions as `passFailNa` items
+("A precondition is a thing you confirm, so it is a pass/fail/N-A item"). The runner's precondition
+panel confirmed one by writing `ITEM_COMPLETE` (`'complete'`). But `isItemComplete`
+(`task-status.tsx:155`) accepts `'complete'` only for *non*-`passFailNa` types; a `passFailNa` item is
+complete only on `pass|fail|na`.
+
+The two halves of the UI then disagreed:
+- `isAnswered` is just `status !== 'incomplete'`, so the panel lit the confirm button green, counted
+  it in `n/m confirmed`, and **unlocked the test steps** — everything looked right;
+- `deriveInstanceStatus` filtered the same item as an unanswered response item and returned
+  `inProgress`.
+
+So **a task carrying any precondition could never reach `completed` / `pass` / `signedOff`**, however
+much was answered — and `TaskInstanceModal`'s self-heal wrote `inProgress` back to the stored status
+on every open. Because a readiness tag is achieved only when every instance on it is complete, the
+tag could never be achieved either. That is the whole PLT-2967/2968 feature dead-ended by one
+vocabulary mismatch.
+
+**The fix, and why not the other option offered.** The reviewer offered (a) toggle to `'pass'`, or
+(b) author preconditions as a non-passFail type. **(b) fixes only new templates** — existing ones keep
+their `passFailNa` preconditions and the runner would go on writing `complete` onto them. (a) fixes
+both, so (a).
+
+One refinement on (a) though: **not a flat `'pass'`**. The panel renders whatever sits under a
+`PRECONDITIONS` header, which need not be `passFailNa` — an `inputField` precondition would then break
+the other way. So `confirmedStatusFor(type)` (`pass` for `passFailNa`, `complete` otherwise), placed
+directly beside `isItemComplete` as its documented inverse so the two cannot drift apart again.
+
+### The bit worth keeping
+
+> **A test was asserting the bug, and its own name said so.** The existing case read *"confirming is
+> answering: the confirmation saves as the item it is"* and asserted `status: 'complete'` — the exact
+> thing it claimed to check was the thing it was getting wrong. A test name that describes the right
+> contract is not evidence the assertion encodes it.
+
+> **Positive control before believing a regression test.** Both new tests were run against the
+> *unfixed* line first (2 failed / 52 passed) before being trusted. The third — the toggle-back
+> path — passes either way and was kept knowingly, as a guard rather than a bug-catcher. Same
+> discipline as the `groupItems` numbering test on 09-04, where the obvious assertion would have
+> passed with the bug present.
+
+Four findings, one review round, three of them the same "two representations of the same fact allowed
+to disagree" shape: type says optional / write says required (×2), panel says confirmed / derivation
+says unanswered. Worth a deliberate sweep for the pattern rather than waiting for a fifth.
