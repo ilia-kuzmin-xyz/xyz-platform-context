@@ -1245,3 +1245,50 @@ pipeline produced nothing, not because the code was clean. Re-run from the right
 genuinely 0, so the conclusion held — **but it held by luck**. Same shape as the SonarCloud
 `{"total":0}` on a private project (17:53 on 09-03). *A zero from a pipeline whose first stage failed
 is not evidence. Check the command succeeded before believing its count.*
+
+## 2026-09-05 09:1x — the two schema-gating findings on #2186, and why the write path was the gap
+
+Two Copilot findings on `checklist-library-service.ts` (threads `…fh0DU` at :102, `…fh0Df` at :203)
+turned out to be the **same defect stated twice**, and both were right.
+
+**The defect.** `task_template.requires_sign_off` and `task_item.section_type` are newer than the
+tables they sit on. The evidence they may be absent is *in the file itself*: both row interfaces mark
+them optional (`requires_sign_off?`, `section_type?` with the comment "Absent until the migration
+that adds it"), and `rowToItem` already guards the read (`if (row.section_type)`). But every WRITE
+sent them unconditionally. PostgREST rejects a payload naming a column the table does not have
+(`PGRST204`), so on an environment behind on the migration **template create and edit failed
+outright** — a broken feature, not a degraded one, even though every other field in the payload was
+storable.
+
+**Why "just confirm the migration is promoted" was not available.** Copilot's option (1). The only
+promotion evidence in reach is `fb67dcc`'s message — *"xyz-supabase#23 is applied **on dev**"* — and
+`data-layer.md` records `dev` and `stable` as **two separate databases**, with the census (12 Aug,
+table-level only) predating that migration. The `xyz-supabase` repo is outside this session's access
+scope, so column-level parity on `stable` is unknowable from here. Same caveat already flagged on the
+SCHEMA_PREVIEW thread on 09-04. So option (2), gating, was the only one I could actually deliver.
+
+**The design, and the alternative rejected.** Not the `columnPresent` probe
+`ChecklistInstanceService` uses (`checklist-instance-service.ts:180`) — that reads the column list
+off a row already fetched, and **a create has no row to judge by**. On an empty project the probe
+returns "column absent" and silently discards a value the database *could* hold. So: write
+optimistically, and on `isMissingColumn` write again without the column
+(`withOptionalColumn` in `checklist-library-service.ts`). Zero extra requests wherever the column
+exists — which is `dev` today and everywhere post-migration — and one extra round-trip where it
+doesn't.
+
+`isMissingColumn` is new, added beside `isMissingRelation` in `commissioning-request-error.ts`
+(`PGRST204` / Postgres `42703`), matched **by code only** for the same reason the table predicate is:
+a bare 400 is some other rejection (constraint, bad filter, unparseable body) and must stay fatal.
+
+**The trade-off a reviewer should push back on if they disagree:** the degrade *silently loses* the
+ticked "requires sign-off" — it writes, it's dropped, it reads back false. A `log.warn` is the only
+trace. I took that over failing the save because the read path can't surface the flag on such an
+environment anyway, and because it is the house posture already (`isMissingRelation` → "read as no
+overrides"). Stated on the threads so it can be argued with rather than discovered.
+
+### The reusable bit
+
+> **When a row shape marks a column optional, check the WRITE path too.** Both interfaces here
+> already said the column might be absent, and the read path already coped. The gap was that
+> "optional" had been applied to the type and to reads and never to the payload — which is the one
+> place absence is fatal rather than merely empty.
