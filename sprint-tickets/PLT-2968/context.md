@@ -1292,3 +1292,37 @@ overrides"). Stated on the threads so it can be argued with rather than discover
 > already said the column might be absent, and the read path already coped. The gap was that
 > "optional" had been applied to the type and to reads and never to the payload — which is the one
 > place absence is fatal rather than merely empty.
+
+### Same session, one more of the same shape: `listSignatures`
+
+A third finding landed while the above was being written, and it is the identical defect a third
+time: `ChecklistInstanceService.listSignatures` read `task_execution_signature` with no
+`isMissingRelation` guard, while `AssetReadinessService.listOverrides` has had one for its own table
+since PLT-2968. **This one was worse than it looks**: `TaskInstanceModal` calls `useTaskSignatures`
+on *every* open, so a missing signature table did not cost you sign-off history — it took down the
+whole task runner, over history that environment cannot have yet.
+
+Fixed in `ba31e80` with the same reading (`[]` + `log.warn`). **Reads only** — `addSignature` still
+throws, and the comment at the catch says why, so nobody "finishes the job" by degrading the write:
+a signature that cannot be stored must not look as though it was. That line — degrade the read,
+never the write — is the one that also separates this from the column case, where the row still
+lands and only the new field drops.
+
+Three findings in one review, all the same shape. Worth a sweep of every commissioning read/write
+against the "is this table/column newer than what it sits on?" question rather than waiting for the
+next review to find the fourth.
+
+### Verification note: how these were actually run
+
+`npm ci` is impossible here (`@xyzreality/dhtmlx-gantt` on npm.pkg.github.com → 401). Workaround that
+worked: install into the scratchpad with the `@xyzreality/*` deps stripped and no lockfile, then
+symlink `node_modules` into the repo. **Two traps found doing it:**
+
+1. `node_modules` is **not** in this repo's `.gitignore` — the symlink showed up as untracked in
+   `git status`. A `git add -A` would have committed it. Staged explicit paths instead and removed
+   the link before committing.
+2. A whole-project `tsc --noEmit` returned **237 errors** — all pre-existing noise from the unpinned
+   install resolving different styled-components/styled-system type versions than the lockfile, and
+   the same mismatch fails unrelated component suites. *So the whole-project signal is worthless in
+   this setup;* filtering to the touched paths (clean) and running the service suites (417 pass, 29
+   files) is the real one. Do not read a red full-suite here as a repo problem.
