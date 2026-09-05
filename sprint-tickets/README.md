@@ -2830,3 +2830,96 @@ So #2192 remains merge-ready, now on post-#2180 master, and **still needs only a
 
 *Recording the resolution and not just the risk: the earlier note said "watch that run", and a flagged
 risk that is never closed out reads to the next run as still open.*
+
+## Run 2026-09-05 — the sprint refilled: 6 eligible tickets, 3 shipped, 2 held for clarification
+
+JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()` — **9 tickets, 6
+eligible.** After weeks of "0 eligible" runs the board has been repopulated, almost entirely with
+Commissioning work.
+
+| Ticket | Summary | Was | Now | Outcome |
+|--------|---------|-----|-----|---------|
+| PLT-3038 | GMT offset in timezone selector | Open | Dev In Progress | **PR #2202** — CI green |
+| PLT-2999 | Task library context menu | Open | Dev In Progress | **PR #2203** — one real CI regression, fixed |
+| PLT-2966 | Asset details readiness area | Open | Dev In Progress | **PR #2204** — stacked on `PLT-2968` |
+| PLT-2972 | Affects System tag interaction | Open | Analysis In Progress | clarification raised |
+| PLT-2952 | Asset List linking mode | Open | Analysis In Progress | clarification raised |
+| PLT-3086 | System impact modal | Open | Dev In Progress | **already built** — Rishi's #2190; not duplicated |
+| PLT-2524 / PLT-2968 / PLT-2967 | — | Blocked / In Code Review | unchanged | ineligible |
+
+`.claude/commissioning-active` had to be created (the marker directory didn't exist) — five of the
+six were commissioning, and without it the whole area is out of scope by the repo's own rule.
+
+### The judgement that mattered: three built, two refused
+
+The two held were not held for lack of effort — both were fully scoped first, and both turned out to
+ask for something with **no data behind it**:
+
+- **PLT-2952** — "match strength" has **0 hits repo-wide**; per-user linking progress is
+  **unattributable** (`asset_element_link` has no user column); and a staged "linking mode"
+  **reverses PLT-2953**, merged three days earlier, whose code says *"There is no linking MODE"*.
+- **PLT-2972** — the modal's contents are genuinely ambiguous (the system's tasks across all members,
+  or only what the tag puts on *this* asset), and the two readings produce different features.
+
+> **Scoping a ticket to the point where you can name what is missing is the deliverable when the
+> ticket can't be built.** Both comments name the file, the column and the conflicting decision, so
+> the answer can come back as a decision rather than another investigation.
+
+### Could not read any ticket mock-up this run
+
+Jira attachment content (`/rest/api/3/attachment/content/<id>`) returns **403** — the MCP tool
+exposes attachment *metadata* but there is no authenticated fetch for the bytes. Four of the six
+tickets are mock-up-driven. Where a placement had to be chosen anyway (PLT-2966), it is **reasoned in
+the PR and flagged as a design call**, not presented as matching the design.
+
+### Checkpoint 1 — #2186's four open threads: three fixed, one open by design
+
+Fixed and pushed as `a9baf04`: runner i18n (`FILTERS` now carries **keys**, resolved at render — a
+`translate()` in a module-level const runs at import before the locale loads and freezes), the
+O(n²) `indexOf`-per-row numbering (index carried through the filter, so a filtered item keeps its
+real number — the `position` suggestion would NOT have), and an orphaned JSDoc block.
+
+**Left open on purpose:** the `setOverride` read-modify-write race. Real, reproducible, already
+answered at length on the thread, and genuinely out of scope for this PR — but resolving a confirmed
+concurrency defect with no ticket behind it is how it gets lost. It is the **one open thread across
+all nine of my PRs.**
+
+*(A parallel session verified all three fixes at head and wrote them up in `PLT-2968/context.md` —
+`9dcf84d`. Independent confirmation, not duplication.)*
+
+### Checkpoint 2 — CI, and a regression worth remembering
+
+Read per check run. `master` = `1b15ad9`, unmoved all run.
+
+| PR | Head | build |
+|----|------|-------|
+| #2186 | `a9baf04` | green before the push; re-running |
+| #2192 / #2194 / #2197 / #2199 | unchanged | ✅ all green |
+| #2202 | `c8f0607` | ✅ **green** |
+| #2203 | `fac8569` → `ab35e3f` | ❌ **1 failed** → fixed, re-running |
+| #2204 | `85b7157` | in progress |
+
+**#2203's failure was mine and it was real, not flaky.** `TaskLibraryTab.test.tsx:487` selects the
+task rows with `/^task-item-(?!type-)/`; the new kebab's `task-item-menu-<id>` matched, joined the
+list and shifted the ordering assertion. Fixed by **moving the new ids out of that namespace**
+(`task-menu-` etc.) rather than widening the regex — the type badge already needed the one exception
+and a second would leave the trap for the next person.
+
+> **Standing note for `TaskLibraryTab`: any new `task-item-*` testid joins the row-ordering match.**
+
+### Checkpoint 3 — every PR of mine is current with master
+
+All nine sit on `1b15ad9`. Nothing to merge. The one stale PR on the board is **#2190** (Rishi's,
+base nine days old) and it was **deliberately not touched** — someone else's idle draft is a question
+for its author, not a branch to push a merge commit into. Asked on PLT-3086.
+
+### Handover
+
+1. **Two clarifications are the critical path** — PLT-2952 (split it?) and PLT-2972 (whose tasks?).
+   Nothing more can be built on either without an answer.
+2. **#2190 is nine days idle and nine days stale**, with the ticket's work already in it.
+3. **Everything else waits on humans**: still 0 approvals on my PRs.
+4. Ticket candidates from earlier runs still stand: the i18n `translate` fallback (820 tr keys),
+   `Modal` → `ModalTitle` label id (64 dialogs), postcss nanoid → 3.3.17, tldraw 2.4.6 → 5.3.2.
+5. New candidate: **`achieved_on` on `asset_readiness`**, mirroring `system_readiness` — it would turn
+   PLT-2966's derived completion timestamp into a stored one. See `PLT-2966/context.md`.
