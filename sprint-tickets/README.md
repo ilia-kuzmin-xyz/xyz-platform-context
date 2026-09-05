@@ -2996,3 +2996,33 @@ spent on that job to settle it, and a comment on #2186 records the reasoning.
 > **Carry forward:** when a Trivy failure names only OS packages, check a sibling PR's scan from the
 > same hour before concluding "repo-wide". Two runs minutes apart disagreeing points at the base
 > image layer, not the CVE database.
+
+## 2026-09-05 08:50 — #2205 GREEN: the libuuid fix works; ported to #2186
+
+**`Scan built image` success (08:47:38→08:47:57)**, complete clean run on `3c97a0c`, verified by step
+list. That answers the open question in the PR: the base image's apk index **does** already carry
+`2.42.3-r0`, so `apk --no-cache upgrade libuuid` clears all seven findings rather than no-opping. No
+base-image bump in `xyz-base-nginx` is needed.
+
+**#2205 now only needs an approval, and it unblocks every open PR in the repo.**
+
+### The held port, released on evidence
+
+Cherry-picked to `PLT-2968` as **`79010c8`** — the change I explicitly declined to port two hours
+earlier *because it was unproven*. The sequencing mattered:
+
+- Before #2205's scan, porting would have been a guess. If the apk index had lagged, the port would
+  have added an unrelated Dockerfile commit to a 38-file feature PR and fixed nothing.
+- After it, the port is justified: #2186 goes green now rather than waiting on #2205 to merge.
+
+> **Rule: "port the existing fix rather than wait" presumes the fix is known to work.** When the fix
+> is itself unverified, the honest order is prove-then-port. Waiting one CI cycle cost nothing and
+> avoided speculatively touching four other PRs.
+
+Used `git cherry-pick -x`, so the commit is byte-identical to #2205's and records its origin — when
+#2205 merges and PLT-2968 next takes master, git sees the same change on both sides and merges it
+instead of conflicting.
+
+**Not ported to #2192**, deliberately: a second Claude session is driving that branch (see the 17:40
+entry on 09-04), and two sessions pushing one branch is how this org's branch sprawl started. It will
+pick the fix up from master when #2205 merges.
