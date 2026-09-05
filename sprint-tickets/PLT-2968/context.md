@@ -1211,3 +1211,37 @@ restoring a reverted hotfix) · `e9ca3ca` `groupItems` numbering (+1 test).
 Still open by design and specified on their threads: `setOverride` race, runner i18n sweep, O(n²)
 numbering, orphaned JSDoc. Still waiting on humans: approvals on #2186 and #2192, and the #2186
 draft-status decision.
+
+## 2026-09-05 08:10 — all three deferred items closed by another session, using the published analysis
+
+`a9baf04` ("close the three open review threads on #2186") — pushed by a **different session** under
+the same author identity — closes every item I deferred rather than raced. **Verified rather than
+taken on trust:**
+
+| item | verification at head |
+|---|---|
+| runner i18n | `FILTERS` carries `labelKey`, and **zero `translate()` calls inside any module-level const** — the freeze-at-import trap avoided |
+| O(n²) numbering | `indexOf(item)` gone (0 occurrences); `.map((item, index) => ({ item, index }))` at 755 → `number={itemNumber(group, index)}` at 776 — index carried through the filter, so numbering still means the item's real place |
+| orphaned JSDoc | block at 75 now sits directly on `TaskColumnSupport` (87); `ITaskSignature` (65) has its own at 58 |
+
+**This validates the deferral, and is worth keeping as a practice.** Three times I declined to patch
+a file another actor was rewriting, and instead published on the thread: the exact site list, the
+module-scope `translate()` trap, the `labelKey` pattern to reuse, and why `position` was NOT
+equivalent to the index. The other session then implemented all three *correctly and in one commit* —
+their own comments cite the `position` reasoning explicitly ("done your way rather than mine"). Had I
+raced the edits I would have bought merge conflicts in a file taking a commit every few minutes, and
+delivered no more.
+
+> **Specify, don't race, when another actor owns the file — but specify completely.** A deferral is
+> only legitimate if it leaves behind everything needed to do the work: locations, the trap, the
+> pattern to reuse, and the rejected alternative with its reason. "Worth a follow-up" is a punt;
+> this was not.
+
+### Also recorded: a false zero I nearly reported as verification
+
+While checking, a `git show | grep -c` returned **"indexOf occurrences: 0"** — but the `cd` had not
+persisted and git had errored with `fatal: not a git repository`. The count was zero because the
+pipeline produced nothing, not because the code was clean. Re-run from the right directory it was
+genuinely 0, so the conclusion held — **but it held by luck**. Same shape as the SonarCloud
+`{"total":0}` on a private project (17:53 on 09-03). *A zero from a pipeline whose first stage failed
+is not evidence. Check the command succeeded before believing its count.*
