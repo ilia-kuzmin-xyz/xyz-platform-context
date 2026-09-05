@@ -187,3 +187,43 @@ may re-order once it merges.
 - Durable fact (Copilot keeps flagging it wrong on PRs like #2184): the IAM authorities endpoint
   `GET /account/projects/{id}/authorities` is keyed by the **mongo** project id —
   `useEditorAuthorities` passes `projectIdForToken` (raw mongo id) by design.
+
+## 2026-09-05 — three PRs raised; two schema gaps and one stale doc found
+
+**Raised this run** (all draft, all on current master except where noted):
+- **#2203 PLT-2999** — Rename / Duplicate / Delete on a task-library row. Adds `rename`,
+  `duplicate` and `remove` to `checklistLibraryService`, which had none of them.
+- **#2204 PLT-2966** — completion date-time on an achieved readiness tag. **Based on `PLT-2968`,
+  not master.**
+- (#2202 PLT-3038 is non-commissioning.)
+
+### Two schema facts worth carrying
+
+1. **`asset_readiness` has `is_achieved` that nothing writes, and no `achieved_on`** — while
+   `system_readiness` has **both** `isAchieved` and `achievedOn`. So there is no stored moment for
+   "this asset reached this level"; PLT-2966 derives it from the latest save across the level's task
+   instances. **Candidate ticket: add `achieved_on` to `asset_readiness`** and the derivation
+   collapses to a read.
+2. **`asset_element_link` has no user column** (`id, project_id, asset_id, element_id, created_at`),
+   so nothing that attributes a link to a person can be built client-side. This is what blocks
+   PLT-2952's "per-user linking progress".
+
+Also: **no asset↔element matching or scoring exists anywhere in the repo** (`matchStrength`,
+`autoMatch`, `fuzzy` → 0 hits). PLT-2952's "match strength" is entirely net-new, algorithm and
+storage both.
+
+### Stale doc, corrected
+
+`hc-frontend/docs/commissioning/asset-register-and-3d-linking.md` §55-105 describes an
+"Isolate in 3D" toggle and `use-asset-type-element-isolation.ts` /
+`use-asset-link-element-isolation.ts`. **Those files no longer exist.** Related: the viewer's asset
+left panel is **`assets-panel/assets-panel.tsx`**, not `AssetListContent` — the latter survives only
+in `AssetListPage` and `TypesTab`, and its `panel-mode` / `enableElementLinking` props have no
+caller left. PLT-2953 (#2148) is what moved linking to selection-first and deleted the panel-owned
+mode.
+
+### Scoping-rule reminder that cost time this run
+
+`.claude/commissioning-active` could not be created because **`.claude/` itself did not exist** in a
+fresh checkout. `mkdir -p .claude && touch .claude/commissioning-active` — without it, five of the
+six eligible sprint tickets are out of scope by the repo's own rule.
