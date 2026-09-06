@@ -1443,3 +1443,28 @@ ignore list.
 
 **PLT-2968 / #2186 is red on this repo-wide blocker, not on its own diff** — its lint, full test
 suite and image build all passed.
+
+## 2026-09-06 07:5x — alpine v3.24 published the fix; the "wait it out" option resolved itself
+
+**`v3.24` now ships `libuuid` / `util-linux` `2.42.3-r1`** (verified against the live APKINDEX this
+morning), past the `2.42.3-r0` the secdb advisory names. Yesterday it was `2.42.1-r0` with the fix
+only in edge.
+
+So the advisory-ahead-of-repo window closed overnight, which is **option 1 from the #2205 write-up
+resolving on its own**: `apk --no-cache upgrade libuuid` now has something to install, and the line
+in #2205 / PLT-2968 becomes effective with no code change. The `.trivyignore` suppression (option 2)
+is no longer needed and should NOT be applied — good outcome from not having pushed it unilaterally
+yesterday.
+
+A `build` re-run of the same workflow run (`33958155116`) was started at 07:41 on the unchanged
+commit. Whatever it returns is informative: green means the fresh `apk` index carried the new
+package; still-red would mean a BuildKit layer cache served the pre-fix layer.
+
+**Do not repeat yesterday's mistake in the other direction:** if it goes green, that is only
+attributable to the alpine publication *because the index change was verified independently first*.
+The green alone still proves nothing about mechanism — check that the scan no longer lists `libuuid`
+at all, rather than inferring it.
+
+Also now stale and needing a touch-up before merge: the Dockerfile comment says `2.42.1-r0 ->
+2.42.3-r0` (actual is `2.42.3-r1`) and asserts "the fixed version is already in alpine" — true today,
+was false when written.
