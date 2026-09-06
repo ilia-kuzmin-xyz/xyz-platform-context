@@ -1468,3 +1468,36 @@ at all, rather than inferring it.
 Also now stale and needing a touch-up before merge: the Dockerfile comment says `2.42.1-r0 ->
 2.42.3-r0` (actual is `2.42.3-r1`) and asserts "the fixed version is already in alpine" — true today,
 was false when written.
+
+### 08:00 — #2186 is fully green, and what the green does / does not prove
+
+Re-run of the unchanged `2b5c046` completed 08:00: every step green, `Scan built image` included
+(07:59:51→08:00:11), on a real 6.7-minute `Build image`.
+
+**Guarding against the mirror of yesterday's error.** The log shows `Cache saved with key:
+cache-trivy-2026-09-06` — no same-day cache existed, so it downloaded a *current* DB before scanning.
+That rules out "passed because the DB was stale", which is the failure mode that produced the false
+green on #2205 yesterday. Combined with the independently-verified index change, the mechanism holds.
+
+**What is still not provable from here:** whether the clean image is because the apk line installed
+2.42.3-r1, or because `xyz-base-nginx` was rebuilt overnight and already carries the fix (making the
+line a harmless no-op). Both give the same result. The next master push decides it, since master does
+not carry these lines. *Stated as unknown on the PR rather than asserted either way* — the whole
+lesson of yesterday.
+
+**No code change was needed anywhere.** Also: the reworded Dockerfile comment says "the fixed version
+is already in alpine", which was false when written and is true today — so it needs no touch-up, and
+re-running CI on a green PR to change `2.42.3-r0` to `-r1` in a comment would cost more than it's
+worth.
+
+### The `.trivyignore` that never got written
+
+Option 2 — suppressing the seven HIGH CVEs — would have been live in the repo for roughly **18
+hours** before becoming both unnecessary and wrong, left for someone to notice and remove.
+
+> **When a scanner blocks everything and a suppression looks like the pragmatic call, the question is
+> "how long is this window?", not "how do I get green now?".** An advisory published ahead of its
+> package is a window measured in hours, not a permanent state. Escalating and waiting cost one day
+> of red CI; suppressing would have cost a stale security exception of unknown lifetime. The
+> instinct to not push a security suppression on my own judgement was right for a better reason than
+> I had at the time.
