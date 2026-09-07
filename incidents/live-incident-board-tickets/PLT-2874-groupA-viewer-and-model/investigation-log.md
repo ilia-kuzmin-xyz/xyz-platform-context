@@ -4,6 +4,56 @@ FAR01 (`b28712bb-0691-4db2-a626-85c2f1f5ead6`). Editor federated file reported ~
 elements on 07-07; dashboard reported ~695,000 with the scrubber at the end. Yash linked LVN1
 (Freshdesk 7514) on 07-27 as a second project with the same symptom.
 
+## 2026-09-07 — de-dup FE fix from the 08-28 recommended-action is already shipped; only the labelling decision is outstanding
+
+Scheduled live-incident sweep. Jira re-fetched fresh (`getJiraIssue`, full fields): status **In
+Analysis**, `updated = 2026-08-25T09:53:57+0100` — **byte-identical to every snapshot from 08-25
+through 08-31**, still 6 comments, newest still Darminder's 08-17 14:01 "Fix still ongoing
+following QA latest testing." GitHub re-checked directly (`search_pull_requests
+query:"PLT-2874 in:title,body"` against `hc-frontend`): still exactly one result, PR #2084,
+merged 2026-07-31. No PR anywhere named `PLT-2874-dashboard-element-count-diagnostics` either
+(searched by head branch, zero results) — that branch, if it still exists, has still never been
+raised as a PR. Nothing on the ticket or in GitHub has moved in **13 days**.
+
+**New this run — checked the claim in `recommended-action.md` § 2026-08-28 ("The de-dup fix —
+can ship without waiting on the answer above") against the actual code in `hc-frontend`, rather
+than carrying it forward unverified for a fourth pass.** That entry (and its 08-31 restatement)
+says a small independent PR is still needed at `dashboard-color-service.ts:643` and the
+`reApplyColors` call site to de-duplicate `coloredDbIds` before it reaches the tile. **This is
+already done, on both call sites, on current `master` (`hc-frontend` @ `56fd089`,
+2026-09-07):**
+
+```
+src/main/webapp/app/pages/organisation/ViewerPage/components/dashboard-panels/viewer/dashboard-color-service.ts
+  700  const elementCount = countDistinctElements(elementsWithStatus, this.coloredDbIds.length)  // initial paint
+  703  this.statisticsService.setVisibleElements(elementCount)
+  876  const elementCount = countDistinctElements(elementsWithStatus, this.coloredDbIds.length)  // reApplyColors
+  879  this.statisticsService.setVisibleElements(elementCount)
+```
+
+`element-count.ts`'s header comment names PLT-2874 explicitly and `countDistinctElements` builds
+a `Set` of `modelElementId` before falling back to the raw object count — this **is** the
+distinct-by-source-element count the 08-28 entry asks for, on the exact call site it names. It
+shipped as part of PR #2084 (merged 07-31); the 08-13 entry in this same file already said as
+much ("both call sites are now covered") — the 08-28 recommended-action entry appears to have
+lost track of that between the 08-24 "team discussion" reframe and the 08-28 rewrite, and 08-31
+carried the stale claim forward again without re-checking code. Flagging rather than silently
+fixing, per this repo's additive-writing rule: the 08-28/08-31 "ship the de-dup fix" action item
+is **moot**, not merely unsent.
+
+**What is actually still outstanding, and it is the same thing the 08-31 entry called "the sole
+blocker": the decision-request comment to Mostafa and Pietro** (`recommended-action.md` §
+2026-08-28, "Draft comment to Mostafa and Pietro") about the residual ~82,000-element population
+gap (linked-but-no-status vs status-but-not-linked) and the tile labelling. That is a
+communication action, not a code one, and nothing about today's code check changes its content —
+the numbers in the draft (879,931 / 851,409) still stand, since they were measured on live prod
+data on 08-27 and are independent of which repo commit is checked out.
+
+**Stall clock:** 21 days since the last human comment on the ticket (08-17); 10 days since the
+decision-request draft was written (08-28) and still not posted.
+
+---
+
 ## 2026-07-30 — RESOLVED in diagnosis: the two surfaces count different units
 
 **The editor counts elements. The dashboard counts geometry objects.** On this model there are

@@ -902,3 +902,16 @@ the proc's internals were not read. The change feed is strong evidence against s
 Draft reply prepared for Yash (unposted, Ilia to send): fix landed; correction that these were
 not dead links; the count mismatch remains and belongs in PLT-2874; asks him to confirm the
 activity now reads complete.
+
+## 2026-09-07 — reply posted; ball is now with the customer
+
+Scheduled sweep, live re-fetch. The draft above **has been sent**: comment `111276` (Ilia,
+2026-09-04 12:41) on the live ticket matches it almost verbatim — two elements marked installed,
+the "16 dead links" correction, and the PLT-2874 pointer for the residual count mismatch. Yash's
+Freshdesk automation followed immediately (`111277`, 09-04 12:51) with **Waiting on customer**.
+Jira `status` is still **With Customer**, `updated = 2026-09-04T12:51:48+0100`; no comment since.
+
+Nothing to action this run — the ask to Yash (confirm the activity reads complete for the
+customer) is answered by waiting on Freshdesk, not by us. Re-check on the next sweep for the
+customer's confirmation; if none arrives within the team's usual follow-up window this is a
+"can we close this?" nudge to Yash, same shape as PLT-2890's.

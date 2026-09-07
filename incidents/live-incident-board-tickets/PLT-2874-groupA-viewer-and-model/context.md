@@ -1,5 +1,19 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+## 2026-09-07 — confirmed unchanged on Jira/GitHub; the 08-28 "de-dup fix" action item is retired (already shipped)
+
+Status still **In Analysis**, `updated` still 2026-08-25T09:53:57+0100, still 6 comments ending at
+109779 (Darminder, 08-17). GitHub re-checked: still only PR #2084 (merged 07-31) references
+PLT-2874; no PR exists for the diagnostic branch either. 13 days with no movement anywhere.
+
+Full detail in `investigation-log.md` § 2026-09-07 and the correction in `recommended-action.md`
+(same date): the "ship the de-dup fix" bullet under § 2026-08-28 was checked against current
+`hc-frontend` code this run and found already merged (both `dashboard-color-service.ts` call
+sites use `countDistinctElements` since PR #2084). That action item is retired, not just unsent.
+**The only thing left on this ticket is the decision-request comment to Mostafa and Pietro**
+(`recommended-action.md` § 2026-08-28, unposted 10 days) — a communication action with no code
+work behind it.
+
 ## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
 
 Status still **In Analysis**. Comment list unchanged, still ending at 109779 (Darminder, 08-17,

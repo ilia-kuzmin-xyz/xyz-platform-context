@@ -342,3 +342,12 @@ thing outstanding is administrative: post the close-out comment and transition w
 §3's optional reference-table question (the £600 Cat3 / CSA / Underground Services row) still has
 nowhere fresher to land — PLT-3061's thread is itself parked on Josh's return (~09-02) — and still
 does not gate this close.
+
+## 2026-09-07 — confirmed unchanged, 63 days stale
+
+Live re-fetch: status `With Customer`, priority Major, assignee Yash Patel, resolution `null`,
+`updated` still **2026-07-06T10:18:45+0100**, 13 comments, newest still 106553 (Freshdesk #7126
+closed 07-06) — byte-identical to every prior snapshot back to 08-28. **63 days** since the last
+Jira activity of any kind. Root cause was settled long ago (§2); the only outstanding item is
+administrative — post the close-out comment and transition with a resolution. Not re-investigated
+this run, per protocol.

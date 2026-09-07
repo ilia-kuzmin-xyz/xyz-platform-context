@@ -1,5 +1,12 @@
 # PLT-2874 — Recommended action
 
+> **2026-09-07: the "de-dup FE fix" in § 2026-08-28 below is already shipped — verified against
+> `hc-frontend` master (`56fd089`), both call sites in `dashboard-color-service.ts` already call
+> `countDistinctElements`. Do not action that bullet; see `investigation-log.md` § 2026-09-07 for
+> the code read. The only thing still outstanding on this ticket is posting the decision-request
+> comment to Mostafa and Pietro, § 2026-08-28 "Draft comment to Mostafa and Pietro" — unchanged,
+> unposted, now 10 days.**
+
 > **2026-08-18: two new comments (Yash asking if a fix shipped; Darminder confirming a fix is under
 > QA testing) — neither answers the project/model or slider question below. The 08-14 draft to
 > Gennaro is unchanged and still the right message to send; see `context.md` § 2026-08-18 for why
@@ -384,9 +391,14 @@ Staging answers H1 vs H3 vs H4 without anyone running a query.
 >
 > Is it fine to just rename the labels ("linked to program" vs "with a recorded status"), or is there an expectation I'm missing about why those two counts should agree?
 
-### The de-dup fix — can ship without waiting on the answer above
+### The de-dup fix — ~~can ship without waiting on the answer above~~ already shipped (corrected 2026-09-07)
 
-`dashboard-color-service.ts:643` (and the `reApplyColors` call site, `:874-879` per the 08-13 entry) builds `coloredDbIds` as a flat array; the tile shows `.length`. Change to a distinct-by-source-element count (the folder's `element-count.ts`/`countDistinctElements` helper already exists and is used elsewhere on this ticket's own diagnostic branch, per the 08-24 entry). This is the same shape of fix as PR #2084's original de-dup, on the one call site PLT-2874 hasn't already covered. Worth landing as its own small PR rather than waiting on the label conversation.
+Superseded by `investigation-log.md` § 2026-09-07: this bullet mis-stated the code state. Both
+call sites (`dashboard-color-service.ts:700-703` initial paint, `:876-879` `reApplyColors`)
+already call `countDistinctElements` and have done so since PR #2084 merged on 07-31 — the 08-13
+entry in `investigation-log.md` already recorded this ("both call sites are now covered") before
+this 08-28 entry was written. There is no independent FE fix to land here. The only action left
+on this ticket is the decision-request comment below.
 
 ### What this changes about the diagnostic branch
 

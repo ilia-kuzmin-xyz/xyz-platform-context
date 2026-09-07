@@ -208,3 +208,14 @@ one-line redirect to the Power BI export (110385) still the last technical word 
 Yash or the customer since. The three-hypothesis split (residual code gap / historic backfill never
 done / Power BI export-side) is still undistinguished against data. Nothing re-investigated, nothing
 re-derived — per the run brief, delta-check only.
+
+## 2026-09-07 — no substantive change; `updated` moved but only Freshdesk automation fired
+
+Live re-fetch: status `With Customer`, 15 comments (13 → 15), `updated` moved to
+**2026-09-04T15:20:30+0100**. The two new comments are both Freshdesk-automation status echoes
+(`111296` Closed, `111297` Waiting on customer, both 09-04 15:19-15:20, both posted by Yash's
+integration, no free text) — **not** a human reply. Mostafa's 08-25 Power BI redirect (110385)
+is still the last substantive technical word; nothing from Yash or the customer since. The
+three-hypothesis split is still undistinguished against data. **10 days** since the reopen with
+no human follow-up — worth a nudge to Yash next time a human is driving this queue, same shape as
+the PLT-2890/PLT-3101 "can we close this" pattern, but not re-derived or drafted this run.

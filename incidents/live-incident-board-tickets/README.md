@@ -45,6 +45,43 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-07 (scheduled) — 7 in-scope tickets (down from 12 on 09-04), 5 left scope (all resolved or into review — none dropped in error), PLT-3101 has a real update, PLT-2874's 08-28 "de-dup fix" action item retired as already-shipped, 5 confirmed unchanged, zero Jira actions taken
+
+Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules
+above (With Customer included as in-scope-but-parked; With Technical Support/In QA/In Code
+Review/Done+Customer Release Check+Archived/Blocked excluded). **7 tickets in scope** — down from
+12 on 09-04. Every comment on every in-scope ticket was fetched live and diffed against each
+folder's last-recorded comment id/count, not just `updated`.
+
+### Left scope this run — all confirmed, none missing in error
+
+| Ticket | Was (09-04) | Now | What happened |
+|---|---|---|---|
+| PLT-3084 | Ready For Development | **In Code Review** | Per the 09-04 "Requested pass" entry above — PR #2197, transitioned deliberately |
+| PLT-3091 | Dev In Progress | **In Code Review** | Same requested pass — master merged in, transitioned |
+| PLT-3095 | With Customer | **Done** | Follows the 09-04 note that Ilia's fix explanation had already resolved it |
+| PLT-3051 | With Customer | **Done** | Fix had shipped/QA-verified since 08-27; customer confirmation must have landed |
+| PLT-3061 | With Customer | **Done** | Was parked on Josh's return (~09-02); closed since |
+
+### Group A (6)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3101](PLT-3101-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | **Real update.** The 09-03 draft to Yash was sent (comment `111276`, 09-04 12:41): two elements marked installed, "16 dead links" corrected to "real elements with no geometry", residual 835-vs-819 mismatch routed to PLT-2874. Freshdesk auto-flipped to Waiting on customer. Nothing to action — ball is with the customer | resolved-pending-confirmation |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Jira unchanged since 08-25 (13 days). **Correction, not a chase:** checked the 08-28/08-31 "ship the de-dup fix" action item against current `hc-frontend` code — already shipped as part of PR #2084 (both `dashboard-color-service.ts` call sites use `countDistinctElements`). That bullet is retired. Only the decision-request comment to Mostafa/Pietro remains outstanding (10 days unposted) | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` moved (09-04) but it's Freshdesk automation only (Closed→Waiting on customer flip), no human reply. Mostafa's 08-25 Power BI redirect still the last technical word. 10 days since a human touched it | 1 |
+| [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | Unchanged since 09-02; Ilia's answer ("no way to sync, not planned") already posted and *is* the close-out — nothing further owed unless the customer replies | 1 (on us, but answered) |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged since 08-18 (20 days); customer's 08-10 XER-pair offer still never taken up | 1 |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged, now **63 days** stale; close-out comment still the only outstanding (administrative) step | 1 — stale, unresponded (on us) |
+
+### Group B (1) — one line, per this run's instruction to skip detailed work
+
+| Ticket | Status | Note |
+|---|---|---|
+| PLT-2651 | Dev In Progress (moved from In Analysis, no new comment) | Follows the 09-04 "MEASURED ON PROD" entry in its own folder (H1/H2/V2 confirmed, fix named) — the status move looks like the natural next step, not fresh news |
+
+---
+
 ## Requested pass: 2026-09-04 — Ilia's two dev-stage tickets given complete draft PRs (PLT-3084 new PR #2197, PLT-3091 unblocked), both tickets moved to In Code Review
 
 Not the scheduled sweep. Ilia asked for the tickets **assigned to him** in `Ready For Development`

@@ -395,3 +395,10 @@ it. Flagging, not transitioning; this routine takes no live action.
 Same 4 PNGs as recorded since 08-19. This routine still cannot read image content, so Darminder's
 visual basis for naming `'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'` remains unverified here. The XER
 pair the customer offered on 08-10 has still never been requested — 21 days since the offer.
+
+## 2026-09-07 — confirmed unchanged
+
+Live re-fetch: status `With Customer`, `updated` still **2026-08-18T10:08:13+0100**, 5 comments,
+newest still Darminder's 08-17 15:08 naming the suspect draft schedule and asking for the previous
++ current XER pair. **20 days** since that ask; the customer's 08-10 offer to provide the XER pair
+has still never been taken up. Nothing re-derived.

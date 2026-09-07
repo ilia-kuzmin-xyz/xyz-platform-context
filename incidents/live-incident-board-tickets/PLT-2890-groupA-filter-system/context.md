@@ -482,3 +482,11 @@ to take twice.
 
 This also *strengthens* Mostafa's answer rather than weakening it: two independently-written fields is
 exactly why they cannot be merged, and exactly why nothing populates one from the other today.
+
+## 2026-09-07 — confirmed unchanged
+
+Live re-fetch: status `With Customer`, `updated` still **2026-09-02T18:21:39+0100**, 17 comments,
+newest still Freshdesk's auto-flip to "Waiting on customer" (`111103`) right after Ilia's answer
+that there is no automatic way to sync Contractor/Company and none is planned (`111102`). Nothing
+from the customer since. That answer is itself the "can we close this?" resolution — no further
+draft is owed unless the customer comes back. Nothing re-derived.

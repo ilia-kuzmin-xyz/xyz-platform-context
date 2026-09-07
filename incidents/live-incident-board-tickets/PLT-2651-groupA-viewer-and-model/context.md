@@ -1,5 +1,14 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-07 — Group A → Group B: status is now Dev In Progress
+
+Scheduled sweep. Board re-query shows PLT-2651 has moved from **In Analysis** (09-01 snapshot) to
+**Dev In Progress**, `updated = 2026-09-04T13:28:24+0100` — no new comment accompanies the
+transition (last comment is still 110665, 08-28), so it reads as the natural follow-on from the
+09-04 "MEASURED ON PROD" entry below (fix named) rather than a fresh development. Per this run's
+scope, Group B gets no deep work this pass — noting the reclassification only. Next run: a light
+dev-readiness/fix-ownership check, same as the README's standing rule for Group B tickets.
+
 ## 2026-09-01 — confirmed unchanged, delta-checked against live Jira
 
 Status still **Open**, assignee Ilia. Last comment is still 110665 (Yash, 08-28 14:53, "Waiting on
