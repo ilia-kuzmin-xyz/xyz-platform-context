@@ -46,3 +46,21 @@ read-only text.
 
 Rishi's **#2160** (PLT-2970/71/73, affects-systems) touches the same section — coordinate before
 starting.
+
+## 2026-09-07 — still held, clarification unanswered
+
+Checked at the start of the scheduled run. **Nothing has changed since 09-05.** Still
+`Analysis In Progress`; the 09-05 09:04 clarification is still the only comment, no reply. Two days
+open on a **Critical** ticket.
+
+The two questions (whose tasks — the system's across all members, or only what the tag puts on *this*
+asset; and list-that-opens-the-editor vs a full fill-in form) are both still unanswered, and both
+still change *what* gets built rather than how. Hold stands.
+
+One thing worth noting for whoever picks it up: the reuse position has **improved** since 09-05.
+`StepTasksModal` now sits on `PLT-2968`, which was merged up to current master today, and #2186 is
+green with only one deliberately-open thread. So the moment the scope question is answered, the
+system-scoped variant of that modal is the whole job.
+
+**Do not re-ask** — see the same note on PLT-2952.
+

@@ -54,3 +54,24 @@ The other half — the "Link to models" button and the Linked/Unlinked filter �
 - **Conflict risk is narrow:** #2186 touches `assets-panel.test.tsx` (which this must edit) but
   **not** `assets-panel.tsx` itself.
 - Could not view the ticket's three mock-ups — Jira attachment content 403s outside the MCP tool.
+
+## 2026-09-07 — still held, clarification unanswered
+
+Checked at the start of the scheduled run. **Nothing has changed since 09-05.** The ticket is still
+`Analysis In Progress`, and the clarification comment posted 09-05 09:03 is still the *only* comment
+on the issue — no reply from Darminder or anyone else. Two days open on a **Critical** ticket.
+
+Re-confirmed the hold is still the right call rather than just repeating it:
+
+- The proposed split is a **product decision**, not a technical one — it asks whether match strength
+  and per-user progress leave this ticket. Not mine to take unilaterally.
+- Building even "the easy half" alone is **not** safe. The easy half is the *"Link to models"* entry
+  point, and that is precisely the bit that reintroduces the staged linking mode PLT-2953 (#2148,
+  merged 09-02) deliberately removed. Shipping it would re-litigate a shipped decision by
+  implication. The Linked/Unlinked filter is the only genuinely uncontentious piece, and it is too
+  small to be worth a PR on its own.
+
+**Do not re-ask.** A second comment repeating the first adds noise and does not move it. The unblock
+is a human answering, or the ticket being split in refinement. Next run: check for a reply first;
+if one exists, the analysis above is complete enough to start immediately.
+
