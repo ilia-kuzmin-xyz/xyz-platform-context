@@ -3026,3 +3026,48 @@ instead of conflicting.
 **Not ported to #2192**, deliberately: a second Claude session is driving that branch (see the 17:40
 entry on 09-04), and two sessions pushing one branch is how this org's branch sprawl started. It will
 pick the fix up from master when #2205 merges.
+
+## 2026-09-07 — check-in: nothing to build, and a correction to the Trivy story
+
+No development this wake. Both clarifications are **still unanswered** after two days (PLT-2952 and
+PLT-2972, one comment each — mine — both still Analysis In Progress), so neither can move. Nothing
+new to pick up: the sprint's other tickets are unchanged.
+
+### Correction — master is NOT red, and #2205's premise is overstated
+
+**Supersedes the 09-05 note's framing, and #2205's own description.** #2205 states Trivy's scan is
+red "on every PR in this repo, including master's own builds". Checked rather than assumed:
+
+- **`Build & Test & Deploy - frontend service [Master]` run 1151 on `56fd089` — conclusion
+  `success`** (06 Sep 22:56). Master's own build is green, and `56fd089` does **not** carry the
+  libuuid change (#2205 is still open).
+- #2203 passed the identical `Scan built image` three minutes after #2186 failed it, off the same
+  base image and workflow (recorded 09-05).
+
+Two green runs on the un-fixed tree defeat "red on every build". The libuuid CVEs hit **some** runs,
+which points at a **base-image layer or Trivy DB cache difference between runners**, not a
+tree-wide break. So #2205 is reasonable hardening, **not** the emergency its description implies —
+worth knowing before anyone rushes a base-image bump on the strength of that wording.
+
+> **The 09-05 lesson held and is worth restating:** when a Trivy failure names only OS packages,
+> check a sibling run from the same hour *and* master's own latest build before concluding
+> "repo-wide". Here both checks contradicted it.
+
+### State of my PRs
+
+A parallel session did the housekeeping: master (`1b15ad9` → `56fd089`, #2201 merged) was merged into
+every one of my PRs, and the libuuid fix plus two further PLT-2967 commits (`ba31e80`, `2b5c046`)
+were pushed to `PLT-2968`. **#2204's base was merged in too**, so the stack is current.
+
+- **#2202 / #2203 / #2204** — current with master, Sonar gates green at the new heads, builds
+  re-running after the merges. **No reviews at all yet** — they are drafts and no human has looked.
+- **#2186** — 26 review threads, **exactly 1 open**: the `setOverride` race, still open by design.
+  No new findings arrived. Its Copilot *job* failed at 07:48 but filed nothing.
+- **#2201 was not a conflict risk** despite its title ("Project Settings - Task library") — it
+  touched `AssetTypePage/*` and `TypesTab` only, four files, no `TaskLibraryTab`. Checked because
+  PLT-2999 lives in that tab.
+- **#2190 (PLT-3086)** — unchanged, still base `e1114cd`, now **12 days stale**, question to Rishi
+  still unanswered.
+
+**Still 0 approvals anywhere.** Everything is waiting on a human, which is why this wake sent no
+notification.
