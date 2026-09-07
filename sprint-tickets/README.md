@@ -3071,3 +3071,26 @@ were pushed to `PLT-2968`. **#2204's base was merged in too**, so the stack is c
 
 **Still 0 approvals anywhere.** Everything is waiting on a human, which is why this wake sent no
 notification.
+
+### 08:05 (09-07) — all four builds landed GREEN, #2186 included
+
+Closing out the "builds re-running" above rather than leaving it as the last word. Verified per
+check run:
+
+| PR | Head | build | carries libuuid port? |
+|----|------|-------|---|
+| #2202 | `4dc2a2b` | ✅ 08:04 | **no** |
+| #2203 | `66f494a` | ✅ 08:04 | **no** |
+| #2204 | `d5f5f2a` | ✅ 08:04 | yes (via base) |
+| #2186 | `88cabd3` | ✅ 08:02 | yes |
+
+**#2186 is no longer red** — the 09-05 Trivy failure is resolved.
+
+And the third and fourth data points against "red on every build": **#2202 and #2203 both passed
+`Scan built image` with no libuuid change in them at all.** Together with master's green run 1151,
+that is three un-fixed trees scanning clean. The runner-cache explanation is now the only one that
+fits.
+
+**Nothing is outstanding that an agent can act on.** Every remaining item needs a person: two
+unanswered clarifications (PLT-2952, PLT-2972), the one open `setOverride` thread left open by
+design, #2190's unanswered question, and **0 approvals** across nine PRs.
