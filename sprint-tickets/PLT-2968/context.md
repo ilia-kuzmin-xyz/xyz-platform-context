@@ -1566,3 +1566,23 @@ docstring, runner section title); the persisted string was the outlier.
 deeper fix (render the title from `sectionType`, never persist display copy) would fix existing rows
 and allow localisation, but changes rendering for user-authored headers too — flagged for a decision,
 not done.
+
+### 08:0x — #2205's whole delta is the dead line; and a stale local ref nearly misled me
+
+Verified against current master (`c7c96b0`): **#2205's entire delta is `Dockerfile`, 12 insertions** —
+the no-op `RUN apk --no-cache upgrade libuuid` and its comment. Nothing else. Posted a correction on
+the PR, because my 09-06 comment had offered "merge it to protect master" as a legitimate option and
+that is now known to be pointless; leaving it would invite someone to merge a no-op on my own earlier
+advice.
+
+Both #2186 and #2192 have also had master merged in by the parallel session, and both merges verified
+clean in **both** directions (my files byte-identical across the merge; master's files intact; zero
+overlap between the two sets, which is *why* it was clean rather than luck holding).
+
+> **Check your local refs before believing a diff.** `git diff origin/master...branch` reported **9
+> changed files** for #2205 and I nearly wrote that down. The branch had been fetched; `origin/master`
+> had not, so the merge base was stale by two commits and master's own newer work showed up as the
+> branch's. After `git fetch origin master` the real answer was one file. The tell was that the number
+> looked wrong for a branch whose only purpose is one Dockerfile line — *the sanity check on a
+> surprising diff is the refs, not the diff.* Third instance of this family in this run, after the
+> false `grep -c` zero and the SonarCloud `{"total":0}` on a private project.
