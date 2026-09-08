@@ -2058,9 +2058,13 @@ unverified — **the 403 in point 5 blocks creating a role as a project admin, s
 exercised end to end** — and marked point 2 as depending on point 5. The bottom note now records
 PLT-3022 as closed.
 
-> **The retraction was left visible in the ticket rather than the phrase quietly deleted.** Sergey
-> had already read the old wording, so a silent edit would have left his question unanswered in the
-> place people actually look, and invited the next reader to ask it again.
+> **Corrected same day — do not repeat this.** The rewritten point 2 first carried a parenthetical
+> explaining that the earlier `(uuid)` wording had been wrong. That was removed within two minutes,
+> and the reasoning behind it was wrong: **a ticket description is a spec for the person doing the
+> work, not a changelog of the reporter's own edits.** Self-corrections there are noise to the
+> assignee and read as apologising in a document nobody reads for that. The correction belongs in
+> the reply to the person who asked, and nowhere else. Point 2 now states only the ask, the reason
+> it is unverified, and its dependency on point 5.
 
 > **Lesson for drafted replies: check who you are writing to before explaining their own system.**
 > The first draft of the reply quoted `Role.java` and `RoleConstant.java` back at the person who
