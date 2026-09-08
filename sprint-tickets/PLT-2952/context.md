@@ -75,3 +75,9 @@ Re-confirmed the hold is still the right call rather than just repeating it:
 is a human answering, or the ticket being split in refinement. Next run: check for a reply first;
 if one exists, the analysis above is complete enough to start immediately.
 
+
+## 2026-09-08 — still unanswered (day 3)
+
+Checked the ticket: **one comment, still mine, no reply**. Status unchanged at Analysis In Progress.
+Held per the "do not re-ask" note above — no second comment posted. Nothing about the analysis has
+changed; it remains complete enough to start the moment the split question is answered.

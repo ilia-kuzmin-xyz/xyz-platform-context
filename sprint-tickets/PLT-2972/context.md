@@ -64,3 +64,9 @@ system-scoped variant of that modal is the whole job.
 
 **Do not re-ask** — see the same note on PLT-2952.
 
+
+## 2026-09-08 — still unanswered (day 3)
+
+Checked the ticket: **one comment, still mine, no reply**. Status unchanged at Analysis In Progress.
+Held per the "do not re-ask" note above. The reuse position noted on 09-07 still holds and improved
+slightly: `PLT-2968` took master again today (`e3684e1`), so `StepTasksModal` sits on current master.
