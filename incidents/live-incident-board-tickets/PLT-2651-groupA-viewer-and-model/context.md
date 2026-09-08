@@ -640,3 +640,99 @@ right angle for the federation, not zero.
    method looks like an empty list**. If it reports `"function"`, Forge genuinely sees no 3D
    models and V4 is worse than divergent; if `"undefined"`, ignore that row. **Do not cite the
    `all3dCount: 0` reading until this is answered.**
+
+---
+
+## 2026-09-08 — REPRODUCED ON DEMAND. Ilia found the trigger. V1 + V2 both confirmed.
+
+**The four-month non-reproduction is over, and the cause is load order after all.**
+
+### What Ilia did — the controlled experiment that settled it
+
+| case | procedure | result |
+|---|---|---|
+| 1 | load `…ELEC_BracketsAndSupports_Bld1-V1` **first**, then switch the box on | box **misaligned** — `theta = -25.053°` |
+| 2 | load a **correctly-oriented** model first, *then* load the brackets model | box **aligned** — `theta = +17.261°` |
+
+Same project, same code, same build. **The only variable is which model was loaded first.**
+`+17.261°` matches the ~17° the feature's design doc records for ATL08; `-25.053°` is the
+brackets sub-model's own footprint, ~42° off.
+
+Cut planes confirmed both values exactly (`atan2(n.y, n.x)` on the vertical planes), so the
+computed angle is what the box actually uses.
+
+### ⚠️ Correction — the agent retracted the load-order hypothesis on FLAWED evidence
+
+On 09-04 the agent measured `getVisibleModels()[0]` in both sessions, saw the **same** model
+(`ELEC_BracketsAndSupports_Bld1-V1`, `visibleModels: 1`) alongside two different `theta`
+values, and concluded load order was ruled out. **That inference was wrong.**
+
+`theta` is computed **once**, at the moment the section box is switched on, and frozen
+(`_patchPromise` memo, `section-tool-orientation.ts:57-63`). The script reads
+`getVisibleModels()[0]` **at read time** — which is not the model that was first *at patch
+time*. In case 2 the correctly-oriented model drove the patch and was no longer the visible
+first model by the time the script ran. Same script output, entirely different history.
+
+**Rule for the next run: a memoised value cannot be attributed from post-hoc state.** If a
+value is computed once and frozen, reading the inputs later tells you nothing about what it
+was computed from. Instrument at compute time, or vary one input and compare — which is what
+Ilia did and the agent did not.
+
+The agent also proposed a fragment-count test (`fragments.length` vs Friday's 6605) to check
+whether partial streaming was the cause. **That test could not discriminate** — the count is
+read after loading completes, so both sessions report 6605 regardless. Dead end, do not repeat.
+
+### Mechanism — V1 and V2 acting together, both now measured
+
+1. **V2** — `_doPatch` derives the angle from `getVisibleModels()[0]` only
+   (`section-tool-orientation.ts:90-105`). First model wins.
+2. **V1** — the result is memoised for the life of the page (`:57-63`, `_theta` assigned once
+   at `:114`). Nothing resets it on model load or unload.
+
+So: whichever model is first when the box goes on sets the angle for the whole session, and
+every model loaded afterwards inherits it. `calculateFittedBoundingBox()` unions the *extent*
+of all visible models but rotates them all by that one frozen `theta` (`:76-77`, `:84`) —
+which is why the box grows to cover new models while staying at the old angle (measured 09-04:
+`theta` bit-identical, every plane distance moved).
+
+### This explains the whole history — nothing left unaccounted for
+
+- **Three months of non-reproduction** (Rishi 06-03 here, 06-15 on PLT-2771): reproduction
+  depends on which model the tester happens to open first. Open the federated model first and
+  it looks fine.
+- **PLT-2771's "was working for a week or two but now is aligned with true north"**: the user
+  changed which model they open first.
+- **PLT-2756 breaking ATL5/6/7 seven days after the May fix**: different projects, different
+  first models, different angles from the same algorithm.
+- **Two closures on "works now"** (06-04, and the 05-26 release): both were sessions that
+  happened to load a well-oriented model first.
+
+### Workaround — now real, and offerable to the customer
+
+**Load the main/federated model before switching the section box on** — or load everything
+first, then clip. Verified in case 2 above.
+
+Supersedes the 08-31 recommendation's refresh suggestion *and* the agent's 09-04 retraction of
+it: a refresh alone is not enough, because a refresh that again loads the brackets model first
+reproduces the fault. **The ordering is what matters, not the refresh.**
+
+### The fix — unchanged, now with proof rather than inference
+
+Both in `components/section-tool/section-tool-orientation/section-tool-orientation.ts`:
+
+1. **Compute the footprint across every visible model, not `getVisibleModels()[0]`** (`:90-114`).
+2. **Invalidate the memo when the visible model set changes** (`:57-63`).
+
+Guard rail, unchanged: ATL08 is a diagonal building and its box is *supposed* to be tilted
+(Rishi's PR #1933 acceptance criteria, comment 104360, 06-05). ATL07 must stay axis-aligned.
+The target is the right angle for the federation, not zero — a fix that axis-aligns ATL08
+re-breaks PLT-2756.
+
+### Still open
+
+- Which projects the fix is verified against before it ships. Proposed: **ATL08** (must hug the
+  diagonal), **ATL07** (must stay axis-aligned — the PLT-2756 regression), **FAR01** (what
+  PR #2069 was tuned for). This is the **4th attempt** on these 40 lines; #2069 fixed ATL08 and
+  broke three siblings within a week.
+- `typeof …viewer.get3DModels` — V4/H3 unanswered. Low priority now that the mechanism is known.
+- Reply to Yash drafted, unposted.

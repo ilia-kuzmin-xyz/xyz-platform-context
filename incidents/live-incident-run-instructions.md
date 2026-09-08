@@ -536,3 +536,30 @@ bytes behind them — no image, PDF, or XER can be opened from this routine, ful
 default and different auth might work". Stop suggesting "different credentials" in a flag; the gap
 is the session, not the object. State plainly what a human needs to open (filename + attachment id)
 and what question it would settle, and move on — do not spend a retry on it next time.
+
+## 2026-09-08 — A memoised value cannot be attributed from post-hoc state
+
+**PLT-2651 cost an extra pass because of this.** The section-box angle is computed once, when
+the user switches the box on, and frozen for the life of the page. The agent measured
+`getVisibleModels()[0]` **after the fact** in two sessions, saw the same model with two
+different angles, and concluded that load order was ruled out.
+
+That inference was invalid, and Ilia's controlled experiment overturned it within the hour:
+load the sub-model first → wrong angle; load a well-oriented model first → right angle. The
+first model *at compute time* was different; the first model *at read time* was the same.
+
+### Rules
+
+1. **If a value is computed once and cached, reading its inputs later tells you nothing.** The
+   inputs have moved on. Either instrument at compute time, or **vary one input and compare
+   outcomes** — the second is usually cheaper and is what actually worked here.
+2. **Prefer a controlled experiment to a richer read.** Two runs differing in exactly one step
+   beat any amount of post-hoc state dumping. The operator can do this in the UI in minutes;
+   the agent cannot do it at all from a console snapshot.
+3. **Check that a proposed test can actually discriminate before asking for it.** The agent
+   asked for `fragments.length` against a recorded baseline of 6605 to test partial-streaming.
+   Both sessions necessarily report the final count, so the test could not distinguish the
+   cases whatever it returned. Wasted round trip; ask "what would each outcome rule out?" first.
+4. **"Works fine now" on a load-order defect is not evidence of a fix.** PLT-2651 was closed
+   twice on that basis (05-26 release, 06-04) and reopened both times. Non-determinism means a
+   passing session proves nothing about the next one.
