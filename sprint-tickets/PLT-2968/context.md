@@ -1501,3 +1501,68 @@ hours** before becoming both unnecessary and wrong, left for someone to notice a
 > of red CI; suppressing would have cost a stale security exception of unknown lifetime. The
 > instinct to not push a security suppression on my own judgement was right for a better reason than
 > I had at the time.
+
+## 2026-09-08 07:5x — #2205 answered by experiment; and a review finding whose premise didn't exist
+
+### #2205 should be CLOSED, not merged — the base image caught up
+
+The question I flagged on 09-06 as unresolvable ("is the clean image from the apk line, or from a
+rebuilt base?") got answered for free, by a natural experiment already running:
+
+**#2192's branch does NOT carry `RUN apk --no-cache upgrade libuuid`** (it is based on master, which
+never had it). Its build passed on 09-07 with a real 6-minute `Build image` (08:03:44→08:09:42) and
+**`Scan built image` green** (08:10:16→08:10:34).
+
+So an image built from master's Dockerfile, with no libuuid upgrade line at all, now scans clean →
+**the base image `xyz-base-nginx:latest` carries the fix itself**, exactly as the Dockerfile comment
+anticipated ("drop once the base image catches up"). #2205's line is now a no-op. Recommend closing
+it rather than merging.
+
+**And this pass is not another stale-DB artefact** — I checked, having been burned once. The Trivy DB
+cache in play was `cache-trivy-2026-09-06` or newer, and that DB provably *contains* the libuuid
+advisory: it is the same DB that failed #2186 on 09-05/06. A clean scan against a DB that holds the
+advisory can only mean the installed package is fixed.
+
+> **The cheapest way to answer "which of two causes was it?" is often a run already in flight for
+> another reason.** No extra CI, no extra push: one branch happened to differ in exactly the one
+> variable in question. Look for that before declaring something unknowable.
+
+### The `projectId` logging finding: the cited policy does not exist
+
+Copilot flagged both of my `isMissingRelation` degrade warnings for logging `projectId`, "per the
+session-logging guidance". **I could not find any such guidance** — no hits in `docs/`, `.claude/`,
+`CLAUDE.md`, or `logService/`.
+
+What the log service *does* have is an enumerated redaction policy, and it is narrow and deliberate:
+`redactPathKeys` (`log-utils.ts:60`) strips **invite / reset-finish secret tokens** from URLs, and
+`maskEmail` masks **emails**. Credentials and personal identifiers. Project ids are not on the list —
+and are logged at info/warn from ~10 existing sites into these same OPFS logs (`PortfolioPage` ×3,
+`duckdb-service`, `opfs-cache-manager` ×3 incl. a `warn`, `ProjectInviteCompletePage`).
+
+Declined, with the evidence, and named the two things that would change my mind (a written policy
+elsewhere, e.g. Confluence, which a grep can't see; or a decision that project ids *are*
+tenant-identifying here — in which case the fix is repo-wide plus a `redactProjectId` helper, not two
+lines).
+
+> **A review bot citing a policy is not evidence the policy exists.** Check for it before complying:
+> the cost of complying wrongly here would have been ~10 call sites made inconsistent and the one
+> genuinely diagnostic field removed from a degrade warning whose whole purpose is to say *which*
+> environment is behind.
+
+### Also fixed: "Task steps" persisted under a section titled "Task items" (`4bb7aa3`)
+
+`SECTION_LABELS.TEST_STEPS` was `'Task steps'`, but the label is **persisted** and the runner renders
+a group by its stored label — and `splitBySection` drops only the PRECONDITIONS header, so the
+TEST_STEPS one renders *inside* a section `TaskInstanceModal` titles "Task items". Users saw a group
+"Task steps" nested under "Task items". "Task items" is the settled term (page heading, page
+docstring, runner section title); the persisted string was the outlier.
+
+> **The existing test could never have caught it.** It asserted the same constant the source writes,
+> so both moved together. The mismatch lived *across two files*. Added a case that compares the
+> persisted label to the i18n heading directly — and verified it fails on drift before trusting it.
+
+*Caveat recorded on the PR:* only newly written headers change; stored rows keep "Task steps".
+`splitDefinition` routes on `sectionType`, not the label, so old templates still edit fine. The
+deeper fix (render the title from `sectionType`, never persist display copy) would fix existing rows
+and allow localisation, but changes rendering for user-authored headers too — flagged for a decision,
+not done.
