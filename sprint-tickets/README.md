@@ -3238,3 +3238,49 @@ Six green, four still running at the time of writing, **zero failures**:
 | #2197 | ✅ 08:01:08 | #2204 / #2199 / #2195 | ⏳ |
 
 SonarCloud is green on all eight PRs that had reported by 07:54.
+
+### 08:20 — closing the run: **all ten builds GREEN**, and a parallel session is live in this repo
+
+Completing the table above rather than leaving "four still running" as the last word. Verified per
+check run, at the merged heads:
+
+| PR | build | PR | build |
+|----|-------|----|-------|
+| #2186 | ✅ 08:14:14 | #2199 | ✅ 08:10:30 |
+| #2204 | ✅ 08:01:20 | #2195 | ✅ 08:01:29 |
+| #2203 | ✅ 08:00:59 | #2194 | ✅ 08:01:19 |
+| #2202 | ✅ 08:00:32 | #2192 | ✅ 08:00:43 |
+| #2205 | ✅ 08:00:38 | #2197 | ✅ 08:01:08 |
+
+**Ten of ten green**, SonarCloud green on all ten, and `copilot-pull-request-reviewer` green on all
+ten. Every branch verified to contain `origin/master` by `git merge-base --is-ancestor`, not by
+trusting the merge output.
+
+#### A second Claude session is working this repo concurrently — check before acting
+
+Discovered mid-run, and it changes how a run should behave. Evidence, all from today:
+
+- `main` here **moved under me** between my two pushes (`a15a2aa..d7f3424`), adding
+  `sprint-tickets/PLT-2968/context.md`. Pulled and merged per policy; **no conflict**.
+- **`PLT-2968` advanced past my merge** (`e3684e1 → 4bb7aa36`) and **`PLT-3104` too**
+  (`5a8a6e7 → a6e8b73f`), both authored correctly as `ilia-kuzmin-xyz`.
+- Copilot's re-runs filed **five new threads at 07:46** — four on #2186, one on #2199 — and the
+  parallel session had **answered and resolved all five by 07:56**, before this run reached them.
+
+> **Carry-forward: re-read a thread's state immediately before replying to it.** Five threads went
+> from new to resolved inside ten minutes. A run that had queued replies off its first read would
+> have posted five duplicate answers onto already-closed threads. Nothing was duplicated here only
+> because the thread list was re-fetched after the builds rather than before.
+
+**One consequence to pick up next run:** `PLT-2966` (#2204) merged `PLT-2968` at `e3684e1`, and
+`PLT-2968` has since moved to `4bb7aa36`. #2204 is therefore **behind its own base again** — not
+wrong, and its build is green, but it wants another base merge whenever that stack is next touched.
+
+#### Final state — everything left needs a person
+
+- **1 open review thread in total**, across all ten PRs: the `setOverride` race on #2186, open by
+  choice with the interleaving documented. Everything else — 29 of 30 threads on #2186, and every
+  thread on the other nine — is resolved.
+- **0 approvals** across ten PRs. No human has reviewed any of them since 2026-09-02.
+- Two clarifications unanswered for three days; #2190 unanswered for thirteen.
+- The 13 mis-authored commits await an author decision (see the identity section above).
