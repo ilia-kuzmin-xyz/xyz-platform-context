@@ -353,3 +353,14 @@ active no longer auto-expands the matches' parents (search text unchanged); rety
 Both implicit `$open` writers in the viewer gantt are now explicit and event-independent. Not
 confirmed as *the* customer cause (ATL05 stopped reproducing on 09-01), but Ilia's AMS CLONE -XV2
 search repro is the concrete path #2195 now fixes. Awaiting Darminder's re-review; PR still draft.
+
+### 2026-09-08 (late) — one red build, self-inflicted, fixed; head `637994c18`
+
+`build` on `c4ebd14ce` failed at webpack type-check: `TS2352` on `task as Task` in the reveal's matcher,
+cast from the helper's `{ id }`-only task type. The pre-push check had type-checked the helper and
+its tests in isolation, not the hook that calls it. Fix `637994c18`: `revealSearchMatches` is
+generic over the task type, so the hook passes its own `Task` and needs no cast. This time the
+hook's exact call was compiled against the real dhtmlx 8.x `GanttStatic` d.ts before pushing.
+(`gantt` from `useViewer()` is `any` — `viewer-provider.tsx:41` — so only the cast could break.)
+Check suite on `637994c18` completed with no failures at 15:09. Sonar gate passed throughout, with
+"1 New issue" that is unreadable from here (private project; anonymous API returns empty).
