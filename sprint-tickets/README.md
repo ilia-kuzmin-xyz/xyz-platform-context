@@ -3094,3 +3094,123 @@ fits.
 **Nothing is outstanding that an agent can act on.** Every remaining item needs a person: two
 unanswered clarifications (PLT-2952, PLT-2972), the one open `setOverride` thread left open by
 design, #2190's unanswered question, and **0 approvals** across nine PRs.
+
+## 2026-09-08 — 0 eligible tickets (7th run running); master merged into all 10 PRs; **commit-authorship defect found**
+
+Sprint composition unchanged in substance. Nine tickets, **none kick-off-eligible**:
+
+| Ticket | Summary | Status | Eligible? |
+|--------|---------|--------|-----------|
+| PLT-2524 | Parquet last-updated tracking | Blocked | ❌ |
+| PLT-2968 | Readiness tag override context menu | In Code Review | ❌ |
+| PLT-2967 | Readiness tag task context menu | In Code Review | ❌ |
+| PLT-2972 | Affects System Tag interaction | Analysis In Progress | ❌ — clarification unanswered since 09-05 |
+| PLT-2952 | Asset List — enter linking mode | Analysis In Progress | ❌ — clarification unanswered since 09-05 |
+| PLT-3086 | System Edit/Move impact modal | Dev In Progress | ❌ |
+| PLT-3038 | GMT offset in timezone selector | Dev In Progress | ❌ |
+| PLT-2999 | Task library context menu | Dev In Progress | ❌ |
+| PLT-2966 | Asset Details — readiness area | Dev In Progress | ❌ |
+
+**Verified the JQL wasn't hiding anything**, since "0 eligible" seven runs running invites the
+suspicion that the query is wrong rather than the board. Re-ran with `openSprints()` dropped and
+the four in-flight statuses excluded: 30+ hits, all general backlog last touched between April and
+August (PLT-402, PLT-1618, PLT-838, …), **none in the open sprint**. The sprint query is correct;
+the board genuinely has nothing ready for dev.
+
+### ⚠️ Carry-forward: check `git config user.email` before committing in `hc-frontend`
+
+**The container's checkout starts with `user.name=Claude`, `user.email=noreply@anthropic.com`.**
+The standing instruction is that commits are pushed on Ilia's behalf only, so this is a defect,
+and it has already produced published history:
+
+| PR | Branch | Claude-authored commits |
+|----|--------|---|
+| #2195 | `PLT-3096-fix` | **7 of 11** |
+| #2199 | `PLT-3104` | 1 of 7 |
+| #2197 | `PLT-3084` | 2 of 6 |
+| #2194 | `PLT-3099` | 3 of 7 |
+| | **total** | **13** |
+
+The other six branches are clean, and **none of the 13 has reached `master`** (checked the last 60
+commits there) — so the blast radius is four open, unapproved, unmerged PRs.
+
+Set the identity explicitly this run before merging, so today's ten merge commits are all authored
+`ilia-kuzmin-xyz <154247993+ilia-kuzmin-xyz@users.noreply.github.com>` — verified per branch after
+the merge and before the push, not assumed.
+
+**The 13 existing commits were left alone deliberately.** Correcting them needs a rebase plus a
+force-push across four open PRs: that breaks any reviewer's local checkout and re-anchors review
+threads, for a cosmetic gain, and nobody asked for it. It is the author's call, not a routine's.
+Raised in the run summary instead.
+
+> **Rule for the next run: the git identity is not sticky.** The container is ephemeral, so
+> `git config` has to be re-set every session. Do it *before* the first commit, and verify with
+> `git log -1 --format='%an <%ae>'` rather than trusting the config read.
+
+### Checkpoint 1 — review feedback: clean, and nothing new since 09-07
+
+Checked per PR rather than inferred. **Zero open threads anywhere except one, open by design:**
+
+| PR | Threads | State |
+|----|---------|-------|
+| #2186 | 26 | 25 resolved; **1 open** — the `setOverride` read-modify-write race, held as a follow-up with the interleaving written out |
+| #2199 | 8 | all resolved |
+| #2192 | 4 | all resolved |
+| #2195 | 4 | all resolved |
+| #2194 | 1 | resolved |
+| #2197 | 1 | resolved |
+| #2202 / #2203 / #2204 / #2205 | 0 | no review yet — all still drafts |
+
+Newest review comment across every PR is **2026-09-07T07:41**, all of it the review bot. **No human
+has commented on any of my PRs since 2026-09-02**, and there are still **0 approvals across all ten**.
+
+### Checkpoint 2 — builds green before the merges; `copilot-pull-request-reviewer` fails repo-wide
+
+Every `build` check at the pre-merge heads was `success` (#2186, #2192, #2195, #2199 verified
+directly). The 09-05 Trivy/libuuid episode stays closed.
+
+**Standing oddity worth a name:** the `copilot-pull-request-reviewer` *job* reports
+`conclusion: failure` on every PR checked — #2186, #2192, #2195, #2199 — while still filing
+findings on the same runs (it filed on #2192 and #2195 at 07:47–07:49 on 09-07). So it is failing
+*after* doing its work. It is not a required check and does not gate anything, so it is **not**
+treated as a build failure and no hotfix PR was raised for it. Recorded because a future run
+looking at a red tick on that job will otherwise re-investigate it from scratch.
+
+### Checkpoint 3 — master merged into all ten PRs
+
+**`master` moved `56fd089 → c7c96b0`** (#2207, PLT-3110, merged 09-07 22:16). Every one of the ten
+PRs was exactly **1 behind**.
+
+Checked the conflict surface before merging rather than merging and seeing: `c7c96b0` touches four
+files, all `scheduleService/*` plus the dashboard `api-activities-loader`. Nothing any open PR
+touches — #2195 is the nearest miss, and it lives in `gantt-x/bar/hooks/`. **All ten merged clean,
+no conflicts.**
+
+Order mattered for the stack: `PLT-2968` took master first, then `PLT-2966` took `PLT-2968`, so
+#2204 gets master through its own base rather than a second, divergent merge of it.
+
+| PR | Branch | New head |
+|----|--------|----------|
+| #2186 | `PLT-2968` | `e3684e1` |
+| #2203 | `PLT-2999` | `68486df` |
+| #2202 | `PLT-3038` | `f36e640` |
+| #2205 | `fix/trivy-libuuid-util-linux` | `b3abd2b` |
+| #2199 | `PLT-3104` | `5a8a6e7` |
+| #2197 | `PLT-3084` | `92f7477` |
+| #2195 | `PLT-3096-fix` | `1a297e7` |
+| #2194 | `PLT-3099` | `fbdfe99` |
+| #2192 | `fix/trivy-nanoid-cve-2026-73086` | `eefdced` |
+| #2204 | `PLT-2966` | `9fc6dff` |
+
+Builds re-running at the new heads at the time of writing — in progress, so per checkpoint 2 not
+judged this run.
+
+### Nothing else was actionable
+
+No development kicked off, for the seventh consecutive run. **Neither clarification has been
+answered in three days** (PLT-2952, PLT-2972 — one comment each, both mine), so neither ticket can
+move, and re-pinging is noise. #2190 (PLT-3086) is now **13 days stale** on base `e1114cd` with
+Rishi's question still unanswered; it is his PR, so it was not touched.
+
+Everything outstanding needs a person: two clarifications, one race-condition follow-up held by
+choice, #2190's question, the authorship decision above, and **0 approvals across ten PRs**.
