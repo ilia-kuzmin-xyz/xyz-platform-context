@@ -167,3 +167,34 @@ owner and a date, or the ticket should stop being labelled `With Customer` when 
 asked of the customer since 08-10. Worth Ilia's attention on return if it is still cold: this is the
 one ticket on the board whose entire blocker is that a correct, ready, three-sentence question has
 sat unsent for two weeks.
+
+## 2026-09-08 — SUPERSEDES steps 1-2 above. The file arrived; the ask is now internal and free.
+
+Steps 1 and 2 above assumed we had nothing but a hypothesis and needed the customer's files to test
+it. As of 09-07 16:24 that changed: attachment `64009` (`WI-1_M_WT_B11 - DD8.2.26 1.xer`, 27 MB) is
+on the ticket — the file offered 08-10, asked for by name 08-17. See `context.md` § 2026-09-08 for
+why this is unopenable from this session (confirmed 403, not assumed) and the exact two-line check
+it needs.
+
+**Classification: class 3 — resolvable once someone with file access runs one check, not more
+customer back-and-forth.** Do not send step 2 (the customer-facing schedule-pair ask) — the file we
+already have can settle H1 on its own; only ask the customer for the *previous* schedule if this
+check comes back negative.
+
+### Draft to Darminder — 79 words, UNPOSTED
+
+> Hi Darminder — Matthew's XER for the 2nd Aug B11 schedule is finally on the ticket (attachment
+> `64009`). Could you (or whoever can open it) run one check: does the file have more than one `%T
+> PROJECT` row, and under `%T PROJWBS`, what `proj_id` does 'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'
+> sit under versus B11's own project row?
+>
+> **If they don't match, that's the extra WBS parent explained — a multi-project export, not a
+> parsing bug.**
+
+**Assumption this rests on, one line:** that a mismatch between those two `proj_id` values is in fact
+what the Web Viewer's schedule tree renders as an "extra parent WBS" — inferred from the code reading
+in `context.md` §4 (Path 1/Path 2), not confirmed against this specific file.
+
+**Not sent in this draft:** the previous-schedule ask. It only becomes necessary if the check above
+comes back negative (single project, no `proj_id` mismatch) — at that point H2 (parent-loss on
+re-ingest) becomes the lead hypothesis and a before/after diff is genuinely needed.

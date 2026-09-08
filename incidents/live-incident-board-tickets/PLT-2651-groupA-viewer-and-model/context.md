@@ -1,5 +1,26 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-08 — CORRECTION: the 09-07 "Group A → Group B" reclassification below was wrong; this stays Group A
+
+`live-incident-run-instructions.md` § Grouping is explicit: a Dev-In-Progress ticket is Group B
+**unless** it is assigned to Ilia, or its most recent comment is a question aimed at us — either
+exception alone reclassifies it back to Group A. PLT-2651 is assigned to **Ilia Kuzmin** (confirmed
+live this run) and its most recent substantive comment (110665, 08-28) is Yash's question to
+Ilia/Rishi about newly-imported models — both exception clauses hold, not one. The 09-07 entry
+below noted the status change but did not check either clause before demoting it to Group B; folder
+name (`groupA`) was never actually renamed, so this is a metadata correction, not a folder move.
+**Superseding, not deleting** the 09-07 note: its factual observation (status moved to Dev In
+Progress, `updated` 09-04, no new comment) still stands, only the group conclusion drawn from it
+was wrong.
+
+**Live re-check this run:** no new Jira comment since 110665 (08-28); status still Dev In Progress;
+no GitHub PR yet against the named fix (searched `hc-frontend` for "PLT-2651" — only #1871, the
+original May fix, and #2069, PLT-2906's fix, exist; nothing implementing the 09-04
+`section-tool-orientation.ts` changes). The two outstanding console checks from 09-04 (clean-load
+test, V4/H3 `typeof` check) are still unrun — this is where the ticket actually sits: fully
+diagnosed, fix named down to file:line, blocked only on those two checks before a PR is safe to
+write. Action class **3** (needs Ilia's own visual/console session first, not more code-reading).
+
 ## 2026-09-07 — Group A → Group B: status is now Dev In Progress
 
 Scheduled sweep. Board re-query shows PLT-2651 has moved from **In Analysis** (09-01 snapshot) to

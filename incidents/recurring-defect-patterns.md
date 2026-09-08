@@ -303,6 +303,25 @@ comparison source" ticket should check progress weighting **before** checking wh
 categories are in scope — cheaper than a scope diff, and this pattern now has two independent
 occurrences (filter-list visibility, headline %) from the same one setting.
 
+### 2026-09-08 addition — candidate third occurrence, UNCONFIRMED (the decisive fact hasn't been checked yet)
+
+**PLT-3109** (META-LVN-BLD1&2, Group A, first triaged 09-08): dashboard 46% Planned/45% Installed vs
+the customer's own Power BI export ("Combined_Percent Complete") reading 46%/0.3% for the same
+activity, reported project-wide across "15,000+ Activity IDs." Unlike PLT-3010, this one arrived
+with the mechanism already named **by the customer themselves**, unprompted: *"We are using element
+based percentages as the schedule does not have proper labour units included"* — a near-verbatim
+match for `ProgressWeightingTypeLabel.LINKED_ELEMENT_COUNT`'s own description
+(`progress-weighting-types.ts:33`, "element based" in the customer's words vs "determined by the
+number of elements linked to it" in ours).
+
+**Marked candidate, not confirmed, because the one fact that would settle it — the project's actual
+live `ProgressWeightingMethod` — was not checked** (no prod DB/Power BI access this session; see
+`live-incident-board-tickets/PLT-3109-groupA-progress-tracking/context.md` §4). Add to this
+pattern's confirmed-occurrence count only after that check lands. If confirmed, note the new wrinkle
+it would add: this is the first occurrence where the customer's own export, not just our dashboard,
+disagrees with itself depending on which basis produced it — worth asking whether the export feed is
+weighting-aware at all, or hardcoded to one basis regardless of the project's dashboard setting.
+
 ---
 
 ## Pattern 4 — Two surfaces disagree about a number (and the method that resolves it)

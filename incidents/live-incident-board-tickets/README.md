@@ -45,6 +45,38 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-08 (scheduled) — 8 in-scope tickets (up from 7 on 09-07), 1 brand-new (PLT-3109), PLT-2651 correction reverses yesterday's Group B demotion, PLT-3033 has a real update after a 28-day wait, 5 confirmed unchanged, zero Jira actions taken
+
+Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules
+above. **8 tickets in scope.** Every in-scope ticket's live comments/attachments/status were
+fetched and diffed against its folder's last-recorded state, not just `updated`.
+
+### Correction to yesterday's run: PLT-2651 is Group A, not Group B
+
+09-07 reclassified PLT-2651 to Group B on the status move alone, without checking the two standing
+exceptions (`live-incident-run-instructions.md` § Grouping): assigned to Ilia, or most recent
+comment a question aimed at us. PLT-2651 satisfies **both** — assignee is Ilia Kuzmin, most recent
+comment (110665, 08-28) is Yash's question to Ilia/Rishi. Folder name was never actually changed
+(`groupA` throughout), so this is a metadata correction only. Full reasoning in the folder's own
+2026-09-08 entry.
+
+### Group A (8)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | **Brand new** (created 09-07 11:26, first run to touch it). Strong pattern match to PLT-3010/PLT-2941 (Pattern 3, progress-weighting basis mismatch) — customer's own words name the exact FE setting. One unverified fact (LVN's live weighting value) would confirm or redirect it | 1 (pending one check) |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | Open | **Real update.** The XER file offered 08-10, asked for by name 08-17, finally arrived 09-07 16:24 (28 days later) — but is a confirmed 403/unopenable from this session. One two-line text-search settles H1; drafted a hand-off to Darminder rather than another customer round trip | 3 |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | Dev In Progress | Reclassified back to Group A this run (see above). Unchanged since 08-28; no PR yet against the 09-04 named fix; still blocked on two console checks only Ilia can run in a live session | 3 |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-17 (comments) / 08-25 (status). Decision-request comment to Mostafa/Pietro still unposted (11 days) | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-04 (Freshdesk automation only). Three-question draft to Yash/Mostafa still unposted | 1 |
+| [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | Unchanged since 09-02; Ilia's substantive answer already posted, only a one-line "can we close this?" nudge remains | 1 (on us, but answered) |
+| [PLT-3101](PLT-3101-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-04. 4 days since our reply — normal response latency, not yet a stall | resolved-pending-confirmation |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged, now **64 days** stale, **24th consecutive run** recommending the same unposted close-out comment | 1 — stale, unresponded (on us) |
+
+### Group B (0) — PLT-2651 was the only Dev In Progress ticket and moves to Group A above
+
+---
+
 ## Run: 2026-09-07 (scheduled) — 7 in-scope tickets (down from 12 on 09-04), 5 left scope (all resolved or into review — none dropped in error), PLT-3101 has a real update, PLT-2874's 08-28 "de-dup fix" action item retired as already-shipped, 5 confirmed unchanged, zero Jira actions taken
 
 Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules

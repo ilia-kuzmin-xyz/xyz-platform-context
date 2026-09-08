@@ -519,3 +519,20 @@ in a single session.
 5. **Prefer a public getter over a private field** where one exists — `theta` has one
    (`section-tool-orientation.ts:47-49`), so the reading does not depend on property names
    surviving the bundle.
+
+## 2026-09-08 — Jira attachment *content* is 403 from this routine; confirmed, not assumed
+
+Every prior "media unopenable" note on this board deferred without actually trying the fetch.
+Tested directly this run against a real attachment (PLT-3033's XER, id `64009`):
+
+```
+curl https://api.atlassian.com/ex/jira/<cloudId>/rest/api/3/attachment/content/<id>
+→ HTTP 403 {"errorMessages":["You do not have permission to view attachment with id: <id>"]}
+```
+
+The Atlassian MCP tools (`getJiraIssue` etc.) return attachment **metadata** (filename, size,
+mimetype, the same `content`/`thumbnail` URLs) but this session's credentials cannot fetch the
+bytes behind them — no image, PDF, or XER can be opened from this routine, full stop, not "unless
+default and different auth might work". Stop suggesting "different credentials" in a flag; the gap
+is the session, not the object. State plainly what a human needs to open (filename + attachment id)
+and what question it would settle, and move on — do not spend a retry on it next time.

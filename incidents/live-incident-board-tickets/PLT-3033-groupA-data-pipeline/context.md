@@ -402,3 +402,49 @@ Live re-fetch: status `With Customer`, `updated` still **2026-08-18T10:08:13+010
 newest still Darminder's 08-17 15:08 naming the suspect draft schedule and asking for the previous
 + current XER pair. **20 days** since that ask; the customer's 08-10 offer to provide the XER pair
 has still never been taken up. Nothing re-derived.
+
+## 2026-09-08 — THE XER FILE ARRIVED, same day as the last snapshot above. Unopenable here; one query settles H1.
+
+**Movement, finally, on 2026-09-07 at 16:22-16:26 BST** — after this file's own "confirmed unchanged"
+snapshot was taken earlier the same day (07:10 UTC), so it is genuinely new to this run, not missed
+last time:
+
+- `111482` (16:22:45) — Freshdesk status → Open (someone re-opened the thread with the customer).
+- `111483` (16:24:50) — Yash: *"user has got back 'yes, 2nd of august schedule.'"*
+- **Attachment `64009`, `WI-1_M_WT_B11 - DD8.2.26 1.xer`, 27.2 MB, uploaded by Yash at 16:24:49** — the
+  file the customer offered on **08-10** and that Darminder asked for by name on **08-17**, landing
+  **28 days** after the original offer.
+- `111484` (16:25:50) — Freshdesk status → Waiting on 3rd line.
+
+**What this does and does not answer.** "Yes, 2nd of august schedule" reads as confirmation of *which*
+schedule the file is (matching the ticket's own "2nd Aug" framing), not as an answer to Darminder's
+specific 08-17 question (does `'WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT'` show as its own entry in the
+schedule switcher). There is no visible message in this thread that ever asked Matthew that literal
+question — consistent with the "relay failed silently" pattern flagged on 08-31/09-04. Also: only
+**one** file arrived (the current/2nd-Aug one), not the schedule **pair** Darminder asked for — a
+before/after diff is still not possible from what we have.
+
+**Tried and confirmed unopenable this session:** `curl` directly against
+`https://api.atlassian.com/.../attachment/content/64009` → **HTTP 403**,
+`{"errorMessages":["You do not have permission to view attachment with id: 64009"]}`. This routine
+has no Jira attachment-download credential, distinct from every prior "we haven't opened it" note on
+this ticket (those never actually attempted the fetch) — this one is a confirmed, not assumed, gap.
+
+**Why this doesn't have to wait for a second file.** H1 (multi-project/EPS XER export not scoped by
+`proj_id`) is fully testable against this **one** file — it only asks whether the file itself contains
+more than one project's rows, which needs no "before" version to compare against. A human with Jira UI
+access (or anyone Yash can hand the file to) can settle it directly: open the XER as text (P6 XER is
+tab-delimited with `%T <TABLENAME>` section headers) and:
+1. `grep -c '^%T\tPROJECT'` — more than one hit means the file itself is a multi-project export.
+2. Under the `%T PROJWBS` table, search for `WI-1_W_WT_B11_2026-8.2 - LIVE - DRAFT` (or just `LIVE -
+   DRAFT`) and read the row's `proj_id` field against the B11 project's own `proj_id` from the `%T
+   PROJECT` table — a mismatch confirms H1 outright; a match under `%T PROJWBS` with no parent found
+   among the other WBS rows would instead point at H2 (parent-loss promoting an orphan to root).
+
+This is the same single query the file has been asking a human to run since 08-19 (`SELECT DISTINCT
+proj_id FROM PROJWBS`) — now finally possible, just not from this session.
+
+**Updated confidence: 6/10 (unchanged in number, but the blocker moved).** H1 is unchanged at 6/10 as
+a hypothesis; what changed is that the artifact needed to test it now exists and the only remaining
+gap is someone with file access running the two-line check above, not another round of "ask the
+customer."

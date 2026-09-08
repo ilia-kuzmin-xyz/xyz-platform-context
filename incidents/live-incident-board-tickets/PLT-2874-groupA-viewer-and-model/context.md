@@ -1,5 +1,12 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+## 2026-09-08 — confirmed unchanged
+
+Live re-fetch: status still `In Analysis`, priority Minor, assignee Ilia Kuzmin, 6 comments, newest
+still Darminder's 08-17 14:01 "fix still ongoing following QA latest testing." No new Jira activity
+since 09-07. The 08-28 decision-request comment to Mostafa/Pietro (retired de-dup item aside) remains
+the only outstanding action, still unposted. Nothing re-derived.
+
 ## 2026-09-07 — confirmed unchanged on Jira/GitHub; the 08-28 "de-dup fix" action item is retired (already shipped)
 
 Status still **In Analysis**, `updated` still 2026-08-25T09:53:57+0100, still 6 comments ending at

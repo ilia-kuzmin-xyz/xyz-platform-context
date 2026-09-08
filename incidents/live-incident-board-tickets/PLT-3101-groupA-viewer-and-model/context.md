@@ -903,6 +903,14 @@ Draft reply prepared for Yash (unposted, Ilia to send): fix landed; correction t
 not dead links; the count mismatch remains and belongs in PLT-2874; asks him to confirm the
 activity now reads complete.
 
+## 2026-09-08 — confirmed unchanged; 4 days since our reply, no customer response yet
+
+Live re-fetch: status still `With Customer`, `updated` still `2026-09-04T12:51:48+0100`, 10
+comments, newest still `111277`. No customer reply yet to the "can you confirm CH08-MY-41 now
+reads complete" ask. Not yet at the follow-up-nudge threshold named on 09-07 — 4 days is normal
+customer-response latency, not stall. Re-check next sweep; escalate to a "can we close this?" nudge
+(PLT-2890 shape) only once it clears that window. Nothing re-derived.
+
 ## 2026-09-07 — reply posted; ball is now with the customer
 
 Scheduled sweep, live re-fetch. The draft above **has been sent**: comment `111276` (Ilia,

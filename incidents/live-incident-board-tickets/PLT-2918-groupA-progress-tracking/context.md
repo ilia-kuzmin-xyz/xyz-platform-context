@@ -209,6 +209,12 @@ Yash or the customer since. The three-hypothesis split (residual code gap / hist
 done / Power BI export-side) is still undistinguished against data. Nothing re-investigated, nothing
 re-derived — per the run brief, delta-check only.
 
+## 2026-09-08 — confirmed unchanged
+
+Live re-fetch: status still `With Customer`, labels still `[not_testable]`, 15 comments, newest still
+111297 (09-04 15:20, Freshdesk → Waiting on customer). No new Jira activity since 09-07. The
+three-question draft to Yash/Mostafa (08-26 entry below) remains unposted. Nothing re-derived.
+
 ## 2026-09-07 — no substantive change; `updated` moved but only Freshdesk automation fired
 
 Live re-fetch: status `With Customer`, 15 comments (13 → 15), `updated` moved to

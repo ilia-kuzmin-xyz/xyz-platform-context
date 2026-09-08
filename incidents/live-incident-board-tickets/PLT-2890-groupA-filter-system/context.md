@@ -483,6 +483,12 @@ to take twice.
 This also *strengthens* Mostafa's answer rather than weakening it: two independently-written fields is
 exactly why they cannot be merged, and exactly why nothing populates one from the other today.
 
+## 2026-09-08 — confirmed unchanged
+
+Live re-fetch: status still `With Customer`, 17 comments, newest still 111103 (Ilia, 09-02 18:21,
+Freshdesk → Waiting on customer). No new Jira activity since 09-07. The one-line "Can we close this
+one now?" question (09-03 entry below) remains unposted. Nothing re-derived.
+
 ## 2026-09-07 — confirmed unchanged
 
 Live re-fetch: status `With Customer`, `updated` still **2026-09-02T18:21:39+0100**, 17 comments,

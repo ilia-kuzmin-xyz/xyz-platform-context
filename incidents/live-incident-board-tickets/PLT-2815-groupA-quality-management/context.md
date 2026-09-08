@@ -343,6 +343,13 @@ thing outstanding is administrative: post the close-out comment and transition w
 nowhere fresher to land — PLT-3061's thread is itself parked on Josh's return (~09-02) — and still
 does not gate this close.
 
+## 2026-09-08 — confirmed unchanged, 64 days stale
+
+Live re-fetch: status still `With Customer`, `updated` still 2026-07-06T10:18:45, 13 comments,
+newest still the 07-06 "Closed" Freshdesk-automation line. No new Jira activity since 09-07. The
+short 2026-08-14 close-out draft in `recommended-action.md` remains unposted — **24th consecutive
+run recommending it.** Nothing re-derived; still flagged for human attention (see summary).
+
 ## 2026-09-07 — confirmed unchanged, 63 days stale
 
 Live re-fetch: status `With Customer`, priority Major, assignee Yash Patel, resolution `null`,
