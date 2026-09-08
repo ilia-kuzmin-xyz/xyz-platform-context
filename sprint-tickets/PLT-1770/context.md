@@ -1961,3 +1961,82 @@ Verified what actually landed on master:
 
 Sprint-ticket work for PLT-1770 is DONE. Next run: nothing to do here unless the flag is
 being enabled or PLT-3022 is picked up.
+
+## 2026-09-08 — follow-up sweep: PLT-1770 closed & staging-verified, and **PAPI-3738 was picked up today**
+
+Asked to follow up on the merged PLT-1770 and its BE ticket. The 08-07 "MERGED" entry above was
+the last word in this file, and **four of its statements are now out of date**. Superseding them
+here rather than editing them in place, so the sequence stays readable.
+
+### PLT-1770 itself — Closed / Done, verified on Staging
+
+- **Status: Closed, resolution Done.** Assignee is now **Gennaro Boccia** (QA), not Ilia.
+- **"Verified implemented on Staging 26.3.6"** — Gennaro, 2026-09-07 09:55.
+- Pietro asked on 05 Aug what the merge actually buys; Ilia's reply (05 Aug 14:35) is the
+  scope-of-record and still accurate. Four comments total, nothing unanswered.
+
+### ⭐ PAPI-3738 moved TODAY, three changes inside 20 minutes
+
+The 08-07 entry calls it "BE, Backlog" and unowned. That is no longer true as of **08 Sep**:
+
+| When (BST) | Who | What |
+|---|---|---|
+| 13:18 | **Sergey Kuderskiy** | **assigned it to himself** (was unassigned) |
+| 13:20 | Sergey | Sprint **58 → 57** |
+| 13:37–13:38 | Ali Seyedof | re-parented: off `PAPI-3330`, onto epic **`PAPI-3600` "Additional API EPs Q3 2026"** (Dev In Progress, Must Have) |
+
+**It is now in an open sprint** — confirmed by matching it against `sprint in openSprints()`, not
+inferred from the sprint number, so the 58→57 move is a pull *into* the active sprint rather than a
+push out. **Workflow status is still `Backlog`**, so it is scheduled and owned but not started, and
+it still carries **zero comments** — none of the six questions has been answered in writing yet.
+
+The six asks are unchanged (Quality extras; the 5 missing authority families; custom-role id on the
+contacts PUT; deleted-role semantics; blessing the level→code splits; and who may use `/api/roles`,
+the 403 point). Point 5 is the one with a live FE consequence.
+
+### Two more corrections to the 08-07 entry
+
+- **PLT-3022 is CLOSED / Done** (07 Sep, Gennaro). The entry says the block on it "is now cleared"
+  and implies it is waiting to be picked up — it has since been done. Nothing to pick up.
+- **The `js-yaml` advisory is RESOLVED.** `origin/master`'s `package-lock.json` now carries
+  **`js-yaml 4.3.1`**, read out of the lockfile rather than trusted from a commit subject. The entry
+  lists it as an open repo CI-hygiene item; it is not.
+
+### The live question nobody owns: **the flag is still OFF**
+
+`src/main/webapp/app/config/constants.ts` on current master (`c7c96b0`) still reads
+`{ name: 'CustomPermissions', value: false }`. So the feature remains **dark on master** — exactly
+as the 08-07 entry recorded at merge time, and unchanged a month later.
+
+That sits oddly beside "Verified implemented on Staging 26.3.6". The benign reading is that Gennaro
+verified through the per-browser `feature-flags` cookie, which is how this feature has always been
+exercised and which the earlier entries document. **This was not confirmed with him** — it is the
+likely explanation, not an established fact, and worth one question rather than an assumption.
+
+**Searched for a ticket to turn it on: there isn't one.** `text ~ "custom permissions"` across PLT
+and PAPI, not-Done, returns only PAPI-3738 and the portfolio family below. So a shipped, QA-verified,
+approved feature has **no owner for the step that makes it visible to users**.
+
+### Also surfaced: the whole Portfolio-level mirror is Open and unassigned
+
+Untouched since 03 Aug, no assignee on any of them:
+
+| Ticket | Summary | Status |
+|---|---|---|
+| PLT-3013 | Portfolio Level Custom Permissions (parent) | Backlog |
+| PLT-2928 | [Portfolio Level] Create Custom Permissions | Open |
+| PLT-2929 | [Portfolio Level] Edit custom permissions | Open |
+| PLT-2930 | [Portfolio Level] Remove Custom Permissions from Portfolio | Open |
+
+These are the portfolio mirror of what shipped at project level, and the project-level work is the
+obvious template for them. Related but separate: **PAPI-3717** covers portfolio-invitation custom
+roles on the BE side.
+
+### Answering "do we have context for these?"
+
+**Yes for PLT-1770** — this file, ~1,960 lines, is the fullest ticket record in the repo.
+**PAPI-3738 has no file of its own**; it lives inside this one (six mentions, from its creation on
+06 Aug through the 403 repro that widened point 5). That is reasonable while it is purely a BE
+dependency of this ticket — but now that it is owned, sprinted and parented under its own epic, the
+next run should consider whether it has earned `sprint-tickets/PAPI-3738/`. Not created now: there
+is nothing in it that this file does not already say.
