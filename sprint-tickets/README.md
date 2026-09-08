@@ -3214,3 +3214,27 @@ Rishi's question still unanswered; it is his PR, so it was not touched.
 
 Everything outstanding needs a person: two clarifications, one race-condition follow-up held by
 choice, #2190's question, the authorship decision above, and **0 approvals across ten PRs**.
+
+### 08:05 (09-08) — correction: the `copilot-pull-request-reviewer` failure has cleared
+
+**Supersedes the "standing oddity" note above — do not carry that forward as an open item.** On the
+re-runs triggered by today's master merges, that job reports `conclusion: success` on **every** PR
+checked (#2186, #2192, #2194, #2195, #2197, #2199). It was a transient fault in the bot's own
+workflow across 09-07, not a persistent condition, and it needs no investigation.
+
+The reasoning that led to leaving it alone still stands and is worth keeping: it is not a required
+check, it gates nothing, and it was filing findings normally throughout the period it reported
+failure. A red tick on a non-gating bot job is not a build failure.
+
+### 08:05 — build results at the merged heads
+
+Six green, four still running at the time of writing, **zero failures**:
+
+| PR | build | PR | build |
+|----|-------|----|-------|
+| #2203 | ✅ 08:00:59 | #2194 | ✅ 08:01:19 |
+| #2202 | ✅ 08:00:32 | #2192 | ✅ 08:00:43 |
+| #2205 | ✅ 08:00:38 | #2186 | ⏳ re-run from 07:55 |
+| #2197 | ✅ 08:01:08 | #2204 / #2199 / #2195 | ⏳ |
+
+SonarCloud is green on all eight PRs that had reported by 07:54.
