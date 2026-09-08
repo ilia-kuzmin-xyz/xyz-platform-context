@@ -2040,3 +2040,30 @@ roles on the BE side.
 dependency of this ticket — but now that it is owned, sprinted and parented under its own epic, the
 next run should consider whether it has earned `sprint-tickets/PAPI-3738/`. Not created now: there
 is nothing in it that this file does not already say.
+
+### 2026-09-08 (later) — PAPI-3738 description corrected after Sergey queried point 2
+
+Sergey (who wrote IAM) asked where the `(uuid)` in point 2 came from, and whether it implied roles
+being stored outside IAM. Both halves of that were fair:
+
+- **`uuid` was simply wrong.** IAM's `Role` carries a Mongo-generated `String` `@Id`; no UUID is
+  involved anywhere. The word implied a distinction that does not exist.
+- **Nothing about role storage changes.** Roles live only in IAM. The only permission-related thing
+  held outside it is the per-feature *level selection* for the five features with no authority
+  family — browser `localStorage`, and it exists precisely until point 1 of this ticket lands.
+
+**Point 2 rewritten** to ask what was actually meant: does the contacts PUT work with a role created
+through `POST /api/roles`, and do its authorities take effect. Added the real reason it is
+unverified — **the 403 in point 5 blocks creating a role as a project admin, so the flow was never
+exercised end to end** — and marked point 2 as depending on point 5. The bottom note now records
+PLT-3022 as closed.
+
+> **The retraction was left visible in the ticket rather than the phrase quietly deleted.** Sergey
+> had already read the old wording, so a silent edit would have left his question unanswered in the
+> place people actually look, and invited the next reader to ask it again.
+
+> **Lesson for drafted replies: check who you are writing to before explaining their own system.**
+> The first draft of the reply quoted `Role.java` and `RoleConstant.java` back at the person who
+> wrote them, and answered a question about IAM internals that was never asked. The real question
+> was "what do you want from me in this point" — and the strongest answer was not a mechanism
+> explanation but the reason we could not test it ourselves.
