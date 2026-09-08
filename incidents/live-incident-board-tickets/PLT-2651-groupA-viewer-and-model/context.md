@@ -736,3 +736,65 @@ re-breaks PLT-2756.
   broke three siblings within a week.
 - `typeof …viewer.get3DModels` — V4/H3 unanswered. Low priority now that the mechanism is known.
 - Reply to Yash drafted, unposted.
+
+---
+
+## 2026-09-08 (later) — Direction change: true north, not geometry-guessing. Testing on the customer's project first.
+
+### Ilia rejected the micro-patch. Darminder aligned independently.
+
+Ilia: *"I don't like micro patches, what was the suggestion, true north?"* Darminder, same day, on
+the **same defect on HoloSite**: *"we are pushing back on it saying the project settings should be
+set as true north and the model oriented correctly on upload."* HoloSite is waiting on their user;
+Darminder thinks they *"might need to reupload after updating project settings."*
+
+### What "true north" actually is here — code-verified
+
+| piece | what it does | where |
+|---|---|---|
+| project `angleToTrueNorth` | rotates the **model placement** in the browser at load | `ViewerPage/utils/helpers.ts:242` (`applyBasePointTransform`), `ProjectBasePointCache.ts:49` |
+| Forge `SectionTool` | orients the **section box** from `refPointTransform` — a *different* transform | Forge internals; see `section-tool-orientation.md` |
+| `refPointTransform` | exported by Revit **without** the building's rotation | patch's own header comment, `section-tool-orientation.ts:26-30` |
+| `SectionToolOrientation` (Rishi, May) | **guesses** the rotation from the first model's footprint and writes it into `refPointTransform` | `section-tool-orientation.ts:90-123` |
+| `ignoreTrueNorthAngle` | set on upload; **never read by the viewer**; not even returned by the models endpoint | `projectModelsActions.ts:63,185` only |
+
+**ATL08 has `angleToTrueNorth = 0`** (Pietro + Yash, 05-11). The building is at ~17°.
+
+**So the two transforms are decoupled.** Setting true north rotates the model; the box reads
+`refPointTransform`, which true north does not touch. That gap is why Rishi went to
+geometry-guessing in May, and the guess is what has failed four times.
+
+### The proper fix (parked, not built) — replace the guess, keep the mechanism
+
+Keep Rishi's mechanism (mutate `refPointTransform`, reload the Section extension — **proven**:
+`theta` and the measured cut planes agree exactly) but **source the angle from the project's
+`angleToTrueNorth` instead of the footprint estimate**. Deterministic, no load-order dependence,
+nothing frozen wrong. Deletes `minAreaRect` / `collectFragmentXYCorners` from the path.
+
+Consequence: projects with a tilted building and true north = 0 show an axis-aligned box until
+they set it. That is Darminder's stance and it is honest. **Blast radius unknown — count projects
+with true north = 0 before shipping.** Not yet done.
+
+### ⚠️ Prediction for the customer-side test — recorded so the result can be judged
+
+Ilia chose to **ask the ATL08 customer to set true north to ~17° first**, mirroring HoloSite, and see
+what happens, before any code changes.
+
+From the code, the agent's prediction: **the setting change alone will NOT fix the section box.**
+- Models will rotate by 17° (placement transform, client-side at load — **no re-upload needed
+  for this part**; Darminder's re-upload expectation may reflect a backend step the FE reading
+  cannot see, so the message to the customer allows for it).
+- The `SectionToolOrientation` patch still runs: its gate reads `existingRotZ` from
+  `refPointTransform` (`:95-102`), which true north does not change, so it still sees ≈0 and
+  still guesses from the first-loaded model's footprint. That footprint is itself now rotated
+  by 17°, so the guessed angle shifts by an unknown amount. **Net effect on the box: uncertain,
+  possibly worse.**
+
+If the box **does** come right after the setting change, the agent's reading of the transform
+coupling is wrong and should be revisited. If it **does not**, that is the expected result and
+confirms the code change is required regardless of settings. Either outcome is informative;
+neither is a failure of the test.
+
+### Workaround unchanged, still valid today
+
+Load the main/federated model before switching the section box on (verified 09-08, case 2).
