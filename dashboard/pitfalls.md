@@ -368,3 +368,15 @@ and record it *before* any empty-selection early-return, or "Deselect all" never
 root/visibleNodes/idToIndex and leaves `state.nodes.selection` alone, so after switching activity the
 old ids linger, resolve to nothing, and the selection actions look available while doing nothing.
 Clear explicitly on the id that identifies the content.
+
+## 2026-09-08 — dhtmlx-gantt: `render()` does not fire `onDataRender`
+
+Confirmed in the dhtmlx 8.0.11 source (same major as `@xyzreality/dhtmlx-gantt`). `onDataRender` is
+fired at the end of **`refreshData()`** — which `gantt.open()`/`gantt.close()` reach through the task
+store's `onItemOpen`/`onItemClose`. `gantt.render()` ends with **`onGanttRender`** instead. Anything
+attached to `onDataRender` therefore runs on the user's next expand/collapse click, not on the
+`gantt.render()` a hook just called. `onBeforeTaskDisplay` filtering *does* run on `render()`, which
+is why the search filter visibly applied while its `onDataRender` follow-up did not. Bit PLT-3096
+(#2195, `use-apply-search-filter.tsx`): a reveal armed in the search effect and flushed from
+`onDataRender` fired on the next click and opened every collapsed sibling. Fix was to make the reveal
+an explicit call in the effect rather than depend on the event.

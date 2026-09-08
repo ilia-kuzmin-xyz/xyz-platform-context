@@ -563,3 +563,27 @@ first model *at compute time* was different; the first model *at read time* was 
 4. **"Works fine now" on a load-order defect is not evidence of a fix.** PLT-2651 was closed
    twice on that basis (05-26 release, 06-04) and reopened both times. Non-determinism means a
    passing session proves nothing about the next one.
+
+## 2026-09-08 — Never put a ✅ on a test scenario you have not traced through the code
+
+**PLT-3096, #2195.** Asked to add the operator's real repro (search `install`, collapse Building C then
+D) to a PR's test steps, the agent wrote it up with a ✅ expected result. The PR did not cover it: the
+reopen under search came from `use-apply-search-filter.tsx`, a code path the fix never touched. The
+operator caught it with one question. Had a reviewer followed the steps first, the PR would have
+failed review on a claim the author made up.
+
+### Rules
+
+1. **A "How to test" step with an expected result is a claim about the code.** Before writing it,
+   trace the trigger in the scenario to the lines the PR changes. If the trace does not reach them,
+   the step goes under "Not covered by this PR", not under ✅.
+2. **The operator's scenario is the one to trace first**, not the one the fix happens to address.
+   Different entry points (toggle vs search vs reload) into the same symptom are routinely different
+   code paths.
+3. **When you find you were wrong, correct the PR body immediately**, before explaining — a wrong ✅
+   is live for every reviewer the moment it is saved.
+4. **Event-timed logic needs the event source checked, not assumed.** The follow-up fix armed a
+   flag in an effect and consumed it in `onDataRender`; dhtmlx does not fire `onDataRender` from
+   `render()`, so the flag fired on the user's next click. If a fix depends on "X fires after Y",
+   find where X is fired in the library source (a public tarball of the same major is enough) or
+   make the logic explicit so the ordering no longer matters. The second was the right answer here.

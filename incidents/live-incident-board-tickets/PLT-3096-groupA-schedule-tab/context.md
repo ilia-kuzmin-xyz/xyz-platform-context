@@ -290,3 +290,66 @@ are explicit user actions and are untouched. `useShowWBS` was the only implicit 
 `build` success and SonarCloud success (0 new issues, 0 hotspots, 22.0% coverage on new code) on
 `d5509246b`. Same Trivy story as #2194 — red on the base-branch `nanoid` CVE first, green after
 porting #2192's `.trivyignore` entry. **#2195 is a green, mergeable draft.**
+
+## 2026-09-08 — a SECOND cause, a ✅ written before it was traced, and Darminder's review
+
+Interactive session with Ilia. Status of #2195 at the end of the day: head `c4ebd14ce`, CI green on
+the previous head, Darminder's `changes_requested` answered and review re-requested.
+
+### The search filter was the other half of the bug — and the customer's actual path
+
+Ilia's real repro on **AMS CLONE -XV2 (dev)** is with **`install` typed in the schedule search**:
+AMS01 → Construction → Data Center → Cladding → collapse Building C, collapse Building D → C reopens.
+That path is **not** the `useShowWBS` effect fixed on 09-02. It is `use-apply-search-filter.tsx`:
+
+- `onBeforeTaskDisplay` → `taskMatchesSearch()` recursed into children and, for any row with a matching
+  descendant, added the row to `parentIdsToExpand` (`:82`) — **on every render**.
+- `onDataRender` then `gantt.open()`-ed everything in that set (`:125-131`) — **on every render**.
+
+Under an active search every displayed WBS row is an ancestor of a match (non-matching rows are
+filtered out), so the whole visible tree was force-opened on every render, and a collapse — which
+itself triggers a render — was undone by its own render. The 09-01 code read (§ "Code read", bullet 3)
+saw this call site and correctly dismissed it *for the no-search case*; it never came back to it for
+the search case. Fixed in `7b065bccc` — then fixed again, see below.
+
+### The wrong ✅ — recorded because it is the lesson
+
+Asked to extend #2195's test steps with Ilia's search scenario, the agent wrote it up with a ✅
+expected result **without tracing whether the PR covered it**. Ilia asked "does the PR indeed ready
+for such scenario?"; the answer was no. Rule added to `live-incident-run-instructions.md` (09-08).
+
+### Darminder's review (14:24) — the first search fix was wrong in a second way
+
+`7b065bccc` armed a "reveal" flag in the search effect and flushed it from `onDataRender`. Darminder
+(collaborator, tested on AMS CLONE -XV2): with `install` active and C and D collapsed, **opening C also
+opened D**. Cause, confirmed in the dhtmlx 8.0.11 source (public `dhtmlx-gantt` tarball, same major as
+`@xyzreality/dhtmlx-gantt ^8.0.8`):
+
+- `onDataRender` is fired at the end of **`refreshData()`**, which `open()`/`close()` reach via the
+  task store's `onItemOpen`/`onItemClose`.
+- `gantt.render()` — what the search effect calls — ends with **`onGanttRender`**, not `onDataRender`.
+
+So the reveal never ran on typing; it sat armed until the user's next click (open C → `refreshData`
+→ `onDataRender`), and that flush opened every displayed ancestor at once, D included.
+
+**Fix `c4ebd14ce`:** revealing is an explicit step inside the search-change effect — walk every task,
+open the ancestors of every match in one `batchUpdate`, then `render()`. Runs only when
+`debouncedSearchText` or the gantt instance changes; no click and no later render can trigger it.
+`onBeforeTaskDisplay` lost its side effect, `onDataRender` now only updates the match count.
+`scheduler/hooks/reveal-search-matches.ts` (+6 tests on the AMS01→…→Building C/D tree) replaces
+`search-match-expander.ts`. 18 tests across the PR, isolated harness, prettier + `tsc --strict` clean.
+Browser run **not** done from here — Darminder's re-test is the verification.
+
+**Product question left open with Darminder (in the PR comment):** a new search now opens the parents
+of its matches deterministically, *including a WBS row the user had collapsed beforehand if it holds
+matches* (both buildings do for `install`). That is the search's original intent made reliable. If
+the preference is "a search never opens a row the user closed", it is a one-line change in the matcher.
+
+**Deliberate trade, in the PR body:** a schedule reload on the *same* gantt instance while a search is
+active no longer auto-expands the matches' parents (search text unchanged); retyping a character does.
+
+### Where the ticket stands
+
+Both implicit `$open` writers in the viewer gantt are now explicit and event-independent. Not
+confirmed as *the* customer cause (ATL05 stopped reproducing on 09-01), but Ilia's AMS CLONE -XV2
+search repro is the concrete path #2195 now fixes. Awaiting Darminder's re-review; PR still draft.

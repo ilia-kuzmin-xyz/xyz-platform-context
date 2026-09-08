@@ -322,6 +322,23 @@ it would add: this is the first occurrence where the customer's own export, not 
 disagrees with itself depending on which basis produced it — worth asking whether the export feed is
 weighting-aware at all, or hardcoded to one basis regardless of the project's dashboard setting.
 
+### 2026-09-08 (later) — PLT-3109 promoted to **confirmed third occurrence**, with the wrinkle answered
+
+Ilia opened the ticket's screenshots. The customer's own Power Query for `Combined_Percent Complete
+(2)` ends `WHERE TotalPlannedLaborUnits IS NOT NULL AND TotalPlannedLaborUnits <> 0` — dropping
+15,595 of 19,598 activities before any percentage is computed, on a project whose schedule has no
+labour units. The dashboard (element weighting, 45%) is right; the report hardcodes the other basis.
+
+**Answer to the wrinkle above:** our export feed *is* weighting-agnostic — `?deviceType=BI` returns
+`linkedElementCount` and `plannedLaborUnits` side by side, and the progress outputs carry both
+`LaborWeighted*` and `ElementWeighted*` columns. The basis was chosen downstream, in the client's SQL.
+
+**Pattern 3 now has three confirmed occurrences and three organs:** the filter panel (PLT-2941), the
+project setting vs the customer's model (PLT-3010), and a hardcoded WHERE in the customer's own report
+(PLT-3109). Recognition signature, sharpened: **Planned agrees, Installed/Actual collapses toward 0,
+scale is project-wide** → a labour-units filter or weight somewhere in the Actual path, not a data
+fault. Ask for the report's source SQL before anything else.
+
 ---
 
 ## Pattern 4 — Two surfaces disagree about a number (and the method that resolves it)

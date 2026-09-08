@@ -144,3 +144,80 @@ BI number comparison already quoted in text. If one of the 5 already shows the w
 - **Overall triage confidence: 6/10.** High-confidence pattern match, held back one point short of
   higher because the one fact that would make it 9/10 — the project's actual weighting setting — is a
   five-minute check nobody has run yet.
+
+## 2026-09-08 (later) — Ilia opened the 5 screenshots. §4's one gap is answered, from the other side.
+
+The morning entry said the decisive fact was the project's weighting setting. It was decisive — but
+the screenshots show the mismatch is not in *our* setting at all. It is a **hardcoded labour-hours
+assumption in the customer's Power BI query.**
+
+**Screenshot 4 — Power Query, `Combined_Percent Complete (2)`, Source step.** The tail of the SQL:
+
+```sql
+WHERE TotalPlannedLaborUnits IS NOT NULL
+  AND TotalPlannedLaborUnits <> 0
+```
+
+Every activity with no labour units is dropped **before any percentage is computed**. Meta's schedule
+has none on most activities (Paddy's own words). Query hits `Warehouse_Schema (META)` / `PG_Tenant`;
+columns `ActivityId, LinkedElements, TotalPlannedLaborUnits, PlannedProgress, ActualProgress,
+ProjectId, UserItemId`. Applied steps: DB → SafeSchema → Source → RenamedColumns → AddedEarnedValue.
+
+**Screenshot 5 — the counts.** `Combined_Percent Complete (2)` distinct Activity ID = **4,003**;
+`Combined_Programme` activity_id = **19,598**. Gap 15,595 = "15,000+ Activity IDs".
+
+**Screenshot 2 — the example.** `DC1.NW.STR.6122` in Paddy's export: Planned Elements 7, Installed
+Elements blank, Intangible % Complete blank, Duration 1 — labour units absent, so it fails the WHERE.
+
+**Screenshot 1 — dashboard.** Element `a1cd1043…` shows **Installed 07/27/26**, activity linked,
+940 elements in Piling. Dashboard is consistent with itself; nothing to debug there.
+
+**Screenshot 3 — Paddy's pivot.** Piling: 946 planned, 940 in-period, 940 expected, installed blank.
+Installed only populates for disciplines whose activities carry labour units (Concrete 30, UG Telecom
+50, Underground Services 79) — exactly the filter's fingerprint.
+
+### Classification (revised): Pattern 3, third occurrence — **confirmed**, report-side, no platform code change
+
+Same disease as PLT-3010, different organ: there it was our project setting, here it is the report's
+own SQL. The dashboard (element weighting, 45%) is right. The fix is to delete the two WHERE lines.
+Safe for all tenants: under labour weighting a zero-labour activity already contributes zero weight,
+so the filter was redundant there and only ever broke element-weighted projects.
+
+### Why the platform-api export is not the culprit
+
+`GET /schedules/{rev}?deviceType=BI` (`schedules.service.ts:133-141`, `:396-445`) returns **both**
+bases per activity — `linkedElementCount`, `plannedLaborUnits`, `actualProgress`, `physCompletePct` —
+and the progress-output schemas carry `LaborWeighted*` **and** `ElementWeighted*` columns side by side
+(`swagger.components.schemas.json:2806-2849`). The feed is weighting-agnostic; the report picked one.
+
+### Confidence 8/10 → the Power BI refresh makes it 10
+
+Held off 10 because only the tail of the Source SQL is visible (a second filter or join could also
+drop rows), the project's weighting setting is still inferred from the 45%, and removing the filter
+could surface a null `ActualProgress` for zero-labour rows in the warehouse. All three resolve in one
+refresh with the WHERE removed: expect ~19.6k activities and `DC1.NW.STR.6122` present with progress.
+
+### Access
+
+Ilia has **no Power BI / DAX Studio access** (corrected mid-session). The check therefore goes to
+whoever owns the report. The screenshots are Paddy's own Power Query, so the report is client-side →
+route via Yash to the client. Dashboard DuckDB can still confirm the gap size independently:
+count activities with `COALESCE(TotalPlannedLaborUnits,0)=0` in the activity-level table; expect ~15.6k.
+
+### Draft to Yash (SHORT rule; UNPOSTED — Ilia posts) — supersedes the morning's Darminder draft
+
+> Hi Yash — good news, this isn't a data problem on the dashboard; it's a filter in the client's
+> Power BI report.
+>
+> In the `Combined_Percent Complete (2)` query, the source SQL has `WHERE TotalPlannedLaborUnits IS
+> NOT NULL AND TotalPlannedLaborUnits <> 0`. Paddy's schedule has no labour units on most activities,
+> so that filter throws out about 15,600 of the 19,600 activities before any percentage is
+> calculated. Those activities then count as 0% installed, which is where the 0.3% comes from. The
+> dashboard uses element counts, not labour units, so it isn't affected and the 45% is correct.
+>
+> **Could you ask Paddy to remove those two WHERE lines from the query and refresh?**
+> `Combined_Percent Complete` should then hold ~19,600 activities and DC1.NW.STR.6122 will appear
+> with its installed progress. The filter is safe to drop even for labour-based projects, since
+> activities with zero labour units already carry zero weight.
+>
+> If the number still doesn't match after that, send us the full query text and we'll take it from there.

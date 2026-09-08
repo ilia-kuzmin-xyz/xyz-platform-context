@@ -75,6 +75,18 @@ comment (110665, 08-28) is Yash's question to Ilia/Rishi. Folder name was never 
 
 ### Group B (0) — PLT-2651 was the only Dev In Progress ticket and moves to Group A above
 
+### 2026-09-08 (interactive, later) — two updates after the scheduled run
+
+- **PLT-3109 → class 1, confirmed, report-side.** Ilia opened the screenshots: the client's Power
+  Query hardcodes `WHERE TotalPlannedLaborUnits <> 0`, dropping 15,595 of 19,598 activities. Dashboard
+  is correct. Pattern 3 promoted to three confirmed occurrences. Yash draft (ask client to delete the
+  two WHERE lines) in the folder, unposted. Ilia has no Power BI access — confirmation is the client's.
+- **PLT-3096 (#2195, out of Group scope — Dev In Progress/PR):** a *second* implicit `$open` writer
+  found and fixed — the search filter re-opened ancestors of matches on every render, and its
+  follow-up fix fired on the wrong dhtmlx event (`onDataRender` ≠ `render()`). Darminder's
+  changes-requested answered, head `c4ebd14ce`, re-review requested. A ✅ was written on an untraced
+  scenario; rule added to `live-incident-run-instructions.md`. Detail in the folder's 09-08 entry.
+
 ---
 
 ## Run: 2026-09-07 (scheduled) — 7 in-scope tickets (down from 12 on 09-04), 5 left scope (all resolved or into review — none dropped in error), PLT-3101 has a real update, PLT-2874's 08-28 "de-dup fix" action item retired as already-shipped, 5 confirmed unchanged, zero Jira actions taken
