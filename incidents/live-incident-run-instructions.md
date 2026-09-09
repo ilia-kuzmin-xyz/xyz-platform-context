@@ -651,3 +651,39 @@ consecutive runs without anyone re-reading the code path.
 runs stops being re-examined. Each pass reported it as "ready, just needs sending", which reads as
 progress. **A draft that has gone unsent for more than a week should be re-validated against code
 before it is re-recommended, not just re-counted in days.**
+
+## 2026-09-09 — Trivy again (js-yaml), and a correction: the lockfile CAN be regenerated here for one package
+
+Third overnight Trivy red on the two FE PRs (#2195 on its 07:44 master merge, #2194 pre-empted):
+**`js-yaml` 4.3.1, CVE-2026-84375, HIGH, fixed 4.3.2.** Same shape as 09-02's nanoid: master's tree,
+CVE entered the DB overnight, no dependency change on either branch. No unblock PR existed for it
+(#2205, draft, is a different Trivy failure — alpine `util-linux`).
+
+### Two facts that changed the approach
+
+1. **`js-yaml` is pinned through `package.json` → `overrides` (`"js-yaml": "^4.3.1"`), not a
+   dependency.** `npm update js-yaml` therefore reports "up to date" and moves nothing, and
+   `npm install js-yaml@4.3.2` fails with `EOVERRIDE`. Before concluding a bump is impossible, grep
+   `package.json` for the package under `overrides` and `resolutions`. The fix is to raise the pin.
+2. **The 09-02 claim "the lockfile cannot be regenerated in this environment" was too broad.** `npm ci`
+   / a full `npm install` do 401 on `@xyzreality/dhtmlx-gantt`, but a **lockfile-only** resolve of one
+   public package does not touch the private package at all:
+   ```bash
+   sed -i 's/"js-yaml": "\^4\.3\.1"/"js-yaml": "^4.3.2"/' package.json
+   npx -y npm@11 install --package-lock-only --ignore-scripts --no-audit --no-fund
+   ```
+   Result: 1 line in `package.json`, 3 lines in `package-lock.json` (version/resolved/integrity of
+   the one entry). **Use `npm@11`, not the box's npm 10.9.7** — npm 10 rewrote the file without the
+   `libc` fields the repo's lockfile carries, producing ~30 lines of unrelated churn (`git checkout
+   package-lock.json` to discard). Match the npm that wrote the lockfile, then check `git diff --stat`
+   is the one package before committing.
+
+So this time the port is a **real bump** (`40ca4c412` on PLT-3096-fix, cherry-picked as `ae339f973`
+on PLT-3099), not a `.trivyignore` entry. One comment per PR, as before. It no-ops when master
+carries the same bump. **Master itself is red on this until someone lands it there** — a one-line
+`overrides` change + lockfile regen; not opened as a PR from this session (needs an explicit ask).
+
+**Reusable, sharpened:** when Trivy names a *package* the diff does not touch → (a) check
+`overrides`/`resolutions` for a pin, (b) try the lockfile-only bump with the matching npm major,
+(c) fall back to `.trivyignore` only when the fixed version does not exist on the registry
+(`npm view <pkg> versions --json`).
