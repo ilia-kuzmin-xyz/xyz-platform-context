@@ -3423,3 +3423,64 @@ were verified byte-identical) or another repo-wide scanner episode.
 **One improvement worth recording:** `copilot-pull-request-reviewer` now concludes **`success`**.
 The 09-08 entry logged it as `conclusion: failure` on every PR while still filing findings — that
 "standing oddity" appears to have cleared itself. Not caused by anything this run did.
+
+## 2026-09-09 — third Trivy DB event in eight days: js-yaml. Fixed, PR #2209
+
+`build` went red on **#2202** at `0ca7147`. Not that PR's failure — its diff is four files
+(`date-utils.ts`, `useTimezoneQuery.ts`, two tests) and touches no dependency. Tests passed; the
+failing step is **`Vulnerability scanner`**, the npm side rather than the image side:
+
+```
+package-lock.json (npm)     Total: 1 (HIGH: 1, CRITICAL: 0)
+js-yaml   4.3.1  →  fixed 4.3.2      CVE-2026-84375   (DoS in YAML parsing)
+```
+
+**Third instance of this exact pattern in eight days** — nanoid 09-02, alpine libuuid 09-05
+(#2205, still open), js-yaml 09-09. A CVE enters Trivy's DB overnight and a tree that scanned clean
+the day before fails with nothing changed.
+
+### Fixed, and this one was genuinely fixable
+
+**#2209** raised (draft, base master). Unlike the other two, 4.3.2 is a published patch and there is
+exactly **one** `js-yaml` in the tree.
+
+**The correction worth carrying:** my first read said `js-yaml` was a direct dependency because
+`grep '"js-yaml"' package.json` hit line 313. **It is not — line 313 is inside the `overrides`
+block.** `js-yaml` appears in neither `dependencies` nor `devDependencies`. It is there because
+**`swagger-ui-react` pins `=4.1.1`** and the override lifts the tree off that pin. So the fix goes
+through the override floor (`^4.3.1` → `^4.3.2`), which is how every other entry in that block
+reads.
+
+> **A grep hit in `package.json` does not mean "dependency".** That file also holds `overrides`,
+> `resolutions` and `msw` blocks. Parse it and check which block the key is in.
+
+### How the lockfile edit was validated without `npm ci`
+
+`npm ci` cannot run here (no `NPM_TOKEN` for the private `@xyzreality` registry), so the three
+fields npm would rewrite were edited by hand and checked by inspection. The integrity hash came
+from **the registry's own metadata for 4.3.2** (`registry.npmjs.org/js-yaml/4.3.2` → `dist.integrity`),
+not composed:
+
+| Check | Result |
+|---|---|
+| `dependencies` 4.3.1 vs 4.3.2 | identical (`argparse: ^2.0.1`) |
+| `bin` | identical |
+| `argparse@2.0.1` already nested under js-yaml | yes — no tree restructuring |
+| Other requirers | `@eslint/eslintrc`, `mocha`, `swagger-client` all `^4.1.0` — satisfied |
+| js-yaml copies in lockfile | exactly 1 (hoisted) |
+| Overrides mirrored in the lockfile | none — nothing else to sync |
+| JSON parses; no js-yaml `4.3.1` left | confirmed |
+
+`Install dependencies` in CI is what actually proves the hash — the same thing that validated the
+hand-edited lockfile on #2192.
+
+### Not ported into #2202
+
+A lockfile change inside a timezone-label PR makes that diff hard to review, and #2209 no-ops it
+once it lands. **The one re-run was also not spent**: the scan will fail identically until 4.3.2 is
+in the tree, so a re-run would tell us nothing. One comment on #2202 records this.
+
+> **Pattern for next time, now three-for-three:** an npm-side Trivy failure naming a package the PR
+> never touched is a DB event, not the PR. Check for an existing fix PR first (the routine's own
+> rule — #2205 already existed on 09-05 and a duplicate was correctly avoided), then fix at the
+> tree level in its own PR rather than porting into feature branches.
