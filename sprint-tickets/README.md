@@ -3484,3 +3484,41 @@ in the tree, so a re-run would tell us nothing. One comment on #2202 records thi
 > never touched is a DB event, not the PR. Check for an existing fix PR first (the routine's own
 > rule — #2205 already existed on 09-05 and a duplicate was correctly avoided), then fix at the
 > tree level in its own PR rather than porting into feature branches.
+
+### 08:27 (09-09) — #2209 verified GREEN. The hand-edited lockfile holds
+
+`build` on #2209 → **success** (08:08:49 → 08:27:00). That single green tick settles both open
+questions at once:
+
+1. **`Install dependencies` succeeded** → the hand-edited `integrity` hash is valid. This was the
+   only real risk in the change, and it is the same way #2192's hand-edited lockfile was validated.
+   Taking the hash from the registry's own `dist.integrity` rather than composing one is what made
+   this work — worth repeating next time.
+2. **`Vulnerability scanner` passed** → CVE-2026-84375 is genuinely cleared by 4.3.2. Not merely
+   "should be fixed"; observed.
+
+The branch was **rebased** onto the new master (`c7c96b0` → `00be0c1`) by a parallel session and the
+sha changed to `015370c1`. Content verified intact via `get_diff` — still 1 commit, 2 files, +4/−4,
+the same three lockfile fields and the override floor. **Check the diff, not just the commit count,
+when a branch you pushed comes back with a different sha.**
+
+### Scope of the outage, confirmed by reading logs rather than inferring
+
+All four of my PRs failed on the **byte-identical** row, in the **filesystem** scan
+(`trivy fs` → `package-lock.json (npm)`), with `Lint & Run Tests` green on every one:
+
+| PR | head | failing step | tests |
+|----|------|---|---|
+| #2202 | `0ca7147` | `Vulnerability scanner` (step 19) | ✅ |
+| #2203 | `cc97667` | same | ✅ |
+| #2204 | `b55fd9c` | same | ✅ |
+| #2186 | `e3684e1` | build failed 08:15:59 — cause being confirmed | ✅ (Sonar ran) |
+
+It is the **single remaining unignored finding** in the tree (`Total: 1`), everything else being
+suppressed by `.trivyignore`, which is why one bump clears the lot. `Scan built image` was
+**skipped** on all of them — step 19 fails first — so the libuuid image finding never even ran
+today. That is a useful detail: **the two Trivy failures of this week are in different steps**, and
+an image-scan fix cannot help a filesystem-scan failure.
+
+**Still needs a human:** #2209 is green but a **draft**, as is #2205. Neither can merge, and every
+other PR stays red until #2209 does.
