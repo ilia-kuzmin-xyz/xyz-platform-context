@@ -1586,3 +1586,38 @@ overlap between the two sets, which is *why* it was clean rather than luck holdi
 > looked wrong for a branch whose only purpose is one Dockerfile line — *the sanity check on a
 > surprising diff is the refs, not the diff.* Third instance of this family in this run, after the
 > false `grep -c` zero and the SonarCloud `{"total":0}` on a private project.
+
+## 2026-09-09 07:5x — the setOverride race is a storage-model mismatch, not a locking problem
+
+The parallel session added a good analysis on the `setOverride` thread, ruling out the three obvious
+client-side fixes. **Verified its two load-bearing claims rather than trusting them, and both hold:**
+
+- `asset-readiness-service.test.ts:43` is genuinely `it('never writes is_achieved')`, asserting
+  `'is_achieved' in row === false` at :46 and :78, under a comment calling the written columns "a
+  deliberate, closed set". So the whole-ladder upsert would break a *pinned* invariant — its inserts
+  would materialise `is_achieved` at the DB default and make this service the owner of a column it
+  deliberately never writes.
+- The client filter union really is `eq | in | is` only (`commissioning-data-client.types.ts:21-23`),
+  so a negated predicate needs the client extended — **and would not fix the race anyway**, since the
+  predicate still encodes one writer's intent.
+
+### What I added: the root cause, not a fourth workaround
+
+This PR's own description states the domain rule — **one override per asset**, expressed across
+levels. But it is **stored as N rows, one per readiness step**. So one logical write ("override this
+asset to Yellow") must touch N rows, and N rows cannot be written atomically without a transaction or
+a function. *The race is the inevitable consequence of storing one fact in many rows.*
+
+Store it as one row per asset naming the target level, and derive the per-step ladder at read time:
+one upsert on one row, last writer wins by definition, no read-modify-write, no RPC — and the
+`is_achieved` problem disappears rather than being worked around, because no step rows need
+materialising at all.
+
+> **When every available fix for a race is a locking mechanism, check whether the race is really a
+> normalisation bug.** Three workarounds were evaluated and rejected on their own terms before anyone
+> asked why a single logical fact required N writes. The schema is the thing making atomicity
+> expensive here.
+
+Recorded on the thread as the option the follow-up should weigh *against* "add a Postgres function",
+since only this one makes the defect impossible rather than serialised. Thread stays **open** — a
+real defect being carried forward, and the thread is the only place that is visible.
