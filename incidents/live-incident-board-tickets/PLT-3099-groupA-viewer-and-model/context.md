@@ -559,3 +559,42 @@ carried the same false blocker.
 The 1,239 ids are already exported: `analysis/PLT-3099-ATL08-CY1300-moved-elements.csv` (ignore its
 misleading `previousActivity_*` columns, per the 09-02 retraction). The runbook wants
 `userItemId, activityId, modelElementId` — that CSV needs reshaping to match before use.
+
+## 2026-09-09 — CORRECTIONS from reading the live ticket. Earlier sections above are stale on three points.
+
+Ilia challenged an answer built from this folder rather than from Jira. Fetched PLT-3099 live (9
+comments). Three things in the notes above are **wrong or superseded** — labelled, not deleted:
+
+**1. Ctrl+Z is NOT an open question, and NOT PLT-3084.** The 09-01 first pass (§ "PLT-3084 is the
+same symptom…") proposed a console check on ATL08 to see whether it runs a build predating #2081,
+and flagged it as "the single highest-value next step". **Ilia had already answered it on 09-02**
+(comment 110991→111080): *"On Ctrl+Z: that is the AT10X issue, fixed under **PLT-2743** but waiting
+on the **26.3.6** release."* So: diagnosed, fixed, pending release. **Do not run the console check
+and do not re-raise it.** The PLT-3084 lineage in that section is a plausible-but-unused theory.
+
+**2. The 1,239 were MOVED, not added.** Ilia's prod trace (111080): *"Nothing extra was linked.
+1,239 elements were moved off activity **CY-1250** onto CY-1300, in one action at 16:55 UK on 1
+September. An element holds only one activity link, so linking one that already belongs elsewhere
+moves it, silently."* → **the under-reported half is that CY-1250 lost 1,239 links**, which the
+customer never saw. Reversible; Ilia has the exact 1,239 ids and the customer confirmed on 09-02
+(111085) they should go back to CY-1250. Remediation stated as "we will remove the 1,239 from
+CY-1300" (111097) — **not confirmed done anywhere; check before closing the ticket.**
+
+**3. The customer's setup included a SECTION BOX, and that part already worked.** Comment 111085:
+they *"intentionally selected and linked approximately **400 visible elements** while working with a
+**section box** and **isolated element types**"* and got 1,239 — the extra ~800 being hidden
+elements in the same area. Ilia's confirmed cause (111097): *"Drag-select respects the section box
+and filters but **not isolation**, so hidden elements inside the drag area were picked up."*
+So the minimal repro is **isolation + drag only**; the section box is incidental and needs no step.
+Repro instructions that ask the tester to arrange floors behind one another, or that describe
+isolated-out geometry as "ghosted", are wrong on both counts — see `dashboard/pitfalls.md` 09-09.
+
+**Status:** **In Code Review** (not "Open" as the 09-01 header says), last updated 09-02 18:03.
+Assignee Ilia. Freshdesk 7816 → "Waiting on 3rd line".
+
+### Lesson (also in `live-incident-run-instructions.md`)
+
+The notes are a cache, not a source. This folder's 561 lines were written on 09-01, *before* the two
+comments that answered the ticket's open questions. Answering from the cache produced a confident,
+wrong account of half the ticket. **Re-fetch the ticket before describing its state, however
+detailed the local notes look.**

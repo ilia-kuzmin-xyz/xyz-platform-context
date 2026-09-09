@@ -757,3 +757,25 @@ handlers (`useShowWBS` attaches its own `type === 'Activity'` filter): if they A
 hidden anyway and the staleness is invisible. **Not proven** — `callEvent` delegates to an event-chain
 object whose combination rule was not read. Impact is confined to "search active + Show WBS off",
 which is exactly #2195's Scenario 3 step 5, so a manual test pass will expose it if it is real.
+
+## 2026-09-09 — The notes are a cache. Re-fetch the ticket before you describe its state.
+
+Asked to recall what PLT-3099 was about, the run answered from
+`PLT-3099-groupA-viewer-and-model/context.md` — 561 lines, detailed, and written on **09-01**. Two
+comments landed on **09-02** that answered the ticket's open questions, and the folder never got
+them. The result was a confident account that was wrong on half the ticket: it presented Ctrl+Z as
+an unresolved mystery needing a console check (Ilia had already tied it to **PLT-2743**, fixed,
+awaiting the 26.3.6 release) and described 1,239 elements as extra links (they were **moved off
+CY-1250**, which is the more serious, unreported half).
+
+Ilia caught it — *"did you [read the] jira ticket with live incident and comments in there at all?"*
+
+**Rule:** a folder in this repo is a cache of a Jira ticket, and a stale cache is worse than no
+cache because it reads authoritative. Before answering *"what is this ticket about"*, *"what's the
+status"*, or *"what's outstanding"* — **fetch the issue with `comment` in `fields`** and diff it
+against the folder. The playbook already requires this per triage run; it applies just as much to a
+one-line conversational recall, which is exactly when it feels skippable.
+
+Corollary: when a fetch does contradict the folder, **write the correction into the folder
+immediately** (dated, labelling what it supersedes) so the next reader of that cache is not misled
+the same way.

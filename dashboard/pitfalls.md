@@ -380,3 +380,18 @@ is why the search filter visibly applied while its `onDataRender` follow-up did 
 (#2195, `use-apply-search-filter.tsx`): a reveal armed in the search effect and flushed from
 `onDataRender` fired on the next click and opened every collapsed sibling. Fix was to make the reveal
 an explicit call in the effect rather than depend on the event.
+
+## 2026-09-09 — Isolation in the Web Viewer hides completely; it does not ghost
+
+The viewer initialises with `ghosting: false` (`viewer-x/viewer-y.tsx:220`) and calls
+`setGhosting(false)` (`viewer-service.ts:618`), so **"Isolate selected" makes everything else fully
+invisible**, not faint. The only place ghosting is switched on is the activity-linking-list highlight
+(`activity-linking-list/hooks/useGhostedHighlight.ts:108`), which turns it off again afterwards.
+
+Consequences, both hit while writing PLT-3099 test steps:
+- **Repro instructions must not tell a tester to aim at "ghosted" or "faint grey" geometry** — there
+  is nothing to see. After isolating, the invisible elements occupy empty-looking screen space, and a
+  drag rectangle over that space still hits them. That invisibility is exactly why the PLT-3099
+  over-selection was silent: nothing on screen suggested those elements were in the selection.
+- The word "ghosted" in a PR description or a customer reply is misleading here. Say "hidden" or
+  "switched off by the isolation".
