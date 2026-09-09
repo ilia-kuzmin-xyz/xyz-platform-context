@@ -3658,3 +3658,24 @@ as "a fix was abandoned" was wrong.
 > escalating** — a CVE-database failure is as likely to disappear on its own as to need a fix.
 
 Net for the next run: **no outstanding Trivy work in this repo.** Steps 19 and 20 are both green.
+
+### 16:48 — all four PRs GREEN on the re-synced heads
+
+Every one of the four passed the full pipeline, **steps 19 and 20 both green**, so the js-yaml
+episode is closed end to end.
+
+| PR | Branch | Head | Run | Result |
+|----|--------|------|-----|--------|
+| #2202 | `PLT-3038` | `8b0e392` | 4629 | ✅ |
+| #2203 | `PLT-2999` | `a731065` | 4630 | ✅ |
+| #2204 | `PLT-2966` | `5cd3fd9` | 4632 | ✅ |
+| #2186 | `PLT-2968` | `87c1386` | 4631 | ✅ |
+
+Sonar quality gate passed on all four. #2203 and #2204 each report **1 new non-blocking Sonar issue**
+(gate green, so not a build failure) — worth a look on the next run but nothing is held up by it.
+Coverage on new code: 28.4% (#2202), 44.5% (#2203), 25.8% (#2204).
+
+Review threads: **0 open** across all four. #2186 carries 32 Copilot threads, **all 32 resolved**;
+#2202/#2203/#2204 have no review threads at all. (Note for the next run: the MCP thread payload uses
+**`is_resolved`**, snake_case — reading it as `isResolved` returns `None`, which counts every thread
+as open and produced a false "32 open" scare in this run before I checked the object's keys.)
