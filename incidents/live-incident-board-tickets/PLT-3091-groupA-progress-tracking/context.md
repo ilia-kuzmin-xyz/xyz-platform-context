@@ -785,3 +785,47 @@ enhancement, not an unresolved blocker.
 **Lesson:** two rulings that look like they answer different questions can be one position. Before
 carrying something forward as "open", check whether an answer already given covers it by implication.
 Eight days of "waiting on planning" here were self-inflicted.
+
+### 2026-09-09 (later) — PAPI-3936 raised for Sachin. #944 realigned with master and green.
+
+**⚠️ A Jira issue WAS created this run, on Ilia's explicit instruction** (*"go ahead, just mention that
+this ticket was raised to the live incident and leave url"*), after the payload was shown and approved
+— same protocol as the 09-04 PUTs. The standing no-Jira-writes rule otherwise stands.
+
+**[PAPI-3936](https://xyzreality.atlassian.net/browse/PAPI-3936)** — *"actualProgress returns 0 instead
+of null for Level of Effort activities"*. Bug · **Major** · assignee **Sachin Badoni**
+(`712020:53df5480-…`) · Domain **API 2** · status Backlog. Description opens with the PLT-3091 link,
+states Mostafa's decision, and puts #944 on its own line as "needs review", plus the paste-ready test
+call. Reason: platform-api is Sachin's, so the fix needs a ticket on his side even though the PR came
+from here.
+
+**Field note for next time:** `PAPI` has a **required custom field `customfield_10488` "Domain"**
+(multiselect) — creation fails with *"Domain is required"* without it. Allowed: `API 1` (11497),
+**`API 2` (11496)**, `DevOps` (11498), `AI` (11966).
+
+### #944 review pass, same run — the branch was quietly broken
+
+Ilia asked for a review before merge. Three findings, all fixed:
+
+1. **55 commits behind master, and the diff would have reverted it** — 71 files / 4,313 deletions,
+   including master's device-type rename and `parseDecimal`. Merged master in (`fc89e523`).
+2. **The merge was textually clean but broke the tests.** Two new cases still passed `"WEB"` / `"BI"`
+   (master renamed them `WEBEDITOR` / `DASHBOARD`) so they no longer compiled; and master's new
+   `parseDecimal` coercion tests stub rows *without* `ValidForProgressCalculations`, so the truthy
+   check read `undefined` as "excluded" and blanked their values — 2 failures.
+   **Fix: the condition is now `=== false`**, which is what was meant. Blank a row the scheduler
+   explicitly excludes; leave a nullish flag alone (WBS rows already carry null progress).
+   `2d91a7b6`.
+3. **Comment bloat.** A 17-line e2e header, a 5-line spec header, a 3-line service comment and two
+   narrating comments removed (`205462ac`). Ticket references now live in the commit and the PR only —
+   Ilia's rule: *"what for we need such wall of text and especially mentioning the ticket?"*. One
+   comment kept, on the e2e, because "this passes without the fix" is not inferable.
+
+Head `205462ac`: `build` ✅, SonarCloud ✅ (gate passed; still the same 10 unenumerable new issues the
+branch has carried since 09-02), Copilot ✅, NPM Audit ✅. Copilot's one open thread (the e2e not being
+real regression cover) answered and **resolved**. Description rewritten twice at Ilia's direction —
+final form is prose + a Test block with concrete ids, no tables, no section headers beyond two.
+
+**Reusable:** before reviewing any PR that has sat for days, `git rev-list --count origin/master..HEAD`
+and the reverse. A branch far behind master produces a diff that looks like a mass deletion, and a
+clean merge can still break compilation and other people's tests.
