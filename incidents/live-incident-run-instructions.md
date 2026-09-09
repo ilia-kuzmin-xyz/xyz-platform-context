@@ -687,3 +687,12 @@ carries the same bump. **Master itself is red on this until someone lands it the
 `overrides`/`resolutions` for a pin, (b) try the lockfile-only bump with the matching npm major,
 (c) fall back to `.trivyignore` only when the fixed version does not exist on the registry
 (`npm view <pkg> versions --json`).
+
+### 2026-09-09 (08:35) — outcome: the js-yaml bump is confirmed; note the Trivy cache lag
+
+Both PRs green with the bump: #2194 `ae339f973` (build 08:27) and #2195 `502d3add4` (build 08:33), Trivy
+step included. One observation worth keeping: #2194's *earlier* head `11ad855a5` also passed Trivy at
+08:11 on the **unbumped** lockfile, while #2195 had failed on the same lockfile at 08:05. The runners
+restore Trivy's DB from a cache (`Restore DB from cache` step), so a fresh CVE hits whichever runner has
+the newer DB first — one PR red and another green on identical dependencies is expected for a few
+hours, and is not evidence that the CVE is spurious. Fix on sight; do not wait for it to "settle".
