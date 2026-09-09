@@ -1679,3 +1679,51 @@ all. #2205 remains unmerged if it is ever needed again.
 After yesterday's wrong-thread reply, I fetched both target comments and confirmed `3965943058` →
 `i18n/en/main.json` and `3965943131` → `Dockerfile` *before* posting. The habit works; it cost one
 extra read.
+
+## 2026-09-09 08:1x — the fourth repo-wide Trivy blocker: js-yaml CVE-2026-84375
+
+`Vulnerability scanner` (step 19, the **npm/fs** scan — not the image scan) went red on #2192:
+
+```
+package-lock.json (npm)   js-yaml 4.3.1 → fixed 4.3.2   CVE-2026-84375 (HIGH, DoS in YAML parsing)
+```
+
+Fresh DB immediately beforehand (`[vulndb] Need to update DB`, 112 MiB download). Fourth instance of
+this shape: nanoid 09-02, libuuid 09-05, this now.
+
+**Ruled out that it was #2192's own doing**, which mattered because #2192 is the PR that *rewrites*
+`.trivyignore`: its delta is three files and only **removes** dependencies, and its suppressed-id set
+is **identical** to master's (compared sorted id lists — 21 each, no adds, no drops).
+
+### A hotfix already existed — checked before opening one
+
+**#2209** (`Force js-yaml 4.3.2`), opened by the parallel session ~8 minutes earlier. The standing
+instruction is to open a hotfix PR for a global build failure *while avoiding a duplicate*; the check
+is what made the difference between helping and forking the fix.
+
+**What I contributed instead: verified its hand-edited lockfile against `registry.npmjs.org`.**
+Integrity hash character-identical, `resolved` correct, and — the part that makes a hand-edit *safe*
+rather than merely plausible — `dependencies` identical between 4.3.1 and 4.3.2 (`argparse ^2.0.1`),
+so no new transitive entry is needed and the tree does not restructure. A wrong hash fails late, at
+`Install dependencies`, after a runner is spent.
+
+### Declined to port the fix into #2192, against the usual rule
+
+The reason porting an existing fix into a red PR is normally free is that it **no-ops** once the base
+carries it. **That is true of source edits and false of lockfiles.** #2192 already edits
+`package-lock.json`, and #2209 edits the same `node_modules/js-yaml` node — porting would *guarantee*
+a textual conflict for whichever merges second, in the file where hand-resolving is most dangerous.
+
+> **"Port the fix so the PR goes green" has a file-type exception.** For a lockfile, port ⇒ conflict,
+> not no-op. Merge the hotfix first and let the feature branch pick it up from master.
+
+### My own error this round, caught before it went anywhere load-bearing
+
+I claimed `js-yaml` was a **direct dependency** at `package.json:313`. It is **only** in `overrides` —
+`dependencies`, `devDependencies`, `resolutions`, `peerDependencies` all have no entry. I had grepped
+`'"js-yaml"'`, got a line number, and assumed the enclosing block.
+
+> **A grep hit gives you a line, not a structure.** Third time this run that a bare
+> grep/diff has produced an unverified structural claim (the false `grep -c` zero; the stale-master
+> 9-file diff; this). For JSON, parse it — `python3 -c "json.load(...)"` and check the actual key —
+> rather than inferring the block from a line number.
