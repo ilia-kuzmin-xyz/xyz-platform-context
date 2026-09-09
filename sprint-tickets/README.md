@@ -3408,3 +3408,18 @@ Two traps this produced, both worth remembering:
 
 This is acceptable for pure merge commits between two independently-green heads with no overlapping
 files, which is all this run pushed. It would **not** be acceptable for a code change.
+
+#### Post-push CI state at hand-off (09-09 ~08:15) — **`build` unverified, next run must confirm**
+
+After the nine merge pushes: **SonarCloud `success` on every PR that had reported**
+(#2192, #2195, #2197, #2202, #2203, #2204, #2205) and **`copilot-pull-request-reviewer` `success`**
+on #2192, #2194, #2195, #2197. The `build` job was **still `in_progress` on all nine** when this
+run ended — started 07:47–07:57 and still running past 08:15, i.e. longer than the usual ~19 min.
+
+Nothing indicates a failure; it simply hadn't concluded. **First thing next run: check `build` on
+all nine heads**, and if any is red, confirm whether it is the merge (it shouldn't be — both sides
+were verified byte-identical) or another repo-wide scanner episode.
+
+**One improvement worth recording:** `copilot-pull-request-reviewer` now concludes **`success`**.
+The 09-08 entry logged it as `conclusion: failure` on every PR while still filing findings — that
+"standing oddity" appears to have cleared itself. Not caused by anything this run did.
