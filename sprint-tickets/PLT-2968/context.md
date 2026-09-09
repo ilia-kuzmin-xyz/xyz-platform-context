@@ -1874,3 +1874,30 @@ Subscribed to #2186 activity, so a red build wakes the session rather than being
 nanoid → 3.3.17 (the one genuinely fixable row in the `.trivyignore` census); tldraw 2.4.6 → 5.x
 (what actually clears all three nanoid CVEs); `achieved_on` on `asset_readiness`; and "render section
 title from `sectionType`, never persist display copy".
+
+### 2026-09-09 (later) — `beed07e` verified green, step by step
+
+The merge build completed. Checked the **step list**, not the job conclusion, because a green
+`build` job does not imply every step ran — step 20 was *skipped* on earlier runs while the job
+still reported success:
+
+| Step | Result |
+|------|--------|
+| 7 `Lint & Run Tests` | ✅ 16:50:21 → 16:59:03 |
+| 15 `Build image` (prod webpack — the only typecheck in CI) | ✅ 17:00:54 → 17:06:43 |
+| 19 `Vulnerability scanner` | ✅ 17:06:44 → 17:07:10 |
+| **20 `Scan built image`** | **✅ 17:07:10 → 17:07:28 — ran, not skipped** |
+
+Step 9 `Download fixtures` reads `skipped`, correctly — step 8 restored the fixtures cache, so the
+download is the cache-*miss* path. Every other step is `success`. SonarCloud quality gate passed
+(8 new issues, non-blocking; 0 security hotspots; 47.0% coverage on new code). No legacy commit
+statuses on the head (`get_status` → `total_count: 0`).
+
+Re-verifying step 20 mattered rather than being ceremony: **the merge changed the image's dependency
+tree** (shortid gone from the lockfile), so 09-09's earlier step-20 pass on `87c1386` did not
+transfer to this content. Same principle as the note above — a green check is about one specific
+tree, not about the branch in general.
+
+**#2186 is now as far as I can take it:** green on `beed07e`, no merge conflict, 0 of 32 review
+threads open. `mergeable_state: blocked` is the required-review gate and nothing else, so the only
+remaining input is a human approval.
