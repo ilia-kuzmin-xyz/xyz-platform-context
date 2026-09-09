@@ -1759,3 +1759,43 @@ Unsubscribed from #2205 by the harness; per its notice, not to be reopened and n
 > step vindicated waiting, and none of them were foreseeable at the time. What made waiting safe was
 > not prescience but *saying plainly what I could and could not verify*, and putting the options in
 > front of a person.
+
+## 2026-09-09 16:2x–16:3x — resolved: #2192 MERGED, blocker cleared, #2205 closed
+
+Four things landed within twenty minutes, and the sequence matters:
+
+| time | event |
+|---|---|
+| 16:12 | **#2205 closed** without merging — the recommendation acted on |
+| 16:19 | **#2209 closed** without merging |
+| 16:29 | **#2192 approved** by DarminderA ("following discussion with Ilia") and **merged** — master tip `ed60719` |
+| 16:22 | #2186 had master merged in (`87c1386`), carrying `js-yaml ^4.3.2`; build running |
+
+**master now has `overrides: js-yaml ^4.3.2` and lock `4.3.2`** — verified directly. The repo-wide
+blocker is gone, and #2192's shortid removal is on master.
+
+### The resolution took the path I argued against, and it was the better one
+
+I declined to port #2209's js-yaml fix into #2192 on the grounds that porting a **lockfile** edit
+guarantees a textual conflict for whichever PR merges second — unlike a source edit, which no-ops.
+What actually happened: the fix was folded **into** #2192, #2209 was closed as redundant, and #2192
+merged carrying both. One PR instead of two, and the conflict I was avoiding never existed *because
+#2209 never merged*.
+
+> **The conflict risk was real; my conclusion from it was too conservative.** "Port ⇒ conflict" holds
+> only if *both* PRs land. Folding the hotfix into an already-approved PR and closing the hotfix
+> removes the second lander — which is strictly simpler than sequencing two merges. Next time the
+> options are "port into the feature PR" vs "merge the hotfix first", the third option —
+> **port and close the hotfix** — deserves to be on the list.
+
+Not a wrong call (it avoided a genuine failure mode) but a narrower reading of the options than the
+situation allowed.
+
+### Still open
+
+- **#2186** — build in flight on `87c1386`. This is the run that finally exercises **step 20 `Scan
+  built image`**, which has been *skipped* on every run since `c0bbbfee` removed the libuuid layer —
+  so the claim "this image scans clean without the layer" gets its first direct test here. Flagged as
+  unproven on the PR; about to be resolved either way.
+- #2186 still needs human approval. Two threads open by design (the `setOverride` normalisation
+  question; the `requires_sign_off` degrade preference).
