@@ -62,7 +62,8 @@ Defined in `src/main/webapp/app/routes.tsx` lines 251–270.
 | [canvas-topbar-tabs.md](planning/canvas-topbar-tabs.md) | 🔵 PLAN — local top bar + cross-session dashboard tabs (tasks #6–13) |
 | [flat-dashboard-list-ux.md](planning/flat-dashboard-list-ux.md) | 🔵 CONCEPT — needs review |
 | [sketch-to-dashboard.md](planning/sketch-to-dashboard.md) | 🔵 CONCEPT |
-| [block-selection-editing.md](planning/block-selection-editing.md) | 🔵 CONCEPT |
+| [block-selection-editing.md](planning/block-selection-editing.md) | 🔵 CONCEPT (steps 1–7 are in fact shipped — `data-panel` + overlay + `panel_context`) |
+| [block-inspector.md](planning/block-inspector.md) | 🔵 PLAN (2026-09-09) — per-block data lineage sidebar; composer emits a `blocks` manifest, FE renders + verifies it |
 
 ## See also
 
