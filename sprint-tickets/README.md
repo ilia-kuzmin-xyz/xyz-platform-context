@@ -3560,3 +3560,75 @@ call being un-made on the libuuid side.
 Step 19 fails first and **skips** step 20, so today no image scan ran on any PR. #2205 could not
 have helped today, and #2209 does not address the image finding. Two open drafts, two distinct
 problems.
+
+---
+
+## 2026-09-09, 16:30 — resolution: the js-yaml blocker is CLEARED, and both hotfix PRs were CLOSED unmerged
+
+This closes out the 08:15 / 08:35 entries above. **Neither hotfix PR merged.** The fix reached
+master anyway, by a route I did not predict.
+
+### What actually happened
+
+| PR | Subject | Outcome |
+|----|---------|---------|
+| **#2209** `fix/trivy-js-yaml-cve-2026-84375` | js-yaml `^4.3.2` via the overrides block | **closed, not merged** (16:19) |
+| **#2205** | alpine/libuuid image-scan fix | **closed, not merged** (`closed_at 2026-09-09T16:12:41Z`) |
+| **#2195** (PLT-3096) | *feature* PR — WBS collapse state | **merged** as `f5c2aac`, and it carries the js-yaml bump |
+| **#2199** (PLT-3104) | — | merged |
+
+Master head is now `f5c2aac`, with lockfile `js-yaml 4.3.2` and override `^4.3.2`. Traced with
+`git log -S'"js-yaml": "^4.3.2"'` → `f5c2aac`, i.e. **#2195, one of my own PRs**. Someone folded the
+security bump into a feature branch rather than landing the standalone hotfix. My commit `015370c`
+never reached master.
+
+### The lesson, and it goes against my own call
+
+On 09-09 morning I argued (and a parallel session independently agreed, see `c0bbbfe` un-making the
+libuuid port) that **a tree-level security fix belongs in its own PR, not ported into a feature
+branch**. That is still the cleaner history. But it is not what unblocked the repo:
+
+> The separate hotfix PR sat as a draft nobody merged for eight hours. The bump riding inside a
+> feature PR that was *already in review* landed the same day. When a repo-wide scan failure is
+> blocking every branch, **the fastest merge path wins over the tidiest history** — and the tidiest
+> history is worth nothing while every PR is red.
+
+Practical consequence for the next run: before opening a standalone hotfix PR for a repo-wide scan
+failure, check whether a PR **already close to merge** touches `package.json` / `package-lock.json`.
+Porting into it may clear the blockage days sooner. Say so in that PR's description so the reviewer
+knows why an unrelated dependency line is in the diff.
+
+### Branch re-sync (all four of mine)
+
+Merged current master (`f5c2aac`) into each still-red branch and pushed, verifying `js-yaml 4.3.2`
+in the lockfile on each afterwards:
+
+| Branch | PR | old → new head |
+|--------|----|----------------|
+| `PLT-3038` | #2202 | `0ca7147` → `8b0e392` |
+| `PLT-2999` | #2203 | `cc97667` → `a731065` |
+| `PLT-2968` | #2186 | `c0bbbfe` → `87c1386` |
+| `PLT-2966` | #2204 | `b55fd9c` → `5cd3fd9` (base is `PLT-2968`, so it merged *that*, not master) |
+
+A parallel session did the same on `fix/trivy-nanoid-cve-2026-73086` (#2192, `7c6391b`) — so that
+nanoid hotfix is also still open and unmerged.
+
+### ⚠️ New concern: the libuuid image-scan finding now has NO fix landed
+
+#2205 was the only fix for the **09-05 alpine/libuuid finding in step 20 (`Scan built image`)**.
+It is closed unmerged, and nothing else in the tree addresses it.
+
+The reason nobody has noticed: **step 19 (`Vulnerability scanner`, `trivy fs`) failing SKIPS step 20.**
+For the whole of 09-09 step 19 was red repo-wide, so the image scan never ran. Now that js-yaml is
+fixed and step 19 goes green, **step 20 executes again — and may go red on libuuid on every branch.**
+
+Watch for this on the next run. If it reappears: the fix is a base-image bump or a `.trivyignore`
+entry, #2205 had the shape of it, and **check for an existing PR before opening another** (that check
+is what stopped me duplicating #2205 in the first place).
+
+### Two dated corrections to the entries above, both now moot but keep the pointer
+
+- The 08:15 line **"Still needs a human: #2209 is green but a draft"** — superseded. Both drafts were
+  closed instead of merged; the escalation I sent on that basis is retired.
+- The 08:35 note that `PLT-2968` did not carry the libuuid change **remains correct** and is now
+  academic: with #2205 closed, no branch carries it and master does not either.
