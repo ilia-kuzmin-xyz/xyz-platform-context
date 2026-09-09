@@ -711,3 +711,44 @@ Verified after the merge that the PR's own diff against master is still exactly 
 Mostafa on 08-28 whether the LOE-progress display is a planning-team call, and nobody has answered.
 Now 7 days. The code is ready; what to *show* in place of the removed 0% is not decided, and that is
 a product answer, not a code one. The PR stays a draft for that reason, not because of CI.
+
+## 2026-09-09 — ✅ UNBLOCKED. Mostafa's answer arrived: leave "-". #944 already implements it; no new PR, no FE change.
+
+Ilia relayed Mostafa's decision: **just leave `"-"`** for Level of Effort activities. That closes the
+one question the 09-04 entry named as *"the only thing in the way of merging"*.
+
+**#944 already produces exactly that** — verified end to end this run, not assumed:
+
+| step | evidence |
+|---|---|
+| API blanks it | `origin/PLT-3091:src/services/schedules.service.ts:83,93` — `actualProgress: item.validForProgressCalculations ? item.actualProgress : null` |
+| not yet on master | `origin/master:schedules.service.ts` — grep for that line returns **nothing**, so the PR is still needed |
+| `null` renders as a dash | `gantt-x/scheduler/utils/formatters.ts:1-6` read on **master**: `if (value === null \|\| value === undefined) return '-'`, and `0` falls through to `'0%'` |
+| both columns use it | `scheduler-columns/scheduler-columns.tsx:137` (Planned %), `:159` (Actual %) — note the path gained a `scheduler-columns/` directory since the 08-31 entry cited it |
+| detail panel too | `activity-properties/activity-progress.tsx:46,49` |
+
+⇒ **No frontend change is required.** The fix is the 5 lines already on the branch.
+
+**Covers both cohorts the customer raised** (110649: *"Exactly this is the issue, and for the
+non-completed ones we cannot assign any progress on them from the WV"*). The predicate is
+`validForProgressCalculations`, which is false for all 19 — so the 10 completed ones lose the false
+`0%`, and the 9 unfinished ones also show `-` instead of an uneditable zero.
+
+### #944's live state (checked, not recalled)
+
+**Open, NOT a draft** — the 09-02 and 09-04 entries above both describe it as a draft; that is
+**superseded**, it was readied at some point before today. All four checks **green** as of 09-04
+12:48: `build`, `SonarCloud`, `copilot-pull-request-reviewer`, `NPM Audit`. `mergeable_state:
+blocked` = awaiting required reviews from Seyedof / rishib-xyz / sachinbadonixyz. Head `17a39e3b`,
+198 additions / 3 deletions across 4 files.
+
+**Action taken this run:** description rewritten only — a "Decision" section recording Mostafa's
+answer with the four-layer evidence chain, the stale *"This stays a draft on purpose"* paragraph
+removed (wrong twice over: it is not a draft, and the blocker is resolved), and the Web Viewer
+check added to the test steps. **No code touched, no new PR raised** — per the 09-02 warning in this
+folder, #944 is already the second raising of this diff and a third would be wrong.
+
+**Jira not touched** (standing rule). PLT-3091 is `In Code Review`; the ticket still needs a reply to
+Yash telling the customer the dash is the agreed outcome, and the open product question (should an
+*unfinished* LOE activity show a derived percentage?) is worth splitting off rather than holding this
+ticket open.
