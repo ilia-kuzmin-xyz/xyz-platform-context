@@ -3313,3 +3313,14 @@ the time. A service-based fix would have marked all 819 installed. Rules now in
 | PLT-3101 | name an owner for the geometry/ingest divergence; raise that ticket |
 | PLT-3104 | raise the BE `minRemainingMs` ticket for issue attachments (logs already do 24h) |
 | PLT-3104 | check session `platform-web-f90ceddc-…` logs for a 403 to confirm the trigger |
+
+### 2026-09-09 (interactive, later) — PLT-3096 merged; PLT-3099 still open
+
+- **PLT-3096 → MERGED.** #2195 squash-merged as `f5c2aace7` at 14:13 after DarminderA approved. Final
+  fix: `wbs-open-state.ts` capture/restore for the Show-WBS effect, plus a *pure removal* of the
+  search filter's expand step (a search no longer changes which rows are open — his call). Jira still
+  `Dev In Progress`; needs a human to move it. Detail in the folder's 09-09 entries.
+- **Master's Trivy red is resolved by that merge** — the `js-yaml ^4.3.2` bump rode along in #2195.
+- **PLT-3099 (#2194) open, green, awaiting review approvals** (`mergeable_state: blocked` = required
+  reviews, not a conflict). Head `565d955f8`. Both Copilot findings from this morning fixed; PR
+  description corrected today where it misstated the code.

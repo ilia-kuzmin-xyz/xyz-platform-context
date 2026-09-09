@@ -424,3 +424,15 @@ deletions across 6 files including the js-yaml bump.
 **Still unproven, deliberately left:** the stale `showWBS` closure in the search handler — see
 `live-incident-run-instructions.md` 09-09 § "Known, unproven, left alone". Behaviour is identical to
 master; Scenario 3 step 5 of the PR is the manual check that would expose it if real.
+
+### 2026-09-09 14:13 — **MERGED** to master as `f5c2aace7`. Ticket work is done.
+
+Squash-merged ~1h after Darminder's approval. Session auto-unsubscribed from the PR.
+
+**Side effect worth knowing: master's Trivy failure is fixed by this merge.** #2195 carried the
+`js-yaml ^4.3.2` override bump, so `master:package.json` now has it — no separate "unblock CI" PR is
+needed, and #2194's cherry-picked copy of the same bump no-ops when it merges. (Run-instructions
+09-09 said master would stay red "until someone lands it there"; it landed here. Superseded.)
+
+**Jira not touched** (standing rule). PLT-3096 is still `Dev In Progress` and the fix is on master —
+a human moves it on.
