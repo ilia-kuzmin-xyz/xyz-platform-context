@@ -1621,3 +1621,19 @@ materialising at all.
 Recorded on the thread as the option the follow-up should weigh *against* "add a Postgres function",
 since only this one makes the defect impossible rather than serialised. Thread stays **open** — a
 real defect being carried forward, and the thread is the only place that is visible.
+
+### Correction: I posted that analysis on the wrong thread first
+
+The root-cause comment above went onto the **`useAssetReadiness.ts` hook-tests thread**
+(`3906622631`) instead of the `setOverride` race thread (`3927007011`). Reposted on the right one and
+left a one-line pointer on the wrong one.
+
+**The galling part: that same thread already contained a "Wrong anchor — replying on the right
+thread" note from 09-02.** So this is the second time a reply has landed on that exact thread by
+mistake, and I had read its history earlier in this run.
+
+> **`add_reply_to_pull_request_comment` takes a comment id, and a comment id carries no visible hint
+> of which thread it belongs to.** `3906622631` and `3927007011` look equally plausible. The only
+> safe habit is to re-read the target comment's `path` immediately before replying, not to trust an
+> id copied from an earlier listing — the listing that produced it may have been for a different
+> thread entirely. The wake notification's own `file` field is what caught it, after the fact.
