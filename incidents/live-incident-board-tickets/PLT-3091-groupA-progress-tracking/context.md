@@ -838,6 +838,10 @@ per the SHORT rule, no @-mentions: PAPI-3936 raised and assigned to Sachin with 
 green, ticket blocked on that review plus the next platform-api release, and Mostafa's dash decision
 with what the customer will see.
 
+**CORRECTED 2026-09-09 (see the next entry): `Blocked` DOES exist in PLT — it is on the Task/Story
+workflow, not the Live Incident one. The paragraph below is right that the transition is unavailable
+on PLT-3091, wrong that the status does not exist.**
+
 **The requested transition was NOT performed, because it is not possible.** `getTransitionsForJiraIssue`
 on PLT-3091 with `includeUnavailableTransitions: true` returns **12 transitions and none is Blocked**:
 Done, ARCHIVED (NOT RELEASED), READY FOR RELEASE, Ready For QA, Open, Customer Release Check, Dev In
@@ -851,3 +855,35 @@ without re-checking the live transition list first.**
 
 Left at **In Code Review**, which is the truthful state: the PR exists and is awaiting review. The
 blocking is recorded in the comment text instead, which is where a reader looks anyway.
+
+### 2026-09-09 (final) — PAPI-3936 linked as a blocker. `Blocked` is unreachable for a **Live Incident** — workflow, not permissions.
+
+**Link created:** `PAPI-3936` **blocks** `PLT-3091` (link type `Blocks`, id 10000; inward = blocker =
+PAPI-3936, outward = blocked = PLT-3091). Jira now shows the "is blocked by" relation on both, which
+is the signal a reader actually sees.
+
+**Why the status still could not be set — measured, not assumed.** The PLT project runs **more than
+one workflow scheme, split by issue type**:
+
+| issue | type | transitions | `Blocked` offered? |
+|---|---|---|---|
+| PLT-3091 (In Code Review) | **Live Incident** | 12, incl. unavailable | **No** |
+| PLT-2651 (Dev In Progress) | Live Incident | 13 | **No** |
+| PLT-2660 (currently *in* Blocked) | Live Incident | 11 outbound, incl. `Development Unblocked` → Ready For Development | n/a (already there) |
+| **PLT-2437** (Ready For Development) | **Task** | 15, all `isGlobal:true` — incl. **1151 `Blocked`**, plus Ready For Analysis, UX/UI In Progress, In QA Testing, WAITING FOR BE/DPL, Released | **Yes** |
+
+⇒ `Blocked` (status id **10002**) belongs to the **Task/Story** workflow. The Live Incident workflow
+has no edge into it from any status this session could reach. PLT-2660 sitting in Blocked as a Live
+Incident is an artefact — a bulk move, or a workflow change after the fact — and **cannot be
+reproduced through the API today**.
+
+**Left at In Code Review**, which is truthful (PR written, awaiting review), with the blocking carried
+by (a) the `Blocks` link and (b) comment 111795. Reported to Ilia rather than forcing it: reaching
+Blocked would mean walking the ticket backwards through Open → Ready For Development, losing the
+In Code Review state and misrepresenting work that is finished.
+
+**Reusable, and it corrects this routine's own scope rules:** `live-incident-run-instructions.md`
+§ Fetch the board lists `Blocked` among the statuses to exclude. For **Live Incidents that is dead
+config** — a PLT Live Incident cannot enter Blocked. Do not promise a stakeholder that a live incident
+will be "moved to Blocked"; link the blocker instead. Always read the live transition list for the
+**issue type in hand**, since two PLT tickets in the same project can offer completely different sets.
