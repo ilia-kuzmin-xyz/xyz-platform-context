@@ -829,3 +829,25 @@ final form is prose + a Test block with concrete ids, no tables, no section head
 **Reusable:** before reviewing any PR that has sat for days, `git rev-list --count origin/master..HEAD`
 and the reverse. A branch far behind master produces a diff that looks like a mass deletion, and a
 clean merge can still break compilation and other people's tests.
+
+### 2026-09-09 (later still) — comment 111795 POSTED to PLT-3091. "Blocked" does not exist in this workflow.
+
+**A Jira comment WAS posted this run, on Ilia's explicit instruction** (*"then record it to our live
+incident and move live incident to blocked"*). Comment **111795**, 17:58 BST, three short paragraphs
+per the SHORT rule, no @-mentions: PAPI-3936 raised and assigned to Sachin with its URL, #944 up and
+green, ticket blocked on that review plus the next platform-api release, and Mostafa's dash decision
+with what the customer will see.
+
+**The requested transition was NOT performed, because it is not possible.** `getTransitionsForJiraIssue`
+on PLT-3091 with `includeUnavailableTransitions: true` returns **12 transitions and none is Blocked**:
+Done, ARCHIVED (NOT RELEASED), READY FOR RELEASE, Ready For QA, Open, Customer Release Check, Dev In
+Progress, With Customer, With Technical Support, In Analysis, Ready for QA Testing, No QA Required.
+
+**Note the discrepancy with this routine's own scope rules**, which list `Blocked` among the excluded
+statuses (`live-incident-run-instructions.md` § Fetch the board, and the 09-07 run log). Either that
+status was removed from the PLT workflow, or it exists on a different issue type / workflow scheme and
+never applied to Live Incidents. **Do not plan around a `Blocked` status for a PLT Live Incident
+without re-checking the live transition list first.**
+
+Left at **In Code Review**, which is the truthful state: the PR exists and is awaiting review. The
+blocking is recorded in the comment text instead, which is where a reader looks anyway.
