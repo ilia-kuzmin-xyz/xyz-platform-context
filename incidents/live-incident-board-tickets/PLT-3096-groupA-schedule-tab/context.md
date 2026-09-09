@@ -364,3 +364,29 @@ hook's exact call was compiled against the real dhtmlx 8.x `GanttStatic` d.ts be
 (`gantt` from `useViewer()` is `any` — `viewer-provider.tsx:41` — so only the cast could break.)
 Check suite on `637994c18` completed with no failures at 15:09. Sonar gate passed throughout, with
 "1 New issue" that is unreadable from here (private project; anonymous API returns empty).
+
+## 2026-09-09 — decision: a search never opens a collapsed row. Reveal removed. Supersedes yesterday's "product question".
+
+Ilia told Darminder the expected behaviour was that typing `install` auto-expands Building C and D
+if they were collapsed beforehand. Darminder: *"I think it should remain closed because now I search
+'installa' as the testing instructions they are opened. It should stay consistent and remain closed."*
+Ilia relayed it; direction taken.
+
+**Consequence that made the implementation a removal, not a guard:** the viewer schedule loads with
+every branch open (`use-load-schedule-data.tsx:58-60` sets `open = true` before parse), so the *only*
+collapsed rows are ones the user collapsed. Under "never open what the user closed", the search-time
+reveal has nothing legitimate left to open. `reveal-search-matches.ts` + tests deleted in
+`0355a76b8`; the hook's diff against master is now: `parentIdsToExpand` side effect gone,
+`gantt.open()` loop in `onDataRender` gone, two never-read refs gone, one explanatory comment added.
+Nothing replaces the expand.
+
+**Trade accepted (in the PR body, agreed in review):** a match inside a collapsed WBS row stays out of
+sight until the user opens it; the "Showing N results" count still includes it.
+
+Yesterday's "deliberate trade" (reload on the same gantt no longer re-reveals) and the open product
+question are both moot — there is no reveal. PR steps: Scenario 1 step 7 asserts `installa` opens
+nothing; new Scenario 2 = collapse C and D *before* searching, both stay collapsed.
+
+Also today on this branch: `40ca4c412` js-yaml override bump (Trivy, see run-instructions 09-09),
+`502d3add4` two dead refs removed (Copilot). Head `0355a76b8`, Darminder re-requested. Both PRs were
+green on the js-yaml bump before this commit; CI on `0355a76b8` pending.
