@@ -598,3 +598,69 @@ The notes are a cache, not a source. This folder's 561 lines were written on 09-
 comments that answered the ticket's open questions. Answering from the cache produced a confident,
 wrong account of half the ticket. **Re-fetch the ticket before describing its state, however
 detailed the local notes look.**
+
+## 2026-09-09 (later) — ⛔ THE ISOLATION DIAGNOSIS IS WRONG. #2194 does not reproduce. Do not merge it as the PLT-3099 fix.
+
+**Live test by Ilia on the pre-fix release**, isolation active, drag-box in **every** direction:
+
+```
+[{ "total": 1, "hidden": 0, "visible": 1 }]
+```
+
+One element isolated → exactly one element selected, zero invisible ones. **Forge's `geometric`
+box-selection already excludes isolated-out elements.** So `filterSelectionByVisibility` is a
+**no-op** for the isolate case, and #2194 cannot be the fix for this ticket.
+
+**This also means comment 111097 to the customer is wrong.** *"Drag-select respects the section box
+and filters but not isolation, so hidden elements inside the drag area were picked up"* was a
+**code-read** conclusion — true of our own pipeline (no visibility filter existed before #2194) but
+false about net behaviour, because the Forge extension filters first. The customer has been told a
+cause that does not hold. **Needs a correction to Yash/Kyriakos before the ticket closes.**
+
+### Where the ~800 actually came from — the arithmetic nobody used
+
+Customer: selected **~400**, linked **1,239**. Two facts settle where the gap is:
+
+- `linking-service.ts:378` — `linkSelectedElements()` takes `selectionStore.selectedElements`
+  **directly** (`Array.from(selectedElements.values()).map(e => e.mongoId)`). **No expansion at link
+  time.**
+- `viewer-x/components/blocks/element-stats.tsx:16` — the on-screen **"Selected:"** counter renders
+  `selectedElements.size`, i.e. the *same store*.
+
+⇒ 1,239 links means **1,239 were in `selectedElements`** at the moment of linking. The counter would
+have read 1,239. The customer's "~400" is what they *believed* they had, not a reading they quoted.
+
+**So the over-selection is real and is in the selection — but it is not the isolate path.** Leading
+candidate, untested: the sync from the Forge viewer selection into
+`selectionStore.selectedElements`. `viewer-y.tsx:265` sets
+`setSelectionMode(Autodesk.Viewing.SelectionMode.LEAF_OBJECT)`, and there is NWD-specific
+parent/child handling elsewhere in the selection path (`_isDbIdAllowedForFilteredBoxSelection`,
+`applyNoChildHighlightPatch`). If a box hit returns **container** nodes and the store expands each to
+its leaf children, that is exactly the kind of ~3× multiplier seen here — and the customer's model
+(`PC-RAGAN 8.1-Model Switch EVO Bldg 6-MECH_CHW Pipes-V7`) is very likely an NWD. **This is the next
+place to look. It is a hypothesis, not a finding.**
+
+Also still unexplored, and named by the customer in 111085 (*"section boxes, filters, or isolation
+tools"*): the **filter** guard only runs when `getModelActiveFilterCount() > 0`
+(`selection-service.ts:141`). A type filter that does not register a model active filter count would
+bypass it entirely. The customer said "isolated element **types**", which sounds like the type
+filter rather than the viewer's Isolate.
+
+### What to do with #2194
+
+- **Do not merge as the PLT-3099 fix.** It fixes nothing observable in that scenario.
+- The change is *harmless* (it can only drop dbIds the viewer reports invisible) and its two
+  Copilot-driven guards are sound, but it adds a per-element instance-tree walk for no proven gain.
+  Either close it, or keep it explicitly as defence-in-depth with the PR retitled — **not** as this
+  ticket's remedy. Ilia's call.
+- The 9 tests and the `filter-selection-by-visibility` module remain valid as a description of the
+  *intended* invariant; they simply test a path Forge already covers.
+
+### Process failure worth naming
+
+Six exchanges were spent writing and rewriting repro instructions for a mechanism **never once
+observed** — floors behind floors, "ghosted" geometry, drag direction — all reasoned from source
+without a single live check. The one thing that settled it took the operator two minutes.
+The 09-08 rule (*"never put a ✅ on a test scenario you have not traced"*) was too weak: tracing code
+is not evidence. **A fix for a live-incident ticket needs the bug observed failing at least once
+before the fix is written.** Added to `live-incident-run-instructions.md`.

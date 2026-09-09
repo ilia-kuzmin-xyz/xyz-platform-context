@@ -779,3 +779,38 @@ one-line conversational recall, which is exactly when it feels skippable.
 Corollary: when a fetch does contradict the folder, **write the correction into the folder
 immediately** (dated, labelling what it supersedes) so the next reader of that cache is not misled
 the same way.
+
+## 2026-09-09 — ⛔ Observe the bug failing BEFORE writing the fix. Code reading is not evidence.
+
+**PLT-3099 / #2194 was built on a mechanism that does not occur.** The reasoning was: our selection
+pipeline honours the section box and the active filters but has no visibility check, therefore
+drag-select must pick up isolated-out elements. That is a correct reading of *our* code and a wrong
+conclusion about behaviour — the Forge `Autodesk.BoxSelection` extension (`type: 'geometric'`,
+`viewer-y.tsx:251-259`) already excludes invisible fragments. Ilia's live check on the pre-fix
+release, isolation on, drag in every direction:
+
+```
+[{ "total": 1, "hidden": 0, "visible": 1 }]
+```
+
+Zero hidden elements in the selection. The fix is a no-op; the diagnosis given to the customer in the
+ticket is wrong; six exchanges went into repro instructions for something that never happened.
+
+### Rules
+
+1. **Before writing a fix for a live-incident ticket, get the failure observed once.** By us, by the
+   operator, or by a reviewer — but observed. Reading the code tells you what *our* layer does; it
+   cannot tell you what the third-party layers above and below it already handle.
+2. **Third-party libraries silently do half the job.** Forge here; dhtmlx on PLT-3096. Any argument of
+   the form "our code never checks X, therefore X is broken" is invalid unless the library's own
+   handling of X has been ruled out — and the cheapest way to rule it out is one live measurement,
+   not a source read of a bundled minified library.
+3. **When a repro cannot be produced, stop and say so.** Do not iterate on the instructions. Three
+   failed attempts to hand over a repro is the signal that the *mechanism* is wrong, not the wording.
+4. **Reconcile the arithmetic in the report before choosing a cause.** PLT-3099 said 400 selected →
+   1,239 linked. Linking consumes `selectionStore.selectedElements` directly
+   (`linking-service.ts:378`) and the on-screen counter renders the same store
+   (`element-stats.tsx:16`), so 1,239 *were selected* and the discrepancy was never about visibility
+   at all. That check costs two greps and would have redirected the whole investigation on day one.
+5. **A code-read conclusion posted to a customer is a liability.** 111097 told the customer isolation
+   was the cause. It has to be corrected. Mark such comments as inferred when posting, or verify first.
