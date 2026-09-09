@@ -1,0 +1,707 @@
+/* The single-file version ran inside a host that supplied these. Standalone,
+   the page supplies them itself. */
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: light dark; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+
+:root {
+    --ink: #16202b;
+    --ink-soft: #46596b;
+    --ink-faint: #74899a;
+    --mylar: #eef0ea;
+    --sheet: #f7f8f4;
+    --raised: #ffffff;
+    --rule: #c9cfc6;
+    --rule-soft: #dfe3da;
+    --grid: #ccd3c9;
+
+    --ux: #1f6f8b;
+    --bridge: #a9701a;
+    --api: #4a5f7a;
+    --future: #6b4a8b;
+
+    --alarm: #b3261e;
+    --alarm-fill: #fbeceb;
+
+    --tag-red: #c8322e;
+    --tag-amber: #c99700;
+    --tag-green: #17845a;
+
+    --font-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+    --font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ink: #e7ece8;
+      --ink-soft: #a3b2be;
+      --ink-faint: #77899a;
+      --mylar: #10171e;
+      --sheet: #18212a;
+      --raised: #1d2832;
+      --rule: #35434f;
+      --rule-soft: #27323c;
+      --grid: #2b3844;
+
+      --ux: #6fb9d0;
+      --bridge: #dda94f;
+      --api: #a3b8d0;
+    --future: #b494d6;
+      --future: #b494d6;
+
+      --alarm: #f0625c;
+      --alarm-fill: #331a19;
+
+      --tag-red: #f0625c;
+      --tag-amber: #e8bb3b;
+      --tag-green: #3ecb92;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #e7ece8;
+    --ink-soft: #a3b2be;
+    --ink-faint: #77899a;
+    --mylar: #10171e;
+    --sheet: #18212a;
+    --raised: #1d2832;
+    --rule: #35434f;
+    --rule-soft: #27323c;
+    --grid: #2b3844;
+
+    --ux: #6fb9d0;
+    --bridge: #dda94f;
+    --api: #a3b8d0;
+
+    --alarm: #f0625c;
+    --alarm-fill: #331a19;
+
+    --tag-red: #f0625c;
+    --tag-amber: #e8bb3b;
+    --tag-green: #3ecb92;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--mylar);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1660px; margin: 0 auto; padding: 2.2rem 1.5rem 4rem; }
+
+  /* ---------------------------------------------------------------- masthead */
+  header.masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.1rem; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.8rem, 3.6vw, 2.7rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0.3rem 0 0.5rem;
+    text-wrap: balance;
+  }
+
+  .standfirst { max-width: 72ch; color: var(--ink-soft); margin: 0; font-size: 0.95rem; }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------------------------------------------------------------- controls */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.7rem;
+    padding: 0.85rem 0 0.7rem;
+  }
+
+  .group-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.28rem 0.7rem 0.28rem 0.55rem;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    background: var(--sheet);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--ink-faint);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle input { position: absolute; opacity: 0; pointer-events: none; }
+
+  .toggle .dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border: 1.5px solid currentColor;
+    background: transparent;
+    flex: none;
+  }
+
+  .toggle:has(input:checked) { background: var(--raised); border-color: currentColor; }
+  .toggle:has(input:checked) .dot { background: currentColor; }
+  .toggle:has(input:focus-visible) { outline: 2px solid var(--ux); outline-offset: 2px; }
+
+  .toggle:has(input:checked) { color: var(--layer, var(--ink)); }
+  .toggle[data-layer="gaps"] { --layer: var(--alarm); }
+  .toggle[data-layer="gaps"] .dot { border-radius: 50%; }
+
+  .spacer { flex: 1 1 auto; }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+  }
+  .btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .btn:focus-visible { outline: 2px solid var(--ux); outline-offset: 2px; }
+  .btn.zoom { width: 2rem; padding: 0.3rem 0; font-size: 0.9rem; line-height: 1; }
+
+  .zoom-level {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    min-width: 3.2rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------------------------------------------------------------- viewport */
+  .viewport {
+    position: relative;
+    /* A floor in pixels as well as a viewport-relative height: a container that
+       reports zero height — a hidden pane, a thumbnail pass, an iframe measured
+       before layout settles — would otherwise collapse the board to nothing. */
+    height: min(76vh, 900px);
+    min-height: 420px;
+    border: 1px solid var(--ink);
+    background-color: var(--sheet);
+    background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .viewport.panning { cursor: grabbing; }
+
+  .canvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+
+  .hint {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    background: color-mix(in srgb, var(--sheet) 85%, transparent);
+    padding: 0.15rem 0.45rem;
+    pointer-events: none;
+  }
+
+  .stage-label {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.3rem;
+    width: 300px;
+  }
+
+  .stage-label b { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 0.7rem; line-height: 1.35; padding-top: 0.3rem; border: 0; }
+
+  /* ---------------------------------------------------------------- concept */
+  .concept {
+    position: absolute;
+    width: 300px;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: grab;
+  }
+
+  .concept.dragging { cursor: grabbing; z-index: 40; }
+  .concept:focus-visible { outline: 2px solid var(--ux); outline-offset: 4px; }
+
+  .concept > h3 {
+    font-family: var(--font-body);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    margin: 0 0 0.3rem 0.9rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  /* Registration cross — the marks a set of overlays is pinned through. */
+  .concept > h3::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    background:
+      linear-gradient(var(--rule), var(--rule)) center / 100% 1px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) center / 1px 100% no-repeat;
+    transform: translateX(-0.9rem);
+    margin-right: -0.5rem;
+  }
+
+  .stack { position: relative; display: flex; flex-direction: column; }
+
+  .sheet {
+    position: relative;
+    border: 1px solid var(--rule);
+    border-left-width: 3px;
+    background: var(--raised);
+    padding: 0.22rem 0.5rem 0.3rem;
+    min-height: 3rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* The overlay itself — each sheet sits a label-line below the one before and
+     paints over it, so every label stays readable while the sheets share a
+     place. The offsets are set from script, because they depend on which sheets
+     are actually showing: a missing sheet is never overlapped, and the sheet
+     after a hidden one must not be pulled up out of the card. */
+
+  /* A sheet takes its colour and stacking from the layer that built it — set as
+     --layer and --depth from the LAYERS list, so no rule names a layer. */
+  .sheet { border-left-color: var(--layer, var(--rule)); z-index: var(--depth, 1); }
+
+  .sheet[data-provisional] {
+    background-image: repeating-linear-gradient(
+      -45deg, transparent 0 6px, color-mix(in srgb, var(--layer) 12%, transparent) 6px 12px);
+    border-style: dashed;
+  }
+
+  .sheet[hidden] { display: none; }
+
+  .sheet .row { display: flex; align-items: baseline; gap: 0.4rem; }
+
+  .sheet .tag {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    flex: none;
+    width: 1.1rem;
+    text-align: center;
+    border: 1px solid currentColor;
+    line-height: 1.1;
+  }
+
+  .sheet .tag { color: var(--layer, var(--ink-faint)); }
+
+  .sheet .label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  /* A surface layer names a screen, not an identifier, so it drops the mono. */
+  .sheet[data-role="surface"] .label { font-family: var(--font-body); font-weight: 600; font-size: 0.8rem; }
+
+  .sheet .sub {
+    display: none;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    color: var(--ink-faint);
+    margin: 0.1rem 0 0 1.5rem;
+  }
+
+  /* Only the front-most visible sheet has room to say more. */
+  .sheet.front .sub { display: block; }
+
+  .sheet.ghost {
+    /* background-color, not the shorthand: the shorthand would wipe the
+       provisional hatch off a sheet that is both proposed and absent. */
+    background-color: transparent;
+    border-style: dashed;
+    border-color: var(--rule-soft);
+    border-left-color: var(--rule);
+    min-height: 1.75rem;
+  }
+
+  .sheet.ghost .label {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-faint);
+  }
+
+  .sheet.ghost .tag { color: var(--ink-faint); border-style: dashed; }
+
+  body.show-gaps .sheet.ghost {
+    border-color: var(--alarm);
+    border-left-color: var(--alarm);
+    background: var(--alarm-fill);
+  }
+  body.show-gaps .sheet.ghost .label,
+  body.show-gaps .sheet.ghost .tag { color: var(--alarm); }
+  body.show-gaps .concept[data-flag="1"] > h3 { color: var(--alarm); }
+
+  .viewport.has-selection .concept { opacity: 0.35; }
+  .viewport.has-selection .concept.is-selected { opacity: 1; }
+  .viewport.has-selection .concept.is-selected .sheet:not(.ghost) { box-shadow: 0 1px 0 var(--ink), 1px 0 0 var(--ink); }
+
+  /* ------------------------------------------------------- comparison window */
+  .scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--mylar) 62%, transparent);
+    display: grid;
+    place-items: center;
+    padding: 1.2rem;
+    /* The board suppresses touch gestures; the window needs them back. */
+    touch-action: auto;
+    cursor: default;
+    overflow: auto;
+  }
+
+  .scrim[hidden] { display: none !important; }
+
+  .window {
+    width: min(880px, 100%);
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--raised);
+    border: 1px solid var(--ink);
+    box-shadow: 6px 6px 0 color-mix(in srgb, var(--ink) 14%, transparent);
+    cursor: default;
+  }
+
+  .window > header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.8rem 0.9rem 0.7rem;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .window .kind {
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .window h2 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0.1rem 0 0;
+    letter-spacing: -0.01em;
+  }
+
+  .window .tally {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    margin-top: 0.25rem;
+  }
+
+  .close {
+    margin-left: auto;
+    flex: none;
+    width: 1.7rem;
+    height: 1.7rem;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-faint);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .close:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .close:focus-visible { outline: 2px solid var(--ux); outline-offset: 2px; }
+
+  /* min-height:0 is what lets a flex child shrink below its content and scroll,
+     instead of pushing the window past the bottom of a short viewport. */
+  .window .body { overflow: auto; min-height: 0; padding: 0 0 0.8rem; }
+
+  /* Three columns, one row per attribute: what the screen calls it, our column,
+     theirs. The marker column carries which side actually has it. */
+  /* The column count comes from LAYERS, set on the element. */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.6rem repeat(3, minmax(7rem, 1fr));
+    font-size: 0.79rem;
+  }
+
+  .grid > .head {
+    position: sticky;
+    top: 0;
+    background: var(--raised);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0.5rem 0.5rem 0.4rem;
+    border-bottom: 1px solid var(--rule);
+    z-index: 2;
+  }
+
+  .grid > .head { color: var(--layer, var(--ink-faint)); }
+
+  .grid > .cell {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--rule-soft);
+    overflow-wrap: anywhere;
+  }
+
+  .grid > .cell.mark {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-align: center;
+    color: var(--ink-faint);
+    padding-left: 0.35rem;
+    padding-right: 0.15rem;
+  }
+
+  .grid > .cell.ui { color: var(--ink); }
+  .grid > .cell.col { font-family: var(--font-mono); font-size: 0.76rem; }
+  .grid > .cell.none { color: var(--ink-faint); font-family: var(--font-body); font-style: italic; }
+
+  /* ── a column, the way a schema browser shows one: name, keys, type ── */
+  .colline {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    line-height: 1.4;
+  }
+
+  .colline.also { margin-top: 0.15rem; }
+
+  .colline .cn {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+
+  .colline .ct {
+    margin-left: auto;
+    padding-left: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    padding: 0 0.22rem;
+    border-radius: 2px;
+    flex: none;
+  }
+
+  .badge.pk { background: var(--layer, var(--ink)); color: var(--raised); }
+  .badge.fk,
+  .badge.en {
+    color: var(--layer, var(--ink-soft));
+    border: 1px solid color-mix(in srgb, var(--layer, var(--ink-soft)) 45%, transparent);
+    background: color-mix(in srgb, var(--layer, var(--ink-soft)) 10%, transparent);
+  }
+  .badge.en { border-style: dashed; }
+
+  .cell .ref {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--ink-faint);
+    margin-top: 0.05rem;
+  }
+
+  /* Permitted values, shown rather than hidden behind a tooltip — an enum you
+     cannot read is the same as an undocumented one. */
+  .cell .values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem;
+    margin-top: 0.2rem;
+  }
+
+  .cell .val {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    line-height: 1.5;
+    padding: 0 0.25rem;
+    color: var(--ink-soft);
+    background: var(--sheet);
+    border: 1px solid var(--rule-soft);
+  }
+
+  /* A proposal's cells. "Not specified yet" is deliberately loud — it is a
+     different claim from "nothing", and the easiest one to mistake for it. */
+  .grid > .cell.d-added,
+  .grid > .cell.d-changed { color: var(--layer); }
+  .grid > .cell.d-same { color: var(--ink-faint); font-size: 0.72rem; }
+  .grid > .cell.d-tbd {
+    color: var(--alarm);
+    font-family: var(--font-body);
+    font-style: italic;
+    background: var(--alarm-fill);
+  }
+
+  .grid > .cell.note {
+    grid-column: 2 / -1;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    padding-top: 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .grid > .mark.r-aligned { color: var(--ink-faint); }
+  .grid > .mark.r-partial { color: var(--bridge); font-weight: 600; }
+  .grid > .mark.r-neither { color: var(--alarm); }
+
+  body.show-gaps .grid > .r-partial,
+  body.show-gaps .grid > .r-neither { background: var(--alarm-fill); }
+
+  .window footer {
+    border-top: 1px solid var(--rule);
+    padding: 0.6rem 0.9rem 0.7rem;
+  }
+
+  .window footer p { margin: 0; font-size: 0.78rem; color: var(--ink-soft); max-width: 88ch; }
+  .window footer p.gap { color: var(--alarm); margin-bottom: 0.35rem; }
+  .window footer p.house { color: var(--ink-faint); font-size: 0.72rem; margin-top: 0.35rem; }
+  .window footer p.proposal { color: var(--future); font-size: 0.8rem; margin-top: 0.45rem; }
+  .window footer p.proposal strong { font-weight: 600; }
+
+  .window .marks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    padding: 0.5rem 0.9rem 0;
+  }
+
+  .board-note {
+    border: 1px solid var(--ink);
+    border-top: 0;
+    background: var(--raised);
+    padding: 0.5rem 0.9rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+
+  /* ---------------------------------------------------------------- legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    margin-top: 1.3rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule-soft);
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+
+  .legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    width: 1.1rem;
+    text-align: center;
+    border: 1px solid currentColor;
+    flex: none;
+  }
+  .chip { color: var(--layer, var(--ink-faint)); }
+
+  .ladder { display: inline-flex; gap: 0.2rem; }
+  .ladder i { width: 0.55rem; height: 0.8rem; display: block; }
+
+  /* ---------------------------------------------------------------- notes */
+  .notes { margin-top: 2.2rem; display: grid; gap: 1.3rem; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+
+  .note-block h3 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    margin: 0 0 0.4rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .note-block ol, .note-block ul { margin: 0; padding-left: 1.15rem; font-size: 0.86rem; color: var(--ink-soft); }
+  .note-block li { margin-bottom: 0.35rem; }
+  .note-block li strong { color: var(--ink); font-weight: 600; }
+  code { font-family: var(--font-mono); font-size: 0.85em; overflow-wrap: anywhere; }
+
+  footer.stamp {
+    margin-top: 2.4rem;
+    padding-top: 0.9rem;
+    border-top: 2px solid var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+  }
+
+  /* The board swallows touch gestures, so on a phone it keeps to less of the
+     screen — otherwise there is nowhere left to scroll the page from. */
+  @media (max-width: 620px) {
+    .viewport { height: 58vh; }
+    .hint { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
