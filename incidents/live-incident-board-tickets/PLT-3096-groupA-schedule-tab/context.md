@@ -390,3 +390,37 @@ nothing; new Scenario 2 = collapse C and D *before* searching, both stay collaps
 Also today on this branch: `40ca4c412` js-yaml override bump (Trivy, see run-instructions 09-09),
 `502d3add4` two dead refs removed (Copilot). Head `0355a76b8`, Darminder re-requested. Both PRs were
 green on the js-yaml bump before this commit; CI on `0355a76b8` pending.
+
+### 2026-09-09 13:07 — APPROVED by Darminder. #2195 is green, clean and mergeable.
+
+*"Thanks for making those changes. Looks all good from my side. Approved!"* — DarminderA (collaborator),
+after re-testing the search scenarios on AMS CLONE -XV2. Head `a78241546`: `build` ✅, SonarCloud ✅
+(**0 new issues** — the long-standing unreadable "1 new issue" cleared when the reveal helper was
+deleted), Copilot ✅ no comments, `mergeable_state: clean`, not a draft. 3 reviewers still listed as
+requested (Tom, Rishi, Sergiusz) but Darminder is the ticket assignee and the one who tested.
+**Not merged from this session** — no instruction to merge, and merging is outside this routine's remit.
+
+Final shape of the fix, for the record: `wbs-open-state.ts` (capture/restore, 12 tests) +
+`useShowWBS.ts` snapshot on the way into the flat view; and in `use-apply-search-filter.tsx` a pure
+*removal* — `parentIdsToExpand`, the `gantt.open()` loop in `onDataRender`, and three never-read
+locals (`searchTextRef`, `showWBSRef`, `searchText`) all gone, nothing added. 341 additions / 25
+deletions across 6 files including the js-yaml bump.
+
+### Review-pass corrections that landed the same morning (all three were mine)
+
+1. **Formatting was verified with the wrong prettier major** (3.9.6 vs the repo's pinned 2.7.1). Two
+   test files were genuinely dirty — one per PR — fixed in `3fc14b318` (#2195) and `565d955f8` (#2194).
+   Full rule and the reason CI never caught it: `live-incident-run-instructions.md` 09-09.
+2. **The PR description asserted a "before" nobody observed** — the no-search double-collapse. Nothing
+   in the code reopens a row with no search active, and the 09-02 instrumented run recorded both rows
+   closing cleanly. That scenario is now a labelled regression check, and the PR states plainly that
+   the customer's ATL05 sequence has never been reproduced here.
+3. **The premise was an assumption until traced.** "The viewer tree loads fully open" is now verified
+   in the dhtmlx source (`$open` takes a data-supplied `open`; `open_tree_initially` only fills the
+   gap) *and* against the live `parse(12380, 12377 open:true)`. Two further facts verified the same
+   way: `onBeforeTaskDisplay` fires over `fullOrder` with no open-state gate (so the result count still
+   counts hidden matches) and `showTask()` only scrolls (so clearing a search cannot reopen anything).
+
+**Still unproven, deliberately left:** the stale `showWBS` closure in the search handler — see
+`live-incident-run-instructions.md` 09-09 § "Known, unproven, left alone". Behaviour is identical to
+master; Scenario 3 step 5 of the PR is the manual check that would expose it if real.
