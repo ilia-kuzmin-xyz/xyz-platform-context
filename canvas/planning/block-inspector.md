@@ -1,9 +1,12 @@
 # Block Inspector — per-block data lineage (PowerBI-style field well)
 
-> **Status: PLAN — agreed in principle 2026-09-09, no ticket yet.** Rename to
-> `PLT-XXXX-block-inspector.md` once the ticket exists.
-> Branch: `feature/canvas-block-inspector` (hc-frontend, cut from master 2026-09-09).
-> Prototype: Claude Design "Report Tool Prototype" (screenshot in the 09-09 session).
+> **Status: BUILT — draft PRs open 2026-09-10.** See the dated section at the
+> foot of this file for what shipped and where it differs from the plan below.
+> Ticket: **PLT-3117**. Branch `PLT-3117` on both repos.
+> - pipeline: XYZReality/XYZ_InfiniteCanvasAgentPipeline#17
+> - frontend: XYZReality/hc-frontend#2212
+>
+> Plan agreed 2026-09-09. Prototype: Claude Design "Report Tool Prototype".
 
 ## Problem
 
@@ -226,3 +229,84 @@ and TSX in agreement — measured, not assumed, on the check set.
 
 **Needs human:** visual before/after on the 10 prompts (I cannot judge layout regressions
 from a terminal); confirmation of the pipeline deploy status; the ticket.
+
+---
+
+## 2026-09-10 — what was actually built (PLT-3117)
+
+Both halves are on draft PRs: pipeline #17, frontend #2212. The plan above is
+unchanged in substance; this section records where the build differs from it
+and what was learned on the way.
+
+### Differences from the plan
+
+- **Multi-source blocks from the start.** `sources` is a list, not a single
+  `source`, and the composer prompt explicitly forbids flattening a mixed
+  panel (a verdict banner reading progress + issues + media) to make its entry
+  tidier. The plan flagged this as a risk to mitigate; it was cheaper to build
+  it in.
+- **Unresolved fields are kept, not dropped.** A declared field the catalogue
+  does not know becomes `unresolvedFields` on the entry and shows in the
+  sidebar as unverified. Dropping it would have hidden the interesting case —
+  a hydrator that gained a field the catalogue has not caught up with.
+- **Edit carry-forward** (not in the plan). An edit re-emits the whole page and
+  the composer sometimes describes only the panel it changed, which would blank
+  the inspector for the rest of the report. `carry_forward_blocks()` keeps prior
+  entries for ids still present as a `data-panel` in the new TSX; a freshly
+  declared entry always wins. Without it the feature would look broken in the
+  most common flow.
+- **The catalogue is session-scoped, not per report.** ~9KB of JSON; a session
+  holds many dashboards, and the vocabulary describes the project, not one
+  report. Saved once at the top of the session file.
+- **Entry point is a "Sources · N" button in the canvas bar** (as in the
+  prototype), where N is the count of distinct entities across the report's
+  bindings. It toggles inspect mode.
+- **Inspect is a separate picking mode** from panel editing — the two share the
+  overlay but are mutually exclusive, because one report cannot serve two
+  meanings of a click. Inspect does not dim the report and shows no comment
+  popover.
+
+### Two bugs the tests caught during the build
+
+- `get_template_artifact()` cached and returned the *same dict* every call.
+  Harmless while the payload was flat strings; with a nested `blocks` list a
+  caller could edit the manifest the next request would get. It now hands out
+  copies. The old test asserted identity (`is first`) — rewritten to assert
+  what actually matters, that the file is read once.
+- The frontend row-sorter put missing values **first** in descending order, so
+  a "worst first" list would have opened with the rows that have no value at
+  all. Blanks now sort last in both directions, and ordering comparisons
+  against a missing value are false as in SQL.
+
+### Verified numbers
+
+- Source list injected into the composer prompt: **3,780 chars (~945 tokens)**
+  of input for a project with every capability.
+- Catalogue JSON on `artifact_skeleton`: **8.9 KB**.
+- Pipeline suite: 342 pass. Canvas frontend suite: 187 pass.
+- `tsc --noEmit` adds no new errors (the three pre-existing CanvasBar
+  styled-system errors are unrelated).
+
+### Found on the way, deliberately not fixed here
+
+- **Repo ESLint cannot run in this checkout at all**: `eslint-plugin-sonarjs`
+  throws `TypeError: Cannot read properties of undefined (reading
+  'FunctionType')` at plugin load against ESLint 9.39.5, including on untouched
+  files. The pre-push lint gate is therefore not actually running for anyone in
+  this state. Worth its own ticket.
+- `tokens_css` is in the composer spec but never emitted over SSE, so the
+  sandbox always falls back to `FALLBACK_TOKENS_CSS` (`useCanvas.ts` reads
+  `a.tokens_css` and always gets `undefined`).
+- Dead read of a `viewerConfig` key at `server.py:1593` that
+  `parse_artifact_output` can never return.
+- `rooms` is missing from the `ProjectData` TypeScript contract in the composer
+  prompt — only the room-readiness template documents it.
+
+### Still open
+
+- The 10-prompt before/after check (layout regressions, and how often manifest
+  and TSX disagree) — needs a human with the UI.
+- Tweak/re-bind scope for phase 2.
+- Backfill for already-published reports: today they read "no data binding
+  declared".
+- Inspector on the dashboard-tab and library views.
