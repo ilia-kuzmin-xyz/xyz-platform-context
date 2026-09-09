@@ -102,3 +102,67 @@ fresh sample activity ID from Paddy. Mostafa — substantiate or rule out the Po
 **Also flag, not actioned:** the `not_testable` label was added 08-11 based on a staging repro
 attempt that predates this recurrence report — worth a second look by Radu/Gennaro given the
 customer says it's still happening, but that's their call, not this comment's.
+
+---
+
+## 2026-09-09 — ACTION CLASS 1 (stale, unresponded). Chase Yash for one activity code.
+
+**Supersedes the 08-26 three-question draft above as the thing to send — do not post that one.**
+It asked three questions of two people and was never sent in 14 days, which is the predictable fate
+of a three-question comment. Its content is still correct and is preserved above; the difference is
+that this one asks for a single value from a single person. The 08-26 draft's question 1 (was the
+gap ever restored?) is not asked here because `investigation-log.md § 2026-09-09` now answers it
+from our own records: there is no record it ever ran.
+
+**Class 1 — "stale, unresponded; it needs following up by a named person."** Not class 2: there is
+no code to write, the shipped fix was re-verified intact this run. Not class 3: nothing here is
+settled by looking at the app — the open question is about data and about what the customer said.
+Not class 4: there is no disagreement to convene a meeting over, just a question nobody has asked.
+
+**Who owes what:** Yash owes the ticket a note on what Paddy actually said when Freshdesk #7461
+reopened on 09-08 — he handled it in Freshdesk in 41 minutes and wrote nothing in Jira, so the
+customer's side of the last two weeks is invisible to us. Mostafa owes his 08-25 Power BI theory
+something checkable, or a withdrawal; it has stood unsupported for 15 days and is being used as an
+explanation. Ilia owes the data question below.
+
+**Assumption this draft rests on, stated here and not in the message:** that the July restore never
+ran, inferred from its absence in the ticket, in this folder and in the whole context repo, plus our
+own 07-28 "not started" note. If Ilia in fact ran it, the draft's premise is wrong and the fresh
+activity code becomes evidence of a *new* loss instead — the question still works, only the
+interpretation changes.
+
+### Draft — Jira comment on PLT-2918, to Yash Patel (author: Ilia) — **88 words**
+
+> Paddy has reopened this twice since the fix shipped and we still can't tell whether he's seeing
+> something new or the July losses, which I don't have a record of us ever restoring. One activity
+> code from this week's report settles it: if it's one that went missing in July there's nothing new
+> to fix and it just needs re-mapping, and if it isn't, we have a live bug to chase. **Can you get me
+> one activity code from Paddy that's showing the wrong WBS Location this week?**
+
+(88 words, 3 sentences, one bolded closed question. DRAFT ONLY — nothing was posted.)
+
+### What Ilia can do without waiting for anyone
+
+Re-run the 07-28 mapping census on AUS01 — project `fd0af178-a9a4-413a-ad77-537219715889`,
+categoryTypeId `8f6483fc-c737-474e-bdd3-680584e04414`, `GET /api/v2/projects/{id}/activities/mapping`.
+If the WBS Location count is still ~7,879 of 10,133, the hole has not moved since July and the
+restore certainly never ran; if it has grown, something is still deleting and that is a new
+incident. This needs no customer, no Yash and no Mostafa, and it is the single cheapest thing
+outstanding on this ticket.
+
+### Board move to propose (do not perform)
+
+Leave it `Open` — it genuinely is on us. **Do not let it go `Done`:** an "Automation for Jira" rule
+mirrors Freshdesk state onto this ticket's status and already moved it to `Done` once, on 09-04, for
+71 seconds, purely because the customer closed #7461. Details and the changelog ids are in
+`context.md § 2026-09-09`. If it needs a status at all, `With Technical Support` is defensible once
+the draft above is sent, since the next input genuinely comes from the customer via Yash — but only
+after it is sent, not instead of sending it.
+
+### Flag for a human, prominently
+
+This is assigned to Ilia, has had **no human comment for 15 days**, the customer has reopened twice
+in that window, and our own records say the data was never repaired. The code fix shipped in 26.3.4
+on 08-17 was for the mechanism; nobody put the ~2,254 missing AUS01 WBS Locations back. Until that
+is either done or ruled out, every reply to Paddy risks being the fourth one that does not change
+what he sees on Monday.

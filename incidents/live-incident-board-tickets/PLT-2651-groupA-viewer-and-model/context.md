@@ -798,3 +798,147 @@ neither is a failure of the test.
 ### Workaround unchanged, still valid today
 
 Load the main/federated model before switching the section box on (verified 09-08, case 2).
+
+---
+
+## 2026-09-09 — the plan was POSTED and the ticket moved to the customer. And the lever it names does not exist in the Web Editor.
+
+**What is new since the 09-08 entries above.** The 09-08 (later) entry recorded Ilia's *decision*
+to ask the ATL08 customer to set true north; Jira now shows it was carried out the same afternoon,
+plus three things that entry could not have recorded. Nothing at all has happened since
+**2026-09-08 14:29** (`updated` = that timestamp), so the ticket is one day into the customer's court.
+
+| when (09-08) | id | what |
+|---|---|---|
+| 13:34 | 111640 | Yash: Freshdesk 6294 → **Waiting on customer** |
+| 14:04 (edited 14:05) | **111642** | **Ilia, posted:** *"the section box takes its angle from whichever model loads first: main model first is fine, PC-Excel first isn't. The viewer works out the angle once from that first model's shape and keeps it. Same issue as HoloSite, so the client should set the project's true north - ATL08 is at 0, should be about 17° (If I get it right). Then we'll see how the box changes and whether models need re-uploading."* |
+| 14:07 | 111643 | **Darminder:** *"this ticket requires the same update as mentioned in the connecting Holosite ticket HS-407 comment 111637"* |
+| 14:29 | 111646 | Yash: *"Thanks for looking into it."* |
+
+Also changed, and not recorded anywhere in this folder before:
+
+- **Status: Dev In Progress → `With Customer`.**
+- **Assignee: Ilia Kuzmin → Yash Patel.** Every prior entry here says "assigned to Ilia"; that is now
+  stale. It stays Group A on the second clause (most recent substantive comment is ours, and the
+  ticket is ours to answer once the customer reports back), not on the assignee clause.
+- **New issue link:** `is connected to` **HS-407** *"Section box misalignment in ATOM HH"* (Live
+  Incident, Major, With Customer). Only `relates to PLT-2756` was recorded before.
+
+### HS-407 read in full for the first time. It carries the product decision this ticket now depends on.
+
+HS-407 is the *same customer, same project* (`SWITCH - ATL08 -xv2`) reporting the box misaligned in
+the **ATOM headset**, opened 2026-06-16 — i.e. three weeks after our May fix, by the same site team.
+It has never been read into this repo. The load-bearing comments:
+
+- **Thomas Masdin, 06-16 (105107):** ATOM only ever supported a section box AABB-aligned to **true
+  north**; project-north support *"would require us adding rotational support to the section box"* —
+  a feature request, not a bug.
+- **The customer's own reason for using project north (105920, 06-26, repeated 09-07 in 111412):**
+  *"when we requested the section box to be fixed in the web viewer I believe the only way for us to
+  have a straight section box was to align with the project. The fix wasn't explained to us other
+  than the fact that it was recommended."* **Our May workaround is why they are on project north.**
+- **Escalation, 09-04 (111303):** *"This is still an issue on our site, and it makes it very
+  difficult to conduct accurate QA inspections. Asking to flag this issue as **urgent**."*
+- **Thomas, 09-07 (111413):** *"Web Viewer shouldn't have 'fixed' this issue and instead advised to
+  move to True north if possible."*
+- **Darminder, 09-08 13:17 (111637)** — the comment 111643 points PLT-2651 at: *"have confirmed with
+  Pietro, Ali, Mostafa, Thomas this is not a change expected on Holosite side. What is expected is
+  the user to follow the workflows and the user should resolve this issue with the model orientation
+  themselves. It has been suggested this is something for BIM manager to resolve and that would be
+  Mikel. **The change on Web editor was done as it was thought to be a bug at the time it was
+  raised.**"*
+
+So the org position, agreed across five people, is now: **`SectionToolOrientation` should not have
+existed; the customer fixes model orientation at source.** That is a bigger decision than PLT-2651
+and it is the reason this ticket is no longer a "write the two-part fix" job.
+
+### ⚠️ VERIFIED, and it contradicts the 09-08 (later) table: true north does NOT rotate models in the Web Editor. The code is commented out.
+
+The 09-08 table row said project `angleToTrueNorth` *"rotates the **model placement** in the browser
+at load — `ViewerPage/utils/helpers.ts:242` (`applyBasePointTransform`)"*. The function does exactly
+that — **but nothing calls it.** Its only call site is inside a comment block:
+
+```ts
+// viewer-service.ts:974-983  (identical on origin/master:974)
+/* Using endpoint for project base point turned off due to bug with misalignment of models
+// Apply base point transformation using project survey data
+const projectDetails = this._projectService.getProjectDetails()
+const transformApplied = await applyBasePointTransform(modelData, projectDetails.survey)
+...
+*/
+```
+
+- `applyBasePointTransform` is defined at `ViewerPage/utils/helpers.ts:187-274` and is the **only**
+  caller of `setPlacementTransform` in the app (`:270`); a repo-wide grep for both symbols returns
+  exactly two hits, `viewer-service.ts:977` (commented) and `helpers.ts:270`. Dead path.
+- Blame puts the comment at or before **2026-08-13** (`^b700eb3`, the boundary commit of this shallow
+  clone) — so it predates the reopening on 08-28 and is not a recent change.
+- The **only** live use of `angleToTrueNorth` in the viewer is `ProjectBasePointCache.ts:49`
+  (`rotMatrix.makeRotationZ(-angle)`), consumed by the PBP/pinpoint coordinate services
+  (`project-service.ts:1007-1040`, `dashboard-pinpoint-base-service.ts:106`). It converts
+  coordinates; it never places a model and never reaches the section tool.
+
+**Consequence for the posted plan:** setting ATL08's project true north to ~17° will change **nothing
+in the Web Editor** — not the model placement, not `refPointTransform`, not the gate, not the box.
+The 09-08 prediction said *"net effect on the box: uncertain, possibly worse"* because it assumed the
+models would rotate. They will not. The prediction is now sharper: **no change whatsoever in the Web
+Editor.** (It may still change the ATOM, which is a separate implementation reading true north —
+Thomas, HS-407 105107. So the setting may fix HS-407 while leaving PLT-2651 exactly as it is today.)
+
+*Standing caveat from the 09-04 lesson: the repo is not the deployed bundle. One console line settles
+it on prod, alongside the existing cookie recipe —
+`window.projectService.viewerService.viewer.getVisibleModels()[0].getPlacementTransform()`. Null or
+identity ⇒ no true-north rotation is being applied, as the source says.*
+
+### VERIFIED: every Web-Editor upload tells the backend to IGNORE the project's true north
+
+`ignoreTrueNorthAngle: true` is **hard-coded** on both upload paths —
+`store/slices/projectModels/projectModelsActions.ts:63` (upload) and `:185` (retry). No FE surface
+sets it to `false`; there is no toggle. Downstream it is real, not decorative: platform-api persists
+it on the model user-file row (`XYZPlatformApi/src/services/userfiles.service.ts:194, 229, 246`),
+validates it (`projects.validator.ts:226-233`) and returns it
+(`models.version.service.ts:38, 86`). What DPL then does with it is **outside both repos** — that is
+the one unverified link.
+
+**INFERRED (needs Ali):** if DPL honours the flag as its name says, then re-uploading through the Web
+Editor after the settings change also produces a model with no project rotation baked in — so the
+second half of the posted plan (*"whether models need re-uploading"*) does not work either, and the
+real ask is a **Revit re-export with correct shared coordinates**, not a re-upload of the same file.
+
+### VERIFIED: the "fix at source" route genuinely works — and it hangs on refPointTransform, not on the setting
+
+`shouldApplyOrientationPatch` (`section-tool-orientation-math.ts:145-155`) returns **false** as soon
+as `|angleFromNearestAxis(existingRotZ)| >= 0.5°`. `existingRotZ` is read from the model's
+`refPointTransform` (`section-tool-orientation.ts:95-102`). So the moment models arrive carrying the
+building's real rotation in their shared-coordinate transform, **our guess switches itself off** and
+Forge's own transform orients the box — exactly the outcome Darminder, Thomas and Rishi are asking
+for, and it needs no code change from us.
+
+**The whole point of this entry:** the direction is right, the lever named in the posted comment is
+the wrong one. The lever for the Web Editor is the **model's shared-coordinate rotation** (set in
+Revit, carried through ingest), not the project's true-north field.
+
+### Killed / do-not-retry, added this pass
+
+- **"Set the project's true north and the Web Editor box will change."** Dead — no code path applies
+  the project angle to a loaded model (`viewer-service.ts:974-983` commented out). Do not re-derive
+  this from `helpers.ts:242`; read the call site.
+- **"Re-upload the same model through the Web Editor and it will come back rotated."** Not dead but
+  unlikely, and not ours to assert — `ignoreTrueNorthAngle: true` is hard-coded on the upload
+  (`projectModelsActions.ts:63, 185`). Ask Ali before telling the customer to re-upload anything.
+
+### Lesson for this repo's own notes
+
+The 09-08 table stated live behaviour from a function body without checking whether the function is
+called. **Before citing a function as behaviour, grep for its call site** — a commented-out call site
+is invisible when you read the function. Same family as the 09-03 denominator rule and the 09-08
+memoisation rule; recorded in `live-incident-run-instructions.md`.
+
+### Still open (unchanged unless noted)
+
+- The two-part code fix (all-visible-models footprint, memo invalidation) remains named and unwritten
+  — and is now **contingent on the product decision in HS-407 111637**, which points the other way.
+- `typeof …viewer.get3DModels` (V4/H3) — still unanswered, still low priority.
+- Blast radius of retiring the guess: how many projects currently rely on it (true north 0 + tilted
+  building). **Still not counted** — needs an authenticated read this automated session does not have.
+- Attachment 63521 still unopened (403); no longer decisive, the mechanism is measured.

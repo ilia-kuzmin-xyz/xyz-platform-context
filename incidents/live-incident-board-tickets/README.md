@@ -1031,6 +1031,13 @@ de-dup FE fix flagged as shippable independent of the labelling decision. `updat
 08-25 09:53. Full detail: `PLT-2874-groupA-viewer-and-model/context.md` + `recommended-action.md`
 § 2026-08-28.
 
+> **⚠️ Superseded 2026-09-09 — do not reuse the figures in the paragraph above.** The de-dup fix was
+> already shipped (PR #2084, 31 July), and the 08-27 reproduction modelled the dashboard tile with the
+> wrong predicate, so `851,409` and the `−82,404` population term are both invalid. On Prod the two
+> surfaces agree to ~0.5%, measured twice. The decision-request draft to Mostafa/Pietro is **retracted
+> and must not be posted**; the open item is Gennaro's Staging undercount. See
+> `PLT-2874-groupA-viewer-and-model/investigation-log.md` § 2026-09-09.
+
 ### PLT-3061 and PLT-2858 — no change (handled earlier today, restated here for the board record)
 
 - **PLT-3061** — no change since 08-27 (Josh, the cost manager who owes the 8 rework-cost values, is

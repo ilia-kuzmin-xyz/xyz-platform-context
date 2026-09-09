@@ -1,5 +1,27 @@
 # PLT-2874 — both counters reproduced from live prod, 2026-08-27
 
+> ## ⚠️ 2026-09-09 — § B and § C are WRONG about the dashboard. Do not quote 851,409 or −82,404.
+>
+> The dashboard counter here was reproduced as `svf2 map ⋈ element_status`. That is **not** the
+> tile's predicate. Two errors, both verified in code on 2026-09-09:
+>
+> 1. **851,409 was never on screen.** The tile has reported distinct `modelElementId`, not dbIds,
+>    since PR #2084 merged on **31 July** — four weeks before this measurement was taken.
+> 2. **797,527 is not it either.** The tile counts rows of `_visible_elements`, whose status CASE
+>    assigns codes 0/3/4 **from the schedule dates with no `element_status` row required**. Its
+>    population is roughly *(linked to a dated activity) ∪ (marked installed)*, not *(has a status
+>    row)*. So the −82,404 "population difference" in § C is an artefact of the join used here.
+>
+> Two independent live readings of the same screen, both post-#2084, contradict this file and were
+> overlooked when it was written: **07-31 in-browser** editor 606,524 / tile 609,643 (+0.5%), and
+> **08-12 Gennaro on Prod** editor 603,844 / tile ~604,000 (~0.03%).
+>
+> **§ A (the editor counter, 879,931), the 1:1 checks, the 1.97× project-wide PEL inflation and the
+> "ten defensible answers" table are unaffected** — they concern `project_element_list` /
+> `activity_links` and stand as measured. Full working, and what it changes:
+> `investigation-log.md` § 2026-09-09; revised action: `recommended-action.md` § 2026-09-09.
+> No corrected absolute number is offered, deliberately — the query has not been re-run.
+
 First time either number has been **measured** rather than reasoned about. Project **FAR01**
 (`b28712bb-0691-4db2-a626-85c2f1f5ead6`), federated model `APLD-FAR01-260813`
 (`20cff6cf-659f-4eb6-b0d5-ae181080afa1`). Read-only throughout.

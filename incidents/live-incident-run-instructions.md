@@ -587,3 +587,67 @@ failed review on a claim the author made up.
    `render()`, so the flag fired on the user's next click. If a fix depends on "X fires after Y",
    find where X is fired in the library source (a public tarball of the same major is enough) or
    make the logic explicit so the ordering no longer matters. The second was the right answer here.
+
+## 2026-09-09 — Before citing a function as behaviour, grep for its CALL SITE
+
+**PLT-2651 again.** The 09-08 pass wrote a table row stating that a project's true-north angle
+*"rotates the model placement in the browser at load — `ViewerPage/utils/helpers.ts:242`"*, read
+straight out of the function body. The function does do that. **Nothing calls it:** its only call
+site is inside a `/* ... */` block (`viewer-service.ts:974-983`, *"turned off due to bug with
+misalignment of models"*), on `master`, for at least a month. On that row rested a prediction about
+what the customer's test would show, and — through the posted comment 111642 — an instruction the
+customer is now acting on.
+
+A commented-out, feature-flagged-off, or simply orphaned call site is **invisible when you read the
+callee**. Reading a function tells you what it would do, not what the app does.
+
+### Rules
+
+1. **Every behavioural claim needs its call site, not just its definition.** `grep -rn 'fnName('`
+   and check that at least one hit is live code. Cite the call site's `file:line` alongside the
+   definition's — a claim citing only a definition is unfinished.
+2. **A definition with zero live callers is a finding**, often a better one than the behaviour you
+   went looking for. Say so explicitly rather than quietly dropping the row.
+3. **Same check for the flag and the branch:** a live call site behind a flag that is off, or behind
+   an `if` that is never true, is the same defect wearing different clothes.
+4. Sibling of the 09-03 denominator rule and the 09-08 memoisation rule: all three are one habit —
+   **check that the thing you are about to reason from is actually in force.**
+
+## 2026-09-09 — Reproducing a surface's number means reproducing its **predicate**, not just its join
+
+A sibling of the denominator rule, and it cost PLT-2874 twelve days of recommending an unsafe
+message. The 08-27 run reached live prod, queried the real artefacts, and reproduced the dashboard's
+element tile as `svf2 map ⋈ element_status`. Careful work, wrong target:
+
+- The tile had stopped counting dbIds **four weeks earlier** (PR #2084, merged 31 July). The
+  measurement modelled the pre-fix formula and captioned it *"the number the overlay's Total shows"*.
+- The tile's real filter is a status CASE that assigns most of its codes **from schedule dates, with
+  no status row required at all**. So "elements carrying an `element_status` row" was never the
+  population, and the headline "82,404 elements exist on one side and not the other" was a property
+  of the chosen join, not of the two surfaces.
+
+That reconstruction then became a decision request to two product owners, recommending a relabelling
+to close a gap the app does not exhibit. It sat drafted for twelve days and was re-endorsed by three
+consecutive runs without anyone re-reading the code path.
+
+**The rules:**
+
+1. **Before reproducing a number from artefacts, read the code that produces it *today*, and date
+   that read against the last release that touched it.** A measurement of prod data is not a
+   measurement of prod behaviour.
+2. **Copy the WHERE clause, not only the FROM clause.** A join reproduces which rows *exist*; the
+   predicate decides which rows *count*. Most surfaces in this codebase differ from each other in the
+   predicate.
+3. **If a reconstruction disagrees with a live reading of the same screen, the reconstruction is
+   wrong.** PLT-2874 had two — an in-browser reading on 07-31 and QA's own Prod figure on 08-12 —
+   both already in the ticket folder, both agreeing with each other to 0.5%, both contradicting the
+   reconstruction by 9%. Neither was checked against it. **Grep the folder for the number you just
+   produced before you build a message on it.**
+4. **When you correct a number, do not immediately supply a replacement you have not measured.** A
+   second guessed figure is the same error with a fresh coat. Say what is wrong, say what it would
+   take to measure, and leave the slot empty.
+
+**And a process point, because this is what let it stand:** a draft carried forward unchanged across
+runs stops being re-examined. Each pass reported it as "ready, just needs sending", which reads as
+progress. **A draft that has gone unsent for more than a week should be re-validated against code
+before it is re-recommended, not just re-counted in days.**

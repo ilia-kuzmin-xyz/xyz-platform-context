@@ -430,3 +430,83 @@ supersedes are **17 days** unposted (first drafted 08-14). Ranked against the re
 board this run, PLT-2651 (Critical, 117 days, customer waiting since 06-03) now sits above it, but
 PLT-2874 is the cheaper of the two to clear — it is one paste and one small PR, with no further
 investigation of any kind required.
+
+---
+
+## 2026-09-09 — ⛔ RETRACTS the 08-28 draft to Mostafa and Pietro. Chase Gennaro on Staging instead.
+
+**Action class: 1 — stale, unresponded.** The only open fault is Gennaro's Staging undercount from
+08-12; nobody owes us a reply because the question was never sent. The chase is drafted below.
+(It is **not** class 4 any more: the 08-24 "needs a team discussion" and the 08-28 product decision
+request both rested on a residual gap that does not exist on Prod — see `investigation-log.md`
+§ 2026-09-09.)
+
+### Do not post the 08-28 comment
+
+`recommended-action.md` § 2026-08-28 → "Draft comment to Mostafa and Pietro" has been the folder's
+sole recommended action for 12 days. **It must not be sent.** Two independent reasons, either one
+sufficient:
+
+1. **Its numbers are wrong for the deployed code.** It tells product *"the dashboard's Total shows
+   851,409"*. The tile has reported distinct elements, not dbIds, since PR #2084 merged on 31 July —
+   four weeks before the measurement it quotes. The 08-27 reproduction also modelled the tile's
+   population as "has an `element_status` row", which is not what the status CASE selects. Full code
+   trace in `investigation-log.md` § 2026-09-09.
+2. **It breaks the standing SHORT rule outright.** 233 words against a 100-word hard cap, four
+   paragraphs, question not bolded, no word count printed. The rule was added on 08-27, one day
+   before this draft was written.
+
+The second reason alone would only need a rewrite. The first means there is nothing to ask product:
+on Prod the two surfaces already agree to ~0.5% (07-31 in-browser) and ~0.03% (Gennaro, Prod,
+08-12). **A relabelling decision was being escalated on a gap that the app does not exhibit.**
+
+The 08-28 entry is left in place per this repo's additive rule — it is superseded, not deleted.
+
+### Draft — to Gennaro Boccia — DRAFT ONLY, NOT POSTED (81 words)
+
+> Gennaro, back to the Staging mismatch you reported on 12 August. On Prod the editor and the
+> dashboard now agree to within half a percent, so the Staging gap looks like that environment's own
+> data rather than the code. The editor figure you quoted doesn't match anything we have recorded for
+> FAR01, so I can't rule out that Staging was simply loading a different federated file, which would
+> account for the whole difference on its own. **Which project were you on?**
+
+*One owner, one question, answerable with a single value. The date-slider screenshot ask and the
+three-query ladder are deliberately held back — sending them together buries the cheap question,
+which is the same reason the 08-14 pass gave and it still holds. Assumption behind the draft, stated
+here and not in the message: that Gennaro's 603,844 was not FAR01 (it matches none of this folder's
+FAR01 figures). If he answers "FAR01", H6 is dead on magnitude and the ladder becomes the next step.*
+
+### Do not send the Darminder draft either, as worded
+
+The 08-20/08-24 line asks *"where does the fix live"*. That question is now answered well enough
+from here: the fix is PR #2084, it merged on 31 July, it is on Prod, and it works. Asking again
+reads as a nudge rather than a question. If anything goes to Darminder it should be about Staging
+specifically, and it can wait until Gennaro names the project.
+
+### Follow-through, unchanged
+
+- H1/H3/H4/H5/H6 are untouched by this correction and remain the candidate set for the Staging
+  undercount (`context.md` § "Reopened 2026-08-13", § 2026-08-14).
+- The standing hardening item still stands: `element-count.ts:14-19` drops rows with a falsy
+  `modelElementId` in silence and only falls back to the object count when the set is *entirely*
+  empty (H5). Worth doing whichever hypothesis turns out to be the trigger — and note it is the one
+  hypothesis that would survive a Staging data refresh.
+- The diagnostic branch `PLT-2874-dashboard-element-count-diagnostics` still has never been raised
+  as a PR and is still not on Staging. It remains the move that answers H1/H3/H4 without anyone
+  running a query.
+- **Do not close the ticket on the Prod behaviour alone.** Prod matching was already true on 07-31
+  and QA reopened it anyway, on Staging. Closing now repeats the 08-13 mistake.
+
+### Needs a human
+
+- **Re-measure the dashboard counter on FAR01 with the status CASE applied** (or simply read the
+  Total tile and the editor's Linked figure on FAR01 and compare). This session cannot: the 08-27
+  prod route needs per-session credentials that are not available here, and no prod MCP tool is
+  exposed to this routine. Until then no corrected absolute number is quoted anywhere in this folder,
+  by choice.
+
+**Confidence:** 9/10 that the 08-28 draft is unsafe to send (code-verified, and corroborated by two
+independent live readings). **6/10 unchanged** on the Staging undercount — five hypotheses, none
+excluded, all still needing environment state.
+
+**No Jira action was taken by this run.**

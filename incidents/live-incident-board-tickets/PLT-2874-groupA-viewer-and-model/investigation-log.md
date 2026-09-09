@@ -328,3 +328,117 @@ the posted draft may use those numbers. The chain from parquet to pixel is close
   `httpfs`. Reconstructing `element_base_data` from parquet needs only `svf2-object-id-map` and
   `element-status` — the activity joins cannot change the row count because the GROUP BY key
   holds no activity column.
+
+---
+
+## 2026-09-09 — ⚠️ CORRECTION: the 08-27 prod measurement reproduced the dashboard tile with the WRONG predicate. The 08-28 draft to product must not be sent.
+
+Scheduled sweep. Jira re-fetched: status **In Analysis**, `updated = 2026-08-25T09:53:57+0100`,
+6 comments, newest still Darminder's 08-17 14:01 — byte-identical to the 09-07 and 09-08
+snapshots. GitHub re-checked (`search_pull_requests query:"PLT-2874 in:title,body"` against
+`hc-frontend`): still exactly one result, PR #2084, merged 2026-07-31. **23 days with no movement.**
+
+Nothing was re-derived from the Jira side. What follows came from checking the *only remaining
+action item* — the decision-request comment to Mostafa and Pietro — against current code before
+recommending a fourth run in a row that it be posted.
+
+### The finding
+
+`prod-measured-2026-08-27.md` § B reproduces the dashboard counter as
+`federation's svf2 map ⋈ element_status`, and states at line 98 that its **851,409** dbId entries
+are *"the number the overlay's Total shows"*, with **797,527** distinct elements behind them. Both
+figures model the wrong thing, for two independent reasons.
+
+**(1) The tile has not reported dbIds since 31 July.** PR #2084 shipped four weeks *before* that
+measurement was taken. VERIFIED end to end on current `master`
+(`hc-frontend` @ `00be0c1`, 2026-09-08):
+
+```
+dashboard-element-stats.tsx:41,49   Total: displayTotal = stats.visible  (from visibleElements$)
+dashboard-color-service.ts:700,703  elementCount = countDistinctElements(elementsWithStatus, …)
+dashboard-color-service.ts:876,879  same, on the reApplyColors path
+element-count.ts:10-20              Set of modelElementId; objectCount only as fallback
+```
+
+`setVisibleElements` has no other non-zero caller anywhere in `app/` (grep: `:131 :421 :560 :703
+:817 :879`, all either `0` or `elementCount`). `getColorStats()` at
+`dashboard-color-service.ts:932` does still return `total: this.coloredDbIds.length`, but it has
+**zero callers** — dead code, reaches no surface. So **851,409 is not, and cannot be, the on-screen
+number.**
+
+**(2) More importantly, 797,527 is not it either — "carrying an `element_status` row" is not the
+tile's population.** The tile counts distinct `modelElementId` in `_visible_elements`, which is
+built at `dashboard-progress-service.ts:2100-2125` as
+
+```sql
+SELECT DISTINCT objectId, modelElementId, status_code
+FROM (SELECT DISTINCT …, <status CASE> AS status_code FROM element_base_data base …)
+WHERE status_code IN (…) AND status_code IS NOT NULL
+```
+
+and `buildInstallationStatusCaseSql` (`utils/installation-status-sql.ts`) assigns a status code
+**from the schedule dates, with no `element_status` row required**:
+
+| branch | condition | needs a status row? |
+|---|---|---|
+| 1 Installed Early / 2 Installed | `installationStatus = 'INSTALLED_ACCURATELY'` | yes |
+| 4 Late | `endDate < refDate` | **no** |
+| 3 Late Start | `startDate < refDate` | **no** |
+| 0 Planned | `startDate IS NOT NULL OR endDate IS NOT NULL` | **no** |
+| NULL — excluded | neither date, not installed | — |
+
+Its own comment on the ELSE branch says it: *"Not Planned: not linked to any schedule — excluded
+from coloring."* `startDate`/`endDate` reach `element_base_data` from the LEFT JOIN through
+`activity_links` → `api_activities` (`:2581`).
+
+**So the tile's population is roughly (linked to a *dated* activity) ∪ (marked installed), not
+(has an element_status row).** The 168,529 elements the 08-27 pass classified as "linked but NO
+status" mostly land in buckets 0/3/4 and **are counted by the tile**; part of the 86,052 "status
+but not linked" are counted too, via branch 2. The −82,404 "population difference" that is the
+entire spine of the 08-28 draft is therefore an artefact of the join chosen for the reproduction,
+not a property of the two surfaces.
+
+### Two independent field readings already corroborated this, and were overlooked
+
+Per the standing rule that a number acted on gets a second source — this correction has two, both
+already in this folder, both taken *after* PR #2084 merged:
+
+| when | source | editor | dashboard tile | gap |
+|---|---|---|---|---|
+| 07-31 | in-browser, FAR01 model `20cff6cf`, full range (this file, § 2026-07-31) | 606,524 | **609,643** | +0.5% |
+| 08-12 | Gennaro, QA, **Prod** rewind (comment 109457) | 603,844 | ~604,000 | ~0.03% |
+
+Both put the post-fix tile **at or slightly above** the editor's linked count. The 08-27 model puts
+it 9.4% below. When an artefact reconstruction contradicts two independent live readings of the
+same screen, the reconstruction is what is wrong.
+
+### What this changes
+
+- **The 08-28 decision request to Mostafa and Pietro is retracted, not merely unsent.** Its
+  headline numbers are wrong for the deployed code, and its central claim — *"even after
+  de-duplicating there's still an ~80,000 gap between them and it isn't going away"* — is
+  contradicted by the app's own measured behaviour on Prod. Do not post it. See
+  `recommended-action.md` § 2026-09-09.
+- **The 08-24 "this needs a team discussion" reframe loses its premise too.** The labelling question
+  was raised because a large residual was thought to survive de-duplication. On Prod it does not.
+- **On Prod, the ticket's original symptom is fixed and the two surfaces agree to ~0.5%.** That was
+  already true on 07-31 and confirmed by QA on 08-12.
+- **The only genuinely open fault on this ticket is Gennaro's Staging undercount** (551,386 against
+  an editor 603,844, 08-12) — never explained, never chased, now 28 days old. H1/H3/H4/H5/H6
+  (`context.md` § "Reopened 2026-08-13" and § 2026-08-14) still stand untouched and still
+  undiscriminated; nothing above bears on them.
+
+### VERIFIED vs INFERRED
+
+**VERIFIED** (code read this run, cited above): the tile reports distinct `modelElementId`;
+`getColorStats` is dead; `_visible_elements` filters on a date-derived status CASE that does not
+require an `element_status` row; the 07-31 and 08-12 readings are as recorded.
+
+**INFERRED, not measured:** the tile's *actual* FAR01 figure as of 08-27. It is above 797,527 and
+the 07-31/08-12 readings suggest it tracks the editor within ~1%, but the artefact query was not
+re-run with the status CASE applied, so no corrected absolute number is offered here. Deliberately:
+substituting a second guessed number for the first would repeat the error.
+
+**Could not re-measure this session.** The 08-27 run reached prod through the MCP recipe in
+`incidents/prod-mcp-access.md`, which needs credentials supplied per session; none are available
+here, and no prod MCP tool is exposed to this routine. Re-running it is a human step.

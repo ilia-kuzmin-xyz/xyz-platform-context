@@ -225,3 +225,72 @@ is still the last substantive technical word; nothing from Yash or the customer 
 three-hypothesis split is still undistinguished against data. **10 days** since the reopen with
 no human follow-up — worth a nudge to Yash next time a human is driving this queue, same shape as
 the PLT-2890/PLT-3101 "can we close this" pattern, but not re-derived or drafted this run.
+
+## 2026-09-09 — REAL CHANGE: Freshdesk #7461 reopened again (09-08), Jira auto-transitioned back to `Open`
+
+First substantive board movement since 08-25. The 09-08 entry above recorded "15 comments, newest
+111297, no new activity since 09-07" — that pass ran **before** 15:54 on 09-08, so it missed the
+whole cycle below. Delta confirmed against a live `getJiraIssue` + changelog fetch this run.
+
+**What is new (all 2026-09-08, all verified from the changelog / comment list):**
+
+| time (BST) | actor | event |
+|---|---|---|
+| 15:54:34 | Yash's Freshdesk integration | comment **111655** — "Ticket ID: 7461 - Freshdesk ticket status changed to : **Open**" |
+| 15:54:36 | **Automation for Jira** (bot) | status **`With Customer` → `Open`** (changelog `1530999`) |
+| 16:35:59 | Yash's Freshdesk integration | comment **111659** — "Freshdesk ticket status changed to : **Waiting on customer**" |
+
+So: the customer reopened #7461, an automation rule mirrored that onto the Jira status, Yash dealt
+with it in Freshdesk within ~41 minutes and put it back on the customer — and **wrote nothing in
+Jira about what Paddy actually said.** Comment count 15 → 17; both new comments are automation
+echoes with no free text.
+
+**Ticket now:** status **`Open`** (not `With Customer` — this is the reason the board picked it up
+in Group A today), priority Major, assignee **Ilia**, labels `[not_testable]`, fixVersion 26.3.4,
+17 comments, `updated` 2026-09-08T16:35:59+0100.
+
+### The durable board mechanic this exposed — worth knowing before anyone trusts this ticket's status
+
+The Jira status on this ticket is **driven by Freshdesk state via an "Automation for Jira" rule**,
+not by a human's judgement. From the changelog:
+
+- 2026-08-25 15:20:48 — bot moved `Customer Release Check` → `Open` (on Freshdesk "Open")
+- 2026-09-04 15:19:19 — bot moved `With Customer` → **`Done`** (on Freshdesk "Closed")
+- 2026-09-04 15:20:30 — Yash manually put it back `Done` → `With Customer`, **71 seconds later**
+- 2026-09-08 15:54:36 — bot moved `With Customer` → `Open` (on Freshdesk "Open")
+
+**⚠️ This ticket can silently self-close.** On 09-04 it *was* `Done` for 71 seconds purely because
+the customer's Freshdesk ticket was closed — no root cause, no cohort sweep, nothing. Only Yash
+noticing stopped it. That is exactly the playbook's "remission, not resolution" failure with a bot
+driving it. Do not read `Done` on this key as a resolution, and do not read a status change here as
+a human decision at all without checking the changelog author.
+
+### Human silence is now the headline fact
+
+**No human has commented on this Jira ticket since 2026-08-25** (Mostafa's 110385, the one-line
+Power BI redirect). That is **15 days**. In that window the customer has reopened Freshdesk **twice**
+(08-25, 09-08) and it was closed once (09-04). The three-question draft prepared on 08-26 was never
+posted (14 days). Nobody owes anybody a reply *inside Jira* because the whole exchange is happening
+in Freshdesk where none of us can see it.
+
+### What did NOT change
+
+- No new technical information, no new hypothesis, no new attachment since 63303 (08-25).
+- The three-hypothesis split — (a) residual code gap on some other edit path, (b) the July gap was
+  never backfilled, (c) Mostafa's Power BI export-side theory — is **still undistinguished against
+  data**. Nothing was re-derived this run.
+- The shipped fix was re-verified present, unchanged, this run — see `investigation-log.md`
+  § 2026-09-09.
+
+### Unopenable media (per run-instructions 2026-09-08: attachment *content* is a hard 403 here, do not retry)
+
+- **`Screenshot 2026-08-25 200515.png`, attachment id `63303`**, 10,669 bytes, added by Yash
+  2026-08-25 15:38 alongside comment 110374. It is the screenshot of Paddy's **Teams message**.
+  **What it would settle:** Paddy's exact words behind "This is still an issue weekly for me" —
+  specifically whether he means *fresh* losses appearing each week, or the same July holes he keeps
+  re-encountering when he runs the weekly report. That single distinction separates hypothesis (a)
+  from hypothesis (b) and is currently the cheapest available discriminator we are not using.
+- The four original 07-21 screenshots (`61116`, `61117`, `61118`, `61119`) — the last-week export vs
+  web-viewer comparison. Historic; superseded in value by the live data census Ilia ran on 07-22.
+- **Nothing on the 09-08 reopen is attached at all** — whatever Paddy said on 09-08 exists only in
+  Freshdesk #7461 and is invisible from Jira. That is the real gap this run could not close.

@@ -58,3 +58,63 @@ dashboard is correct and the fix is in the client's report.
 refresh). Ilia has no Power BI access; the one-refresh confirmation is the client's.
 **Also worth doing, not blocking:** find out whether that Power Query is an XYZ-supplied template. If
 it is, every element-weighted tenant's export has the same defect and the template needs the fix.
+
+---
+
+## 2026-09-09 — **class 1**, and correctly parked. No message today.
+
+The 09-08 action was carried out: Ilia posted the Yash draft at 14:19 (comment `111645`), Yash moved
+Freshdesk #7841 to "Waiting on customer" and the Jira ticket to **With Customer**, and reassigned it
+to himself. Full detail in `context.md` (09-09 entry).
+
+**Class 1 — stale/unresponded — but not yet stale.** Nothing to build (no platform code change is
+warranted; the fix is two lines in the client's own Power Query), nothing needs Ilia's eyes in the
+app, and nothing is ambiguous enough for class 4. The ticket is waiting on one named person's single
+action: **Paddy Dennison removes the two `WHERE` lines and refreshes.** At ~21 hours of silence that
+is normal turnaround, so the class-1 deliverable here is the *dated* chase below, not a message now.
+
+**Do not post anything today.** Yash said "Thanks For help" 21 hours ago; a follow-up now reads as
+chasing him rather than the customer.
+
+### Chase, hold until 2026-09-11 (3 working days). To Yash. UNPOSTED. (81 words)
+
+> Hi Yash, any word from Paddy on the Power BI query? He was going to delete the two labour-unit
+> lines and refresh. **Has he run that refresh yet?** If he has and the installed figure still
+> doesn't match the dashboard, ask him to send the full query text and we'll pick it up from there.
+> If he hasn't had time, no rush. Nothing is blocked on our side, and the dashboard's 45% is the
+> correct number to use in the meantime.
+
+### Reserve, only if Paddy asks whether deleting the filter is safe. To Yash, for relay. UNPOSTED. (81 words)
+
+The safety sentence was dropped when the 09-08 draft was posted, so this reassurance is **not** on the
+ticket. It is the likeliest reason for the customer to stall.
+
+> Removing those two lines is safe. An activity with no labour units already contributes zero weight
+> to a labour-based percentage, so the filter never changed the answer for projects that do have
+> labour units. It only ever removed rows for projects like yours that count by elements instead.
+> **Does the refreshed report now show around 19,600 activities?** If the count is right but a
+> percentage still looks off, send the full query text over and we'll look at the next step.
+
+### The one thing worth doing now, and it is not on this ticket — to Darminder, chat not Jira (78 words)
+
+The cohort question from 09-08 is still unasked, and it is the only part of this incident that could
+still be preventing a repeat elsewhere. `TotalPlannedLaborUnits` is **our** column name
+(`progress-schemas.md:59`), and our own dashboard runs the same `> 0` guard but switches the column by
+weighting method (`progress-queries-v2-api.ts:176-179`) — so the client's SQL looks like our shape
+with the switch removed. Keep it off PLT-3109 so the customer thread stays clean.
+
+> Separate from Paddy's ticket: his Power BI query drops every activity with no labour units, which
+> is why his installed figure collapsed. The column names in it are ours, so the query may have come
+> from a template we hand out rather than something he wrote. **Do we supply that Power BI query to
+> customers?** If we do, every project weighted by element count has the same problem waiting, and
+> the template needs the same two lines removed.
+
+**Assumption, one line:** that the client's query is a copy or descendant of something we authored —
+suggested by the shared column names and the identical query shape, not established.
+
+### Closing condition for this ticket
+
+Per the playbook, close on cause + trigger + cohort, not on "looks fine now": cause is established
+(hardcoded labour-units filter in the client's report); trigger is that Meta's schedule never carried
+labour units, so this was wrong from the first refresh rather than a regression; **cohort is the open
+one** — the Darminder question above. One refreshed report from Paddy resolves the customer half.

@@ -339,6 +339,23 @@ project setting vs the customer's model (PLT-3010), and a hardcoded WHERE in the
 scale is project-wide** → a labour-units filter or weight somewhere in the Actual path, not a data
 fault. Ask for the report's source SQL before anything else.
 
+### 2026-09-09 addition — the defect is our own idiom with the weighting switch removed
+
+Verified in `hc-frontend` while re-checking PLT-3109: our dashboard runs **the same `> 0` guard** the
+client's report does, but picks the column from the project's setting —
+`progress-queries-v2-api.ts:176-179` (`PLANNED_LABOUR_HOURS ? 'TotalPlannedLaborUnits' :
+'TotalLinkedElements'`), applied at `:230`, `:247`, `:438`, `:460`, `:592`. And
+`TotalPlannedLaborUnits` is **our** column name, not the customer's
+(`docs/dashboard/duckdb-tables/progress-schemas.md:59`).
+
+So Pattern 3's third organ is not a foreign mechanism: it is our query shape with the ternary
+collapsed to its labour branch. **Two consequences worth carrying forward.** First, when a customer's
+report disagrees with the dashboard, diff their SQL against ours *as the same query missing a switch*
+rather than as an unknown calculation — it locates the defect in one read. Second, any SQL we hand a
+customer that hardcodes `TotalPlannedLaborUnits` is a latent Pattern 3 for every element-weighted
+tenant; whether we supply such a template is still unasked (see
+`live-incident-board-tickets/PLT-3109-groupA-progress-tracking/recommended-action.md`, 09-09).
+
 ---
 
 ## Pattern 4 — Two surfaces disagree about a number (and the method that resolves it)
@@ -1006,3 +1023,88 @@ same endpoint and copy where *it* gets its id from. On PLT-3104 that was one gre
 **Watch for.** The same split exists for tenant ids (`mongoTenantId` vs postgres) — see
 `issues.service.ts:402` passing `projectDetails.mongoTenantId`. Assume any id in this codebase
 may have two spaces until checked.
+
+---
+
+## 2026-09-09 candidate — the mechanism was fixed and the data it destroyed was never repaired (PLT-2918)
+
+One occurrence so far. Filed as a candidate; watch for a second before promoting.
+
+**Shape.** A defect destroys data. We diagnose it, ship a code fix that stops it recurring, move the
+ticket through QA and release, and mark it delivered. The customer, who only ever sees the data,
+reports the identical symptom the following week and every week after. Each report is then read as
+evidence of a *new* bug or of a *bad fix*, and the investigation restarts from the wrong end.
+
+**PLT-2918, HITT AUS01.** The destructive category-mapping Save was confirmed against live data
+(7,879 of 10,133 activities still had a WBS Location; Precast lost 19 of 21), fixed in PR #2078 and
+released in 26.3.4 on 2026-08-17. A three-tier recovery plan was posted on 07-23; tier 1 (BE restore)
+was ruled out the same day — no mapping history, deletion is hard — and tier 2 (re-apply from the
+customer's export) was recorded on 07-28 as *"not started"* and, as of 09-09, has no record of ever
+having run. Meanwhile the customer reopened the Freshdesk ticket on 08-25 and again on 09-08 with
+*"this is still an issue weekly for me"*, and the team spent that fortnight weighing whether the fix
+was incomplete or whether the customer's Power BI export was at fault. Both are plausible; neither is
+needed to explain a weekly report run against data nobody put back.
+
+**Recognition signature.**
+- A ticket with a released `fixVersion` that the customer keeps reopening.
+- The symptom's cadence matches a *report schedule* (weekly, monthly), not a *usage* pattern — data
+  that is simply still wrong looks like a recurrence every time someone looks.
+- The ticket contains a recovery/remediation plan with no comment confirming which tier ran.
+- The team's live hypotheses are all about *new* causes, and none of them is "the old damage is
+  still there".
+
+**The check, and it is nearly free.** Re-run whatever measurement originally quantified the damage.
+If the number has not moved, the remediation never ran and there is no second defect to find. If it
+has grown, there is. On PLT-2918 that is one paginated API count of WBS Location mappings on AUS01
+against the 07-28 baseline of 7,879 — it needs no customer, no repro and no branch.
+
+**The rule.** *A code fix and a data repair are two deliverables, and shipping the first does not
+discharge the second.* Track them separately: a fix ticket closes on the release, a remediation
+closes on a re-measured count. When a mechanism is confirmed to have destroyed data, the cohort sweep
+from the playbook's Phase 6 is not optional cleanup — it is the only half of the work the customer
+can actually see.
+
+**Related:** `data-remediation-runbook.md` (how to run the repair safely: snapshot, expected delta,
+verify with the same measurement); `live-incident-playbook.md` § Phase 6 "Close properly", which
+already requires cause + trigger + **cohort** and was satisfied on the first two only.
+
+---
+
+## 2026-09-09 — amendment to **Pattern 6**: an audit built on the *fallback* signature misses the cases the fallback never touched
+
+From a re-derivation of `rework_reference.json` during the PLT-2815 pass. Pattern 6 above is
+unchanged and still correct; this narrows one of its recognition steps.
+
+Pattern 6's recognition signature says: *"check which rule each side of the comparison matched — if
+they matched via different rules, or one matched no rule at all, the fix is a data/product addition."*
+Both PLT-2815 (different rules) and PLT-3061 (no rule at all) fit, so the natural next move is to
+sweep the table for that signature. An audit branch for PLT-2815 did exactly that and found five
+`specific → generic` inversions, correctly.
+
+**The trap: the customer's symptom and the fallback signature are not the same set.** The reported
+symptom was *"Category 4 costs more than Category 3."* Sweeping for the fallback signature found 3 of
+the 4 Cat3 → Cat4 cases in the table. The fourth — `Mechanical | VESDA`, £845.71 → £1,840,
+`rework_reference.json:77-78` — is two package-specific rows with no fallback involved, so a
+fallback-shaped audit excludes it by construction, and it is just as customer-visible.
+
+**The rule: sweep for the symptom the customer described, then classify by mechanism. Not the
+reverse.** A mechanism-shaped filter written after one diagnosis will silently define away the cases
+that reach the same symptom another way, and it does so most confidently in exactly the run that just
+proved the mechanism.
+
+**The denominator move that settles it,** per the 2026-09-03 rule in `live-incident-run-instructions.md`:
+the audit excluded specific-vs-specific inversions on the grounds that *"there are a dozen of them"* and
+they are accepted pricing. There are indeed 12 — but **only one of the 12 sits at Cat3 → Cat4**; the other
+11 are all at Cat1 → Cat2 or Cat2 → Cat3, where a rising step is plausible for a sparse catastrophic band.
+Measured on the slice that matters rather than the table as a whole, the exclusion discards exactly one
+row, and it is the anomalous one. *Before dismissing a class as common, count it on the slice the ticket
+is actually about.*
+
+**Second finding, extending Pattern 6's "standing risk" on unnormalised `===` matching.** That risk was
+recorded for Discipline values a project supplies (PLT-3061's `CSA-TCB`) and has now also fired *inside
+the shipped table*: `Install Elec Equip` and `Install Elec Equipment` both exist under `Electrical`
+(`rework_reference.json:34-38`) with prices differing 1.7×–2.6×. Match is plain `===`
+(`use-rework-cost-calculation.ts:101-104`), so the spelling a project happens to use decides the price it
+is quoted. **When a lookup table is hand-authored, audit it for near-duplicate keys as well as missing
+ones** — a near-duplicate is worse than a gap, because a gap shows up as a blank field and a duplicate
+shows up as a plausible wrong number.

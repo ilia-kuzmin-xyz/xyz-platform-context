@@ -799,3 +799,33 @@ in this domain.** Two things, neither blocking the other, both drafted and both 
 Nothing in the 08-28 analysis is superseded or revised by this pass; this is a delta-check only. The
 `updated` timestamp is the same value it has carried since 08-25, so the ticket has had no Jira
 activity of any kind — not a stalled conversation, an unstarted one.
+
+## 2026-09-09 — no Jira movement (23 days); but the 08-27 measurement and the 08-28 draft are both corrected
+
+Live re-fetch: status `In Analysis`, priority Minor, assignee Ilia Kuzmin, 6 comments, newest still
+Darminder's 08-17 14:01, `updated` still 2026-08-25T09:53:57+0100 — byte-identical to the 09-07 and
+09-08 snapshots. GitHub re-checked: still only PR #2084 (merged 07-31). **Nothing is new since the
+last run.**
+
+What is new came from checking the folder's own sole remaining action before recommending it a
+fourth time. **The 08-27 prod measurement reproduced the dashboard tile with the wrong predicate,
+and the 08-28 decision request to Mostafa and Pietro is retracted as a result.** In short:
+
+- The tile has reported **distinct elements, not dbIds, since PR #2084 merged on 31 July** — four
+  weeks before the 08-27 measurement quoted `851,409` as "the number the overlay's Total shows".
+- `_visible_elements` selects on a status CASE that assigns codes **from schedule dates with no
+  `element_status` row required**, so `797,527` ("carrying a status") is not the tile's population
+  either, and the `−82,404` population term is an artefact of the join used in the reproduction.
+- Two independent live readings of the same screen, both post-fix, put the tile **at or slightly
+  above** the editor: 07-31 in-browser 609,643 vs 606,524 (+0.5%), and Gennaro on Prod 08-12
+  ~604,000 vs 603,844 (~0.03%).
+
+**Consequence for §"2026-08-27 (later)" above and for the 08-24 "why a discussion and not a fix"
+section: both are superseded on the dashboard side.** The residual they were escalating does not
+exist on Prod. Neither section is deleted; §A of `prod-measured-2026-08-27.md` (the editor counter,
+the 1:1 checks, the 1.97× PEL inflation) is unaffected and still stands.
+
+**The one genuinely open fault remains Gennaro's Staging undercount** (551,386 against editor
+603,844, 08-12) — 28 days old, never chased, and H1/H3/H4/H5/H6 are untouched by any of the above.
+Full code trace: `investigation-log.md` § 2026-09-09. Revised action and the 81-word chase draft:
+`recommended-action.md` § 2026-09-09.

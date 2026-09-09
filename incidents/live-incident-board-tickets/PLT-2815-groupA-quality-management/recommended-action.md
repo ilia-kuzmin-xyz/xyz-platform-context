@@ -184,3 +184,80 @@ action at this point, not an open investigation. Surfaced explicitly in this run
 because 23 unposted recommendations is past the point where repeating it in a file nobody
 re-reads is doing any good — a decision is needed on whether to post it, or to explain why not
 (e.g. if there's a reason it's being deliberately left open that isn't recorded here).
+
+## 2026-09-09 — ACTION CLASS 1. Stop re-drafting the record comment; chase the named owner instead.
+
+**Jira unchanged, 65 days stale, 25th consecutive run recommending an unposted close-out.** Nothing
+about the diagnosis changed and none of it was re-argued. Three things changed around it, all
+recorded in `context.md` § 2026-09-09.
+
+### Action class: **1 — stale, unresponded; needs following up by a named person**
+
+Not class 2: there is no dev work whose absence is holding this ticket, and the one piece of code
+that exists (the 08-27 audit branch) is not a fix and should not land on the back of a close. Not
+class 3: nothing to see in the app, both figures were reproduced from source to the cent and
+re-verified against Confluence on 08-14. Not class 4: nobody disagrees about anything.
+
+**Who owes what:** Yash Patel (assignee and coordinator) owes one board action. Nobody is waiting on
+engineering, nobody is waiting on the customer, and the customer-facing Freshdesk #7126 has been
+Closed since 07-06.
+
+### What changed in the recommendation
+
+The instrument changes, the outcome does not. Every run since 07-30 has recommended *posting the
+record comment and transitioning*, and 25 runs of writing that into a file have produced nothing.
+The file is not the blocker; the ask has never been put to the person who can act on it. So this run
+drafts a **chase to Yash**, not another version of the record comment.
+
+The 2026-08-14 short record comment (reproduced in the 2026-08-31 note above) is still accurate and
+still fine to post if whoever closes it wants the outcome on the ticket. It is unchanged and not
+re-drafted here.
+
+### Draft — to Yash Patel (chase). **Unposted. A human pastes it, a human makes the transition.** (83 words)
+
+> Hi Yash, PLT-2815 has been static since 6 July and Freshdesk 7126 is already closed on the
+> customer's side. The numbers were confirmed correct back in June: Cat 3 for CSA Underground
+> Services has its own price of £600, Cat 4 has none so it falls back to the general CSA figure of
+> £740, which is why it reads higher in euros. Mostafa's call was to leave them as intended. Nothing
+> is outstanding on our side. **Can you close it with a resolution?**
+
+Transition guidance unchanged from §2 of the 07-30 recommendation: `With Customer` → `Done`, and
+**never with an empty resolution** (the ticket currently has `resolution = null`).
+
+### §3 of the 07-30 recommendation is SUPERSEDED — do not keep carrying it as "ask it on PLT-3061"
+
+The 08-20 note re-homed §3's £600 question onto PLT-3061's live Mostafa/Pietro thread. **That route is
+closed.** Josh replied on PLT-3061 on 09-02 declining a reference-table change and proposing the
+customer filter by vendor; that ticket's remaining action is Josh and the ML9 project manager. Product
+has now declined to touch this table twice (Mostafa 06-23, Josh 09-02). Stop waiting for a thread to
+ride on. The §3 text itself is preserved above, not deleted; only its delivery plan is dead.
+
+### New, separate item — do NOT post it here and do NOT hold the close for it
+
+`context.md` § 2026-09-09 §3 found a **fourth** live case of this ticket's exact symptom that the
+08-27 audit excludes by design: **Mechanical / VESDA, Cat 3 £845.71 → Cat 4 £1,840**, both
+package-specific rows, no fallback involved (`rework_reference.json:77-78`). It will read as the same
+bug to the next customer who files under Mechanical. This belongs on its own product/data item
+addressed to Mostafa and Pietro, raised when there is appetite for a table change, which right now
+there visibly is not.
+
+**Draft, if and when it is raised as its own item (72 words):**
+
+> One from the rework cost table, separate from any live ticket. Under Mechanical, VESDA is priced at
+> £845.71 for Category 3 and £1,840 for Category 4, so a more severe issue costs less than a milder
+> one. Under Electrical the same package steps down normally. A client raised this shape in June for a
+> different package and it will read as a bug again. **Is the Mechanical VESDA Category 4 figure right?**
+
+Also for that item, not drafted into a message: the near-duplicate package pair `Install Elec Equip`
+vs `Install Elec Equipment` (`rework_reference.json:34-38`), whose prices differ 1.7×–2.6× and which
+Rule 1 matches by exact `===` — so the spelling a project uses decides the price. Same class as
+PLT-3061's `CSA-TCB`.
+
+### Flag: the 08-27 branch is stranded, and it is not a reason to keep this open
+
+`origin/PLT-2815-rework-cost-ladder-audit` (commit `f480450`) is pushed with **no pull request, open
+or closed** — verified this run. It is audit + test only, no behaviour change. If anyone picks it up,
+its filter needs widening first (see `debug-instructions.md`, 2026-09-09 note). If nobody does, delete
+the branch rather than leaving it to look like queued work. Either way it does not gate the close.
+
+**No Jira action was taken by this run.**

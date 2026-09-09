@@ -92,3 +92,28 @@ no normalization or aliasing (`:101-104`, `:126-128`). Any project-specific disc
 by Mostafa and Pietro, not dev bugs** — the code is a faithful implementation of the documented ladder.
 Before treating a wrong or missing rework cost as a defect, get the issue's exact Category/Discipline/
 Package strings and check them against the JSON.
+
+### 2026-09-09 — two additions to the rework-cost section above (from the PLT-2815 pass)
+
+**The helper text already names which rule produced the value.** `getEstimatedReworkCostHelperText`
+(`use-rework-cost-calculation.ts:171-204`) returns *"Generated based on the Category level, Discipline,
+and Package."* after a Rule 1 hit (`:181-182`) and *"Generated based on the Category level and
+Discipline."* after a Rule 2 fallback (`:183-184`). So two figures a user is comparing are already
+labelled on screen with their own provenance, and the labels differ when the ladder mixed rules. Useful
+when explaining an odd-looking pair to a customer, and worth knowing before anyone proposes building
+such an indicator.
+
+**The table is not monotonic by category, and that is largely intended.** Costs do not reliably fall as
+Category rises. Across the 37 Discipline+Package ladders there are 18 upward steps: 12 between two
+package-specific rows, 5 where a package-specific cost is undercut by the generic fallback one category
+up, 1 the other way. Do not assert "cost decreases with category" when triaging — it is not a property
+of this dataset. The narrower thing that does read as a defect to customers is a **Cat 3 → Cat 4** rise,
+which occurs 4 times (`CSA|Underground Services`, `Electrical|Earthing`, `Electrical|Fire Alarm`,
+`Mechanical|VESDA`).
+
+**Near-duplicate keys, not just missing ones.** The pitfall above covers Discipline names a project
+supplies. The shipped table also carries two spellings of one package under `Electrical` —
+`Install Elec Equip` and `Install Elec Equipment` (`rework_reference.json:34-38`) — priced 1.7×–2.6×
+apart. With plain `===` matching, the spelling a project uses decides the price quoted. Four package
+names legitimately appear under two disciplines each (`Busduct`, `Containment`, `Sprinkler`, `VESDA`);
+that is by design, since Discipline is part of every match.

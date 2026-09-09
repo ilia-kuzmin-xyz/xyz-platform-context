@@ -149,3 +149,78 @@ was shipping in 26.3.4. Verified today in the `hc-frontend` checkout on `master`
 `ORIENTATION_MISMATCH_THRESHOLD_RAD = 0.5 * (Math.PI / 180)` and
 `refPointTransform.compose(pos, quat, scale)` at `:123`. **The fix is in master.** That risk can be
 struck from the PLT-2906 folder.
+
+---
+
+## 2026-09-09 — ACTION CLASS 4 (with a class-1 chase attached). Ticket is With Customer; the instruction they were given cannot work in the Web Editor.
+
+**State:** `With Customer` since 2026-09-08 14:29, assignee now **Yash Patel** (was Ilia). Ilia's
+comment 111642 asked the customer, via Yash, to set ATL08's project true north to ~17° and then see
+whether the box changes and whether models need re-uploading. Darminder (111643) tied the ticket to
+HS-407 111637, where Pietro, Ali, Mostafa and Thomas have agreed the fix is the customer correcting
+model orientation at source, and that *"the change on Web editor was done as it was thought to be a
+bug at the time it was raised."*
+
+**Why class 4, not 2.** The remaining question is not code we can write. It is whether
+`SectionToolOrientation` stays at all — a decision that spans two products (Web Editor, ATOM), five
+people and at least six projects (ATL05-08, FAR01/02, ATOM HH), with an uncounted blast radius
+(every project today relying on the guess: true north 0 plus a tilted building). Writing the named
+two-part fix now would contradict the direction the same group agreed yesterday and risks reopening
+PLT-2756 for the third time. **Explicitly not class 2**, and not class 3 — no visual debugging is
+outstanding; the mechanism is measured (09-04, 09-08).
+
+**The class-1 half, and it is time-critical.** The customer is being asked to do something that,
+per the code, cannot change the Web Editor box: the project's true-north angle is never applied to a
+loaded model — `applyBasePointTransform`'s only call site is commented out
+(`viewer-service.ts:974-983`, same on `origin/master`). And every Web-Editor upload hard-codes
+`ignoreTrueNorthAngle: true` (`projectModelsActions.ts:63, 185`), so the re-upload half may be inert
+too. If we say nothing, the likely outcome is a week spent on a settings change that produces no
+visible difference, on a Critical ticket 126 days old whose twin HS-407 was escalated as **urgent**
+on 09-04. See `context.md` § 2026-09-09 for the full verification.
+
+**Assumption this rests on (one line, not for the message):** that DPL honours
+`ignoreTrueNorthAngle` as its name implies — unverifiable from the FE and api-v2 repos, which is
+precisely what the draft below asks.
+
+---
+
+### Draft — to **Ali Seyedof** (DPL / ingest), for Ilia to post if he agrees — DRAFT ONLY, not posted (98 words)
+
+> Ali, a question about model processing on ATL08. Every model uploaded through the Web Editor is
+> sent with the project's true north angle marked as ignored, and we cannot see what happens to it
+> after that. The customer is about to set ATL08's true north to roughly 17 degrees and re-upload,
+> and we would like to know whether that can change anything before they spend a week on it.
+>
+> **If a project has a true north angle set and a model is then uploaded through the Web Editor,
+> does the processed model come back rotated by that angle?**
+
+**What each answer means (for us, not for the message):**
+
+- **"No, we ignore it"** → the settings change and a re-upload both do nothing in the Web Editor.
+  The ask to the customer becomes a **Revit re-export with the building's rotation in shared
+  coordinates**, which is the only thing that reaches `refPointTransform`. Once it does, our patch
+  switches itself off on its own (`section-tool-orientation-math.ts:145-155`, gate at ≥0.5°) and
+  Forge orients the box correctly — no code change needed from us.
+- **"Yes, we apply it"** → the plan works as posted, and the FE hard-coding
+  `ignoreTrueNorthAngle: true` on every upload (`projectModelsActions.ts:63, 185`) becomes a bug in
+  its own right, because no user can ever get that behaviour from the Web Editor.
+
+### Not drafted, deliberately
+
+- **No correction posted on PLT-2651 yet.** Ilia's comment 111642 is one day old and the customer is
+  already actioning it; a public correction before Ali answers would be a second guess in front of a
+  customer who has been told wrong things twice already (26.2.3 "fixed", 06-04 closed on
+  non-reproduction). Ask Ali first, then correct once, with a value in hand.
+- **No column move.** `With Customer` is the correct column while the ball is genuinely theirs.
+
+### The decision that needs a human, and it is bigger than this ticket
+
+HS-407 111637 reclassifies the whole Web-Editor workaround as something that should not have shipped.
+If that stands, PLT-2651's real resolution is *"remove the guess, require correct model orientation"*,
+not *"improve the guess"*. That needs an owner and a number before it can be actioned:
+**how many live projects currently depend on the guess** (true north 0 and a tilted footprint) — each
+one gets an axis-aligned box the day it is removed. Nobody has counted them; this automated session
+cannot (no authenticated project read). Proposed: Ilia + Darminder + Pietro settle keep-or-retire,
+with that count on the table, before any code is written on these 40 lines for the fifth time.
+
+**No Jira action was taken by this run** — no comment, no transition, no assignment, no field edit.

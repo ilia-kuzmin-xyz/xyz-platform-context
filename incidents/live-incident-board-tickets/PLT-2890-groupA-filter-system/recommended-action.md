@@ -229,3 +229,51 @@ posting; Ilia was live in the ticket at the same time this session was.
 "Waiting on customer" (`111103`, 18:21:32) right after, but nobody has actually asked the customer to
 confirm closing PLT-2890 in Jira. That one line is still worth sending — draft, unposted, one
 sentence: "Can we close this one now?" — everything else in the file above is spent.
+
+---
+
+## 2026-09-09 — **Action class 1 (stale, unresponded).** The 09-03 one-liner is still the right action, and is now overdue.
+
+Seven days of silence. No comment, no field change since 09-02 18:21. Every question the ticket has
+carried is answered (filter shipped 26.3.3; Mostafa settled the merge; Ilia answered the auto-populate
+ask in `111102`). **Nothing is owed by engineering.** The ticket is open purely because the close
+request was never put to the customer — Ilia asked *Yash* on 09-02 (`111072`) and got a new customer
+question back before Yash could act on it, and it was never picked back up.
+
+**One correction to the framing above:** the ticket is assigned to **Yash**, not Ilia. Automation for
+Jira reassigns it to Yash whenever it moves to "With Technical Support" (twice on record, 09-01 and
+09-02, both within two seconds of Ilia's transition). So it is already in the right hands and the
+draft below is a nudge, not a handover.
+
+**The 09-07 entry in `context.md` said no further draft is owed unless the customer comes back. After a
+full week of silence, that is superseded** — the customer coming back is exactly what will not happen
+on its own while a resolved ticket sits in "With Customer" with no question in front of them.
+
+**Assumption:** that the customer's silence means satisfaction rather than an unread reply. Not
+verifiable from here; the draft is worded so either answer moves the ticket.
+
+### Draft, for Ilia to paste, addressed to Yash (42 words, unposted — no Jira action was taken)
+
+> Hi Yash, nothing outstanding on our side here. The filter shipped in 26.3.3, Mostafa confirmed the
+> two contractor fields stay separate, and there's no way to sync them automatically. The customer
+> hasn't come back since 2 September. **Can we close this one?**
+
+Deliberately not in it: the release date, the `CONTRACTOR` category name, the label-collision finding,
+and any offer to build a sync. All three questions are already answered in the thread above it, and
+naming the label collision here would hand the customer a fresh reason to keep the ticket open.
+
+### The one piece of real work left, and it is NOT this ticket
+
+The panel renders **two sections both titled exactly `Contractor`**. Confirmed this run:
+`dashboard-filter-utils.ts:241` holds back only `discipline` and `package` from the dynamic block, and
+`:281` passes the type name through `toDisplayName` (`:22-28`), which turns ML9's raw `CONTRACTOR` into
+the string `Contractor` — identical to the hardcoded `title='Contractor'` at
+`dashboard-filter-panel.tsx:364`. Nothing on screen distinguishes them.
+
+**No such ticket exists** — JQL `text ~ "contractor" AND created >= "2026-09-01"` returns zero. It has
+been recommended in this file since 08-31 and never raised.
+
+It is small and self-contained (class 2 in shape: disambiguate the two titles, or teach the dynamic
+block that a type name colliding with a built-in filter needs qualifying). **Do not reopen 2890 for it
+— that decision stands from 09-02.** Raising the ticket is a Jira write, so it is not something this
+routine does; it needs Ilia to create it.

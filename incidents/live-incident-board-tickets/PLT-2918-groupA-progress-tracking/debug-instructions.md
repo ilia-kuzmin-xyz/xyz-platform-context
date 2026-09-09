@@ -27,3 +27,20 @@
       looking at the original hole for six weeks and there is no new bug at all.
 - [ ] Only if that comes back "yes, restored": ask Mostafa to test the Power BI export-side theory.
 - [ ] No browser check needed from you on this one.
+
+## 2026-09-09 — amendment to "What I need from you" above
+
+**The Sachin question above is the wrong hop and should not be asked as written.** Sachin already
+answered the part he owns, on 07-23: *"no we don't have history for mappings"* / *"deletion is hard
+for mappings"* — tier 1 (BE restore) was ruled out that day and is recorded in
+`investigation-log.md § 2026-07-23`. Asking him again whether "the recovery ran" will get the same
+answer and lose another week.
+
+Tier 2 (script re-apply from Paddy's export) was **Ilia's own action item**, and this folder's own
+07-28 note says *"Data restore for AUS01, not started."* Nothing anywhere records it starting since.
+So the question is not for Sachin — it is one line from Ilia: **did you ever re-apply the mappings?**
+
+The rest of the 08-27 note stands: the shipped fix was re-verified intact on 2026-09-09
+(`category-mapping-service.ts:277`), so Paddy's weekly recurrence is still almost certainly not this
+code path. The cheapest next step is now the AUS01 mapping census re-run, which needs nobody —
+see `recommended-action.md § 2026-09-09`.

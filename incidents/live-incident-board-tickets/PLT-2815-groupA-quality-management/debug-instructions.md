@@ -37,3 +37,38 @@ no dev work remains. But **do not close this as a one-off bad value** — that f
 - [ ] **One product question, same conversation as PLT-3061:** when a package has no row at a given
       category, should it fall back to the generic discipline cost even when that exceeds the package's
       own lower-category cost? A "clamp to the lower category" rule would kill all five at once.
+
+---
+
+## 2026-09-09 — correction to the above. The five-row table is right; the *filter that produced it* is too narrow.
+
+Everything in the 08-27 note re-verified independently this run and **needed no correction**: the five
+`specific → generic` inversions are exactly right, and "12 ladders step upward somewhere" is exactly
+right (12 `specific → specific` upward steps across 37 Discipline+Package ladders).
+
+**But `findCrossRuleInversions` excludes a live case of the symptom this ticket is about.** Its comment
+says it deliberately skips specific-vs-specific inversions because *"there are a dozen of them"*. True
+overall, and misleading for the slice that matters. Restricted to **Cat 3 → Cat 4** (Paolo's literal
+complaint: Category 4 rendering above Category 3) there are **four** cases, not three:
+
+| Discipline / Package | Cat 3 | Cat 4 | resolution | caught? |
+|---|---|---|---|---|
+| CSA / Underground Services | £600.00 | £740.00 | specific → generic | yes |
+| Electrical / Earthing | £1,120.00 | £1,184.00 | specific → generic | yes |
+| Electrical / Fire Alarm | £853.33 | £1,184.00 | specific → generic | yes |
+| **Mechanical / VESDA** | **£845.71** | **£1,840.00** | **specific → specific** | **no** |
+
+Of the 12 `specific → specific` upward steps, **exactly one is Cat3 → Cat4** — that one
+(`rework_reference.json:77-78`). The other 11 sit at Cat1 → Cat2 or Cat2 → Cat3. So the exclusion
+discards a single row and it is the row that reproduces the reported symptom. Contrast
+`Electrical / VESDA`, which steps down cleanly (£4,120 → £2,100 → £1,280, `:74-76`) — same package
+name, different discipline, clean ladder.
+
+**If this branch is picked up, do this first:** report Cat3 → Cat4 upward steps regardless of which
+rule produced each side, and keep the source labels for triage. As it stands the test pins the known
+five and a newly-introduced specific-vs-specific Cat3 → Cat4 inversion still passes CI.
+
+**Branch status, verified 2026-09-09:** `origin/PLT-2815-rework-cost-ladder-audit`, one commit
+`f480450`, **no pull request exists (open or closed)**. Pushed 08-27 and unraised for 13 days. The
+ticket's own recommendation is still to close (see `recommended-action.md`), so if nobody intends to
+raise this, delete the branch rather than leave it looking queued.

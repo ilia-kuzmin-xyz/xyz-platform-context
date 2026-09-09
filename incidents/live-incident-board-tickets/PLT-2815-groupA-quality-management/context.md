@@ -358,3 +358,132 @@ closed 07-06) — byte-identical to every prior snapshot back to 08-28. **63 day
 Jira activity of any kind. Root cause was settled long ago (§2); the only outstanding item is
 administrative — post the close-out comment and transition with a resolution. Not re-investigated
 this run, per protocol.
+
+## 2026-09-09 — no Jira change (65 days). But two things moved *around* the ticket, and the 08-27 audit has a hole.
+
+**Jira: byte-identical, nothing new.** Live `getJiraIssue`: status `With Customer`, priority Major,
+assignee Yash Patel, `resolution = null`, `resolutiondate = null`, `updated =
+2026-07-06T10:18:45.272+0100`, **13 comments**, newest still **106553** (Yash, Freshdesk #7126 →
+Closed, 07-06). Same 2 attachments (`59263`, `59262`), `issuelinks: []`. **65 days** since any Jira
+activity; **25th consecutive run** recommending a close-out that has not been posted. The root cause
+was settled long ago (§2, verified at source 08-14) and was **not** re-investigated this run.
+
+Everything below is new, and none of it comes from Jira.
+
+### 1. §3's follow-up question has lost its landing spot — and has arguably been answered by default
+
+The 08-20 note parked this ticket's orphaned "is `Cat3 | CSA | Underground Services = £600` correct?"
+question on PLT-3061, on the reasoning that Mostafa and Pietro were freshly engaged on this exact
+table. **That opening closed on 09-02.** Josh replied on PLT-3061 and *declined* a reference-table
+change, proposing the customer filter by vendor instead; that ticket is now recommended for
+`With Technical Support` and its remaining action is Josh talking to the ML9 project manager. See
+`PLT-3061-groupA-quality-management/context.md` § 2026-09-02.
+
+Consequence for this ticket: product has now declined to touch this table **twice** — Mostafa
+2026-06-23 ("leave it as intended"), Josh 2026-09-02 (declines the `CSA-TCB` rows). §3 should stop
+being carried as an open follow-up waiting for a thread to ride on. It is not going to be asked that
+way, and it does not gate the close. Marked superseded in `recommended-action.md` this run; the
+underlying data question is re-homed as its own item (see §3 below), not deleted.
+
+### 2. The 08-27 audit branch is real, pushed, and has NO pull request
+
+`debug-instructions.md` (08-27) describes a branch. It exists and the description is accurate:
+
+- `origin/PLT-2815-rework-cost-ladder-audit`, one commit **`f480450`** ("PLT-2815: audit the
+  rework-cost table for specific-vs-fallback inversions"), 27 Aug 2026, on top of `master` at
+  `b9d4893`. Two new files, 235 additions, no behaviour change:
+  `.../issue-properties/blocks/rework-cost-ladder-audit.ts` and `...-audit.test.ts`.
+- **`list_pull_requests(head=XYZReality:PLT-2815-rework-cost-ladder-audit, state=all)` returns `[]`.
+  There is no PR, open or closed.** VERIFIED. The branch has sat pushed and unraised for 13 days.
+
+That matters mainly because `debug-instructions.md` reads as though the work is queued. It is not
+queued; it is stranded. Same failure mode already recorded on PLT-3061 (its 08-24 diagnostic branch,
+also unmerged and unraised).
+
+### 3. The audit's arithmetic is right, but its filter excludes a fourth live case of Paolo's exact complaint
+
+Re-derived the whole table independently this run (script over `rework_reference.json`, all 90 rows,
+37 distinct Discipline+Package ladders, each category resolved through the real ladder — Rule 1 exact
+match, else Rule 2 generic, per `use-rework-cost-calculation.ts:94-121` and `:123-144`). **Both of the
+08-27 branch's headline counts are exactly correct** — nothing to retract:
+
+- `specific → generic` inversions (a package-specific cost undercut by a generic fallback one
+  category up): **5**, and they are precisely the five in `debug-instructions.md`. VERIFIED.
+- "12 ladders step upward somewhere": **12** `specific → specific` upward steps. VERIFIED.
+
+**The new finding is about the filter, not the counts.** `rework-cost-ladder-audit.ts`
+(`findCrossRuleInversions`) deliberately reports only `lower.source === 'specific' && higher.source
+=== 'generic'`; its own comment says *"Deliberately does NOT report inversions between two specific
+rows or between two generic rows: those are product's pricing, and there are a dozen of them."*
+
+That justification holds for the ladder as a whole and **fails for the slice this ticket is actually
+about.** Paolo's complaint is narrow and specific: *Category 4 renders above Category 3.* Restricted
+to Cat3 → Cat4 steps only, there are **four** cases across the 37 ladders, not three:
+
+| Discipline / Package | Cat 3 | Cat 4 | how each resolved | in the audit? |
+|---|---|---|---|---|
+| CSA / Underground Services | £600.00 | £740.00 (generic) | specific → generic | ✅ (this ticket, ML9) |
+| Electrical / Earthing | £1,120.00 | £1,184.00 (generic) | specific → generic | ✅ |
+| Electrical / Fire Alarm | £853.33 | £1,184.00 (generic) | specific → generic | ✅ |
+| **Mechanical / VESDA** | **£845.71** | **£1,840.00** | **specific → specific** | ❌ **excluded by design** |
+
+`rework_reference.json:77-78`. **Mechanical / VESDA is a live, package-specific Cat 4 priced at 2.2×
+its own Cat 3**, needs no fallback to happen, and would produce a complaint textually identical to
+this ticket's. Applying the denominator rule: of the 12 `specific → specific` upward steps, **exactly
+one is Cat3 → Cat4** — this one. The other 11 all sit at Cat1 → Cat2 or Cat2 → Cat3, where a rising
+step is plausibly real pricing for a sparse catastrophic band. So the "there are a dozen of them"
+defence discards precisely one row, and it happens to be the one row that reproduces the reported
+symptom. VERIFIED by enumeration; the judgement that Cat1→Cat2 rises are acceptable pricing while
+Cat3→Cat4 is not remains product's to make, and is INFERRED here.
+
+Clean broken-vs-working pair, same package name under two disciplines: **Electrical / VESDA** is
+monotonic (Cat2 £4,120 → Cat3 £2,100 → Cat4 £1,280, `rework_reference.json:74-76`); **Mechanical /
+VESDA** inverts. A project that maps VESDA under Mechanical gets the bad ladder; under Electrical,
+the good one.
+
+**Effect on the branch, if anyone picks it up:** its test pins the known five, so it will not catch
+Mechanical / VESDA, and a future edit that introduces another `specific → specific` Cat3 → Cat4
+inversion passes CI. Noted in `debug-instructions.md` this run.
+
+### 4. Second data-hygiene finding, same class as PLT-3061 — near-duplicate *package* spellings
+
+PLT-3061 was a *discipline* naming variant (`CSA-TCB` absent from a table carrying only `CSA`).
+The same hazard exists one column over, inside the shipped table itself. 33 distinct package names;
+exactly one near-duplicate pair, both under `Electrical`:
+
+- `Install Elec Equip` — Cat1 £8,320.00, Cat2 £1,800.00 (`rework_reference.json:34-35`)
+- `Install Elec Equipment` — Cat1 £14,080.00, Cat2 £4,683.33, Cat3 £11,600.00 (`:36-38`)
+
+Prices differ by 1.7×–2.6× for what is almost certainly the same trade, and Rule 1 matches on plain
+`===` with no normalisation (`use-rework-cost-calculation.ts:101-104`), so **which spelling a project
+happens to use decides the price it is quoted.** VERIFIED (values and the match operator). That the
+two are meant to be the same package is INFERRED — nobody has confirmed it, and it needs product, not
+a dev.
+
+(Four package names legitimately appear under two disciplines each — `Busduct`, `Containment`,
+`Sprinkler`, `VESDA` — with different costs. That is by design, since Discipline is part of every
+match, and is *not* a finding.)
+
+### 5. Useful for the close-out: the UI already says which rule produced each number
+
+`getEstimatedReworkCostHelperText` (`use-rework-cost-calculation.ts:171-204`) returns different
+helper text depending on which rule matched: `:181-182` *"Generated based on the Category level,
+Discipline, and Package."* when Rule 1 hit, `:183-184` *"Generated based on the Category level and
+Discipline."* when it fell back to Rule 2. VERIFIED.
+
+So Paolo's two figures were each already labelled with their own provenance on screen, and the labels
+differed. That is the plain-English way to explain the inversion to a customer without any jargon —
+"one of those two numbers is priced for your package, the other is the discipline average" — and it
+is a fact about the shipped UI, not an argument. Worth knowing the affordance exists before anyone
+proposes building one.
+
+### What remains unverified after this run
+
+- Whether `Install Elec Equip` and `Install Elec Equipment` are the same trade (product call).
+- Whether Mechanical / VESDA's Cat 4 £1,840 is a genuine price or a data-entry error (product call).
+- Whether the close-out has gone unposted for 25 runs because nobody read the file, or because someone
+  deliberately wants it left open. Still unknown, still the thing blocking this ticket.
+- The 2 attachments (`59263` "Screenshot 2026-06-17 135944.png", `59262` "Screenshot 2026-06-17
+  140026.png") and the 2 inline blobs in comment 105170 remain unopenable — attachment *content* is
+  confirmed 403 for this session. They are corroborative screenshots of two figures already
+  reproduced to the cent from source; nothing load-bearing is behind them. Not retried this run.

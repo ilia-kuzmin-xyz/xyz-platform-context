@@ -221,3 +221,86 @@ count activities with `COALESCE(TotalPlannedLaborUnits,0)=0` in the activity-lev
 > activities with zero labour units already carry zero weight.
 >
 > If the number still doesn't match after that, send us the full query text and we'll take it from there.
+
+## 2026-09-09 — the 09-08 draft was posted, the ticket moved to With Customer, and the ball is now Paddy's
+
+Live Jira check this morning. **Everything below is new relative to the 09-08 entries above; nothing
+above is retracted.**
+
+### Board state now (was: Open / Darminder / 2 comments)
+
+| field | 09-08 entry above | live, 09-09 |
+|---|---|---|
+| Status | Open | **With Customer** (id 10711, category "In Progress") |
+| Assignee | Darminder Atker | **Yash Patel** |
+| Priority | Major | Major (unchanged) |
+| Comments | 2 | **5** |
+| Last updated | 2026-09-07 11:31 | **2026-09-08 14:32** |
+| Freshdesk #7841 | Waiting on 3rd line | **Waiting on customer** |
+
+### The three new comments (all 2026-09-08, none today)
+
+1. **`111645` · Ilia Kuzmin · 14:19** — the drafted reply from the 09-08 entry above, **posted**. So
+   the "UNPOSTED — Ilia posts" label on that draft is now stale; treat that draft as delivered.
+   It went out near-verbatim, with two edits worth knowing about:
+   - the opening "good news" was dropped;
+   - **the safety sentence was dropped** — *"The filter is safe to drop even for labour-based
+     projects, since activities with zero labour units already carry zero weight."* That reassurance
+     is therefore **not** on the ticket. If Paddy hesitates to delete the two lines, or asks whether
+     removing them will break other projects, that answer has not yet been given to him. Held as a
+     ready-to-paste draft in `recommended-action.md`.
+2. **`111647` · Yash · 14:31** — Freshdesk #7841 moved to "Waiting on customer".
+3. **`111648` · Yash · 14:32** — *"@Ilia Kuzmin Thanks For help."*
+
+**Nothing has arrived on 09-09.** ~21 hours of customer silence, which is normal turnaround and not
+yet a chase. Nobody on our side owes anything; the next event is Paddy's refresh.
+
+### New code evidence on the one follow-up left open on 09-08
+
+The 09-08 `recommended-action.md` left one non-blocking item: *"find out whether that Power Query is
+an XYZ-supplied template. If it is, every element-weighted tenant's export has the same defect."*
+Not answered — that needs someone who knows what we hand customers — but two facts that bear on it
+were verified in `hc-frontend` this session:
+
+- **VERIFIED — `TotalPlannedLaborUnits` is our own column name, not the customer's invention.** It is
+  a column in our progress-output schema (`docs/dashboard/duckdb-tables/progress-schemas.md:59`,
+  `docs/dashboard/api-progress-outputs-mapping.md:39,113`) and is referenced by name across the
+  dashboard query layer (`progress-queries-v2-api.ts:41,178,388,533`;
+  `dashboard-progress-service.ts:478`; `progress-data.types.ts:14`; `types.ts:86`). So the client's
+  Power Query is reading a warehouse table that mirrors our schema — which makes "did this SQL start
+  life as something we supplied?" a real question rather than an idle one.
+- **VERIFIED — our own dashboard applies the *same* `> 0` filter idiom, but weighting-aware, which is
+  exactly why the dashboard is right and the report is wrong.** `progress-queries-v2-api.ts:176-179`
+  picks the weight column from the project's setting:
+
+  ```ts
+  const weightColumn =
+    config.method === ProgressWeightingType.PLANNED_LABOUR_HOURS
+      ? 'TotalPlannedLaborUnits'
+      : 'TotalLinkedElements'
+  ```
+
+  and then filters `AND ${weightColumn} > 0` (`:230`, `:247`, `:438`, `:460`, `:592`). On an
+  element-weighted project the guard is `TotalLinkedElements > 0`, so a zero-labour activity survives.
+  The client's SQL is the same shape **with the switch removed** — the labour branch hardcoded.
+  That is the whole defect in one sentence, and it strengthens (does not prove) the template theory.
+
+**Refinement to §3 above, not a retraction.** §3 said the element-weighting column name "is **not**
+hardcoded on the FE — it comes from the backend response". That is right for the two *progress*
+columns (`config.plannedProgressColumnName` / `config.actualProgressColumnName`,
+`dashboard-progress-service.ts:479-480`) but wrong for the *weight* column: `TotalLinkedElements` is
+hardcoded at `progress-queries-v2-api.ts:176-179` and `dashboard-progress-service.ts:476-478`. Minor,
+and it does not change any 09-08 conclusion — but it means this repo *can* show the element-weighted
+weight column's literal name, which §3 said it could not.
+
+### What remains unverified (unchanged from 09-08, plus one)
+
+- Whether the client's Power Query is XYZ-supplied or client-authored. **This is now the only
+  follow-up with cohort implications** — if it is ours, every element-weighted tenant has the same
+  broken export sitting unreported. Nobody has been asked.
+- Whether removing the two WHERE lines surfaces a null `ActualProgress` for zero-labour warehouse
+  rows. Still resolves in the same single refresh.
+- The project's live `ProgressWeightingMethod` remains inferred from the 45% figure, never read.
+  It stopped being decisive on 09-08 and still is not, but it is still not a *read* fact.
+- Attachment bytes: still not fetchable from this routine (confirmed 403, run-instructions 09-08).
+  Not a blocker here — Ilia opened all 5 PNGs on 09-08 and their contents are recorded above.

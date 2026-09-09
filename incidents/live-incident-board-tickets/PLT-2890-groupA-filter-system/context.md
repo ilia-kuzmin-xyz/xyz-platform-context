@@ -496,3 +496,103 @@ newest still Freshdesk's auto-flip to "Waiting on customer" (`111103`) right aft
 that there is no automatic way to sync Contractor/Company and none is planned (`111102`). Nothing
 from the customer since. That answer is itself the "can we close this?" resolution — no further
 draft is owed unless the customer comes back. Nothing re-derived.
+
+## 2026-09-09 — no new Jira activity for 7 days. Three small corrections, none of them re-derived work.
+
+Live re-fetch plus the **full changelog** (30 entries, all returned). **No comment and no field change
+since 2026-09-02T18:21:39+0100.** Newest comment is still `111103` (Freshdesk → Waiting on customer).
+17 comments, unchanged. Status **With Customer**. Nothing from the customer in a week.
+
+Nothing above is re-derived. What follows is only what the previous entries did not have.
+
+### 1. The assignee is **Yash Patel**, not Ilia — and it changed automatically
+
+The 08-31 entry records *"Assignee | **Ilia Kuzmin** (unchanged since the 07-13 second pass)"*, and the
+09-07 / 09-08 entries did not re-check the field. From the changelog:
+
+| when | who | change |
+|---|---|---|
+| 09-02 18:19:01 | Ilia | status **Open → With Technical Support** |
+| 09-02 18:19:03 | **Automation for Jira** | assignee **Ilia → Yash Patel** (fired twice, 86 ms apart) |
+| 09-02 18:21:39 | Yash | status **With Technical Support → With Customer** |
+
+The same automation fired on 09-01 17:17:21, also within two seconds of Ilia moving the ticket to With
+Technical Support. **Mechanism: moving this ticket to "With Technical Support" reassigns it to Yash
+automatically.** Worth knowing generally for this board — an assignee on a support-status ticket is not
+evidence anybody chose it, so do not read "assigned to X" as "X picked this up" on a
+With-Technical-Support or With-Customer ticket.
+
+Consequence for 2890: **the ticket is formally on Yash's side, not ours.** That is correct and matches
+the state — every question put to us has been answered.
+
+### 2. Full status path, now pinned from the changelog (previous entries reconstructed it from comments)
+
+`Customer Release Check` →(08-28 09:50, automation) `Open` →(08-28 11:53, Ilia) `In Analysis`
+→(09-01 17:17) `With Technical Support` →(09-01 17:31) `With Customer` →(09-02 09:00, automation)
+`Open` →(09-02 10:57) `With Technical Support` →(09-02 11:01) `Open` →(09-02 18:19) `With Technical
+Support` →(09-02 18:21) **`With Customer`**. Every flip is driven by the Freshdesk sync or by Ilia
+answering; none of it is new information about the defect.
+
+### 3. The label-collision follow-up ticket was never raised — and the collision is *exact*
+
+The 08-31 and 09-02 entries both end by recommending a small, separate, low-priority FE ticket for the
+panel rendering two identically titled "Contractor" sections. **It does not exist.** JQL
+`text ~ "contractor" AND created >= "2026-09-01"` returns **zero issues**. Eight days, unactioned.
+
+Re-read the code this run to state the mechanism precisely, because the earlier note said the dynamic
+section is *"titled straight from the type name"* and that is slightly wrong in a way that matters:
+
+- `dashboard-filter-panel.tsx:363-379` — hardcoded QA section, literal `title='Contractor'` (`:364`).
+- `dashboard-filter-panel.tsx:403-413` — dynamic block, `title={catType.typeName}` (`:411`).
+- `dashboard-filter-utils.ts:241` — `const coreTypes = new Set(['discipline', 'package'])`. Only those
+  two are held back from the dynamic block, so a category type named `CONTRACTOR` renders as its own
+  section. Confirmed verbatim, unchanged.
+- `dashboard-filter-utils.ts:281` — the section title is **not** the raw type name, it is
+  `toDisplayName(typeInfo.typeName)`.
+- `dashboard-filter-utils.ts:22-28` — `toDisplayName` lowercases, replaces `_`/`-` with spaces, then
+  title-cases each word.
+
+So ML9's raw `CONTRACTOR` is normalised to the string **`Contractor`** — **character for character
+identical** to the hardcoded section's title. The two sections are not merely similar-looking; there is
+nothing on screen to tell them apart at all. Had the raw name survived, `CONTRACTOR` next to
+`Contractor` would at least have been distinguishable, and the customer's "we have two different
+contractor filters" question might never have been asked. That is the sharpest one-line justification
+for the follow-up ticket, and it was not in the file before.
+
+**VERIFIED this run:** all five line references above, read directly.
+**INFERRED (not re-run this session):** that ML9's category type is literally named `CONTRACTOR` — that
+comes from the 09-01 prod read recorded above. Given that input, the rendered title `Contractor` is
+verified composition, not a guess.
+
+### Action class: **1 — stale, unresponded**
+
+All four substantive questions this ticket has carried are answered and closed: the filter was built and
+shipped (26.3.3, 08-10); the merge question was settled by Mostafa (`110990`, `110992`); the
+auto-populate question was answered by Ilia (`111102`). Nothing is owed by engineering. The ticket is
+open only because **nobody has asked the customer to confirm it can be closed** — Ilia asked *Yash*
+that on 09-02 (`111072`) and got a new customer question back instead, so the close request was never
+put to the customer and has now sat for a week.
+
+This is not class 2/3/4: there is no code to write on 2890, nothing to see in the app, and no
+disagreement to resolve. It needs one chase by a named person (Yash), which is the class 1 definition.
+
+**The label-collision fix is a genuine class 2 sliver, but it is not part of 2890.** The standing
+decision in `recommended-action.md` — do not reopen 2890 a third time — holds. It should be raised as
+its own low-priority ticket, and the one-line justification is in §3 above.
+
+### Unopenable media (unchanged, and now confirmed non-load-bearing)
+
+- `60664` / `60665` (`image-20260713-112131.png`, `image-20260713-112145.png`, Yash, 07-13) — the
+  original old-vs-new panel screenshots. 403 from this session per the 09-08 rule; a human can open
+  them. **They would settle nothing that is still open** — the original defect they document is shipped
+  and verified.
+- The two inline images in comment `110633` are signed Freshdesk links, not Jira attachments, so they
+  have no attachment id to hand to anyone. **Also no longer load-bearing:** Ilia's own screenshots on
+  09-01 already answered the one-panel-or-two-pages question they were needed for.
+
+### What remains unverified
+
+- The full issue-side contractor option list (still 500 of 1,135 issues read). Moot for every open
+  question; recorded only so nobody re-reads it thinking it matters.
+- Whether the customer considers the matter closed. That is the entire remaining content of the ticket.
+- Nothing was compiled or run; this environment cannot build the app.

@@ -101,6 +101,28 @@ the dead-band 5°→0.5°, and PLT-2771 (same project as the reopened PLT-2651, 
 in between. Full incident detail and the live hypothesis:
 `incidents/live-incident-board-tickets/PLT-2651-groupA-viewer-and-model/context.md`.
 
+### 2026-09-09 — true north does NOT orient anything in the viewer. Two verified facts that keep getting assumed the other way.
+
+1. **The project's `angleToTrueNorth` is never applied to a loaded model.** `applyBasePointTransform`
+   (`ViewerPage/utils/helpers.ts:187-274`) builds the placement matrix and is the only caller of
+   `setPlacementTransform` (`:270`) — but its single call site is inside a comment block,
+   `viewer-service.ts:974-983` (*"Using endpoint for project base point turned off due to bug with
+   misalignment of models"*), identical on `origin/master`. The only live use of the angle is
+   `ProjectBasePointCache.ts:49`, which feeds PBP/pinpoint **coordinate conversion**
+   (`project-service.ts:1007-1040`, `dashboard-pinpoint-base-service.ts:106`) — not placement, not
+   the section tool. **Changing a project's true-north setting changes nothing you can see in the
+   Web Editor.**
+2. **Every Web-Editor upload hard-codes `ignoreTrueNorthAngle: true`** —
+   `store/slices/projectModels/projectModelsActions.ts:63` (upload) and `:185` (retry); no FE surface
+   sets it false. platform-api persists and returns it (`userfiles.service.ts:194,229,246`;
+   `models.version.service.ts:38,86`); what DPL does with it is outside both repos and **unverified**.
+
+What *does* control the section box is the model's `refPointTransform`. Once it carries a real
+rotation, `shouldApplyOrientationPatch` bows out at ≥0.5°
+(`section-tool-orientation-math.ts:145-155`) and Forge orients the box itself — so "fix the model
+export" genuinely disables our guess, while "fix the project setting" does not touch it. Detail:
+`incidents/live-incident-board-tickets/PLT-2651-groupA-viewer-and-model/context.md` § 2026-09-09.
+
 ### applyScaling
 `applyScaling: 'm'` tells Forge the model units are metres. Forge's internal unit is feet by default; without this, all coordinates are off by a factor of ~3.28.
 

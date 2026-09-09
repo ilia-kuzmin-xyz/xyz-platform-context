@@ -170,3 +170,94 @@ new data loss.
 The mechanism was read from source, not observed at runtime. Three separate confident predictions
 about how to trigger it were wrong. Treat the "how it gets into that state" part of the diagnosis
 as unproven; the "what the code does once in that state" part is solid and test-covered.
+
+## 2026-09-09 — fix re-verified intact; and the finding that reframes the whole ticket: **there is no record the AUS01 restore ever ran**
+
+Two things checked this run. Nothing else was re-derived — the 07-28 reproduction routes stay
+killed, do not retry them.
+
+### 1. The shipped fix is still on the checkout, unchanged (VERIFIED)
+
+Re-read from source, not from the earlier note:
+
+- `services/categories/category-mapping-service.ts:246-251` — `saveDataMapping` now takes
+  `editedTypeIdsByActivity: Map<string, Set<string>>`.
+- `:277` — the delete branch is `} else if (editedTypeIds?.has(categoryTypeId)) {`, with the
+  comment *"Empty AND explicitly edited by the user -> an intentional clear."* The unconditional
+  cross-type delete is gone.
+- `:236-238` — the doc comment names PLT-2918 as the reason.
+- `components/gantt-x/scheduler/scheduler-data-mapping/mapping-service.ts:77` `_editedTypeIds`,
+  `:509`, `:1067-1070`, `:1090` — the per-activity edited-type map is accumulated and passed through.
+- `components/project-x/entities/schedule-entity-category-utils.ts:76` `getEditedCategoryTypeIds`
+  plus its spec `schedule-entity-category-utils.test.ts` (incl. the real-cascade case at `:45-61`).
+
+**No regression.** Only one commit has touched these files since the fix (`b700eb3`, PLT-3040 /
+#2139, Darminder, 2026-08-13) and it does not alter the guard. *Caveat on that last claim: this
+checkout's history is squashed/rewritten (the commit shows these files as `new file`), so treat the
+"only one commit" part as INFERRED from this checkout, not as GitHub ground truth. The presence and
+shape of the guard in the working tree is VERIFIED.*
+
+So hypothesis (a) — "residual code gap on the mapping-panel Save path" — stays where the 08-27
+`debug-instructions.md` left it: the destructive cross-type delete is structurally impossible on
+this path. The two known under-deleting escape hatches (legacy V1 dropdown, package predictor)
+both fail *safe* and cannot delete a WBS Location.
+
+### 2. The restore was never recorded as done — and that is probably the actual answer
+
+Searched the whole context repo for any record of the AUS01 WBS-Location recovery being executed.
+There is none. What exists:
+
+- **07-23, comment 107993 (Ilia, on-ticket):** the three-tier plan — (1) BE restore via Sachin,
+  (2) script re-apply from Paddy's export, (3) manual.
+- **07-23, Sachin's answer (this log, § 2026-07-23):** *"no we don't have history for mappings"* /
+  *"deletion is hard for mappings"*. **Tier 1 is dead.** There is nothing to un-delete.
+- **07-28, this log, § Outstanding item 3:** *"**Data restore for AUS01, not started.**"* Tier 2 was
+  Ilia's own job and had not begun.
+- **Nothing after that.** No Jira comment, no folder entry, no note anywhere in
+  `xyz-platform-context` records tier 2 or tier 3 running. `grep -r AUS01` returns only this ticket's
+  own files plus unrelated tickets.
+
+**Therefore (INFERRED, from absence across three independent places rather than one):** the ~2,254
+AUS01 activities with no WBS Location as of the 07-28 census are, in all likelihood, *still* missing
+it today. Stated as "no record it ran", not "it definitely never ran" — Ilia could have done it in
+July without writing it down. **One person can falsify this in one sentence.**
+
+**Why this reframes the ticket.** If the restore never ran, then Paddy's "this is still an issue
+weekly for me" needs no new bug to explain it at all: every week he runs the AUS01 report, and every
+week the same July holes are still there. Hypothesis (b) stops being one of three equals and becomes
+the leading explanation, because it is the only one that (i) is consistent with a *shipped and
+verified* code fix, (ii) requires no second undiscovered defect, and (iii) predicts exactly the
+weekly cadence he describes — a report run on a schedule against unchanged bad data.
+
+It also explains why the ticket keeps bouncing: we shipped a fix for the *mechanism* and told the
+customer it was handled, but never repaired the *data* the mechanism destroyed. A code fix is
+invisible to Paddy; his 19-of-21 missing Precast locations are not.
+
+### The one measurement that decides it (cheap, and it is a three-way discriminator)
+
+Get **one activity code that is wrong in this week's report** and check it against the API:
+
+1. Its WBS Location mapping is **absent**, and the activity is in the known 07-28 missing set →
+   **hypothesis (b)**, old hole, never restored. No new bug. Action is data remediation.
+2. Its WBS Location mapping is **absent**, and the activity **had** one after 08-17 → **hypothesis
+   (a)**, a live second defect. Action is a new investigation with a dated loss window.
+3. Its WBS Location mapping is **present and correct** in the API → **hypothesis (c)**, Mostafa is
+   right, the loss is on the Power BI export side and this is not a viewer/mapping ticket.
+
+Anchors already in this folder for step 1: AUS01 postgres project id
+`fd0af178-a9a4-413a-ad77-537219715889`; WBS Location categoryTypeId
+`8f6483fc-c737-474e-bdd3-680584e04414` (7,879 mappings against 10,133 activities on 07-28);
+`GET /api/v2/projects/{id}/activities/mapping`; anchor activity A4300, itemId
+`9d0fed9c-c79d-4c53-9446-454516ab3e11`.
+
+**Re-running the 07-28 census on its own is worth doing too** — if the count is still ~7,879 the
+hole never moved; if it has grown, something is still deleting. That one number is independent of
+anything the customer sends and nobody has to be chased for it. Recorded as the second-cheapest
+next step; not run here (no API access from this routine).
+
+### Still unverified after this run
+
+- Whether the July restore ran. (Absence of record only.)
+- What Paddy said on 09-08 — it is in Freshdesk #7461, invisible from Jira, nothing attached.
+- Whether the current WBS Location mapping count on AUS01 still matches 7,879.
+- Mostafa's Power BI theory — never substantiated with anything checkable, by anyone, since 08-25.
