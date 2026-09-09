@@ -3632,3 +3632,29 @@ is what stopped me duplicating #2205 in the first place).
   closed instead of merged; the escalation I sent on that basis is retired.
 - The 08:35 note that `PLT-2968` did not carry the libuuid change **remains correct** and is now
   academic: with #2205 closed, no branch carries it and master does not either.
+
+### 16:42 — correction to the entry directly above: the libuuid concern is RETIRED, not pending
+
+The § above warns that with step 19 green again, **step 20 (`Scan built image`) would start running and
+might go red on libuuid across every branch**, since #2205 was closed without merging.
+
+**That prediction is wrong.** Step 20 ran and **passed**. From the job steps of #2202's green run
+(`8b0e392`, run `34376233543`, job `102549624722`):
+
+| # | Step | Result | Window |
+|---|------|--------|--------|
+| 19 | `Vulnerability scanner` (`trivy fs`) | ✅ success | 16:38:59 → 16:39:43 |
+| 20 | `Scan built image` | ✅ success | 16:39:43 → 16:40:05 |
+
+So the alpine/libuuid finding of 09-05 is **no longer reported by Trivy at all** — it aged out of the
+DB, was reclassified, or `ignore-unfixed: true` now suppresses it. It was never fixed; it stopped
+being raised. Which retrospectively explains why **#2205 was closed rather than merged**: by the time
+anyone looked, there was nothing left to fix. Closing it was correct, and my reading of that closure
+as "a fix was abandoned" was wrong.
+
+> **Do not infer a live problem from an unmerged fix.** A closed hotfix PR can mean the finding went
+> away, not that it was ignored. Both of this week's Trivy scares (nanoid 09-02, libuuid 09-05)
+> resolved without their hotfix PRs merging. **Re-run the scan and read the step result before
+> escalating** — a CVE-database failure is as likely to disappear on its own as to need a fix.
+
+Net for the next run: **no outstanding Trivy work in this repo.** Steps 19 and 20 are both green.
