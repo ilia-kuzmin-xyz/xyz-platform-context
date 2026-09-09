@@ -696,3 +696,64 @@ step included. One observation worth keeping: #2194's *earlier* head `11ad855a5`
 restore Trivy's DB from a cache (`Restore DB from cache` step), so a fresh CVE hits whichever runner has
 the newer DB first — one PR red and another green on identical dependencies is expected for a few
 hours, and is not evidence that the CVE is spurious. Fix on sight; do not wait for it to "settle".
+
+## 2026-09-09 — Verify formatting with the repo's PINNED prettier, not whatever `npx prettier` gives you
+
+Every "prettier clean" claim made in this session for hc-frontend was made with **prettier 3.9.6**
+from the scratchpad harness. **hc-frontend pins `prettier@2.7.1`** (`package.json`, and the lockfile
+agrees). Different major, different defaults — prettier 3 expands short arrays of objects and moves
+the parens on `({...} as unknown as T)`. Two test files were dirty against 2.7.1 while reading clean
+against 3.9.6:
+`wbs-open-state.test.ts` (#2195) and `filter-selection-by-visibility.test.ts` (#2194), both fixed
+today (`3fc14b318`, `565d955f8`). Both were *already* dirty before this session touched them, so this
+is not damage from the wrong-version writes — but the wrong-version *checks* is why nobody noticed.
+
+**Why CI never caught it:** `.github/workflows/pr-check.yaml` runs `npm run test-ci` only. There is
+**no `format:check` step**, so formatting never fails a build here. It only bites the next person who
+runs `npm run format:fix` and gets unrelated churn in their diff.
+
+**Rule:** `npx -y prettier@$(grep -o '"prettier": *"[^"]*"' package.json | head -1 | cut -d'"' -f4)`
+— or just read the pin first. Same discipline as matching the npm major when regenerating a lockfile
+(see the js-yaml note above): **match the tool version the repo pins, or the check is meaningless.**
+
+### Review pass also caught an over-claim in a PR description
+
+#2195's "How to test" asserted, for the *no-search* double-collapse, *"Before: A sprang back open the
+moment B was clicked."* **That was never true on dev.** With no search active nothing in the code
+re-opens a row on a chevron click, and the 09-02 instrumented run recorded both rows closing cleanly.
+Corrected: that scenario is now labelled a regression check, and the PR states plainly that the
+customer's ATL05 sequence has never been reproduced here. Two genuine defects of the same *shape*
+are fixed (Show-WBS effect, search filter); that is not the same as confirming the customer's cause,
+and the description now says so. Same lesson as the 09-08 rule above, one level up: **don't write a
+before/after claim for a "before" you never observed.**
+
+### Three library facts verified in the dhtmlx 8.0.11 source (public tarball, same major as the fork)
+
+Worth keeping — all three were assumptions in earlier drafts:
+1. **`open` in parsed data beats `config.open_tree_initially`.** `r.defined(e.$open) || (e.$open =
+   r.defined(e.open) ? e.open : this.$openInitially())`. The viewer sets `open = true` on every row
+   (`use-load-schedule-data.tsx:60`) so its tree loads fully expanded despite
+   `open_tree_initially = false` (`use-initialize-gannt-chart.tsx:85`). Matches the live
+   `parse(12380 tasks, 12377 with open:true)` from 09-02.
+2. **`onBeforeTaskDisplay` fires for EVERY task, open or collapsed.** It is the store's `onFilterItem`;
+   `filter()` iterates `eachItem` → `fullOrder`, built by `_traverseBranches` with no `$open` gate.
+   So a search's "Showing N results" counts matches inside collapsed rows.
+3. **`gantt.showTask()` does NOT open ancestors** — its whole body is `getTaskPosition` + `scrollTo`.
+   The comment at `use-apply-search-filter.tsx` claiming it "opens parent WBS nodes" is **wrong**
+   (pre-existing, left in place — the fork could differ and it is not worth a speculative edit).
+
+**Caveat on all three:** read from the *public* `dhtmlx-gantt` 8.0.11, not the private
+`@xyzreality/dhtmlx-gantt` fork. Fact 1 has independent live confirmation; 2 and 3 do not.
+
+### Known, unproven, left alone: a stale-closure read in the search filter
+
+`onBeforeTaskDisplay` closes over `showWBS` (`use-apply-search-filter.tsx:99`) but its effect's deps
+are `[gantt, scheduleService]`, so a Show-WBS toggle does not re-run it and the handler keeps a stale
+value. The sibling value uses a ref for exactly this reason (`showUserProgressOnlyRef`), and a
+`showWBSRef` existed but was **never read** — Copilot flagged it as dead code and it was removed
+(`502d3add4`) rather than wired up, which keeps behaviour identical to master.
+Whether the stale read is observable depends on how dhtmlx combines two `onBeforeTaskDisplay`
+handlers (`useShowWBS` attaches its own `type === 'Activity'` filter): if they AND, the WBS row is
+hidden anyway and the staleness is invisible. **Not proven** — `callEvent` delegates to an event-chain
+object whose combination rule was not read. Impact is confined to "search active + Show WBS off",
+which is exactly #2195's Scenario 3 step 5, so a manual test pass will expose it if it is real.
