@@ -1799,3 +1799,78 @@ situation allowed.
   unproven on the PR; about to be resolved either way.
 - #2186 still needs human approval. Two threads open by design (the `setOverride` normalisation
   question; the `requires_sign_off` degrade preference).
+
+## 2026-09-09 (late) — step 20 passed, and the branch head caught up with master
+
+### The unproven claim is now proven
+
+The `87c1386` build completed **green on every step**, including the two that mattered:
+
+- **step 19 `Vulnerability scanner`** ✅ (16:41:37 → 16:42:05) — js-yaml cleared.
+- **step 20 `Scan built image`** ✅ (16:42:05 → 16:42:24) — **the decisive one.** It had been
+  *skipped* on every run since `c0bbbfee` removed the libuuid layer, so "this image scans clean
+  without the layer" was inference. It is now a direct observation on a real build.
+
+That closes the caveat left on the PR earlier in the day. Confirmation posted as comment
+`5605454007`.
+
+### Merged master in — and the reason was better than routine hygiene
+
+Superseding the "Still open" note above: `origin/master` had moved to `ed60719` (#2192, *Drop
+shortid, an unused dependency holding a vulnerable nanoid in the tree*), leaving PLT-2968 one commit
+behind. Merged it as `beed07e`.
+
+The non-obvious part, and worth carrying forward:
+
+> **A green PR check does not mean the branch head is clean.** PR CI builds the **merge commit**, not
+> the head. #2186's scans were green because the merge commit already had master's `shortid`
+> removal — while `origin/PLT-2968` itself still carried `shortid 2.2.16` and, under it,
+> `shortid/node_modules/nanoid 2.1.11`, the third and most vulnerable nanoid copy. Green CI, dirty
+> head. Merging master in is what made the two agree.
+
+This is the same shape as the 09-05 libuuid mistake (*a green check proves the check passed, not
+that your change is why*), arriving from the opposite direction: there the green was stale, here the
+green was real but about a different tree than the one I was reasoning over.
+
+Merge specifics, verified before pushing:
+- Clean automatic merge, **no conflicts**. Exactly 3 files, all of them master's: `package.json`
+  (−`shortid`, −`@types/shortid`), `package-lock.json` (−24 lines), `.trivyignore` (nanoid census
+  rewritten around the removal).
+- `git grep shortid -- src webpack scripts test` → **no hits**, so nothing on this branch imported
+  the dependency master dropped as unused. Checked *before* merging, not after.
+- Nothing this branch owns moved: `Dockerfile` still byte-identical to master's, `js-yaml ^4.3.2`
+  override intact, lockfile parses (2206 packages).
+- **No human approval existed to lose** — all 25 reviews on the PR are Copilot's or my own replies,
+  so the push cost nothing. Checked first; the answer is what made the merge free.
+
+### Review threads: 0 open
+
+Superseding "Two threads open by design" above — that was true when written; it is not now.
+**All 32 review threads on #2186 are resolved** (`is_resolved: true`, 32/32; 20 also outdated).
+The two design concerns behind those threads still stand as *things a reviewer should weigh*, they
+just no longer sit as open threads:
+
+1. **`setOverride` concurrency race** — structural, not a locking bug. One logical fact (one override
+   per asset) stored as N rows means N writes. The fix is normalisation — one row per asset, ladder
+   derived at read time — which makes the race impossible rather than serialised. Carried-forward
+   defect, not introduced here.
+2. **`requires_sign_off` degrade preference** — the column-missing fallback silently drops a ticked
+   flag rather than failing the save. Deliberate, and a one-line flip if a reviewer prefers loud
+   failure.
+
+### State at end of run
+
+| PR | State |
+|----|-------|
+| #2192 | **merged** — master tip `ed60719` |
+| #2205 | **closed** unmerged, as I recommended (libuuid layer did nothing) |
+| #2209 | **closed** as redundant (folded into #2192) |
+| #2186 | `beed07e`, build re-running on the merge; `mergeable_state: blocked` = **awaiting human approval only** |
+
+Subscribed to #2186 activity, so a red build wakes the session rather than being discovered late.
+
+**Unchanged and still worth raising as tickets:** i18n fallback (820 keys missing from `tr`);
+`tsc --noEmit` beside `Lint & Run Tests` (prod webpack is currently the only typecheck); postcss
+nanoid → 3.3.17 (the one genuinely fixable row in the `.trivyignore` census); tldraw 2.4.6 → 5.x
+(what actually clears all three nanoid CVEs); `achieved_on` on `asset_readiness`; and "render section
+title from `sectionType`, never persist display copy".
