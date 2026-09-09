@@ -1727,3 +1727,35 @@ I claimed `js-yaml` was a **direct dependency** at `package.json:313`. It is **o
 > grep/diff has produced an unverified structural claim (the false `grep -c` zero; the stale-master
 > 9-file diff; this). For JSON, parse it — `python3 -c "json.load(...)"` and check the actual key —
 > rather than inferring the block from a line number.
+
+## 2026-09-09 16:12 — #2205 CLOSED without merging. Loop closed cleanly.
+
+Someone acted on the recommendation. Verified the repo is left uniform rather than assuming it:
+`master` has no `upgrade libuuid` line, `PLT-2968` has none (removed in `c0bbbfee`), and the two
+Dockerfiles are now **identical**. Nothing anywhere still carries the dead layer, and nothing was
+left needing a port.
+
+Unsubscribed from #2205 by the harness; per its notice, not to be reopened and no replacement PR.
+
+### The arc, worth keeping as one story
+
+1. **09-05** — 7 HIGH libuuid CVEs blocked every build. Opened #2205 with `apk upgrade libuuid`, and
+   claimed its green scan proved it worked.
+2. **09-06** — **that claim was wrong.** Alpine v3.24 had no fixed package (only edge did), so the
+   command was a no-op; the green came from a stale date-keyed Trivy DB. Corrected publicly, moved
+   #2205 to draft, retitled it, and put three options to the team rather than pushing a
+   `.trivyignore` suppression on my own judgement.
+3. **09-06, later** — alpine published `2.42.3-r1`. Option 1 ("wait") resolved itself. **The
+   suppression I nearly pushed would have been live ~18 hours before becoming both unnecessary and
+   wrong.**
+4. **09-08** — a natural experiment already in flight settled the remaining question: #2192's branch
+   has no libuuid line and its image scanned clean → the **base image** carries the fix → #2205 was
+   redundant. Recommended closure.
+5. **09-09** — removed the dead layer from #2186 too (a reviewer had asked me to *reword* its
+   misleading comment; the right answer was to delete the code the comment described), leaving
+   #2186's Dockerfile identical to master's. Then closed the loop here.
+
+> **The load-bearing decision was refusing to suppress on my own judgement at step 2.** Every later
+> step vindicated waiting, and none of them were foreseeable at the time. What made waiting safe was
+> not prescience but *saying plainly what I could and could not verify*, and putting the options in
+> front of a person.
