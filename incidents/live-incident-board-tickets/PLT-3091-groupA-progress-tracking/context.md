@@ -752,3 +752,36 @@ folder, #944 is already the second raising of this diff and a third would be wro
 Yash telling the customer the dash is the agreed outcome, and the open product question (should an
 *unfinished* LOE activity show a derived percentage?) is worth splitting off rather than holding this
 ticket open.
+
+### 2026-09-09 (correction to the entry above) — the "9 unfinished ones" is NOT an open question. Ilia's point.
+
+The entry above, and every entry back to 08-31, carried *"the 9 unfinished ones, where no progress can
+be entered"* as outstanding work. **It is not.** Ilia pointed out the obvious: if the field shows `-`
+because no independent value exists, then it should not be editable either — the lock and the dash are
+the same rule.
+
+Mostafa ruled on both, and the two rulings are consistent:
+- **110588 (08-27):** *"level of effort activities cannot have progress entered."* — all 19, not just the completed ones.
+- **09-09 (relayed by Ilia):** leave `"-"`.
+
+⇒ No value → nothing to show → nothing to enter. It also disposes of Ilia's own follow-up in **110982**
+(*"should an unfinished Level of Effort activity show a calculated percentage?"*) — "leave the dash" is
+the answer, and it is **no**. That question was left hanging for 8 days as a supposed planning blocker;
+it had effectively been answered by the display decision.
+
+**So PLT-3091 is fully answered once #944 deploys.** Nothing is waiting on planning.
+
+**The one genuine remainder** is a *different* defect, already documented in the 08-31 entry under
+"The aggravating detail": for a non-editable activity the detail panel renders the tooltip *"Actual
+progress updates every 15 minutes. Values may be slightly delayed"* (`activity-progress.tsx:170-175`;
+same copy in `gantt-tooltip.tsx:20`). On an LOE row that is a false promise. `progress-lock-reason.ts`
+still does not exist on `master` and `PLT-3091-explain-uneditable-progress` never became a PR.
+**Worth its own ticket; must not hold PLT-3091 open.**
+
+Both the PR description and this folder previously framed the derived-percentage idea as "still open on
+the ticket". Corrected in #944's description today — it is now written as a possible future
+enhancement, not an unresolved blocker.
+
+**Lesson:** two rulings that look like they answer different questions can be one position. Before
+carrying something forward as "open", check whether an answer already given covers it by implication.
+Eight days of "waiting on planning" here were self-inflicted.
