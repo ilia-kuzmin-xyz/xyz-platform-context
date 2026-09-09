@@ -1637,3 +1637,45 @@ mistake, and I had read its history earlier in this run.
 > safe habit is to re-read the target comment's `path` immediately before replying, not to trust an
 > id copied from an earlier listing — the listing that produced it may have been for a different
 > thread entirely. The wake notification's own `file` field is what caught it, after the fact.
+
+## 2026-09-09 07:5x — two more findings; the libuuid layer is now DELETED from #2186
+
+**"Your username" labelling a display name** (`override-readiness-modal.tsx:209`). The value is
+`` `${firstName} ${lastName}`.trim() `` — and that same string is what persists as `modifiedBy`. On a
+dialog that records who authorised a safety-relevant override, calling it a "username" invites
+reading it as an auditable login identity. Fixed by making the label follow the value: **"Your
+name"**, key renamed `overrideUsernameLabel` → `overrideUserLabel` so the key doesn't keep the lie.
+Checked first: not in the `tr` bundle (whole `assetDetail` block untranslated → nothing orphaned) and
+the tests assert the `-value` testid, not the label. 515 assets-panel tests green.
+
+Declined the reviewer's *other* option (show a real username): there is no username on the account
+object, and inventing one for an audit field changes what the override records — product decision,
+not a copy fix.
+
+### The libuuid layer is gone from #2186, not reworded
+
+The reviewer asked me to reword the comment because an unpinned `apk upgrade` cannot promise
+`2.42.1-r0 -> 2.42.3-r0`. Right — and **the comment had gone wrong twice over**: alpine v3.24 has
+since published `2.42.3-r1` (not r0), and its claim that the base image hadn't caught up is now false
+too.
+
+So instead of rewording a comment on a dead layer, **the layer is deleted** (`c0bbbfe`). Justified by
+the #2192 experiment (see 09-08 entry). **The Dockerfile on PLT-2968 is now byte-identical to
+master's** — verified by `diff` — so this PR no longer diverges from master on image hardening at
+all. #2205 remains unmerged if it is ever needed again.
+
+> **A comment that states a prediction as a fact will rot silently.** "2.42.1-r0 -> 2.42.3-r0"
+> described what an unpinned upgrade *would* land on; nothing fails when that stops being true. The
+> `libssl3`/`libcrypto3` line above has exactly the same shape and was left alone because it is still
+> doing real work — but its version numbers are the part to drop if it is ever touched.
+
+> **The right answer to "reword this misleading comment" can be "delete the code it describes".**
+> Twice now on this PR the reviewer asked for a wording change and the real defect was underneath it
+> (the `SECTION_LABELS` copy was a persisted-value bug; this was a dead layer). Worth asking what the
+> comment is defending before improving its prose.
+
+### Process note: checked the comment `path` before replying this time
+
+After yesterday's wrong-thread reply, I fetched both target comments and confirmed `3965943058` →
+`i18n/en/main.json` and `3965943131` → `Dockerfile` *before* posting. The habit works; it cost one
+extra read.
