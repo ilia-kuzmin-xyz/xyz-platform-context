@@ -310,3 +310,48 @@ and what was learned on the way.
 - Backfill for already-published reports: today they read "no data binding
   declared".
 - Inspector on the dashboard-tab and library views.
+
+### 2026-09-10 (later) — what an adversarial review round found
+
+Both halves were reviewed line by line after the first push. 15 findings, all
+fixed on the branch. Recording the pattern because it will recur in anything
+that reports numbers about other numbers.
+
+**Every serious finding was the same failure: the sidebar stating a confident
+number that the panel beside it contradicts.** A lineage view that is
+occasionally wrong is worse than none, because it is consulted precisely when
+someone already distrusts a figure.
+
+The three that would have shipped visibly broken:
+
+1. **The template's panel ids were invisible to a static reader.** The
+   artefact passed ids through a `panel` prop the `Panel` wrapper expanded at
+   render time, so `panel_ids()` — which reads the TSX as text — found one of
+   seven. The first edit of any room-readiness report would have dropped six
+   bindings, and the frontend would then have saved the shortened manifest.
+   Fixed by making the attribute literal and spreading it through the wrapper.
+   **Lesson: anything a build-time or server-side reader has to find must be
+   literal in the source, not assembled at render time.**
+2. **Edits on a restored session lost the manifest permanently.** The
+   frontend's `prior_artifact` payload (used when thread memory is gone) never
+   carried `blocks`, so `carry_forward_blocks` had nothing to work with — and
+   the save path then wrote the loss to the session file, which is the only
+   copy.
+3. **Unevaluatable filters produced invented counts.** `in` handed a bare
+   string, or `contains` with no value, both survived validation; on the
+   frontend the first reported *0 rows* beside a panel full of them and the
+   second matched everything. Now dropped at validation, and the frontend
+   treats a filter it cannot evaluate as narrowing nothing rather than
+   everything.
+
+Smaller ones worth remembering: presence of a declared field was sampled from
+the first 20 rows (sparse columns like an issue's `position` were accused of
+being absent); an empty second source counted as vouching for every field,
+silencing a real warning on the first; the session catalogue was *replaced*
+per report, so switching project mid-session stripped the earlier dashboards'
+field types **and the `rooms` caveat about not reconciling with project-level
+progress** — a caveat disappearing from a panel whose numbers still need it.
+
+Two crash paths from malformed persisted bindings (bare `.sources.map` during
+render; a source key resolving to a primitive reaching the `in` operator) —
+both from trusting the shape of data written by an older build.
