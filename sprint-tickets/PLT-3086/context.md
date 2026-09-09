@@ -1,28 +1,33 @@
 # PLT-3086 — System Edit/Move: impact modal for membership-ending actions
 
-**Status:** Dev In Progress (was Open — status was lagging the code). **Not my work.**
+**Not this routine's code.** The work lives in **Rishi's** draft PR
+[#2190](https://github.com/XYZReality/hc-frontend/pull/2190) (29 files, base
+`task/PLT-3058-target-cx-data-model`). Nothing has been pushed to it by this routine, deliberately —
+it is someone else's branch.
 
-## 2026-09-05 — triaged, deliberately not started
+## 2026-09-09 — first local context file for this ticket
 
-Came up as eligible in the sprint sweep because Jira said **Open**. It is not unstarted: Rishi has
-[#2190](https://github.com/XYZReality/hc-frontend/pull/2190) — **draft, 29 files, +2010/-33, 9
-commits** — covering the shared modal, the data layer, in-app `system_requirement` generation and the
-member-remove door. The ticket description itself carries an "Implementation status" section saying
-so; the *status field* was the only thing out of date.
+Created because the routine kept re-deriving the same three facts every run.
 
-**No new branch was created.** Moved to Dev In Progress and commented on the ticket instead.
+**State:** PR #2190 is **draft and has not moved since 2026-08-27**. Its base is
+`task/PLT-3058-target-cx-data-model` (PR #2150), *not* `master`, so it is a stacked PR and #2150
+has to land first. GitHub has been reporting it as blocked.
 
-### State of #2190 as of this run
+**Open question, unanswered since 2026-09-05:** the 09-05 run asked on the ticket whether #2190 is
+ready to come out of draft or is waiting on something. **Rishi has not replied.** Do not re-ask —
+one unanswered ping is enough; re-posting it every run is noise.
 
-- **draft**, last touched **2026-08-27** — nine days idle.
-- base `e1114cd`; master is `1b15ad9`. **Nine days behind.**
-- `mergeable_state: blocked`.
+**Status churn:** moved Dev In Progress → Analysis In Progress on **2026-09-08 10:56:29 by Ilia's
+account** (5 seconds after the same move on PLT-2999; the routine's token shares that account, so
+human vs. run is indistinguishable). Moved back to **Dev In Progress** on 09-09 to match the fact
+that a PR exists. **If it is in Analysis again next run, ask rather than move it.**
 
-### Why nothing was pushed to it
+**Scope reminder from the ticket description** (Confluence + prototype are canonical, the
+description defers to them): this ticket is the *membership-ending / "step gone"* case only. The
+member-row → Remove-from-system door is the only membership-ending action with a live UI, and it is
+the one #2190 wires. Cross-type + coarsen move doors, the batched bulk edit-session, the
+element-removal door and the "step survives" variant are all explicitly **out of scope**
+follow-ups, each with a cited source in the description.
 
-It is Rishi's branch. The routine's checkpoint-3 rule says bring master into a stale PR, but that
-rule is for PRs I own or was asked to drive; pushing a merge commit into someone else's idle draft
-without asking is not that. Raised on the Jira ticket as a question to him instead.
-
-**Next run:** if #2190 is still idle and still stale, that question is the thing to chase — not the
-code, which is already written.
+**Blocks:** PLT-2989 (System Details — Activity Log) and PLT-2975 (Asset Details — Activity Log),
+both still `Open`.

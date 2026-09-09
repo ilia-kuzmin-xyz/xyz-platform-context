@@ -86,3 +86,20 @@ one exception and a second would leave the same trap for the next control added 
 - **`tr` locale:** the entire `hc.components.TaskLibraryTab` namespace is absent from
   `i18n/tr/main.json`, so the new keys are en-only like the rest of the tab. Consistent with where
   that stands (see the standing i18n-fallback candidate), not a decision taken here.
+
+## 2026-09-09 — status only; no code change
+
+Found parked in **Analysis In Progress**, not Dev In Progress as the header above says. The
+transition Dev In Progress → Analysis In Progress was made **2026-09-08 10:56:24 by Ilia's
+account** (which is also this routine's token, so the changelog can't tell human from run).
+PLT-2999 has **zero Jira comments**, so no analysis question was ever recorded against it.
+
+Moved back to **Dev In Progress** this run, because the code is done: PR
+[#2203](https://github.com/XYZReality/hc-frontend/pull/2203) still draft, `build` + SonarCloud
+**green**, no review threads at all yet.
+
+Master merged in (`cc97667`, master `c7c96b0 → 00be0c1`) — clean, no conflicts, no file overlap
+with master's 9 changed files. Nothing in the implementation notes above is superseded.
+
+> If this ticket appears in Analysis again, **do not move it a second time** — ask Ilia whether the
+> 09-08 move was deliberate. Flagged in the 09-09 run summary.
