@@ -3522,3 +3522,41 @@ an image-scan fix cannot help a filesystem-scan failure.
 
 **Still needs a human:** #2209 is green but a **draft**, as is #2205. Neither can merge, and every
 other PR stays red until #2209 does.
+
+### 08:35 (09-09) — #2186 confirmed same cause, and a correction to my own 09-07 note
+
+**#2186 failed on the identical js-yaml row** (step 19, `trivy fs`, `package-lock.json`), tests green
+(07:58:36 → 08:07:21). All **four** of my PRs, one root cause, none of them theirs. Commented once on
+each; no re-runs spent, nothing ported.
+
+#### Correction — supersedes the 09-07 entry above
+
+That entry says the libuuid fix "was ported into `PLT-2968`". **True when written, no longer true of
+the branch.** The precise state:
+
+- `79010c8` (libuuid, +7 lines in `Dockerfile`) **is** reachable from `PLT-2968`'s history, so the
+  09-07 reading of `git log a9baf04..origin/PLT-2968` was correct;
+- but `PLT-2968`'s current head is **`c0bbbfe` — "…and drop the dead libuuid layer"**. A parallel
+  session removed it. `git diff --name-only origin/master...origin/PLT-2968` now shows **no**
+  Dockerfile / `.trivyignore` / `.github` changes, and the branch's Dockerfile has no `libuuid` line.
+
+So the commit is in the history and the change is not in the tree. Both halves matter: a
+reachability check (`merge-base --is-ancestor`) says the commit is there, and only a **diff** says
+whether the change still is.
+
+> **`git log A..B` shows what is REACHABLE, not what is still applied.** A later commit can revert a
+> change while its original stays in the history. When the question is "does this branch carry X",
+> diff the trees — don't read the log.
+
+Worth noting the parallel session reached the same judgement I did on js-yaml independently:
+a tree-level security fix belongs in its own PR, not ported into a feature branch. `c0bbbfe` is that
+call being un-made on the libuuid side.
+
+#### The two Trivy failures are in different steps — don't conflate them
+
+- **09-05 libuuid** → `Scan built image` (step 20), container/alpine target. Fix: #2205.
+- **09-09 js-yaml** → `Vulnerability scanner` (step 19), `trivy fs` / npm target. Fix: #2209.
+
+Step 19 fails first and **skips** step 20, so today no image scan ran on any PR. #2205 could not
+have helped today, and #2209 does not address the image finding. Two open drafts, two distinct
+problems.
