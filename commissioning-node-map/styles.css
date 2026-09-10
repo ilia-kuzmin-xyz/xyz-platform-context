@@ -747,7 +747,8 @@ img { max-width: 100%; }
   }
 
   .cell .dot,
-  .marks .dot {
+  .marks .dot,
+  .legend .dot {
     width: 0.42rem;
     height: 0.42rem;
     border-radius: 50%;
@@ -757,7 +758,8 @@ img { max-width: 100%; }
   }
 
   .cell .dot.on,
-  .marks .dot.on { background: var(--layer, var(--ink-faint)); }
+  .marks .dot.on,
+  .legend .dot.on { background: var(--layer, var(--ink-faint)); }
 
   .marks span { display: inline-flex; align-items: center; gap: 0.3rem; }
 

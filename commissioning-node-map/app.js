@@ -1,7 +1,21 @@
 const CARD_W = 300;
-  const COL_GAP = 44;
-  const ROW_GAP = 26;
-  const TOP = 78;
+  const COL_GAP = 96;
+  const ROW_GAP = 44;
+
+  /**
+   * Where the first card sits, measured rather than assumed.
+   *
+   * A stage heading carries a blurb that wraps differently depending on which
+   * font actually loaded, so a fixed offset clears it on one machine and
+   * collides on the next. Ask the headings how tall they are.
+   */
+  function stageTop() {
+    let tallest = 0;
+    document.querySelectorAll('.stage-label').forEach(label => {
+      tallest = Math.max(tallest, label.offsetHeight);
+    });
+    return Math.round(tallest + 40);
+  }
 
   const viewport = document.getElementById('viewport');
   const canvas = document.getElementById('canvas');
@@ -37,6 +51,20 @@ const CARD_W = 300;
     entry.append(chip, document.createTextNode(layer.label));
     legendHost.appendChild(entry);
   });
+
+  /* The dot key belongs to the page, not to each window — it was identical in
+     all 28 of them. */
+  const dotKey = document.getElementById('dot-key');
+  if (dotKey) {
+    const entry = add(dotKey, 'span');
+    entry.append('In the comparison, a filled dot means that store holds the attribute:');
+    BASE_STORES.forEach(layer => {
+      const one = add(dotKey, 'span');
+      const dot = add(one, 'span', 'dot on');
+      dot.style.setProperty('--layer', layer.colour);
+      one.append(layer.label);
+    });
+  }
 
   const toggleHost = document.getElementById('layer-toggles');
   LAYERS.forEach(layer => {
@@ -157,7 +185,8 @@ const CARD_W = 300;
 
   /** Stage columns, packed top to bottom. The board's honest reading order. */
   function tidy() {
-    const nextY = STAGES.map(() => TOP);
+    const top = stageTop();
+    const nextY = STAGES.map(() => top);
     CONCEPTS.forEach(concept => {
       const column = concept.stage - 1;
       concept.x = column * (CARD_W + COL_GAP);
@@ -431,7 +460,12 @@ const CARD_W = 300;
         const values = add(cell, 'div', 'values');
         meta.en.forEach(one => add(values, 'span', 'val', one));
       }
-      if (meta.fk) add(cell, 'div', 'ref', `→ ${meta.fk}`);
+      /* The target only earns a line when the column name does not already
+         give it away — `asset_id → asset` tells nobody anything. */
+      if (meta.fk && !found.column.toLowerCase().includes(meta.fk.toLowerCase().replace(/_/g, ''))
+          && !found.column.toLowerCase().replace(/_/g, '').includes(meta.fk.toLowerCase().replace(/_/g, ''))) {
+        add(cell, 'div', 'ref', `→ ${meta.fk}`);
+      }
     });
   }
 
@@ -460,16 +494,23 @@ const CARD_W = 300;
   function buildWindow(concept) {
     windowEl.textContent = '';
     const rows = concept.fields ?? [];
+    /* A sparse layer earns a column only where the concept speaks about it.
+       Otherwise every window carried an empty "Proposed" column. */
+    const columns = LAYERS.filter(layer => !layer.sparse || concept.sheets[layer.key]);
     const tally = { aligned: 0, partial: 0, neither: 0 };
     rows.forEach(row => { tally[alignment(row).state] += 1; });
 
     // ------------------------------------------------------------ header
     const header = add(windowEl, 'header');
     const heading = add(header, 'div');
-    add(heading, 'span', 'kind', 'Concept · attributes');
     add(heading, 'h2', null, concept.name).id = 'window-title';
-    add(heading, 'div', 'tally',
-      `${tally.aligned} line up · ${tally.partial} incomplete · ${tally.neither} stored nowhere`);
+    // Only the counts that are not zero; a run of zeroes reads as noise.
+    const counted = [
+      [tally.aligned, 'line up'],
+      [tally.partial, 'in one store only'],
+      [tally.neither, 'stored nowhere'],
+    ].filter(([n]) => n > 0).map(([n, what]) => `${n} ${what}`);
+    add(heading, 'div', 'tally', counted.join(' · '));
 
     const close = add(header, 'button', 'close', '×');
     close.type = 'button';
@@ -479,9 +520,9 @@ const CARD_W = 300;
     // -------------------------------------------------------------- table
     const body = add(windowEl, 'div', 'body');
     const grid = add(body, 'div', 'grid');
-    grid.style.gridTemplateColumns = `1.6rem repeat(${LAYERS.length}, minmax(7rem, 1fr))`;
+    grid.style.gridTemplateColumns = `2.2rem repeat(${columns.length}, minmax(7rem, 1fr))`;
     add(grid, 'div', 'head');
-    LAYERS.forEach(layer => {
+    columns.forEach(layer => {
       add(grid, 'div', 'head', layer.column).style.setProperty('--layer', layer.colour);
     });
 
@@ -491,18 +532,20 @@ const CARD_W = 300;
       const { state, held } = alignment(row);
       const where = `r-${state}`;
       marker(add(grid, 'div', `cell mark ${where}`), held);
-      LAYERS.forEach(layer => {
+      columns.forEach(layer => {
         if (layer.extends) {
           const { text, kind } = delta(layer, row);
-          const cell = add(grid, 'div', `cell ${kind === 'added' || kind === 'changed' ? 'col' : 'none'} d-${kind} ${where}`, text);
+          const cell = add(grid, 'div',
+            `cell ${kind === 'added' || kind === 'changed' ? 'col' : 'none'} d-${kind} ${where}`,
+            kind === 'same' ? '' : text);
           cell.style.setProperty('--layer', layer.colour);
+          if (kind === 'same') cell.title = 'unchanged by the proposal';
           return;
         }
         const value = row[layer.key];
         if (!value) {
-          const empty = add(grid, 'div', `cell none ${where}`,
-            layer.role === 'store' ? 'nothing' : 'not surfaced');
-          empty.style.setProperty('--layer', layer.colour);
+          add(grid, 'div', `cell none ${where}`, '—').title =
+            layer.role === 'store' ? 'nothing here' : 'not surfaced on screen';
           return;
         }
         if (layer.role !== 'store') {
@@ -521,15 +564,6 @@ const CARD_W = 300;
     });
 
     // ------------------------------------------------------------- footer
-    const marks = add(windowEl, 'div', 'marks');
-    add(marks, 'span', null, 'A filled dot means that store holds the attribute:');
-    BASE_STORES.forEach(layer => {
-      const entry = add(marks, 'span');
-      const dot = add(entry, 'span', 'dot on');
-      dot.style.setProperty('--layer', layer.colour);
-      entry.append(layer.label);
-    });
-
     const footer = add(windowEl, 'footer');
     if (concept.note) add(footer, 'p', concept.flag ? 'gap' : '', concept.note);
 
@@ -548,9 +582,6 @@ const CARD_W = 300;
         .join(' · '));
     }
 
-    add(footer, 'p', 'house',
-      'Housekeeping columns are left out of the table: ours id and created_at, theirs Id, InsertedOn, '
-      + 'the entity’s own UUID, ProjectShardId, CreatedBy and LastModifiedOn / LastModifiedBy.');
   }
 
   function openWindow(id) {
