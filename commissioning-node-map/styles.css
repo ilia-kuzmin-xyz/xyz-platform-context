@@ -538,29 +538,37 @@ img { max-width: 100%; }
 
   /* ── a column, the way a schema browser shows one: name, keys, type ── */
   .colline {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: baseline;
-    gap: 0.3rem;
-    line-height: 1.4;
+    column-gap: 0.35rem;
+    line-height: 1.45;
   }
+
+  /* Badges sit between the name and the type, and wrap as a set rather than
+     pushing the type off to the far edge of a wide cell. */
+  .colline .keys { display: flex; gap: 0.2rem; align-items: baseline; }
 
   .colline.also { margin-top: 0.15rem; }
 
   .colline .cn {
     font-family: var(--font-mono);
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--ink);
-    overflow-wrap: anywhere;
+    /* `task_template.current_version_id` should fold at the dot or an
+       underscore, not split `current_ver` from `sion_id`. */
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: none;
   }
 
   .colline .ct {
-    margin-left: auto;
-    padding-left: 0.35rem;
     font-family: var(--font-mono);
     font-size: 0.62rem;
     color: var(--ink-faint);
     white-space: nowrap;
+    justify-self: end;
   }
 
   .badge {
@@ -623,13 +631,18 @@ img { max-width: 100%; }
   }
 
   .grid > .cell.note {
-    grid-column: 2 / -1;
+    grid-column: 1 / -1;
     font-size: 0.75rem;
-    line-height: 1.4;
+    line-height: 1.45;
     color: var(--ink-soft);
-    padding-top: 0;
-    border-bottom: 1px solid var(--rule-soft);
+    padding: 0 0.6rem 0.5rem 2.7rem;
+    border-bottom: 1px solid var(--rule);
   }
+
+  /* A row's cells carry no rule of their own; the row below draws the line, so
+     a note cannot leave a stray segment under the marker column. */
+  .grid > .cell { border-bottom: 0; }
+  .grid > .cell.row-end { border-bottom: 1px solid var(--rule); }
 
   .grid > .mark.r-aligned { color: var(--ink-faint); }
   .grid > .mark.r-partial { color: var(--bridge); font-weight: 600; }
@@ -740,10 +753,9 @@ img { max-width: 100%; }
   /* ── the marker column: one dot per store, filled where it holds the value ── */
   .grid > .cell.mark {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 0.16rem;
-    padding-top: 0.55rem;
-    align-self: start;
+    padding: 0.45rem 0.35rem 0.4rem 0.6rem;
   }
 
   .cell .dot,
@@ -776,3 +788,71 @@ img { max-width: 100%; }
   .viewport.has-selection .concept.is-selected .sheet:not(.ghost) {
     box-shadow: 0 0 0 1px var(--brand);
   }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     APP SHELL — the board owns the screen.
+
+     Everything that used to sit around it (masthead, standfirst, legend,
+     notes, footer) is gone: a board you have to scroll to is not a board.
+     What is left is one slim bar with the layer manager and the zoom.
+     ══════════════════════════════════════════════════════════════════════ */
+  html, body { height: 100%; }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--sheet);
+  }
+
+  header.bar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem 0.55rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.75rem;
+    background: var(--mylar);
+    border-bottom: 1px solid var(--rule);
+    z-index: 20;
+  }
+
+  header.bar h1 {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .bar-sep {
+    width: 1px;
+    align-self: stretch;
+    background: var(--rule);
+    margin: 0 0.15rem;
+    flex: none;
+  }
+
+  header.bar .group-label { flex: none; }
+
+  #layer-toggles { display: contents; }
+
+  /* The board fills what is left, and its own rounding goes with the frame. */
+  .viewport {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .hint {
+    margin: 0;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--rule);
+    padding: 0.2rem 0.6rem;
+  }
+
+  /* A toggle carries the layer's badge, so the bar doubles as the key. */
+  .toggle .chip { margin-right: -0.1rem; }

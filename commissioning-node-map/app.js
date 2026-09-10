@@ -38,50 +38,26 @@ const CARD_W = 300;
      the stores line up — it only says what one of them is meant to become. */
   const BASE_STORES = STORES.filter(layer => !layer.extends);
 
-  /* One toggle and one legend entry per layer, so a new layer arrives with its
-     own control and its own key without anything else being touched. */
-  const legendHost = document.getElementById('layer-legend');
-  LAYERS.forEach(layer => {
-    const entry = document.createElement('span');
-    const chip = document.createElement('i');
-    chip.className = 'chip';
-    chip.textContent = layer.tag;
-    chip.style.setProperty('--layer', layer.colour);
-    // The chip is the badge as it appears on a card; the text is what it means.
-    entry.append(chip, document.createTextNode(layer.label));
-    legendHost.appendChild(entry);
-  });
-
-  /* The dot key belongs to the page, not to each window — it was identical in
-     all 28 of them. */
-  const dotKey = document.getElementById('dot-key');
-  if (dotKey) {
-    const entry = add(dotKey, 'span');
-    entry.append('In the comparison, a filled dot means that store holds the attribute:');
-    BASE_STORES.forEach(layer => {
-      const one = add(dotKey, 'span');
-      const dot = add(one, 'span', 'dot on');
-      dot.style.setProperty('--layer', layer.colour);
-      one.append(layer.label);
-    });
-  }
-
+  /* One toggle per layer, carrying that layer's badge — so the bar is both the
+     layer manager and the key to what the badges on the cards mean. */
   const toggleHost = document.getElementById('layer-toggles');
   LAYERS.forEach(layer => {
     const toggle = document.createElement('label');
     toggle.className = 'toggle';
     toggle.dataset.layer = layer.key;
     toggle.style.setProperty('--layer', layer.colour);
+    toggle.title = `${layer.label} — ${layer.role === 'surface' ? 'screens' : 'a place data lives'}`;
 
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.dataset.band = layer.key;
     input.checked = true;
 
-    const dot = document.createElement('span');
-    dot.className = 'dot';
+    const chip = document.createElement('i');
+    chip.className = 'chip';
+    chip.textContent = layer.tag;
 
-    toggle.append(input, dot, document.createTextNode(layer.label));
+    toggle.append(input, chip);
     toggleHost.appendChild(toggle);
   });
 
@@ -446,14 +422,15 @@ const CARD_W = 300;
       if (index > 0) line.classList.add('also');
       add(line, 'span', 'cn', part.trim());
 
-      if (!found) return;
+      if (!found) { add(line, 'span', 'keys'); add(line, 'span', 'ct'); return; }
       const { meta } = found;
-      if (meta.pk) add(line, 'span', 'badge pk', 'PK');
+      const keys = add(line, 'span', 'keys');
+      if (meta.pk) add(keys, 'span', 'badge pk', 'PK');
       if (meta.fk) {
-        const badge = add(line, 'span', 'badge fk', 'FK');
+        const badge = add(keys, 'span', 'badge fk', 'FK');
         badge.title = `references ${meta.fk}`;
       }
-      if (meta.en) add(line, 'span', 'badge en', 'ENUM');
+      if (meta.en) add(keys, 'span', 'badge en', 'ENUM');
       add(line, 'span', 'ct', meta.t);
 
       if (meta.en) {
@@ -520,7 +497,10 @@ const CARD_W = 300;
     // -------------------------------------------------------------- table
     const body = add(windowEl, 'div', 'body');
     const grid = add(body, 'div', 'grid');
-    grid.style.gridTemplateColumns = `2.2rem repeat(${columns.length}, minmax(7rem, 1fr))`;
+    /* The screen column holds a short phrase; the store columns hold
+       identifiers, badges and a type, so they get the room. */
+    const share = columns.map(layer => (layer.role === 'surface' ? '0.85fr' : '1.25fr')).join(' ');
+    grid.style.gridTemplateColumns = `2.7rem ${share}`;
     add(grid, 'div', 'head');
     columns.forEach(layer => {
       add(grid, 'div', 'head', layer.column).style.setProperty('--layer', layer.colour);
@@ -531,6 +511,7 @@ const CARD_W = 300;
       // row's class — that is what lets a whole row take a colour.
       const { state, held } = alignment(row);
       const where = `r-${state}`;
+      const cells = [];
       marker(add(grid, 'div', `cell mark ${where}`), held);
       columns.forEach(layer => {
         if (layer.extends) {
@@ -557,10 +538,10 @@ const CARD_W = 300;
         describeColumn(cell, layer, concept, value);
       });
 
-      if (row.note) {
-        add(grid, 'div', `cell mark ${where}`);
-        add(grid, 'div', `cell note ${where}`, row.note).style.gridColumn = '2 / -1';
-      }
+      /* The rule under a row is drawn once, by its note if it has one and by
+         the row's own cells otherwise — so it never leaves a stray segment. */
+      if (row.note) add(grid, 'div', `cell note row-end ${where}`, row.note);
+      else [...grid.children].slice(-1 - columns.length).forEach(cell => cell.classList.add('row-end'));
     });
 
     // ------------------------------------------------------------- footer

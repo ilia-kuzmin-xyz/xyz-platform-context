@@ -11,100 +11,33 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="wrap">
-  <header class="masthead">
-    <div class="eyebrow">XYZ Commissioning · read from source, 10 Sep 2026</div>
-    <h1>Commissioning Node Map</h1>
-    <p class="standfirst">
-      One domain held in three places at once. Every card on the board is a single <strong>concept</strong> — and
-      pinned through it, like a set of tracing overlays, the three names that concept goes by: the
-      <strong>screen</strong> a person uses, the <strong>Supabase table</strong> we write today, and the
-      <strong>api-v2 table</strong> that replaces it. Switch a layer off to read one sheet at a time. A dashed slot
-      means that layer has nothing for this concept, which is where the work is.
-    </p>
-  </header>
 
-  <div class="controls">
-    <span class="group-label">Sheets</span>
-    <span id="layer-toggles"></span>
-    <label class="toggle" data-layer="gaps"><input type="checkbox" id="gaps-toggle"><span class="dot"></span>Mark the gaps</label>
-    <span class="spacer"></span>
-    <button class="btn zoom" id="zoom-out" aria-label="Zoom out">−</button>
-    <span class="zoom-level" id="zoom-level">100%</span>
-    <button class="btn zoom" id="zoom-in" aria-label="Zoom in">+</button>
-    <button class="btn" id="fit">Fit</button>
-    <button class="btn" id="tidy">Tidy up</button>
+<header class="bar">
+  <h1>Commissioning Node Map</h1>
+  <span class="bar-sep" role="presentation"></span>
+
+  <span class="group-label">Sheets</span>
+  <span id="layer-toggles"></span>
+  <label class="toggle" data-layer="gaps"><input type="checkbox" id="gaps-toggle"><span class="dot"></span>Gaps</label>
+
+  <span class="spacer"></span>
+
+  <button class="btn zoom" id="zoom-out" aria-label="Zoom out">−</button>
+  <span class="zoom-level" id="zoom-level">100%</span>
+  <button class="btn zoom" id="zoom-in" aria-label="Zoom in">+</button>
+  <button class="btn" id="fit">Fit</button>
+  <button class="btn" id="tidy">Tidy up</button>
+</header>
+
+<main class="viewport" id="viewport">
+  <div class="canvas" id="canvas"></div>
+  <p class="hint">drag to pan · scroll to zoom · drag a card to move it · click one to compare</p>
+
+  <div class="scrim" id="scrim" hidden>
+    <section class="window" id="window" role="dialog" aria-modal="true" aria-labelledby="window-title"></section>
   </div>
+</main>
 
-  <div class="viewport" id="viewport">
-    <div class="canvas" id="canvas"></div>
-    <div class="hint">drag to pan · scroll to zoom · drag a card to move it</div>
-
-    <div class="scrim" id="scrim" hidden>
-      <section class="window" id="window" role="dialog" aria-modal="true" aria-labelledby="window-title"></section>
-    </div>
-  </div>
-
-  <p class="board-note">Click any card to open its attributes side by side — what the screen collects, what we store in Supabase, and what api-v2 expects.</p>
-
-  <div class="legend">
-    <span id="layer-legend" style="display:contents"></span>
-    <span>Front sheet shows the detail — switch layers to change which</span>
-    <span id="dot-key" style="display:contents"></span>
-    <span>Dark by default; follows your system setting</span>
-    <span>Housekeeping columns are left out of the comparison: ours <code>id</code> and
-      <code>created_at</code>, theirs <code>Id</code>, <code>InsertedOn</code>, the entity’s own UUID,
-      <code>ProjectShardId</code>, <code>CreatedBy</code> and <code>LastModified*</code>.</span>
-    <span>Readiness ladder
-      <i class="ladder"><i style="background:var(--tag-red)"></i><i style="background:var(--tag-amber)"></i><i style="background:var(--tag-green)"></i></i>
-      one gate per rung
-    </span>
-  </div>
-
-  <div class="notes">
-    <div class="note-block">
-      <h3>The chain, in five lines</h3>
-      <ol>
-        <li>A <strong>workflow</strong> owns ordered <strong>rungs</strong> — Red, Yellow, Green.</li>
-        <li>An <strong>asset type</strong> points at one workflow. That pointer is the entire reason an asset shows a ladder.</li>
-        <li>The type maps <strong>task templates</strong> onto each rung.</li>
-        <li>Every asset of that type gets one <strong>task instance</strong> per mapped template.</li>
-        <li>Answering a task opens a <strong>run</strong>; the run clears the rung; the rungs are the tag.</li>
-      </ol>
-    </div>
-    <div class="note-block">
-      <h3>Where the sheets do not register</h3>
-      <ul>
-        <li><code>task_item</code> appears under <strong>three</strong> different api-v2 tables — the question, its
-          placement, and the section header. One table has to become three.</li>
-        <li><code>asset_type.workflow_id</code> is nullable for us and <strong>NOT NULL</strong> for them. Seven dev
-          rows are null, so today's data would fail the migration, not just hide a ladder.</li>
-        <li>Our per-item note maps onto a comment that belongs to the whole run, so the item is lost.</li>
-        <li>A question is reusable across tasks for them and owned by one version for us — which is why we snapshot
-          the wording and they do not need to.</li>
-        <li>The 3D element link is ours alone. Sign-off <em>does</em> have a home there — as a checklist item, not a
-          table — but our role, party and drawn image do not.</li>
-      </ul>
-    </div>
-    <div class="note-block">
-      <h3>Which database am I on?</h3>
-      <ul>
-        <li><code>dev</code> — local and dev builds, fed by the <code>develop</code> branch of <code>xyz-supabase</code>.</li>
-        <li><code>stable</code> — staging, preprod, prod, fed by <code>main</code>. Level with dev since 4 Sep; it had
-          been five weeks behind, which is what the staging 400s were.</li>
-        <li>Picked at runtime from the Spring profile, not at build time.</li>
-        <li>Row-level security is permissive throughout — separation is client-side only.</li>
-      </ul>
-    </div>
-  </div>
-
-  <footer class="stamp">
-    <span>Sources: hc-frontend master · Supabase dev schema · PostgreSQLDatabase Database/xyz/Tables</span>
-    <span>28 concepts · 625 columns, all read from source</span>
-    <span>How to extend this map: the contract at the top of this page's script</span>
-    <span>Your layout is remembered in this browser only</span>
-  </footer>
-</div>
 <script src="data/columns.js"></script>
 <script src="model.js"></script>
 <script src="app.js"></script>
