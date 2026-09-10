@@ -73,19 +73,20 @@ const STAGES = [
      layer is a new key and never a change of shape.
 
      REGENERATING THE COLUMN REGISTRY
-       ours    supabase gen types typescript --project-id ohmzwpcilvxpozljllle
-               (dev; stable is gpuerhiwzgnfcvrzvwgw — schemas are level as of
-               4 Sep 2026). Primary keys and permitted values are not in the
-               generated types: read them from XYZReality/xyz-supabase,
-               supabase/migrations/*.sql. Half the tables were renamed after
-               creation, so follow `alter table … rename to …` before matching
-               a create-table body to a current name.
-       theirs  XYZReality/PostgreSQLDatabase — Database/xyz/Tables/11x-14x for
-               columns and primary keys, Database/xyz/Constraints/06x-09x for
-               foreign keys. Value sets live in TypeScript rather than CHECK
-               constraints: XYZPlatformApi, src/types/commissioning.types.ts.
-       Scope every CHECK to its own table. Several tables have a `status`
-       column and they do not share a value set.
+     `npm run schema`, then `npm run check`. Do not edit data/ by hand.
+       ours    the live dev database, over Supabase's Management API. Needs
+               SUPABASE_ACCESS_TOKEN (a personal access token — no database
+               password). Columns, types, keys and value sets all come from
+               pg_catalog, so there is one source and it cannot lag.
+       theirs  XYZReality/PostgreSQLDatabase — Database/xyz/Tables for columns
+               and primary keys, Database/xyz/Constraints for foreign keys.
+               Value sets live in TypeScript: XYZPlatformApi,
+               src/types/commissioning.types.ts. No database to read, so this
+               is their schema as committed, not as deployed.
+     A caution earned the hard way: a foreign key belongs to one table. The
+     generated TypeScript lists relationships in a shape that invites applying
+     one to every table sharing the column name, which fabricated 39 of them.
+     Read constraints from pg_constraint, keyed on conrelid.
 
      WHAT IS DELIBERATELY NOT HERE
      A proposed-Supabase layer. Its definition is written below, commented

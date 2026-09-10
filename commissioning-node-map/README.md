@@ -37,6 +37,7 @@ the root directory is enough. Vercel serves the files directly; it never runs `s
 | `model.js` | the data — `LAYERS`, `TABLES`, `CONCEPTS` |
 | `app.js` | the board, the overlay stacks and the comparison window |
 | `server.js` | local static server, for `npm run dev` only |
+| `tools/` | the generator and the model checker |
 
 ## Changing it
 
@@ -50,9 +51,21 @@ regenerate the column registry from source. The short version:
   added/changed/unchanged is computed by diffing rather than hand-labelled.
 - A concept's `id` is permanent — it keys the saved board layout in each viewer's browser.
 
-Nothing in `model.js` is typed from memory. Every column name, type, key and value set is read
-from the live dev schema, the `xyz-supabase` migrations, and `PostgreSQLDatabase`'s DDL and
-constraint files.
+Nothing in `model.js` is typed from memory.
+
+- **Ours** comes from the **live dev database**, over Supabase's Management API — columns, types,
+  primary keys, foreign keys and permitted values all from the one place. Needs a personal access
+  token from [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens):
+
+  ```bash
+  SUPABASE_ACCESS_TOKEN=sbp_... npm run schema
+  ```
+
+  No database password, and nothing to change in the database. The token must stay out of the
+  repository.
+
+- **Theirs** comes from `PostgreSQLDatabase`'s DDL and constraint files on GitHub, read with `gh`.
+  There is no database to read, so that side is api-v2 **as committed**, not as deployed.
 
 ## Note on contents
 
