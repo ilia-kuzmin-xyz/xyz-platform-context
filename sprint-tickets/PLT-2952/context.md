@@ -81,3 +81,22 @@ if one exists, the analysis above is complete enough to start immediately.
 Checked the ticket: **one comment, still mine, no reply**. Status unchanged at Analysis In Progress.
 Held per the "do not re-ask" note above — no second comment posted. Nothing about the analysis has
 changed; it remains complete enough to start the moment the split question is answered.
+
+
+## 2026-09-10 — still unanswered (day 5)
+
+Checked at the start of the scheduled run. **One comment, still mine, still no reply.** Status
+unchanged at `Analysis In Progress`. Held per the "do not re-ask" note above — no second comment
+posted.
+
+Nothing in the analysis has changed. What *has* changed is how long this has been sitting: the
+clarification went up **2026-09-05 09:03** and this is the fifth day open on a **Critical** ticket
+whose blocker is a one-line product answer. That is now worth raising with Ilia directly rather
+than only recording here — escalated in this run's summary. The Jira ticket itself stays quiet.
+
+Recap of the blocker for whoever reads this next, so it needn't be re-derived: two of the four
+things the ticket asks for have nothing behind them (**match strength** does not exist anywhere in
+the codebase; **per-user linking progress** can't be attributed because `asset_element_link` has no
+column for who made the link). And the "Link to models" entry point reintroduces the staged linking
+mode that **PLT-2953 (#2148, merged 09-02) deliberately removed**. The ask on the ticket is to split
+it.

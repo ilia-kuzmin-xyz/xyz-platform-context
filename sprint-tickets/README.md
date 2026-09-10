@@ -3679,3 +3679,87 @@ Review threads: **0 open** across all four. #2186 carries 32 Copilot threads, **
 #2202/#2203/#2204 have no review threads at all. (Note for the next run: the MCP thread payload uses
 **`is_resolved`**, snake_case — reading it as `isResolved` returns `None`, which counts every thread
 as open and produced a false "32 open" scare in this run before I checked the object's keys.)
+
+---
+
+## Run 2026-09-10
+
+JQL unchanged. **10 tickets in the sprint; 3 eligible** (not blocked / Dev In Progress / In Code
+Review), and none of the three turned into new development — for three different and legitimate
+reasons.
+
+| Ticket | Summary | Status | Eligible? | Outcome this run |
+|--------|---------|--------|-----------|------------------|
+| PLT-3117 | Infinity Canvas — per-block data lineage inspector | Open | ✅ | **Already built.** PR #2212 exists and is green. Moved to `Dev In Progress`; new context file written |
+| PLT-2952 | Asset List — enter linking mode and format data | Analysis In Progress | ✅ | Held — clarification unanswered, **day 5** |
+| PLT-2972 | Asset Details — Affects System tag interaction | Analysis In Progress | ✅ | Held — clarification unanswered, **day 5** |
+| PLT-2524 | Parquet last-updated for planned/actual progress | Blocked | ❌ | — |
+| PLT-2967 / PLT-2968 | Readiness tag task + override context menus | In Code Review | ❌ | #2186 green, 32/32 threads resolved |
+| PLT-2966 | Asset details — readiness completion moment | Dev In Progress | ❌ | Re-synced onto `PLT-2968` |
+| PLT-2999 | Task-library row context menu | Dev In Progress | ❌ | Re-synced onto master |
+| PLT-3038 | GMT offset in timezone selector | Dev In Progress | ❌ | Re-synced onto master |
+| PLT-3086 | System edit/move impact modal | Dev In Progress | ❌ | Rishi's #2190, untouched (not this routine's branch) |
+
+### The js-yaml episode was *not* closed end to end — two PRs were missed
+
+The 09-09 entry above concluded "the js-yaml episode is closed end to end" on the strength of four
+green PRs (#2202, #2203, #2204, #2186). **That conclusion was too broad.** It covered the four PRs
+that run happened to re-sync; it did not check the other two. #2197 (`PLT-3084`) and #2194
+(`PLT-3099`) were never re-synced, and #2197 was **still red this morning on exactly the js-yaml
+finding** — `js-yaml 4.3.1`, CVE-2026-84375, HIGH, fixed in 4.3.2 — 24 hours after the episode was
+declared over.
+
+> **Lesson: "all green" is only ever a claim about the PRs you actually enumerated.** Before writing
+> a closing statement about a cross-cutting CI problem, list every open PR in the repo and check
+> each. Four out of six looked identical to all of them.
+
+The fix needed no new code. `master` has carried `"js-yaml": "^4.3.2"` in `overrides` since #2195;
+#2197's base predated it. Merging master in was the whole fix — checkpoint 2 and checkpoint 3
+resolved by the same commit.
+
+### Checkpoint 3 — branch drift measured before touching anything
+
+`git rev-list --count origin/<branch>..origin/master`, so the numbers are drift, not guesses:
+
+| Branch | Behind | Ahead | Action |
+|--------|--------|-------|--------|
+| `PLT-3084` | 2 | 7 | merged master → `26882ea` (**fixes the red build**) |
+| `PLT-3099` | 2 | 11 | merged master → `7d8fdc1` |
+| `PLT-3038` | 1 | 5 | merged master → `893317f` |
+| `PLT-2999` | 1 | 6 | merged master → `d21dc97` |
+| `PLT-2966` | 2 behind its **base** `PLT-2968` | 68 | merged `PLT-2968` → `b22c6d6` |
+| `PLT-2968` | 0 | 62 | already current |
+| `PLT-3117` | 0 | 8 | already current |
+
+**All five merges were clean — no conflicts.** `js-yaml: ^4.3.2` was re-verified in both
+`package.json` and `package-lock.json` on every branch *after* merging, because the merges delete
+lines from both files (master's `shortid` removal, #2192) and a silent loss of the override would
+have re-broken the scan.
+
+`PLT-2966` is stacked on `PLT-2968`, **not** master — merge its base, not master, or the PR diff
+grows to include everything in PLT-2968.
+
+### Checkpoint 1 — review feedback: clean
+
+**0 open threads across all 7 PRs**, verified per PR rather than inferred.
+
+| PR | Branch | Threads | State |
+|----|--------|---------|-------|
+| #2212 | `PLT-3117` | 0 | never reviewed (draft) |
+| #2204 | `PLT-2966` | 0 | — |
+| #2203 | `PLT-2999` | 0 | — |
+| #2202 | `PLT-3038` | 0 | — |
+| #2197 | `PLT-3084` | 1 | resolved, replied |
+| #2194 | `PLT-3099` | 3 | all resolved, replied |
+| #2186 | `PLT-2968` | 32 | **all 32 resolved** |
+
+(The `is_resolved` snake_case note from the 09-09 run held — read it that way and the count is right
+first time.)
+
+### Escalated to Ilia rather than re-asked on the ticket
+
+Two **Critical** tickets, PLT-2952 and PLT-2972, have had an unanswered clarification since
+**2026-09-05** — five days. Both are one product answer away from being buildable, and both are the
+only eligible tickets in the sprint. The "do not re-ask" rule still holds for Jira (a second comment
+is noise), but five days on Critical is worth a human hearing about, so it went in the run summary
+instead.

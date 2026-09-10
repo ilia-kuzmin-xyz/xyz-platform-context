@@ -70,3 +70,18 @@ system-scoped variant of that modal is the whole job.
 Checked the ticket: **one comment, still mine, no reply**. Status unchanged at Analysis In Progress.
 Held per the "do not re-ask" note above. The reuse position noted on 09-07 still holds and improved
 slightly: `PLT-2968` took master again today (`e3684e1`), so `StepTasksModal` sits on current master.
+
+
+## 2026-09-10 — still unanswered (day 5)
+
+Checked at the start of the scheduled run. **One comment, still mine, still no reply.** Status
+unchanged at `Analysis In Progress`. Held per the "do not re-ask" note — no second comment posted.
+
+Fifth day open on a **Critical** ticket. As with PLT-2952, that is now worth Ilia hearing about
+directly, so it is escalated in this run's summary rather than re-asked on the ticket.
+
+The reuse position is unchanged and still good: `StepTasksModal` (from PLT-2968) sits on current
+master, `PLT-2968` is **0 commits behind master** as of this run, and #2186 is green with **all 32
+review threads resolved**. The moment the scope question is answered — whose tasks the modal shows,
+and list-that-opens-the-editor vs. a full fill-in form — the system-scoped variant of that modal is
+the whole job.
