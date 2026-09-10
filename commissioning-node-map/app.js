@@ -33,8 +33,8 @@ const CARD_W = 300;
     chip.className = 'chip';
     chip.textContent = layer.tag;
     chip.style.setProperty('--layer', layer.colour);
-    entry.append(chip, document.createTextNode(
-      layer.role === 'store' ? `${layer.label} table` : layer.label.toLowerCase()));
+    // The chip is the badge as it appears on a card; the text is what it means.
+    entry.append(chip, document.createTextNode(layer.label));
     legendHost.appendChild(entry);
   });
 
@@ -350,10 +350,24 @@ const CARD_W = 300;
    */
   function alignment(row) {
     const held = BASE_STORES.filter(layer => row[layer.key]);
-    const mark = held.length ? held.map(layer => layer.tag).join('') : '—';
-    if (held.length === BASE_STORES.length) return { state: 'aligned', mark };
-    if (held.length === 0) return { state: 'neither', mark };
-    return { state: 'partial', mark };
+    if (held.length === BASE_STORES.length) return { state: 'aligned', held };
+    if (held.length === 0) return { state: 'neither', held };
+    return { state: 'partial', held };
+  }
+
+  /**
+   * The marker: one dot per store, filled where that store holds the
+   * attribute, hollow where it does not.
+   *
+   * It used to be the layers' tags run together — fine as `BA`, nonsense once
+   * a tag is a word. Dots also stay legible however many layers there are.
+   */
+  function marker(cell, held) {
+    BASE_STORES.forEach(layer => {
+      const dot = add(cell, 'span', held.includes(layer) ? 'dot on' : 'dot');
+      dot.style.setProperty('--layer', layer.colour);
+      dot.title = `${held.includes(layer) ? 'in' : 'not in'} ${layer.label}`;
+    });
   }
 
   /**
@@ -474,9 +488,9 @@ const CARD_W = 300;
     rows.forEach(row => {
       // The grid lays cells out directly, so every cell of a row carries the
       // row's class — that is what lets a whole row take a colour.
-      const { state, mark } = alignment(row);
+      const { state, held } = alignment(row);
       const where = `r-${state}`;
-      add(grid, 'div', `cell mark ${where}`, mark);
+      marker(add(grid, 'div', `cell mark ${where}`), held);
       LAYERS.forEach(layer => {
         if (layer.extends) {
           const { text, kind } = delta(layer, row);
@@ -508,9 +522,13 @@ const CARD_W = 300;
 
     // ------------------------------------------------------------- footer
     const marks = add(windowEl, 'div', 'marks');
-    add(marks, 'span', null, `${BASE_STORES.map(layer => layer.tag).join('')}  lines up across every store`);
-    BASE_STORES.forEach(layer => add(marks, 'span', null, `${layer.tag}  only ${layer.label}`));
-    add(marks, 'span', null, '—  stored nowhere');
+    add(marks, 'span', null, 'A filled dot means that store holds the attribute:');
+    BASE_STORES.forEach(layer => {
+      const entry = add(marks, 'span');
+      const dot = add(entry, 'span', 'dot on');
+      dot.style.setProperty('--layer', layer.colour);
+      entry.append(layer.label);
+    });
 
     const footer = add(windowEl, 'footer');
     if (concept.note) add(footer, 'p', concept.flag ? 'gap' : '', concept.note);

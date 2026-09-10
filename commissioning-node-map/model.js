@@ -99,20 +99,20 @@ const STAGES = [
      speculative layer `provisional: true` and it draws hatched, so a
      proposal never reads as something that already exists. */
   const LAYERS = [
-    { key: 'ux', tag: 'S', label: 'Screens', column: 'On screen', role: 'surface', colour: 'var(--ux)' },
-    { key: 'bridge', tag: 'B', label: 'Supabase bridge', column: 'Supabase', role: 'store', colour: 'var(--bridge)' },
-    { key: 'api', tag: 'A', label: 'api-v2', column: 'api-v2', role: 'store', colour: 'var(--api)' },
+    { key: 'ux', tag: 'UX', label: 'Screens', column: 'On screen', role: 'surface', colour: 'var(--ux)' },
+    { key: 'bridge', tag: 'Supa', label: 'Supabase bridge', column: 'Supabase', role: 'store', colour: 'var(--bridge)' },
+    { key: 'api', tag: 'Api-v2', label: 'api-v2', column: 'api-v2', role: 'store', colour: 'var(--api)' },
 
     /* A proposal, not a store. `extends` makes it a delta: added and changed are
        worked out by diffing against that layer, never hand-labelled, so it
        cannot quietly claim a gap that has since been filled. `sparse` keeps it
        off every card it says nothing about. */
-    { key: 'apiNext', tag: 'A+', label: 'Proposed api-v2', column: 'Proposed', role: 'store',
+    { key: 'apiNext', tag: 'Api-v2 next', label: 'Proposed api-v2', column: 'Proposed', role: 'store',
       colour: 'var(--future)', provisional: true, sparse: true, extends: 'api',
       source: 'Commissioning API status tracker (PAPI-3330), read 9 Sep 2026' },
 
     /* The same shape for the other direction, once a written plan exists:
-      { key: 'bridgeNext', tag: 'B+', label: 'Proposed Supabase', column: 'Proposed',
+      { key: 'bridgeNext', tag: 'Supa next', label: 'Proposed Supabase', column: 'Proposed',
         role: 'store', colour: 'var(--future-2)', provisional: true, sparse: true,
         extends: 'bridge', source: '…' },
        Left out on purpose — nothing is written down for it yet, and a layer
@@ -120,7 +120,7 @@ const STAGES = [
     
     /* A worked example — uncomment to see a fourth sheet appear on every
        card, in the toggles, and as a column in the comparison window:
-      { key: 'future', tag: 'F', label: 'Proposed', column: 'Proposed',
+      { key: 'future', tag: 'Next', label: 'Proposed', column: 'Proposed',
         role: 'store', colour: 'var(--future)', provisional: true },
        then add `future:` to any concept’s sheets and to its field rows. */
   ];

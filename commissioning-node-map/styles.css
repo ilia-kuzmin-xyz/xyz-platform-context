@@ -1,88 +1,107 @@
 /* The single-file version ran inside a host that supplied these. Standalone,
    the page supplies them itself. */
 *, *::before, *::after { box-sizing: border-box; }
-html { color-scheme: light dark; }
+html { color-scheme: dark light; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 
 :root {
-    --ink: #16202b;
-    --ink-soft: #46596b;
-    --ink-faint: #74899a;
-    --mylar: #eef0ea;
-    --sheet: #f7f8f4;
-    --raised: #ffffff;
-    --rule: #c9cfc6;
-    --rule-soft: #dfe3da;
-    --grid: #ccd3c9;
+    color-scheme: dark;
+    /* Surfaces, recessed to raised. */
+    --mylar: #1c1c1c;
+    --sheet: #171717;
+    --raised: #212121;
+    --rule: #2e2e2e;
+    --rule-soft: #262626;
+    --grid: #2b2b2b;
 
-    --ux: #1f6f8b;
-    --bridge: #a9701a;
-    --api: #4a5f7a;
-    --future: #6b4a8b;
+    /* Text, strong to faint. */
+    --ink: #ededed;
+    --ink-soft: #b4b4b4;
+    --ink-faint: #7e7e7e;
 
-    --alarm: #b3261e;
-    --alarm-fill: #fbeceb;
+    /* One hue per layer. The bridge takes Supabase's own green, because that
+       is what it is; the others sit either side of it without competing. */
+    --ux: #a78bfa;
+    --bridge: #3ecf8e;
+    --api: #60a5fa;
+    --future: #f59e0b;
 
-    --tag-red: #c8322e;
-    --tag-amber: #c99700;
-    --tag-green: #17845a;
+    --brand: #3ecf8e;
+    --alarm: #f87171;
+    --alarm-fill: #2b1a1a;
 
-    --font-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-    --font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+    --tag-red: #f87171;
+    --tag-amber: #fbbf24;
+    --tag-green: #3ecf8e;
+
+    /* Rounding, small to large. Supabase rounds nearly everything; the point
+       is that a dense page of identifiers still reads as a set of objects. */
+    --r-sm: 5px;
+    --r: 8px;
+    --r-lg: 12px;
+    --r-pill: 999px;
+
+    --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --ink: #e7ece8;
-      --ink-soft: #a3b2be;
-      --ink-faint: #77899a;
-      --mylar: #10171e;
-      --sheet: #18212a;
-      --raised: #1d2832;
-      --rule: #35434f;
-      --rule-soft: #27323c;
-      --grid: #2b3844;
+  /* Dark is the default, so light is the override — in both directions. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --mylar: #fbfbfb;
+      --sheet: #f4f4f5;
+      --raised: #ffffff;
+      --rule: #e4e4e7;
+      --rule-soft: #efeff1;
+      --grid: #e0e0e3;
 
-      --ux: #6fb9d0;
-      --bridge: #dda94f;
-      --api: #a3b8d0;
-    --future: #b494d6;
-      --future: #b494d6;
+      --ink: #18181b;
+      --ink-soft: #52525b;
+      --ink-faint: #8b8b93;
 
-      --alarm: #f0625c;
-      --alarm-fill: #331a19;
+      --ux: #7c5cd6;
+      --bridge: #10855a;
+      --api: #2563eb;
+      --future: #b45309;
 
-      --tag-red: #f0625c;
-      --tag-amber: #e8bb3b;
-      --tag-green: #3ecb92;
+      --brand: #10855a;
+      --alarm: #b91c1c;
+      --alarm-fill: #fef2f2;
+
+      --tag-red: #dc2626;
+      --tag-amber: #b45309;
+      --tag-green: #10855a;
     }
   }
 
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --ink: #e7ece8;
-    --ink-soft: #a3b2be;
-    --ink-faint: #77899a;
-    --mylar: #10171e;
-    --sheet: #18212a;
-    --raised: #1d2832;
-    --rule: #35434f;
-    --rule-soft: #27323c;
-    --grid: #2b3844;
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --mylar: #fbfbfb;
+    --sheet: #f4f4f5;
+    --raised: #ffffff;
+    --rule: #e4e4e7;
+    --rule-soft: #efeff1;
+    --grid: #e0e0e3;
 
-    --ux: #6fb9d0;
-    --bridge: #dda94f;
-    --api: #a3b8d0;
+    --ink: #18181b;
+    --ink-soft: #52525b;
+    --ink-faint: #8b8b93;
 
-    --alarm: #f0625c;
-    --alarm-fill: #331a19;
+    --ux: #7c5cd6;
+    --bridge: #10855a;
+    --api: #2563eb;
+    --future: #b45309;
 
-    --tag-red: #f0625c;
-    --tag-amber: #e8bb3b;
-    --tag-green: #3ecb92;
+    --brand: #10855a;
+    --alarm: #b91c1c;
+    --alarm-fill: #fef2f2;
+
+    --tag-red: #dc2626;
+    --tag-amber: #b45309;
+    --tag-green: #10855a;
   }
 
   * { box-sizing: border-box; }
@@ -167,7 +186,7 @@ img { max-width: 100%; }
 
   .toggle:has(input:checked) { background: var(--raised); border-color: currentColor; }
   .toggle:has(input:checked) .dot { background: currentColor; }
-  .toggle:has(input:focus-visible) { outline: 2px solid var(--ux); outline-offset: 2px; }
+  .toggle:has(input:focus-visible) { outline: 2px solid var(--brand); outline-offset: 2px; }
 
   .toggle:has(input:checked) { color: var(--layer, var(--ink)); }
   .toggle[data-layer="gaps"] { --layer: var(--alarm); }
@@ -186,7 +205,7 @@ img { max-width: 100%; }
     cursor: pointer;
   }
   .btn:hover { color: var(--ink); border-color: var(--ink-soft); }
-  .btn:focus-visible { outline: 2px solid var(--ux); outline-offset: 2px; }
+  .btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
   .btn.zoom { width: 2rem; padding: 0.3rem 0; font-size: 0.9rem; line-height: 1; }
 
   .zoom-level {
@@ -201,6 +220,7 @@ img { max-width: 100%; }
   /* ---------------------------------------------------------------- viewport */
   .viewport {
     position: relative;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
     /* A floor in pixels as well as a viewport-relative height: a container that
        reports zero height — a hidden pane, a thumbnail pass, an iframe measured
        before layout settles — would otherwise collapse the board to nothing. */
@@ -259,7 +279,7 @@ img { max-width: 100%; }
   }
 
   .concept.dragging { cursor: grabbing; z-index: 40; }
-  .concept:focus-visible { outline: 2px solid var(--ux); outline-offset: 4px; }
+  .concept:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
 
   .concept > h3 {
     font-family: var(--font-body);
@@ -292,6 +312,7 @@ img { max-width: 100%; }
     position: relative;
     border: 1px solid var(--rule);
     border-left-width: 3px;
+    border-radius: var(--r);
     background: var(--raised);
     padding: 0.22rem 0.5rem 0.3rem;
     min-height: 3rem;
@@ -321,14 +342,17 @@ img { max-width: 100%; }
 
   .sheet .tag {
     font-family: var(--font-mono);
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     flex: none;
-    width: 1.1rem;
+    padding: 0 0.32rem;
     text-align: center;
-    border: 1px solid currentColor;
-    line-height: 1.1;
+    border: 1px solid color-mix(in srgb, var(--layer, var(--rule)) 45%, transparent);
+    background: color-mix(in srgb, var(--layer, var(--rule)) 12%, transparent);
+    border-radius: var(--r-pill);
+    line-height: 1.5;
+    white-space: nowrap;
   }
 
   .sheet .tag { color: var(--layer, var(--ink-faint)); }
@@ -407,12 +431,13 @@ img { max-width: 100%; }
 
   .window {
     width: min(880px, 100%);
+    border-radius: var(--r-lg);
     max-height: 100%;
     display: flex;
     flex-direction: column;
     background: var(--raised);
-    border: 1px solid var(--ink);
-    box-shadow: 6px 6px 0 color-mix(in srgb, var(--ink) 14%, transparent);
+    border: 1px solid var(--rule);
+    box-shadow: 0 18px 40px -12px rgb(0 0 0 / 45%);
     cursor: default;
   }
 
@@ -421,7 +446,7 @@ img { max-width: 100%; }
     align-items: flex-start;
     gap: 1rem;
     padding: 0.8rem 0.9rem 0.7rem;
-    border-bottom: 1px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
   }
 
   .window .kind {
@@ -452,6 +477,7 @@ img { max-width: 100%; }
     flex: none;
     width: 1.7rem;
     height: 1.7rem;
+    border-radius: var(--r-sm);
     border: 1px solid var(--rule);
     background: transparent;
     color: var(--ink-faint);
@@ -460,7 +486,7 @@ img { max-width: 100%; }
     cursor: pointer;
   }
   .close:hover { color: var(--ink); border-color: var(--ink-soft); }
-  .close:focus-visible { outline: 2px solid var(--ux); outline-offset: 2px; }
+  .close:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
   /* min-height:0 is what lets a flex child shrink below its content and scroll,
      instead of pushing the window past the bottom of a short viewport. */
@@ -543,8 +569,8 @@ img { max-width: 100%; }
     font-weight: 700;
     letter-spacing: 0.04em;
     line-height: 1.5;
-    padding: 0 0.22rem;
-    border-radius: 2px;
+    padding: 0 0.24rem;
+    border-radius: var(--r-sm);
     flex: none;
   }
 
@@ -577,10 +603,11 @@ img { max-width: 100%; }
     font-family: var(--font-mono);
     font-size: 0.6rem;
     line-height: 1.5;
-    padding: 0 0.25rem;
+    padding: 0 0.3rem;
     color: var(--ink-soft);
     background: var(--sheet);
-    border: 1px solid var(--rule-soft);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
   }
 
   /* A proposal's cells. "Not specified yet" is deliberately loud — it is a
@@ -633,8 +660,9 @@ img { max-width: 100%; }
   }
 
   .board-note {
-    border: 1px solid var(--ink);
+    border: 1px solid var(--rule);
     border-top: 0;
+    border-radius: 0 0 var(--r-lg) var(--r-lg);
     background: var(--raised);
     padding: 0.5rem 0.9rem;
     font-size: 0.82rem;
@@ -659,10 +687,13 @@ img { max-width: 100%; }
     font-family: var(--font-mono);
     font-size: 0.62rem;
     font-weight: 600;
-    width: 1.1rem;
+    padding: 0 0.34rem;
     text-align: center;
-    border: 1px solid currentColor;
+    border: 1px solid color-mix(in srgb, var(--layer, var(--rule)) 45%, transparent);
+    background: color-mix(in srgb, var(--layer, var(--rule)) 12%, transparent);
+    border-radius: var(--r-pill);
     flex: none;
+    white-space: nowrap;
   }
   .chip { color: var(--layer, var(--ink-faint)); }
 
@@ -705,3 +736,41 @@ img { max-width: 100%; }
   }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* ── the marker column: one dot per store, filled where it holds the value ── */
+  .grid > .cell.mark {
+    display: flex;
+    align-items: center;
+    gap: 0.16rem;
+    padding-top: 0.55rem;
+    align-self: start;
+  }
+
+  .cell .dot,
+  .marks .dot {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
+    border: 1px solid var(--layer, var(--ink-faint));
+    background: transparent;
+    flex: none;
+  }
+
+  .cell .dot.on,
+  .marks .dot.on { background: var(--layer, var(--ink-faint)); }
+
+  .marks span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+  /* Rounding for the remaining objects, so nothing reads as a bare slab. */
+  .stage-label { border-bottom-color: var(--rule); }
+  .concept > h3::before { opacity: 0.7; }
+  .note-block h3 { border-bottom-color: var(--rule); }
+  footer.stamp { border-top-color: var(--rule); }
+  header.masthead { border-bottom-color: var(--rule); }
+  .legend { border-top-color: var(--rule); }
+  .detail { border-radius: var(--r-lg); border-color: var(--rule); }
+
+  /* A selected card is lifted by a brand ring rather than a hard shadow. */
+  .viewport.has-selection .concept.is-selected .sheet:not(.ghost) {
+    box-shadow: 0 0 0 1px var(--brand);
+  }
