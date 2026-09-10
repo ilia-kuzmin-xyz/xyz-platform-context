@@ -1,6 +1,17 @@
 const CARD_W = 300;
-  const COL_GAP = 96;
-  const ROW_GAP = 44;
+  const COL_GAP = 112;
+  const ROW_GAP = 64;
+
+  /**
+   * Bumped whenever the packing geometry changes.
+   *
+   * A saved layout wins over the default one, which is right for a board
+   * somebody arranged — and wrong for one they never touched, because then a
+   * change to the spacing here can never reach them. A layout saved under
+   * different geometry is stale, and stale beats absent only if you never
+   * change the geometry.
+   */
+  const LAYOUT_VERSION = 2;
 
   /**
    * Where the first card sits, measured rather than assumed.
@@ -177,10 +188,27 @@ const CARD_W = 300;
     concept.el.style.top = `${concept.y}px`;
   }
 
+  /** True once the reader has dragged something; their arrangement then wins. */
+  let arranged = false;
+
   function savePositions() {
-    const saved = {};
-    CONCEPTS.forEach(concept => { saved[concept.id] = [Math.round(concept.x), Math.round(concept.y)]; });
-    writeStore(LS_POS, saved);
+    const at = {};
+    CONCEPTS.forEach(concept => { at[concept.id] = [Math.round(concept.x), Math.round(concept.y)]; });
+    writeStore(LS_POS, { v: LAYOUT_VERSION, arranged, at });
+  }
+
+  /** The saved layout, but only if this build packed it and a human arranged it. */
+  function savedArrangement() {
+    const saved = readStore(LS_POS);
+    if (!saved || saved.v !== LAYOUT_VERSION || !saved.arranged) return null;
+    return saved.at ?? null;
+  }
+
+  /** Re-pack unless the reader has arranged the board themselves. */
+  function repack() {
+    if (arranged) return;
+    tidy();
+    savePositions();
   }
 
   /* ------------------------------------------------------------------- view */
@@ -247,7 +275,9 @@ const CARD_W = 300;
   viewport.addEventListener('pointerdown', event => {
     if (event.button !== 0 || !event.isPrimary) return;
     const card = event.target.closest('.concept');
-    viewport.setPointerCapture(event.pointerId);
+    // Capture keeps the gesture alive past the cursor leaving the board, but it
+    // throws if the pointer is already gone — which must not lose the drag.
+    try { viewport.setPointerCapture(event.pointerId); } catch { /* no capture */ }
 
     drag = {
       card: card ? byId.get(card.dataset.id) : null,
@@ -289,7 +319,7 @@ const CARD_W = 300;
 
     if (drag.card) {
       drag.card.el.classList.remove('dragging');
-      if (drag.moved) savePositions();
+      if (drag.moved) { arranged = true; savePositions(); }
       else select(drag.card.id);
     } else if (!drag.moved) {
       select(null);
@@ -306,7 +336,7 @@ const CARD_W = 300;
     viewport.classList.remove('panning');
     if (drag.card) {
       drag.card.el.classList.remove('dragging');
-      if (drag.moved) savePositions();
+      if (drag.moved) { arranged = true; savePositions(); }
     }
     drag = null;
   });
@@ -621,6 +651,8 @@ const CARD_W = 300;
   function setLayer(layer, on) {
     document.querySelectorAll(`.sheet[data-layer="${layer}"]`).forEach(sheet => { sheet.hidden = !on; });
     layoutStacks();
+    // Hiding a sheet changes every card's height, so the packing is stale.
+    repack();
   }
 
   document.querySelectorAll('[data-band]').forEach(input => {
@@ -643,6 +675,7 @@ const CARD_W = 300;
   });
   document.getElementById('fit').addEventListener('click', fit);
   document.getElementById('tidy').addEventListener('click', () => {
+    arranged = false;
     tidy();
     savePositions();
     openingView();
@@ -668,8 +701,9 @@ const CARD_W = 300;
   layoutStacks();
   tidy();
 
-  const savedPositions = readStore(LS_POS);
+  const savedPositions = savedArrangement();
   if (savedPositions) {
+    arranged = true;
     CONCEPTS.forEach(concept => {
       const at = savedPositions[concept.id];
       if (Array.isArray(at) && at.length === 2) {
@@ -691,7 +725,7 @@ const CARD_W = 300;
       if (sized || !viewport.clientWidth || !viewport.clientHeight) return;
       sized = true;
       layoutStacks();
-      if (!readStore(LS_POS)) tidy();
+      repack();
       openingView();
     });
     observer.observe(viewport);
@@ -700,7 +734,7 @@ const CARD_W = 300;
   addEventListener('resize', draw);
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => {
-      if (!readStore(LS_POS)) tidy();
+      repack();
       draw();
     });
   }
