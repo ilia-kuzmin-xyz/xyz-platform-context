@@ -5,6 +5,16 @@ we write today, and the **api-v2 schema** that replaces it. Each card on the boa
 concept, carrying the three names it goes by as offset overlay sheets; clicking one opens a
 column-by-column comparison with keys, types and permitted values.
 
+## Two boards
+
+| Page | What it shows |
+|---|---|
+| `index.html` | the map — every concept and the three names it goes by |
+| `coverage.html` | the same board with two more layers: what has **landed** in Supabase, and where the **UI is ahead of the data** |
+
+`coverage-model.js` only pushes onto `LAYERS` and `CONCEPTS`, so the two boards
+cannot fall out of step, and `npm run check` validates both.
+
 ## Run it
 
 ```bash
@@ -34,7 +44,9 @@ the root directory is enough. Vercel serves the files directly; it never runs `s
 |---|---|
 | `index.html` | the document and the page's markup |
 | `styles.css` | all styling; layer colours arrive as `--layer`, so no rule names a layer |
-| `model.js` | the data — `LAYERS`, `TABLES`, `CONCEPTS` |
+| `model.js` | the data — `LAYERS`, `CONCEPTS` |
+| `coverage-model.js` | the coverage board's two extra layers, added to the above |
+| `data/` | the generated column registry — never edited by hand |
 | `app.js` | the board, the overlay stacks and the comparison window |
 | `server.js` | local static server, for `npm run dev` only |
 | `tools/` | the generator and the model checker |

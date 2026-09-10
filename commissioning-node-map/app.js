@@ -57,7 +57,8 @@ const CARD_W = 300;
     toggle.className = 'toggle';
     toggle.dataset.layer = layer.key;
     toggle.style.setProperty('--layer', layer.colour);
-    toggle.title = `${layer.label} — ${layer.role === 'surface' ? 'screens' : 'a place data lives'}`;
+    const ROLE_IS = { surface: 'screens', store: 'a place data lives', status: 'how far it got' };
+    toggle.title = `${layer.label} — ${ROLE_IS[layer.role] ?? layer.role}`;
 
     const input = document.createElement('input');
     input.type = 'checkbox';
@@ -159,8 +160,12 @@ const CARD_W = 300;
   }
 
   /* ----------------------------------------------------------- positioning */
-  const LS_POS = 'cx-node-map-layout';
-  const LS_STATE = 'cx-node-map-sheets';
+  /* Each board keeps its own layout and layer state: the coverage page carries
+     extra layers, so its cards are a different height and its packing is not
+     the map's. Set window.BOARD_ID before this script to name a board. */
+  const BOARD = typeof BOARD_ID === 'string' ? BOARD_ID : 'map';
+  const LS_POS = `cx-node-map-layout:${BOARD}`;
+  const LS_STATE = `cx-node-map-sheets:${BOARD}`;
 
   function readStore(key) {
     try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (error) { return null; }

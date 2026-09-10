@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Commissioning Node Map</title>
-<meta name="description" content="How the commissioning screens, the Supabase bridge and api-v2 line up — one layered map with the mismatches marked.">
+<title>Commissioning Coverage</title>
+<meta name="description" content="Which parts of the commissioning design have landed in Supabase, and which the screens offer with no working storage path.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🗺️</text></svg>">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -13,8 +13,8 @@
 <body>
 
 <header class="bar">
-  <h1>Commissioning Node Map</h1>
-  <a class="board-link" href="coverage.html">Coverage &rarr;</a>
+  <h1>Commissioning Coverage</h1>
+  <a class="board-link" href="index.html">&larr; Map</a>
   <span class="bar-sep" role="presentation"></span>
 
   <span class="group-label">Sheets</span>
@@ -32,7 +32,7 @@
 
 <main class="viewport" id="viewport">
   <div class="canvas" id="canvas"></div>
-  <p class="hint">drag to pan · scroll to zoom · click a card to compare · Tidy up re-packs the board</p>
+  <p class="hint">the map, plus what landed in Supabase and what the screens offer with nowhere to put it</p>
 
   <div class="scrim" id="scrim" hidden>
     <section class="window" id="window" role="dialog" aria-modal="true" aria-labelledby="window-title"></section>
@@ -40,7 +40,9 @@
 </main>
 
 <script src="data/columns.js"></script>
+<script>const BOARD_ID = "coverage";</script>
 <script src="model.js"></script>
+<script src="coverage-model.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

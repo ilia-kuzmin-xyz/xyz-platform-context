@@ -26,6 +26,8 @@ img { max-width: 100%; }
     --bridge: #3ecf8e;
     --api: #60a5fa;
     --future: #f59e0b;
+    --landed: #3ecf8e;
+    --ahead: #f472b6;
 
     --brand: #3ecf8e;
     --alarm: #f87171;
@@ -66,6 +68,10 @@ img { max-width: 100%; }
       --bridge: #10855a;
       --api: #2563eb;
       --future: #b45309;
+    --landed: #10855a;
+    --ahead: #be1558;
+      --landed: #10855a;
+      --ahead: #be1558;
 
       --brand: #10855a;
       --alarm: #b91c1c;
@@ -856,3 +862,17 @@ img { max-width: 100%; }
 
   /* A toggle carries the layer's badge, so the bar doubles as the key. */
   .toggle .chip { margin-right: -0.1rem; }
+
+  /* A link to the other board sits with the title, not with the controls. */
+  header.bar a.board-link {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    text-decoration: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-pill);
+    padding: 0.2rem 0.6rem;
+    white-space: nowrap;
+  }
+  header.bar a.board-link:hover { color: var(--ink); border-color: var(--ink-soft); }
+  header.bar a.board-link:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }

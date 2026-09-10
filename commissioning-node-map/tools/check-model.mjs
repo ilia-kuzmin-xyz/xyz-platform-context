@@ -45,12 +45,23 @@ const literal = (name, open, close) => {
   throw new Error(`unterminated ${name}`);
 };
 
+const problems = [];
+const fail = (where, what) => problems.push(`${where}: ${what}`);
+
 const TBD = Symbol.for('not specified yet');
 const LAYERS = literal('LAYERS', '[', ']');
 const CONCEPTS = literal('CONCEPTS', '[', ']');
 
-const problems = [];
-const fail = (where, what) => problems.push(`${where}: ${what}`);
+/* coverage-model.js only adds to those two, so applying it here checks the
+   coverage board by the same rules — otherwise its layer would be exactly the
+   unchecked hand-written data this tool exists to catch. */
+const coveragePath = path.join(ROOT, 'coverage-model.js');
+if (fs.existsSync(coveragePath)) {
+  const warnings = [];
+  new Function('LAYERS', 'CONCEPTS', 'console',
+    fs.readFileSync(coveragePath, 'utf8'))(LAYERS, CONCEPTS, { warn: m => warnings.push(m) });
+  warnings.forEach(warning => problems.push(`coverage-model.js: ${warning}`));
+}
 
 /* ────────────────────────────────────────────────────────────────── layers */
 const keys = new Set();
@@ -61,7 +72,8 @@ for (const layer of LAYERS) {
   }
   if (keys.has(layer.key)) fail(where, 'duplicate key');
   keys.add(layer.key);
-  if (!['surface', 'store'].includes(layer.role)) fail(where, `role must be surface or store, not ${layer.role}`);
+  const ROLES = ['surface', 'store', 'status'];
+  if (!ROLES.includes(layer.role)) fail(where, `role must be one of ${ROLES.join(', ')}, not ${layer.role}`);
   if (layer.extends && !LAYERS.some(other => other.key === layer.extends)) {
     fail(where, `extends \`${layer.extends}\`, which is not a layer`);
   }
