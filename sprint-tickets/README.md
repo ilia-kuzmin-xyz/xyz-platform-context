@@ -3763,3 +3763,36 @@ Two **Critical** tickets, PLT-2952 and PLT-2972, have had an unanswered clarific
 only eligible tickets in the sprint. The "do not re-ask" rule still holds for Jira (a second comment
 is noise), but five days on Critical is worth a human hearing about, so it went in the run summary
 instead.
+
+## 2026-09-10, 08:05 — overnight: master moved again, a parallel session re-synced, all four still green
+
+Nothing needed doing this morning. Recording it so the next run doesn't redo the sync.
+
+**Master is now `ed60719`** — #2192 ("Drop shortid, an unused dependency holding a vulnerable nanoid
+in the tree") merged at 17:30 on 09-09. That is the third of the week's Trivy items and the only one
+whose **fix PR actually merged**; the other two (js-yaml #2209, libuuid #2205) were closed.
+
+**A parallel session merged the new master into all four branches at 07:41–07:42**, authoring as the
+user, same as this one would have:
+
+| PR | Branch | head 09-09 → 09-10 | build |
+|----|--------|--------------------|-------|
+| #2202 | `PLT-3038` | `8b0e392` → `893317f` | ✅ 07:58:44 |
+| #2203 | `PLT-2999` | `a731065` → `d21dc97` | ✅ 08:01:10 |
+| #2204 | `PLT-2966` | `5cd3fd9` → `b22c6d6` (merged `PLT-2968`, not master) | ✅ 08:02:14 |
+| #2186 | `PLT-2968` | `87c1386` → `beed07e` (merged 16:49 on 09-09) | ✅ 17:07:35 |
+
+Verified rather than assumed: no `<<<<<<<`/`>>>>>>>` in any of the four trees, and
+`git diff master...<branch>` on each is still **only that ticket's own files** — 4 files on
+`PLT-3038`, 9 on `PLT-2999`. So the merges brought in master's changes and nothing else.
+
+Sonar gate passed on all four again. #2202 now reports **0** new issues (it was 0 yesterday too);
+#2203 and #2204 still carry **1 new non-blocking issue** each. Copilot re-reviewed #2186 at
+16:49–16:53 on 09-09 and **added no new threads** — still 32, all 32 resolved.
+
+### Gotcha for the next run: `actions_list` can serve a stale page
+
+`list_workflow_runs` returned runs from **09-03** with `total_count` dropped from 4171 to 3836,
+i.e. a stale or differently-sharded page, while the runs I wanted were minutes old. **Per-PR
+`get_check_runs` was correct and current.** When a run listing disagrees with what you just pushed,
+trust the PR's own check runs — do not conclude the run never started.
