@@ -3796,3 +3796,43 @@ Sonar gate passed on all four again. #2202 now reports **0** new issues (it was 
 i.e. a stale or differently-sharded page, while the runs I wanted were minutes old. **Per-PR
 `get_check_runs` was correct and current.** When a run listing disagrees with what you just pushed,
 trust the PR's own check runs — do not conclude the run never started.
+
+### 08:05 — all five re-synced PRs GREEN, including the one that was red
+
+| PR | Branch | Head | `build` | Sonar | Copilot |
+|----|--------|------|---------|-------|---------|
+| #2197 | `PLT-3084` | `26882ea` | ✅ 08:00:24 | ✅ | ✅ |
+| #2194 | `PLT-3099` | `7d8fdc1` | ✅ 08:01:08 | ✅ | ✅ |
+| #2202 | `PLT-3038` | `893317f` | ✅ 07:58:44 | ✅ | — |
+| #2203 | `PLT-2999` | `d21dc97` | ✅ 08:01:10 | ✅ | — |
+| #2204 | `PLT-2966` | `b22c6d6` | ✅ 08:02:14 | ✅ | — |
+
+**No outstanding CI work in this repo.** #2197's Trivy failure is fixed by the master merge alone —
+no hotfix PR was needed, and none should be raised.
+
+### One new review thread, disagreed with and resolved
+
+Pushing to `PLT-3084` re-triggered `copilot-pull-request-reviewer`, which raised a **new** finding on
+`useActivityMenu.ts:90` — that the `requestAnimationFrame` callback re-reads `treeRef.current`
+instead of the captured `tree`, so `selectAll()` "could run on a different tree instance".
+
+**Disagreed, with reasons, and resolved.** Recording the reasoning here because this exact spot will
+attract the same comment on every future Copilot run:
+
+- `<Tree>` in `activity-linking-list.tsx` is mounted with **no `key`**, so an activity switch does
+  *not* remount it — react-arborist updates the same `TreeApi` in place. That is the very behaviour
+  the panel's `useEffect([id]) → deselectAll()` exists to compensate for (the instance and its
+  `selection.ids` survive the switch). **There is no second instance for the frame to land on.**
+- `<Tree>` *is* conditionally rendered on `showTree`, so it can unmount — and React nulls a ref
+  object on unmount, so `treeRef.current?.selectAll()` correctly no-ops. **Capturing `tree` would be
+  worse**: the captured reference stays a live `TreeApi` after unmount and would mutate a detached
+  store. Re-reading the ref is deliberate.
+- The one genuinely real ordering — click Select all, activity switches within the same ~16ms frame,
+  `deselectAll()` runs, then the frame re-selects — **is not fixed by capturing the instance either**
+  (same object either way). The actual fix is cancelling the pending frame on `id` change; not added,
+  because the suite cannot be run locally (no `NPM_TOKEN`, so no `node_modules`) and it is unprovokable
+  by hand.
+
+> **Pattern worth keeping:** a review bot's finding can point at a real line while naming a mechanism
+> that cannot happen. Check whether the component actually remounts (does it have a `key`?) before
+> accepting an "instance changed underneath you" argument.
