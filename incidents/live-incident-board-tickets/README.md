@@ -45,6 +45,43 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-10 (scheduled) — 8 in-scope tickets (up from prior day's 6 in the 09-09 interactive pass), 2 brand-new (PLT-3115, PLT-3116), 4 left scope (2 resolved for the customer, 1 resolved independently by Darminder, 1 an anomalous Blocked transition), 6 confirmed unchanged, zero Jira actions taken
+
+Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules
+above. **This session started on a stale, diverged git branch** (`claude/lucid-cori-wn5g94`, a
+shallow clone whose local `origin/main` ref was stale) — resolved by unshallowing and fast-forwarding
+onto `main` before any board work started; see the repo's own `.claude/CLAUDE.md` policy. No merge
+conflict existed once the real history was visible (full detail: this run's git log, commit adjacent
+to this one). Every in-scope ticket's live comments/status were fetched fresh, not read from cache.
+
+### Left scope this run
+
+| Ticket | Was | Now | What happened |
+|---|---|---|---|
+| PLT-3101 | With Customer | **Done** | Ilia's 09-04 fix (2 elements marked installed) confirmed by the customer; Freshdesk auto-closed 09-08. Folder renamed to `resolved-viewer-and-model` |
+| PLT-3104 | (untagged, Open) | **Ready For QA** | Fix built as PR #2199 (per this session's own prior commits); folder renamed to `resolved-quality-management` |
+| PLT-3033 | Open | **With Technical Support** | Darminder opened the customer's XER independently and concluded the 08-02 upload itself was malformed — arrived at without the proj_id/multi-project-export check this folder had queued since 08-19. Customer asked to confirm by re-uploading; our queued hand-off draft is superseded, not sent |
+| PLT-3091 | In Code Review (09-09 measurement) | **Blocked** | Anomalous: the 09-09 entry in this ticket's own folder measured that no transition into `Blocked` exists for the Live Incident workflow, and deliberately left it at In Code Review for that reason. Hours later it is in Blocked anyway — not done by this routine. Recorded, not chased; out of scope either way |
+
+### Group A (8)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | **Brand new** (created 09-09, 1 day old). "Select same type" → "Isolate" silently no-ops. Full code trace done; mechanism narrowed to a selection-bridge dbId→elementId gap, not the Pattern-1 linked-elements path. One console check (drafted) would confirm or redirect it | 3 (pending one check) |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other (Cloud Admin device page — no existing domain doc) | Open · Major | **Brand new** (created 09-09, 1 day old). Customer's literal mechanism doesn't match current code: the field that actually saves already has `autoComplete='off'` + `data-lpignore='true'`; a sibling delete-confirmation field has neither, but isn't the one that saves. Need to know which field the customer means before fixing anything | 1, with a no-risk class-2 hardening described but not applied |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08 comment-wise (111646); the 09-09 interactive session's call-site correction (the true-north lever posted 09-08 has its only caller commented out) already lives in this folder, not yet relayed to the customer | 4 with a class-1 chase attached |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-17 (24 days). The 09-09 retraction of the 08-28 decision-request draft (numbers predated PR #2084) already lives in this folder; Gennaro's Staging undercount (now 29 days old) is the one open item | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk auto-reopen, no new human comment) | Unchanged in substance since 09-09; assigned to Ilia, 16 days of human silence, customer has reopened twice | 1 |
+| [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | Unchanged since 09-02 (8 days); the 09-09 close-out draft to Yash already lives in this folder, unposted | 1 (on us, but answered) |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged, now **66 days** stale (last human comment 07-06), **26th consecutive run** recommending the same close-out; the 09-09 pass reframed it as a direct chase to Yash and found a 4th Cat3→Cat4 inversion | 1 — stale, unresponded (on us) |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk auto-reopen, no new human comment) | Unchanged since 09-09; Ilia's fix explanation posted and thanked, side question to Darminder (Power BI template reuse) still queued | 1 |
+
+### Group B (0) — still empty
+
+No ticket on the board carries `Ready For Development` or `Dev In Progress` today.
+
+---
+
 ## Run: 2026-09-08 (scheduled) — 8 in-scope tickets (up from 7 on 09-07), 1 brand-new (PLT-3109), PLT-2651 correction reverses yesterday's Group B demotion, PLT-3033 has a real update after a 28-day wait, 5 confirmed unchanged, zero Jira actions taken
 
 Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules

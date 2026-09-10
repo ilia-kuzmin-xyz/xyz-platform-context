@@ -236,3 +236,11 @@ Wants its own ticket, gated on the log check.
   separate, minor, unraised.
 - **PAPI-3385** (storage serving `Content-Disposition`) would delete the blob-fetch dance in
   both carousels and remove this bug class entirely.
+
+## 2026-09-10 — left scope: now Ready For QA behind PR #2199
+
+Live re-fetch. Status is **Ready For QA** (assignee Gennaro Boccia, `updated` 2026-09-08 16:54).
+Per this session's own commit history the branch was renamed and the fix now sits on PR **#2199**.
+Folder renamed `(untagged)` → `resolved-quality-management` to match the board-tracking convention
+for tickets that have left Group A into the dev/QA pipeline. No further action needed from this
+routine unless QA bounces it back.

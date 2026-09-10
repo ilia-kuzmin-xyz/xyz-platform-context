@@ -330,3 +330,21 @@ It is the only thing left that we cannot determine ourselves, and it takes site 
   into scope — via the runbook's "is deletion even the right fix?" gate.
 
 Both branches are already written up, so whichever answer comes back needs no fresh investigation.
+
+---
+
+# 2026-09-10 — RESOLVED. Comment 111276 (09-04) is what actually got posted; ticket now Done
+
+Live re-fetch. Status is now **Done** (Freshdesk `#7819` closed 2026-09-08 08:14, comment `111519`).
+The posted comment is close to the "post-verification" draft above but not identical: Ilia's 111276
+(2026-09-04 12:41) says the 2 elements were **marked as installed** directly ("on the customer's
+confirmation that the activity is complete"), not that a link-deletion runbook ran. No CSV attached,
+no runbook steps executed — the simpler path (mark installed, keep the links, since the elements are
+valid) was taken instead of this file's remediation plan. Also corrects an earlier comment's "16 dead
+links" language to "real, correctly linked elements whose geometry never made it into any model" —
+matching this file's 09-03 (third pass) retraction almost exactly.
+
+The 835-vs-819 count mismatch itself was **not** resolved here — 111276 explicitly routes it to
+PLT-2874, which is where this routine has been tracking it since. Folder renamed
+`groupA` → `resolved` (viewer-and-model unchanged). No further action needed on PLT-3101 from this
+routine.

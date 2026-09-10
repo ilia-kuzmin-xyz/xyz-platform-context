@@ -887,3 +887,17 @@ In Code Review state and misrepresenting work that is finished.
 config** — a PLT Live Incident cannot enter Blocked. Do not promise a stakeholder that a live incident
 will be "moved to Blocked"; link the blocker instead. Always read the live transition list for the
 **issue type in hand**, since two PLT tickets in the same project can offer completely different sets.
+
+## 2026-09-10 — correction: it IS in Blocked now. The 09-09 conclusion above was right about the API, wrong about the outcome
+
+Live re-fetch: status is **Blocked** (id `10002`), `updated` 2026-09-09T18:06:30+0100 — hours after
+the entry above measured that no transition into Blocked exists for this issue type and deliberately
+left it at In Code Review. Nobody on this session's side performed a transition (hard rule; also the
+transition list itself was the thing measured as empty).
+
+**Not re-litigated, just flagged plainly:** either (a) a human moved it through a UI path this
+session's API read didn't see (e.g. an admin "bulk change workflow" screen, which edits status
+directly rather than walking the transition graph), or (b) the workflow scheme changed between the
+09-09 measurement and now. Both are outside what this routine can observe from here. The ticket is
+out of scope either way (`Blocked` is an exclusion), so no action follows from this — recorded only
+so the next run doesn't re-derive "Blocked is unreachable" from a board state that has since moved.

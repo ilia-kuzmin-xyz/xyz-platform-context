@@ -448,3 +448,15 @@ proj_id FROM PROJWBS`) — now finally possible, just not from this session.
 a hypothesis; what changed is that the artifact needed to test it now exists and the only remaining
 gap is someone with file access running the two-line check above, not another round of "ask the
 customer."
+
+## 2026-09-10 — left scope: Darminder resolved it independently, without the two-line check above
+
+Live re-fetch. Status is now **With Technical Support**. Darminder opened the XER himself (comment
+`111661`, 09-08 16:52): *"looking at the project this appears to be resolved by uploading the
+correctly formatted schedule and the ticket can be closed?"* — i.e. the **08-02 upload itself was
+malformed**, not a downstream parsing bug. That's the same family as H1 (bad input, not a defect in
+our ingestion) but arrived at from the file directly rather than via the `proj_id`/multi-project-export
+test this folder had queued since 08-19. **The two-line check was never run** — Darminder's read
+didn't need it. Yash asked the customer to confirm by re-checking on 09-08; no reply yet as of this
+run. Nothing left for this routine: the hand-off draft in `recommended-action.md` is superseded by
+Darminder's own resolution and should not be sent.
