@@ -85,3 +85,49 @@ whether this is the right mechanism at all.
   the screen recording would show this if the browser console were open, but was not visible to us
   (media unopenable, see above).
 - Whether this reproduces on more than one project — only LVN1-2 reported so far, cohort unknown.
+
+---
+
+## 2026-09-10 (later run) — independent confirmation of the mechanism, plus a decisive check
+
+This run re-derived the trace above from source without having read this file first (it was written
+by the 08:00 sweep, commit `638434d`). It landed on the **same** chain, by the same file:line hops:
+`isolateSelected` → `viewerService.getAggregateSelection()` → `selectionStore.selectedElements` →
+the `modelDbId2ElementId` gate in `_handleSelectionChange` → the empty-selection no-op branch in
+`applyFilters`. Two independent reads converging is worth recording; it does **not** upgrade the
+hypothesis to verified — both reads are static, and neither instrumented a live viewer.
+
+**One detail the earlier note doesn't have, which sharpens the case.** `selectSameTypes` already
+runs its matched dbIds through a filter before selecting them — `buildAggregateEntry`
+(`use-context-menu-actions.tsx:214-238`) calls `filterByVisibilitySets` with `hiddenNodes`,
+`isolatedNodes` **and** `disabledDbIds` (`projectService.modelId2model.get(model.id)?.disabledDbIds`).
+So the code already has a platform-side notion of "dbIds this app knows about" at the exact point
+where it builds the selection — but it filters on *visibility*, never on whether the dbId resolves
+through `modelDbId2ElementId`. That asymmetry is the shape of the bug: the selection is allowed to
+contain ids the isolate path structurally cannot act on. It also suggests where a fix goes —
+`buildAggregateEntry` is the natural place to either drop unmapped ids or count them for a message.
+
+**Replace the eyeballed console check with this.** The 08:00 note asks for
+`selectionStore.selectedElements.size` compared against "what's highlighted on screen", which is a
+judgement call on a dense model. Both numbers are readable directly, so compare them:
+
+```js
+// after Select same type, BEFORE clicking Isolate. Read-only.
+const vs = window.projectService.viewerService
+const forge = vs.viewer.getAggregateSelection()
+  .reduce((n, s) => n + (s.selection || s.ids || s.dbIdArray || []).length, 0)
+const app = vs.getAggregateSelection().reduce((n, s) => n + s.ids.length, 0)
+console.table([{ forge, app, dropped: forge - app }])
+```
+
+Note the two `getAggregateSelection` are **different functions** — `vs.viewer.…` is Forge's native
+selection, `vs.…` is the app-store reconstruction (`viewer-service.ts:636`). That is the whole bug
+in one line.
+
+- `app === 0` while `forge > 0` → the hard no-op is fully explained; hypothesis confirmed.
+- `0 < app < forge` → the bridge drops *some* ids; expect a partial isolation, not a no-op.
+- `app === forge` → hypothesis is wrong, fault is downstream in `filter-service.ts`. Per the
+  2026-09-09 Forge-BoxSelection lesson: measure before believing our own layer is at fault.
+
+Watch the console for `No data found for key:` (`viewer-service.ts:674`) during the same action —
+that warning firing is a second, independent signal of the same drop.
