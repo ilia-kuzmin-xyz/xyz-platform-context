@@ -664,3 +664,81 @@ without a single live check. The one thing that settled it took the operator two
 The 09-08 rule (*"never put a ✅ on a test scenario you have not traced"*) was too weak: tracing code
 is not evidence. **A fix for a live-incident ticket needs the bug observed failing at least once
 before the fix is written.** Added to `live-incident-run-instructions.md`.
+
+---
+
+## 2026-09-10 — a much better candidate for the 1,239 than the visibility theory
+
+Found while tracing **PLT-3116** (the new "can't isolate after Select same type" incident). Both
+tickets are the same underlying fault seen from opposite ends: **`selectionStore.selectedElements`
+is a reconstruction of the Forge selection, not a copy of it, and it can diverge in both
+directions.** PLT-3116 is the shrink direction (unmapped dbIds silently dropped → isolate no-ops).
+PLT-3099 may be the **grow** direction.
+
+### The mechanism
+
+`selection-service.ts:380-393`, inside `_handleSelectionChange`:
+
+```ts
+if (!isBulkSelection) {
+  for (const dbId of dbIdArray) {
+    const mapKey = `${modelId}-${dbId}`
+    const hasElementId = this._viewerService.modelDbId2ElementId.has(mapKey)
+    if (!hasElementId) {
+      const childIds = parentToChildrenMap.get(dbId) || []
+      childIds.forEach(childId => {
+        if (!allowedDbIds || allowedDbIds.has(childId)) {
+          expandedDbIds.add(childId)
+        }
+      })
+    }
+  }
+}
+```
+
+Every selected dbId that has **no elementId** is expanded to **all of its children**. The store
+therefore ends up holding more elements than the user selected in the viewer. And
+`linkingService.linkSelectedElements()` maps `selectionStore.selectedElements` directly
+(`linking-service.ts:378`) — so the link action links the *expanded* set, not the box result.
+
+Select ~400 visible leaves whose box also crosses a handful of container/group nodes with no
+elementId, and each of those contributes its entire child list. Getting from ~400 to 1,239 needs
+only a few such containers. That fits the reported numbers far better than the visibility theory.
+
+### Two things worth flagging about this code
+
+1. **The child expansion is not gated on `isNwdModel`.** The block comment at `:329-332` says "For
+   NWD models with small selections, find parents for unmapped nodes and expand containers to
+   children", and the parent-finding block at `:339` *is* gated on `isNwdModel` — but the child
+   expansion loop at `:380` is not. It runs on every model type, Revit included. Intent and
+   implementation disagree; that gap may be the whole defect.
+2. **`allowedDbIds` only constrains the expansion when filters are active** (`:377` — it is `null`
+   when `getModelActiveFilterCount() === 0`). With no filters, the expansion is unbounded.
+
+### Status: hypothesis, NOT verified — and note what it would replace
+
+This is a static read. It has **not** been reproduced, and per the 2026-09-09 lesson on this very
+ticket (asserting a fix before observing the bug fail) it must not be written up as the cause until
+someone measures it.
+
+If it holds, it means **PR #2194 is aimed at the wrong layer**, which the 09-09 live test already
+suggested independently: Forge's geometric box selection was measured to exclude isolated-out
+elements on its own (`{total: 1, hidden: 0, visible: 1}` in every drag direction, pre-fix), so
+filtering the box result by visibility cannot be what produced 1,239. The expansion above is
+downstream of the box entirely and would fire regardless of visibility.
+
+### The measurement that settles it
+
+Same one-liner as PLT-3116's, but here the interesting sign is **negative `dropped`**:
+
+```js
+const vs = window.projectService.viewerService
+const forge = vs.viewer.getAggregateSelection()
+  .reduce((n, s) => n + (s.selection || s.ids || s.dbIdArray || []).length, 0)
+const app = window.projectService.selectionStore.selectedElements.size
+console.table([{ forge, app, inflation: app - forge }])
+```
+
+Drag-box a region of an ATL08-like model with no filters active. `app > forge` confirms the
+expansion is inflating the set that linking consumes. Do it on a model with container/group nodes —
+on a flat model with every dbId mapped, the expansion has nothing to add and the numbers will match.
