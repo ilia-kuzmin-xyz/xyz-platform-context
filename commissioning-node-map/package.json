@@ -1,11 +1,13 @@
 {
   "name": "commissioning-node-map",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "How the commissioning screens, the Supabase bridge and api-v2 line up",
   "scripts": {
     "dev": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "schema": "node tools/build-columns.mjs",
+    "check": "node tools/check-model.mjs"
   },
   "engines": {
     "node": ">=18"
