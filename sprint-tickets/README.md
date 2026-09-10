@@ -3836,3 +3836,49 @@ attract the same comment on every future Copilot run:
 > **Pattern worth keeping:** a review bot's finding can point at a real line while naming a mechanism
 > that cannot happen. Check whether the component actually remounts (does it have a `key`?) before
 > accepting an "instance changed underneath you" argument.
+
+## 2026-09-10, 09:40 — #2204 CLOSED and folded into #2186; PLT-2966 now ships there
+
+**#2204 (PLT-2966) was closed without merging** at 09:16. The stated reason, in a comment on it:
+
+> Folded into #2186 — commits 072ce08b9 and 1516d0342 cherry-picked onto PLT-2968, tests green
+> there. Kept as one PR because PLT-2968 is not finished without this: its design has the tag show
+> the override *and* its date-time, and both draw the same badge on the same component. The stack
+> had already taken six merge commits to stay level with its base, for +252/-1 of real change.
+
+That reverses the stacking call I made on 09-05, and on the evidence it is the better one: six merge
+commits of overhead for +252/-1 of change is a bad trade, and the two tickets genuinely draw the
+same badge on the same component.
+
+### Verified the work was not lost — this is the part that mattered
+
+A close-without-merge is where work disappears, so I checked the tree rather than trusting the
+comment. **Both cherry-picks are on `PLT-2968`:**
+
+- `3d0a5649c` "PLT-2966: show when a readiness tag was completed, beside its tick"
+- `919ccdc64` "PLT-2966: update the one existing assertion that read done off the count"
+
+All four files are in `git diff master...PLT-2968` (`use-readiness-steps.ts` +59,
+`readiness-ladder.tsx` +243, and both test files), the i18n keys `completedAt` / `completedDetail`
+are at `main.json:113-114`, and the `readiness-step-completed-wt-1` assertions are in
+`readiness-ladder.test.tsx`. Nothing stranded.
+
+> **A cherry-pick's source SHA is NOT reachable from the target branch** — the pick makes a new
+> commit. `git merge-base --is-ancestor 072ce08b9 origin/PLT-2968` says "no" and that is the correct
+> answer for a healthy cherry-pick. This is the mirror image of the 09-08 lesson (a reachable commit
+> whose change had been reverted): **reachability and applied-ness are independent, so verify the
+> tree either way.**
+
+### Current board
+
+| PR | Ticket(s) | State | CI on current head |
+|----|-----------|-------|--------------------|
+| #2202 | PLT-3038 | **ready for review** (taken out of draft by the user at 09:17) | ✅ `893317f` 07:58 |
+| #2203 | PLT-2999 | draft | ✅ `d21dc97` 08:01 |
+| #2186 | PLT-2968 + PLT-2967 + **PLT-2966** | ready for review | ✅ `919ccdc` 09:34 |
+| #2204 | PLT-2966 | **closed**, folded into #2186 | — |
+
+Copilot re-reviewed #2186 on the new head (09:16–09:22) and **raised nothing new**: still 32
+threads, all 32 resolved. Sonar gate passed. **0 open review comments across every PR.**
+
+So PLT-2966 is no longer separately reviewable — anyone tracking that ticket should look at #2186.
