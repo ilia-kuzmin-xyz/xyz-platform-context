@@ -2213,3 +2213,53 @@ migration story for templates already carrying English labels.
 - **Orphan children in `groupItems`** — a child naming an absent header still lands in no group.
   Same shape as `f9f1825` and I'd rather it degrade to ungrouped, but that is a behaviour change
   nobody asked for; smuggling one into a refactor is how refactors get a bad name. Flagged only.
+
+### 2026-09-11 (round 4) — I had to revert my own fix from an hour earlier
+
+`d179b83`. The more useful half of this entry is the mistake.
+
+**The `isChecklistSection` guard (9fd7b13) was wrong, in the direction it was meant to protect.**
+
+Copilot suggested applying the same guard to the instance read path. Checking whether to, rather than
+just doing it, is what exposed that the original was a defect. Both splitters use a header's section
+to **end the run of items before it**:
+
+```ts
+if (item.type === 'header' && item.sectionType) { section = item.sectionType; continue }
+```
+
+Drop an unrecognised value to `undefined` and that branch stops firing, so:
+- the header **stops dividing** — a `PRECONDITIONS` run bleeds into everything after it;
+- in the builder it stops being skipped and becomes an ordinary **editable row**.
+
+Strictly worse than the bogus-union-value it prevented, and landing on exactly the templates the
+guard existed for.
+
+> **The lesson is about the shape of the fix, not the bug.** The cast *was* a real lie. But faced
+> with "this value might not fit the type", I reached for **discard the value** when the honest move
+> was **widen the type** — the column is text, and every consumer only ever asks whether it equals
+> `PRECONDITIONS`. Discarding data to satisfy a type is almost always the wrong end of that trade:
+> the type was the thing that was wrong.
+
+Second-order damage worth noting: **the test I wrote asserted the defect.** It pinned "unknown
+sections are dropped", so it would have defended the bug against anyone who later fixed it. That is
+now the second time today a test of mine entrenched something wrong (the other being SECTION_LABELS
+pinned to English).
+
+> Both have the same root: I wrote the test to describe *what my change did*, not *what the system
+> should guarantee*. A test written from the change is a change-detector. Write it from the
+> invariant, and it survives the change being wrong.
+
+**Also fixed:** the orphan child in `groupItems` — a child naming an absent header belonged to no
+group at all and rendered nowhere; now ungrouped, in list order. I had explicitly declined this last
+push on the grounds that nobody had asked for a behaviour change. A reviewer then asked, which
+retired the reason. Worth remembering that "nobody asked" is a reason with a short shelf life.
+
+891 tests across 54 files. Reverting the orphan rescue fails exactly its 2 cases, the other 5 pass.
+
+### State
+
+Head `d179b83`, 0 behind master. The parallel session is active again (it pushed `6ad3410`, a
+styling change, on top of my work) — **all five of my earlier commits verified as ancestors and my
+changes verified present in the head's working files**, not just in history. From here the feature
+work is theirs; I am not pushing further into the same files.
