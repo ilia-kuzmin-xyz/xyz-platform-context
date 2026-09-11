@@ -2094,3 +2094,47 @@ each has my proposal on the thread.
 
 Three pushes in ~25 min each superseded the previous CI run. Verified each before pushing, but worth
 noting: batching two of them would have cost one less build.
+
+### 2026-09-11 (evening) — a fourth data-loss bug, and the finding that keeps repeating
+
+A third review round. Twelve threads now open. Two things worth separating out.
+
+**1. Reopening a completed task discards every unchanged answer.** Verified in the code, not taken on
+trust: `openExecution` inserts the template's items with `response: DEFAULT_ITEM_RESPONSE` and never
+carries the prior run's answers across. So editing one field on a completed task opens a *new* run
+with everything blank, writes only the changed position, then `setInstanceStatus` writes a status
+derived from the **old in-memory** answers. A run holding one answer is stored `completed`, and since
+`getInstance` reads the current run, the rest are gone from view.
+
+Not fixed, and the reason is semantics rather than size — the fix is small either way. The code reads
+as *both* histories at once:
+
+| Reading | Then |
+|---|---|
+| reopen = **amendment** | `openExecution` should clone the prior responses; one seeding change |
+| reopen = **genuine re-run** | blank items are correct (the docstring says exactly this), and the bug is that a field edit opens a run at all |
+
+> Whichever is chosen, one part is wrong under **both**: the status written must describe the run it
+> is written onto. Deriving it from answers that live on a superseded execution is indefensible
+> either way — and fixing just that turns silent data loss into a task that visibly reads
+> `inProgress`. That is the piece to do first if someone wants a safe partial fix.
+
+**2. The same finding has now arrived five times in different clothes** — terminal verdict selectable
+with items unanswered; `requiresSignOff` persisted but never consumed; the sign-off card shown for
+checklists that don't need it; signatures not participating in status; completion reachable with no
+execution at all. They are one gap: **nothing gates completion**, so a readiness level can go green on
+a task that was never answered or signed.
+
+> In a commissioning product that is not a nit. Recording it as one finding rather than five so it
+> does not get triaged as five small ones.
+
+### Where my judgement landed on fix-vs-flag
+
+Fixed today (3): each had **one** defensible minimal fix and no product question — a guard, an id
+translation, a branch condition. Flagged (4 areas): each needs someone to choose what the product
+*means* — what gates completion, what reopening is, what the builder does with a section it cannot
+show, how verdict maps to stored status.
+
+That line held up better than "severity" would have. The reopen bug is more severe than two I fixed,
+and it is still the right one to leave, because guessing the history model would be a worse outcome
+than the bug being visible and owned.
