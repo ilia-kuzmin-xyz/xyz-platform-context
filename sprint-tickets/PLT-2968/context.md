@@ -2263,3 +2263,56 @@ Head `d179b83`, 0 behind master. The parallel session is active again (it pushed
 styling change, on top of my work) — **all five of my earlier commits verified as ancestors and my
 changes verified present in the head's working files**, not just in history. From here the feature
 work is theirs; I am not pushing further into the same files.
+
+### 2026-09-11 (round 5/6) — `ad1bba3`, and the review loop is not converging
+
+**`blocked` was missing from my own `NEVER_DERIVED_STATUSES`** (`ad1bba3`). The set had one member
+where the derivation block names two, and the second was two lines above the one I quoted when I
+added it:
+
+```
+//   • blocked          — never derived, and nothing in the app writes it yet
+```
+
+I read "nothing in the app writes it yet" as "so it cannot occur". *Yet* was the operative word — the
+column is shared with api-v2, so a blocked row can arrive from outside and the heal quietly unblocked
+it. Same shape as the bug the set was created for.
+
+> **The test for that set is "can `deriveInstanceStatus` return it", not "is this status unusual".**
+> I had applied the right principle to one status and not checked whether it applied to others, in a
+> comment that listed them.
+
+**A false comment in `completedAtOf`** (PLT-2966, not mine — reported, not pushed, since that file is
+being actively worked):
+
+```ts
+// …a malformed value cannot skew a max the way `new Date(...)` returning NaN would.
+```
+
+Verified by running it rather than reasoning:
+
+```
+'not-a-date' > '2026-09-11T10:00:00.000Z'  →  true
+```
+
+`'n'` sorts above `'2'`, so a malformed value doesn't fail to be excluded — it **reliably wins** the
+max and becomes the tag's completion time. The `new Date(...)` approach the comment dismisses is the
+*safer* one here, because `NaN > x` is false and could never win. The property is exactly backwards.
+
+### The thing worth carrying forward
+
+Five review rounds. One finding has arrived **about eight times** in different clothes — terminal
+verdict with items unanswered, `requiresSignOff` never consumed, sign-off card on checklists,
+signatures not in status derivation, completion with no execution. All one question: **what gates
+completion.** A second cluster (reopen loses answers, signature written to a frozen run, outcome-note
+edit mutating history) is one more: **is reopening an amendment or a new run.**
+
+> **Picking off symptoms does not converge a loop whose cause is an unmade decision.** Six commits of
+> mine landed because each had a single defensible minimal answer. What remains is not a backlog of
+> small things; it is two product decisions with a long tail. Said so on the PR rather than keep
+> fixing around the edges — that is the more useful thing a reviewer can do at this point.
+
+State: head `ad1bba3`, 0 behind master, build running. The parallel session is active in the feature
+files (`6ad3410` styling, `7c6c03d` a genuine ordering fix — an unordered execution-item read let row
+id decide what counted as a precondition, which is the ordering assumption my `7dcb228` fallback
+depends on). My six commits all verified as ancestors with changes present in the working files.
