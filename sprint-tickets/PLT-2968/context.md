@@ -2172,3 +2172,44 @@ that grouping fails.
 
 **Nothing further from me without a decision.** 12 threads open, each carrying analysis and a
 proposal. Every remaining item needs someone to choose what the product means.
+
+### 2026-09-11 (round 3) — `9fd7b13`, and a finding that indicted my own morning's work
+
+Two more fixed, **batched into one push** after noticing I'd spent three CI cycles in 25 minutes
+earlier for no good reason.
+
+- **`row.section_type as ChecklistSection`** asserted what the column never promised — it is plain
+  text, so a newer writer's value or a typo reached callers as a valid section. New
+  `isChecklistSection` guard; unrecognised values left unset, reading as "no section". Test fails
+  when the guard is reverted.
+- **`groupItems` re-filtered per header** → one pass bucketing by parent. Recorded honestly in the
+  commit: at one task's worth of items this was never a measured cost. The real gain was noticing
+  that **child order within a group** had no coverage, and it *is* the procedure's reading order.
+
+### ⚠️ The SECTION_LABELS finding argues against a test I added this morning
+
+Copilot flagged that `SECTION_LABELS` persists English strings which then leak into non-English UI.
+Correct — and sharper than it put it: **I added a test today asserting those persisted strings equal
+the English UI headings.**
+
+> The guard was right about the bug in front of it (the runner renders a group by its STORED label,
+> so persisting "Task steps" while the UI said "Task items" showed two names for one thing). But the
+> fix pinned the two together **in English**, when the real answer is not to persist display copy at
+> all — store `sectionType`, translate at render. **That test is a stopgap to be deleted, not
+> extended.** Said so on the PR so nobody later reads it as the intended design.
+
+This is the same follow-up already listed in this file as "render section title from `sectionType`,
+never persist display copy" — it now has independent corroboration and a concrete blocker: a
+migration story for templates already carrying English labels.
+
+> Worth generalising: a test that pins two things together is only as good as the relationship being
+> right. Mine made a wrong relationship harder to change. Ask whether the invariant should exist
+> before making it machine-checked.
+
+### Not taken
+
+- **i18n cluster** (4 comments, `task-runner.parts.tsx`): one piece of mechanical work, broad enough
+  to be its own commit, belongs with the runner's copy pass.
+- **Orphan children in `groupItems`** — a child naming an absent header still lands in no group.
+  Same shape as `f9f1825` and I'd rather it degrade to ungrouped, but that is a behaviour change
+  nobody asked for; smuggling one into a refactor is how refactors get a bad name. Flagged only.
