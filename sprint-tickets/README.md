@@ -4110,3 +4110,45 @@ that notification says to look, so it is kept current instead.
 3. Delete-dialog copy contradicting `remove()`'s own doc comment — wrong sentence, right behaviour.
 4. Usage probe narrower than the promise it makes (archived/invalidated excluded).
 5. The transactional asks — need a server-side RPC; scope call, follow-up ticket.
+
+### 19:06 — third Copilot round. Three findings land on MY 09-05 decisions, and all three are fair.
+
+Round three ("🔵 Needs a closer look", 17 comments) mostly restates one and two. What is new matters
+because it is not the parallel session's code — it is mine, from the original PLT-2999 commit.
+
+**1. My tests mock the service layer, which this repo explicitly tells us not to do.**
+`TaskLibraryTab.context-menu.test.tsx:18` does `vi.mock('app/services/serviceProvider', …)`. The
+repo's own `CLAUDE.md` says, in as many words:
+
+> Prefer mocking the **network** (MSW) over the service layer (`vi.mock('app/services/serviceProvider')`)
+> so the real service + axios + React Query run.
+
+I wrote twelve cases against a mocked service and described them in the PR as covering the flows.
+They cannot see React Query error states — which is exactly why **the fail-open usage bug got through
+a green suite**. This is the same lesson as the in-memory-client one on 09-11, arriving twice in one
+day from opposite directions: *the test double I chose decided what the tests were able to notice.*
+There was a documented house rule pointing at the right double and I did not follow it.
+
+**2. A `<button>` inside a `<button>` on the folder row.** Verified: `ListItemButton` opens at
+`TaskLibraryTab.tsx:520` and closes at `:610`; the `RowActionsMenu` I extracted sits at **`:578`**,
+inside it, and renders an `IconButton`. Invalid HTML, and browsers and assistive tech can associate
+the kebab with the folder toggle. The extraction was right; where it is mounted is not.
+
+**3. `disableAutoFocus` was one prop too many.** On 09-05 I set
+`disableRestoreFocus`/`disableEnforceFocus`/`disableAutoFocus` together and documented it as "so
+Rename's field isn't blurred on mount". Copilot's point is that **`disableRestoreFocus` alone**
+solves that, while `disableAutoFocus` additionally leaves focus on the kebab when the menu opens, so
+keyboard users never enter the menu's roving focus. Correct — I reached for three props where one was
+needed and wrote a comment justifying the set rather than the individual choices. Relatedly, the
+trigger still stops pointer and click propagation but **not keydown**, so keyboard activation also
+opens the row.
+
+**Also new, and worth a look:** the usage probe picks the current run by nullable `started_at`, while
+the runner defines it by persisted `sequence` (`ChecklistInstanceService`'s rule) — equal timestamps
+or clock skew can show an older completed run instead of the live one. Plus an archive-only project
+renders "No tasks match your search or filter" with no search active (`:1320`), and the empty-folder
+delete path has `onSuccess` but no `onError`, so a failed delete says nothing (`:1042`).
+
+**Still no extra notification** — fourth review event on one PR, and the 18:50 push already points
+here. The list above is the current state; the priority order in the 18:54 entry stands, with these
+three added below it as smaller, certain fixes.
