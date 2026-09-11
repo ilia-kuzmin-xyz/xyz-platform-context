@@ -2353,3 +2353,38 @@ control cannot produce. Flagged on the thread as a product call rather than sett
 Seven commits from me on this PR: verdict self-heal, `blocked` in the same guard, two grouping bugs,
 an orphan rescue, a revert of my own over-eager section guard, and this. Every one had a single
 defensible minimal answer. Everything still open needs a product decision.
+
+### 2026-09-11 (round 8) — `50e9a42`: the one part of the sign-off cluster that was not a decision
+
+`TASK_TYPE_REQUIRES_SIGN_OFF` says `checklist: false`, but `SignOffCard` was mounted for every
+instance — so a checklist offered a signature control and could persist one against a kind the model
+says has none. The verdict card **two lines above it** was already gated; the sign-off card was not.
+
+Gated on `requiresSignOff(normalizeTaskType(instance.type))` rather than reusing the neighbouring
+`showVerdict`. Same kinds today, different questions — *does this score a verdict* vs *does this need
+a signature* — and a kind that scored a verdict without needing a signature would otherwise silently
+get both.
+
+> **Worth separating from the cluster it looks like it belongs to.** Eight of the nine sign-off /
+> completion findings need a product decision. This one did not: the contract had already decided,
+> and the code simply didn't ask it. Being able to tell those apart is what let this ship while the
+> rest correctly stays open.
+
+### ⚠️ Three existing tests were pinning the defect
+
+Gating the card broke three sign-off tests — they rendered the **default `checklist` fixture** and
+asserted the card was present. They were not testing sign-off; they were testing that sign-off
+appeared where it shouldn't. Now they render a `functionalTest`, and a new case pins that a checklist
+does not get the card.
+
+> **Third time today on this PR.** The `SECTION_LABELS` guard pinned English persistence; the
+> section-drop test asserted "unknown sections are dropped"; these asserted a checklist has sign-off.
+> The tell is the same each time: **a fix makes tests fail in the direction of the fix.** That is not
+> a signal to reconsider the fix — it is a signal that the tests encoded the old behaviour rather
+> than a requirement. Worth a moment's suspicion every time, and worth asking of a test being
+> written: *would this still be right if the code were wrong?*
+
+895 tests across 54 files; the new case fails when the gate is removed, the other 58 pass.
+
+**Eight commits from me now.** Everything still open needs a product decision — including the other
+half of this one (whether a signature should gate completion), which is untouched.
