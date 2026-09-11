@@ -4065,3 +4065,48 @@ did not establish. Needs `isError` plumbed through and the action held non-confi
 keyboard also activates the row — the same class of bug as the pointer-down one I documented on
 09-05, one event away. Plus `pendingSignOff`/`signedOff` falling through to success colouring, and no
 unit cover on the new `formatDateTime`.
+
+### 18:54 — second Copilot round on #2203: mostly restated, but TWO genuinely new, and one is the worst yet
+
+A second review arrived seven minutes after the first. Most of it repeats round one. Two findings are
+new, and the first is more serious than either of the two I led with in my notification.
+
+**NEW — folder delete operates on the FILTERED folder** (`TaskLibraryTab.tsx:1305`). Verified in the
+tree, not taken on trust:
+
+```
+const folders = useMemo(() => {
+  const grouped = groupChecklistsByFolder(liveDefinitions, taskFolders, {
+    search, taskType: taskTypeFilter === ALL_FILTER ? undefined : taskTypeFilter, …
+```
+…and the row renders `onDelete={… => startDeleteFolder(folder)}` with **that** object. So
+`folder.checklists` is only what the current search and task-type filter leave visible.
+
+Delete a folder while a search is active and you delete the matching tasks, then
+`TaskFolderService.remove` moves **the ones you could not see** to the root. The dialog counts the
+filtered subset, so it says "and its 3 tasks" over a folder holding ten. **Silent relocation of data
+the user was never shown** — worse than the copy bug I led with, because that one misdescribes a
+correct behaviour whereas this one does the wrong thing. Fix is small: resolve from `allFolders`
+(line 1141) before starting the delete.
+
+**NEW — the usage probe excludes archived instances and invalidated executions**
+(`checklist-library-service.ts:531`). Both can still carry recorded work, while the dialog and the
+type contract both say *any* recorded run blocks deletion. So `remove()` can delete a template whose
+history exists — the guard is narrower than the promise it makes. Same family as the fail-open: the
+safety check does not cover what the UI claims it covers.
+
+Everything else in round two restates round one (fail-open usage error, non-atomic duplicate,
+non-atomic folder delete, archived templates reachable from pickers/`reconcileAssets`, usage keyed
+per instance, system label, status colours, i18n copy ×2).
+
+**No second notification sent.** I pushed one at 18:50 naming the two verified findings and pointing
+here for the rest; a second push seven minutes later about the same PR and the same review cycle
+would be the kind of interruption that makes the next real alert easier to ignore. This file is where
+that notification says to look, so it is kept current instead.
+
+**Revised priority for whoever picks this up:**
+1. Folder delete on the filtered list — wrong behaviour, silent data movement, small fix.
+2. Fail-open when the usage query errors — a guard asserting safety it never established.
+3. Delete-dialog copy contradicting `remove()`'s own doc comment — wrong sentence, right behaviour.
+4. Usage probe narrower than the promise it makes (archived/invalidated excluded).
+5. The transactional asks — need a server-side RPC; scope call, follow-up ticket.
