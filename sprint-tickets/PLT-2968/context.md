@@ -2047,3 +2047,50 @@ scratchpad, strip `@xyzreality/*` (private registry, 401), `npm install --ignore
 --legacy-peer-deps` (**the plain install now fails on a `@hookform/resolvers` peer conflict — it did
 not before**), then symlink the result in. ~3 min. Note `node_modules` is NOT gitignored here, so
 stage files explicitly and never `git add -A` in this repo.
+
+### 2026-09-11 (later) — a third fix, and the two grouping bugs were a pair
+
+A second review round landed on my push. One more real finding, fixed in `7dcb228`.
+
+**Grouping was broken twice over, and either fix alone leaves it broken.**
+
+| | |
+|---|---|
+| `f9f1825` | parents that **existed but pointed into the wrong id space** — template id vs execution id |
+| `7dcb228` | grouping by parents **that are not there at all** |
+
+The second: `byParent` comes from `supports.groups`, which is `columnPresent(shapes,
+'parent_task_item_id')` — and `columnPresent` is literally `column in rows[0]`. It reports that the
+**schema can express** parent links, never that this template uses any. Our own builder writes none,
+so "column present, no parent ids anywhere" is the *common* case on a migrated database, not an edge
+one. Every item then matched the loose filter, every header opened a group nothing joined, and the
+positional read the docstring promises as a fallback was skipped. Now the parent branch is taken
+only when some item actually names a parent.
+
+`task-runner.parts.tsx` had **no test file at all**; added one (4 cases, 2 fail without the guard).
+Also added the requested `requiresSignOff` mapping coverage — the builder only exercises 2 of the 3
+kinds, which is exactly how the third would drift.
+
+887 tests across 54 files pass.
+
+### Checked-before-claiming, twice, and it changed the answer both times
+
+- **`splitDefinition` drops unknown sections.** Real: it drops a header on *any* `sectionType`, and
+  save re-emits only `PRECONDITIONS`/`TEST_STEPS`, so `DETAILS`/`OVERVIEW` (both in
+  `CHECKLIST_SECTIONS`) round-trip to nothing. **But**: the only `sectionType` values written
+  anywhere in this repo are those same two (`ChecklistCreatePage.tsx:293,295`), so such a template
+  can only arrive from api-v2 or seeded rows. Latent, not live — which changes the fix from "urgent"
+  to "product call about what the builder is for". Left open with three options costed.
+- **My own PR-body wording was wrong.** I had written that a builder-authored template "comes out as
+  one flat list". It comes out as a flat list *plus dangling empty headers*, which is worse. The
+  review's phrasing was more accurate than mine.
+
+### Where it stands
+
+`7dcb228`, build running. **6 threads open, all deliberately** — verdict seeding (×2), terminal
+verdict / `requiresSignOff` gating (×2, one question), the library write side of grouping+units, and
+the section round-trip. Every one is a design decision rather than a defect with an obvious fix, and
+each has my proposal on the thread.
+
+Three pushes in ~25 min each superseded the previous CI run. Verified each before pushing, but worth
+noting: batching two of them would have cost one less build.
