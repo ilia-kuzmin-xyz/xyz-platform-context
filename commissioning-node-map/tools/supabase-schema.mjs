@@ -70,7 +70,7 @@ from pg_constraint c
 join pg_class t on t.oid = c.conrelid
 join pg_namespace n on n.oid = t.relnamespace
 where n.nspname = 'public' and c.contype in ('p', 'f', 'c')
-order by t.relname`;
+order by t.relname, c.conname`;
 
 /** Every quoted literal in an `= ANY (ARRAY[...])`, in the order written. */
 function permittedValues(def) {
@@ -97,7 +97,17 @@ export function readSupabase(project, token) {
       continue;
     }
     if (row.kind === 'f') {
-      cols.forEach(col => { if (table[col] && !table[col].fk) table[col].fk = row.target; });
+      /* A column can sit in more than one composite key — asset_type_task's
+         workflow_id is in both (asset_type_id, workflow_id) and
+         (readiness_step_id, workflow_id). Keeping only the first made the
+         output depend on the order rows came back in, which showed up as a
+         change that had not happened. Keep every target, in name order. */
+      cols.forEach(col => {
+        if (!table[col]) return;
+        const targets = table[col].fk ? table[col].fk.split(' / ') : [];
+        if (!targets.includes(row.target)) targets.push(row.target);
+        table[col].fk = targets.join(' / ');
+      });
       continue;
     }
     /* A value set is a CHECK on exactly one column. A multi-column CHECK says

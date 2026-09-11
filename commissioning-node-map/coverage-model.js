@@ -17,7 +17,7 @@
  * map and this board never fall out of step. Load it between model.js and
  * app.js.
  *
- * Read from source on 10 Sep 2026: hc-frontend PR #2186 at the PLT-2968 head,
+ * Read from source on 11 Sep 2026: hc-frontend PR #2186 at the PLT-2968 head,
  * and the live dev schema in data/columns.json.
  */
 
@@ -67,9 +67,24 @@ annotate('section-of-a-task', {
 ]);
 
 annotate('the-question-itself', {
-  landed: { label: 'task_item.unit', detail: '3 Sep — the unit beside a reading' },
+  landed: {
+    label: 'task_item.unit · value_fields · table_columns · table_cells',
+    detail: '3 Sep the unit; 10 and 11 Sep the declared shape of a reading and of a grid',
+  },
 }, [
   { ux: 'Unit beside a reading', landed: 'Was a stand-in until 3 Sep' },
+  {
+    ux: 'A reading with named value slots',
+    bridge: 'value_fields',
+    landed: '10 Sep — authored, then rejected on save, now stored',
+    note: 'The builder has authored inputField items for weeks while apply_execution refused any definition containing one, because task_item had nowhere to put the slots. The column and the RPC landed together.',
+  },
+  {
+    ux: 'A table with columns and rows',
+    bridge: 'table_columns / table_cells',
+    landed: '11 Sep — the same gap, closed the same way',
+    note: 'The grid editor had the same problem as inputField and was fixed to the pattern it set.',
+  },
 ]);
 
 annotate('a-note-against-an-answer', {
@@ -97,7 +112,14 @@ annotate('evidence-file', {
     label: 'commissioning_file · commissioning_file_association',
     detail: '8 Sep — a file can be registered and attached to a run, an item or a signature',
   },
-});
+}, [
+  {
+    ux: 'Reference document on a task',
+    api: 'CommissioningTaskFileReferenceMapping',
+    landed: '11 Sep, on their side',
+    note: 'api-v2 grew its first file link table. It attaches a file reference to a task definition, which is our referenceDocument association — so the two sides now agree about a document on a task, and still not about evidence on a run.',
+  },
+]);
 
 /* ──────────────────────────── what the screens offer and nothing carries yet */
 

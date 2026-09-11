@@ -43,6 +43,7 @@ const API_TABLES = [
   '138_xyz_task_execution_comment', '139_xyz_task_execution_issue',
   // Adds ReadinessGate.Colour — omit it and the rung concept loses its colour.
   '142_xyz_readiness_gate_metadata',
+  '143_xyz_commissioning_task_file_reference_mapping',
 ];
 const API_CONSTRAINTS = [
   '064_xyz_commissioning_workflow', '065_xyz_readiness_gate', '066_xyz_asset_type',
@@ -55,6 +56,7 @@ const API_CONSTRAINTS = [
   '084_xyz_asset_task_execution', '085_xyz_task_execution_checklist_response',
   '086_xyz_task_execution_comment', '087_xyz_task_execution_issue',
   '088_xyz_asset_task_status_history',
+  '101_xyz_commissioning_task_file_reference_mapping',
 ];
 
 /* ElementInstallationStatus predates commissioning, so it is created in the

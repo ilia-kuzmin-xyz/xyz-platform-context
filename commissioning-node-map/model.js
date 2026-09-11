@@ -359,7 +359,7 @@ const STAGES = [
       flag: true,
       sheets: {
         ux: { label: 'Project Settings → Template builder', detail: 'Added from the element palette' },
-        bridge: { label: 'task_item', table: 'task_item', detail: 'type, label, must_pass, allow_na, unit' },
+        bridge: { label: 'task_item', table: 'task_item', detail: 'type, label, must_pass, allow_na, unit, and the declared shape of a reading or a grid' },
         api: { label: 'ChecklistItem', table: 'ChecklistItem', detail: 'Response type plus a jsonb Config — the unit lives in there' },
       },
       fields: [
@@ -369,10 +369,12 @@ const STAGES = [
         { ux: 'Must pass', bridge: 'must_pass', api: 'Config.required' },
         { ux: 'Allow N/A', bridge: 'allow_na', api: 'Config.allowNA' },
         { ux: 'Unit', bridge: 'unit', api: 'Config.values[].unit' },
-        { ux: 'Min / max', api: 'Config.values[].min / Config.values[].max', note: 'They can bound a reading; we cannot.' },
+        { ux: 'Declared value slots', bridge: 'value_fields', api: 'Config.values', note: 'Landed 10 Sep. A reading item declares named slots — id, name, Number or Text, unit, min and max — as jsonb, the shape signing_slots already used. Until then the builder could author one and the execution RPC rejected it.' },
+        { ux: 'Min / max', bridge: 'value_fields', api: 'Config.values[].min / Config.values[].max', note: 'Both sides can bound a reading now; ours arrived inside value_fields on 10 Sep.' },
+        { ux: 'Table columns and cells', bridge: 'table_columns / table_cells', api: 'Config.columns', note: 'Landed 11 Sep, following the same pattern: a grid declares its headers and starting cells as jsonb. api-v2 pairs Config.columns with a rowCount rather than storing the cells.' },
         { ux: 'Evidence required', bridge: 'evidence_required', api: 'Config.acceptedFiles' },
       ],
-      note: 'api-v2 treats a question as reusable across tasks; ours belongs to one version. And our unit column is their Config key.',
+      note: 'api-v2 treats a question as reusable across tasks; ours belongs to one version. Their whole Config is one jsonb blob; ours is spread across unit, value_fields, table_columns and table_cells — the same facts, held in four columns rather than one document.',
     },
     
     {
@@ -678,8 +680,8 @@ const STAGES = [
       sheets: {
         ux: { label: 'Task runner → Evidence', detail: 'Mobile attaches; web only stores a reference' },
         bridge: { label: 'commissioning_file', table: 'commissioning_file', detail: 'A reference to a file held in XYZ Platform, never the bytes. Merged 8 Sep' },
-        api: { absent: 'No table — files live in the platform, not the schema' },
-        apiNext: { label: 'AssetDocument · CommissioningTaskVersionDocument · CommissioningSystemDocument', detail: 'D11 — three link tables named, no columns designed' },
+        api: { label: 'CommissioningTaskFileReferenceMapping', table: 'CommissioningTaskFileReferenceMapping', detail: 'Landed 11 Sep — a file reference attached to a task definition' },
+        apiNext: { label: 'AssetDocument · CommissioningSystemDocument', detail: 'D11 — two of the three link tables are still named only' },
       },
       fields: [
         { ux: 'File name', bridge: 'file_name', apiNext: TBD },

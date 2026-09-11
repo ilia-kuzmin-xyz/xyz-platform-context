@@ -222,7 +222,7 @@
    },
    "workflow_id": {
     "t": "uuid?",
-    "fk": "readiness_step"
+    "fk": "readiness_step / asset_type"
    },
    "readiness_step_id": {
     "t": "uuid?",
@@ -796,7 +796,7 @@
    },
    "workflow_id": {
     "t": "uuid?",
-    "fk": "readiness_step"
+    "fk": "readiness_step / system_type"
    },
    "readiness_step_id": {
     "t": "uuid?",
@@ -1168,6 +1168,15 @@
    },
    "assigned_to": {
     "t": "text?"
+   },
+   "value_fields": {
+    "t": "jsonb?"
+   },
+   "table_columns": {
+    "t": "jsonb?"
+   },
+   "table_cells": {
+    "t": "jsonb?"
    }
   },
   "task_template": {
@@ -1886,6 +1895,32 @@
     "t": "boolean"
    },
    "ArchivedOn": {
+    "t": "timestamptz"
+   }
+  },
+  "CommissioningTaskFileReferenceMapping": {
+   "Id": {
+    "t": "int generated always as identity"
+   },
+   "CommissioningTaskFileReferenceMappingId": {
+    "t": "uuid"
+   },
+   "CommissioningTaskId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "CommissioningTask"
+   },
+   "FileReferenceId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "FileReference"
+   },
+   "ProjectShardId": {
+    "t": "int",
+    "pk": true,
+    "fk": "Project"
+   },
+   "InsertedOn": {
     "t": "timestamptz"
    }
   },
