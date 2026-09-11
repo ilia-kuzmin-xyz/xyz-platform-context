@@ -3975,3 +3975,35 @@ CI: `0dccfa4d1` ✅ 17:08, `5fdb6272f` ✅ 17:40, `41ebaebd6` still running at t
 > **Judgement recorded:** when another session is pushing to a branch every twenty minutes, verifying
 > each head is not diligence — it is a race. Confirm the branch is healthy, write down the state and
 > the dependency, and leave it.
+
+### 18:35 — the xyz-supabase#37 dependency is RESOLVED; #2203 is ready for review
+
+Supersedes the ⚠️ in the 17:45 entry above. **Do not act on that warning.**
+
+`xyz-supabase#37` has **merged** — the PR body now reads *"Storage for archive is live on dev
+(xyz-supabase#37, merged)"*. So `task_template.archived_at` exists, Archive and Restore no longer
+400, and there is **no merge-order constraint** on #2203.
+
+I was one step from sending "don't merge #2203 before the migration" when I re-read the body first.
+It had been rewritten since 17:42 and the dependency was already gone. That is the **second** time
+this week the same shape of mistake nearly went out: on 09-09 I published that the libuuid finding
+had no fix landed, when the scan had simply stopped reporting it.
+
+> **Re-read the source immediately before escalating, not when you first formed the view.** A
+> blocker recorded an hour ago is a claim about an hour ago. On a branch someone is actively pushing
+> to, a PR body can be rewritten between your reading and your warning — and a stale escalation costs
+> the reader more than silence would have.
+
+**#2203 is now ready for review** (out of draft at 18:33), reviewers requested: TomMasdinXYZ,
+DarminderA, rishib-xyz, SergiuszXYZ. All three of the sprint's PRs are now non-draft.
+
+Final shape, 16 commits: **17 files, +2983/−145**. The body was rewritten again, now much shorter and
+pointed at concrete fixtures in the **ATX Cx demo project** (`DCOS - Control Panel (Level 2A Red
+Tag)`, `Systems Handover Check`) rather than describing the mechanism — a better review brief than
+either of my versions. Folder delete also gained a rule since 17:45: an empty folder goes silently,
+otherwise its tasks go with it, and if any one has been run the whole folder is blocked.
+
+Development was still in flight at the time of writing (commits at 19:08, 19:17, 19:23 local — the
+commissioning theme rebuilt *on* the app theme, dialog buttons moved to theme variants, and the
+blocking-asset list virtualised instead of capped at five). Not tracking further; see the handover
+note above.
