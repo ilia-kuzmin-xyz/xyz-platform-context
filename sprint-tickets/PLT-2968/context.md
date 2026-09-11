@@ -2138,3 +2138,37 @@ show, how verdict maps to stored status.
 That line held up better than "severity" would have. The reopen bug is more severe than two I fixed,
 and it is still the right one to leave, because guessing the history model would be a worse outcome
 than the bug being visible and owned.
+
+### 2026-09-11 (close) — green on `7dcb228`, verified per step
+
+All three fixes are on a green head. Checked the step list, not the job conclusion:
+
+| Step | |
+|------|--|
+| 7 `Lint & Run Tests` | ✅ 13:47:05 → 13:55:46 |
+| 15 `Build image` (the only typecheck in CI) | ✅ 13:57:40 → 14:03:25 |
+| 19 `Vulnerability scanner` | ✅ |
+| **20 `Scan built image`** | **✅ 14:03:56 → 14:04:15, ran not skipped** |
+
+`copilot-pull-request-reviewer` reads **cancelled** — the bot superseding its own run, not a gate
+failing. Worth knowing because the wake event's "nothing is still running or failed" explicitly does
+**not** cover cancelled suites, so it cannot be taken as proof on its own; the build was read
+directly instead.
+
+State: head `7dcb228`, **0 behind master**, 68 ahead, `mergeable_state: blocked` = required reviews
+only. SonarCloud gate passed (duplication 0.9% → 1.6%, from my new test fixtures; well inside).
+
+### Corrected my own PR-body claim — my fix had outdated it
+
+Earlier today I wrote in the description that a builder-authored template "comes out as one flat
+list". True when written; **false after `7dcb228`**, which made grouping fall back to position when
+no parent links exist — so those templates now group under their headers properly. The remaining gap
+is narrower than I had stated: the builder cannot author an *explicit parent link* (or a unit), not
+that grouping fails.
+
+> Second time today my own prose about this area was wrong in the direction of overstating breakage —
+> first understating the empty-headers symptom, now understating the fix. Re-read descriptions after
+> changing the behaviour they describe; a PR body is not write-once.
+
+**Nothing further from me without a decision.** 12 threads open, each carrying analysis and a
+proposal. Every remaining item needs someone to choose what the product means.
