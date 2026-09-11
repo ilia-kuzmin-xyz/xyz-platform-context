@@ -2388,3 +2388,43 @@ does not get the card.
 
 **Eight commits from me now.** Everything still open needs a product decision — including the other
 half of this one (whether a signature should gate completion), which is untouched.
+
+### 2026-09-11 (round 9) — `f38d68e`: took the timestamp fix I had deferred
+
+Earlier I reported the `completedAt` comment as having its safety property backwards and *offered*
+to fix it, declining to push because `use-readiness-steps.ts` was "being actively worked". Two things
+changed: the finding was raised again, and `git log` shows the file untouched since **09-05** — my
+reason had expired. Took it.
+
+```
+'not-a-date' > '2026-09-11T10:00:00.000Z'   →  true
+```
+
+`'n'` sorts above `'2'`, so a malformed stamp did not fail to be excluded — it reliably **won** the
+max and became the completion time on the tag. `new Date(...)` was the *safe* behaviour the comment
+dismissed, because `NaN > x` is false. Now compares parsed instants, skips unparseable values, and
+returns the stored ISO string so the display is still exactly what the row holds.
+
+> **"Not mine to touch" is a claim with a shelf life.** I was right to defer at the time — two
+> sessions in one file makes conflicts — but a deferral is a bet on someone else picking it up, and
+> it needs re-checking rather than standing forever. `git log` on the file answered it in one
+> command; I should have checked that before deferring the first time rather than inferring activity
+> from the branch as a whole.
+
+897 tests; both new cases fail when the string comparison is restored.
+
+### Nine commits, and the shape of what is left
+
+| Fixed (9) | Each had one defensible minimal answer |
+|---|---|
+| verdict self-heal destroying `passWithComments` | `blocked` missing from the same guard |
+| parent ids in the wrong id space | grouping by parents that do not exist |
+| orphaned children rendering nowhere | a failed precondition unlocking the steps |
+| sign-off card offered on checklists | completion stamps compared as strings |
+| (plus a revert of my own over-eager section guard) | |
+
+Everything still open is one of three things: **a product decision** (what gates completion; is
+reopening an amendment or a new run; what the builder does with a section it cannot show), **the
+runner's i18n copy pass** (one mechanical commit, belongs with whoever owns the strings), or
+**error-state handling** across the query consumers (a consistent pattern to apply once, not nine
+patches).
