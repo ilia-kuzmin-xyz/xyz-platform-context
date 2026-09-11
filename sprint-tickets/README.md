@@ -3930,3 +3930,48 @@ by id *and* project.
 
 CI green on `0dccfa4d1` (build 17:08:10, Sonar gate passed, coverage 42.0%). Branch still current
 with master `ed60719`; diff still scoped to this ticket's files plus the new wire-contract test.
+
+## 2026-09-11, 17:45 — PLT-2999 is under ACTIVE development by another session; scope has tripled
+
+Three commits landed on `PLT-2999` inside an hour (17:49, 18:22, 18:42 local), with a fourth build
+already running. **Another session owns this branch right now.** I stopped verifying each commit —
+chasing a branch someone else is actively pushing to wastes effort and risks two sessions editing the
+same files. Handing it over rather than following it.
+
+### What it has become
+
+The PR is no longer the ticket I scoped on 09-05. Then: *Rename, Duplicate and Delete on a
+task-library row*, 9 files, +1112/−87. Now: **16 files, +2861/−131, 10 commits**, and the title is
+the only part unchanged. Added since:
+
+- **Archive / Restore** — a task leaves the library into a collapsed section at the foot, restorable
+  from its own menu (`ArchiveSection.tsx`, new).
+- **Delete is now gated** — any recorded run of the task removes the destructive button entirely and
+  offers Archive instead, listing the runs behind the refusal. This is a much better answer than the
+  "no usage warning on delete" I explicitly deferred in my original PR notes.
+- **Delete folder** — new dialog; `folder_id` is ON DELETE SET NULL so tasks fall to Unassigned.
+- **Menu styling lifted into `commissioningTheme`** (`MuiMenu`/`MuiMenuItem`/`MuiDivider`), replacing
+  repeated local `sx`, and the delete dialog's hardcoded `#fd3d39` became the `detection500` token.
+
+The PR description was rewritten to match — **it is not stale**, which I checked specifically,
+because a body describing a third of its diff is how a reviewer gets misled.
+
+### ⚠️ The concern to carry forward: it now depends on an unmerged migration
+
+Archive and Restore write **`task_template.archived_at`**, which lands in
+**XYZReality/xyz-supabase#37**. Per the PR's own note, until that merges to `develop` **both actions
+return 400 from PostgREST**. Everything else in the PR works without it, and a row read before the
+column exists reads as live.
+
+So this PR must not merge ahead of xyz-supabase#37, or it ships two buttons that error. The
+dependency is stated prominently in the PR body, which is the right place for it — flagged here so
+the next run does not have to rediscover it.
+
+Sonar: gate still passing, but **new issues went 1 → 4** and coverage moved 42.0% → 49.9% across
+these commits. Non-blocking; worth a look once the branch settles.
+
+CI: `0dccfa4d1` ✅ 17:08, `5fdb6272f` ✅ 17:40, `41ebaebd6` still running at time of writing.
+
+> **Judgement recorded:** when another session is pushing to a branch every twenty minutes, verifying
+> each head is not diligence — it is a race. Confirm the branch is healthy, write down the state and
+> the dependency, and leave it.
