@@ -901,3 +901,52 @@ directly rather than walking the transition graph), or (b) the workflow scheme c
 09-09 measurement and now. Both are outside what this routine can observe from here. The ticket is
 out of scope either way (`Blocked` is an exclusion), so no action follows from this — recorded only
 so the next run doesn't re-derive "Blocked is unreachable" from a board state that has since moved.
+
+## 2026-09-11 — PR #944 merged; the ticket can come out of Blocked
+
+`XYZReality/XYZPlatformApi#944` merged at 14:01. LOE activities
+(`ValidForProgressCalculations = false`, `ActivityType = TT_LOE`) now return
+`actualProgress: null` from `GET /projects/:id/schedules/:revisionId`, on both the
+WEBEDITOR and DASHBOARD paths. `progressToPercentage` already renders `null` as `-`, so the
+Web Viewer's Actual % column and PowerBI both show a dash instead of a wrong `0%` — no
+frontend change was needed. 19 activities on ATL05 are affected, 10 of them P6-Complete.
+
+**Jira follow-up is a human action, not done by this run:** PLT-3091 sits in **Blocked**
+with PAPI-3936 linked as the blocker. Now that #944 has merged, the block is spent — the
+incident can move on and PAPI-3936 can close. Neither was transitioned here (this session
+is read-only against Jira apart from two explicitly-granted exceptions on 09-09).
+
+### Two process findings worth keeping
+
+**1. A test that asserts `null` on a fixture that is already `null` proves nothing.**
+Copilot caught this twice in one PR — once in the e2e (excluded activity never had a
+seeded progress) and once in the unit spec (WBS row had both the flag and the progress
+null, so `=== false` and a truthy check were indistinguishable). Both were green either
+way. The fix in each case is to seed a *non-null* value and assert it survives or is
+blanked. Generalised into `recurring-defect-patterns.md`.
+
+**2. I argued a valid review finding away on an unverified claim.** On 04 Sep I told
+Copilot `ActualProgress` "can't be seeded — nothing in platform-api writes that column".
+Wrong: `saveActivitiesProgress` (`activities.service.ts:262`) writes it via
+`CALL xyz."usp_InsertActivitiesProgress"`, and `activities.e2e.spec.ts:324` already
+asserted on it. I had searched for the column in table DDL, not found it (it lives in
+`PostgreSQLDatabase`, outside repo scope), and stopped — without checking the *write path*.
+That false claim then sat in the PR description for a week. **When a column looks
+unseedable, grep for the service that writes it before concluding anything.**
+
+### Seeding activity progress in an e2e (reusable)
+
+`createActivityProgress(projectId, activityId, progress, calendarDate)` now exists in
+`test/e2e/util/db-helper.ts`. It calls the stored procedure rather than a direct INSERT, so
+it stays correct without the `ActivityProgress` DDL. Seeded progress for *today's date* is
+surfaced by `fn_GetScheduleRevision` on both WEBEDITOR and DASHBOARD (`full=true`) —
+confirmed in CI, not assumed.
+
+### Concurrent-edit note
+
+Sachin Badoni pushed `30c2ecce "PLT-3091: Sonar fixes"` directly to the PR branch mid-run
+(a `to.equal(null)` → `to.be.null` sweep). It also reverted the discriminating WBS fixture
+above, and kept the comment claiming the discrimination — almost certainly sweep collateral,
+since `.to.equal(WBS_ACTUAL_PROGRESS)` resembles the pattern but isn't a null assertion.
+Resolved by **merging** (never rebasing over a reviewer's commit), keeping all his style
+changes, restoring the one value, and saying so on the PR. He approved afterwards.
