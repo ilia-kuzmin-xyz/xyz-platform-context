@@ -2316,3 +2316,40 @@ State: head `ad1bba3`, 0 behind master, build running. The parallel session is a
 files (`6ad3410` styling, `7c6c03d` a genuine ordering fix — an unordered execution-item read let row
 id decide what counted as a precondition, which is the ordering assumption my `7dcb228` fallback
 depends on). My six commits all verified as ancestors with changes present in the working files.
+
+### 2026-09-11 (round 7) — `2551a47`: a failed precondition was unlocking the steps
+
+The best find of the day, and the contract it broke was one I had written.
+
+`confirmedStatusFor` — which the preconditions panel's toggle writes through — states it plainly:
+
+> Confirming a pass/fail item is a `pass`; there is no way to express the other two from a toggle,
+> and **a precondition that failed is one you leave unconfirmed.**
+
+But the gate, the panel's confirmed count and the toggle's on-state all asked `isAnswered`, which is
+true of anything but `incomplete`. A precondition stored `fail` therefore read as confirmed and
+**unlocked the test steps it exists to hold back.** On a commissioning gate that is the wrong
+direction to fail in.
+
+New `isConfirmed(type, status)`, the inverse of `confirmedStatusFor`, at all three precondition
+sites. The genuine "answered" counts are untouched — those do mean answered.
+
+> **The pattern across today's three self-inflicted ones is the same.** `confirmedStatusFor` (mine)
+> stated a contract; `NEVER_DERIVED_STATUSES` (mine) named a rule; `deriveInstanceStatus`'s comment
+> listed what it never produces. Each time the *prose was right* and a caller asked a near-miss
+> question instead — `isAnswered` for confirmed, one status for two, "nothing writes it" for "cannot
+> occur". **Writing the invariant down is not the same as having anything enforce it**; a docstring
+> cannot fail a build. Where an invariant matters, give it a predicate callers must route through —
+> which is what `isConfirmed` and `isDerivableStatus` now are.
+
+`na` is treated as unconfirmed too, deliberately: the toggle can only write `confirmedStatusFor` or
+`incomplete`, so a stored `na` came from elsewhere, and a gate should not open on a value its own
+control cannot produce. Flagged on the thread as a product call rather than settled quietly.
+
+894 tests across 54 files; the two new cases fail when the gate is reverted, the other 56 pass.
+
+### Running total
+
+Seven commits from me on this PR: verdict self-heal, `blocked` in the same guard, two grouping bugs,
+an orphan rescue, a revert of my own over-eager section guard, and this. Every one had a single
+defensible minimal answer. Everything still open needs a product decision.
