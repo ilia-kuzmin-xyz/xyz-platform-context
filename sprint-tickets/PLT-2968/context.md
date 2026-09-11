@@ -1960,3 +1960,90 @@ longer exist. Verified against the code (`TASK_TYPE_REQUIRES_SIGN_OFF` in `task-
 it from the kind), not inferred from the commit subject. A reviewer following step 1 would hunt for a
 missing toggle. Not touched yet: a build was in flight on that commit and the body is edited
 wholesale, so racing the session that just pushed would clobber it.
+
+## 2026-09-11 — two verified bugs fixed off a Copilot review, and a process mistake
+
+A Copilot review landed 8 inline findings on the runner rebuild. Two were real, severe and had
+clean minimal fixes; I took those. The rest are answered or deliberately left, below.
+
+### Fixed 1 — the self-heal destroyed a verdict nobody derives (`4419e04`)
+
+`TaskInstanceModal` heals a stored status that disagrees with what the items derive to. Sound for
+drift; wrong for one status, because **`task-status.tsx` documents that `passWithComments` is never
+derived**:
+
+> (`passWithComments` is a human judgement on the run as a whole, so nothing here derives it.)
+
+If nothing derives it, it disagrees with the items *by construction*, so a heal asking only "do
+these differ?" can never leave it alone. Reproduced: a `functionalTest` stored `passWithComments`
+with both items `pass` fires the heal with `{status: 'pass'}`. The verdict is destroyed on open —
+and the same effect does `setVerdict(null)`, so the UI shows nothing to say what was lost.
+
+Fix: `NEVER_DERIVED_STATUSES` + `isDerivableStatus` next to `deriveInstanceStatus`, gating the heal.
+
+### Fixed 2 — grouped items rendered nowhere once a run opened (`f9f1825`)
+
+`rowToItem` took `id` from the **execution** row and `parentItemId` from the **template** row.
+`groupItems` groups by `item.parentItemId === header.id` — comparing the two id spaces, so no child
+ever matched.
+
+> **The part the review undersold:** the child does not fall back to ungrouped. `groupItems` treats
+> an item as loose only when it has *no* `parentItemId` (`task-runner.parts.tsx:153`), and these have
+> one that simply matches nothing. So the child is in neither bucket — it renders **nowhere**, and
+> its header sits empty. In the headline feature of PLT-2967.
+
+Fix: translate parent through **position**, already the item's identity in both tables (`rowToItem`'s
+own docstring says so, and `shapeByPosition` beside it relies on it). An unresolvable parent now
+yields *no* `parentItemId` rather than a stale template one, so the child comes out ungrouped rather
+than invisible — the visible failure mode of the two. `getInstance()` and `listForStep()` both go
+through `itemsOf()`, so one call site covers both.
+
+Both fixes carry a test that fails when the fix alone is reverted while its file's other tests stay
+green. 879 tests across 53 files pass.
+
+### ⚠️ My own mistake: I built and tested a fix against a stale checkout
+
+I made the whole first fix — edits, tests, "155 passed" — on a working tree **3 commits behind
+origin**. I had `git reset --hard origin/PLT-2968` days earlier and never re-synced, so "the current
+head" in my head was `beed07e`, not `0ed23b5`.
+
+What exposed it was a contradiction I nearly explained away: Copilot said `Switch` was an unused
+import, my grep found it used at lines 385 and 410, and an earlier `git show origin/PLT-2968` of the
+*same file* had shown only the import. Two greps of "the same file" disagreeing is only possible if
+they are not the same file.
+
+> **Rule for next time: `git fetch && git status` against the remote BEFORE reading code to verify a
+> review finding, not just before pushing.** A stale tree does not announce itself — every command
+> succeeds and every test passes, they are just answering a question about the wrong commit. I got
+> lucky: the three files happened to be byte-identical between the two commits, so the verification
+> still held once moved across. That was luck, not method.
+
+### Answered, not fixed — and why
+
+- **`verdict` never seeded from the stored instance** (2 threads, left OPEN deliberately). Real: the
+  effect restores `outcomeNote` and sets `verdict` to `null` on the very next line. Not a one-liner
+  though — it needs a mapping decision (seed from `status` or `outcome`? what does a `signedOff` run
+  show? does re-save preserve or re-derive?). Guessing would be worse than leaving it visible.
+  **Consequence flagged on the thread:** until it is seeded, reopening a `passWithComments` run and
+  saving any edit still sends the derived `pass` with no note — the heal guard does not cover the
+  save path.
+- **`parent_task_item_id` never written by the library service** — the other half of grouping. A
+  builder-authored template has no parent links to translate. Needs parent *and* unit threaded
+  through the builder's item model; bigger than a review fix.
+- **Terminal verdict selectable with unanswered items**, and **`requiresSignOff` persisted but never
+  enforced** — both real-looking, both about what should gate completion. Design calls.
+- **`projectId` in degraded-path logs** — Copilot repeating a finding already refuted with evidence
+  on this PR (no such convention exists in `docs/`, `.claude/`, `CLAUDE.md` or `logService/`; the
+  implemented redaction policy is narrow and enumerated). Not re-litigated.
+- **`SCHEMA_PREVIEW` "enabled by default"** — does not hold; `task-runner.preview.ts:17` is `false`.
+- **"unused `Switch` import will fail lint"** — half right. The import was dead (removed), but the
+  build was **green on that exact commit**, so it was never lint-fatal. Net warnings on the touched
+  files went 29 → 28.
+
+### Rebuilding the local test environment
+
+The container had been reclaimed, so `node_modules` was gone. Rebuilt it: copy `package.json` to a
+scratchpad, strip `@xyzreality/*` (private registry, 401), `npm install --ignore-scripts
+--legacy-peer-deps` (**the plain install now fails on a `@hookform/resolvers` peer conflict — it did
+not before**), then symlink the result in. ~3 min. Note `node_modules` is NOT gitignored here, so
+stage files explicitly and never `git add -A` in this repo.
