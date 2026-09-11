@@ -1108,3 +1108,52 @@ the shipped table*: `Install Elec Equip` and `Install Elec Equipment` both exist
 is quoted. **When a lookup table is hand-authored, audit it for near-duplicate keys as well as missing
 ones** — a near-duplicate is worse than a gap, because a gap shows up as a blank field and a duplicate
 shows up as a plausible wrong number.
+
+---
+
+## Pattern 11 — a test asserting `null` on a fixture that is already `null` (2026-09-11, PLT-3091)
+
+**Two independent instances in one PR**, both caught by Copilot rather than by me, and both green
+either way before the fix.
+
+### Recognition signature
+
+A test asserts `expect(x.field).to.be.null` (or `.to.equal(null)`) to prove that production code
+*blanks* that field — but the fixture feeding it never set the field to anything else. The assertion
+is satisfied by the absence of data, not by the behaviour under test. Delete the production change
+and the test still passes.
+
+The two instances on PLT-3091:
+
+| Where | Fixture | Why it proved nothing |
+|---|---|---|
+| `test/e2e/api/schedules.e2e.spec.ts` | `createScheduleActivity` never wrote `ActualProgress` | excluded activity came back `null` because none was ever stored |
+| `test/unit/services/schedules.service.spec.ts` | WBS row had `ValidForProgressCalculations: null` **and** `ActualProgress: null` | `=== false` and a truthy check both return `null` for a nullish flag — indistinguishable |
+
+### The fix, both times
+
+Seed a **non-null** value, then assert it is blanked (or preserved). And where the seeding route is
+itself unproven, seed a *second* row that must come back **intact** — a canary. Without the canary,
+"the field is null" can still mean "nothing was ever written", and you are back to the same hole one
+layer down.
+
+### How to check you have actually closed it
+
+Regress the production code to the wrong implementation and confirm the test goes red. On PLT-3091
+that meant rewriting both call sites to `validForProgressCalculations ? item.actualProgress : null`
+→ 24 passing / 3 failing; restore → 27 passing. **A blanking test you have not watched fail is not
+evidence.** This is the same discipline as the 2026-09-09 lesson on PLT-3099 (observe the bug failing
+before writing the fix), applied to test quality rather than to a diagnosis.
+
+### Related process finding — do not argue a review finding away from a half-checked claim
+
+The e2e instance was raised on 04 Sep and I dismissed it: `ActualProgress` "can't be seeded, nothing
+in platform-api writes that column". That was false. I had grepped for the column in table DDL, not
+found it (the schema lives in `PostgreSQLDatabase`, outside repo scope), and concluded — without
+grepping for the **write path**, where `saveActivitiesProgress` calls
+`usp_InsertActivitiesProgress` and an existing e2e already asserts on the written value. The wrong
+claim then shipped in the PR description and sat there a week.
+
+**Rule: before declaring something untestable/unseedable/unreachable, grep for the code that writes
+or reaches it, not just for its declaration.** A missing DDL in this repo means the schema is
+elsewhere, not that the column is inert.
