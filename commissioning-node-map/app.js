@@ -583,8 +583,9 @@ const CARD_W = 300;
     const footer = add(windowEl, 'footer');
     if (concept.note) add(footer, 'p', concept.flag ? 'gap' : '', concept.note);
 
-    /* A proposal has to say where it came from and when, or it becomes folklore. */
-    LAYERS.filter(layer => layer.extends && concept.sheets[layer.key]).forEach(layer => {
+    /* Any layer that makes a claim has to say where it came from and when, or
+       it becomes folklore — a proposal about api-v2, or a reading of a design. */
+    LAYERS.filter(layer => layer.source && concept.sheets[layer.key]).forEach(layer => {
       const proposal = add(footer, 'p', 'proposal');
       add(proposal, 'strong', null, `${layer.label}: `);
       proposal.append(concept.sheets[layer.key].detail ?? concept.sheets[layer.key].label);

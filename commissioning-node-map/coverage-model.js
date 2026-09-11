@@ -41,6 +41,18 @@ LAYERS.push(
     sparse: true,
     provisional: true,
   },
+  {
+    key: 'designed',
+    tag: 'Designed',
+    label: 'Designed, not built',
+    column: 'Designed, not built',
+    role: 'status',
+    colour: 'var(--designed)',
+    sparse: true,
+    provisional: true,
+    source: 'Commissioning Platform (standalone) prototype — the template editor in '
+      + 'Project settings → Task library, read 11 Sep 2026',
+  },
 );
 
 /** Adds a sheet and its rows to a concept that already exists on the map. */
@@ -183,5 +195,88 @@ annotate('work-required', {
     bridge: 'task_instance_item.assignee',
     ahead: 'Column unused — the runner shows answered_by instead',
     note: 'The runner reads task_execution_item.answered_by into the field it calls the assignee, so the screen shows who answered rather than who was asked.',
+  },
+]);
+
+/* ───────────────────────────── what the design has and the screens do not yet
+
+   The opposite direction from "UI ahead": here the prototype shows something
+   the builder has not been given, and in five of the six the column is already
+   waiting. Read off the template editor on 11 Sep, after a rail that was mine
+   rather than the design's came out of the builder.                          */
+
+annotate('where-the-question-sits', {
+  designed: {
+    label: 'Nested items · drag to reorder',
+    detail: 'Both lists are trees in the prototype, dragged into order',
+  },
+}, [
+  {
+    ux: 'Preconditions and items nest under a group',
+    bridge: 'task_item.parent_task_item_id',
+    designed: 'Storage landed 4 Sep; the builder’s lists are flat',
+    note: 'The prototype draws preconditions and task items with the same recursive node, indented by depth. The runner already reads groups; only the builder cannot make one.',
+  },
+  {
+    ux: 'Drag an item into place',
+    bridge: 'task_item.position',
+    designed: 'Order is stored; the builder has no drag',
+    note: 'Every row in the prototype carries a drag handle, and the form elements are dragged in from the rail.',
+  },
+]);
+
+annotate('section-of-a-task', {
+  designed: {
+    label: 'Assign a group to someone',
+    detail: 'A group row reads “Assigned to:” with an avatar and a name',
+  },
+}, [
+  {
+    ux: 'Who a group is assigned to',
+    bridge: 'task_item.assigned_to',
+    designed: 'Column landed 4 Sep; the builder never offers it',
+    note: 'api-v2 has the same field on its header table. Both stores are ready and no screen writes it.',
+  },
+]);
+
+annotate('evidence-file', {
+  designed: {
+    label: 'Reference documents on a template',
+    detail: '“Available to the engineer on site” — attach, list, remove',
+  },
+}, [
+  {
+    ux: 'Reference documents on a template',
+    bridge: 'commissioning_file_association.task_template_version_id',
+    api: 'CommissioningTaskFileReferenceMapping',
+    designed: 'Both stores have a place; nothing attaches one',
+    note: 'Ours landed 8 Sep as an association type, theirs on 11 Sep as its own table. This is the one place the two sides already agree about files.',
+  },
+]);
+
+annotate('task-guarding-a-rung-asset', {
+  designed: {
+    label: 'Target asset type and rung, while editing the template',
+    detail: 'Two selects in the identity card, beside the description',
+  },
+}, [
+  {
+    ux: 'Set the target asset type and the rung it gates',
+    bridge: 'asset_type_task.asset_type_id / asset_type_task.readiness_step_id',
+    designed: 'Only reachable from the type editor',
+    note: 'The mapping exists and is authored elsewhere — Project Settings → Types → Add task. The design puts it on the template too, so an author never leaves the editor to say what the task is for.',
+  },
+]);
+
+annotate('the-question-itself', {
+  designed: {
+    label: 'Field preview',
+    detail: 'A collapsed strip down the right of the editor',
+  },
+}, [
+  {
+    ux: 'See a field as the engineer will',
+    designed: 'Pure UI — nothing to store',
+    note: 'The only one of these six that needs no column at all.',
   },
 ]);

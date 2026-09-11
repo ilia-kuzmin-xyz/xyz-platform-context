@@ -28,6 +28,7 @@ img { max-width: 100%; }
     --future: #f59e0b;
     --landed: #3ecf8e;
     --ahead: #f472b6;
+    --designed: #38bdf8;
 
     --brand: #3ecf8e;
     --alarm: #f87171;
@@ -70,8 +71,10 @@ img { max-width: 100%; }
       --future: #b45309;
     --landed: #10855a;
     --ahead: #be1558;
+    --designed: #0369a1;
       --landed: #10855a;
       --ahead: #be1558;
+      --designed: #0369a1;
 
       --brand: #10855a;
       --alarm: #b91c1c;
