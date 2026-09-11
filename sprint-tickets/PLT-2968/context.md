@@ -2428,3 +2428,35 @@ reopening an amendment or a new run; what the builder does with a section it can
 runner's i18n copy pass** (one mechanical commit, belongs with whoever owns the strings), or
 **error-state handling** across the query consumers (a consistent pattern to apply once, not nine
 patches).
+
+### 2026-09-11 (close) — `f38d68e` green; all nine fixes verified on the head
+
+Per step, not by job conclusion: step 7 `Lint & Run Tests` ✅ 16:34:56→16:43:52, step 15
+`Build image` ✅ 16:45:55→16:52:01, step 19 `Vulnerability scanner` ✅, **step 20 `Scan built image`
+✅ 16:52:32→16:52:54 — ran, not skipped.** Head `f38d68e`, **0 behind master**, 76 ahead,
+`mergeable_state: blocked` = required reviews only. All ten of my commits verified as ancestors.
+
+### ⚠️ A `cancelled` conclusion is not a failure — and reading steps saved me from saying it was
+
+The previous run (`50e9a42`) reported **`conclusion: cancelled`** while every one of its 43 steps
+read `success`. The steps finished at 16:33:33; the job was cancelled at 16:33:37 — four seconds
+later — because my own push of `f38d68e` superseded it.
+
+> This is the **inverse** of the trap I have been guarding against all week. I read steps rather than
+> conclusions because a green conclusion can hide a skipped step; here the conclusion was *worse*
+> than reality and would have had me report a passing commit as a failure. **The habit is right in
+> both directions: the conclusion is a summary, the steps are the evidence.**
+>
+> Also worth knowing for the next run: `cancelled` on this repo usually means *you pushed again*, not
+> that anything broke. Check the timestamps against your own pushes before diagnosing.
+
+### Final state of my involvement
+
+| | |
+|---|---|
+| Commits | 10 (9 fixes + 1 master merge) |
+| Tests | 897 across 54 files, green |
+| Threads | every finding either fixed, answered with a proposal, or refuted with evidence |
+| Open | two product decisions, the runner's i18n copy pass, and an error-state pattern |
+
+Nothing further from me without a decision. The PR is green, conflict-free and waiting on people.
