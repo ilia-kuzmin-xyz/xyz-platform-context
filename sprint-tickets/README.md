@@ -3882,3 +3882,51 @@ Copilot re-reviewed #2186 on the new head (09:16–09:22) and **raised nothing n
 threads, all 32 resolved. Sonar gate passed. **0 open review comments across every PR.**
 
 So PLT-2966 is no longer separately reviewable — anyone tracking that ticket should look at #2186.
+
+## 2026-09-11, 17:10 — my PLT-2999 `remove()` had a real partial-failure bug; corrected on the branch
+
+A parallel session pushed `0dccfa4d1` onto `PLT-2999` ("Delete a task template with one statement,
+and stop rename inventing a definition"). It rewrites two methods I wrote on 09-05. **It is right
+and my version was wrong**, so this is recorded as a correction to my own work, not a note about
+someone else's.
+
+### The bug: a delete that could half-succeed
+
+My `remove()` walked the chain by hand — items → null `current_version_id` → versions → template —
+**on the assumption that nothing cascades**. I wrote in the PR that this "makes the delete safe under
+RESTRICT / NO ACTION / SET NULL alike". That was a guess dressed as a guarantee. The schema actually
+cascades: `task_template_version` and `task_item` both hang off the template **ON DELETE CASCADE**,
+and `task_template.current_version_id` is **ON DELETE SET NULL**.
+
+So four statements did one statement's work, with **no transaction around them**. The failure mode is
+concrete: `commissioning_file_association.task_template_version_id` is **ON DELETE RESTRICT**, so a
+version held by a file association fails the *third* statement — **after the first has already
+deleted the template's items.** The user gets an error and a task still sitting in the library with
+nothing inside it. One scoped `DELETE` is atomic: it takes everything, or it fails clean and changes
+nothing.
+
+> **Defensive sequencing is not a substitute for knowing the constraint.** "Do it in an order that
+> works whatever the FK turns out to be" reads as careful and is the opposite: it multiplies the
+> statements, and every extra statement is another place to fail half-done when nothing wraps them
+> in a transaction. **Look the FK up.** The census is in `commissioning/data-layer.md`.
+
+Second fix, smaller but the same shape: my `rename()` returned a synthesised `IChecklistDefinition`
+with `items: []` and `version: 0`, because the template row carries neither. Nothing read it, but
+anything that did would have written those two fabrications into the cache. It returns `void` now.
+**Verified the hook is unaffected** — `useChecklistDefinitionRename` never touched the return value:
+`onMutate` updates optimistically from `name`, `onSettled` invalidates.
+
+### Also worth keeping: why the old tests couldn't catch it
+
+My `checklist-library-service.row-actions.test.ts` asserted "leaves no orphan versions or items"
+through `InMemoryCommissioningClient` — **which models no foreign keys at all**, so it cannot tell a
+hand-walked chain from a single cascading delete. Those assertions were deleted and replaced with a
+wire-contract test pinning the shape that actually matters: one `remove`, on `task_template`, scoped
+by id *and* project.
+
+> **A fake with no constraints cannot test constraint behaviour.** An assertion that passes against
+> both the right and the wrong implementation is worse than no assertion — it reads as coverage.
+> When the behaviour under test *is* the database's, pin the wire contract instead.
+
+CI green on `0dccfa4d1` (build 17:08:10, Sonar gate passed, coverage 42.0%). Branch still current
+with master `ed60719`; diff still scoped to this ticket's files plus the new wire-contract test.
