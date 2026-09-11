@@ -44,3 +44,14 @@ Ticket is 1 day old, already assigned to Darminder, no customer chase pending. N
 
 No code was written or pushed. No branch was created. This is a diagnosis-and-a-console-check
 hand-off, not a fix — per this run's instruction to describe actions rather than perform them.
+
+---
+
+## 2026-09-11 (scheduled) — unchanged, classification and draft both stand
+
+Jira re-fetched: no new comments, no status change (still Open), no new attachments since the
+2026-09-10 entry. Classification is unchanged: **3 — resolvable in-session, needs Ilia's visual
+debugging first**. The console check above (`forge`/`app`/`dropped` table in `context.md`) is still
+the one thing that settles this, and it has still not been run. No draft Jira comment is warranted
+yet — the ticket is 2 days old, assigned, and nobody is waiting on us for a reply; posting the console
+snippet itself would be premature since we have not run it ourselves first.

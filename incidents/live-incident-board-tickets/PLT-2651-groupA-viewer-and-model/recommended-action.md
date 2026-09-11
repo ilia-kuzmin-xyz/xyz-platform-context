@@ -1,5 +1,48 @@
 # PLT-2651 — Recommended action
 
+## 2026-09-11 (scheduled) — unchanged since 09-08; the 09-09 correction is now 3 days unposted. Restating the draft, unchanged in substance.
+
+Fresh `getJiraIssue` fetch this run: no new comment since 111646 (09-08), status still `With
+Customer`, assignee still Yash Patel, no new attachment. `hc-frontend` re-checked directly (see
+`context.md` this date): `viewer-service.ts:974-983` still has the `applyBasePointTransform` call
+site commented out, and `section-tool-orientation.ts` still has both named defects (`models[0]`-only,
+unbounded memo) unwritten. Nothing has moved since the 09-09 interactive session — this pass changes
+no recommendation, only re-verifies it and restates the draft so it is not lost between runs.
+
+**Still true north diagnosis, and still not sent to the customer.** The customer is currently sitting
+on an instruction (comment 111642) to change ATL08's true-north setting, which — per the code read on
+09-09 and re-confirmed today — cannot change anything in the Web Editor. Every day this goes unposted
+is a day the customer may spend acting on it for nothing. This is the class-1 half of the class-4
+action class below.
+
+**Not changed from 09-09:** the decision to ask Ali (DPL) first before posting a public correction.
+No answer from Ali has arrived (nothing was posted — draft-only, per the hard rule), so the same
+posture holds: correct the customer once, with Ali's answer in hand, rather than issue a second
+guess. This run's draft below is written anyway, per this run's explicit instruction, because 3 days
+of silence on a Critical, 128-day-old ticket is long enough that the human reviewing this should see
+the message ready to go rather than wait further on Ali.
+
+**Action class: 4, with a class-1 chase attached (unchanged).** See `context.md` this date for the
+full restatement of why (product decision spanning Web Editor + ATOM + ≥6 projects; not code this
+session can write).
+
+### Draft — to Yash Patel, on PLT-2651 — DRAFT ONLY, not posted (93 words)
+
+> Yash, quick correction before they act on my last message: changing the project's true north
+> setting won't change anything in the Web Editor's section box, that code path isn't active. What
+> actually fixes it is the model being re-exported from Revit with the right rotation in its
+> coordinates, not a settings change or a re-upload. We're double-checking the exact export ask with
+> our backend team so we give them one correct instruction instead of a second wrong one. **Can you
+> ask them to hold off on the true-north change until we confirm that?**
+
+**Assumption above the draft, not in it:** rests on `ignoreTrueNorthAngle` being honoured by DPL as
+its name implies — unverified (Ali's question, still unposted, is the 09-09 draft further down this
+file).
+
+**No Jira action taken by this run.**
+
+---
+
 ## 2026-08-31 — first pass. Chosen: reply to Yash with the premise corrected and one test that is also a workaround. Keep the ticket Open.
 
 **Why this and not the alternatives**

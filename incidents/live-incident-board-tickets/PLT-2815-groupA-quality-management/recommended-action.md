@@ -185,6 +185,14 @@ because 23 unposted recommendations is past the point where repeating it in a fi
 re-reads is doing any good — a decision is needed on whether to post it, or to explain why not
 (e.g. if there's a reason it's being deliberately left open that isn't recorded here).
 
+## 2026-09-11 (scheduled) — unchanged, 27th consecutive run. The 09-09 chase-Yash draft stands as written.
+
+**Jira: 67 days stale, nothing new (see `context.md`).** The recommendation is not re-argued and not
+re-drafted: the 09-09 chase-to-Yash draft below is still the right instrument, still accurate, and
+still unposted. Action class unchanged: **1 — stale, unresponded (on us)**. No new evidence changes
+either the diagnosis or the ask; this run adds no new investigation, per the run protocol for an
+unchanged ticket. No Jira action was taken by this run.
+
 ## 2026-09-09 — ACTION CLASS 1. Stop re-drafting the record comment; chase the named owner instead.
 
 **Jira unchanged, 65 days stale, 25th consecutive run recommending an unposted close-out.** Nothing

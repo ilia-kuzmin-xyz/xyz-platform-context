@@ -118,3 +118,37 @@ Per the playbook, close on cause + trigger + cohort, not on "looks fine now": ca
 (hardcoded labour-units filter in the client's report); trigger is that Meta's schedule never carried
 labour units, so this was wrong from the first refresh rather than a regression; **cohort is the open
 one** — the Darminder question above. One refreshed report from Paddy resolves the customer half.
+
+---
+
+## 2026-09-11 — still class 1. Hold-until date reached; new internal reassignment noted, not yet a reason to change either draft
+
+See `context.md` (09-11 entry) for the full diff. Two things happened since 09-09, neither from
+Paddy: Freshdesk auto-reopened (already known, automation only), and Darminder reassigned the Jira
+issue to Pietro Desiato with the comment *"waiting for further input following Ilias comment"*
+(`111944`, 2026-09-10 13:53) — an internal move, not an answer to the template-reuse question, and
+not something to guess at.
+
+**The 09-09 chase to Yash** (below, unchanged) was written "hold until 2026-09-11" — that is today.
+Nothing about the reassignment bears on whether Paddy has run the refresh, so the chase is ready to
+send as-is; the assignee change is a separate, internal thread.
+
+**New, optional: a chat clarifier to Darminder**, since "further input" on what is not stated and is
+worth one direct question rather than inferring it (unposted; chat, not Jira):
+
+> Saw you moved PLT-3109 to Pietro — what does he need to weigh in on? If it's whether that Power BI
+> query is one of our templates, I can just ask him that directly.
+>
+> **What's the open question you want his input on?**
+
+(38 words)
+
+**Original 09-09 chase to Yash, carried forward unchanged, now due:**
+
+> Hi Yash, any word from Paddy on the Power BI query? He was going to delete the two labour-unit
+> lines and refresh. **Has he run that refresh yet?** If he has and the installed figure still
+> doesn't match the dashboard, ask him to send the full query text and we'll pick it up from there.
+> If he hasn't had time, no rush. Nothing is blocked on our side, and the dashboard's 45% is the
+> correct number to use in the meantime.
+
+(81 words, unchanged from 09-09)

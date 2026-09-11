@@ -304,3 +304,56 @@ weight column's literal name, which §3 said it could not.
   It stopped being decisive on 09-08 and still is not, but it is still not a *read* fact.
 - Attachment bytes: still not fetchable from this routine (confirmed 403, run-instructions 09-08).
   Not a blocker here — Ilia opened all 5 PNGs on 09-08 and their contents are recorded above.
+
+## 2026-09-11 (scheduled) — new comment: Darminder reassigns to Pietro Desiato, "waiting for further input following Ilias comment"; Paddy still silent
+
+Live Jira fetch (`comment` + `attachment` + `status` + `assignee`, full thread). **Everything below
+is new relative to the 09-09 entry above; nothing above is retracted.**
+
+### Board state now (was: With Customer / Yash Patel / 5 comments, 09-09)
+
+| field | 09-09 entry above | live, 09-11 |
+|---|---|---|
+| Status | With Customer (Freshdesk "Waiting on customer") | **Open** — Freshdesk auto-reopened 2026-09-09 11:01 (comment `111765`, automation only, already noted in the board README's 09-10 row) |
+| Assignee | Yash Patel | **Pietro Desiato** |
+| Comments | 5 | **7** |
+| Attachments | 5 PNGs, ids 63983-63987 | unchanged — same 5 ids, no new attachments |
+
+### The one new comment (not seen by any prior run)
+
+**`111944` · Darminder Atker · 2026-09-10 13:53** — *"Assigned to @Pietro Desiato waiting for
+further input following Ilias comment."* Verbatim, no more text than that. This reassigns the Jira
+issue from Yash to Pietro Desiato; it does **not** answer the 09-08/09-09 side question ("is the
+client's Power Query an XYZ-supplied template?") — it routes the ticket to product (Pietro is the
+product lead per the run-instructions role table) rather than answering it. Read plainly: Darminder
+saw Ilia's 111645 explanation and wants Pietro's input before whatever happens next, but does not
+say on what — could be the template-reuse cohort question, could be a general sign-off on the
+diagnosis, could be something else entirely. **Inferred, not verified**, which reading is intended.
+
+This is worth flagging distinctly from the side question this folder has been tracking: the
+09-08/09-09 draft to Darminder was written for **chat, deliberately kept off the ticket** ("Keep it
+off PLT-3109 so the customer thread stays clean," `recommended-action.md`). It was never sent
+(hard rule: draft only). Darminder's 111944 is an independent action — he raised his own
+"further input" need, on the ticket itself, unprompted by anything we sent. So the side question
+remains exactly as open as before; what changed is that the ticket now visibly names a second person
+(Pietro) who may end up answering it, or something adjacent to it.
+
+### Customer side: unchanged, now past the chase's hold date
+
+No comment from Paddy Dennison. The 09-09 `recommended-action.md` chase draft to Yash was written
+"hold until 2026-09-11" — **that date is today.** Nothing about 111944 bears on whether Paddy has
+run the refresh; that is still a pure customer-side unknown, unrelated to the internal reassignment.
+See `recommended-action.md` for whether the chase should go out now, held, or adjusted for the new
+assignee.
+
+### What remains unverified (unchanged from 09-09, plus one)
+
+- Whether the client's Power Query is XYZ-supplied or client-authored — still nobody has been asked
+  (the chat-draft to Darminder was never sent, and 111944 does not answer it).
+- **New:** what "further input" Darminder is waiting on from Pietro — not stated in the comment,
+  not inferable from anything else on the ticket. If a human is following this up in person, that is
+  the one clarifying question worth asking directly ("further input on what, specifically?").
+- Whether removing the two WHERE lines surfaces a null `ActualProgress` for zero-labour warehouse
+  rows. Still resolves in the same single refresh, still unrun.
+- The project's live `ProgressWeightingMethod` remains inferred from the 45% figure, never read.
+- Attachment bytes: still not fetchable from this routine; not a blocker (see 09-08 entry).

@@ -1,5 +1,10 @@
 # PLT-2874 — Recommended action
 
+> **2026-09-11: unchanged. Send the Gennaro draft at § 2026-09-09 below — still the only open
+> action, now 30 days since his 08-12 finding.** Jira re-fetched fresh this run (`context.md` §
+> 2026-09-11): 6 comments, `updated` still 2026-08-25T09:53, PR #2084 still the only PR under this
+> key. Nothing here is amended.
+
 > **2026-09-07: the "de-dup FE fix" in § 2026-08-28 below is already shipped — verified against
 > `hc-frontend` master (`56fd089`), both call sites in `dashboard-color-service.ts` already call
 > `countDistinctElements`. Do not action that bullet; see `investigation-log.md` § 2026-09-07 for

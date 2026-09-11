@@ -294,3 +294,60 @@ in Freshdesk where none of us can see it.
   web-viewer comparison. Historic; superseded in value by the live data census Ilia ran on 07-22.
 - **Nothing on the 09-08 reopen is attached at all** — whatever Paddy said on 09-08 exists only in
   Freshdesk #7461 and is invisible from Jira. That is the real gap this run could not close.
+
+## 2026-09-11 (scheduled) — unchanged since 09-09; verified via fresh `getJiraIssue`
+
+Live re-fetch this run (`comment`, `attachment`, `status`, `updated` all requested). Diffed field by
+field against the 09-09 entry above rather than assumed — this ticket's board-search history has had
+a transient index miss before, so the fetch was by direct key, not by JQL.
+
+**Every field matches the 09-09 record exactly, including the second-level timestamp:**
+
+| field | 09-09 record | 09-11 fetch |
+|---|---|---|
+| status | `Open` | `Open` |
+| `updated` | 2026-09-08T16:35:59+0100 | 2026-09-08T16:35:59+0100 |
+| comment count | 17 | 17 |
+| newest comment | 111659 (Freshdesk automation, "Waiting on customer") | 111659, same body, same timestamp |
+| labels | `[not_testable]` | `[not_testable]` |
+| fixVersion | 26.3.4 | 26.3.4 |
+| assignee | Ilia Kuzmin | Ilia Kuzmin |
+| attachments | 5 (61116–61119, 63303) | same 5, no new ids |
+
+No new comment, no new attachment, no status change. **Nothing to investigate** — there is no new
+signal to chase in code or data; re-running the AUS01 mapping census or re-deriving the
+hypothesis split would not be responding to anything new, so neither was done this run (per
+run-instructions: re-investigate only if new comments/attachments exist).
+
+### The Freshdesk auto-reopen pattern: did NOT recur again since 09-09 — but the underlying silence continues and has grown
+
+The two-auto-reopens-with-no-human-reply pattern documented on 09-09 (08-25 reopen, 09-04 spurious
+`Done` self-close caught by Yash, 09-08 reopen) has **not produced a third cycle** in the 3 days
+since — the ticket has simply sat at `Open`/`Waiting on customer` (Freshdesk-side) with no further
+automation events. That is consistent with "Paddy hasn't come back again yet," not with "the pattern
+stopped."
+
+**Human silence in Jira is now 17 days**, not 15: last human comment is still 110385 (Mostafa
+Kamel Hussien, 2026-08-25T17:02, the one-line Power BI redirect), and 2026-08-25 → 2026-09-11 is 17
+days. The 09-09 draft chasing Yash for one activity code (`recommended-action.md` § 2026-09-09) is
+**still unposted** — 2 days older than when it was written, still the right ask, nothing about it
+has been overtaken by events. No human has answered "what did Paddy actually say on 09-08" either;
+that remains invisible in Freshdesk #7461, exactly as recorded 09-09.
+
+### Unopenable media — nothing new
+
+Same 5 attachments as every prior run (`61116`–`61119` from 07-21, `63303` from 08-25). No new
+attachment arrived on this reopen cycle to flag. Content-fetch is still a confirmed 403 for this
+routine (per run-instructions 2026-09-08) — not retried, per that note.
+
+### Action class — confirmed, not changed
+
+**Class 1 — stale, unresponded, on us.** Same reasoning as the 09-09 entry: no code to write (fix is
+shipped and was re-verified intact 09-09, not re-checked again this run since nothing changed to
+prompt a re-check), nothing resolvable by looking at the app, no disagreement needing a meeting —
+just a chase that has not been sent. Confirming, not correcting, the prior run's classification.
+
+**What remains unverified (same list as 09-09, restated because nothing closed it):** whether the
+July AUS01 restore ever ran (absence-of-record only); what Paddy said on 09-08; the current AUS01
+WBS Location mapping count against the 07-28 baseline of 7,879/10,133; Mostafa's Power BI theory,
+still unsubstantiated since 08-25.

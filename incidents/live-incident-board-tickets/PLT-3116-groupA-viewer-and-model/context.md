@@ -131,3 +131,21 @@ in one line.
 
 Watch the console for `No data found for key:` (`viewer-service.ts:674`) during the same action —
 that warning firing is a second, independent signal of the same drop.
+
+---
+
+## 2026-09-11 (scheduled) — unchanged since 2026-09-10
+
+Fetched fresh via `getJiraIssue` (fields incl. `comment`, `attachment`, `status`, `updated`).
+**VERIFIED:** status still **Open**, assignee still Darminder Atker, `updated` field is
+`2026-09-09T18:11:51.719+0100` — the timestamp of comment `111798`, i.e. no activity since the
+09-10 run read this ticket. Comment thread is unchanged: still exactly the two comments already in
+this file (`111797` Freshdesk auto-note, `111798` Yash's repro note incl. session id
+`platform-web-70e55a74-4834-49e2-8a87-a6f9bf98c1fb`). Attachments unchanged: still the same three
+(`64256`, `64257`, `64258`), all already flagged below as 403-on-content per the 2026-09-08 standing
+rule — not re-flagging as new.
+
+No new information to investigate against, so the hc-frontend code was **not** re-read this run;
+the 09-10 entry's independent two-read confirmation of the mechanism stands as the current state.
+The drafted console check (`forge`/`app`/`dropped` table, above) has still not been run/confirmed by
+a human. Nothing here supersedes any prior section.

@@ -166,3 +166,19 @@ in that window, and our own records say the data was never repaired. The code fi
 on 08-17 was for the mechanism; nobody put the ~2,254 missing AUS01 WBS Locations back. Until that
 is either done or ruled out, every reply to Paddy risks being the fourth one that does not change
 what he sees on Monday.
+
+---
+
+## 2026-09-11 (scheduled) — no change, draft still stands as the thing to send
+
+Fresh `getJiraIssue` fetch this run matches the 09-09 record field-for-field (`context.md` §
+2026-09-11 has the diff table) — no new comment, no new attachment, status still `Open`. **The
+09-09 draft below is not superseded and nothing here needed re-drafting.** It is now 2 days older
+and still unsent — human silence in Jira is **17 days** (last human comment 110385, 08-25), up
+from 15 on 09-09.
+
+The draft's word count, re-checked against the current rule: **88 words**, 3 sentences, one bolded
+closed question — still within the 100-word / six-sentence limit. No edit needed.
+
+**Action class confirmed: 1 (stale, unresponded, on us).** Same reasoning as 09-09; restated in
+`context.md` § 2026-09-11 rather than duplicated here.

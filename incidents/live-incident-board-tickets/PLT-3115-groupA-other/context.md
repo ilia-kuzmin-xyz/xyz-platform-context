@@ -83,3 +83,54 @@ hardened. Three explanations, none yet distinguished:
   in play — not testable from this session (no browser).
 - Whether PLT-2940's original scope covered `DangerZone.tsx` at all, or only the main form — the
   commit itself isn't visible in this session's history.
+
+## 2026-09-11 (scheduled) — status moved to With Customer; Darminder's own repro attempt was negative; core question still unanswered
+
+Fetched fresh from Jira (`getJiraIssue`, fields incl. `comment`, `attachment`). Diffed against the
+09-10 entry above.
+
+**Status changed:** `Open` → **`With Customer`** (was `Open` as of the 09-10 write-up; still
+assignee Darminder Atker, still Major). This is the first status move since creation.
+
+**One new comment, VERIFIED** — `111941`, Darminder Atker, 2026-09-10 13:36 (edited 13:37), addressed
+to Yash:
+
+> "Could we get further details as this should have been fixed under Platform 26.3.4. I have tested
+> on Edge and Chrome with Cloud and last pass does not appear (I used lastPass to login) ... Could we
+> get a video and browser they are using? Maybe we are missing one of the steps they are doing."
+
+Darminder attached two screenshots of his own test (Edge + the Cloud environment; Chrome + the DEV
+environment), both logged in via LastPass, neither showing the autofill. **This is a negative
+internal repro on the main form** — the playbook's Phase 4 move (find/build an internal repro),
+already attempted by the assignee, and it did not reproduce. No reply from Yash or the customer yet
+as of this fetch (2026-09-11) — the ticket is genuinely waiting on the customer relay, one day in.
+
+**Two new attachments, unopenable — same session-wide 403, not re-tested (per the 2026-09-08 rule:
+the gap is the session's credentials, not worth a retry):**
+- `64302` `image-20260910-123056.png` (Darminder, "Edge with Cloud environment")
+- `64303` `image-20260910-123548.png` (Darminder, "Chrome with DEV environment")
+
+**What this changes and what it doesn't:**
+- Does **not** answer the open question — which field/screen the customer means. Darminder's ask
+  covers browser + video but does not explicitly ask main-form-vs-delete-dialog; if the customer's
+  video shows the main form, that still would not explain the symptom given hardening is intact
+  there (confirmed unchanged this run, see below), unless it's a LastPass-version override
+  (hypothesis 2 from 09-10) or a stale bundle (hypothesis 3).
+- **Does** add weight to hypothesis 2/3 over hypothesis 1: an internal LastPass user, logged in via
+  LastPass, on the exact main form, on both Edge and Chrome, in both Cloud and Dev, saw no autofill.
+  That makes "the customer is looking at the unhardened `DangerZone` field" and "customer's specific
+  LastPass version/extension state behaves differently" relatively more likely than before, though
+  neither is confirmed — Darminder's LastPass version/vault contents are unknown and could differ
+  from the customer's in ways that suppress the effect (e.g. no saved credential matching the
+  device's own email-shaped autofill target).
+
+**Code re-verified, unchanged from 09-10:** `DevicePage.tsx:257` (`<Form ... autoComplete='off'>`),
+`:259-270` (`id='deviceName'`, `name='deviceName'`, `autoComplete='off'`, `data-lpignore='true'`) —
+main field hardening intact. `DangerZone.tsx:71` (`name='confirmDeviceNameBeforeDelete'`) still has
+no `autoComplete`/`data-lpignore` nearby — gap still open, still unexploited by any confirmed
+mechanism.
+
+**What remains unverified (carried forward, still true):** which field the customer's screenshots
+show; whether `data-lpignore` is honoured by the customer's specific LastPass/browser combination;
+PLT-2940's original scope. Newly unverified: whether Darminder's non-repro generalises (only two
+browser/env combinations tried, not the customer's).

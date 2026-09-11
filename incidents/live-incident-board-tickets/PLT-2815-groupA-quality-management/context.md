@@ -359,6 +359,18 @@ Jira activity of any kind. Root cause was settled long ago (§2); the only outst
 administrative — post the close-out comment and transition with a resolution. Not re-investigated
 this run, per protocol.
 
+## 2026-09-11 (scheduled) — no change, 67 days stale, 27th consecutive run
+
+Live re-fetch (`getJiraIssue`, `fields` incl. `comment`, `attachment`, `status`, `updated`): status
+still `With Customer`, priority Major, assignee Yash Patel, `resolution = null`,
+`resolutiondate = null`, `updated = 2026-07-06T10:18:45.272+0100`, **13 comments** — read in full,
+same 13 ids as every prior run, newest still **106553** (Yash, Freshdesk #7126 → Closed, 07-06).
+Same 2 attachments (`59263`, `59262`), unchanged. **67 days** since any Jira activity; **27th
+consecutive run** recommending the same close-out that has not been posted. Root cause was settled
+long ago (§2, verified at source 08-14) and was not re-investigated this run — nothing has moved
+that would warrant it. Not re-flagging the 2 attachments or the inline blobs as new; still the same
+confirmed-403, corroborative-only screenshots noted since 2026-06-17/2026-09-09.
+
 ## 2026-09-09 — no Jira change (65 days). But two things moved *around* the ticket, and the 08-27 audit has a hole.
 
 **Jira: byte-identical, nothing new.** Live `getJiraIssue`: status `With Customer`, priority Major,

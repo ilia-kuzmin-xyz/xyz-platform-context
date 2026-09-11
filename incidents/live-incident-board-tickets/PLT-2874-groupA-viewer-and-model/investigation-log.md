@@ -4,6 +4,31 @@ FAR01 (`b28712bb-0691-4db2-a626-85c2f1f5ead6`). Editor federated file reported ~
 elements on 07-07; dashboard reported ~695,000 with the scrubber at the end. Yash linked LVN1
 (Freshdesk 7514) on 07-27 as a second project with the same symptom.
 
+## 2026-09-11 — scheduled sweep, confirmed unchanged; no new code re-verification warranted
+
+Jira re-fetched fresh (full fields incl. `comment`, `attachment`): status **In Analysis**,
+`updated = 2026-08-25T09:53:57+0100`, 6 comments, newest still Darminder's 08-17 14:01 (109779) —
+byte-identical to every snapshot from 08-25 through 09-09. Full comment thread read end to end
+(all 6), not just the newest, to rule out a missed reply; none found. GitHub re-checked
+(`search_pull_requests query:"PLT-2874 in:title,body"`, `hc-frontend`): still exactly one result,
+PR #2084, merged 2026-07-31.
+
+Per this run's brief, code was **not** re-verified beyond that GitHub check, since nothing on the
+ticket changed to warrant it: the 09-07 finding (de-dup fix already shipped at both
+`dashboard-color-service.ts` call sites) and the 09-09 correction (the 08-27 prod measurement used
+the wrong predicate for the tile's population, so its 851,409/−82,404 figures are not usable) both
+stand as recorded, not re-run this pass.
+
+**Day counts:** 25 days since the last human comment (Darminder, 08-17); **30 days** since
+Gennaro's Staging-undercount finding (109457, 08-12) went unanswered — this is the one open item.
+The 08-28 decision-request draft to Mostafa/Pietro stays retracted (§ 2026-09-09 below) and was
+not reconsidered, since PR #2084's state has not changed since the retraction.
+
+**Action class: 1 — stale, unresponded.** Confidence unchanged: 9/10 the 08-28 draft is unsafe to
+send; 6/10 on the Staging undercount (five hypotheses, none excluded).
+
+---
+
 ## 2026-09-07 — de-dup FE fix from the 08-28 recommended-action is already shipped; only the labelling decision is outstanding
 
 Scheduled live-incident sweep. Jira re-fetched fresh (`getJiraIssue`, full fields): status **In

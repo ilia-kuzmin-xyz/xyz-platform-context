@@ -37,3 +37,37 @@ describe actions rather than perform them. If it's wanted, it's a two-line diff 
 ## What this session did NOT do
 
 No code was written or pushed. No branch was created. No Jira comment, transition, or assignment.
+
+---
+
+## 2026-09-11 (scheduled) — second pass. Status now With Customer; Darminder already asked for video + browser; one gap in his ask, drafted below
+
+## Classification: unchanged, **1** — stale-unresponded-to-us doesn't apply (only 1 day since
+## Darminder's ask), but the ball is with the customer via Yash, and Darminder's own question
+## (comment 111941) doesn't cover which screen. The class-2 hardening tail from 09-10 is unchanged
+## and still not applied.
+
+Darminder tried an internal repro himself (Edge + Chrome, Cloud + Dev, logged in via LastPass) and
+did not see the autofill on the main form — see context.md. He then asked Yash for a video and the
+customer's browser. That covers browser and gives us a video, but not explicitly which of the two
+device-name inputs (main form vs. delete-confirmation) the customer is looking at, which is still
+the open question from the 09-10 pass. Nothing here needs sending today — Darminder's comment is
+one day old and this is not yet a stale-unresponded case — but the addition below closes his one
+gap, ready if/when the thread continues.
+
+**Assumption this rests on, one line:** that Darminder's existing ask (111941) will surface the
+screen either way if the customer sends a full video; this draft only removes the chance that a
+short clip or a text reply leaves it ambiguous.
+
+## Draft addition to Yash's/Darminder's thread — 86 words, UNPOSTED
+
+> One more thing worth asking alongside the video: when it happens, is it the main Device Name
+> field on the edit screen, or the box you type the device name into when deleting a device? They
+> look similar but only one of them saves anything, and we've hardened that one already. **Can you
+> get them to say which screen it is, or point it out in the video?** That's the detail we're
+> missing to know whether this is a different field or LastPass overriding our block.
+
+## What this pass did NOT do
+
+No Jira comment, transition, or assignment. No code changed. The `DangerZone.tsx` hardening
+described on 09-10 is still not applied, and still costs nothing whenever it's wanted.

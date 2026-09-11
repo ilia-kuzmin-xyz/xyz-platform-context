@@ -596,3 +596,31 @@ its own low-priority ticket, and the one-line justification is in §3 above.
   question; recorded only so nobody re-reads it thinking it matters.
 - Whether the customer considers the matter closed. That is the entire remaining content of the ticket.
 - Nothing was compiled or run; this environment cannot build the app.
+
+---
+
+## 2026-09-11 (scheduled) — left scope: Freshdesk auto-closed, no customer confirmation ever posted
+
+Board re-query today shows this ticket as **Done** (Jira `updated` 2026-09-10T15:33:49+0100). Fetched
+the full comment thread fresh rather than trusting the status alone, because the 09-10 run's own
+"left scope" table records other tickets closing on a *human* confirmation (PLT-3101) versus a
+Freshdesk automation timeout (PLT-3033-style) — this one is the latter, not the former.
+
+Comment-by-comment: after Ilia's 09-02 chase to Yash (`111072`, "is it fine to close the ticket
+then?"), the very next substantive event is the customer's auto-populate question (`111073`,
+same day), which Ilia answered (`111102`, 09-02 18:18) — a "no, and we're not planning to add
+one" answer, itself unconfirmed by the customer. Freshdesk then sat on "Waiting on customer" for
+**8 days** with zero customer reply, before flipping Open → Closed within 4 minutes on 09-10
+(`111948`/`111949`, 15:29→15:33) — the signature of a support-desk auto-close-on-timeout rule, not
+a person reading and accepting the answer.
+
+**So: closed, but not confirmed.** The label-collision follow-up this folder's 09-09/09-10 entries
+already scoped (§ above, "genuine class 2 sliver... raise as its own low-priority ticket") is
+unaffected either way — it was never part of 2890's own close condition. No new engineering
+question exists on this ticket. Recommending no further action: the close-out this folder has
+recommended since (per the board's own 09-08 count) its 24th+ consecutive run has, in effect,
+happened by attrition rather than by the drafted comment ever being sent. Folder renamed
+`groupA-filter-system` → `resolved-filter-system` to match.
+
+**Not re-opened by this run.** If the customer reopens Freshdesk ticket 7397 again, treat it as a
+fresh reopening, not a continuation of the 09-02 thread.

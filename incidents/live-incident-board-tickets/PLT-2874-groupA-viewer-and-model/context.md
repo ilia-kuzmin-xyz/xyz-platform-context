@@ -1,5 +1,40 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+## 2026-09-11 (scheduled) — unchanged; Gennaro's Staging ask now 30 days unanswered
+
+Live re-fetch (`getJiraIssue`, full fields incl. `comment`/`attachment`): status still **In
+Analysis**, priority Minor, assignee Ilia Kuzmin, 6 comments, newest still Darminder's 08-17 14:01
+(109779) *"Fix still ongoing following QA latest testing."* `updated` still
+2026-08-25T09:53:57+0100 — byte-identical to every snapshot since 08-25. Full comment thread
+re-read end to end this run (107239 → 109779, all 6, not just the recent ones) specifically to
+check nothing was missed by a prior pass: nothing was. Both original attachments (`60327`,
+`60328`, Mostafa's 07-07 screenshots) are still the only attachments and remain unopened/unopenable
+by this agent — a standing gap recorded since 07-13, not a new finding, so not re-flagged as new.
+
+GitHub re-checked: `search_pull_requests query:"PLT-2874 in:title,body"` against `hc-frontend`
+still returns exactly one result, **PR #2084** (merged 2026-07-31). No second PR exists under this
+key. Nothing else re-verified this run — the 09-07 code read (de-dup fix already shipped in both
+`dashboard-color-service.ts` call sites) and the 09-09 correction (the 08-27 prod measurement used
+the wrong predicate) both stand exactly as recorded; not re-run this pass, per this run's brief
+("don't redo the whole trace if nothing changed").
+
+**Day counts, computed from the actual last human comment/finding dates, not just `updated`:**
+- **25 days** since the last human comment on the ticket (Darminder, 08-17 → 09-11).
+- **30 days since Gennaro's Staging-undercount finding went unanswered** (comment 109457, 08-12 →
+  09-11). This remains the single open item on the ticket.
+
+Nothing to re-derive. The 09-09 retraction of the 08-28 decision-request draft to Mostafa/Pietro
+stands — its numbers modelled the dashboard tile with the wrong predicate
+(`investigation-log.md` § 2026-09-09) — and is **not resurrected this run**: PR #2084 is unchanged
+(still the only PR, still merged 07-31), so there is no new basis to revisit it. The Gennaro chase
+draft (`recommended-action.md` § 2026-09-09, 81 words) is still the one thing left to send.
+
+**Action class: 1 — stale, unresponded.** Nobody owes us a reply because the Gennaro question has
+still never been sent. Confidence unchanged: 9/10 that the 08-28 draft remains unsafe to send;
+6/10 on the Staging undercount itself — H1/H3/H4/H5/H6 (§ "Reopened 2026-08-13", § 2026-08-14) are
+all still live and still undiscriminated, all still needing Staging environment state nobody has
+supplied.
+
 ## 2026-09-08 — confirmed unchanged
 
 Live re-fetch: status still `In Analysis`, priority Minor, assignee Ilia Kuzmin, 6 comments, newest

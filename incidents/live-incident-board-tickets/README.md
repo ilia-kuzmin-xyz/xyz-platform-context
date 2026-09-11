@@ -45,6 +45,74 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-11 (scheduled) — 8 in-scope tickets, 1 brand-new (PLT-3119), 1 left scope (PLT-2890, Freshdesk auto-closed on timeout not on customer confirmation), 7 confirmed/refreshed unchanged-in-substance, zero Jira actions taken
+
+Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules
+above. **Reliability note:** the routine JQL (`status not in (...)`) transiently returned an
+incomplete page this run — 15 results instead of the true 8 in-scope + exclusions, silently
+dropping PLT-2918 — before a second, differently-shaped query (`searchResultMode: all`, explicit
+`totalCount`) returned the correct, complete 8. Read as Jira search-index eventual consistency, not
+a JQL logic error (the narrow query `key = PLT-2918 AND status not in (...)` matched immediately
+when run in isolation). **Do not trust a single `hasNextPage: false` result as ground truth** for
+this board without a `totalCount` cross-check or a diff against the prior run's own ticket list —
+this run only caught the gap because it diffed against 09-10's recorded 8.
+
+Every in-scope ticket was re-investigated in parallel by a dedicated pass (one per ticket): fresh
+Jira fetch (full comment thread + attachments, not cached), diffed against the folder's last
+recorded state, hc-frontend re-checked only where something new warranted it, and one dated
+2026-09-11 entry appended to each ticket's own files. Full detail lives in each folder; this table
+is the index, not the record.
+
+### Left scope this run
+
+| Ticket | Was | Now | What happened |
+|---|---|---|---|
+| PLT-2890 | With Customer | **Done** | Freshdesk auto-closed 09-10 15:33, 4 minutes after an automatic re-open, following **8 days of silence** on "Waiting on customer" — a timeout auto-close, not a human reading and accepting Ilia's 09-02 answer. No new engineering question exists either way. Folder renamed `groupA-filter-system` → `resolved-filter-system` |
+
+### Group A (8)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | **Brand new** (created 09-10, never triaged before). "AEX01" (project APLD-AEX01) missing from the Projects section of the APLD portfolio dashboard while showing fine in Milestone Performance. Code read shows both widgets share one filtered project list on our native dashboard — the split as described structurally shouldn't happen there, so the customer's view is very likely a separate PowerBI-linked report neither Darminder nor this session has visibility into. Genuinely low confidence pending one attachment (`64304`, smallest of the four, probably shows the actual weighting values) | 4, leaning 1 once that one screenshot is opened |
+| [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | Unchanged since 09-10 — same 2 comments, same 3 attachments, no re-investigation needed. Mechanism (selection-bridge dbId→elementId gap on "select same type"→"isolate") still just a static-code hypothesis; the drafted console check hasn't been run | 3 (pending one check) |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other (Cloud Admin device page) | **With Customer** (moved from Open) | Darminder ran his own internal repro (Edge+Chrome, Cloud+Dev) and could **not** reproduce the autofill on the main Device Name field — a negative result, consistent with that field's existing `autoComplete='off'`/`data-lpignore='true'` hardening. He's asked Yash for a video + the customer's browser; still open which of the two candidate fields the customer actually means | 1 (ball with customer via Yash) |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08 (comment 111646, a thank-you) — **128 days old** (recomputed), board's only Critical. Code re-verified: the true-north call site is still commented out in `viewer-service.ts`, both named orientation defects still unfixed. The 09-09 correction (the setting the customer was told to change can't affect the Web Editor's section box) is **still not relayed** | 4 with a class-1 chase attached |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since Darminder's 08-17 comment, now **25 days**. Full 6-comment thread re-read end to end, GitHub re-checked for a new PR (none beyond the existing #2084). **Gennaro's Staging-undercount finding is now 30 days unanswered** — the one open item, and the only actionable draft | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk-automation only) | Unchanged since 09-09, field-for-field identical fetch. Human silence now **17 days** (last human comment Mostafa's 08-25 Power BI redirect); the 09-09 chase-to-Yash draft stands, unposted | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk auto-reopened) | New comment: Darminder reassigned the ticket **Yash → Pietro Desiato**, "waiting for further input following Ilia's comment" — an internal handoff, not an answer to the still-queued Power BI template-reuse question. What input Pietro needs is itself unclear; flagged rather than guessed | 1 |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged since 07-06. **67 days stale, 27th consecutive run** recommending the identical unposted close-out. Full thread re-read to confirm rather than assume nothing changed | 1 — stale, unresponded (on us) |
+
+### Group B (0) — still empty
+
+No ticket on the board carries `Ready For Development` or `Dev In Progress` today.
+
+### Standing gaps (unopenable media) — not re-verified this run unless noted
+
+PLT-3119's 4 screenshots (new, session-wide 403 pattern — flagging `64304` specifically as worth a
+human's first look, it's much smaller than the other three); PLT-3115's 2 new attachments from
+Darminder's non-repro (`64302`/`64303`, same pattern); all other standing gaps (PLT-2651's 08-28
+screenshot, PLT-2815's 2 screenshots + inline blobs, PLT-2874's original 07-07 screenshots,
+PLT-2918's 5 attachments, PLT-3109's 5 attachments, PLT-3116's 3 attachments) are unchanged from
+prior runs and not re-tested per the routine's own standing rule.
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-3119** — open attachment `64304` first (smallest of the four); it likely settles whether
+   this is our native dashboard or the separate PowerBI report in one look.
+2. **PLT-2651** — send the true-north correction to the customer. Critical, 128 days, drafted and
+   ready.
+3. **PLT-2815** — execute the close-out. Purely administrative, 67 days / 27 runs unposted.
+4. **PLT-2874** — send the Gennaro ask (project/model name + date-slider screenshot). 30 days
+   unposted.
+5. **PLT-2918** — send the chase-to-Yash draft. 17 days of human silence.
+6. **PLT-3109** — ask Darminder/Pietro what input is actually needed, now that the ticket has
+   moved internally without answering the standing question.
+7. **PLT-3115** — Darminder's ask to Yash (video + browser) already covers most of the gap; the
+   supplementary one-liner on which field is drafted and ready if he wants to send it together.
+8. **PLT-3116** — run the drafted console check (needs a live session, only Ilia can do this).
+
+---
+
 ## Run: 2026-09-10 (scheduled) — 8 in-scope tickets (up from prior day's 6 in the 09-09 interactive pass), 2 brand-new (PLT-3115, PLT-3116), 4 left scope (2 resolved for the customer, 1 resolved independently by Darminder, 1 an anomalous Blocked transition), 6 confirmed unchanged, zero Jira actions taken
 
 Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules

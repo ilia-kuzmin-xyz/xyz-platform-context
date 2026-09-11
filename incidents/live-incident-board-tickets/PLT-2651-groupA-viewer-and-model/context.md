@@ -1,5 +1,85 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-11 (scheduled) — unchanged since 09-08 comment-wise; code confirmed unchanged too. Draft correction written, still unposted.
+
+**Fetched fresh via `getJiraIssue` (fields incl. `comment`, `attachment`).** Result diffed against
+the folder's last-recorded state (09-09/09-10 entries below).
+
+- **Status:** `With Customer` (unchanged). **Assignee: Yash Patel** (unchanged since 09-09 — the
+  09-08 reassignment away from Ilia stands, still stale in every entry before 09-09 that says
+  "assigned to Ilia").
+- **Comments:** 33 total, **no new comment since 111646** (Yash, 2026-09-08T14:29:28+0100, *"Thanks
+  for looking into it."*). Zero technical movement in 3 days.
+- **Attachments:** still exactly 4 — `57467`, `57468`, `57277`, `63521` (the 403 one). No new
+  attachment. Nothing to newly flag; 63521's 403 is the standing 08-28 gap, not re-flagged as new
+  per this run's instructions.
+- **`updated`:** 2026-09-08T14:29:28+0100 — matches last comment, confirms no silent field edit.
+- **Day count, recomputed:** created 2026-05-06T12:11:32+0100 → today 2026-09-11 = **128 days old**
+  (verified by date arithmetic, not carried forward from a prior run's count).
+
+**Code re-checked in `hc-frontend` this run** (working tree at commit `ed60719`, "Drop shortid, an
+unused dependency holding a vulnerable nanoid in the tree (#2192)"; `git log --all --grep=PLT-2651
+-i` returns **zero** commits — no branch or PR anywhere in this checkout's history references this
+ticket):
+
+- `viewer-service.ts:974-983` — **the `applyBasePointTransform` call site is still commented out**,
+  byte-for-byte the same block the 09-09 entry quoted (*"Using endpoint for project base point
+  turned off due to bug with misalignment of models"*). The true-north lever named in comment 111642
+  still has no live caller.
+- `section-tool-orientation.ts:88-114` (`_doPatch`) — **still `models[0]` only** (`:93`, gate at
+  `:95`, footprint at `:104`), **still memoises `_theta` with no invalidation** on model load/unload
+  (`:38`, `:57-63`). Neither half of the named two-part fix has been written. This matches the 09-09
+  entry exactly — **VERIFIED again, not stale.**
+
+**So: the 09-09 correction — that setting ATL08's project true north cannot change anything in the
+Web Editor's section box — still has not been relayed to the customer.** Comment 111642 (Ilia, still
+the most recent technical comment) is the only thing the customer has been told, and it points them
+at a setting change that, per the code re-read above, does nothing on this surface. No comment from
+Ali (DPL) has arrived either — the 09-09 draft asking whether DPL honours `ignoreTrueNorthAngle` was
+never posted (per this repo's own hard rule: draft only).
+
+### Group tag re-confirmed: Group A. Re-examined against the two standing exceptions, and neither holds today — the tag survives on the README's own status rule instead.
+
+Per `live-incident-run-instructions.md` § Grouping, the two exceptions that pull a **Group B**
+ticket back to Group A are: assignee is Ilia, or the most recent comment is a question aimed at us.
+**As of this run, neither is true**: assignee is Yash Patel (not Ilia, since 09-08), and the most
+recent comment (111646) is a thank-you, not a question. If this ticket's status were `Dev In
+Progress`/`Ready For Development` today, it would in fact fail both exceptions and read as Group B.
+
+**It stays Group A regardless, because this board's own `README.md` (§ Scope rules, line 21) folds
+`With Customer` into Group A directly** — "`groupA` (evaluate/clarify — Open/In Analysis/With
+Customer)" — independent of the assignee/question exceptions, which only matter for a
+`Dev In Progress`/`Ready`-status ticket. Status is `With Customer`, so Group A applies on that basis
+alone. **Flagging explicitly, as instructed:** the two exceptions from the base instructions file no
+longer independently support Group A for this ticket; only the README's broader status rule does.
+Folder tag (`groupA`) is correct and unchanged.
+
+### Action class re-stated: 4, with a class-1 chase attached (unchanged from 09-09)
+
+No new fact changes this. The remaining question (does `SectionToolOrientation` stay or get retired,
+per HS-407 111637's cross-team agreement) is still a product decision spanning two products and at
+least six projects — not code this session can write. The class-1 half — relaying the true-north
+correction before the customer sinks more time into it — is now **3 days overdue** rather than 1.
+
+### Draft — to Yash Patel, on PLT-2651 — DRAFT ONLY, not posted (93 words)
+
+> Yash, quick correction before they act on my last message: changing the project's true north
+> setting won't change anything in the Web Editor's section box, that code path isn't active. What
+> actually fixes it is the model being re-exported from Revit with the right rotation in its
+> coordinates, not a settings change or a re-upload. We're double-checking the exact export ask with
+> our backend team so we give them one correct instruction instead of a second wrong one. **Can you
+> ask them to hold off on the true-north change until we confirm that?**
+
+**Assumption this rests on (one line, not in the message):** that DPL honours
+`ignoreTrueNorthAngle` as its name implies is still unverified — the "re-export from Revit" framing
+is the code-side conclusion (`section-tool-orientation-math.ts:145-155`, gate at ≥0.5°), not
+confirmed by Ali. If DPL turns out to apply the angle despite the flag, this draft's second sentence
+would need revising before it goes out.
+
+**No Jira action taken by this run** — no comment, no transition, no assignment, no field edit.
+
+---
+
 ## 2026-09-08 — CORRECTION: the 09-07 "Group A → Group B" reclassification below was wrong; this stays Group A
 
 `live-incident-run-instructions.md` § Grouping is explicit: a Dev-In-Progress ticket is Group B
