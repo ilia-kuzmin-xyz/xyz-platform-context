@@ -88,6 +88,11 @@ const STAGES = [
      one to every table sharing the column name, which fabricated 39 of them.
      Read constraints from pg_constraint, keyed on conrelid.
 
+     Their side is a curated list of DDL files, because the same numeric range
+     holds model and issue migrations that are not commissioning tables. The
+     generator audits that list against the directory on every run and names
+     anything new, so a table can be left out on purpose but never by accident.
+
      WHAT IS DELIBERATELY NOT HERE
      A proposed-Supabase layer. Its definition is written below, commented
      out, because no written plan exists to seed it from — see rule 4.

@@ -64,6 +64,17 @@ const API_CONSTRAINTS = [
    wanted here. */
 const API_EXTRA = [{ file: '030_xyz_b_model_redesign', only: ['ElementInstallationStatus'] }];
 
+/* Files in the same numeric range that were looked at and left out. Recorded
+   so the audit below stays quiet until something genuinely new appears — a
+   warning that fires on every run is one nobody reads. */
+const API_IGNORED = {
+  '115_xyz_model_alter': 'model, not commissioning',
+  '115_xyz_room_capture_point': 'capture points',
+  '132_xyz_model_element_alter': 'model elements',
+  '140_xyz_issue_comment_alter': 'issues',
+  '142_xyz_drop_check_list': 'a cleanup, creates nothing',
+};
+
 /** api-v2's value sets live in TypeScript enums, not in CHECK constraints. */
 const API_VALUES = {
   'CommissioningTaskVersionHeader.SectionType': ['PRECONDITIONS', 'TEST_STEPS', 'DETAILS', 'OVERVIEW'],
@@ -103,6 +114,37 @@ function apiFile(kind, name) {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(file, sql);
   return sql;
+}
+
+/**
+ * Names every DDL file in the commissioning range that the lists above do not
+ * mention.
+ *
+ * The lists are curated on purpose — the same numeric range holds model,
+ * issue and cleanup migrations that are not commissioning tables, so pulling
+ * the range in wholesale would put unrelated api-v2 tables on the map. But
+ * curation fails silently: PAPI-3919 added CommissioningTaskFileReferenceMapping
+ * and the map went on saying api-v2 had no file table at all, because nothing
+ * looked. This looks, and refuses to be quiet about it.
+ *
+ * It reports rather than includes. Whether a new table belongs on the map is a
+ * judgement, and a generator should not be making it.
+ */
+function unlisted() {
+  const inRange = /^1(1[5-9]|[2-4][0-9])_/;
+  const listed = new Set([
+    ...API_TABLES,
+    ...API_EXTRA.map(extra => extra.file),
+    ...Object.keys(API_IGNORED),
+  ]);
+
+  const names = JSON.parse(execFileSync('gh',
+    ['api', `repos/${API_REPO}/contents/Database/xyz/Tables`, '--jq', '[.[].name]'],
+    { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }));
+
+  return names
+    .map(name => name.replace(/\.sql$/, ''))
+    .filter(name => inRange.test(name) && !listed.has(name));
 }
 
 console.log(`  reading ${API_TABLES.length} api-v2 tables and ${API_CONSTRAINTS.length} constraint files…`);
@@ -191,4 +233,14 @@ for (const layer of ['bridge', 'api']) {
   console.log(`    ${layer.padEnd(7)} ${Object.keys(registry[layer]).length} tables · ${count(layer)} columns`
     + ` · ${flagged(layer, 'pk')} pk · ${flagged(layer, 'fk')} fk · ${flagged(layer, 'en')} value sets`);
 }
-console.log(`    total   ${count('bridge') + count('api')} columns\n`);
+console.log(`    total   ${count('bridge') + count('api')} columns`);
+
+const missed = unlisted();
+if (missed.length) {
+  console.log('\n  api-v2 DDL files in the commissioning range that this tool does not read:');
+  missed.forEach(name => console.log(`    ${name}`));
+  console.log('\n  Decide whether each belongs on the map, then add it to API_TABLES with');
+  console.log('  its constraints file, or to API_IGNORED with a reason.\n');
+} else {
+  console.log('  every api-v2 DDL file in range is read or deliberately ignored\n');
+}
