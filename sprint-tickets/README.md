@@ -4007,3 +4007,61 @@ Development was still in flight at the time of writing (commits at 19:08, 19:17,
 commissioning theme rebuilt *on* the app theme, dialog buttons moved to theme variants, and the
 blocking-asset list virtualised instead of capped at five). Not tracking further; see the handover
 note above.
+
+## 2026-09-11, 18:50 — Copilot: "Changes recommended" on #2203, 4 Critical. Triaged.
+
+Copilot submitted a **🟡 Changes recommended** review at 18:47 UTC: 9 comments, **4 Critical**, on a
+PR that went ready-for-review 14 minutes earlier with four human reviewers requested. The six commits
+either side (18:54–19:41 local) are all theme/layout work and **none addresses these** — the review
+landed after the last of them.
+
+I did not fix them. Another session has been pushing to these exact files every ten minutes; editing
+them concurrently would collide and duplicate. Triage instead, so whoever picks this up is not
+reading nine same-looking bullets.
+
+### Verified correct — I checked these against the tree, not the summary
+
+**1. The delete dialog's copy is factually wrong** (`i18n/en/main.json:549,553`). It promises:
+
+> "Deleting removes it from the library **and from those assets**."
+
+`remove()` deletes `task_template` **only** — and the method's own doc comment two files away says
+`task_instance.task_template_id` is ON DELETE SET NULL, so the generated task stays on the asset with
+its snapshotted name and version. **The code's own comment contradicts the user-facing copy.** On a
+destructive confirmation this is the worst place to be wrong: it is the sentence someone reads before
+deciding. Fix is the copy, not the behaviour — the retention is correct and deliberate.
+
+**2. A failed safety check renders the destructive button** (`DeleteTaskDialog.tsx:156`,
+`TaskLibraryTab.tsx:1346`). If the usage query rejects, `isPending`/`isLoadingUsage` goes false while
+`usage.data` stays undefined — which the dialog reads as *"no recorded work"* and shows the normal
+red Delete. **A guard that fails open is worse than no guard**, because the UI now asserts safety it
+did not establish. Needs `isError` plumbed through and the action held non-confirmable with a retry.
+
+### Plausible, but the fix is server-side — scope call needed, not a quick patch
+
+- **Delete is not atomic with its own precondition** (`checklist-library-service.ts:664`). The usage
+  check is a client-side preflight; a run can be recorded in the gap, or another caller can invoke
+  `remove()` directly. Enforcing it properly means a Postgres RPC — **out of this PR's scope**, and
+  arguably out of the frontend's. Worth a ticket; not worth blocking on.
+- **`staleTime: 0` does not refetch on Confirm** (`useChecklistLibrary.ts:181`) — same TOCTOU, one
+  layer up. Cheaper to mitigate than the above (refetch before mutating) and worth doing even though
+  it narrows rather than closes the window.
+- **Archive-all and folder-delete run sequential mutations with no rollback**
+  (`TaskLibraryTab.tsx:993,1012`) — a mid-loop failure leaves a half-archived folder. Real, and the
+  honest fix is a batch operation.
+
+### Worth checking, could be a genuine functional hole
+
+- **Archived templates may still be reachable** (`:487`) — `useChecklistDefinitionList` also feeds the
+  task pickers and `taskInstanceSync`, and neither filters `archivedAt`, so an archived template could
+  still be applied to a newly created asset. If true that defeats the point of archiving. Also flagged
+  for the routed `ChecklistLibraryPage` (`:214`).
+- **Usage is keyed by `task_instance_id`** (`:543`) so one asset with several instances counts more
+  than once — the count shown in the refusal dialog.
+- **System-owned instances show `template_name` where the system's label belongs** (`:584`).
+
+### Minor
+`RowActionsMenu` stops pointer and click propagation but not **keydown**, so operating the menu by
+keyboard also activates the row — the same class of bug as the pointer-down one I documented on
+09-05, one event away. Plus `pendingSignOff`/`signedOff` falling through to success colouring, and no
+unit cover on the new `formatDateTime`.
