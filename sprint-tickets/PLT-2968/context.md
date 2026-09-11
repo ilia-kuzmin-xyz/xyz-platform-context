@@ -1901,3 +1901,62 @@ tree, not about the branch in general.
 **#2186 is now as far as I can take it:** green on `beed07e`, no merge conflict, 0 of 32 review
 threads open. `mergeable_state: blocked` is the required-review gate and nothing else, so the only
 remaining input is a human approval.
+
+## 2026-09-10/11 — the PR grew to three tickets; and a scope-gate trap worth knowing about
+
+### What landed while I was idle
+
+A parallel session folded PLT-2966 in and rebuilt the runner. Head moved twice:
+
+| Head | What |
+|------|------|
+| `beed07e` → `919ccdc` | PLT-2966 folded in from **#2204**, which was **closed unmerged** 09-10 09:16:53. Two commits, 252 insertions over 7 files, 183 of them tests. |
+| `919ccdc` → `0ed23b5` | `PLT-2967: sign-off follows the task kind, and preconditions are not a setting` — a **simplification**, net −43 lines. |
+
+Both heads verified green **per step**, not by job conclusion: `919ccdc` had step 19 ✅ 09:33:45→09:34:12 and step 20 ✅ 09:34:12→09:34:32. Branch is `0` behind master throughout, so the 09-09 merge held.
+
+**Review threads: still 32/32 resolved** across both heads. SonarCloud gate passed each time (8 → 9 → 10 new issues as the diff grew; 0 security hotspots throughout).
+
+### My own work survived the rewrite — checked, not assumed
+
+`0ed23b5` deleted 85 lines from `ChecklistCreatePage.tsx` and 4 keys from the en bundle, both files I had changed, so I verified rather than trusted:
+
+- `SECTION_LABELS` still at `ChecklistCreatePage.tsx:100`, still `{ PRECONDITIONS: 'Preconditions', TEST_STEPS: 'Task items' }`, still used at both call sites (`:294`, `:296`).
+- The cross-file guard test is intact and still asserts against `mlt/en/main.json`.
+- The 4 removed keys are the settings-rail ones (`taskSettings`, `preconditionsHint`, `requireSignOff`, `requireSignOffHint`). The two the guard depends on — `preconditions` and `taskItems` — **survive with values still equal to `SECTION_LABELS`**, so the guard holds rather than merely not-failing.
+
+### Copilot's `SCHEMA_PREVIEW` finding does not hold against current code
+
+It reported `SCHEMA_PREVIEW` as "enabled by default (production-impacting preview behavior)".
+`task-runner.preview.ts:17` reads `export const SCHEMA_PREVIEW = false`. Nothing to do — recorded so the
+next run doesn't re-chase it.
+
+### ⚠️ The commissioning scope gate can never fire for these tickets
+
+`hc-frontend/CLAUDE.md` puts Commissioning **out of scope by default**, switched on when *either*:
+the branch name contains `commission` (case-insensitive), **or** `.claude/commissioning-active` exists.
+
+On this repo, as checked out fresh, **neither can be true**:
+
+- the branch naming convention for this work is **`PLT-xxxx`** — `PLT-2968` contains no `commission`,
+  and never will for any ticket number;
+- **`.claude/` does not exist in the repo at all** — it is untracked, and `.gitignore:183` lists
+  `.claude/commissioning-active` explicitly, so the marker cannot arrive with a clone.
+
+So a fresh session that checks out `PLT-2968` and reads CLAUDE.md is instructed to **skip the very
+code the ticket is about** — "do NOT read, review, flag, refactor, or edit it". Nothing has broken
+yet only because these sessions have been long-lived and carried the context forward. A short session,
+or a new developer, would stop at the gate.
+
+**Worth raising as a ticket:** either add a third signal CLAUDE.md can actually see (a `PLT-` ticket
+allow-list, or a tracked marker rather than a git-ignored one), or say plainly in CLAUDE.md that
+commissioning tickets are named `PLT-xxxx` and the branch-name signal will not fire for them.
+
+### Open, and mine to fix once the build settles
+
+`0ed23b5` removed the sign-off and preconditions toggles, but the PR body's **How to test step 1**
+still says *"switch on Preconditions and add one, and switch on Require sign-off"* — controls that no
+longer exist. Verified against the code (`TASK_TYPE_REQUIRES_SIGN_OFF` in `task-type.types.ts` derives
+it from the kind), not inferred from the commit subject. A reviewer following step 1 would hunt for a
+missing toggle. Not touched yet: a build was in flight on that commit and the body is edited
+wholesale, so racing the session that just pushed would clobber it.
