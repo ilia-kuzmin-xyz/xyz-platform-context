@@ -4182,3 +4182,50 @@ failure; and my service-layer-mocked tests.
 
 No notification for this — it is entirely good news and needs nothing from the user. The 18:50 push
 pointed them here, so here is where the resolution belongs.
+
+### 07:56 — the rest of the list is worked too. Five more fixed, three deliberately open, one push-back.
+
+Verified in the tree at `c0ef2a2`: `includeArchived` (5 refs), `ownerKey` (3), `systemLabels` (6),
+`isLaterRun` (2), and `duplicate()`'s compensating delete at `checklist-library-service.ts:515-522`.
+
+**Fixed**
+
+- **Archived templates were still reachable** — the one I called a possible functional hole, and it
+  was real: `useChecklistDefinitionList` has **8 callers** (asset-type and system-type editors,
+  readiness levels, the import page) and none filtered `archivedAt`, so an archived template could
+  still be attached to a type and generated onto a new asset. The hook is now **live-only by default**
+  via `select`, and the Task library tab opts back in with `{ includeArchived: true }`. Same cached
+  query, so opting in costs no request — and **a picker added later inherits the safe default rather
+  than the bug**, which is the part that makes this the right shape of fix.
+- **Usage counted per instance** — an `ownerKey()` (asset, else system, else the instance alone) now
+  collapses both `appliedCount` and the evidence list. The method's own doc said *"Counted and listed
+  BY ASSET. One asset retested three times is one row"*, so the code had been contradicting its own
+  stated contract — same species as the delete-copy bug.
+- **System label** — `system_id` added to the row type, `systemLabels()` resolving name + type
+  alongside `assetLabels()`; `template_name` demoted to last-resort fallback.
+- **Run recency** — `isLaterRun()` orders by `sequence` (the rule `ChecklistInstanceService` already
+  uses), with `started_at` kept only as a tiebreak for rows written before the column existed. Test
+  has attempt 2 carrying an *earlier* start than attempt 1.
+- **Duplicate** — compensating delete: if `moveToFolder` rejects, the copy is removed and the original
+  error rethrown, so Duplicate either lands the copy in the source folder or leaves nothing behind.
+
+**Deliberately left open, grouped into one backend ticket** — `remove()` without a transactional
+precondition, folder delete, and archive-all. All three want a server-side batch/RPC. The reasoning
+given is right: a client-side compensating re-create would be *worse* than the gap, because recreated
+tasks return with new ids. Left visible rather than resolved, which is the honest call.
+
+**Push-back, and I think it is correct — this supersedes my own framing.** On the archived/invalidated
+exclusions I recorded (18:54) that *"the guard is narrower than the promise it makes"*. The reply
+argues the **guard** is right and the **promise** was wrong: an archived instance means the asset no
+longer owes that task, and an invalidated execution is a superseded attempt whose retest is already in
+the list, so counting either would block retirement on work that is not outstanding. Plus deleting a
+template never destroys history anyway — `task_instance.task_template_id` is ON DELETE SET NULL. So
+the copy changed from "while that history exists" to **"while that work is still on those assets"**,
+and the code stayed. Fixing the sentence rather than the behaviour is the same call I endorsed for the
+delete-dialog copy; consistent, and better than what the review asked for.
+
+**Net:** of the ~15 findings across three rounds, the substantive ones are fixed or reasoned-open with
+a ticket. Still outstanding and unaddressed as of this entry: the nested `<button>` in
+`ListItemButton`, `disableAutoFocus` plus the missing keydown stop, status colours in
+`RecordedWorkList`, the archive-only empty state, the silent empty-folder delete failure, and my
+service-layer-mocked tests — the smaller items, several of them mine.
