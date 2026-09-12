@@ -4359,3 +4359,15 @@ not the same as an answer to the question I was actually asking.**
 **No notification.** The Copilot ↔ branch loop is turning these round in minutes, the PR is blocked
 and cannot merge while it is, and there is nothing here the user can act on that the thread does not
 already say. This file is corrected, which is the part that was actually broken.
+
+### 08:24 — #2203 green again
+
+Build ✅ on `a645761` (08:05:10 → 08:24:05), Sonar gate passed, Copilot's run completed. The 08:03
+failure on `c0ef2a2` is closed: one test, fixed on the branch two minutes after it broke, nothing for
+me to push.
+
+Open on the PR: the two incomplete fixes in the 08:06 correction above (`taskInstanceSync` bypassing
+the archive filter; `byOwner` losing template identity for folder queries), the three backend-atomicity
+threads deliberately left open for one RPC ticket, and the smaller items — nested `<button>`,
+`disableAutoFocus` + missing keydown stop, status colours, archive-only empty state, silent
+empty-folder failure, `formatDateTime` unit cover, and my service-layer-mocked tests.
