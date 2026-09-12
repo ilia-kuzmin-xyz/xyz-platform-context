@@ -4371,3 +4371,30 @@ the archive filter; `byOwner` losing template identity for folder queries), the 
 threads deliberately left open for one RPC ticket, and the smaller items — nested `<button>`,
 `disableAutoFocus` + missing keydown stop, status colours, archive-only empty state, silent
 empty-folder failure, `formatDateTime` unit cover, and my service-layer-mocked tests.
+
+### 08:27 — the generation-path bypass is now genuinely fixed (head `bc763e0`)
+
+Closes the first half of my 08:06 correction. The exclusion moved out of the hook and into the
+generation lookup itself:
+
+```
+task-instance-sync.ts:20   const liveDefinitionsById = (definitions) =>
+                             new Map(definitions.filter(def => !def.archivedAt).map(...))
+task-instance-sync.ts:143    definitionById: liveDefinitionsById(definitions),   // assets
+task-instance-sync.ts:356    const definitionById = liveDefinitionsById(definitions)  // systems
+```
+
+Both call sites already did `if (!definition) continue`, so an archived template now generates
+nothing without any change at the call sites. The hook's live-only default stays as a second layer
+for the pickers. The helper carries a comment saying **why** it cannot live only in the hook —
+reconciliation calls `ChecklistLibrary.list` directly — which is the sentence that stops someone
+re-centralising it later and quietly reopening the hole.
+
+**How I verified it, deliberately differently from 07:56:** enumerated *every* `ChecklistLibrary.list(`
+call site in the file (2), checked each reaches the filter, then read the filter body to confirm it
+filters on `archivedAt`. Three steps, because "the mechanism exists" was exactly the claim that misled
+me last time. Symmetry was not assumed either — the asset path at `:143` was checked separately from
+the system path at `:356`, since a fix landing on one and not the other is precisely the failure mode.
+
+Still open from that correction: **`byOwner` keyed by owner alone**, which under-reports
+`tasksWithWork` when a folder query spans templates with work on the same asset.
