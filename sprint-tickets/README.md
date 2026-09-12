@@ -4267,3 +4267,37 @@ clarifications raised 2026-09-05 — seven days, both Critical, both blocked on 
 `@xyzreality/dhtmlx-gantt`). **No run since this constraint appeared has executed a test locally.**
 Standalone `esbuild` (parse) and `prettier@2.7.1` (format) both work via `npx` and were used instead.
 If local validation matters, a token with `read:packages` is the unblock.
+
+### 08:05 — #2203 went red on `c0ef2a2`, and was fixed on the branch two minutes later
+
+One test failed out of 4774 (`1 failed | 4620 passed | 149 skipped`): the **new** case added for the
+filtered-folder-delete fix, `TaskLibraryTab.context-menu.test.tsx:497`
+— *"deletes the WHOLE folder while a search is narrowing it"*.
+
+Cause: it called `screen.getByTestId('tasks-tab-search')` **synchronously** after `renderTab()`, while
+every other case in the file awaits a `findBy*` first. The tab's list and folder queries are promises,
+so nothing had rendered yet. Already fixed at head `a645761`, where line 499 reads
+`const search = await screen.findByTestId('tasks-tab-search')`. **Nothing for me to push** — the red
+head is superseded and a build on the fixed one started at 08:05.
+
+#### A mistake of my own, mid-diagnosis, worth keeping
+
+While checking whether the testid existed I ran:
+
+```
+git grep -n "tasks-tab-search" origin/PLT-2999 -- '*.tsx' | grep -v test
+```
+
+Empty. I briefly concluded the testid did not exist at all and said so. It does —
+`TaskLibraryTab.tsx:179`. **My own `grep -v test` deleted the answer**, because the matching line
+contains `data-testid`. The filter meant to drop test *files* dropped the one production line that
+proves the attribute exists.
+
+> **A `grep -v` filter is a claim about what you are excluding, and `test` is a substring of
+> `data-testid`, `latest`, `contest`, `attestation`.** When a negative filter returns nothing,
+> re-run without it before concluding the thing is absent — "no results" from a filtered search is
+> evidence about the filter as much as about the tree.
+
+Second time this run that a *tooling* artefact nearly produced a wrong published claim: the other was
+`actions_list` serving a stale page (09-10 entry). Both were caught by re-checking rather than by
+being careful the first time, which is the honest description.
