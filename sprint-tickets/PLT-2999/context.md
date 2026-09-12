@@ -199,3 +199,47 @@ exercised and green. The pre-existing 12 mocked-service cases also survived the 
 real trap (the `sequence` tiebreak) but cannot catch render-timing mistakes in new tests. When
 adding a component test blind, copy the await-shape of the neighbouring test rather than reasoning
 about it — every other test in that file already waits via `findByTestId` before touching the DOM.
+
+### `a645761` green — then a fourth Copilot round found two holes in MY fixes. Both were real.
+
+The test-timing fix went green (build + Sonar + reviewer all success). The reviewer then re-read the
+whole change and posted two new threads. Both were correct, both were regressions introduced by the
+09-12 push, and both are now fixed in `bc763e0`.
+
+**1. The archived filter only covered React Query consumers — and missed the generation path.**
+`taskInstanceSync` calls `serviceProvider.ChecklistLibrary.list(projectId)` **directly** at
+`task-instance-sync.ts:112` (`reconcileAssets`) and `:333` (the system equivalent), never through the
+hook. So an archived template still mapped to a type carried on generating instances onto newly
+imported assets — which is precisely the thing archiving exists to stop, and the thing I claimed to
+have fixed. Filtering the pickers was the *less* important half.
+
+Fixed with `liveDefinitionsById()` at the point the generation lookup is built. Both call sites
+already had `if (!definition) continue`, so an archived template now generates nothing with no other
+change. The hook default stays as the second layer.
+
+**Generalisable lesson:** "filter it in the hook, everything inherits the safe default" was only true
+of hook callers. Before claiming a data rule is enforced, grep for **direct service calls**, not just
+hook usages — `grep -rn "ChecklistLibrary.list"` would have shown both in one line, and I only
+grepped `useChecklistDefinitionList`.
+
+**2. The owner collapse lost per-template identity across a folder.** `usage()` is asked about every
+template in a folder at once. Keying `byOwner` on the owner alone meant two different tasks with work
+on the *same asset* overwrote each other — hiding one task's run in the evidence, and undercounting
+`tasksWithWork`, which `TaskLibraryTab.tsx:919` derives from
+`new Set(executions.map(run => run.templateId)).size`. So the blocked-folder dialog would say "1 of
+the 3 tasks" where it should say 2.
+
+Key is now `${ownerKey}::${templateId}`. **`appliedCount` deliberately still collapses on the owner
+alone** — it is read out as a number of assets, so one asset carrying two of the folder's tasks is
+still one asset. Test added for exactly that split.
+
+**Generalisable lesson:** the dedupe I was asked for was "one ASSET, one row" for a single template.
+I applied it to a method that also serves the multi-template folder case, and the single-task tests
+all still passed. When tightening a key, check every caller's cardinality — not just the one the
+review comment was about.
+
+### Thread state at end of run
+
+**15 threads: 13 resolved, 2 open by choice** (`remove()` RPC and the folder-delete/archive-all
+batch — one backend ticket, not yet raised). Build on `bc763e0` was still running when the run ended;
+**next run: check it first.**
