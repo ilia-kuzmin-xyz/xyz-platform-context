@@ -178,3 +178,24 @@ What was done instead: every file parsed with standalone `esbuild` (JSX balance,
 with the repo's exact `prettier@2.7.1`, and the existing test suite read line by line to reason about
 breakage — which is how the `sequence` tiebreak in (5) was caught before pushing. CI is the real
 validator. **Next run: check #2203's build first.**
+
+### CI caught what the missing node_modules could not — and it was the test, not the fix
+
+`c0ef2a2` went red. Worth recording exactly what, because it is the cost of not being able to run
+anything locally, and it was cheaper than it looks:
+
+**1 test file failed, 392 passed, 0 lint errors.** The single failure was one of the *new* tests —
+`deletes the WHOLE folder while a search is narrowing it` — reaching for `tasks-tab-search` on the
+first frame, while the tab still renders `tasks-tab-loading` and the toolbar is not mounted. A
+`findByTestId` instead of `getByTestId` is the whole fix (`a645761`).
+
+**Nothing in the production change broke anything.** The other two new component cases passed,
+including the fail-open one, and all the new service cases passed — so the `ownerKey` collapse, the
+`sequence` rule, `systemLabels`, the compensating delete and the live-only hook default are all
+exercised and green. The pre-existing 12 mocked-service cases also survived the async
+`usagePermitsDelete()` gate, which was the main regression risk.
+
+**Lesson for the next run in this container:** the esbuild-parse + read-the-suite approach caught the
+real trap (the `sequence` tiebreak) but cannot catch render-timing mistakes in new tests. When
+adding a component test blind, copy the await-shape of the neighbouring test rather than reasoning
+about it — every other test in that file already waits via `findByTestId` before touching the DOM.
