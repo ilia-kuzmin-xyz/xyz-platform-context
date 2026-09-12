@@ -243,3 +243,13 @@ review comment was about.
 **15 threads: 13 resolved, 2 open by choice** (`remove()` RPC and the folder-delete/archive-all
 batch — one backend ticket, not yet raised). Build on `bc763e0` was still running when the run ended;
 **next run: check it first.**
+
+### End-of-run state: `bc763e0` GREEN
+
+`build` success, `SonarCloud` success. The reviewer run on this commit came back **cancelled**
+(superseded, not failed) and posted nothing new — thread total is still **15: 13 resolved, 2 open by
+choice**.
+
+So the PR is green, 0 behind master, still draft, and the only outstanding items on it are the two
+atomicity threads that need the backend batch/RPC ticket. **That ticket is still not raised** — it is
+the one concrete follow-up this run leaves behind.
