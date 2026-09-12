@@ -100,3 +100,14 @@ the codebase; **per-user linking progress** can't be attributed because `asset_e
 column for who made the link). And the "Link to models" entry point reintroduces the staged linking
 mode that **PLT-2953 (#2148, merged 09-02) deliberately removed**. The ask on the ticket is to split
 it.
+
+## 2026-09-12 — still unanswered (day 7)
+
+Checked at the start of the scheduled run. **One comment, still mine, still no reply.** Status
+unchanged at `Analysis In Progress`. Held per the "do not re-ask" note — no second comment posted.
+
+Seventh day open on a **Critical** ticket whose blocker is a one-line product answer. Escalated in
+this run's notification to Ilia again, alongside the #2186 finding. The Jira ticket stays quiet.
+
+Nothing in the analysis above has changed and it remains complete enough to start the moment the
+question is answered.

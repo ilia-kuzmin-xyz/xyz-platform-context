@@ -2460,3 +2460,70 @@ later — because my own push of `f38d68e` superseded it.
 | Open | two product decisions, the runner's i18n copy pass, and an error-state pattern |
 
 Nothing further from me without a decision. The PR is green, conflict-free and waiting on people.
+
+## 2026-09-12 — #2186 is NOT clean any more: 37 unresolved threads, one confirmed data-loss bug
+
+**Supersedes the 09-10 note that "#2186 is green with all 32 review threads resolved."** That was
+true when written. A fresh Copilot round landed **2026-09-11 16:33** and the count is now
+**76 threads total, 37 unresolved**. CI is still green and the branch is 0 behind master — this is
+review debt, not a build problem.
+
+No fixes started this run. The volume is well past what one run can do properly, and several of
+these are runner-semantics questions rather than patches. Triaged and ordered instead, so whoever
+picks it up doesn't re-derive it.
+
+### Tier 1 — verified in the code, data loss
+
+**Reopening a completed task and changing one field discards every other answer.** Checked both
+halves rather than taking the comment on trust:
+
+- `TaskInstanceModal.tsx:281` sends `itemStatuses: changed` — only the modified items.
+- `checklist-instance-service.ts` `setItemStatus`: `if (!execution || execution.completed_at)` →
+  `openExecution(...)`. Once the previous run is completed, the next write opens a **new** execution.
+
+So the new run is created with default/unanswered items, only the changed ones are written into it,
+and the unchanged answers are never carried over — while the modal keeps displaying the old values as
+if they were retained. Threads `PRRT_kwDOEcrjY86hfrYC`, `PRRT_kwDOEcrjY86hh6Ut`.
+
+### Tier 2 — readiness can be satisfied by work that wasn't done (not individually re-verified)
+
+- Terminal verdict selectable with items unanswered; `pass` is written and `useReadinessSteps` counts
+  the level complete (`task-runner.parts.tsx:496,497`, `TaskInstanceModal.tsx:543`).
+- Stale `pass` survives an item later marked Fail — the button disables, the state doesn't clear
+  (`TaskInstanceModal.tsx:569`, `task-runner.parts.tsx:502`).
+- Persisted verdict/outcome never seeded back into the modal, so reopening and saving **erases** the
+  stored verdict and its comment (`TaskInstanceModal.tsx:420`, types `:158`).
+- `requiresSignOff` is persisted but nothing consumes it — a functional test reaches `pass` without
+  sign-off (`:72`, `ChecklistCreatePage.tsx:310`, `task-runner.parts.tsx:654`).
+- Tasks on **locked** ladder steps open an editable modal → the ladder can jump
+  (`readiness-ladder.tsx:383`).
+
+### Tier 3 — history mutated in place
+
+- Signature inserted into the frozen historical execution after reopen
+  (`checklist-instance-service.ts:804,813`).
+- Outcome-note edits target the completed run (`:718,722`).
+- Signing while dirty re-seeds from the server and drops unsaved edits (`:834`).
+
+### Tier 4 — smaller, certain
+
+- ~8 threads: hard-coded user-facing strings in `task-runner.parts.tsx` bypassing i18n, plus English
+  section-header labels persisted and rendered (`ChecklistCreatePage.tsx:124`).
+- Headers with an unrecognised `sectionType` are silently dropped on edit (`:142`) — the read path
+  deliberately preserves them, so an edit corrupts an existing definition.
+- Render-phase `setState` in `readiness-ladder.tsx:155` (×2 threads) — wants `useLayoutEffect`.
+- `asset-readiness-service.ts:165,171` set-then-clear override is not atomic.
+- `checklist-instance-service.ts:572` read isn't constrained to the `asset_readiness` bucket.
+- `:480` execution-capability probe reports false before any run exists, so per-item notes and
+  `passWithComments` are hidden until the user saves and reopens.
+- `TaskInstanceModal.tsx:571` rejected `mutateAsync` surfaces nothing to the user.
+
+### Suggested order for the next run
+
+Tier 1 first and on its own — it is the only one that destroys entered data, and the fix (re-run all
+current values into the new execution, or reset local state on reopen) is a decision worth making
+carefully rather than alongside 36 other edits. Tier 2 next, as one coherent "when may a task be
+called done" change, because those five threads are the same question asked five ways. Tier 4 is
+mechanical and can ride any later push.
+
+Notified Ilia this run with Tier 1 and a pointer here.

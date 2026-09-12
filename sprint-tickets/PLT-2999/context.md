@@ -103,3 +103,78 @@ with master's 9 changed files. Nothing in the implementation notes above is supe
 
 > If this ticket appears in Analysis again, **do not move it a second time** — ask Ilia whether the
 > 09-08 move was deliberate. Flagged in the 09-09 run summary.
+
+## 2026-09-12 — worked the three review rounds; 10 findings fixed and pushed
+
+Pushed `c0ef2a2` to `PLT-2999`. CI was green before it and the branch was 0 behind master, so
+checkpoints 2 and 3 were already satisfied — this run was checkpoint 1 only.
+
+Every finding was **re-verified in the tree** before being accepted. Three of the four rounds' worth
+of comments collapsed into ten real defects, one disagreement, and three server-side asks.
+
+### Fixed
+
+1. **Folder delete acted on the FILTERED folder** — the one the 09-11 notes led with, and confirmed:
+   `folders` (`TaskLibraryTab.tsx:1165`) is grouped with `search` + `taskType`, and `:1306` handed
+   that object to `startDeleteFolder`. New `wholeFolder()` helper re-resolves from `allFolders`
+   (unfiltered) before anything destructive. Fixes archive-all on the same path, since both read
+   `folderPendingDelete`. Test: search narrows a 2-task folder to 1, delete, both go.
+2. **Delete guard failed open** — `blocked = executions.length > 0`, so a rejected usage query read
+   as "no recorded work" and drew the red Delete. `usageError` / `onRetryUsage` plumbed through;
+   dialog has an explicit `unchecked` state offering only a retry.
+3. **`staleTime: 0` didn't refetch on Confirm** — both confirm paths now await `usagePermitsDelete()`,
+   which refetches and gates. Narrows the window; does not close it (see below).
+4. **`usage()` counted per instance, not per asset** — contradicting its own doc comment. New
+   `ownerKey()` (asset → system → instance) collapses both `appliedCount` and the evidence list.
+5. **"Latest run" picked by `started_at`** — the runner uses persisted `sequence`
+   (`checklist-instance-service.ts:194`). New `isLaterRun()`: sequence decides, timestamp breaks a
+   tie. **The tiebreak is load-bearing** — existing tests insert executions with no `sequence`, and
+   a pure sequence compare regressed them.
+6. **System tasks named after themselves** — `template_name` shown where the system's name belongs.
+   `system_id` added to the row type, `systemLabels()` added alongside `assetLabels()`.
+7. **Archived templates still reachable from every picker** — `useChecklistDefinitionList` has 8
+   callers and none filtered `archivedAt`, so an archived task could be attached to a type and
+   generated onto a new asset. Hook is now live-only by default via `select`; the tab opts in with
+   `{ includeArchived: true }`. Same cached query, so opting in costs no request.
+8. **`duplicate()` stranded its copy** at the root if `moveToFolder` failed, and retrying multiplied
+   strays. Compensating delete added.
+9. **Empty-folder delete had no `onError`** — silent failure, no dialog to carry the message.
+10. **`<button>` inside `<button>`** — `RowActionsMenu` was inside `ListItemButton`. Moved to a
+    sibling overlaid on the row's right end. Also dropped `disableAutoFocus` (kept
+    `disableRestoreFocus`, which is the one that protects Rename's field) and added a keydown
+    propagation stop.
+
+Plus the i18n copy: `appliedBody` promised deletion removes the task "from those assets" while
+`remove()`'s own doc says `task_template_id` is ON DELETE SET NULL and the asset keeps it.
+
+### Disagreed, resolved with reasoning
+
+The probe excluding **archived instances** and **invalidated executions** is deliberate: an archived
+instance is a task the asset no longer owes, and an invalidated run's replacement is already in the
+list. Deleting a template doesn't destroy history either way (SET NULL). The copy was what overstated
+it — `blockedBody` changed from "while that history exists" to "while that work is still on those
+assets".
+
+### Left OPEN — need a server-side change
+
+- `remove()` is not atomic with its own precondition. Needs a Postgres RPC.
+- Folder delete is a sequential loop with no rollback.
+- Archive-all, same shape (less damaging — reversible — but the toast still claims the full count).
+
+Grouping all three into **one backend ticket** rather than three. Not yet raised.
+
+### State
+
+11 of 13 threads resolved, 2 open by choice. PR description rewritten (test step 6 covers the
+filtered-folder case). Still draft.
+
+### Caveat on validation — read this before trusting the above
+
+**Nothing was run locally.** `npm ci` fails in the scheduled-run container: the private
+`@xyzreality/*` packages need `read:packages` and neither the session `GITHUB_TOKEN` nor `NPM_TOKEN`
+carries it (401 on `@xyzreality/dhtmlx-gantt`). So no vitest, no eslint, no tsc.
+
+What was done instead: every file parsed with standalone `esbuild` (JSX balance, syntax), formatted
+with the repo's exact `prettier@2.7.1`, and the existing test suite read line by line to reason about
+breakage — which is how the `sequence` tiebreak in (5) was caught before pushing. CI is the real
+validator. **Next run: check #2203's build first.**

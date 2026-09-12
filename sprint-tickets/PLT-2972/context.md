@@ -85,3 +85,14 @@ master, `PLT-2968` is **0 commits behind master** as of this run, and #2186 is g
 review threads resolved**. The moment the scope question is answered — whose tasks the modal shows,
 and list-that-opens-the-editor vs. a full fill-in form — the system-scoped variant of that modal is
 the whole job.
+
+## 2026-09-12 — still unanswered (day 7)
+
+Checked at the start of the scheduled run. **One comment, still mine, still no reply.** Status
+unchanged at `Analysis In Progress`. Held per the "do not re-ask" note — no second comment posted.
+
+Seventh day open on a **Critical** ticket whose blocker is a one-line product answer. Escalated in
+this run's notification to Ilia again, alongside the #2186 finding. The Jira ticket stays quiet.
+
+Nothing in the analysis above has changed and it remains complete enough to start the moment the
+question is answered.

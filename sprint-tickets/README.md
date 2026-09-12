@@ -4229,3 +4229,41 @@ a ticket. Still outstanding and unaddressed as of this entry: the nested `<butto
 `ListItemButton`, `disableAutoFocus` plus the missing keydown stop, status colours in
 `RecordedWorkList`, the archive-only empty state, the silent empty-folder delete failure, and my
 service-layer-mocked tests — the smaller items, several of them mine.
+
+## Triage — 2026-09-12
+
+JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()`
+
+| Ticket | Summary | Status | PR | Eligible? |
+|--------|---------|--------|----|-----------|
+| PLT-2524 | Parquet last-updated tracking | Blocked | — | ❌ |
+| PLT-3086 | System Edit/Move impact modal | In Code Review | #2190 (Rishi's) | ❌ |
+| PLT-3038 | GMT offset in timezone selector | In Code Review | #2202 | ❌ |
+| PLT-2999 | Task library context menu | In Code Review | #2203 | ❌ |
+| PLT-2968 / 2967 / 2966 | Readiness override, tasks modal, completion stamp | In Code Review | #2186 | ❌ |
+| PLT-2972 | Affects System tag interaction | Analysis In Progress | — | ⚠️ held, day 7 |
+| PLT-2952 | Asset List linking mode | Analysis In Progress | — | ⚠️ held, day 7 |
+| PLT-3117 | Infinity Canvas lineage inspector | Dev In Progress | #2212 | ❌ |
+
+**Net: 0 tickets eligible for kick-off.** Both Analysis tickets are still waiting on the same
+clarifications raised 2026-09-05 — seven days, both Critical, both blocked on a product decision.
+
+### Checkpoints
+
+- **Checkpoint 2 (CI): green on all six of my PRs** — #2203, #2202, #2212, #2197, #2194, #2186.
+- **Checkpoint 3 (master freshness): all six 0 behind `ed60719`.** No merges needed.
+- **Checkpoint 1 (feedback):**
+  - **#2203** — worked properly. 10 findings fixed and pushed (`c0ef2a2`), 11 of 13 threads resolved,
+    2 left open for a backend batch/RPC. Detail in `PLT-2999/context.md`.
+  - **#2186** — **regressed from clean to 37 unresolved threads** after a 09-11 Copilot round,
+    including a confirmed data-loss bug on reopened tasks. Triaged and ordered, not started. Detail
+    in `PLT-2968/context.md`.
+  - #2202 / #2212 / #2197 / #2194 — no new feedback.
+
+### Environment constraint worth knowing
+
+`npm ci` cannot complete in the scheduled-run container — the private `@xyzreality/*` packages need
+`read:packages`, and neither `GITHUB_TOKEN` nor `NPM_TOKEN` carries it (401 on
+`@xyzreality/dhtmlx-gantt`). **No run since this constraint appeared has executed a test locally.**
+Standalone `esbuild` (parse) and `prettier@2.7.1` (format) both work via `npx` and were used instead.
+If local validation matters, a token with `read:packages` is the unblock.
