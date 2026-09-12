@@ -4427,3 +4427,45 @@ nested `<button>`, `disableAutoFocus` + missing keydown stop, status colour norm
 values, archive-only empty state, silent empty-folder failure, `formatDateTime` unit cover, execution
 item counts including header rows, in-progress row hidden by a newer completed one, and my
 service-layer-mocked tests.
+
+### 08:50 — fifth Copilot round. The notable finding is one the earlier fixes *caused*.
+
+(Copilot noted it "was unable to run its full agentic suite" this round; 6 comments, two duplicated.)
+
+**The copy still says "assets", but the data no longer means only assets.** Verified at `bc763e0`:
+
+```
+:549  "appliedBody": "This task is applied to {{appliedCount}} assets, …"
+:553  "appliedBodyFolder": "These tasks are applied to {{appliedCount}} assets, …"
+```
+
+`appliedCount` is now `new Set(instanceRows.map(row => ownerKey(...)))`, and `ownerKey` is *asset,
+else system*. So a task blocked by a **system** is reported as being applied to N *assets*. Nothing
+was wrong with this copy when it was written — **the `systemLabels()` fix made it wrong**, by teaching
+the evidence path about system owners while the sentence describing the count stayed asset-only.
+
+That is the third time in this PR that a fix invalidated an assumption somewhere else:
+
+| Fix | What it silently broke |
+|---|---|
+| per-owner dedup (for the instance overcount) | folder queries — `tasksWithWork` under-reported |
+| `systemLabels()` (for the wrong evidence label) | the copy, which still says "assets" |
+| archive filter in the hook (for the pickers) | nothing — but it *missed* `taskInstanceSync` |
+
+> **In a change this size the dangerous edits are not the wrong ones, they are the right ones whose
+> blast radius nobody re-walked.** Each of these was a correct fix. What was missing each time was the
+> second question: *what else assumed the old behaviour?* Worth asking explicitly on every fix in this
+> PR's remaining list, because the pattern has now recurred three times.
+
+Also correct, smaller:
+- `archiveAllInstead` / `archiveAll` read *"Archive all {{count}}"* — **no noun**. Should be
+  "all {{count}} tasks".
+- `RecordedWorkList:168` — the toggle is a `role='button'` div firing on Space **keydown**, which
+  repeats while held, so holding Space toggles repeatedly. Native buttons fire Space on keyup. Guard
+  `event.repeat`, or use `ListItemButton` (though note the nested-button finding — it must not go
+  inside another button).
+- `MENU_WIDTH` (214) duplicated across the row-actions menu and the tab's select menus; worth one
+  exported constant.
+
+Good news visible in the same file: the delete copy fix landed properly — `:549` now reads
+*"Deleting removes it from the library. The assets keep the task they were already given."*
