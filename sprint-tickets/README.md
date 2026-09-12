@@ -4152,3 +4152,33 @@ delete path has `onSuccess` but no `onError`, so a failed delete says nothing (`
 **Still no extra notification** — fourth review event on one PR, and the 18:50 push already points
 here. The list above is the current state; the priority order in the 18:54 entry stands, with these
 three added below it as smaller, certain fixes.
+
+## 2026-09-12, 07:55 — the top three #2203 findings are FIXED. Triage above is superseded on those.
+
+The session driving `PLT-2999` worked the list overnight and replied on each thread. **Verified in the
+tree at head `c0ef2a2`, not taken from the replies:**
+
+| Finding (my priority order, 18:54) | Fix | Verified |
+|---|---|---|
+| **1. Folder delete used the filtered list** | `wholeFolder()` helper re-resolves from `allFolders` before anything destructive starts | ✅ `TaskLibraryTab.tsx:1245-46` — `allFolders.find(c => c.id === folder.id) ?? folder`, with a comment saying why. Covers archive-all too, since both read `folderPendingDelete`. Test: search narrows a 2-task folder to 1, delete, both go |
+| **2. Fail-open on usage error** | `usageError` + `onRetryUsage` plumbed through; dialog gains an explicit `unchecked` state rendering neither Delete nor Archive, only retry | ✅ 8 refs in `DeleteTaskDialog.tsx`, 2 in `TaskLibraryTab.tsx` |
+| **3. `staleTime: 0` did not re-read on Confirm** | `usagePermitsDelete()` gate both confirm paths await — refetches, returns false on error or if the fresh answer shows work | ✅ 3 refs in `TaskLibraryTab.tsx` |
+
+`isLoadingUsage` now also covers `isFetching`, so the refetch-before-confirm reads as *checking*
+rather than briefly looking answered — a detail worth noting, because that gap is exactly how the
+original fail-open presented.
+
+The reply on #3 is honest about its own limit: it **narrows** the race rather than closing it, and
+closing it properly means enforcing the precondition inside the delete (a server-side RPC). That
+matches my 18:50 triage — item 5, scope call, follow-up ticket. Good to see it recorded on the thread
+rather than quietly claimed as solved.
+
+**Still open from the triage** (unchanged, lower priority): usage probe excluding archived/invalidated
+runs; archived templates reachable via pickers/`reconcileAssets`; usage keyed per instance;
+system label falling back to `template_name`; run recency by `started_at` instead of `sequence`;
+non-atomic duplicate and folder delete; nested `<button>` in `ListItemButton`; `disableAutoFocus` and
+the missing keydown stop; status colours; archive-only empty state; silent empty-folder delete
+failure; and my service-layer-mocked tests.
+
+No notification for this — it is entirely good news and needs nothing from the user. The 18:50 push
+pointed them here, so here is where the resolution belongs.
