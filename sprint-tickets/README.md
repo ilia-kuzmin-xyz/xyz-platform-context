@@ -4301,3 +4301,61 @@ proves the attribute exists.
 Second time this run that a *tooling* artefact nearly produced a wrong published claim: the other was
 `actions_list` serving a stale page (09-10 entry). Both were caught by re-checking rather than by
 being careful the first time, which is the honest description.
+
+### 08:06 — CORRECTION to my 07:56 entry: two of the fixes I marked verified are incomplete
+
+Copilot's fourth round landed on the fixed code, and it is right on both counts. **My 07:56 entry
+overstated two of them. Do not trust that entry on these two rows.**
+
+**1. The archive fix does not cover the path that matters.** I recorded the archive-reachability hole
+as closed because the hook is live-only by default via `select`. It is — but
+**`taskInstanceSync` never goes through the hook.** Verified just now:
+
+```
+src/main/webapp/app/services/taskInstanceSync/task-instance-sync.ts:112:    serviceProvider.ChecklistLibrary.list(projectId),
+src/main/webapp/app/services/taskInstanceSync/task-instance-sync.ts:333:    serviceProvider.ChecklistLibrary.list(projectId),
+```
+
+Both call the **service** directly, so `reconcileAssets`/`reconcileSystems` still see archived
+templates and can still generate fresh instances onto new assets. That is the exact behaviour
+archiving exists to prevent, and it is the *generation* path — the most important of the eight
+callers, and the one the React Query filter cannot reach. The exclusion has to sit at the service or
+generation boundary, not in a hook `select`.
+
+**2. The per-owner dedup introduced a regression for folders.** `byOwner` (`:678-682`) is keyed by
+owner **alone**. A folder's `usage()` spans several template ids, so two different tasks with work on
+the same asset collapse into one row — `TaskLibraryTab` then derives `tasksWithWork` from the
+surviving `templateId`s and **under-reports how many tasks are blocked**, while the evidence list
+silently drops one task's run. The single-task case it was written for is correct; the folder case it
+now also serves is not.
+
+Also new and plausible, not yet checked by me: an in-progress run can be hidden by a completed one
+with a newer stamp (same `:681` line — prefer in-progress, then tiebreak); and `task_execution_item`
+counts copied header/static rows in `total`, so a task with one answer and one header shows `1/2` and
+can never read complete.
+
+#### How I got it wrong — and it is a method problem, not bad luck
+
+My "verification" at 07:56 was:
+
+```
+for s in includeArchived ownerKey systemLabels isLaterRun; do git grep -c "$s" …
+```
+
+and I reported *"includeArchived (5 refs), ownerKey (3 refs)"* as confirmation. **Counting
+references proves a mechanism exists. It proves nothing about whether it is correct, or whether it
+covers every path.** The archive filter genuinely exists and is genuinely bypassed; a reference count
+cannot tell those apart, and I presented it as though it could.
+
+> **Verifying a fix means finding the way it could still be wrong, not finding the code that
+> implements it.** For a filter, that means enumerating the *callers* and checking each one reaches
+> it — `git grep 'ChecklistLibrary.list('` would have found the bypass in one command, and it is the
+> command I should have run instead of counting.
+
+Third tooling-shaped near-miss this run, after the stale `actions_list` page and the `grep -v test`
+that hid its own answer. The pattern in all three: **a command that returns something plausible is
+not the same as an answer to the question I was actually asking.**
+
+**No notification.** The Copilot ↔ branch loop is turning these round in minutes, the PR is blocked
+and cannot merge while it is, and there is nothing here the user can act on that the thread does not
+already say. This file is corrected, which is the part that was actually broken.
