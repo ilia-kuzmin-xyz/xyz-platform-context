@@ -4398,3 +4398,32 @@ the system path at `:356`, since a fix landing on one and not the other is preci
 
 Still open from that correction: **`byOwner` keyed by owner alone**, which under-reports
 `tasksWithWork` when a folder query spans templates with work on the same asset.
+
+### 08:28 — the `byOwner` regression is fixed too. My 08:06 correction is now fully closed.
+
+Verified at `bc763e0`:
+
+- **Evidence rows** are keyed `${owner}::${templateId}` (`:686`), so two of a folder's tasks with work
+  on the same asset are two rows, and `tasksWithWork` — derived at `TaskLibraryTab.tsx:919` from
+  `new Set(executions.map(run => run.templateId)).size` — stops losing one.
+- **`appliedCount`** still collapses on the owner alone (`:603`, via `ownerKey`), which is right: it is
+  read out as *"applied to N assets"*, so one asset carrying two of the folder's tasks is one asset.
+
+Both choices carry comments saying why they differ (`:599-602`, `:679-682`). That matters more than
+usual here, because the two collapses now sit six lines apart and look like an inconsistency unless
+the reason is written down — the next person to "tidy" them into one key would reintroduce exactly
+this bug.
+
+**Both halves of the 08:06 correction are closed.** Worth noting the sequence for the next run: the
+owner-collapse *was itself the fix* for the earlier per-instance overcount, and it introduced this
+regression by being right for one caller (a single task) and wrong for the other (a folder).
+
+> **When one function serves two callers, a fix verified against one of them is half-verified.**
+> `usage()` is asked about one template by the task dialog and about many by the folder dialog. Every
+> finding in this area — the overcount, the collapse, the regression — comes from that one fact.
+
+Remaining on #2203: the three backend-atomicity threads (one RPC ticket), and the smaller items —
+nested `<button>`, `disableAutoFocus` + missing keydown stop, status colour normalisation for legacy
+values, archive-only empty state, silent empty-folder failure, `formatDateTime` unit cover, execution
+item counts including header rows, in-progress row hidden by a newer completed one, and my
+service-layer-mocked tests.
