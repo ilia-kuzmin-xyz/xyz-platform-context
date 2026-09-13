@@ -4588,3 +4588,54 @@ not "everything else passed" — it is "tests passed, types unverified".**
 Re-ran the failed job (the one legitimate re-run: an error naming a service the diff doesn't touch).
 Local `tsc --noEmit` had already covered the touched files — see the 08:0x entry for why that is now
 possible — so this was confirmation rather than the only evidence, which is a first on this branch.
+
+## 2026-09-13, 08:05 — round six. The pattern is now the headline: **five fixes have introduced new defects.**
+
+Two new findings, and **both are consequences of yesterday's fixes**. Verified at `f606080`.
+
+**1. Cancel no longer cancels a delete** (`TaskLibraryTab.tsx:999-1008`, and worse at `:1053-1058`).
+
+```
+1005  const confirmDeleteTask = async () => {
+1006    if (!taskPendingDelete) return          // captured in the closure
+1007    if (!(await usagePermitsDelete())) return   // network round-trip
+1008    deleteTask.mutate(taskPendingDelete.id, {   // uses the captured value
+```
+
+`isBusy` (`:1427`) does not cover the in-flight `usage.refetch()`, so **Cancel stays enabled during
+that await**. Pressing it sets `taskPendingDelete` to null and closes the dialog — and this closure
+carries on and deletes anyway. `confirmDeleteFolder` has the same shape and deletes **every task in
+the folder** after the user has cancelled.
+
+This is caused by the `usagePermitsDelete()` fix. Before it, confirm was synchronous from the user's
+point of view — mutate fired immediately, so there was no window in which Cancel could be pressed but
+ignored. **The safety fix opened the gap.**
+
+**2. `executions.length` now overcounts owners** (`DeleteTaskDialog.tsx:133`). Evidence rows became
+`owner::templateId`-scoped yesterday, so one asset carrying two of a folder's tasks is legitimately
+two rows — and the dialog reads that length as a count of blocking assets. The service's own new test
+demonstrates the contradiction: `appliedCount === 1` with two execution rows.
+
+### The tally, because it is now the most important fact about this PR
+
+| # | The fix | What it introduced |
+|---|---|---|
+| 1 | per-owner dedup (for the instance overcount) | folder `tasksWithWork` under-reported |
+| 2 | `systemLabels()` (for the wrong evidence label) | copy still said "assets" |
+| 3 | archive filter in the hook (for the pickers) | missed `taskInstanceSync` entirely |
+| 4 | `owner::templateId` (fixing #1) | `executions.length` overcounts owners |
+| 5 | `usagePermitsDelete()` (for the TOCTOU) | **Cancel no longer cancels** |
+
+Every one of those fixes was correct in itself. Each changed a shape or a timing that something
+nearby depended on, and the dependency was not re-walked. Two of them are fixes *of fixes*.
+
+> **This is a property of the change, not of any one edit.** A 3,000-line PR that has produced five
+> regressions from five corrections should not be merged on the strength of green CI and resolved
+> threads — the resolutions are exactly what has been generating the defects. It wants one human pass
+> over the delete/archive/usage path as a whole, asking what each fix's new timing or shape broke.
+
+Also this round: archive enforcement in `taskInstanceSync` has **no test** (the reconciliation suite
+covers a missing template, not an archived one), the hook's live-only `select` has no test either,
+and `taskLibraryTheme` is applied to `ChecklistDetailContent` (`:1467`) which restyles the whole
+detail page though the theme's own docs say it should not inherit those overrides. Plus the
+still-open status normalisation and `formatDateTime` cover.
