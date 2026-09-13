@@ -4469,3 +4469,29 @@ Also correct, smaller:
 
 Good news visible in the same file: the delete copy fix landed properly — `:549` now reads
 *"Deleting removes it from the library. The assets keep the task they were already given."*
+
+## 2026-09-13, 07:57 — round five addressed in `f606080`; verified
+
+- **Copy now owner-neutral.** `:549`/`:553` read *"applied to {{appliedCount}} assets and systems …
+  They keep the task they were already given"*; `blockedBody`, `blockedBodyFolder` and both
+  archive-instead lines likewise. `archiveAll` gained its noun: *"Archive all {{count}} tasks"*.
+  So the second-order break the `systemLabels()` fix caused is closed.
+- **`event.repeat` guard** at `RecordedWorkList.tsx:167`, with a comment explaining that keydown
+  repeats while held. Chose the guard over swapping in `ButtonBase` — reasonable here, since going
+  semantic would mean redoing the row's layout for no behavioural gain, **and** `ListItemButton` is
+  exactly what the still-open nested-`<button>` finding is about, so reaching for it would have
+  traded one a11y bug for another.
+- **`MENU_WIDTH`** exported once from `taskLibrary.styles.ts:63`, beside `NEST_INDENT` and
+  `TYPE_COLUMN_WIDTH`, imported by both files and used across four MenuDrawer surfaces.
+
+One deliberate leftover, stated on the thread: the interpolation is still named **`assetCount`** even
+where the sentence now says "assets and systems". Invisible to users, and renaming reaches the dialog
+and its tests. Defensible — but it is now a name that contradicts its own string, so worth a line in
+whatever ticket carries the backend batch work, or it will mislead the next reader of that JSON.
+
+**Still open on #2203:** the backend batch/RPC ticket (folder delete, archive-all, `remove()`
+precondition — `allSettled` accepted as a fair interim but grouped into the same ticket), nested
+`<button>` in `ListItemButton`, `disableAutoFocus` + missing keydown stop on the row menu, status
+colour normalisation for legacy values, archive-only empty state, silent empty-folder failure,
+`formatDateTime` unit cover, execution counts including header rows, in-progress row hidden by a
+newer completed one, and my service-layer-mocked tests.
