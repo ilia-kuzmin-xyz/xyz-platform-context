@@ -4562,3 +4562,29 @@ the reopen fix (901 tests, same positive-control method, and it found the reopen
 which is better evidence for the amendment reading than the argument I used). No conflict this time,
 but that is the third day running with two sessions on the same tickets. Worth the ticket owner
 knowing: the duplicated effort is invisible unless you read the commit times.
+
+## 2026-09-13, 08:2x — a `build: failure` on #2186 that was SonarCloud being down
+
+`f493251`'s build came back **failure**, and the conclusion alone would have read as "my push broke
+it". The step list says otherwise:
+
+| step | outcome |
+|---|---|
+| 7 `Lint & Run Tests` | **success** — the four new wire-contract tests and lint pass in CI |
+| 10 `Dashboard Progress Regression` | success |
+| 12 `Execute SonarQube Scan` | **failure** after 5.9s |
+| 13–16, 19–20 (incl. 15 `Build image`) | **skipped** |
+
+The Sonar failure is `HttpException: Error 503 on https://sonarcloud.io/api/settings/values.protobuf`
+— `503 Service Temporarily Unavailable`, thrown while the scanner was still fetching global settings,
+i.e. before it looked at a single line of this branch. Nothing to do with the diff.
+
+**The part worth keeping: a Sonar outage silently costs you the typecheck.** Step 12 failing
+short-circuits the job, so `Build image` — the *only* place this repo runs a real `tsc` — is skipped.
+That is the same blind spot recorded on 09-03 (five cancelled runs, no typecheck for an hour),
+reached by a different route. **A red `build` whose Sonar step died is not "tests failed" and is also
+not "everything else passed" — it is "tests passed, types unverified".**
+
+Re-ran the failed job (the one legitimate re-run: an error naming a service the diff doesn't touch).
+Local `tsc --noEmit` had already covered the touched files — see the 08:0x entry for why that is now
+possible — so this was confirmation rather than the only evidence, which is a first on this branch.
