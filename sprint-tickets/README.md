@@ -4780,3 +4780,28 @@ answers did not support.** That is the sharpest thing to know about this PR goin
 **Outstanding across the sprint, unchanged:** PLT-2952 and PLT-2972 clarifications and the #2190
 question to Rishi, all waiting on people since 09-09. On #2203: the backend batch/RPC ticket and the
 smaller items listed in the 08:50 entry, three of them mine.
+
+### 08:40–09:00 — outage confirmed ended, and #2203 is green end to end
+
+Both re-runs failed at step 12 again (tests passing both times), so rather than spend a third blind
+retry I probed the service directly:
+
+```
+curl -o /dev/null -w "%{http_code}" https://sonarcloud.io/api/settings/values.protobuf   → 200
+```
+
+The exact endpoint that had 503'd was answering again, which makes a further run *evidence-backed*
+rather than retry-until-green — worth the distinction, because "re-run and hope" is the habit the
+one-re-run rule exists to stop.
+
+**#2203 then went green end to end** on `f606080`: `Lint & Run Tests`, `Execute SonarQube Scan`,
+`Build image`, `Verify serving behaviour`, `Vulnerability scanner`, `Scan built image` — all success,
+08:40:42→08:59:56. So the PLT-2999 fixes are CI-verified **including the typecheck**, which the two
+outage runs had skipped.
+
+**#2186 could not be brought to the same state, and that is fine.** The parallel session pushed four
+times in ~35 minutes (`48d7ee5` → `2a95934` → `edc1e3c`, working the Tier-2 "when may a task be
+called done" cluster), and each push cancels the previous ~19-minute build. `f493251` is still an
+ancestor of the branch and its tests passed at step 7 on two separate runs, so the Tier-1 fix is
+verified as far as this branch's cadence allows. **This is the 09-03 pattern repeating: a branch with
+two active writers cannot hold a green head long enough to prove one.**
