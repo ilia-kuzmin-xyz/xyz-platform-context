@@ -4639,3 +4639,38 @@ covers a missing template, not an archived one), the hook's live-only `select` h
 and `taskLibraryTheme` is applied to `ChecklistDetailContent` (`:1467`) which restyles the whole
 detail page though the theme's own docs say it should not inherit those overrides. Plus the
 still-open status normalisation and `formatDateTime` cover.
+
+### 08:07 — #2203 red again, and this one is NOT the PR's
+
+`f606080` failed, but read the steps before concluding anything:
+
+| Step | Result |
+|---|---|
+| 7 · `Lint & Run Tests` | ✅ **success** (07:57:41 → 08:06:24, 8m43s) |
+| 12 · `Execute SonarQube Scan` | ❌ **failure** — 08:06:33 → 08:06:42, **9 seconds** |
+| 13-20 (image build, Trivy) | skipped |
+
+Nine seconds is the tell: a real Sonar analysis on this repo takes ~90s. The cause, from the log:
+
+```
+Error 503 on https://sonarcloud.io/api/settings/values.protobuf
+<h1>503 Service Temporarily Unavailable</h1>
+…
+INFO  EXECUTION FAILURE
+INFO  Total time: 5.842s
+```
+
+**SonarCloud was down.** The scanner 503'd fetching global settings during bootstrap and never reached
+any analysis. Tests had already passed. This is the textbook "died before anything ran" case, so it
+earns the one re-run — and a re-run of the same run (`34746445811`) was **already in flight** when I
+went to trigger it (my `rerun_failed_jobs` returned *"403 This workflow is already running"*, new job
+`103696372349` started 08:07:31). So the re-run is spent whether or not I spent it.
+
+> **A failing step's *duration* is evidence about its cause.** Nine seconds for a step that normally
+> takes ninety is an infrastructure answer before you read a single line of the log — and it is the
+> cheapest signal available, sitting in the job's step list. Read the step timings first, then the
+> log.
+
+Note this is a different shape from the week's Trivy failures: those were **real findings** in a
+blocking scan; this is the **scanner's own service** being unavailable. Both present as "a scan step
+went red", and only the log distinguishes them.
