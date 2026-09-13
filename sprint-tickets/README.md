@@ -4495,3 +4495,70 @@ precondition — `allSettled` accepted as a fair interim but grouped into the sa
 colour normalisation for legacy values, archive-only empty state, silent empty-folder failure,
 `formatDateTime` unit cover, execution counts including header rows, in-progress row hidden by a
 newer completed one, and my service-layer-mocked tests.
+
+## 2026-09-13, 08:0x — vitest AND `tsc --noEmit` DO run locally. The blocker was `npm ci`, not the repo
+
+**Supersedes "no `node_modules`, so no local vitest" wherever it appears** — it is in
+`PLT-2968/context.md` (several times, incl. the 09-03 evening entry that tested `NPM_TOKEN` and got
+a 401), `PLT-2874-.../context.md:671`, `PLT-2858-.../context.md:504`,
+`PLT-3104-.../context.md:218`, `live-incident-board-tickets/README.md:315,1485`, and it has shaped
+a lot of work: fixes shipped unrun, review replies that say "I can't run the suite locally", and
+type errors found by CI eighteen minutes into `Build image`.
+
+The 401 is real. The conclusion drawn from it was too broad. `@xyzreality/dhtmlx-gantt` is the
+**only** private dependency, `npm ci` refuses to do anything without it, but `npm install` without
+it is fine — and nothing outside `gantt-x/` and `dashboard-panels/gantt/` imports it, so vitest
+never loads it unless a gantt test is in the run.
+
+```bash
+SP=<scratchpad>/hcf
+mkdir -p $SP && cd /home/user/hc-frontend && tar --exclude=.git -cf - . | (cd $SP && tar xf -)
+cd $SP
+# drop the one private dep, and the lock that pins it
+python3 - <<'PY'
+import json; d=json.load(open('package.json'))
+d['dependencies'].pop('@xyzreality/dhtmlx-gantt', None)
+json.dump(d, open('package.json','w'), indent=2)
+PY
+rm -f .npmrc package-lock.json
+npm install --no-audit --no-fund --legacy-peer-deps   # ~2 min, 2134 packages
+npx vitest run <paths>
+npx tsc --noEmit -p tsconfig.json
+```
+
+`--legacy-peer-deps` is required: without the lock, `yup@0.32.9` conflicts with
+`@hookform/resolvers@5.9.1`'s `peerOptional yup@^1`. Plain `npm install` dies on it.
+
+**Do this in the scratchpad, never in the checkout** — the 09-03 attempt was abandoned partly
+because editing `package.json` in place tripped the uncommitted-changes stop hook. Copy the tree,
+and re-copy `src/` into it after editing rather than working in it directly.
+
+### What each command is actually worth
+
+- **vitest: trustworthy.** Ran the full commissioning surface this way — 22 wire-contract, 196
+  across the task-runner suites, 161 across TaskLibraryTab. Same runner and config as CI.
+- **`tsc --noEmit`: a smoke test on YOUR files, not a CI baseline.** Dropping the lock re-resolves
+  every transitive `@types/*`, so the tree reports **237 pre-existing errors** that CI does not have
+  (mostly styled-system `children` overloads in `components/`). Filter to the paths you touched:
+  `... | grep "^src.*error TS" | grep -iE "<your dirs>"`. A clean filtered result is real signal —
+  this repo otherwise has no typecheck before `Build image` at step 15 of an ~18-minute job — but
+  the raw count means nothing and must not be reported as a regression.
+- **eslint: trustworthy**, and worth running since `lint` has no `--max-warnings 0` and warnings
+  are easy to add without noticing.
+
+### Method note that paid off twice today
+
+Both fixes this run were checked with a **positive control** — revert the fix in the scratchpad copy,
+confirm the new test actually fails, restore. On `f493251` exactly one of the four new tests flipped;
+the other three are invariants that must hold either way, which is worth knowing rather than
+mistaking them for regression cover. Without that step "22 passed" would have been indistinguishable
+from a test that asserts nothing.
+
+### Parallel session, again
+
+A second session was running this same scheduled task concurrently — it committed `8332327` and
+`7777770` documenting `f493251`/`f606080` within minutes of those pushes, and independently verified
+the reopen fix (901 tests, same positive-control method, and it found the reopen dialog's own copy,
+which is better evidence for the amendment reading than the argument I used). No conflict this time,
+but that is the third day running with two sessions on the same tickets. Worth the ticket owner
+knowing: the duplicated effort is invisible unless you read the commit times.
