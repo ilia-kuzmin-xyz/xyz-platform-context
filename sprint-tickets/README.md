@@ -4674,3 +4674,29 @@ went to trigger it (my `rerun_failed_jobs` returned *"403 This workflow is alrea
 Note this is a different shape from the week's Trivy failures: those were **real findings** in a
 blocking scan; this is the **scanner's own service** being unavailable. Both present as "a scan step
 went red", and only the log distinguishes them.
+
+### 08:18 — re-run hit the identical 503. Stood down with one comment on the PR.
+
+Attempt 2 (`103696372349`, 08:07:31 → 08:17:59) failed the same way: tests ✅ 8m52s, then
+`Execute SonarQube Scan` dead in **9s** at *"Load global settings"* on the same
+`Error 503 … /api/settings/values.protobuf`. `SONAR_TOKEN` is present in the step env, so this is
+**not** auth — it is SonarCloud returning 503.
+
+So: sustained outage, tests green twice, my one re-run spent, nothing fixable in this repo. Posted
+**one comment** on #2203 ([`5652173095`](https://github.com/XYZReality/hc-frontend/pull/2203#issuecomment-5652173095))
+naming the failing check, the 503, that the token rules out auth, that tests passed on both attempts,
+and that it will hit any other PR building meanwhile. That is the standing-down comment the rules
+require when a failure is not the PR's and no fix exists.
+
+**No notification sent.** An external outage that self-resolves gives the user nothing to act on —
+unlike the js-yaml episode, where a human had to merge something. If it is still down when the timer
+fires I will reconsider, because a sustained outage does eventually become a decision (make Sonar
+non-blocking for now), and that decision is theirs, not mine — modifying the workflow is out of scope
+without asking.
+
+> **Same red check, three different causes this week, three different correct responses.** A real
+> finding in a blocking scan (js-yaml → fix and merge it), a finding that quietly stopped being
+> reported (libuuid → do nothing, verify), and the scanner's own service failing (this → re-run once,
+> then stand down and say so). The check status is identical in all three. **Only the log tells you
+> which one you are in**, and the response differs completely — so "a scan went red" is never a
+> diagnosis.
