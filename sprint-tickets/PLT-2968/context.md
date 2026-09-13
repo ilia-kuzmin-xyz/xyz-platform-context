@@ -2655,3 +2655,63 @@ Per the rule written in the entry above: the one re-run is spent, a second 503 i
 down rather than a second data point against the PR, **and I did not re-run again**. The push of
 `48d7ee5` started a fresh run on new code, which is a new run rather than a re-run and will show
 whether the outage has cleared.
+
+### 2026-09-13 — the verdict cluster: three fixes, one shape
+
+After the preconditions cap (`48d7ee5`), three more review threads turned out to be the same
+sentence said three ways: **the Overall result card's rules govern what can be PICKED, and the
+picked verdict was stored as-is however the world moved afterwards.** `useReadinessSteps` counts
+`pass`/`passWithComments` as complete, so every one of them advanced a readiness step the answers
+did not support.
+
+**`2a95934` — a verdict grades a finished run; it cannot finish one.**
+
+1. A passing verdict could be picked over unanswered items — including on a task with *nothing*
+   answerable at all, which is the version that needed no bad data to go wrong. Pass and Pass with
+   comments are now withheld until every item is answered, with the same explanatory panel the
+   failed-item rule uses. **Fail stays offered on purpose**: it isn't in `DONE_TASK_STATUSES`, so it
+   advances nothing, and abandoning a run at the step that failed with the rest unanswered is a real
+   thing to record. Gating it would have cost a workflow to close a hole it doesn't open.
+2. The answers move after the picking. Declare Pass, then fail an item: the button greys out but
+   `verdict` is still `'pass'` in state at save. `verdictHolds` re-checks the declared verdict
+   against the answers on screen when Save is pressed.
+
+> Copilot offered two fixes for (2) — clear the stale verdict when answers change, or normalise it
+> at save. **Took the second deliberately.** Clearing on change is a reset the user didn't ask for
+> and can't see coming: fail an item by mistake, fix it back, and the verdict is gone with no
+> indication it ever was. Checking at save means the state you're looking at is the state you keep,
+> and only the *stored* result is constrained.
+
+> And a stale verdict is **dropped**, not capped to non-complete. On a run that has since failed the
+> derivation's `fail` is the truth; capping to `inProgress` would throw that away to enforce a rule
+> `fail` never broke. Which is the opposite call from the precondition cap — worth noticing that
+> "cap it" and "drop it" are both right, in different places, for the same reason: keep whichever
+> value is *true*.
+
+**`edc1e3c` — a verdict changed on a finished task needs a run of its own.**
+
+Changing only the verdict is the one save that reaches `setInstanceStatus` with the run already
+frozen: nothing was answered, so no item write opened a replacement on the way. `setInstanceStatus`
+wrote the new status onto `task_instance` and then hit `if (!execution || execution.completed_at)
+return` — leaving the instance saying `fail` while the run behind it still said `pass`. Now it opens
+the replacement itself (seeded, via `openExecution`), and closes *that* one.
+
+Guarded on the verdict actually CHANGING. The modal sends a status on every save, so re-saving a
+finished task unchanged is the common case, and an unguarded reopen would fill the history with
+identical runs. `OUTCOME_BY_STATUS` is coarser than the instance vocabulary (`pass`,
+`passWithComments` and `signedOff` all map to `'pass'`), so a pass→passWithComments change correctly
+opens nothing — the execution's outcome was already right.
+
+`setOutcomeNote` is deliberately left amending the frozen run in place, and now says so in its
+docstring. **Worked this through and changed my mind mid-way**: reopening from there sounds more
+correct, but it runs *after* `setInstanceStatus`, so whenever the verdict changed too it would open a
+SECOND run (the first is already closed and carries no note). The honest fix, if history ever has to
+be strictly append-only, is to write the verdict and its comment together in one close — not to
+reopen twice.
+
+### 2026-09-13 — SonarCloud recovered on its own
+
+Step 12 passed on `48d7ee5` (1m46s, against the 9s-503 failures earlier). The outage was transient,
+and **not re-running a third time was the right call** — the fresh run that a real push started
+answered the question for free. That run shows `cancelled` only because the next push superseded it
+four seconds after Sonar finished.
