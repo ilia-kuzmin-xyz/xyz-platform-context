@@ -2527,3 +2527,43 @@ called done" change, because those five threads are the same question asked five
 mechanical and can ride any later push.
 
 Notified Ilia this run with Tier 1 and a pointer here.
+
+## 2026-09-13 — the reopen bug got fixed, and my reason for not fixing it was wrong
+
+`f493251` (parallel session) fixes the reopen-loses-answers bug — **the one I verified, called the
+most serious thing outstanding, and then declined**, on the grounds that it needed the history model
+decided first: amendment vs a genuine re-run.
+
+That reasoning does not survive contact with the UI. There is **no "start a fresh run" affordance
+anywhere**. The only route into `openExecution` on a completed instance is the modal's reopen
+dialog, and its own copy says what it is:
+
+> "This task is complete. Reopen it to make changes — its status will update as you edit the items."
+
+That is amendment language, and it is the only door. So the "genuine re-run" reading existed solely
+in a docstring — one written for the *first-open* case — and seeding the replacement from the run it
+supersedes takes no capability away from anyone.
+
+> **I reasoned from the code and the docstring and never asked what a user can actually do.** The
+> question I called a product decision had already been decided, visibly, in a confirmation dialog's
+> copy. Two readings in the source is not evidence of two products; it is evidence that one of them
+> was never built. **When a "design decision" blocks a fix, check the UI for the answer before
+> escalating** — the affordances are the spec, and they are cheap to check.
+>
+> The cost was real: I left a data-loss bug in place for two days behind a question that could have
+> been closed in one grep.
+
+### Verified it independently rather than taking it on trust
+
+- Seeds in `openExecution` (one place) rather than making `handleSave` send everything — so the
+  assignee path is covered too, and there is no serial write per item on every save.
+- Shape (`label`, `must_pass`) still comes from the current template; only the answer is inherited.
+- `note` rides along only when the superseded row carries the key — correct, since naming a column
+  PostgREST does not know rejects the whole insert.
+- **`addSignature` is correctly left alone and correctly explained**: it opens a run only when there
+  is *none* (no `completed_at` check), so it has no blank-run path. It also means the separate
+  "signature written into frozen history" finding is untouched — the commit says so rather than
+  quietly absorbing it.
+- **901 tests pass; stripping the seeding fails exactly one.** The test earns its place.
+
+All nine of my fixes verified still present on this head.
