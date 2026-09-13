@@ -2605,3 +2605,53 @@ exactly why it is worth recording — but I discarded the file unread and re-fet
 
 > The pull was "the sanctioned tool gave me 80 lines and I wanted 200". The sanctioned tool takes a
 > `tail_lines` argument. **Check whether the allowed path has the knob before stepping outside it.**
+
+### 2026-09-13 — the precondition gate was only half shut (review finding, downstream of my own fix)
+
+Copilot's review of `2551a47` (the gate I added) found it incomplete, and it was right. The gate made
+the task's controls read-only and left the STATUS alone — which is not the same thing as holding the
+task back. Three separate routes went round it:
+
+1. **The derivation reads the preconditions too.** `deriveInstanceStatus` walks every item on the
+   instance and asks only whether each is ANSWERED — and `isItemComplete` counts `fail` and `na` as
+   answers. A precondition stored `fail` is deliberately *not* `isConfirmed`, so the gate read shut
+   while the derivation read every item answered: a task whose own steps all passed derived
+   `completed` and advanced the readiness step the gate exists to hold.
+2. **Order.** A precondition can be un-confirmed AFTER the answers are in, so "the controls were
+   disabled" never proves the answers were reached through an open gate.
+3. **A declared verdict skips the derivation entirely** — so capping only `derivedStatus` would have
+   left that route open. Confirm → pick Pass with comments → un-confirm → Save.
+
+All three meet at **the status about to be stored**, which is the one place worth capping.
+`withCompletionWithheld(status, type)` in `task-status.tsx` caps a done status at `inProgress`
+(never `notStarted` — every done status implies answered items), and both the header chip and the
+saved `verdict ?? derivedStatus` now pass through it.
+
+**The self-heal writes a status too**, on open, with nobody having acted — so the gate had to reach
+it as well, or merely OPENING such a task stored the `completed` a save is now stopped from storing.
+It **declines** rather than demoting: a stored completion can predate the template gaining
+preconditions, and rewriting it on open would destroy a real one to enforce a rule it was never run
+under. The correction is left to a save, made by someone who chose it. Read off the instance's own
+items, not `preconditionsMet` — that is derived from the `statuses` state the seeding effect is in
+the middle of writing, so on the render that opens a task it still describes the previous one.
+
+`fail` is left alone throughout: terminal but not done (`DONE_TASK_STATUSES`), so it holds its
+readiness step back by itself, and rewriting a failed run as `inProgress` would discard a real answer.
+
+Four tests; each positive control fails exactly its own case (clamp removed → the two save/chip cases;
+heal guard removed → the heal case). Commit `48d7ee5`.
+
+> **The lesson worth keeping:** a gate that disables controls is a UI affordance, not an invariant.
+> The invariant has to live where the value is written. I closed the door and left the window open —
+> and the window was a line of code I had read twice while writing the door.
+
+### 2026-09-13 — the SonarCloud re-run: 503 again, as predicted
+
+Run `34746261803` attempt 2 came back **failure**, step 12 again, **9 seconds** again, identical
+stack: `Error 503 on https://sonarcloud.io/api/settings/values.protobuf` at `Load global settings`.
+Step 7 `Lint & Run Tests` passed (9m01s) on that attempt, as before.
+
+Per the rule written in the entry above: the one re-run is spent, a second 503 is SonarCloud still
+down rather than a second data point against the PR, **and I did not re-run again**. The push of
+`48d7ee5` started a fresh run on new code, which is a new run rather than a re-run and will show
+whether the outage has cleared.
