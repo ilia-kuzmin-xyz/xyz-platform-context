@@ -4700,3 +4700,29 @@ without asking.
 > then stand down and say so). The check status is identical in all three. **Only the log tells you
 > which one you are in**, and the response differs completely — so "a scan went red" is never a
 > diagnosis.
+
+### 08:30 — the outage took #2186 too. Second stand-down comment; notification deliberately held.
+
+**#2186 (`PLT-2968`, head `f4932518`) failed identically** — run 4680, **also attempt 2**, tests ✅
+9m01s, `Execute SonarQube Scan` dead in 9s (08:13:46 → 08:13:55). Checked its step list rather than
+assuming it matched #2203's, which is the habit this run has repeatedly justified.
+
+So both PRs are red on the same external cause, both have spent their one re-run. Posted the matching
+stand-down comment on #2186
+([`5652220225`](https://github.com/XYZReality/hc-frontend/pull/2186#issuecomment-5652220225)) — a
+separate PR with its own reviewers seeing a red check deserves its own explanation, even though the
+cause is shared.
+
+(Worth noting what #2186's new head actually carries, since it is a real bug fix, not churn:
+*"amending a finished task must not discard the answers it isn't touching"* — a completed run is
+frozen, so the next write opened a replacement built from the template with every item blank, and
+editing one field on a completed task therefore wrote that one answer into an otherwise empty run
+while the modal carried on showing the old ones. `openExecution` now seeds the replacement from the
+run it supersedes. That is a data-loss bug and its fix was sitting behind this outage.)
+
+**Notification deliberately NOT sent yet.** There is a real decision here that is the user's — whether
+to make Sonar non-blocking while it is down — and changing the workflow is out of scope without
+asking. But my last hard evidence of the outage is **08:17:52**, and no run has started since. Saying
+"SonarCloud is still down" from fifteen-minute-old data is precisely the stale escalation I got wrong
+twice this week (the libuuid "no fix landed", the xyz-supabase#37 blocker). Timer set; I will look for
+**fresh** evidence and notify only if a run after this point still 503s.
