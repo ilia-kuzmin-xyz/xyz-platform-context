@@ -4754,3 +4754,29 @@ answered itself. Holding for fresh evidence cost nothing and avoided a wasted in
 
 Both stand-down comments stay accurate as posted — they described a real outage at the time, said it
 would clear on the next push, and it did.
+
+### 09:00 — close-out
+
+- **#2203 (`PLT-2999`, `f606080`)** — ✅ green on attempt 3. Build 08:40:42 → 08:59:56, Sonar ✅,
+  Copilot ✅. The outage cost it two failed attempts and ~50 minutes; no code change was needed.
+- **#2202 (`PLT-3038`, `893317f`)** — green, ready for review, 0 open comments. Untouched all week.
+- **#2186 (`PLT-2968`, `edc1e3c`)** — head moved again at 08:49:52; **zero check runs is a
+  brand-new head before checks attach, not an anomaly** (verified by fetching the branch rather than
+  reading anything into the empty list).
+
+#2186 took **four substantive commits this morning**, all correctness in the task runner, and they
+are worth naming because they are not review-nits:
+
+1. amending a finished task was blanking the answers it wasn't touching (data loss);
+2. an unconfirmed precondition greyed the controls but did not hold the status back, so a task whose
+   own steps passed derived `completed` and advanced the readiness step the gate exists to block;
+3. a passing verdict could be picked over unanswered items, and a verdict picked before the answers
+   changed was stored as picked — so a test whose own item read `fail` saved as `pass`;
+4. a verdict changed on a finished task now needs a run of its own.
+
+All four are the same shape: **something that decides a readiness step was trusting a value the
+answers did not support.** That is the sharpest thing to know about this PR going into review.
+
+**Outstanding across the sprint, unchanged:** PLT-2952 and PLT-2972 clarifications and the #2190
+question to Rishi, all waiting on people since 09-09. On #2203: the backend batch/RPC ticket and the
+smaller items listed in the 08:50 entry, three of them mine.
