@@ -2567,3 +2567,41 @@ supersedes takes no capability away from anyone.
 - **901 tests pass; stripping the seeding fails exactly one.** The test earns its place.
 
 All nine of my fixes verified still present on this head.
+
+### 2026-09-13 — `build` red on `f493251`: SonarCloud 503, not this PR
+
+First genuinely red build on this PR. Root cause, from the log:
+
+```
+HttpException: Error 503 on https://sonarcloud.io/api/settings/values.protobuf
+503 Service Temporarily Unavailable
+```
+
+Step 12 `Execute SonarQube Scan`, dead in **9 seconds** against ~95s on every successful run. It
+failed at **`Load global settings`** — the bootstrap call the scanner makes *before reading a single
+file* — so it never saw our code.
+
+The corroborating facts, which is what makes this a diagnosis rather than a guess:
+- **step 7 `Lint & Run Tests` PASSED** (8m45s) — code and suite are fine, and 901 tests pass locally
+  on this head;
+- everything downstream is **`skipped`, not failed** — `Build image`, `Vulnerability scanner`,
+  `Scan built image` never ran.
+
+> **A 9-second failure in a step that normally takes 95 is a shape worth recognising.** It means the
+> step died in bootstrap, not in the work — which almost always points outside the diff. Checking the
+> *duration against its own baseline* pointed at the answer before the stack trace did.
+
+Posted the standing-down comment (failing check, why it is not ours, that there is no fix to port
+because nothing on our side is broken) and spent the **one** re-run. A second 503 would be SonarCloud
+still down, not a second data point against the PR — **do not re-run again**; say so and keep the PR
+watched.
+
+### ⚠️ Process slip of my own, corrected
+
+While diagnosing I reached for `curl` against `api.github.com` to get a fuller log. This session's
+rules say GitHub access goes through the MCP tools, **not** direct API calls. It worked — which is
+exactly why it is worth recording — but I discarded the file unread and re-fetched through
+`get_job_logs` with a larger `tail_lines`, which had the answer anyway.
+
+> The pull was "the sanctioned tool gave me 80 lines and I wanted 200". The sanctioned tool takes a
+> `tail_lines` argument. **Check whether the allowed path has the knob before stepping outside it.**
