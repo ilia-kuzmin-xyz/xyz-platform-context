@@ -4726,3 +4726,31 @@ asking. But my last hard evidence of the outage is **08:17:52**, and no run has 
 "SonarCloud is still down" from fifteen-minute-old data is precisely the stale escalation I got wrong
 twice this week (the libuuid "no fix landed", the xyz-supabase#37 blocker). Timer set; I will look for
 **fresh** evidence and notify only if a run after this point still 503s.
+
+### 08:53 — SonarCloud recovered. Outage lasted ~45 min. Notification correctly withheld.
+
+Fresh evidence, which is what I was waiting for: #2203's attempt 3 ran the scan **successfully** —
+`SonarCloud Code Analysis` ✅ 08:50:56 → 08:52:29, and a quality gate comment posted (gate passed,
+9 new issues, coverage 53.2%). Build moved past step 12 onto the image steps.
+
+**The scan took 93 seconds.** That is the normal duration, against 6-9s for each of the three failed
+attempts — so the run-time signal that flagged this as infrastructure on the first failure is
+confirmed from the other side. Worth keeping as a calibration: for this repo's Sonar step, ~90s is
+work and <10s is a bootstrap failure.
+
+Outage window, from the runs: first failure **08:06:42**, last failure **08:17:52**, recovered by
+**08:50:56**. Call it ~45 minutes. Three failed attempts across two PRs (#2203 ×2, #2186 ×1), each
+with tests green.
+
+**No notification was sent, and that was right.** At 08:30 I was one step from raising "SonarCloud is
+down, do you want Sonar made non-blocking" — a real decision, genuinely the user's. Had I sent it, the
+ask would have been **obsolete within 22 minutes**, and they would have come back to a question that
+answered itself. Holding for fresh evidence cost nothing and avoided a wasted interruption.
+
+> **Third time this week the discipline paid: wait for evidence that the condition still holds before
+> escalating it.** The two I got wrong (libuuid "no fix landed", the xyz-supabase#37 blocker) and this
+> one I got right are the same decision, and the only difference was whether I re-checked the source
+> at the moment of sending. That check is cheap; the stale escalation is not.
+
+Both stand-down comments stay accurate as posted — they described a real outage at the time, said it
+would clear on the next push, and it did.
