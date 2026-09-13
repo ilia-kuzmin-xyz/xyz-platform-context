@@ -4805,3 +4805,54 @@ called done" cluster), and each push cancels the previous ~19-minute build. `f49
 ancestor of the branch and its tests passed at step 7 on two separate runs, so the Tier-1 fix is
 verified as far as this branch's cadence allows. **This is the 09-03 pattern repeating: a branch with
 two active writers cannot hold a green head long enough to prove one.**
+
+## 2026-09-13, 21:55 — round seven, on a NEW blocker added overnight. Sixth instance of the pattern.
+
+`PLT-2999` head is now `7174cfb`; overnight work added **attached files as a deletion blocker**
+(`attachedFiles`). Copilot found two problems with it and both are right.
+
+**1. The probe and its own contract name different columns.** Verified:
+
+```
+service :605-611   select(FILE_ASSOCIATION_TABLE, [ … { column: 'task_instance_id', op: 'in', … } … ])
+types   :73        "…`commissioning_file_association.task_item_id` cascades from the template…"
+```
+
+`task_item_id` (an item of a *template*) and `task_instance_id` (a generated instance) are different
+links. The doc's own justification — *"cascades from the template"* — only holds for `task_item_id`;
+an instance-scoped FK would not cascade from the template at all. So one of the two is wrong, inside
+a **safety probe whose whole job is to refuse a delete**.
+
+Which one matters enormously:
+- if the queried column **does not exist**, PostgREST errors and the failure is loud;
+- if it **exists but links instances rather than template items**, the probe quietly returns **zero**
+  and the delete proceeds — **another fail-open**, and the third in this PR.
+
+I cannot settle it from here: the schema lives in **xyz-supabase**, which is outside this session's
+repo scope. It needs someone with the schema, or the backend owner, to say which link is real.
+
+**2. The confirm-time check does not know about the new blocker.** `usagePermitsDelete()` still
+returns `executions.length === 0`, while `DeleteTaskDialog` treats `attachedFiles > 0` as blocking.
+Attach a file after the dialog opens and the fresh check says yes.
+
+**That is the sixth time a change here left an existing guard un-re-walked** — and pointedly, the
+guard it missed is `usagePermitsDelete()`, which *was itself* the fix for the TOCTOU hole. The tally
+from 09-13 08:05 now reads: per-owner dedup, `systemLabels()`, the hook-only archive filter,
+`owner::templateId`, `usagePermitsDelete()` (the cancel race) — and now `attachedFiles` added without
+updating the very helper that gates the confirm.
+
+**And a third instance of a separate pattern: the tests encode the implementation, not the contract.**
+Copilot notes the file-association tests assert the *query's* shape, so they would pass against the
+wrong column. That joins my `InMemoryCommissioningClient` assertions (which could not tell a cascade
+from a hand-walked chain) and my service-layer mocks (which could not see React Query error states).
+**Three times in one PR, a test has been written to agree with the code rather than to check it.**
+
+Also still open and now explicitly untested: the archive guard in `taskInstanceSync` has no
+archived-definition case, and the hook's live-only `select` has no test either — both are the
+*only* things standing between an archived template and new instances.
+
+**No new notification.** Yesterday's push already carries the operative message — this PR should not
+merge on green CI and resolved threads, it needs a human pass over the delete/archive/usage path.
+Round seven is more evidence for that same conclusion, not a new ask. The one genuinely new item a
+person must action — *which column does `commissioning_file_association` actually use* — is stated on
+the Copilot thread where the author will see it, and cannot be answered from this repo.
