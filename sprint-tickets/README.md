@@ -5000,3 +5000,47 @@ raised with Ilia.
 the session token lacks `read:packages`. No local test runs; CI is the only runner. Two practical
 consequences: sweep every `toEqual` site by hand when a contract gains a field, and use
 **`npx prettier@2.7.1`** — the bare `npx prettier` pulls v3 and reformats unrelated lines.
+
+### 08:50 — close-out. Both PRs green, and the correction that matters
+
+- **#2203 `ac1eb63`** — build ✅ Sonar ✅ Copilot ✅. Five commits this run, **ten findings fixed**,
+  one thread left open on purpose (which column `commissioning_file_association` links by — needs
+  someone with the xyz-supabase schema, asked @DarminderA).
+- **#2186 `84fb6d1`** — build ✅ Sonar ✅. The 23-hour stuck queue is definitively gone: runs now
+  start, get superseded and complete normally. The verdict fix (`4ae3062`) is an ancestor of a green
+  head. Two threads open, both mid-discussion.
+- **#2202 / #2197 / #2194 / #2212** — green, 0 behind master, zero unresolved threads.
+- **#2190** — not mine; 2 Copilot findings unanswered since 08-27, one a real fail-open.
+
+**Open comments across the sprint: 5** (1 mine needing a schema answer, 2 mid-discussion, 2 on
+Rishi's PR).
+
+#### The mistake worth carrying, stated plainly
+
+At 08:17 I notified Ilia that #2203's two pushes were "both CI-green". `aa9c0c0` was; `0a5fe51` had
+been pushed **ninety seconds earlier with no result at all** — and that is exactly where the break
+was. It went red, on a timing-sensitive test I had written myself.
+
+Both halves of this run's discipline were the same rule seen from two sides, and I got one right and
+one wrong in the same hour:
+
+> **Never state a CI result you have not read, and name the sha it applies to.** Green is a claim
+> about one commit at one moment. It does not extend forward to the commit pushed after it, any more
+> than an outage from fifteen minutes ago extends forward to now.
+
+The correction went out in the close-out notification rather than being quietly dropped.
+
+#### And the technical through-line
+
+Ten findings on #2203, and **four of them were one shape: a rule applied to the wrong set.** Not a
+wrong rule — a right rule asked about the wrong rows:
+
+| rule | asked about | should have been |
+|---|---|---|
+| what blocks a delete | the dialog only | the dialog *and* the confirm gate |
+| has the user cancelled | entry to the loop | every iteration |
+| status → colour | 3 statuses of 9 | the shared config |
+| exclude archived | the whole probe, incl. files | only "what does this template still owe" |
+
+**When this tab grows a rule, the question is not "is the rule right" but "which set is it being
+asked about".**
