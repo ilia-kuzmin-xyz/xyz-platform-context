@@ -1,5 +1,35 @@
 # PLT-2874 — Recommended action
 
+## 2026-09-14 — CURRENT. Yash bumped the ticket and Ilia's own "will get back to you today" (09-11) is now unanswered — one combined reply does both jobs
+
+**Chosen action: (a) resolve through communication — one Jira comment that gives Yash the status
+update Ilia already promised him, and folds the still-unsent Gennaro question into the same message,
+addressed to Gennaro by name within it.** Not a new question, and not (b)/(c)/(d) — nothing here is
+newly dev-ready, nothing needs Technical Support, and nothing is blocked; this is the same open item
+as 09-09, now overdue on two fronts instead of one.
+
+**Why one combined message, not two separate ones as before:** the 09-09 draft below was written to
+go to Gennaro alone. Since then Yash has asked for a status update and Ilia has told him one is
+coming "today" — three days ago, as of this run. Posting the Gennaro-only draft in isolation would
+leave Yash's direct question still hanging; posting only a reply to Yash without the Gennaro question
+wastes the opening. One ticket comment, read by both, does both: gives Yash the update he was
+promised, and keeps the question to Gennaro as the one thing anyone still needs to answer with a
+value. **This supersedes nothing in the 09-09 draft's content below — the question is unchanged —
+only how and to whom it is sent.**
+
+**Assumption this rests on, not stated in the message itself:** that Ilia has not already answered
+Yash outside Jira since 09-11. If he has, this draft is moot and nothing needs posting.
+
+### Draft — DRAFT ONLY, NOT POSTED (67 words)
+
+> Yash, the original fed-file mismatch was fixed in July, and Prod has matched since. What's still
+> open is Staging, where Gennaro saw a lower dashboard number on 12 August, which looks like
+> Staging's own data rather than a code bug. His editor figure doesn't match anything we recorded for
+> FAR01, so I can't rule out a different project. **Gennaro, can you confirm which project this was
+> on?**
+
+---
+
 > **2026-09-11: unchanged. Send the Gennaro draft at § 2026-09-09 below — still the only open
 > action, now 30 days since his 08-12 finding.** Jira re-fetched fresh this run (`context.md` §
 > 2026-09-11): 6 comments, `updated` still 2026-08-25T09:53, PR #2084 still the only PR under this

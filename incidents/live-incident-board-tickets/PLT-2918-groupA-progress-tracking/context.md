@@ -351,3 +351,62 @@ just a chase that has not been sent. Confirming, not correcting, the prior run's
 July AUS01 restore ever ran (absence-of-record only); what Paddy said on 09-08; the current AUS01
 WBS Location mapping count against the 07-28 baseline of 7,879/10,133; Mostafa's Power BI theory,
 still unsubstantiated since 08-25.
+
+## 2026-09-14 — confirmed unchanged for a third consecutive pass; code fix re-verified live on current checkout
+
+Live `getJiraIssue` fetch this run (`summary`, `description`, `comment`, `attachment`, `status`,
+`assignee`, `priority`, `created`, `updated`, `labels`, `fixVersions`). Diffed field by field
+against the 09-11 record above rather than assumed.
+
+**VERIFIED (this run, direct fetch/read):**
+- Status **Open**, `updated` still **2026-09-08T16:35:59+0100** — byte-identical to 09-09/09-11.
+- **17 comments**, newest still `111659` (Yash's Freshdesk-automation echo, "Waiting on customer").
+  No new comment since 09-08. No human comment since `110385` (Mostafa, 08-25) — **20 days** of
+  human silence in Jira now, up from 17 on 09-11.
+- **6 attachments**, same set as every prior pass: `61116`–`61119` (07-21 originals), `63303`
+  (08-25 Teams-message screenshot). No new attachment on this fetch.
+- Labels `[not_testable]`, `fixVersion` `26.3.4`, priority Major, assignee Ilia Kuzmin — all
+  unchanged.
+- **The shipped fix is still present and unchanged on the current `hc-frontend` checkout**, read
+  directly (not assumed from the prior note): `saveDataMapping` in
+  `src/main/webapp/app/pages/organisation/ViewerPage/services/categories/category-mapping-service.ts:246-296`
+  takes `editedTypeIdsByActivity: Map<string, Set<string>>` (`:250`), reads it per activity at
+  `:266`, and the delete branch is still gated on `editedTypeIds?.has(categoryTypeId)` (`:277`,
+  comment "Empty AND explicitly edited by the user -> an intentional clear.", `:278`). The doc
+  comment above the function (`:230-245`) still names PLT-2918 as the reason. This call site is
+  **live** — `saveDataMapping` is invoked from the mapping-panel Save path
+  (`mapping-service.ts` → this function), not behind a flag, not dead code.
+  `git log --oneline -- .../category-mapping-service.ts` shows the most recent touch to this file
+  is `478932d` (PLT-2993/2994, Task library folders — unrelated feature), so nothing has landed on
+  this file since the 09-09 re-verification that could have reintroduced the destructive branch.
+
+**INFERRED / unchanged from prior runs, not re-derived this run:** the three-hypothesis split
+(residual code gap / July gap never backfilled / Mostafa's Power BI theory) — still undistinguished
+against data, and still not re-investigated since no new signal arrived to prompt it (per
+run-instructions: re-investigate only on new comments/attachments). Hypothesis (a) stays ruled
+essentially out per the code re-check above (the cross-type destructive delete is structurally
+impossible on this path); hypothesis (b) (never-backfilled July gap) remains the leading
+explanation per `investigation-log.md § 2026-09-09`, on the same absence-of-record basis, not newly
+confirmed.
+
+**Explicit unverified list (unchanged from 09-11, restated, nothing closed it this run):**
+- Whether the July AUS01 restore (tier 2, script re-apply from Paddy's export) ever ran — absence
+  of record only, across this ticket, this folder, and the whole context repo.
+- What Paddy actually said when Freshdesk #7461 reopened on 09-08 — invisible from Jira, nothing
+  attached to that reopen cycle.
+- The current AUS01 WBS Location mapping count (categoryTypeId `8f6483fc-c737-474e-bdd3-680584e04414`,
+  project `fd0af178-a9a4-413a-ad77-537219715889`) against the 07-28 baseline of 7,879/10,133 — not
+  re-run this session (no Activity API v2 / DB access from this routine).
+- Mostafa's Power BI export-side theory — still unsubstantiated with anything checkable since
+  08-25.
+
+**Domain-doc check this run:** `dashboard/schedule-tab.md` re-read — covers the Gantt/DHTMLX
+schedule surface and dynamic category columns generally but has no section specific to WBS
+Location/category-mapping Save semantics; the operative domain content remains the mechanism
+already documented in this file's `§ Mechanism` section above (activity↔category mapping via
+Activity API v2, sourced from `category-mapping-service.ts` directly, not from a domain doc).
+No update made to `schedule-tab.md` or `prg-progress.md` this run — nothing new to add to either.
+
+**Nothing re-derived. Nothing new to chase.** This is a third consecutive "confirmed unchanged"
+pass (09-09 → 09-11 → 09-14). The 09-09 chase-Yash draft (reproduced in `recommended-action.md`)
+remains the right, still-unsent next step.

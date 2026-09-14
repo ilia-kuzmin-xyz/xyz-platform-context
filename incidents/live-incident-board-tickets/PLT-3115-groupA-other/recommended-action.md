@@ -71,3 +71,34 @@ short clip or a text reply leaves it ambiguous.
 
 No Jira comment, transition, or assignment. No code changed. The `DangerZone.tsx` hardening
 described on 09-10 is still not applied, and still costs nothing whenever it's wanted.
+
+---
+
+## 2026-09-14 (scheduled) — third pass. Still class 1; 4 days quiet since Darminder's ask; now assigned to Yash
+
+## Classification: unchanged, **1** — the open question (which field?) is still unanswered and still
+## the blocker; nobody here owes new work, but Darminder's ask has now sat 4 days with no visible
+## reply, and the ticket is assigned to Yash, so a nudge is due. Class-2 tail (DangerZone hardening)
+## unchanged, still not applied.
+
+No new Jira activity since Darminder's 09-10 comment. Assignee is now Yash Patel (was Darminder as of
+the 09-11 note here — see context.md for the correction). PLT-2940 was fetched this pass and confirms
+its fix never touched the delete-confirmation field, which narrows the puzzle slightly but doesn't
+answer it. Given the ticket sits with Yash and the customer for 4 days now, this is worth one short
+nudge rather than a fresh draft — Darminder already asked the right question.
+
+**Assumption this rests on, one line:** that no reply exists outside Jira (e.g. a direct Freshdesk
+or email thread) — this session can only see the Jira record.
+
+## Draft nudge to Yash — 75 words, UNPOSTED
+
+> No reply from the customer yet on Darminder's ask for a video and browser info, and it's been a
+> few days. Before this can move, we still need to know exactly which screen shows the autofill:
+> the main Device Name field, or the box you type the name into when deleting a device. Only one of
+> those is actually hardened against LastPass today. **Have you had a chance to chase the customer
+> for that video?**
+
+## What this pass did NOT do
+
+No Jira comment, transition, or assignment. No code changed. The `DangerZone.tsx` hardening is still
+available and still not applied.

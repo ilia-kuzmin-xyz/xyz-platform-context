@@ -253,3 +253,62 @@ choice**.
 So the PR is green, 0 behind master, still draft, and the only outstanding items on it are the two
 atomicity threads that need the backend batch/RPC ticket. **That ticket is still not raised** — it is
 the one concrete follow-up this run leaves behind.
+
+## 2026-09-14 — round eight: the drift finally got a single source of truth
+
+Head was `7174cfb`, CI **green**, branch **0 behind master** — so checkpoints 2 and 3 were already
+satisfied and the whole pass was feedback. Six open Copilot threads; five fixed in `aa9c0c0`, one
+left open on purpose.
+
+### The one that matters beyond its own fix
+
+`usagePermitsDelete()` returned `executions.length === 0` while the dialog blocked on
+`executions.length > 0 || attachedFiles > 0`. **That is the sixth time a rule here was extended in
+one place and left alone in the other** — and the guard it missed was `usagePermitsDelete()`, which
+*was itself* the fix for the earlier TOCTOU hole.
+
+So it was not fixed by adding the second clause. The rule now lives in **`usageBlocksDelete()`**,
+exported from `checklist-library-service.types.ts`, and both the dialog and the confirm gate read it.
+A seventh blocker cannot be added to only one side. **If you add a blocker, add it there.**
+
+### The other four
+
+- **Cancel during the confirm-time refetch still deleted.** `isLoadingUsage` is
+  `isPending || isFetching`, so across that await the dialog shows a spinner *with Cancel enabled* —
+  exactly when someone cancels. The handlers held the selection in their own render's closure. Now
+  re-read after the await via refs (`taskPendingDeleteRef` / `folderPendingDeleteRef`). The folder
+  path mattered more: it deletes every task in the folder.
+- **`executions.length` overstated the blocked-owner count in folder mode** — a consequence of the
+  earlier per-template keying fix. `usage()` now returns **`blockedOwners`** separately.
+- **The row kebab was an interactive descendant of the card's `role="button"`** (dnd-kit
+  `attributes` supply it). The folder header already solved this by laying its menu over the row as
+  a sibling *and says why in a comment*; the task row now matches. Two details: the card keeps a
+  `ROW_MENU_TRIGGER`-wide reservation so the Type column does not shift, and the drag transform moved
+  up to the wrapper so the dots travel with a dragging row.
+- **Archived-definition reconciliation had no test** on either the asset or the system path, despite
+  `liveDefinitionsById` being the only thing stopping an archived template generating new work.
+
+### Left open: which column `commissioning_file_association` uses
+
+Copilot read the type doc (`task_item_id`) and the query (`task_instance_id`) as contradicting. They
+are **probably not the same claim**: `7174cfb`'s own commit message cites xyz-supabase#35 making
+`task_item_id` ON DELETE CASCADE up through `task_template_version` — that is *why* a delete strands
+the file. `task_instance_id` is *which task the upload was made against*, which is what the probe
+wants. The comment now separates the two.
+
+Still cannot be confirmed here: nothing else in `app/` reads that table and the schema is in
+xyz-supabase. Asked @DarminderA on the thread; **left unresolved deliberately**.
+
+### Environment note, for the next run
+
+`npm ci` **fails in this container** — `@xyzreality/dhtmlx-gantt` is on GitHub Packages and the
+session token has no `read:packages`. So the suite cannot be run locally and CI is the only runner.
+Two consequences worth carrying forward:
+
+1. Every `toEqual` construction site of a changed contract has to be swept by hand (`grep` for the
+   sibling fields), because nothing will catch a missed one before CI.
+2. **`npx prettier` pulls prettier 3; this repo pins 2.7.1.** Running the bare one reformatted
+   unrelated lines (`typeof rows[number]` → `(typeof rows)[number]`, ternary re-indentation) and
+   would have put churn in the diff. Use `npx prettier@2.7.1`. Note also that some files on other
+   branches are *already* prettier-dirty and CI does not gate on it — check against `git stash`
+   before reformatting anything you did not write.

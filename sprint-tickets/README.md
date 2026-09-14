@@ -4726,3 +4726,277 @@ asking. But my last hard evidence of the outage is **08:17:52**, and no run has 
 "SonarCloud is still down" from fifteen-minute-old data is precisely the stale escalation I got wrong
 twice this week (the libuuid "no fix landed", the xyz-supabase#37 blocker). Timer set; I will look for
 **fresh** evidence and notify only if a run after this point still 503s.
+
+### 08:53 — SonarCloud recovered. Outage lasted ~45 min. Notification correctly withheld.
+
+Fresh evidence, which is what I was waiting for: #2203's attempt 3 ran the scan **successfully** —
+`SonarCloud Code Analysis` ✅ 08:50:56 → 08:52:29, and a quality gate comment posted (gate passed,
+9 new issues, coverage 53.2%). Build moved past step 12 onto the image steps.
+
+**The scan took 93 seconds.** That is the normal duration, against 6-9s for each of the three failed
+attempts — so the run-time signal that flagged this as infrastructure on the first failure is
+confirmed from the other side. Worth keeping as a calibration: for this repo's Sonar step, ~90s is
+work and <10s is a bootstrap failure.
+
+Outage window, from the runs: first failure **08:06:42**, last failure **08:17:52**, recovered by
+**08:50:56**. Call it ~45 minutes. Three failed attempts across two PRs (#2203 ×2, #2186 ×1), each
+with tests green.
+
+**No notification was sent, and that was right.** At 08:30 I was one step from raising "SonarCloud is
+down, do you want Sonar made non-blocking" — a real decision, genuinely the user's. Had I sent it, the
+ask would have been **obsolete within 22 minutes**, and they would have come back to a question that
+answered itself. Holding for fresh evidence cost nothing and avoided a wasted interruption.
+
+> **Third time this week the discipline paid: wait for evidence that the condition still holds before
+> escalating it.** The two I got wrong (libuuid "no fix landed", the xyz-supabase#37 blocker) and this
+> one I got right are the same decision, and the only difference was whether I re-checked the source
+> at the moment of sending. That check is cheap; the stale escalation is not.
+
+Both stand-down comments stay accurate as posted — they described a real outage at the time, said it
+would clear on the next push, and it did.
+
+### 09:00 — close-out
+
+- **#2203 (`PLT-2999`, `f606080`)** — ✅ green on attempt 3. Build 08:40:42 → 08:59:56, Sonar ✅,
+  Copilot ✅. The outage cost it two failed attempts and ~50 minutes; no code change was needed.
+- **#2202 (`PLT-3038`, `893317f`)** — green, ready for review, 0 open comments. Untouched all week.
+- **#2186 (`PLT-2968`, `edc1e3c`)** — head moved again at 08:49:52; **zero check runs is a
+  brand-new head before checks attach, not an anomaly** (verified by fetching the branch rather than
+  reading anything into the empty list).
+
+#2186 took **four substantive commits this morning**, all correctness in the task runner, and they
+are worth naming because they are not review-nits:
+
+1. amending a finished task was blanking the answers it wasn't touching (data loss);
+2. an unconfirmed precondition greyed the controls but did not hold the status back, so a task whose
+   own steps passed derived `completed` and advanced the readiness step the gate exists to block;
+3. a passing verdict could be picked over unanswered items, and a verdict picked before the answers
+   changed was stored as picked — so a test whose own item read `fail` saved as `pass`;
+4. a verdict changed on a finished task now needs a run of its own.
+
+All four are the same shape: **something that decides a readiness step was trusting a value the
+answers did not support.** That is the sharpest thing to know about this PR going into review.
+
+**Outstanding across the sprint, unchanged:** PLT-2952 and PLT-2972 clarifications and the #2190
+question to Rishi, all waiting on people since 09-09. On #2203: the backend batch/RPC ticket and the
+smaller items listed in the 08:50 entry, three of them mine.
+
+### 08:40–09:00 — outage confirmed ended, and #2203 is green end to end
+
+Both re-runs failed at step 12 again (tests passing both times), so rather than spend a third blind
+retry I probed the service directly:
+
+```
+curl -o /dev/null -w "%{http_code}" https://sonarcloud.io/api/settings/values.protobuf   → 200
+```
+
+The exact endpoint that had 503'd was answering again, which makes a further run *evidence-backed*
+rather than retry-until-green — worth the distinction, because "re-run and hope" is the habit the
+one-re-run rule exists to stop.
+
+**#2203 then went green end to end** on `f606080`: `Lint & Run Tests`, `Execute SonarQube Scan`,
+`Build image`, `Verify serving behaviour`, `Vulnerability scanner`, `Scan built image` — all success,
+08:40:42→08:59:56. So the PLT-2999 fixes are CI-verified **including the typecheck**, which the two
+outage runs had skipped.
+
+**#2186 could not be brought to the same state, and that is fine.** The parallel session pushed four
+times in ~35 minutes (`48d7ee5` → `2a95934` → `edc1e3c`, working the Tier-2 "when may a task be
+called done" cluster), and each push cancels the previous ~19-minute build. `f493251` is still an
+ancestor of the branch and its tests passed at step 7 on two separate runs, so the Tier-1 fix is
+verified as far as this branch's cadence allows. **This is the 09-03 pattern repeating: a branch with
+two active writers cannot hold a green head long enough to prove one.**
+
+## 2026-09-13, 21:55 — round seven, on a NEW blocker added overnight. Sixth instance of the pattern.
+
+`PLT-2999` head is now `7174cfb`; overnight work added **attached files as a deletion blocker**
+(`attachedFiles`). Copilot found two problems with it and both are right.
+
+**1. The probe and its own contract name different columns.** Verified:
+
+```
+service :605-611   select(FILE_ASSOCIATION_TABLE, [ … { column: 'task_instance_id', op: 'in', … } … ])
+types   :73        "…`commissioning_file_association.task_item_id` cascades from the template…"
+```
+
+`task_item_id` (an item of a *template*) and `task_instance_id` (a generated instance) are different
+links. The doc's own justification — *"cascades from the template"* — only holds for `task_item_id`;
+an instance-scoped FK would not cascade from the template at all. So one of the two is wrong, inside
+a **safety probe whose whole job is to refuse a delete**.
+
+Which one matters enormously:
+- if the queried column **does not exist**, PostgREST errors and the failure is loud;
+- if it **exists but links instances rather than template items**, the probe quietly returns **zero**
+  and the delete proceeds — **another fail-open**, and the third in this PR.
+
+I cannot settle it from here: the schema lives in **xyz-supabase**, which is outside this session's
+repo scope. It needs someone with the schema, or the backend owner, to say which link is real.
+
+**2. The confirm-time check does not know about the new blocker.** `usagePermitsDelete()` still
+returns `executions.length === 0`, while `DeleteTaskDialog` treats `attachedFiles > 0` as blocking.
+Attach a file after the dialog opens and the fresh check says yes.
+
+**That is the sixth time a change here left an existing guard un-re-walked** — and pointedly, the
+guard it missed is `usagePermitsDelete()`, which *was itself* the fix for the TOCTOU hole. The tally
+from 09-13 08:05 now reads: per-owner dedup, `systemLabels()`, the hook-only archive filter,
+`owner::templateId`, `usagePermitsDelete()` (the cancel race) — and now `attachedFiles` added without
+updating the very helper that gates the confirm.
+
+**And a third instance of a separate pattern: the tests encode the implementation, not the contract.**
+Copilot notes the file-association tests assert the *query's* shape, so they would pass against the
+wrong column. That joins my `InMemoryCommissioningClient` assertions (which could not tell a cascade
+from a hand-walked chain) and my service-layer mocks (which could not see React Query error states).
+**Three times in one PR, a test has been written to agree with the code rather than to check it.**
+
+Also still open and now explicitly untested: the archive guard in `taskInstanceSync` has no
+archived-definition case, and the hook's live-only `select` has no test either — both are the
+*only* things standing between an archived template and new instances.
+
+**No new notification.** Yesterday's push already carries the operative message — this PR should not
+merge on green CI and resolved threads, it needs a human pass over the delete/archive/usage path.
+Round seven is more evidence for that same conclusion, not a new ask. The one genuinely new item a
+person must action — *which column does `commissioning_file_association` actually use* — is stated on
+the Copilot thread where the author will see it, and cannot be answered from this repo.
+
+## 2026-09-14, 07:55 — round seven addressed at `aa9c0c0`, and the PATTERN itself was fixed
+
+All three verified in the tree, callers enumerated rather than counted.
+
+**1. The recurring bug got a structural fix, not another instance fix.** Instead of adding
+`&& attachedFiles === 0` at the confirm gate, the rule now lives in **one exported predicate**:
+
+```
+types.ts:115   export const usageBlocksDelete = (usage) =>
+                 usage.executions.length > 0 || usage.attachedFiles > 0
+```
+
+with a doc comment that names the failure out loud — *"every time this rule has been extended in one
+of those two places and not the other, the result has been a confirm path that permits what the
+dialog has just refused."* Exactly two callers, and they are the two that kept diverging:
+`DeleteTaskDialog.tsx:103` and the confirm gate `TaskLibraryTab.tsx:1047`.
+
+**This is the right answer to what I flagged.** I argued the six regressions were a property of the
+change rather than six separate mistakes; the response made a seventh divergence *structurally
+impossible* for this rule instead of patching the sixth. That is a better outcome than the fix I
+would have asked for.
+
+**2. Cancel race closed** — `confirmDeleteTask` captures `target`, awaits, then bails on
+`taskPendingDeleteRef.current?.id !== target.id` (`:1069-1073`). Refs, so it sees a cancellation that
+happened during the await. The reasoning given is right too: Cancel *should* close the dialog; it is
+the mutation that must not fire.
+
+**3. `blockedOwners`** computed as distinct owners of the surviving rows (`:726`), returned on all
+three paths (`:599`, `:634`, `:728`), read by the dialog (`:107`) in place of `executions.length`.
+
+### Correction to my 09-13 21:55 entry — I overstated the file-association risk
+
+I called the `task_instance_id` / `task_item_id` mismatch *"another fail-open"* and said the
+dangerous branch was a column that exists but links the wrong thing. The resolution shows **both
+columns exist and answer different questions**, now documented at `types.ts:85-100`:
+
+- `task_instance_id` — *which task the file was uploaded against*. The key the question is asked by,
+  and what the probe correctly filters on.
+- `task_item_id` — the FK that **cascades** (xyz-supabase#35 made it ON DELETE CASCADE, chaining up
+  through `task_template_version` to `task_template`). It is the **reason** deleting a template would
+  strand the file, not the key the rule is read by.
+
+So there was no contradiction, only a doc that stated the reason and left the key implicit. And my
+risk analysis had the failure direction wrong: **a column that is not there makes a PostgREST read
+reject**, so the failure is loud, not silent. The fail-open I warned about would have needed the
+column to exist *and* be semantically wrong, which is not the case.
+
+> I read two names for one table as a contradiction, when they were two FKs answering two questions.
+> **A safety probe's "which column" can have more than one right answer — the key it is asked by and
+> the key that makes the answer matter are not the same column.** Worth slowing down on before
+> calling a probe broken.
+
+Still open on #2203: the backend batch/RPC ticket (folder delete, archive-all, `remove()`
+precondition), the nested `<button>` in the draggable row, `disableAutoFocus` + keydown stop, status
+colour normalisation for legacy values, archive-only empty state, silent empty-folder failure,
+`formatDateTime` cover, header rows counted in execution totals, the `taskLibraryTheme` leak into the
+detail overlay — and the untested guards: `taskInstanceSync`'s archived case and the hook's live-only
+`select`, plus my service-layer-mocked tests.
+
+### 07:56 — nested button and the untested archive guard both fixed; and my correction was itself too strong
+
+**Nested `<button>` fixed structurally.** `RowActionsMenu` is now the `menu` **prop** of
+`DraggableTaskCard` (`:745-755`), and the component renders a wrapper Box carrying the drag transform
+with an inner Box taking `{...attributes}`/`{...listeners}` — the element dnd-kit gives `role=button`
+— so the menu sits *outside* it. Verified by reading where the props land, not by the prop's name.
+Two details in the fix worth keeping: the card reserves a slot the width of the trigger (or the Type
+column slides into the gap), and the transform moved to the wrapper (or the row slides out from under
+its own kebab mid-drag). It now matches the folder header, which had solved this twenty lines above
+and said why.
+
+**The archive guard is tested.** `task-instance-sync.test.ts` gained an archived-but-still-mapped
+definition on both the asset and system paths, asserting `generate` is never called. This mattered
+more than most: archiving deliberately leaves the type mapping alone, so the link stays live, the
+template still resolves, and `liveDefinitionsById` is the *entire* enforcement.
+
+#### Amendment: my 09-14 correction over-corrected
+
+Yesterday I called the file-association columns "another fail-open". This morning I corrected that to
+"no contradiction, and the failure direction is the safe one". **The second statement was too strong.**
+The author's thread puts it precisely, and it is the accurate version:
+
+- a column that **isn't there** → the read rejects → the dialog refuses to offer a delete at all. Safe.
+- a column that **exists but links something else** → quietly returns zero → the delete goes through.
+
+So the silent branch I originally worried about is real; what was wrong on 09-13 was asserting it as
+the case rather than as one of two, and what was wrong this morning was quoting the safe branch as
+though it covered both. **Neither is checkable from this repo** — the schema is in xyz-supabase and
+nothing else in this app reads that table, so there is no second reader to cross-check against. The
+thread is **left open** with @DarminderA asked to confirm the columns, which is the right disposition:
+it is the one question in this PR that no amount of reading the frontend can settle.
+
+> Two corrections in opposite directions on one finding. The through-line: I twice stated a
+> *conditional* risk as a *settled* one, first alarming and then reassuring. **When the evidence
+> supports "one of two, and I cannot tell which from here", that is the finding** — collapsing it
+> either way is the error, and the collapse is tempting precisely because a clean claim reads better
+> than an open one.
+
+## 2026-09-14, 08:00 — round eight. The quiet failure was the interesting one.
+
+Sprint scan: ten tickets assigned, seven in code review, one blocked, one in dev, **two actionable**
+(PLT-2952, PLT-2972) — and both are still held on clarifications posted **2026-09-05**, now day 9.
+Held again, no re-ask. So the run was all checkpoint work, and it found more than a quiet pass would
+suggest.
+
+### The thing worth carrying forward
+
+**#2186's CI had been stuck for 23 hours and nothing surfaced it.** Zero check runs, PR `blocked`,
+and the 09-13 log had already rationalised an empty check list as "a new head before checks attach".
+It was a workflow run **queued at 09-13 08:51 that never started** — visible only via
+`list_workflow_runs`, and un-cancellable *and* un-re-runnable through the API (409 / 403).
+
+> A red build announces itself. **A build that never starts does not**, and an empty check list looks
+> exactly like a fresh push. Check `created_at` on the run, not just the check list.
+
+The only remedy is a new head sha, and the honest way to get one is a real fix — which the PR had
+waiting: its single **unanswered** thread (open since 09-11 while the other 37 were worked) was a
+data-loss bug. `TaskInstanceModal` reset the run's verdict to null on open, so reopening a
+`passWithComments` functional test and amending anything regraded it to plain `pass`. The self-heal
+already refused to make that exact rewrite *and said why in a comment*; the save path was left doing
+it. Fixed and pushed as `4ae3062`; CI running again.
+
+### #2203 — covered by the 07:55 entry above
+
+Same push (`aa9c0c0`), written up in more depth there: five of six threads fixed, the drift pattern
+given one exported predicate rather than a sixth patch, and the `commissioning_file_association`
+column left open for @DarminderA. Not repeated here.
+
+### Quiet and genuinely fine
+
+#2202, #2197, #2194, #2212 — all green, all 0 behind master, **zero unresolved threads**. Waiting on
+human reviewers, nothing to do.
+
+**#2190 is not mine and is not fine:** two Copilot findings unanswered since **2026-08-27** (18 days)
+on Rishi's draft, which is the PR delivering my PLT-3086. One of them is a real fail-open
+(`endMembership` returning null still applies the impact). Not commented on — it is his PR — but
+raised with Ilia.
+
+### Environment, for whoever runs next
+
+`npm ci` **cannot complete in this container**: `@xyzreality/dhtmlx-gantt` is on GitHub Packages and
+the session token lacks `read:packages`. No local test runs; CI is the only runner. Two practical
+consequences: sweep every `toEqual` site by hand when a contract gains a field, and use
+**`npx prettier@2.7.1`** — the bare `npx prettier` pulls v3 and reformats unrelated lines.

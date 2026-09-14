@@ -149,3 +149,66 @@ No new information to investigate against, so the hc-frontend code was **not** r
 the 09-10 entry's independent two-read confirmation of the mechanism stands as the current state.
 The drafted console check (`forge`/`app`/`dropped` table, above) has still not been run/confirmed by
 a human. Nothing here supersedes any prior section.
+
+---
+
+## 2026-09-14 (scheduled run) — second, independent candidate mechanism found in the same function
+
+Re-fetched the ticket fresh (`comment`, `attachment`, `status`, `updated` in fields). **No change since
+09-11:** same two comments (`111797`, `111798`), status still Open, assignee still Darminder, `updated`
+timestamp unchanged at `2026-09-09T18:11:51.719+0100`, same three attachments, still 403 on content —
+not re-flagging as new. The 09-10 hypothesis (`modelDbId2ElementId` bridge drop → empty selection →
+empty-selection no-op branch) is neither confirmed nor ruled out; its console check has still not been
+run by a human.
+
+This run re-derived the same static trace as the two prior entries (three independent reads now agree),
+then kept reading `filter-service.ts`'s `applyFilters` (`:666-712`) past the point where the earlier
+entries stopped — past the *empty*-selection branch they describe, into the branch that runs when the
+selection is not empty.
+
+**New finding: a second, separate branch in the same function can also fully explain "isolate does
+nothing," with no dependency on the bridge-drop hypothesis at all.** `applyFilters` only calls
+`viewer.setAggregateIsolation(this.isolatedNodesCache)` when `getModelActiveFilterCount() === 0`
+(`filter-service.ts:682-685`) — i.e. only when no discipline / package / level / room / progress /
+status / category filter is currently selected in the editor's Filters panel. Whenever any one of
+those is active, the function takes the `else` branch unconditionally (`:700-708`) and calls
+`filterAndApplyElements`, which rebuilds visibility purely from the filter-panel state
+(`elementId2ModelMongoDbIdWithForgeDbId` filtered by `_filterElement`) and never reads
+`isolatedNodesCache` at all. So a non-empty, correctly-resolved menu selection can be silently thrown
+away the moment isolate is applied — no error, no message; the isolation is cached in memory
+(`this.isolatedNodesCache`) but never handed to the viewer.
+
+Checked this is a live branch, not a guess: `getModelActiveFilterCount()` is the same method the
+Filters panel itself reads to decide whether anything is active (also called at `:1010` and `:1083`),
+and `onIsolatedSelectedThroughMenu` — what `isolateSelected` calls — has four live call sites project
+-wide: the viewer right-click menu (`use-context-menu-actions.tsx:103`), the model-layer tree's isolate
+action (`model-layer-context-menu.tsx` via `model-browser-service.ts:214,300`), and the linked-elements
+panel's isolate action (`use-linked-element-actions.ts:87`). **If this mechanism is real, it is not
+specific to "select same type" or to LVN1-2** — it would silently defeat every menu-driven isolate
+action in the editor, on any project, the instant any Filters-panel filter is switched on.
+
+This does not rule out the 09-10 bridge-drop hypothesis. The two are compatible and cover different
+preconditions: bridge-drop needs an empty resulting selection with *no* panel filter active; this one
+needs a *non-empty* selection with a panel filter active. Both stay open until one live check
+discriminates them.
+
+**What is NOT verified:** whether the customer or Yash had any Filters-panel filter switched on during
+the repro (session `platform-web-70e55a74-4834-49e2-8a87-a6f9bf98c1fb`). Neither the description nor
+comment `111798` says either way. This is the one fact that would confirm or rule out this mechanism,
+and it needs no more code reading — only the screen recording (still 403 to us) or one fresh repro
+with the Filters panel checked before clicking isolate.
+
+### Updated discriminating check (adds to, does not replace, the 09-10 console script)
+
+Before running the `forge`/`app`/`dropped` console table from the 09-10 entry, first look at whether
+the editor's Filters panel shows any active discipline, package, level, room, progress, status or
+category selection. Do this both on a fresh repro and, once a human can open it, against the screen
+recording.
+
+- No active filter chip showing, and the console table gives `app === 0` while `forge > 0` → the
+  09-10 bridge-drop hypothesis is confirmed; this filter-panel mechanism is not what happened here.
+- One or more active filter chips showing, regardless of what the console table gives → this run's
+  mechanism is at least in play; confirm by clearing every filter, repeating "select same type" →
+  "isolate selected," and checking whether isolation now works with the panel empty.
+- An active filter chip showing **and** the console table gives `app === 0` → both mechanisms may be
+  layered; clear the filters first, then re-test the bridge-drop hypothesis on its own.

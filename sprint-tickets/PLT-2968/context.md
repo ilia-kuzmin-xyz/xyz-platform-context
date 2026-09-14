@@ -2764,3 +2764,74 @@ place that didn't.
 this one — it fixes the `setVerdict(null)` finding by seeding the verdict from `instance.outcome`.
 Pulled it before working; no conflict. Worth knowing when reading the log: commits on this branch
 have two authors behind one committer identity.
+## 2026-09-14 — CI had been silently stuck for 23 hours, and one finding was never answered
+
+Two separate things, and the first is the one to remember.
+
+### The build never ran on `edc1e3c` — and nothing said so
+
+`get_check_runs` returned **zero** check runs; `mergeable_state` was `blocked`. The 09-13 run log
+read an empty check list on this PR as *"a brand-new head before checks attach"*, which was right at
+08:56 on 09-13 and **wrong by the next morning**. Head `edc1e3c` was pushed 09-13 08:49 and still had
+no checks 23 hours later.
+
+The actual state, from `list_workflow_runs` (which `get_check_runs` cannot show you):
+
+```
+run 34748600706  "Build & Test - frontend service [PR Check]"
+  head_sha edc1e3c   status QUEUED   created 2026-09-13T08:51:29Z
+  run_started_at == created_at, updated_at never moved
+```
+
+Queued for 23 hours and never started — a GitHub-side orphan, not capacity: #2203's build ran fine
+at 21:46 that evening. Neither remedy worked:
+
+- `cancel_workflow_run` → **409** "Cannot cancel a workflow run that has not been queued yet"
+- `rerun_workflow_run` → **403** "This workflow is already running"
+
+So the run is wedged in a state the API will neither cancel nor re-run. **The only remedy is a new
+head commit** (a new sha gets a new check suite).
+
+> **Lesson, and it generalises: an empty check list is not "checks pending". Read
+> `list_workflow_runs` and compare `created_at` against now.** A stuck-queued run is indistinguishable
+> from a fresh push if you only look at check runs, and it is invisible in exactly the way a red
+> build is not — nobody gets a failure notification for a build that never started. This PR sat
+> un-mergeable for a day with four reviewers assigned and nothing to tell them why.
+
+### The commit that unstuck it was a real fix, not a kick
+
+Empty commits are not an option (and are the wrong habit anyway), so the fix came from the one
+**unanswered** thread on the PR — `r3989485151`, open since 09-11 with no reply while 37 of the 40
+threads had been worked:
+
+`TaskInstanceModal` seeded `outcomeNote` from the instance but reset `verdict` to `null`. A blank
+verdict card does not just *look* empty — it **arms the save**: `declaredVerdict` is null, so
+`instanceStatus` falls through to the derived status, and **`passWithComments` is never derived**.
+Reopen a functional test saved as `passWithComments`, change anything at all, and it stores as
+`pass`, leaving the outcome note on the row explaining a verdict that no longer mentions comments.
+
+The sharp part: **the self-heal already refused to make this exact rewrite** and its comment says why
+in as many words — *"correcting it would overwrite the verdict they chose, silently, on open, with
+the modal showing no verdict to say what was lost."* The guard was put on the heal and not on the
+save. Same family as the four Tier-2 fixes of 09-13: *something that decides a readiness step was
+trusting a value the answers did not support.*
+
+Fixed in `4ae3062` — the card seeds from `instance.outcome` via `isVerdictId()`, which reads off
+`VERDICTS` rather than repeating the three ids. Side benefit: a finished run showed **no** verdict at
+all, so there was no way to revise one either. `verdictHolds` is untouched.
+
+### State at end of run
+
+CI **running** on `4ae3062` (build in_progress 08:00:38). Two threads still open, both mid-discussion
+with replies from me (`parent_task_item_id` on the builder payload; the sign-off cluster), neither
+blocking.
+
+### 2026-09-14 — merge note
+
+The two 09-14 sections above were written by two parallel runs and conflicted in git only because
+they were appended at the same place; **both were kept, neither was arbitrated away.** They dovetail:
+the other run's section explains the stuck-queued build and `4ae3062`, which the "a parallel session
+is on the same branch" note below it refers to.
+
+Acting on its lesson straight away: after pushing `84fb6d1` I checked `list_workflow_runs` rather
+than `get_check_runs`, and compared `created_at` against now — an empty check list is not "pending".

@@ -1,5 +1,28 @@
 # PLT-2918 — recommended action (DRAFT ONLY — execute nothing)
 
+## 2026-09-14 — no change; the 09-09 draft (below, "88 words") still stands, still unsent
+
+Third consecutive confirmed-unchanged pass (09-09 → 09-11 → 09-14): live `getJiraIssue` fetch this
+run matches the 09-11 record field-for-field (`context.md § 2026-09-14` has the full diff). No new
+comment, no new attachment, status still `Open`. Human silence in Jira is now **20 days** (last
+human comment `110385`, Mostafa, 08-25), up from 17 on 09-11.
+
+**Action class confirmed: 1 (stale, unresponded, on us).** Same reasoning as 09-09/09-11 — the
+code fix was independently re-verified intact on the current checkout this run
+(`investigation-log.md § 2026-09-14`), so there is still no code to write; nothing is settled by
+looking at the app; there is no disagreement needing a meeting. The single blocking next step is
+still the same: get one current, dated activity code from Paddy that lets us tell "old July hole,
+never restored" from "new loss" — that is the one thing that unblocks everything else on this
+ticket, and it has been sitting unsent since 09-09.
+
+**Word count re-checked against the current draft below: still 88 words**, 3 sentences, one bolded
+closed question — within the 100-word / six-sentence limit. No edit needed; not reproduced a
+second time in this section to avoid drift between copies — see the 09-09 entry below for the
+exact text.
+
+**Nothing here overrides the 09-09/09-11 board-move guidance:** leave it `Open`; do not let an
+"Automation for Jira" rule quietly carry it to `Done` again (see `context.md § 2026-09-09`).
+
 ## Chosen action: (a) — post the first analysis comment: state the code-verified mechanism, name the ONE data check that pins delete-vs-overwrite, and ask the ONE closed trigger question
 
 This ticket is fresh (Open, no analysis yet). The single highest-value move is to (1) convert the client's report into a mechanism the team can act on, (2) run/assign the one data diff that decides *deleted vs re-pointed*, and (3) get the dated "why now" question to an owner **now**, before the trail goes cold (playbook: an unanswered "why now" is an open incident wearing a closed label). Keep **Ilia Kuzmin** (assignee) as owner of the code + data step; route the trigger question to **Yash Patel** for the client/PM side.

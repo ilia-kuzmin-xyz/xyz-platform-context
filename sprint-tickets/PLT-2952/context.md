@@ -111,3 +111,17 @@ this run's notification to Ilia again, alongside the #2186 finding. The Jira tic
 
 Nothing in the analysis above has changed and it remains complete enough to start the moment the
 question is answered.
+
+## 2026-09-14 — still unanswered (day 9)
+
+Checked at the start of the scheduled run. **One comment, still mine, still no reply.** Status
+unchanged at `Analysis In Progress`. Held per the "do not re-ask" note — no second comment posted.
+
+Ninth day on a **Critical** ticket. Nothing in the analysis has changed; the blocker is still a
+one-line product answer (split the ticket, or tell us where match strength and per-user progress are
+meant to come from).
+
+Worth recording that the hold keeps looking better rather than worse: this run spent its time on
+#2203 and #2186 instead, and both had real correctness bugs waiting in them. Building half of
+PLT-2952 on an assumption about the PLT-2953 reversal would have been the worse use of the same
+hours.

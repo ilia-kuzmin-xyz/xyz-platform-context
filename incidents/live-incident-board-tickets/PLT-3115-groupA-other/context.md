@@ -134,3 +134,55 @@ mechanism.
 show; whether `data-lpignore` is honoured by the customer's specific LastPass/browser combination;
 PLT-2940's original scope. Newly unverified: whether Darminder's non-repro generalises (only two
 browser/env combinations tried, not the customer's).
+
+## 2026-09-14 (scheduled run) — re-fetched fresh; no new comments; assignee changed; PLT-2940's actual scope now recovered
+
+Fetched fresh from Jira (`getJiraIssue`, fields incl. `comment`, `attachment`) and diffed against the
+09-11 entry above, per the "notes are a cache" rule.
+
+**No new comments.** Still only two: 111785 (Yash, 09-09) and 111941 (Darminder, 09-10 13:36,
+asking for video + browser). Darminder's question has sat **4 days** with no visible reply from
+Yash or the customer. Same two screenshot pairs as before (`64222`/`64223` from Yash, `64302`/`64303`
+from Darminder's own negative repro) — still unopenable, 403, not retried.
+
+**Assignee changed, correcting the 09-11 entry:** that entry says "still assignee Darminder Atker."
+The fresh fetch shows **assignee is now Yash Patel**, and the issue's `updated` timestamp
+(2026-09-10T13:54, ~18 minutes after Darminder's comment) is consistent with the reassignment and the
+`Open → With Customer` status move happening together right after Darminder asked his question — i.e.
+Darminder handed the customer-relay job back to Yash rather than waiting on it himself. This is a
+correction to the 09-11 write-up, not a new event since — the change itself may have already been in
+effect on 09-11 and simply mis-read then.
+
+**New: PLT-2940 fetched, and its actual fix scope is now recoverable** (the 09-10 entry said this
+git commit wasn't recoverable from the shallow clone — it wasn't, but the Jira ticket itself was
+never actually fetched until now). PLT-2940 is **Released/Done**, fixed by PR #2095 (comment 109049,
+Rishi Bhugobaun), and QA-verified fixed on Staging 26.3.4 by Gennaro Boccia (comment 109369,
+2026-08-11). Its own testing steps name exactly two surfaces: **Admin → Devices → device detail**
+(Device Name + Device Code) and **Admin → Softwares → version detail**. Verified in code today:
+`SoftwarePage.tsx:241-242` carries the same `autoComplete='off'` + `data-lpignore='true'` pair as
+`DevicePage.tsx:269-270,283-284` — confirming the Software-page half of the fix is also live and
+unchanged. **`DangerZone.tsx` is not mentioned anywhere in PLT-2940** (description, PR comment, or
+QA verification) — this answers, as far as Jira records go, one of the three open questions from
+09-10: the confirm-delete field was never in PLT-2940's scope, hardened or otherwise. It isn't a
+regression there; it was simply never touched.
+
+**Side finding, not verified further, flagged for whoever picks this up next:** PLT-2940 itself
+(already Released for a month) picked up two Freshdesk-automation comments on **2026-09-09** — the
+same day PLT-3115 was raised — "Waiting on customer" then "Open" on its linked Freshdesk ticket 6822.
+That suggests the customer's complaint may have come in as a reopened/continued conversation on the
+*original* Freshdesk ticket, with Yash separately opening PLT-3115 as the new Jira record for it. Not
+chased further this run (no Freshdesk access from this session) — worth knowing if the two tickets
+end up needing to be reconciled.
+
+**Code re-verified, unchanged from 09-10/09-11:** `DevicePage.tsx:257` (`<Form autoComplete='off'>`),
+`:258-271` (`deviceName` input: `id`, `name`, `autoComplete='off'`, `data-lpignore='true'`),
+`DangerZone.tsx:69-76` (`confirmDeviceNameBeforeDelete`: no `id`, no `autoComplete`, no
+`data-lpignore`). No commits touching either file since 09-10 (`git log` on `DevicePage.tsx` /
+`DangerZone.tsx` shows nothing newer than the pre-existing state; repo HEAD as of this fetch is
+`ed60719d`, 2026-09-09).
+
+**What remains unverified, updated:** which field the customer's screenshots show (still the crux,
+still unanswered); whether `data-lpignore` is honoured by the customer's specific LastPass/browser
+combination; whether the Freshdesk-6822/PLT-3115 relationship above matters operationally. **No
+longer unverified:** PLT-2940's scope — confirmed above as Devices + Software version pages only,
+DangerZone was never in it.

@@ -1,5 +1,73 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-14 (scheduled) — unchanged again. Silence since 111646 is now 6 days; correction is now 6 days unposted. Nothing re-investigated that was already killed.
+
+**Fetched fresh via `getJiraIssue`** (fields incl. `comment`, `attachment`; cloudId
+`1ebfaaab-47dc-435c-b940-d025630b5ffd` — note for future runs, the digit group before the final
+`ffd` is easy to mistype, verify against `getAccessibleAtlassianResources` if a call rejects it).
+Result diffed against the 09-11 entry below and against the run-instructions history through
+2026-09-09 (the last date this ticket is discussed there); specifically checked for any comment
+dated after 09-09 — **there is none.**
+
+- **Status:** `With Customer` (unchanged since 09-08). **Assignee: Yash Patel** (unchanged since
+  09-08).
+- **Comments:** 33 total — same count as 09-11, **no new comment since 111646** (Yash,
+  2026-09-08T14:29:28+0100, "Thanks for looking into it."). That is **6 days of silence** now, up
+  from 3 on the 09-11 pass.
+- **Attachments:** exactly 4, same ids as every prior pass — `57467`, `57468`, `57277`, `63521`.
+  No new attachment. **Not re-attempted:** fetching attachment content. Confirmed 403 (2026-09-08
+  entry, `live-incident-run-instructions.md`), a standing dead end for this routine's credentials,
+  not re-flagged as new.
+- **`updated`:** 2026-09-08T14:29:28+0100 — matches last comment, no silent field edit.
+- **Day count, recomputed:** created 2026-05-06T12:11:32+0100 → today 2026-09-14 = **131 days
+  old** (date arithmetic, not carried forward).
+
+**Code re-checked in `hc-frontend` this run** (working tree at commit `ed60719`, same commit the
+09-11 pass recorded — **nothing has been committed to this repo since then**; `git log --all
+--grep='PLT-2651' -i` still returns zero commits, no branch or PR anywhere references this ticket):
+
+- `section-tool-orientation.ts:47-49` — the public `theta` getter is **still there, unchanged**,
+  returning `this._theta`.
+- `section-tool-orientation.ts:57-63` (`patchIfNeeded`) — **still memoises `_patchPromise` with no
+  invalidation**, cleared only on failure. `_theta` is still assigned exactly once, inside
+  `_doPatch` at `:114`.
+- `section-tool-orientation.ts:88-114` (`_doPatch`) — **still `models[0]`-only**: `viewer
+  .getVisibleModels()`, then `const m = models[0]` (`:93`), gate reads `m`'s `refPointTransform`
+  (`:94-102`), footprint is `collectFragmentXYCorners(m)` off that same single model (`:104`).
+  Neither half of the named two-part fix (all-visible-models footprint; memo invalidation) has
+  been written.
+- `viewer-service.ts:974-983` — **the `applyBasePointTransform` call site is still commented out**,
+  byte-for-byte the same block quoted in every prior pass ("Using endpoint for project base point
+  turned off due to bug with misalignment of models"). True north still has no live effect in the
+  Web Editor.
+
+**No new hypothesis run, and none needed.** The controlled experiment that settles H1/H2 was
+already run by Ilia on 09-08 (load brackets sub-model first → `theta = -25.053°`; load a
+correctly-oriented model first, then the brackets model → `theta = +17.261°`) — this pass did
+**not** re-attempt reading `getVisibleModels()[0]` post-hoc as evidence about load order, per the
+09-08 "memoised value cannot be attributed from post-hoc state" rule, and did not repeat the
+fragment-count test (already shown non-discriminating). Nothing here required a new prod
+measurement; this pass is a pure re-verification of Jira state and code against the last two
+recorded passes.
+
+**What is still unverified, unchanged from 09-09/09-11:**
+- Whether DPL honours `ignoreTrueNorthAngle` as its name implies (the question drafted to Ali,
+  still unposted).
+- V4/H3: `typeof window.projectService.viewerService.viewer.get3DModels` — still not run, still
+  low priority now the mechanism is measured.
+- The blast radius of retiring `SectionToolOrientation` (how many live projects rely on the guess:
+  true north 0 + tilted footprint) — still not counted, needs an authenticated project read this
+  environment does not have.
+- Screenshot 63521's contents — no longer decisive (mechanism is measured), still unopenable.
+
+**Net: this is a "confirmed unchanged" pass, not a new development.** Status, assignee, comment
+count, attachments, and every cited line of code all match the 09-11 entry exactly. The only fact
+that has moved is elapsed time: 6 days of customer-facing silence on a Critical ticket sitting on
+an instruction (comment 111642, true-north change) that the 09-09 code read showed cannot affect
+the Web Editor. See `recommended-action.md` 2026-09-14 entry for the restated action.
+
+---
+
 ## 2026-09-11 (scheduled) — unchanged since 09-08 comment-wise; code confirmed unchanged too. Draft correction written, still unposted.
 
 **Fetched fresh via `getJiraIssue` (fields incl. `comment`, `attachment`).** Result diffed against

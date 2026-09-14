@@ -152,3 +152,38 @@ worth one direct question rather than inferring it (unposted; chat, not Jira):
 > correct number to use in the meantime.
 
 (81 words, unchanged from 09-09)
+
+---
+
+## 2026-09-14 — still class 1. Group B by this run's own rubric (see `context.md`). Chase now 3 days overdue; nothing else changed.
+
+Full diff against 09-11 in `context.md`. Live Jira: status, assignee (Pietro Desiato), comment count (7)
+and attachments (5) are all **unchanged** since 09-11. No one has sent the chase below, which was
+written to hold until 2026-09-11 — that date is 3 days past.
+
+**Classification restated:** class 1 (stale, unresponded) and, per this run's Group A/B rubric,
+**Group B** — assigned to product (Pietro), not Ilia, and the last comment is Darminder addressing
+Pietro rather than a question aimed at us. One line of status is enough; nothing here needs a fresh
+technical pass, and the code predicate behind the diagnosis was re-verified unchanged (see `context.md`).
+
+**One-line status:** Fix already explained and posted to the customer on 09-08 (comment `111645`); the
+customer has not yet run the one-line refresh that would confirm it, and an internal reassignment to
+Pietro Desiato on 09-10 ("waiting for further input") has not been followed up by anyone since.
+
+**Two things a human could do, neither urgent:** send the overdue chase to Yash below, and/or ask
+Darminder what "further input" he wants from Pietro, since it is not stated anywhere on the ticket.
+
+### Chase to Yash, ready to send, now overdue (81 words, unchanged text from 09-09/09-11)
+
+> Hi Yash, any word from Paddy on the Power BI query? He was going to delete the two labour-unit
+> lines and refresh. **Has he run that refresh yet?** If he has and the installed figure still
+> doesn't match the dashboard, ask him to send the full query text and we'll pick it up from there.
+> If he hasn't had time, no rush. Nothing is blocked on our side, and the dashboard's 45% is the
+> correct number to use in the meantime.
+
+### Clarifier to Darminder, unchanged from 09-11, still unsent (38 words)
+
+> Saw you moved PLT-3109 to Pietro — what does he need to weigh in on? If it's whether that Power BI
+> query is one of our templates, I can just ask him that directly.
+>
+> **What's the open question you want his input on?**

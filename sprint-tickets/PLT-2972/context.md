@@ -96,3 +96,17 @@ this run's notification to Ilia again, alongside the #2186 finding. The Jira tic
 
 Nothing in the analysis above has changed and it remains complete enough to start the moment the
 question is answered.
+
+## 2026-09-14 — still unanswered (day 9)
+
+Checked at the start of the scheduled run. **One comment, still mine, still no reply.** Status
+unchanged at `Analysis In Progress`. Held per the "do not re-ask" note — no second comment posted.
+
+Ninth day on a **Critical** ticket whose blocker is a one-line product answer.
+
+Reuse position unchanged and still good — `StepTasksModal` sits on `PLT-2968`, which is **0 commits
+behind master** as of this run. Note for whoever picks this up: #2186 is **no longer all-resolved**.
+Its CI had been silently stuck (a run queued 09-13 08:51 that never started, 23 hours), and this run
+pushed `4ae3062` to unstick it — a real fix, not a kick: the task modal was resetting the run's
+verdict to null on open, so reopening a `passWithComments` test and amending anything regraded it to
+plain `pass`. Two threads there remain open, both mid-discussion, neither touching `StepTasksModal`.

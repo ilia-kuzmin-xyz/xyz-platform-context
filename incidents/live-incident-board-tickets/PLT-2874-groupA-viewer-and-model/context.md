@@ -1,5 +1,70 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+## 2026-09-14 — new activity: Yash bumped the ticket, and Ilia's own promised reply to him is now unanswered. No code change, no new diagnostic fact.
+
+Live re-fetch (`getJiraIssue`, full fields incl. `comment`/`attachment`): status still **In
+Analysis**, priority Minor, assignee Ilia Kuzmin. **Comments are now 8, not 6** — two new since the
+09-11 scheduled entry below, both landing *after* that morning's sweep read 6 comments / `updated
+2026-08-25`:
+
+- **112016, 2026-09-11 13:35, Yash Patel**, tagging Darminder and Ilia: *"Any update on this guys?"*
+- **112017, 2026-09-11 13:39, Ilia Kuzmin**, to Yash: *"hi Yash, will get back to you with updates
+  soon today."*
+
+`updated` has moved for the first time since 2026-08-25, to **2026-09-11T13:39:41+0100** — this is
+new, not a re-read of a stale value.
+
+**What this is, stated plainly:** this is the first movement on the ticket in 25 days, and it is not
+new diagnostic content. Yash's comment is a status bump, not a new fact about the mechanism. Ilia's
+reply is a placeholder acknowledging the bump, not an answer — and, read against today's date, it is
+now **3 days overdue against Ilia's own word "today."** That is a different flavour of staleness than
+the rest of this ticket's history: previously the ticket was stale because a question to Gennaro was
+never sent; the newest fact is that the assignee's own promised reply to a colleague is now sitting
+unanswered. Whether Ilia already answered Yash outside Jira (Slack, in person) is invisible to this
+routine and not assumed either way.
+
+**Re-verified rather than carried forward, because new ticket activity is exactly the trigger the
+09-09 postmortem (`live-incident-run-instructions.md` § "Reproducing a surface's number...") warns
+against skipping:**
+
+- GitHub re-checked fresh (`search_pull_requests query:"PLT-2874 in:title,body"`,
+  `XYZReality/hc-frontend`): still exactly **one** result, PR #2084, merged 2026-07-31. Unchanged.
+- `hc-frontend` HEAD is now `ed60719` (2026-09-09, an unrelated dependency-cleanup commit — nothing
+  to do with this ticket). `git log` on `dashboard-color-service.ts`, `element-count.ts` and
+  `dashboard-element-stats.tsx` shows their last touch is still **2026-08-14** — unchanged since the
+  09-07/09-08/09-09 reads.
+- Grepped `dashboard-color-service.ts` directly this run (call sites, not just definitions): line
+  700 and 876 still call `countDistinctElements(elementsWithStatus, this.coloredDbIds.length)` into
+  `statisticsService.setVisibleElements(elementCount)` at 703/879; line 932's `getColorStats()` still
+  reads `this.coloredDbIds.length` under the key `total`. Byte-for-byte the same lines the 09-07/09-09
+  entries recorded. **The 09-09 correction stands: the tile reports distinct elements, not dbIds, and
+  has done so since 31 July.** Nothing here is a new finding — it is a fresh confirmation, done
+  because new Jira activity is precisely the moment a stale conclusion gets re-endorsed without
+  re-checking, which is what happened to the 08-28 draft for twelve days.
+
+**Consequence for the open question:** H1/H3/H4/H5/H6 (`§ "Reopened 2026-08-13"`, `§ 2026-08-14`
+below) are untouched by either new comment — neither addresses which project/model Gennaro tested or
+whether the two environments' date sliders match. Gennaro's Staging-undercount finding (109457,
+08-12) is now **33 days** unanswered, still the single open technical item on this ticket.
+
+**Action class: 1 — stale, unresponded** — but note who now owes the reply has partly shifted: it is
+still true that nobody has ever sent Gennaro the chase, and it is now also true that Ilia owes Yash
+the update he promised. The recommended action below folds both into one message. Confidence
+unchanged: 9/10 the 08-28 draft to Mostafa/Pietro remains unsafe to send (nothing about the code
+changed); 6/10 on the Staging undercount itself — five hypotheses, none excluded, all still needing
+Staging environment state nobody has supplied.
+
+**What remains unverified (not a confidence score, an explicit list):**
+- Whether Ilia already replied to Yash outside Jira since 09-11.
+- Which project/model Gennaro tested on Staging on 08-12.
+- Whether Staging's activity-links parquet and progress `calculatedOn` are stale relative to Prod's,
+  and by how much (H1).
+- Whether the diagnostic branch `PLT-2874-dashboard-element-count-diagnostics` has ever reached
+  Staging or been raised as a PR — last checked 08-27 (no), not re-checked this run since nothing
+  prompted a fresh look at it.
+- The dashboard/editor's actual current FAR01 figures — no prod measurement was re-run this session;
+  the 09-09 correction's position holds: no corrected absolute number is offered here, deliberately.
+
 ## 2026-09-11 (scheduled) — unchanged; Gennaro's Staging ask now 30 days unanswered
 
 Live re-fetch (`getJiraIssue`, full fields incl. `comment`/`attachment`): status still **In

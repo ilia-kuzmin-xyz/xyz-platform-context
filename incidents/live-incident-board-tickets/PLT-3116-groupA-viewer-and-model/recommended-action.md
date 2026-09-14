@@ -55,3 +55,38 @@ debugging first**. The console check above (`forge`/`app`/`dropped` table in `co
 the one thing that settles this, and it has still not been run. No draft Jira comment is warranted
 yet — the ticket is 2 days old, assigned, and nobody is waiting on us for a reply; posting the console
 snippet itself would be premature since we have not run it ourselves first.
+
+---
+
+## 2026-09-14 (scheduled run) — second mechanism found; a first draft is now warranted
+
+**Classification unchanged: 3 — resolvable in-session, needs visual debugging first.** context.md's
+2026-09-14 section adds a second candidate mechanism (a Filters-panel override in the same function),
+independent of the 09-10 bridge-drop one. Both are fully specified in code; choosing between them
+needs exactly one fact neither of us can get from source: whether a Filters-panel filter was switched
+on during the repro. Not class 2 — nothing should be coded before that fact is known, on either
+candidate. Not class 4 — this is a mechanism to confirm, not a product ambiguity.
+
+The prior "no draft needed, only 1-2 days old" reasoning (09-10, 09-11) is now stale: the ticket is
+5 days old with zero developer reply on the thread, and there are now two candidate causes worth
+putting in front of Darminder together rather than continuing to hold both back. A short nudge is
+warranted.
+
+**Assumption the draft rests on:** that Darminder has not already looked into this privately since he
+has not commented; if he has, the question may already be answered.
+
+Draft (not posted), to Darminder:
+
+Before writing a fix, could you reproduce this on LVN1-2? Select some elements, click select same
+type, then try isolate, and check one thing: is any filter, like discipline, package, level or status,
+switched on in the left panel at that moment? Also note whether the model visibly changes at all
+right when you click select same type, before isolate. **Was a panel filter switched on when isolate
+did nothing?** That single check tells us which of two causes is at play, so please share what you
+see either way.
+
+(90 words)
+
+## What this session did NOT do (2026-09-14)
+
+No code was written or pushed, no branch created, and the draft above was not posted to Jira — per
+the standing hard rule, it is left here for a human to send if they choose.

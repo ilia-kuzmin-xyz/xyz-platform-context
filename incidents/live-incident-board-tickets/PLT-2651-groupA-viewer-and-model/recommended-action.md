@@ -1,5 +1,54 @@
 # PLT-2651 — Recommended action
 
+## 2026-09-14 (scheduled) — unchanged again. The correction is now 6 days unposted, not 3. Recommendation and class unchanged; restating only because the clock has moved.
+
+Fresh `getJiraIssue` fetch this run: no new comment since 111646 (09-08, "Thanks for looking into
+it."), status still `With Customer`, assignee still Yash Patel, no new attachment, no comment
+dated after 09-09. `hc-frontend` re-checked directly (see `context.md` this date, working tree
+still at `ed60719`, unchanged since 09-11): `viewer-service.ts:974-983` still has
+`applyBasePointTransform`'s call site commented out, and `section-tool-orientation.ts` still has
+both named defects (`models[0]`-only footprint, unbounded memo) unwritten. **Nothing has moved
+since the 09-08/09-09 interactive session** — this pass changes no recommendation, it only
+re-verifies it and notes that the unposted correction is now stale by twice as long as it was on
+09-11.
+
+**Still true-north diagnosis, and still not sent to the customer.** The customer is sitting on
+comment 111642 (Ilia, 09-08), which asks them to change ATL08's true-north setting — a lever the
+09-09 code read showed has no live call site in the Web Editor. Every day this goes unposted is a
+day the customer may act on it for nothing. **This is the class-1 half of the class-4 action class
+below, and it has now doubled in age since it was last flagged as overdue.**
+
+**Not changed from 09-09/09-11:** the posture of asking Ali (DPL) first before posting a public
+correction. No answer from Ali has arrived (nothing was posted — draft-only, per the hard rule).
+Six days of silence on a Critical, 131-day-old ticket is long enough that a human should see this
+draft ready rather than wait further on Ali; that judgement call is unchanged from 09-11 and is
+restated, not re-argued.
+
+**Action class: 4, with a class-1 chase attached (unchanged).** Per the rubric in
+`live-incident-run-instructions.md`, this is not class 2 or 3: no code fix is safe to write while
+the cross-team product decision in HS-407 111637 (retire the guess vs. improve it) stands
+unresolved, and no further visual debugging is outstanding — the mechanism was already measured on
+prod (09-04, 09-08) via a controlled experiment (load-order varied, one input at a time), not
+inferred from post-hoc state. See `context.md` 2026-09-14 entry for the full re-verification.
+
+### Draft — to Yash Patel, on PLT-2651 — DRAFT ONLY, not posted (93 words)
+
+> Yash, quick correction before they act on my last message: changing the project's true north
+> setting won't change anything in the Web Editor's section box, that code path isn't active. What
+> actually fixes it is the model being re-exported from Revit with the right rotation in its
+> coordinates, not a settings change or a re-upload. We're double-checking the exact export ask with
+> our backend team so we give them one correct instruction instead of a second wrong one. **Can you
+> ask them to hold off on the true-north change until we confirm that?**
+
+**Assumption this rests on (one line, not in the message):** that DPL honours
+`ignoreTrueNorthAngle` as its name implies is still unverified — the "re-export from Revit" framing
+is the code-side conclusion (`section-tool-orientation-math.ts:145-155`, gate at ≥0.5°), not
+confirmed by Ali. Unchanged from every prior pass.
+
+**No Jira action taken by this run** — no comment, no transition, no assignment, no field edit.
+
+---
+
 ## 2026-09-11 (scheduled) — unchanged since 09-08; the 09-09 correction is now 3 days unposted. Restating the draft, unchanged in substance.
 
 Fresh `getJiraIssue` fetch this run: no new comment since 111646 (09-08), status still `With
