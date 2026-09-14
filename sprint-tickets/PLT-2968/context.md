@@ -2715,3 +2715,52 @@ Step 12 passed on `48d7ee5` (1m46s, against the 9s-503 failures earlier). The ou
 and **not re-running a third time was the right call** — the fresh run that a real push started
 answered the question for free. That run shows `cancelled` only because the next push superseded it
 four seconds after Sonar finished.
+
+### 2026-09-14 — two more of the same mistake: a row counted as belonging to what it's attached to
+
+Both from the 09-13 Copilot review. Fixed in `84fb6d1`. Different files, one shape.
+
+**A precondition is not a step of the run it gates.** `liveItems` mapped every item on the
+instance, preconditions included, so a precondition stored `fail` made `deriveInstanceStatus`
+return `fail` for the WHOLE task — a functional test whose own steps all passed was recorded as
+**failed**, when the truth is it was never allowed to start. It also counted in `failedCount`,
+putting "1 failed item" beside a task with no failed item in it.
+
+> The part worth keeping: **my own completion cap could not catch this, and correctly so.**
+> `withCompletionWithheld` only caps statuses that claim completion, and `fail` claims the
+> opposite — so the gate rightly left it alone. Two different wrongs (claiming completion you
+> haven't earned; being blamed for a failure that isn't yours) need two different fixes, and a
+> cap that tried to do both would have started rewriting real failures.
+
+The status and the count now read `rest` — the task's own items. Preconditions keep their job in
+`preconditionsMet`, on the narrower test of confirmation. Same change to the open-time self-heal.
+
+**A `system_requirement` is not the place's own work.** `listForSystemStep` and `listForStep` both
+returned requirement rows. `generateForSystemStep` reads that list to decide which templates already
+exist, so a requirement built from the same template made the system's own task look present and it
+was **never generated**; the step modal also listed tasks the ladder beside it didn't count.
+`use-readiness-steps.ts:72` already drew this line from the other side — the service was the one
+place that didn't.
+
+> **Did NOT follow the reviewer's suggested form, deliberately.** It said "scope to the
+> `system_readiness` bucket". Written that way it would have been a *worse* bug on any bridge whose
+> `bucket` migration hasn't landed: `normaliseBucket` reports a missing column as `asset_readiness`
+> (`DEFAULT_BUCKET`), so an inclusive test discards **every** row — system card empty, reconciliation
+> regenerating forever. And naming `bucket` in the PostgREST filter would reject the whole read, the
+> same trap the `note` column set on `openExecution`.
+>
+> So: `!== 'system_requirement'`, evaluated in code. The exclusive form degrades to "keep
+> everything", which is the safe direction, and an unrecognised bucket stays visible instead of
+> vanishing. There is a test pinning that a bridge with no `bucket` column keeps all its rows and
+> that the read never names the column.
+>
+> **General rule this is an instance of:** when a filter's default is one of the values you are
+> filtering on, `include X` and `exclude not-X` are not the same change. Pick the one whose failure
+> mode is showing too much.
+
+### 2026-09-14 — a parallel session is on the same branch
+
+`4ae3062` ("reopening a finished task must not silently regrade it") was pushed by another run, not
+this one — it fixes the `setVerdict(null)` finding by seeding the verdict from `instance.outcome`.
+Pulled it before working; no conflict. Worth knowing when reading the log: commits on this branch
+have two authors behind one committer identity.
