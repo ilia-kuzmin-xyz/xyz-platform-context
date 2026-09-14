@@ -4953,3 +4953,50 @@ it is the one question in this PR that no amount of reading the frontend can set
 > supports "one of two, and I cannot tell which from here", that is the finding** — collapsing it
 > either way is the error, and the collapse is tempting precisely because a clean claim reads better
 > than an open one.
+
+## 2026-09-14, 08:00 — round eight. The quiet failure was the interesting one.
+
+Sprint scan: ten tickets assigned, seven in code review, one blocked, one in dev, **two actionable**
+(PLT-2952, PLT-2972) — and both are still held on clarifications posted **2026-09-05**, now day 9.
+Held again, no re-ask. So the run was all checkpoint work, and it found more than a quiet pass would
+suggest.
+
+### The thing worth carrying forward
+
+**#2186's CI had been stuck for 23 hours and nothing surfaced it.** Zero check runs, PR `blocked`,
+and the 09-13 log had already rationalised an empty check list as "a new head before checks attach".
+It was a workflow run **queued at 09-13 08:51 that never started** — visible only via
+`list_workflow_runs`, and un-cancellable *and* un-re-runnable through the API (409 / 403).
+
+> A red build announces itself. **A build that never starts does not**, and an empty check list looks
+> exactly like a fresh push. Check `created_at` on the run, not just the check list.
+
+The only remedy is a new head sha, and the honest way to get one is a real fix — which the PR had
+waiting: its single **unanswered** thread (open since 09-11 while the other 37 were worked) was a
+data-loss bug. `TaskInstanceModal` reset the run's verdict to null on open, so reopening a
+`passWithComments` functional test and amending anything regraded it to plain `pass`. The self-heal
+already refused to make that exact rewrite *and said why in a comment*; the save path was left doing
+it. Fixed and pushed as `4ae3062`; CI running again.
+
+### #2203 — covered by the 07:55 entry above
+
+Same push (`aa9c0c0`), written up in more depth there: five of six threads fixed, the drift pattern
+given one exported predicate rather than a sixth patch, and the `commissioning_file_association`
+column left open for @DarminderA. Not repeated here.
+
+### Quiet and genuinely fine
+
+#2202, #2197, #2194, #2212 — all green, all 0 behind master, **zero unresolved threads**. Waiting on
+human reviewers, nothing to do.
+
+**#2190 is not mine and is not fine:** two Copilot findings unanswered since **2026-08-27** (18 days)
+on Rishi's draft, which is the PR delivering my PLT-3086. One of them is a real fail-open
+(`endMembership` returning null still applies the impact). Not commented on — it is his PR — but
+raised with Ilia.
+
+### Environment, for whoever runs next
+
+`npm ci` **cannot complete in this container**: `@xyzreality/dhtmlx-gantt` is on GitHub Packages and
+the session token lacks `read:packages`. No local test runs; CI is the only runner. Two practical
+consequences: sweep every `toEqual` site by hand when a contract gains a field, and use
+**`npx prettier@2.7.1`** — the bare `npx prettier` pulls v3 and reformats unrelated lines.
