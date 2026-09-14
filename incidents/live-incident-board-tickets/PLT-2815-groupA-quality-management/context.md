@@ -499,3 +499,38 @@ proposes building one.
   140026.png") and the 2 inline blobs in comment 105170 remain unopenable — attachment *content* is
   confirmed 403 for this session. They are corroborative screenshots of two figures already
   reproduced to the cent from source; nothing load-bearing is behind them. Not retried this run.
+
+## 2026-09-14 — no change, 70 days stale, 28th consecutive run. Code re-confirmed live against the ticket's own two figures.
+
+**Verified this run (live fetch, `getJiraIssue` with `comment`, `attachment`, `status`, `assignee`,
+`priority`, `created`, `updated`, `resolution`, `resolutiondate`):** status `With Customer`, priority
+Major, assignee Yash Patel, `resolution = null`, `resolutiondate = null`,
+`updated = 2026-07-06T10:18:45.272+0100`, **13 comments** — same 13 ids as every prior run, newest
+still **106553** ("Freshdesk #7126 → Closed", 07-06). Same 2 attachments, same ids (`59263`, `59262`),
+same author (Yash), same filenames. Description text unchanged (Paolo's original report). **70 days**
+since the last Jira activity of any kind; **28th consecutive run** (07-30 → today) recommending the
+same unposted close-out. Nothing re-derived on the diagnosis — none was warranted.
+
+**Inferred vs verified, explicit:**
+- **Verified this run, first-hand:** Jira state byte-identical to every prior snapshot (comment ids,
+  `updated` timestamp, status, resolution, attachments) — fetched directly, not assumed from the
+  folder. The hook `use-rework-cost-calculation.ts` was re-read in full this run (current line numbers
+  shifted slightly from earlier citations — Rule 1 now `:93-121`, Rule 2 `:123-144`, Rule 3 `:146-154`,
+  helper text `:171-204` — same logic, same behaviour, no meaningful diff) and confirmed **live**: it is
+  imported and called from `issue-cost-field.tsx:9-10,33,162` (`useReworkCostCalculation`,
+  `getEstimatedReworkCostHelperText`), not commented out, not gated behind any feature flag. This is not
+  Commissioning-scoped code (no `Asset*`/`Checklist*`/`readiness` naming), so the hc-frontend
+  Commissioning skip rule does not apply and was not invoked. `rework_reference.json:65-67` re-checked
+  directly: `Category 3 | CSA | Underground Services | 600.00` present, still no `Category 4 | CSA |
+  Underground Services` row — reproduces Paolo's two figures unchanged.
+- **Carried forward from prior runs, not re-verified this run (no reason to expect drift, but flagging
+  per protocol):** the Confluence reference table's own content (last independently opened 08-14), the
+  PLT-3061 cross-ticket timeline and Josh's 09-02 decline, and the 08-27 audit branch's PR status (no PR,
+  confirmed 09-09 — not re-checked this run since it does not gate this ticket's close).
+- **Still unverified, unchanged:** the three items listed in the section immediately above (Install Elec
+  Equip/Equipment identity, Mechanical/VESDA Cat 4 £1,840 correctness, and *why* 28 runs of the same
+  recommendation have gone unexecuted). The 2 attachments and 2 inline blobs remain unopened (confirmed
+  403, not retried).
+
+**Nothing about the underlying incident changed.** This is administrative housekeeping, not an open
+investigation — see `recommended-action.md` for this run's note.

@@ -261,3 +261,29 @@ next step; not run here (no API access from this routine).
 - What Paddy said on 09-08 — it is in Freshdesk #7461, invisible from Jira, nothing attached.
 - Whether the current WBS Location mapping count on AUS01 still matches 7,879.
 - Mostafa's Power BI theory — never substantiated with anything checkable, by anyone, since 08-25.
+
+## 2026-09-14 — fix re-checked a second time (still intact); nothing new to investigate
+
+No new comment or attachment since 09-08, so per run-instructions ("re-investigate only if new
+comments/attachments exist") no hypothesis was re-run and none was ruled out this pass. One check
+was still worth doing directly rather than trusting the 09-09 note: re-read
+`category-mapping-service.ts` on the current `hc-frontend` checkout to confirm the guard has not
+regressed in the 5 days since.
+
+**Confirmed, read fresh:** `saveDataMapping` (`category-mapping-service.ts:246-296`) still takes
+`editedTypeIdsByActivity`, still deletes only when `editedTypeIds?.has(categoryTypeId)` (`:277`),
+still carries the PLT-2918 doc comment (`:230-245`). `git log --oneline -- <that file>` shows the
+only commit to touch it since is `478932d` (PLT-2993/2994, Task library drag-and-drop folders) —
+an unrelated feature, not this function. **Call site is live**, not flagged off: this is the save
+path the mapping-panel dropdown/"Done" button actually invokes, confirmed by the same wiring chain
+recorded in `context.md § Mechanism C` (`data-mapping-dropdown.tsx` → `mapping-service.ts` →
+`categoryMappingService.saveDataMapping`).
+
+No reproduction routes were attempted again — the three killed in the 07-28 entry above stay
+killed; nothing here supersedes that.
+
+**Net effect on the three-hypothesis split:** unchanged. (a) residual code gap stays effectively
+ruled out (destructive cross-type delete structurally impossible on this path, now re-checked
+twice); (b) never-backfilled July gap and (c) Mostafa's Power BI theory remain undistinguished
+against data, exactly as of 09-09/09-11 — this run added a second independent code re-check, not a
+new data point on (b) vs (c).

@@ -1,3 +1,28 @@
+## 2026-09-14 — unchanged, 70 days stale, 28th consecutive run. Not re-argued; the 09-09 chase-to-Yash draft is still the recommendation.
+
+Live re-fetch confirms zero movement (see `context.md` this date): status `With Customer`, priority
+Major, assignee Yash Patel, `resolution = null`, `updated` still `2026-07-06T10:18:45.272+0100`, 13
+comments, newest still 106553. The code was re-read end-to-end this run and reconfirmed live (called
+from `issue-cost-field.tsx`, not gated, not commented out) and the reference-table values it reads
+(`rework_reference.json:65-67`) are unchanged — the diagnosis needs no revisiting.
+
+**Action class: unchanged — 1, stale/unresponded, needs following up by a named person (Yash Patel).**
+Not 2 (no dev work is missing or awaited), not 3 (nothing to reproduce — both figures were reproduced
+to the cent from source), not 4 (no disagreement exists between any parties).
+
+**Recommendation, unchanged:** the 2026-09-09 chase-to-Yash draft below (83 words) is still the right
+instrument — not another version of the closing comment, which has been drafted and re-drafted without
+effect across 27 prior runs. Not re-drafted this run.
+
+**Flag for human attention:** this is now a 70-day-old, 28-run pattern of an unexecuted one-click
+action (post a comment, transition to Done with a resolution). The technical and product questions
+were settled by 2026-06-23 and re-verified at the source Confluence table on 2026-08-14; nothing left
+in this ticket is a diagnosis question. Someone with Jira write access needs to either execute the
+close or explicitly decide to leave it open and record why — repeating the recommendation in this file
+a 29th time will not change that.
+
+---
+
 # PLT-2815 — Recommended action
 
 > **Revised 2026-07-30** (was: "(c) keep With Customer — nudge the client"). Escalated from a soft
