@@ -4856,3 +4856,62 @@ merge on green CI and resolved threads, it needs a human pass over the delete/ar
 Round seven is more evidence for that same conclusion, not a new ask. The one genuinely new item a
 person must action — *which column does `commissioning_file_association` actually use* — is stated on
 the Copilot thread where the author will see it, and cannot be answered from this repo.
+
+## 2026-09-14, 07:55 — round seven addressed at `aa9c0c0`, and the PATTERN itself was fixed
+
+All three verified in the tree, callers enumerated rather than counted.
+
+**1. The recurring bug got a structural fix, not another instance fix.** Instead of adding
+`&& attachedFiles === 0` at the confirm gate, the rule now lives in **one exported predicate**:
+
+```
+types.ts:115   export const usageBlocksDelete = (usage) =>
+                 usage.executions.length > 0 || usage.attachedFiles > 0
+```
+
+with a doc comment that names the failure out loud — *"every time this rule has been extended in one
+of those two places and not the other, the result has been a confirm path that permits what the
+dialog has just refused."* Exactly two callers, and they are the two that kept diverging:
+`DeleteTaskDialog.tsx:103` and the confirm gate `TaskLibraryTab.tsx:1047`.
+
+**This is the right answer to what I flagged.** I argued the six regressions were a property of the
+change rather than six separate mistakes; the response made a seventh divergence *structurally
+impossible* for this rule instead of patching the sixth. That is a better outcome than the fix I
+would have asked for.
+
+**2. Cancel race closed** — `confirmDeleteTask` captures `target`, awaits, then bails on
+`taskPendingDeleteRef.current?.id !== target.id` (`:1069-1073`). Refs, so it sees a cancellation that
+happened during the await. The reasoning given is right too: Cancel *should* close the dialog; it is
+the mutation that must not fire.
+
+**3. `blockedOwners`** computed as distinct owners of the surviving rows (`:726`), returned on all
+three paths (`:599`, `:634`, `:728`), read by the dialog (`:107`) in place of `executions.length`.
+
+### Correction to my 09-13 21:55 entry — I overstated the file-association risk
+
+I called the `task_instance_id` / `task_item_id` mismatch *"another fail-open"* and said the
+dangerous branch was a column that exists but links the wrong thing. The resolution shows **both
+columns exist and answer different questions**, now documented at `types.ts:85-100`:
+
+- `task_instance_id` — *which task the file was uploaded against*. The key the question is asked by,
+  and what the probe correctly filters on.
+- `task_item_id` — the FK that **cascades** (xyz-supabase#35 made it ON DELETE CASCADE, chaining up
+  through `task_template_version` to `task_template`). It is the **reason** deleting a template would
+  strand the file, not the key the rule is read by.
+
+So there was no contradiction, only a doc that stated the reason and left the key implicit. And my
+risk analysis had the failure direction wrong: **a column that is not there makes a PostgREST read
+reject**, so the failure is loud, not silent. The fail-open I warned about would have needed the
+column to exist *and* be semantically wrong, which is not the case.
+
+> I read two names for one table as a contradiction, when they were two FKs answering two questions.
+> **A safety probe's "which column" can have more than one right answer — the key it is asked by and
+> the key that makes the answer matter are not the same column.** Worth slowing down on before
+> calling a probe broken.
+
+Still open on #2203: the backend batch/RPC ticket (folder delete, archive-all, `remove()`
+precondition), the nested `<button>` in the draggable row, `disableAutoFocus` + keydown stop, status
+colour normalisation for legacy values, archive-only empty state, silent empty-folder failure,
+`formatDateTime` cover, header rows counted in execution totals, the `taskLibraryTheme` leak into the
+detail overlay — and the untested guards: `taskInstanceSync`'s archived case and the hook's live-only
+`select`, plus my service-layer-mocked tests.
