@@ -357,3 +357,34 @@ assignee.
   rows. Still resolves in the same single refresh, still unrun.
 - The project's live `ProgressWeightingMethod` remains inferred from the 45% figure, never read.
 - Attachment bytes: still not fetchable from this routine; not a blocker (see 09-08 entry).
+
+## 2026-09-14 — routine re-triage. Folder already existed; the task brief that opened this run called it "brand new" — it is not. Nothing on the ticket has moved since 09-11.
+
+Per run-instructions step 0 ("read the folder before opening the ticket"), this folder was found before the Jira fetch. The task this run was given assumed no folder existed and asked for a fresh one at a different path/domain slug (`PLT-3109-groupA-data-pipeline`); that assumption is wrong and the new folder was **not** created — writing a second folder for the same ticket is exactly the PLT-2909 duplicate-folder failure this repo's own branch-policy doc warns about. This entry extends the existing, correctly-domained (`progress-tracking`) folder instead.
+
+**Live Jira fetch, full fields incl. comments/attachments — diffed against the 09-11 entry above:**
+
+| field | 09-11 entry | live, 09-14 |
+|---|---|---|
+| Status | Open | **Open, unchanged** |
+| Assignee | Pietro Desiato | **Pietro Desiato, unchanged** |
+| Priority | Major | Major, unchanged |
+| Comments | 7 | **7, unchanged** |
+| Attachments | 5 PNGs, ids 63983-63987 | unchanged, same 5 ids |
+
+**Nothing has happened in three days.** No comment from Paddy, Pietro, or anyone else since `111944` (Darminder, 2026-09-10 13:53). The chase drafted 09-09/09-11 ("hold until 2026-09-11") was never sent — this routine only drafts, never posts — so it is now **3 days past its intended send date** with no one having decided to send it.
+
+**Code predicate re-verified, not just re-read from the 09-09 note.** Investigation discipline requires checking whether "the formula" changed since it was last read, not trusting a prior read (this is exactly what cost PLT-2874 twelve days). Checked directly:
+- `git log` on `src/main/webapp/app/pages/organisation/ViewerPage/components/services/dashboard-progress/utils/progress-queries-v2-api.ts` (hc-frontend) — last touched `043144d`, 2026-08-24 (PLT-3081), i.e. **before** the 09-09 read, not after. Current `hc-frontend` HEAD is `ed60719` (2026-09-09, dependency cleanup, unrelated file).
+- Grepped the file fresh: the `weightColumn` ternary (`PLANNED_LABOUR_HOURS ? 'TotalPlannedLaborUnits' : 'TotalLinkedElements'`) and the `AND ${weightColumn} > 0` guard both still stand, at the same five call sites the 09-09 entry named (`:230, :247, :438, :460, :592` — line numbers shifted by 0, file unchanged). **The 09-09 mechanism finding is current, not stale.**
+
+**Relation to Pattern 1, checked explicitly per this run's brief.** This run's brief suggested checking whether PLT-3109 is Pattern 1 (dead activity links / element-metadata-vs-geometry divergence, element *counts* disagreeing between surfaces) recurring on a third project. It is not, and this folder already settled that on 09-08: PLT-3109 is a **percent-complete** mismatch (Planned agrees at 46%, Installed/Actual collapses toward 0, project-wide scale) driven by a **progress-weighting basis** difference, not an element-count/link divergence. That is `recurring-defect-patterns.md` **Pattern 3** (confirmed third occurrence, see that file's 2026-09-08/09-09 entries), not Pattern 1. The recognition signatures are genuinely different: Pattern 1 shows as "select/isolate does nothing" or "a model lists elements it doesn't contain" or "progress capped below 100% with installed/linked matching the displayed %"; PLT-3109 shows as "Planned % agrees across surfaces, Installed % collapses to near-zero on one surface only, scale is 15,000+ activities" — Pattern 3's signature, not Pattern 1's, and this ticket is already the citation Pattern 3 uses. No new evidence changes that classification.
+
+**Group A/B call, explicit, per this run's brief.** The ticket is assigned to Pietro Desiato (product), not Ilia, so the assignee exception does not apply. The most recent comment (`111944`) is Darminder telling Pietro he is "waiting for further input following Ilias comment" — that is Darminder addressing Pietro, not a question pointed at us/dev, so the second exception does not apply either. **This is Group B**: no clarification is needed from us to make it dev-ready (nothing is or was ever a dev item — the fix was two lines in the client's own Power BI query), and nothing outstanding requires code. The one open thread (what "further input" Pietro should give, and whether our Power BI export template is the one at fault — see the unanswered cohort question in `recommended-action.md`) is an internal/product question, not a technical unknown blocking this repo's work.
+
+**What remains unverified (unchanged from 09-11):**
+- Whether the client's Power Query is XYZ-supplied or client-authored — still nobody has asked.
+- What "further input" Darminder wants from Pietro — still not stated anywhere on the ticket.
+- Whether removing the two WHERE lines surfaces a null `ActualProgress` for zero-labour warehouse rows — still resolves in one refresh, still unrun.
+- The project's live `ProgressWeightingMethod` — still inferred from the 45% figure, never read directly.
+- Attachment bytes — still not fetchable from this routine (unchanged, not a blocker; Ilia already opened all 5 on 09-08).
