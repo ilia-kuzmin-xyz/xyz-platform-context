@@ -1,57 +1,55 @@
-# PLT-3119 — recommended action (2026-09-10, first pass)
+# PLT-3119 — recommended action (DRAFT ONLY — execute nothing)
 
-## Classification: **class 4** (ambiguous, needs a decision) — leaning class 1 once one fact lands
+**Nothing here has been posted. No Jira or Freshdesk write of any kind was made this pass.**
 
-Not class 2/3: nothing to build, nothing needs Ilia's eyes in the app. The internal thread already
-produced a one-line conclusion ("can't have both types of calculation logic in the same portfolio")
-but never traced it to a mechanism that actually removes a project from a list — this repo's own
-guard (`portfolio-weighting-guard.ts`) only warns/blocks Save, it doesn't filter any dashboard's
-project array (`context.md` §3). So the real question — is "Project List" weighting-aware at all, and
-on which system — is still open, and it's a question for whoever owns that surface (Darminder/Mostafa
-already in the thread), not something this session can settle without prod/PowerBI access.
+## Action class: 1 (needs standard fact-gathering, owed by a named person — internally, not the customer)
 
-## What is blocking, precisely
+The board status ("With Customer") and Freshdesk status ("Waiting on customer") both correctly
+describe where the ticket sits externally — we are not the ones failing to respond, and 4 days of
+customer silence is not yet a chase situation. But the explanation that went out rests on an
+unverified premise (context.md §5): nobody has actually read AEX01's `progressWeightingMethod`
+against its portfolio siblings, or confirmed when AEX01 joined the portfolio relative to the
+weighting-guard's 2026-08-14 ship date. That is exactly the standard-fact-gathering shape class 1
+describes, just aimed at Darminder rather than the customer. Not class 2/3 — there is no fix to
+build or see in-app yet, because it isn't established there's a bug rather than a legacy data
+state. Not class 4 — the question is narrow and answerable by one person, not a product decision.
 
-Two facts would close this in one message each, and neither has been stated:
-1. Whether "Project List" and "Milestone Performance" are the same system (native
-   `PortfolioDashboardPage` or the PowerBI-linked legacy report) — `context.md` §3 shows they
-   *cannot* both be the native page given how that page is built.
-2. AEX01's actual progress-weighting value versus the rest of APLD's portfolio members, side by side
-   — asserted as a mismatch, never shown.
+## Recommended action: one internal question to Darminder, before this is treated as closed
 
-## Draft to Darminder — internal, UNPOSTED (96 words)
+**Not customer-facing.** The customer already has an explanation and is acting on it; re-opening
+that conversation now would be premature. This is purely to confirm the explanation is right before
+anyone relies on it, per the standing rule about causal claims about systems we don't fully own.
 
-> Hi Darminder, one thing doesn't add up before this goes back to the customer: on our own portfolio
-> dashboard, Milestone Performance and the Projects widget read the exact same project data, so
-> nothing can appear in one but not the other there. That suggests the customer's Project List is the
-> separate PowerBI view, not ours. **Can you confirm whether Project List and Milestone Performance
-> are the same system, and what AEX01's progress calculation setting is versus the rest of APLD's
-> projects?** That tells us if this is a real gap or just a setting to align.
+Assumption underlying this draft: that nobody has yet checked AEX01's actual weighting value or
+its portfolio-join date — stated as fact in comment 111942 but not shown as measured anywhere in
+the thread.
 
-**Assumption this rests on, one line:** that Yash's "Milestone Performance" / "Project List" naming
-maps onto this repo's native widgets rather than being his own loose description of two PowerBI report
-pages — plausible from the exact title match on "Milestone Performance", not confirmed.
+> Before this settles as the answer for AEX01: do you know if it was added to the Portfolio before
+> 14 August? If it was, that lines up cleanly, since the weighting-consistency check only stops new
+> conflicts and wouldn't have caught one already there. If it joined after that date, something's
+> getting past the check and that's worth a separate look. **Do you know when AEX01 was added to
+> the portfolio?**
 
-## Also worth doing, not blocking — open attachment `64304` first
+(78 words)
 
-It's a 14KB screenshot (much smaller than the other three, `context.md` §6) — likely a tight crop of
-the "Progress calculation logic" field or its conflict badge. If it already shows AEX01's weighting
-next to a portfolio-mismatch message, half the question above is answered for free and the draft can
-drop to just the "which system" half.
+## What not to do
 
-## Why not a customer-facing message yet
+- Don't re-open the thread with the customer yet — they already have an answer and are mid-action
+  on it (Freshdesk: waiting on customer). Asking Darminder first avoids a second round-trip if the
+  premise turns out to need correcting.
+- Don't file this as a duplicate of PLT-2917 or fold it into that ticket — the mechanisms are
+  different (context.md §3); at most, cross-reference once PLT-3119's cause is confirmed.
+- Don't promote the "calculation logic conflict" into `recurring-defect-patterns.md` Pattern 3 yet
+  — the code-side rule is real (context.md §4) but its application to AEX01 specifically is
+  unconfirmed (context.md §5, §9). Revisit once Darminder answers.
 
-Freshdesk #7907 is already "Waiting on customer" (comment `111943`, 13:48) — the ball is parked there,
-not on us, and it moved same-day as the internal explanation. Sending anything to the customer now
-would either repeat what Yash may already have relayed, or hand them an unconfirmed mechanism. The
-internal question above is what turns "plausible" into "confirmed" before anyone commits to a customer
-answer.
+## Status / assignee
 
-## Closing condition
+No change recommended. Assignee (Yash) and status (With Customer) both fit the ticket's actual
+state.
 
-Per the playbook: cause (portfolio weighting inconsistency) is *asserted*, not yet *shown*; trigger is
-presumably "AEX01 was added/enabled with a different weighting than its portfolio peers", unconfirmed;
-cohort (does this hit every mixed-weighting portfolio on whichever system renders Project List, or is
-it AEX01-specific) is entirely open. Do not close or downgrade this to `resolved` until at least the
-"which system" question is answered — right now the explanation on the ticket is a plausible verbal
-conclusion, not a traced one.
+**Confidence this is the right next step: 7/10.** It closes the one verification gap that matters
+before the ticket is treated as understood, costs one message to one named person, and does not
+touch the customer-facing side that is currently healthy. Not higher because the PowerBI query
+itself (context.md §9.3) remains entirely unverifiable from this session regardless of Darminder's
+answer — confirming the weighting mismatch narrows the cause but does not close the ticket outright.

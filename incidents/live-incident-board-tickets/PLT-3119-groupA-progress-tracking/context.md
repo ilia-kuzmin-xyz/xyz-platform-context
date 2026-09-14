@@ -1,193 +1,192 @@
 # PLT-3119 — "AEX not shown in portfolio dashboard" — triage context
 
-- **Jira:** https://xyzreality.atlassian.net/browse/PLT-3119
-- **Issue type:** Dashboards (Live Incident) · **Project (customer):** AEX01 / **APLD-AEX01**
-- **Status:** **With Customer** (id 10711) → Group A. **Brand new — created 2026-09-10, never
-  triaged before.** Freshdesk #7907.
-- **Priority:** Major · **Reporter:** Yash Patel · **Assignee:** Yash Patel (per live fetch;
-  Darminder investigated but is not the Jira assignee)
-- **Created:** 2026-09-10 12:26 · **Last updated:** 2026-09-10 13:48 (5 comments, all same-day)
-- **Domain slug chosen:** `progress-tracking` (PRG) — every mechanism found (Progress Weighting /
-  "Progress calculation logic" consistency across a portfolio) is the PRG domain's, same tag as the
-  closest sibling **PLT-3109** and the same underlying guard built for **PLT-2911**.
+- **Domain slug:** `progress-tracking` (justification in §6 — the mechanism is progress-weighting
+  consistency, same family as PLT-2917/Pattern 3, not a data-pipeline artefact defect)
+- **Jira:** https://xyzreality.atlassian.net/browse/PLT-3119 (id 122104)
+- **Type:** Live Incident · **Priority:** Major · **Status:** **With Customer**
+- **Assignee:** Yash Patel · **Reporter:** Yash Patel · original client project: **AEX01** (tenant **APLD**)
+- **Freshdesk:** Ticket 7907 — flipped **Waiting on 3rd line → Waiting on customer** same day
+- **Created:** 2026-09-10 12:18 · **Last updated:** 2026-09-10 13:48 (same day; 4 days quiet as of
+  this run, 2026-09-14) · **Comments:** 5 · **Attachments:** 4, all PNG, all inline in comments
+
+This is a brand-new ticket, first triage pass. Total elapsed time on-ticket is under 1.5 hours (all
+5 comments land between 12:18 and 13:48 on 2026-09-10); nothing has moved since.
 
 ---
 
-## 0. Prior-run check
+## 1. Verbatim description
 
-No existing folder. Not a repeat of Pattern 3 in the usual sense (that pattern is a single
-project's own dashboard-vs-report mismatch) — this is the **portfolio-membership** analogue: a
-project's progress weighting disagreeing with its portfolio peers, which `sprint-tickets/README.md`
-and `sprint-tickets/PLT-2911/context.md` already document extensively as a *built* mechanism
-(FE-only guard, shipped 2026-08-07). This ticket is very likely that guard's real-world shape
-surfacing on the live board for the first time.
+> Project:AEX01
+> Description: AEX not being in portfolio dashboard, thanks.
 
-## 1. What "AEX" and "portfolio dashboard" mean here (not guessed from the title)
+The one inline description image is the same permanently-broken `UNKNOWN_MEDIA_attachment` /
+`url=null` shape seen on PLT-2917 and elsewhere — not a session access issue, genuinely lost.
 
-- **AEX = a project code**, not a generic acronym: the ticket's own custom field says `Project:
-  AEX01`, and Yash's first comment names it precisely — **`APLD-AEX01`**, a project inside the
-  **APLD** ("Applied Digital") tenant/portfolio.
-- **"Portfolio dashboard" = the multi-project view listing every project in a portfolio** (as
-  opposed to a single project's own PRG/QLT/CAP dashboard). Two candidate implementations exist in
-  `hc-frontend`, and the ticket does not cleanly distinguish them:
-  1. **Native, feature-flagged:** `app/pages/PortfolioDashboardPage/` (`Portfolio-Dashboard` FF,
-     `GeneralTabEdit.tsx:481`). Ships a `MilestoneWidget` (on-screen title literally **"Milestone
-     Performance"**, `MilestoneWidget.tsx:18`) and a `ProjectsWidget` (on-screen title **"Projects"**,
-     `ProjectsWidget.tsx:194`).
-  2. **Legacy, PowerBI-embedded:** referenced in `dashboard/README.md:118-122`
-     (`PortfolioPage.tsx:97-105`) for the *per-project* dashboard redirect, but no portfolio-level
-     PowerBI report is visible anywhere in `hc-frontend` or `XYZPlatformApi`. Darminder's own comment
-     says the same: *"The one above linked to PowerBI I am not aware of access or how it works."*
-  - Yash's wording — **"Milestone Performance"** and **"Project List"** as two named sections of one
-    "APLD Portfolio" view — matches (1)'s widget naming closely (`Milestone Performance` exactly;
-    `Project List` is a plausible loose name for `Projects`), but as shown in §3 below, (1)'s own data
-    model **cannot produce the split Yash reports**, so which system the customer is actually looking
-    at is unresolved (§5).
+**"AEX" is the project code (AEX01), not a technical term** — confirmed directly from the
+description's `Project:` field and every comment. Nothing else in the ticket uses "AEX" any other
+way.
 
-## 2. What was reported (full comment thread)
+## 2. Comments, and who's waiting on whom
 
-**Description** (custom fields; `Project:AEX01`, `Is The Device Still Usable?: Not Usable` — boilerplate
-template noise, ignore): *"AEX not being in portfolio dashboard, thanks."* One inline image never
-finished uploading (`blob:...UNKNOWN_MEDIA_attachment`, same known Freshdesk-relay failure as
-PLT-3109/PLT-3033/PLT-2890).
+| # | When | Who | What |
+|---|---|---|---|
+| 111937 | 09-10 12:26 | **Yash** | Restates the real complaint precisely: project **APLD-AEX01** is not appearing in the **Project List** section of the **APLD Portfolio**. Says investigation so far found: (a) AEX01 was invisible everywhere in the portfolio because **"Include in Portfolio" was not enabled** in project settings; (b) after enabling it and refreshing the Power BI portfolio data, the project **began appearing in Milestone Performance**; (c) it still does **not** appear in **Project List**. Two screenshots attached (64299, 64300). Asks Darminder to investigate the Milestone-Performance-vs-Project-List split. |
+| 111938 | 09-10 12:27 | Yash | Freshdesk status → Waiting on 3rd line (bookkeeping) |
+| 111940 | 09-10 13:20 | **Darminder** | Checked **our own** Portfolio Dashboard (the hc-frontend one, feature-flagged, referred to as "the one we created on the Platform space behind feature-flags") — **AEX01 appears there fine**, in its Project List. Says he has no visibility into the **PowerBI-linked** portfolio dashboard (the one the customer is actually looking at) and asks Mostafa to advise. Screenshot attached (64301). |
+| 111942 | 09-10 13:39 | **Darminder** | "Following group discussion including Mostafa": names the cause as **"you cant have both types of calculation logic in the same portfolio which has been set for this project"** — a progress-weighting-method conflict. Screenshot of a settings panel attached (64304). No query, log, or data read is cited — this is a verbal/group conclusion, not a demonstrated one. |
+| 111943 | 09-10 13:48 | Yash | Freshdesk status → **Waiting on customer** |
 
-1. **`111937` · Yash · 12:26** — relays the investigation so far:
-   > Customer reports that project **APLD-AEX01** is not appearing in the **Project List** within
-   > the **APLD Portfolio**. Initially, AEX01 was not visible anywhere because **"Include in
-   > Portfolio"** was not enabled in project settings. After enabling it and refreshing the Power BI
-   > portfolio data, the project began appearing in **Milestone Performance**. However, it still does
-   > **not appear in the Project List** section.
-   Two images attached (ids `64299`, and one inline `90991b4d…` — see §6).
-2. **`111938` · Yash · 12:27** — Freshdesk #7907 → "Waiting on 3rd line".
-3. **`111940` · Darminder · 13:20** — *"looking at Applied digital the project Portfolio dashboard in
-   the one we created on the Platform space behind feature-flags the project **does** appear. The one
-   above linked to PowerBI I am not aware of access or how it works. I have asked Platform team and
-   no-one has experience with the PowerBI version. @Mostafa Kamel Hussien would you be able to
-   advise?"* — attachment `64301`.
-4. **`111942` · Darminder · 13:39** — *"Following group discussion including @Mostafa Kamel Hussien
-   the cause of the problem is because you cant have both types of calculation logic in the same
-   portfolio which has been set for this project"* — attachment `64304` (a screenshot, 14KB, much
-   smaller than the others — likely a tight crop of one settings field).
-5. **`111943` · Yash · 13:48** — Freshdesk #7907 → "Waiting on customer".
+**Who's waiting on whom, right now:** the customer. We (Darminder, via Yash/Freshdesk) gave an
+explanation and the ball moved to them the same day, 4 days ago. Nothing indicates the explanation
+was independently verified against AEX01's actual data before it went out — see §5. This is **not**
+a case of us being unresponsive; if anything the risk is the opposite direction (see §5's flag).
 
-**Reading the sequence exactly:** comment 4 (13:39, the technical conclusion) precedes comment 5
-(13:48, moved to "waiting on customer") by 9 minutes, so it is plausible Yash relayed comment 4's
-finding to the customer via Freshdesk before flipping the status — but nothing in Jira confirms what,
-if anything, was actually said to the customer. Not verified either way.
+## 3. What actually differs from PLT-2917 (checked directly, not assumed)
 
-## 3. Code findings (hc-frontend)
+PLT-2917 ("Portfolio Progress Dashboard", milestones wrong) was extensively investigated and its
+root cause is: **the platform has no write path to Actual Finish Date**, so a milestone marked
+100% in the editor can never be reflected as "Complete" in `vw_KeyMilestone` / the Milestone
+widget, because milestone completion is read from Actual End Date, not from user-entered progress.
 
-**VERIFIED — "Include in Portfolio" is `isPortfolioEnabled`, on-screen label "Included in Portfolio
-Dashboard":** `GeneralTabEdit.tsx:521`, form field `GeneralTabEdit.tsx:107,483`. Exact match for
-Yash's wording in comment 1.
+**PLT-3119 is not that.** Nothing in this ticket concerns milestone completion status, Actual
+Finish Date, or `vw_KeyMilestone`. The complaint here is that **an entire project is missing from
+the Project List widget's project roster** — a portfolio-membership/aggregation problem, not a
+per-milestone date problem. Different symptom, different named mechanism (weighting consistency
+vs. Actual Finish Date), different fix surface if either is confirmed.
 
-**VERIFIED — "calculation logic" is a real on-screen label, not paraphrase:** the radio group right
-above the Portfolio toggle in the *same* General tab is titled **"Progress calculation logic"**
-(`GeneralTabEdit.tsx:471`), bound to `progressWeightingMethod`
-(`ProgressWeightingType.PLANNED_LABOUR_HOURS` / `LINKED_ELEMENT_COUNT`,
-`app/types/progress-weighting-types.ts`). Darminder's screenshot (`64304`, 14KB — small, so likely a
-tight crop of exactly this field) is almost certainly this control, or the conflict badge it drives.
+**What the two tickets do share, and it's a real structural echo worth flagging rather than a
+duplicate:** in both tickets, the **Milestone Performance** widget is the one that keeps working
+while a different, aggregation-dependent view breaks. In PLT-2917 that's because milestones are
+zero-weight on every progress-weighting path (so weighting/aggregation quirks don't touch them —
+see PLT-2917 context §0.3). In PLT-3119, Yash independently observed the identical asymmetry:
+AEX01 shows in Milestone Performance but not Project List, straight after enabling Portfolio. That
+is consistent with the same underlying fact (milestones don't participate in the
+progress-weighting aggregation that a Project List rollup needs), not a coincidence — but it is a
+**shared structural cause**, not a shared **defect**. **Not a duplicate of PLT-2917; a sibling
+symptom of the same "Milestone Performance is aggregation-agnostic" property.**
 
-**VERIFIED — a portfolio-wide weighting-consistency guard already exists, built for PLT-2911:**
-`portfolio-weighting-guard.ts:getPortfolioWeightingConflict()` blocks/badges a project whose
-`progressWeightingMethod` disagrees with its portfolio peers (first project sets the basis; a mixed
-legacy portfolio hard-blocks everyone). This is Mostafa/Darminder's "can't have both types of
-calculation logic in the same portfolio" **verbatim** — the mechanism they're describing is this
-guard's own design comment (`portfolio-weighting-guard.ts:8-12`).
+## 4. Code findings — the "calculation logic" claim is real and traceable in hc-frontend
 
-**VERIFIED, and this is the load-bearing finding — the guard/badge does NOT remove a project from
-any list; it only warns, per PLT-2911's own 2026-09-04 entry (`sprint-tickets/PLT-2911/context.md`):**
-the conflict badge renders *next to an already-ticked, already-portfolio-enabled* checkbox
-(`GeneralTabEdit.tsx:139-142`), and blocks **Save** on that settings tab, not the project's presence
-in any dashboard list. So a weighting mismatch, by itself, is not sufficient in this repo's own code
-to explain a project being *absent from a list* — something else has to be doing the excluding, and
-it isn't this guard.
+Darminder's diagnosis names a real, enforced product rule, not a guess invented for this ticket.
+It is fully implemented as a client-side guard on the **project settings** screen that gates the
+same "Include in Portfolio" toggle Yash used:
 
-**VERIFIED — on the native `PortfolioDashboardPage`, "Milestone Performance" and "Projects" read the
-identical, already-filtered project array, so the split Yash describes (present in one, absent from
-the other) cannot happen there:**
-- Both widgets are driven by `usePortfolioData()` (`usePortfolioData.ts:14-32`), which fetches
-  `GET /portfolios/:id/dashboard` once (`portfolioProjectsQueries.ts:9-16`,
-  `portfolio-api-service.ts:43-53`) and applies the same client-side region/status filters
-  (`usePortfolioFilters.ts` via `applyFilters`) before either widget's selector runs.
-- `usePortfolioMilestones.ts:18-23` explicitly takes its "allowed projects" from that same
-  `usePortfolioData(projects => projects)` call.
-- `buildMilestoneWidgetData()` (`portfolioMilestonesData.ts:33-56`) builds `projectById` **only**
-  from `allowedProjects`, and line 53 (`if (!project) continue`) **drops any milestone whose
-  `projectId` isn't in that map** — so a project excluded from the dashboard's project array cannot
-  surface in Milestone Performance either, on this code path.
-- **Conclusion:** if AEX01 truly shows in Milestone Performance but not in "Project List", the
-  surface Yash is looking at is very unlikely to be this native, `/portfolios/:id/dashboard`-backed
-  page — consistent with Darminder's own read that the customer's "APLD Portfolio" is the
-  PowerBI-linked one, which no one on the FE/platform team present in the thread has access to or
-  understands.
+- **The toggle itself:** `GeneralTabEdit.tsx:481-522` — a `Checkbox` labelled *"Included in
+  Portfolio Dashboard"*, bound to `isPortfolioEnabled`, rendered only when the `Portfolio-Dashboard`
+  feature flag is on (`GeneralTabEdit.tsx:81`, `getFeatureFlagValue('Portfolio-Dashboard')`).
+- **The rule:** `portfolio-weighting-guard.ts:46-76`, `getPortfolioWeightingConflict()`. A project
+  may join a portfolio only if the portfolio is currently empty, or its `progressWeightingMethod`
+  (labour-hours vs. linked-element-count — `app/types/progress-weighting-types.ts`) matches every
+  other member already enabled in that portfolio. Enabling is **blocked with a named-projects
+  warning toast** on conflict (`GeneralTabEdit.tsx:499-518`), both on the enable-click and again on
+  Save (`:193-220`) — the guard re-checks even for an already-enabled project whose weighting
+  changed since.
+- **The guard's own doc comment explicitly names exactly this ticket's shape as a known gap:**
+  `portfolio-weighting-guard.ts:54-56`, *"Legacy state from before this guard: members already
+  disagree with each other, so no candidate can be consistent with all of them."* The guard stops
+  **new** conflicts; it has no mechanism to detect or resolve one that already exists.
+- **Membership/weighting lookup:** `usePortfolioWeightings.ts:34-106` — built from the user's
+  project list filtered to `isPortfolioEnabled === true` and the same tenant, then each member's
+  `progressWeightingMethod` fetched individually; a member that can't be read is skipped, not
+  treated as absent (`:92-102`, deliberately fail-safe toward over-blocking).
+- **This guard is recent:** its only commit in `hc-frontend` history is `478932d`, dated
+  **2026-08-14** (squashed into an unrelated-looking commit message, `#2138` — same pattern of
+  batched/squashed merges noted elsewhere on this board). **27 days before this ticket.** If AEX01
+  was added to the APLD portfolio before 14 August, it could never have been checked by this guard
+  at all — a clean, code-verified explanation for how it ended up in a conflicting state despite
+  the guard existing today.
 
-## 4. Hypothesis
+**What this guard does NOT reach, and is worth being explicit about:** this is entirely a
+**hc-frontend project-settings** control. It has no visibility into, and makes no claim about,
+what the **PowerBI-linked** Portfolio Dashboard's own Project List query does with a project whose
+weighting conflicts with its portfolio siblings — that surface is external to hc-frontend, exactly
+as established for PLT-2917 (the "old PowerBI portfolio dashboard" is a different consumer of a
+different backend artefact than anything hc-frontend renders). Confirmed here independently:
+Darminder's own comment (111940) says he could reproduce nothing wrong on **our** portfolio
+dashboard — AEX01 shows correctly there — and has no access to the PowerBI side.
 
-**INFERRED, not verified:** whatever renders the customer's "Project List" (most likely a PowerBI
-report/dataset, per Darminder's comment, structurally outside both `hc-frontend` and
-`XYZPlatformApi`) computes a per-project progress figure that assumes **one** weighting method across
-the whole APLD portfolio, and silently drops a project whose own weighting doesn't match — the same
-shape as **PLT-3109** (a labour-hours-only `WHERE` clause dropping element-weighted activities) and
-**PLT-2911**'s guard (built specifically to stop this at enable-time, but frontend-only and
-non-blocking once already enabled, so a pre-existing or manually-forced mismatch reaches whatever
-consumes it downstream). "Milestone Performance" plausibly doesn't depend on progress-weighting at
-all (it's date/status-driven, per `portfolioMilestonesData.ts` — no weighting field touched anywhere
-in that file), which would explain why it shows AEX01 fine while a progress-percentage-bearing
-"Project List" does not.
+**hc-frontend's own Project List widget (`ProjectsWidget.tsx`, `porfolioProjectsData.ts`) applies
+no weighting-consistency filter of any kind** — `deriveProjectCardsFromProjects()`
+(`porfolioProjectsData.ts:39-63`) only filters client-side on `projectStatus` and `region`; the
+full project list comes straight from `GET /portfolios/:id/dashboard`
+(`portfolioProjectsQueries.ts:9-16`). This is consistent with Darminder's observation that our own
+dashboard is unaffected, and confirms the defect (if it is one) is specific to whatever the PowerBI
+report's Project List panel queries — not shared hc-frontend code.
 
-This has **not** been confirmed against any real query, table, or PowerBI artifact — there is no
-prod/PowerBI access in this session (same gap recorded on PLT-3109), and the mechanism described by
-Mostafa/Darminder in comment `111942` is a one-line verbal conclusion, not a traced root cause.
+## 5. What's unverified — and the one thing worth flagging before this closes
 
-## 5. What remains unverified
+**Nobody has checked AEX01's actual `progressWeightingMethod` against its portfolio siblings'.**
+Comment 111942 states the cause as settled fact from a "group discussion" with one screenshot, not
+from a data read. This matches the recurring shape in `recurring-defect-patterns.md` — *"a
+customer-facing instruction shipped on a premise nobody verified"* — closely enough to name: the
+customer has already been put in "waiting on customer" (implying they've been told to do
+something, e.g. align AEX01's weighting), and that instruction rests on an unconfirmed premise. The
+underlying mechanism (portfolio aggregation needs one weighting basis) is real and code-verified in
+§4; whether it is *actually what's wrong with AEX01 specifically* is not.
 
-- **Which system actually renders "Project List"/"Milestone Performance" for the customer** — native
-  `PortfolioDashboardPage` (feature-flagged) or the legacy PowerBI portfolio report. Darminder himself
-  does not know for the PowerBI one; this session cannot check either without prod/PowerBI access.
-- **AEX01's actual `progressWeightingMethod`, and what the rest of the APLD portfolio's members are
-  set to.** Nobody has stated the two values side by side — the "mismatch" conclusion is asserted,
-  not shown as a diff (the exact discipline the 09-03 "denominator rule" and 09-09 "reproduce the
-  predicate" entries in `live-incident-run-instructions.md` call for).
-- **Whether "Project List" is even weighting-aware at all**, i.e., whether the hypothesis in §4 is
-  the actual mechanism or just a plausible-sounding echo of PLT-2911's guard applied to the wrong
-  layer.
-- **What, if anything, was actually communicated to the customer** before Freshdesk flipped to
-  "Waiting on customer" at 13:48.
-- **Contents of all 4 screenshots** (`64299`, `64301`, `64304`, plus one inline image `90991b4d…` in
-  comment 1) — not opened this session; see §6.
+**Two follow-on questions, unresolved, in order of value:**
+1. Was AEX01 added to the APLD portfolio **before 2026-08-14**? If yes, that's a complete,
+   consistent explanation (legacy conflict, guard never had a chance to catch it) and nothing here
+   points at a live bug. If AEX01 was added **after** that date, the guard should have blocked it —
+   and didn't, which would itself be a defect worth its own investigation (guard bypass, or a
+   feature-flag/tenant edge case).
+2. Even once AEX01's own weighting is confirmed as the odd one out, **nothing establishes that the
+   PowerBI Project List panel's query is what's excluding it, or how** — that panel's SQL/DAX is
+   outside hc-frontend and this session has no BI/DB access. The Milestone-Performance-shows /
+   Project-List-doesn't asymmetry is *consistent* with a weighting-based rollup excluding the
+   project, but that is inference, not a read of the query.
 
-## 6. NEEDS HUMAN — attachments not opened this session
+## 6. Domain slug — why `progress-tracking`
 
-4 PNGs are attached, all from today (2026-09-10), none opened by this routine:
+The named mechanism (progress-weighting-method consistency for portfolio-level aggregation) is a
+progress/schedule concept, lives in the same `ProgressWeightingType` surface as Pattern 3's three
+confirmed occurrences (`recurring-defect-patterns.md` Pattern 3), and the code that actually
+implements the only verifiable half of it (`portfolio-weighting-guard.ts`) sits in project
+settings' progress configuration. `progress-tracking` is the better fit over `data-pipeline`
+because there is no pipeline/artefact defect confirmed here — only a settings-consistency rule and
+an external report this session cannot query.
 
-| id | author | time | size | likely content |
-|---|---|---|---|---|
-| `64299` (+ inline `90991b4d…`) | Yash | 12:26 | 446KB | the customer's own portfolio screenshot(s) showing AEX01 missing from Project List |
-| `64301` | Darminder | 13:20 | 494KB | the native `PortfolioDashboardPage`, project visible |
-| `64304` | Darminder | 13:39 | **14KB** (much smaller — likely a tight crop) | probably the "Progress calculation logic" field/badge (`GeneralTabEdit.tsx:471`) |
+**Candidate addition to Pattern 3** (not made — this ticket's mechanism is unconfirmed against real
+data per §5): if AEX01's weighting-vs-portfolio conflict is confirmed, this would be a fourth organ
+of Pattern 3, at portfolio-membership granularity rather than category-filter or headline-%
+granularity — worth adding once verified, not before.
 
-This routine has no working Jira attachment-content fetch (confirmed 403 on 2026-09-08, see
-`live-incident-run-instructions.md`). A human should open `64304` first — if it shows the "Progress
-calculation logic" radio or the weighting-conflict badge, §4's hypothesis is confirmed for free and
-the only remaining question is which system enforces it on "Project List".
+## 7. Attachments — unreadable, per the standing 2026-09-08 finding (not retried)
 
-## 7. Confidence
+All four are inline-comment PNGs; per the confirmed dead end (session credentials 403 on
+attachment content, `incidents/live-incident-run-instructions.md` § 2026-09-08), none were fetched.
 
-- **"Include in Portfolio" = `isPortfolioEnabled`, and the label match to Yash's wording: 9/10** —
-  exact on-screen label read directly.
-- **Darminder/Mostafa's "calculation logic" conclusion refers to `progressWeightingMethod` /
-  `portfolio-weighting-guard.ts`: 8/10** — exact label match ("Progress calculation logic") and the
-  guard's own design comment uses almost the same words Darminder used, but the actual screenshot
-  (`64304`) was not opened to confirm.
-- **This repo's own guard mechanism, by itself, explains AEX01's omission from a list: 3/10** —
-  actively contradicted by PLT-2911's own 09-04 finding that the guard is a non-blocking badge, not a
-  filter. Something else (unidentified — likely PowerBI-side, unverified) has to be doing the actual
-  exclusion.
-- **The native `PortfolioDashboardPage` is NOT the surface the customer is describing: 7/10** — a
-  clean code-level contradiction (Milestone Performance structurally cannot show a project absent from
-  the same page's Projects widget), not just an absence of evidence.
-- **Overall triage confidence: 3/10.** One day old, the internal team's own explanation is a verbal
-  conclusion rather than a traced mechanism, and the two facts that would settle it (AEX01's weighting
-  vs. its portfolio peers; which system renders "Project List") are both unread by anyone on this
-  thread so far.
+| id | filename | posted by / where | what it would settle |
+|---|---|---|---|
+| 64299 | `Screenshot 2026-09-10 164519-20260910-112347.png` | Yash, comment 111937 | The customer's actual Project List view — confirms AEX01 is genuinely absent (not a search/filter/scroll artefact) and which portfolio this is |
+| 64300 | `image-20260910-112412.png` | Yash, comment 111937 | Second customer-side image, likely the Milestone Performance view showing AEX01 present, for direct comparison against 64299 |
+| 64301 | `image-20260910-121414.png` | Darminder, comment 111940 | Our own hc-frontend Portfolio Dashboard showing AEX01 present — the evidence behind his "works fine here" claim |
+| 64304 | `image-20260910-123851.png` | Darminder, comment 111942 | The actual calculation-logic/weighting settings screen referenced as the cause — this is the single most decisive image: it would show AEX01's weighting value and (if visible) its portfolio peers', which is exactly what §5 says is unverified |
+
+## 8. Confidence (explicit, not rounded up)
+
+- **The complaint is precisely "project missing from Project List, present in Milestone
+  Performance, on the PowerBI-linked Portfolio Dashboard":** 9/10 — verbatim from Yash's own
+  comment, corroborated by Darminder's independent check.
+- **A real, enforced progress-weighting-consistency rule exists in hc-frontend and named
+  "calculation logic" is a fair plain-language label for it:** 9/10 — read the guard, its tests are
+  absent but the logic is direct and the code comment names this exact legacy-conflict shape.
+- **That rule is what's actually excluding AEX01 from the PowerBI Project List panel specifically:**
+  4/10 — plausible, structurally consistent with the Milestone-Performance/Project-List asymmetry,
+  but **not verified against AEX01's actual weighting value, its portfolio siblings' values, or the
+  PowerBI query itself.** No DB/BI access this session.
+- **This is unrelated to PLT-2917's root cause (Actual Finish Date):** 9/10 — read both mechanisms
+  directly; no shared code path, only a shared "Milestone Performance is exempt" structural
+  property (§3).
+
+## 9. What remains unverified after this pass (explicit list)
+
+1. AEX01's actual `progressWeightingMethod`, and its APLD portfolio siblings' — nobody has read
+   this; comment 111942 asserts a conclusion, not a measurement.
+2. Whether AEX01 was added to the portfolio before or after 2026-08-14 (the guard's ship date) —
+   this is the single check that would confirm or rule out "legacy conflict, guard never applied."
+3. What the PowerBI Portfolio Dashboard's Project List query actually filters on — entirely outside
+   hc-frontend and this session's access.
+4. All four attachments (§7) — unread.
+5. Whether the customer has been given anything beyond "waiting on customer" — the actual reply
+   text lives in Freshdesk ticket 7907, not in these Jira comments, and was not read.
