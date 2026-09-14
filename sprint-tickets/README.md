@@ -4915,3 +4915,41 @@ colour normalisation for legacy values, archive-only empty state, silent empty-f
 `formatDateTime` cover, header rows counted in execution totals, the `taskLibraryTheme` leak into the
 detail overlay — and the untested guards: `taskInstanceSync`'s archived case and the hook's live-only
 `select`, plus my service-layer-mocked tests.
+
+### 07:56 — nested button and the untested archive guard both fixed; and my correction was itself too strong
+
+**Nested `<button>` fixed structurally.** `RowActionsMenu` is now the `menu` **prop** of
+`DraggableTaskCard` (`:745-755`), and the component renders a wrapper Box carrying the drag transform
+with an inner Box taking `{...attributes}`/`{...listeners}` — the element dnd-kit gives `role=button`
+— so the menu sits *outside* it. Verified by reading where the props land, not by the prop's name.
+Two details in the fix worth keeping: the card reserves a slot the width of the trigger (or the Type
+column slides into the gap), and the transform moved to the wrapper (or the row slides out from under
+its own kebab mid-drag). It now matches the folder header, which had solved this twenty lines above
+and said why.
+
+**The archive guard is tested.** `task-instance-sync.test.ts` gained an archived-but-still-mapped
+definition on both the asset and system paths, asserting `generate` is never called. This mattered
+more than most: archiving deliberately leaves the type mapping alone, so the link stays live, the
+template still resolves, and `liveDefinitionsById` is the *entire* enforcement.
+
+#### Amendment: my 09-14 correction over-corrected
+
+Yesterday I called the file-association columns "another fail-open". This morning I corrected that to
+"no contradiction, and the failure direction is the safe one". **The second statement was too strong.**
+The author's thread puts it precisely, and it is the accurate version:
+
+- a column that **isn't there** → the read rejects → the dialog refuses to offer a delete at all. Safe.
+- a column that **exists but links something else** → quietly returns zero → the delete goes through.
+
+So the silent branch I originally worried about is real; what was wrong on 09-13 was asserting it as
+the case rather than as one of two, and what was wrong this morning was quoting the safe branch as
+though it covered both. **Neither is checkable from this repo** — the schema is in xyz-supabase and
+nothing else in this app reads that table, so there is no second reader to cross-check against. The
+thread is **left open** with @DarminderA asked to confirm the columns, which is the right disposition:
+it is the one question in this PR that no amount of reading the frontend can settle.
+
+> Two corrections in opposite directions on one finding. The through-line: I twice stated a
+> *conditional* risk as a *settled* one, first alarming and then reassuring. **When the evidence
+> supports "one of two, and I cannot tell which from here", that is the finding** — collapsing it
+> either way is the error, and the collapse is tempting precisely because a clean claim reads better
+> than an open one.
