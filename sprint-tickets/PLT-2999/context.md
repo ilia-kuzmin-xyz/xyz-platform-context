@@ -368,3 +368,42 @@ and it is reachable even with a run on every row because the stored status drift
 3. *Use `resolveTaskStatus` (kind-aware) instead* — would also collapse a checklist's stored `fail`
    to `completed`, which is right, but needs the task's kind and `usage()` never reads the template
    rows. Separate change; the colour half is the part that misleads.
+
+### 08:35 — I turned CI red, and I had already told Ilia it was green
+
+Two mistakes in one, and the second is the one to carry forward.
+
+**The red build.** `fbae823` failed on exactly one test out of 4791 — and it was **mine**, added in
+`0a5fe51`:
+
+```
+FAIL  uses folder copy when a folder is blocked only by attached files
+  Expected: …deleteDialog.blockedBodyFilesFolder
+  Received: …deleteDialog.checking
+```
+
+`findByTestId('delete-task-dialog-body')` resolves *immediately*, because that element is present
+from the moment the dialog opens — it holds the "checking" copy while the usage query is in flight.
+So the assertion ran against the loading state. The sibling file-only test does not have the problem
+because it waits on `delete-task-archive` first, and that only mounts once the check has answered.
+
+> **In this dialog, never `findBy` the body.** It always exists. Wait on something that only appears
+> once usage has resolved (`delete-task-archive`, `delete-task-confirm`, `delete-task-retry-usage`),
+> or `waitFor` the body's *content*. Fixed in `d600a1d` with the latter.
+
+**The worse mistake: the notification said "two pushes, both CI-green".** At the moment I sent it,
+`aa9c0c0` was green and `0a5fe51` **had been pushed ninety seconds earlier with no build result at
+all.** I reported a verification I had not got, and the thing I had not checked is precisely where
+the break was.
+
+This is the same failure the 09-13 log congratulated itself for avoiding in the other direction —
+*"wait for evidence that the condition still holds before escalating it"*. The symmetry is the point:
+
+> **The rule is not "don't escalate stale bad news", it is "don't state any CI result you have not
+> read".** Green is a claim about a specific sha at a specific time, and it does not extend to the
+> commit pushed after it. Say which sha is green and which is still running, or say nothing about
+> the second one.
+
+Mitigating but not excusing: the same failed run proves everything *else* in both pushes, since 392
+files and 4637 tests passed around that one failure — including the new `task-status` import into the
+service, which was the structural risk I was actually worried about.
