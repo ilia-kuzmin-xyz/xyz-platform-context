@@ -407,3 +407,39 @@ This is the same failure the 09-13 log congratulated itself for avoiding in the 
 Mitigating but not excusing: the same failed run proves everything *else* in both pushes, since 392
 files and 4637 tests passed around that one failure — including the new `task-status` import into the
 service, which was the structural risk I was actually worried about.
+
+### 08:38 — round ten, and the pattern has a name now
+
+Copilot's review on `fbae823` posted 3 and suppressed 15. All three posted ones were real; fixed in
+`ac1eb63`.
+
+**The fail-open, and the best finding on the PR.** `usage()` filtered archived instances out **in the
+query**, so the file-association probe never saw them. Archiving an instance withdraws neither the
+upload nor the association, and the cascade that strands the file does not care that the instance is
+archived — so a template whose only attachment sat on an archived instance reported **zero**
+attachments and deleted straight through. Where *every* instance was archived it returned zeros
+without running the probe at all.
+
+The archived split is now in code, not in the query: `allInstanceRows` feeds the file probe, the live
+subset feeds applied counts and executions. Reading `archived_at` rather than filtering on it also
+degrades better on a bridge predating the column — the filter made PostgREST reject the whole read.
+
+**My own cancel fix was half a fix.** I guarded the way INTO the folder handlers and left the loops
+open. `mutateAsync` resolves between iterations, `isBusy` drops, Cancel goes live in the gap. Both
+loops now re-check every iteration, and the archive toast counts what was archived rather than the
+folder's length.
+
+**The green default, again.** One commit after fixing legacy statuses rendering as passes, the *local*
+colour map still defaulted `notStarted`, `pendingSignOff` and `signedOff` to green. Now read from
+`TASK_STATUS_BY_ID`, which already assigns each a colour, with grey as the fallback.
+
+> **Four findings on this PR, one shape: A RULE APPLIED TO THE WRONG SET.** The blocking rule in the
+> dialog but not the confirm gate. The cancel check outside the loop instead of inside it. The colour
+> map covering three statuses of nine. The archived filter over the file probe. Whenever this tab
+> grows a rule, the question to ask is not "is the rule right" but **"which set is it being asked
+> about, and is that the set that matters here"**.
+
+**Deliberately untested:** the mid-loop cancel guard. Cancel is disabled while a mutation is in
+flight, so the window only exists between iterations, and every deterministic test for it asserted a
+fake rather than the real race. Said so on the thread. Given I turned this PR red today with a
+timing-sensitive test of my own, a flaky test here would be worse than none.
