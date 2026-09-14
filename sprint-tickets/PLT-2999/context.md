@@ -312,3 +312,24 @@ Two consequences worth carrying forward:
    would have put churn in the diff. Use `npx prettier@2.7.1`. Note also that some files on other
    branches are *already* prettier-dirty and CI does not gate on it — check against `git stash`
    before reformatting anything you did not write.
+
+### 08:15 — `aa9c0c0` green, follow-up `0a5fe51` pushed
+
+Build ✅ Sonar ✅ Copilot ✅ on `aa9c0c0`, so the five fixes are CI-verified **including the
+typecheck** — which is the whole reason the follow-up was held rather than pushed straight on top.
+
+Copilot's round on that head raised two, both fixed in `0a5fe51`:
+
+- **A task blocked only by an upload has no execution row**, and the folder copy counted blocked
+  tasks from the template ids in `executions`. So a mixed folder said "1 of the 2 tasks have
+  recorded work" while refusing to delete either, and a folder blocked *only* by uploads fell to the
+  single-task branch whose copy says "this task". `usage()` now returns **`blockedTemplateIds`**
+  (run, upload, or both) and the tab reads it instead of re-deriving from half the sources.
+- The **hook's archive filter had no tests** — the half guarding every picker. Three cases now,
+  including `archivedAt` *absent* rather than null.
+
+> **Deliberate non-change, and the reason is worth keeping:** `usageBlocksDelete()` still reads the
+> raw totals, NOT `blockedTemplateIds.length`. That list is derived — a file row whose instance did
+> not come back in the same read contributes nothing — so a hole in the derivation would surface as
+> a **delete being permitted**. The totals cannot under-report. *Counting is a display concern;
+> refusing is not.* Do not "tidy" the predicate to use the list.

@@ -2835,3 +2835,14 @@ is on the same branch" note below it refers to.
 
 Acting on its lesson straight away: after pushing `84fb6d1` I checked `list_workflow_runs` rather
 than `get_check_runs`, and compared `created_at` against now — an empty check list is not "pending".
+
+### 08:15 — the stuck condition is cleared, and the two-writer pattern is back
+
+`4ae3062`'s build was **cancelled** — not stuck, *cancelled*, because a parallel session pushed
+`84fb6d1` on top of it ~15 minutes later. That is the ordinary supersede behaviour and it is the
+proof the 23-hour wedge is gone: runs now start, and get replaced, normally.
+
+The verdict fix survives on the new head (`TaskInstanceModal.tsx:432`), so nothing was lost. But this
+is the **09-03 / 09-13 pattern for the third time**: a branch with two active writers cannot hold a
+green head long enough for any one of them to prove it. Worth saying plainly in a summary rather than
+re-pushing to win a race — re-pushing is what makes it worse.
