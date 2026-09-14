@@ -333,3 +333,38 @@ Copilot's round on that head raised two, both fixed in `0a5fe51`:
 > not come back in the same read contributes nothing — so a hole in the derivation would surface as
 > a **delete being permitted**. The totals cannot under-report. *Counting is a display concern;
 > refusing is not.* Do not "tidy" the predicate to use the list.
+
+### 08:30 — the SUPPRESSED findings were where the real one was hiding
+
+Copilot's review on `aa9c0c0` posted 2 comments and listed **4 more as "suppressed"** in the review
+body — generated, not posted as threads. Easy to skip, and one of the four was the most serious thing
+found all day.
+
+**`usage()` passed `task_instance.status` through raw.** That column is loose text and deliberately
+carries legacy ids (`open`, `incomplete`, `approved`) that the rest of the app reads through
+`normalizeInstanceStatus`. Unnormalised they match neither the `executionStatus.*` translations nor
+`RecordedWorkList`'s colour map — and **that map's default is green**. So a legacy `incomplete` row
+drew a raw label and a *pass-coloured* badge in the list whose entire purpose is to show what stands
+against a template someone is deleting. Fixed in `fbae823`, normalised in the service because the
+status is part of `IChecklistTemplateExecution`'s contract.
+
+`notStarted` also added to the colour map: normalising alone still left it hitting the green default,
+and it is reachable even with a run on every row because the stored status drifts from the answers.
+
+> **Lesson: read the `<details>` block of a Copilot review, not just the posted threads.** The
+> summary line said "legacy status normalization/translation" and the substance was only in the
+> suppressed list. Two of my three pushes this round came from findings nobody would have seen in
+> the conversation view.
+
+**Three not taken, and the reasoning is worth keeping so nobody re-opens them:**
+
+1. *`translate(key, undefined, status)` is an unsupported 3rd arg and "can fail the type check"* —
+   **false**, the typecheck passes on `aa9c0c0`, so react-jhipster declares it. A confident claim
+   about a build that had already disproved it. Worth remembering that bot findings state API facts
+   with the same certainty as logic facts, and the API ones are cheaply checkable.
+2. *Plural forms ("1 assets")* — real but cosmetic, and i18next pluralises on a variable named
+   `count` while these strings interpolate `assetCount` / `withWork` / `taskCount`. Renaming
+   interpolations across six strings and their tests is not worth carrying here.
+3. *Use `resolveTaskStatus` (kind-aware) instead* — would also collapse a checklist's stored `fail`
+   to `completed`, which is right, but needs the task's kind and `usage()` never reads the template
+   rows. Separate change; the colour half is the part that misleads.
