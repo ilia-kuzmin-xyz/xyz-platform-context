@@ -5044,3 +5044,27 @@ wrong rule — a right rule asked about the wrong rows:
 
 **When this tab grows a rule, the question is not "is the rule right" but "which set is it being
 asked about".**
+
+### 2026-09-15, 08:10 — a bottleneck worth naming: three blockers, one person, one repo
+
+Not a new finding, an accumulation. As of this morning the commissioning work has **three separate
+items blocked on Darminder, and all three are blocked by the same thing — no write access to
+xyz-supabase from here:**
+
+1. **#2203** — which column `commissioning_file_association` actually links by. The attached-file
+   safety probe cannot be verified from this repo; nothing else in `app/` reads that table.
+2. **#2186** — is a readiness tag a hard sequential gate or a per-tag progress marker? Two parts of
+   the codebase currently state opposite contracts (a test title vs. `setOverride`'s contiguity rule).
+3. **#2186** — the override upsert+clear wants to be one `rpc()` call. The transport exists and is
+   tested (`postgrest-client.ts:211`); the SQL function does not, and lives in xyz-supabase.
+
+(3) is the interesting one because it is **not** a question — the fix is known and someone here has
+offered to write the SQL. It is blocked purely on where it can be landed.
+
+> **The pattern: this frontend repo can diagnose commissioning data problems but cannot fix the
+> class of them that lives in the schema.** Each one individually reads as "waiting on a reply". Seen
+> together they are one structural gap, and the useful ask is probably not three answers but whether
+> someone on this side can get a path to land xyz-supabase changes.
+
+Recorded rather than notified — three pings had already gone out this morning and none of these is
+newly urgent. It belongs in the next scheduled run's summary.
