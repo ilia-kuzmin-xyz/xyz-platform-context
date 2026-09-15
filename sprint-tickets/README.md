@@ -5075,3 +5075,42 @@ constant and read back by nothing here, so it is a stale echo rather than a cont
 through `withOptionalColumn`, so it may be a bridge column api-v2 consumes, and that cannot be
 settled from this repo either. Strengthens the point rather than changing it: **four blockers, one
 person, and every one of them is "I can see the problem and cannot see across the boundary."**
+
+## 2026-09-15, 19:20 — FIRST HUMAN REVIEW of the sprint: Darminder on #2202 (PLT-3038)
+
+`changes_requested`, with a screenshot. Two points, and they split cleanly.
+
+**1. `America/Los_Angeles` showing a raw underscore.** Fixed and pushed — `8600ee7`.
+`formatTimeZoneName` in `date-utils.ts` beside `withGmtOffset`, applied the same way: **after the
+sort** (so order stays the raw ids' and cannot shift on the spaces) and **to the label only** (the
+value is still the id that gets submitted). Both consumers — the create modal and the read-only
+Settings field — inherit it from the one hook, which is the single-point property the original PR was
+built around.
+
+Kept the `/` deliberately: it separates the region, which is what distinguishes `America/Phoenix`
+from `Asia/Phoenix` and lets the list be scanned by continent. Offered to change it if he prefers.
+
+Tests: five on the helper, two on the hook. The second hook test is the one worth keeping — it pins
+the ordering to the raw id using `Zone/Ab_c` vs `Zone/AbC`, a pair that **swaps** if the label is
+prettified before the sort (`_` is 95, a space is 32, `C` is 67). Verified with node that the pair
+actually discriminates, rather than assuming it would.
+
+**2. "Should it be North America - Los Angeles rather than America? Seems a bit broad."** He is right
+that it is broad, and he asked for it to go to Jason — so it is a design question, not mine to decide.
+What I could usefully add, and did, is *why it is not a formatting tweak*: IANA has only ~9 prefixes
+(`America`, `Europe`, `Asia`, `Africa`, `Australia`, `Pacific`, `Atlantic`, `Indian`, `Antarctica`),
+`America/` genuinely spans both Americas, and **there is no continent field in the payload at all** —
+the prefix is the only signal. Splitting it needs a zone→continent mapping we would write and own,
+edge cases included (`America/Danmarkshavn` is Greenland). Flagged as its own ticket.
+
+> **The useful half of a "check with X" answer is the constraint they will not know.** Darminder
+> cannot tell from the screenshot that the continent isn't in the data; that fact is what turns his
+> question from "make it say North America" into a scoping decision. Answering only "ok, will ask"
+> would have sent him to Jason with less than he needs.
+
+Could not run the suite: `npm ci` still 401s on the private `@xyzreality` registry here, so CI is the
+first real run — same caveat as the original PR. The helper's cases and the ordering pair were
+checked directly with node instead.
+
+Branch was **behind master** (`e25753f5`); merged in cleanly (one workflow file, no conflicts) as part
+of the same push, so checkpoint 3 is satisfied too.
