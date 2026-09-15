@@ -17,8 +17,9 @@
  * map and this board never fall out of step. Load it between model.js and
  * app.js.
  *
- * Read from source on 11 Sep 2026: hc-frontend PR #2186 at the PLT-2968 head,
- * and the live dev schema in data/columns.json.
+ * Read from source on 15 Sep 2026: hc-frontend PRs #2186 (PLT-2968) and #2203
+ * (PLT-2999), and the live dev schema in data/columns.json — which by then
+ * carried xyz-supabase #35, #37 and #39.
  */
 
 LAYERS.push(
@@ -122,7 +123,7 @@ annotate('where-the-question-sits', {
 annotate('evidence-file', {
   landed: {
     label: 'commissioning_file · commissioning_file_association',
-    detail: '8 Sep — a file can be registered and attached to a run, an item or a signature',
+    detail: '8 Sep the table; 13–14 Sep the two upload types the screens actually reach',
   },
 }, [
   {
@@ -130,6 +131,40 @@ annotate('evidence-file', {
     api: 'CommissioningTaskFileReferenceMapping',
     landed: '11 Sep, on their side',
     note: 'api-v2 grew its first file link table. It attaches a file reference to a task definition, which is our referenceDocument association — so the two sides now agree about a document on a task, and still not about evidence on a run.',
+  },
+  {
+    ux: 'Attach a file on a live task',
+    bridge: 'commissioning_file_association.task_instance_id',
+    landed: '13 Sep — the first file type the web runner can actually write',
+    note: 'Every earlier type is gated on a run with write_protocol = 1, which only the managed RPC produces. The web runner writes through plain PostgREST, so none of them was reachable from it. This one is scoped to the instance and the item instead, which is what that surface can supply.',
+  },
+  {
+    ux: 'Reference documents on a template',
+    bridge: 'commissioning_file_association.task_template_id',
+    api: 'CommissioningTaskFileReferenceMapping',
+    landed: '14 Sep, on both sides within three days',
+    note: 'Ours attaches to the template; so does theirs. api-v2 added a second, version-scoped table for media on the same day — we carry both in one association, so each new owner costs them a table and costs us a branch.',
+  },
+  {
+    ux: 'Remove a file you attached',
+    bridge: 'commissioning_file_association.removed_at',
+    landed: '13 Sep, and only for the two upload types',
+    note: 'Associations are immutable and undeletable by design — right for sealed run evidence, wrong for a field engineer picking the wrong PDF. Withdrawal is the one carve-out: the row stays as history, stops counting as in-use so the file can be discarded, and frees its slot for a replacement.',
+  },
+]);
+
+annotate('task-definition', {
+  landed: {
+    label: 'task_template.archived_at',
+    detail: '13 Sep — a template can leave the library without being destroyed',
+  },
+}, [
+  {
+    ux: 'Archive a task',
+    bridge: 'task_template.archived_at',
+    api: 'IsArchived / ArchivedOn',
+    landed: '13 Sep — the gap the map had carried since it was drawn',
+    note: 'The map said “no archive on our side — deleting is the only option” for weeks. It is closed, and closed as a rule rather than a flag: triggers refuse to apply an archived template to an asset type, a system type or a step, so the promise holds in the database and not only on the screen.',
   },
 ]);
 
@@ -168,8 +203,8 @@ annotate('an-answer', {
   {
     ux: 'Add media on a step',
     bridge: 'task_execution_item.evidence_ref',
-    ahead: 'Read, never written',
-    note: 'The item card leaves the Add Media button out for want of a bucket. commissioning_file_association.execution_item_id landed on 8 Sep and hc-frontend references the file tables zero times.',
+    ahead: 'Storage ready twice over; still nothing writes it',
+    note: 'The item card leaves the Add Media button out for want of a bucket. Two routes now exist — execution_item_id since 8 Sep for a managed run, task_instance_id since 13 Sep for the web runner that cannot produce one — and hc-frontend writes neither.',
   },
 ]);
 
@@ -247,10 +282,10 @@ annotate('evidence-file', {
 }, [
   {
     ux: 'Reference documents on a template',
-    bridge: 'commissioning_file_association.task_template_version_id',
+    bridge: 'commissioning_file_association.task_template_id',
     api: 'CommissioningTaskFileReferenceMapping',
-    designed: 'Both stores have a place; nothing attaches one',
-    note: 'Ours landed 8 Sep as an association type, theirs on 11 Sep as its own table. This is the one place the two sides already agree about files.',
+    designed: 'Storage landed 14 Sep; the builder still has no upload',
+    note: 'It had a place on the version since 8 Sep and got its own type on the template on 14 Sep, which is the scope the design asks for — a reference document belongs to the task, not to one revision of it. What is missing is now only the screen.',
   },
 ]);
 

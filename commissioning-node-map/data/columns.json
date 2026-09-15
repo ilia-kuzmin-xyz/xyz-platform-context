@@ -344,7 +344,9 @@
      "referenceDocument",
      "runItemEvidence",
      "runOverallEvidence",
-     "runSignature"
+     "runSignature",
+     "taskInstanceFile",
+     "taskTemplateFile"
     ]
    },
    "position": {
@@ -391,6 +393,24 @@
    },
    "created_at": {
     "t": "timestamptz"
+   },
+   "task_instance_id": {
+    "t": "uuid?",
+    "fk": "task_instance"
+   },
+   "task_item_id": {
+    "t": "uuid?",
+    "fk": "task_item"
+   },
+   "removed_at": {
+    "t": "timestamptz?"
+   },
+   "removed_by": {
+    "t": "text?"
+   },
+   "task_template_id": {
+    "t": "uuid?",
+    "fk": "task_template"
    }
   },
   "commissioning_operation_receipt": {
@@ -1220,6 +1240,9 @@
    "current_version_id": {
     "t": "uuid?",
     "fk": "task_template_version"
+   },
+   "archived_at": {
+    "t": "timestamptz?"
    }
   },
   "task_template_version": {
@@ -2005,6 +2028,32 @@
    },
    "IsTemplate": {
     "t": "boolean"
+   }
+  },
+  "CommissioningTaskVersionFileReferenceMapping": {
+   "Id": {
+    "t": "int generated always as identity"
+   },
+   "CommissioningTaskVersionFileReferenceMappingId": {
+    "t": "uuid"
+   },
+   "CommissioningTaskVersionId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "CommissioningTaskVersion"
+   },
+   "FileReferenceId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "FileReference"
+   },
+   "ProjectShardId": {
+    "t": "int",
+    "pk": true,
+    "fk": "Project"
+   },
+   "InsertedOn": {
+    "t": "timestamptz"
    }
   },
   "CommissioningTaskVersionHeader": {

@@ -44,6 +44,9 @@ const API_TABLES = [
   // Adds ReadinessGate.Colour — omit it and the rung concept loses its colour.
   '142_xyz_readiness_gate_metadata',
   '143_xyz_commissioning_task_file_reference_mapping',
+  // Version-scoped media, the counterpart to 143's task-level reference material:
+  // api-v2 splits what our commissioning_file_association keeps in one table.
+  '144_xyz_commissioning_task_version_file_reference_mapping',
 ];
 const API_CONSTRAINTS = [
   '064_xyz_commissioning_workflow', '065_xyz_readiness_gate', '066_xyz_asset_type',
@@ -57,6 +60,7 @@ const API_CONSTRAINTS = [
   '086_xyz_task_execution_comment', '087_xyz_task_execution_issue',
   '088_xyz_asset_task_status_history',
   '101_xyz_commissioning_task_file_reference_mapping',
+  '102_xyz_commissioning_task_version_file_reference_mapping',
 ];
 
 /* ElementInstallationStatus predates commissioning, so it is created in the
