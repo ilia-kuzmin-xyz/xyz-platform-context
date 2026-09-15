@@ -2846,3 +2846,148 @@ The verdict fix survives on the new head (`TaskInstanceModal.tsx:432`), so nothi
 is the **09-03 / 09-13 pattern for the third time**: a branch with two active writers cannot hold a
 green head long enough for any one of them to prove it. Worth saying plainly in a summary rather than
 re-pushing to win a race — re-pushing is what makes it worse.
+
+## 2026-09-15 — the i18n cluster, the seeding bug, and one finding that needs a human
+
+Scheduled run. No sprint ticket qualified for pickup (all ten are Blocked / Dev In Progress /
+In Code Review), so the whole run was checkpoint 1 on #2186. CI was green and every branch was
+0 behind master, so checkpoints 2 and 3 were clean before starting.
+
+**Thread accounting matters here, because the 09-14 log got it wrong.** That entry said "two
+threads still open". The real number was **25**. The gap was a paging artefact:
+`get_review_comments` returns 50 threads a page and this PR has 80, so a single call sees two
+thirds of them. It also returns `is_resolved` in **snake_case** — a filter written as
+`isResolved` reads `undefined` on every thread and reports all 80 as unresolved, which is the
+opposite error. Both are easy to make and they fail in opposite directions.
+
+> **Check the page count and the key casing before believing a thread count.** `pageInfo.hasNextPage`
+> and `totalCount` are both in the response and both were ignored.
+
+### The i18n cluster — 8 threads, one file, one push (`26744e0`)
+
+`task-runner.parts.tsx` had **zero** `translate()` calls. Every label, placeholder, aria-label
+and message in it was an English literal — while `TaskInstanceModal` two files away resolves its
+filters and search through `hc.commissioning.taskRunner.*`, and the panel around it uses
+`hc.commissioning.assetDetail.*` (145 keys). The namespace already existed *for this component*;
+the component was the one thing not using it. 33 keys added.
+
+Two places where wrapping the literal as-is would have been the wrong shape:
+
+- **A translated fragment spliced into an English sentence.** `Record the outcome as{' '}{canComment
+  ? 'Pass with comments or Fail' : 'Fail'}.` — the clause's position and grammar move with the
+  language, so a slot in the middle of an English sentence cannot carry it. Two whole sentences
+  instead. Same for `Sign as {name || 'you'}`: that slot takes a proper noun, so the nameless case
+  is its own key.
+- **Module-level lists cannot resolve their own labels.** `PASS_FAIL_NA` and `VERDICTS` are
+  module-level, so a `translate()` in them runs once at import and freezes whichever locale loaded
+  first. They carry `labelKey` now — the shape `FILTERS` already used two files away.
+
+`PREVIEW_PRECONDITIONS` deliberately left alone, with a comment saying why: those strings stand in
+for **rows**, not for copy, and the real ones arrive from the database in whatever language they
+were authored in.
+
+> **Two process traps, both hit and both worth writing down.**
+>
+> 1. **Running `prettier --write` on a file that was never prettier-clean.** It reformatted 15 hunks
+>    in the component and **28 of 34** in the test file that had nothing to do with the change. Reverted
+>    and re-applied the edits by exact string replacement, hand-wrapping the handful of long lines.
+>    A diff a reviewer cannot read is a cost, not a tidy-up. `git diff -U0 | grep '^@@'` before and
+>    after tells you immediately.
+> 2. **A text assertion the first grep missed.** `toHaveTextContent('not modelled yet')` at
+>    TaskInstanceModal.test.tsx:161 asserts the sign-off caveat, which the change moved to a key. The
+>    first sweep searched for the strings *as written in the component* and that assertion quotes a
+>    **fragment**. The second sweep went the other way — every `toHaveTextContent|getByText|…` in every
+>    test that touches these files, filtered against the moved strings — and found it. **Sweep from the
+>    assertions, not from the source.**
+
+### `f13ee2b` — the editor seeded from the fetch, not from the task
+
+Copilot raised it as "signing while dirty discards edits". Real, and wider than it reads. The
+seeding effect was keyed on the instance **object**; React Query hands back a new object on every
+refetch and this modal invalidates its own query (the sign-off write, and the self-heal on open).
+So **any** refetch under an open editor re-seeded from the server and discarded statuses, readings,
+notes, the verdict and `editMode` — silently.
+
+Both fixes Copilot offered (disable signing while dirty / persist before signing) treat the
+sign-off card as the problem. It isn't; it is just the door a person can walk through on purpose.
+Seeding now keys on the instance **id**, in a ref.
+
+Two edges that had to be decided rather than defaulted:
+
+- **Closing clears the guard** — all three call sites toggle `open` rather than unmounting, so
+  without clearing, reopening the same task would keep the previous edits on screen.
+- **An open editor with a momentarily absent row does NOT clear it** — `tasks-panel` selects by id
+  out of a list query, so a refetch can hand through a null, and clearing there re-seeds the
+  identical task. Same bug, other door.
+
+> **The part that would have been missed by doing only what the finding said.** `editMode` was
+> seeded from the STORED status while the heal was in the act of replacing it, and only the re-seed
+> on the following refetch reconciled them — so a drifted `completed` opened read-only and corrected
+> itself a round-trip later. Removing the second pass meant the first had to be right. The drift
+> decision is now made once in `storedDrift()` and the heal and `editMode` both read it.
+>
+> **Generalises: before you remove a redundant second pass, find out what was quietly depending on it.**
+
+### Disagreed and resolved: setState during render (2 threads)
+
+`readiness-ladder.tsx:147` adjusts state during render when `assetId` changes. Copilot called it an
+anti-pattern twice and suggested `useLayoutEffect`. It is in fact React's documented "adjusting some
+state when a prop changes" — guarded, and on the component's own state; what React forbids is
+setting **another** component's state during render.
+
+The effect version is the **riskier** one here, which is the whole reason the block exists:
+render-phase discards the output and re-runs before committing, so nothing is ever committed
+carrying the stale `assetId`; `useLayoutEffect` runs after commit, so the override modal would
+commit one frame already holding the new `assetId` — and it **writes** with that prop, recording a
+reason typed for asset A against asset B.
+
+### Left OPEN on purpose: locked steps (`r3991279945`)
+
+The one finding this run refused to act on, and the refusal is the finding.
+
+Copilot: a locked step's tasks open in the fully editable modal, so a later tag can be completed
+before its predecessor and the ladder jumps. **The mechanism is real** — `achievedOf` looks only at
+a tag's own instances, `locked` is derived afterwards.
+
+But two parts of this codebase state opposite contracts:
+
+| Where | What it says |
+|---|---|
+| `use-readiness-steps.test.ts:132` | test *titled* "achievement is per-tag, **not gated by predecessors**" |
+| `readiness-ladder.tsx` | "locked steps included — their breakdown is viewable, just not achievable" |
+| `asset-readiness-service.ts:120` | override writes the target **and every level below**, "so the ladder shows a contiguous run of achieved steps rather than **a ticked Green over a blank Red**" |
+
+So the override path goes out of its way to prevent exactly the state the task path produces for
+free. Either fix contradicts one of them:
+
+1. **Ordered achievement** — make `achievedOf` a running prefix. One small change, matches the
+   tooltip and the override contiguity rule. Reverses a test that states the opposite *in its title*.
+   **Side effect**: a tag with zero tasks is never achieved (`list.length > 0 &&`, deliberate), so on
+   a workflow with an unpopulated tag everything after it flips from green to locked on live projects.
+2. **Gate the work** — thread `locked` into `TaskInstanceModal` and reuse the preconditions gate
+   (`itemsReadOnly` + `withCompletionWithheld`). Contradicts "viewable, just not achievable", and
+   only covers the two ladder doors — `tasks-panel` and `AssetWorkflowStepTasks` open the same modal
+   knowing no ladder.
+
+> **Flipping a contract that a test states in its own title is a decision, not an inference.** Asked
+> on the thread; both options are a small change once someone calls it.
+
+### State at end of run
+
+- **13 threads open on #2186** (down from 25). Clusters: sign-off enforcement (4, one root cause),
+  unknown section headers (2, product call already asked), override atomicity (2, needs a backend
+  transaction/RPC — not fixable from the frontend), `parent_task_item_id` on the builder payload,
+  capability detection with no execution, persisted English header labels, `mutateAsync` error not
+  surfaced, and the locked-steps decision above.
+- **#2203**: 1 open, correctly — waiting on @DarminderA for the `commissioning_file_association`
+  column names, which cannot be checked from this repo.
+- CI green on `84fb6d1` before this run; two pushes since (`26744e0`, `f13ee2b`).
+
+> **Local validation is BLOCKED in this environment and that should be assumed, not rediscovered.**
+> `npm ci` fails 401 on `@xyzreality/dhtmlx-gantt` from `npm.pkg.github.com`; the session's
+> `GITHUB_TOKEN` has no `read:packages`. So no vitest, no `tsc --noEmit` against the real config.
+> What IS possible, and was done: a standalone `typescript` in the scratchpad parsing each edited
+> file for **syntactic** diagnostics via `ts.createSourceFile(...).parseDiagnostics`, plus a JSON
+> parse of the i18n bundle. That catches the unbalanced-JSX class of error, which is the likely one
+> after bulk edits. It does not catch a type error or a failing assertion — CI remains the only
+> check for those.
