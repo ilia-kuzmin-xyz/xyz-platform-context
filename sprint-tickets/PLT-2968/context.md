@@ -2974,11 +2974,44 @@ free. Either fix contradicts one of them:
 
 ### State at end of run
 
-- **13 threads open on #2186** (down from 25). Clusters: sign-off enforcement (4, one root cause),
-  unknown section headers (2, product call already asked), override atomicity (2, needs a backend
-  transaction/RPC — not fixable from the frontend), `parent_task_item_id` on the builder payload,
-  capability detection with no execution, persisted English header labels, `mutateAsync` error not
-  surfaced, and the locked-steps decision above.
+- **10 threads open on #2186**, down from 25 — verified by re-reading all 80 threads in one page,
+  not by arithmetic. Six of the ten carry an answer and are waiting on a person:
+  - `requiresSignOff` persisted column — does anything outside this app read
+    `task_template.requires_sign_off`? (asked @DarminderA)
+  - unknown section headers, ×2 threads — which of the three fixes (asked, still open from 09-11)
+  - override atomicity, ×2 threads — can a function land in xyz-supabase this milestone?
+  - locked steps — is a readiness tag a hard sequential gate, or a per-tag marker?
+
+  Four are genuinely unworked: `parent_task_item_id` on the builder payload; capability detection
+  with no execution; persisted English header labels (`ChecklistCreatePage.tsx:124`, a different
+  problem from the i18n cluster — it is about what gets WRITTEN to the row, not what is rendered);
+  and `mutateAsync` error surfacing, which is fixed locally in `d24870c` and waiting on this
+  build before being pushed.
+
+### The sign-off cluster, resolved by tracing rather than by fixing (3 of 4 threads)
+
+Copilot raised "a functional test can be saved `pass` without a sign-off" four times. Tracing it
+end to end showed **two independent mechanisms**, and only one is a gap:
+
+1. **Signature ITEMS on the template** — `deriveInstanceStatus` (`task-status.tsx:245`) returns
+   `signatureItems.every(isItemComplete) ? 'signedOff' : 'pendingSignOff'`, an item of type
+   `signature` has its own control in the item list, and `pendingSignOff` is not in `DONE_STATUSES`
+   so it holds the step back. **Whole.**
+2. **`SignOffCard` → `task_execution_signature`** — real rows, no status effect. Deliberate and
+   *disclosed*: nothing models which signatories a test requires, the card's docstring says so, and
+   the UI says so to the user. Wiring it into completion means inventing the required-signatory
+   model, which is a feature.
+
+> The genuine defect is the third thing: `ChecklistCreatePage.tsx:310` persists
+> `requiresSignOff(taskType)` — a **denormalised copy of a client-side constant**
+> (`TASK_TYPE_REQUIRES_SIGN_OFF`) that nothing reads back; `showSignOff` asks the kind, not the
+> column. Worse than unused: if the kind→requirement mapping changes, rows written under the old
+> one keep the old answer and no rule says which wins. Left open only because the column is read
+> through `withOptionalColumn`, so it may be api-v2's and have a reader elsewhere.
+
+> **Worth keeping as a habit: a finding repeated four times is usually one cause, but not always
+> one FIX.** Three of these four resolved on an explanation and the fourth is a real defect; a
+> single bulk answer would have either buried the defect or over-claimed on the other three.
 - **#2203**: 1 open, correctly — waiting on @DarminderA for the `commissioning_file_association`
   column names, which cannot be checked from this repo.
 - CI green on `84fb6d1` before this run; two pushes since (`26744e0`, `f13ee2b`).
