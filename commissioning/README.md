@@ -222,6 +222,49 @@ in `AssetListPage` and `TypesTab`, and its `panel-mode` / `enableElementLinking`
 caller left. PLT-2953 (#2148) is what moved linking to selection-first and deleted the panel-owned
 mode.
 
+## 2026-09-15 — scheduled review run: only #2190 (PLT-3086) eligible; held for Ilia
+
+Scope filter (Rishi/Darminder/Tom, non-draft): only **#2190** qualified — Darminder's #2211
+(PLT-3112) is draft, no open PRs by Tom.
+
+**#2190 (PLT-3086, membership-impact modal)** — up to date with master (merge base = master tip,
+no conflicts; "blocked" = approvals only). Sonar quality gate passed 09-15; build on the
+merge-commit head was in progress at review time, but the identical-content parent commit
+(`f6b19b3`) built green 09-14. Jira ticket read in full — AC matches the PR's member-remove +
+rejoin scope; the other doors are ticketed follow-ups (PLT-3130 etc.). Note the later commits
+(rejoin screens, activity-log tab, master merge) were pushed by **Ilia's own account**
+(Claude-assisted) on top of Rishi's base — so an approval from Ilia's account would be
+part-self-review, one more reason this run posted nothing and deferred.
+
+Copilot's two 08-27 threads, both still unresolved on GitHub:
+- endMembership-no-op → **addressed in code** (thread outdated): `useMembershipImpactAction` reads
+  the membership first and bails when already deleted; disposition deliberately runs BEFORE
+  `endMembership` (ordering rationale in `use-membership-impact.ts`).
+- fetch-all instances on panel render → partially stale: `select()` paginates past the 1000-row
+  cap since #2171, and `useAllTaskInstances` is a shared react-query key. Still eager on render —
+  perf nit, non-blocking.
+
+**Findings this run (code-level, not posted to the PR — Ilia to arbitrate):**
+1. **Major — multi-system rejoin drops prompts.** `add-asset-systems-modal.tsx` collects per-system
+   `awaitingChoice` but calls `rejoin.ask` only for `pending[0]`; systems 2..n with archived work
+   get no restore-or-fresh prompt, and nothing re-asks later (`reconcileProject` and the
+   requirement-config backfill both discard `awaitingChoice`). Asset stays silently short of those
+   tasks; only recovery is the Activity-tab Restore, which has no "fresh" option.
+2. **Major — Activity-tab Restore can violate the one-set invariant.** `asset-activity-log.tsx`
+   restores the recorded ids unconditionally. If the asset rejoined and chose "Start fresh", a
+   later Restore un-archives the old set beside the fresh one → two live sets, the exact §09
+   duplicate the rest of the PR prevents. `restoreInstances`' own docstring puts the duplicate
+   check on the caller; this caller has none. Also un-archives onto a system the asset may no
+   longer be a member of (design intent unclear — the card exists for never-rejoins).
+3. **Medium — actor never populated.** `applyMembershipImpact` accepts `actor` but no door passes
+   it; every log entry renders "system · <date>" in the Activity tab. Provenance is a stated
+   purpose of the log.
+4. Minor: sequential awaits (per-membership `readPriorWork`, per-instance discard `remove`) — fine
+   at MVP scale.
+
+Held rather than approved/changes-requested: 3.3k-line flag-gated feature, visual walkthrough
+(dev Supabase env) explicitly required by the PR's own testing steps, plus the self-review angle.
+
 ### Scoping-rule reminder that cost time this run
 
 `.claude/commissioning-active` could not be created because **`.claude/` itself did not exist** in a
