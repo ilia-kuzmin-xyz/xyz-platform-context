@@ -5151,3 +5151,34 @@ comment rather than user-facing copy, which makes it cheaper, not different.
 Tests: four on the filter (shown spelling, pasted id, offset, no-match), typed against `SelectOption`
 explicitly to cut the risk of a TS failure I cannot catch locally — `npm ci` still 401s on the private
 registry, so CI remains the first real run.
+
+### 19:50 — #2202 green on `374981e`, all review feedback addressed
+
+Build ✅ 19:32:18 → 19:50:06. Sonar ✅ **0 new issues**, 0% duplication. Copilot's own run ✅.
+The TypeScript I could not check locally compiled, and the new tests pass — that was the live risk,
+since `npm ci` 401s here and I had typed `SelectOption` explicitly to reduce exactly that exposure.
+
+Coverage on new code reads **22.9%**, down from 28.4%. Not a regression in testing: the denominator
+grew by the `form-select.tsx` prop and the `Step1Content` wiring, neither of which has a unit test of
+its own. The gate passed. Worth a sentence if anyone asks why the number moved.
+
+Replied on both Copilot threads, and to Darminder on the PR. **One item is genuinely open and needs a
+person:** the continent granularity question he raised — *"North America - Los Angeles rather than
+America?"* — which he asked to take to Jason. I answered with the constraint that makes it a scoping
+call (no continent in the payload; `America/` spans both Americas; it needs a mapping we would own)
+rather than just agreeing to ask.
+
+**Could not re-request Darminder's review**: there is no tool here for re-requesting a human reviewer
+on an existing PR (`create_pull_request` accepts reviewers, but only at creation). He will see the
+comment and the two new commits; noting the gap rather than claiming the re-request happened.
+
+#### State of the three PRs
+
+| PR | Head | CI | Open with a person |
+|----|------|----|--------------------|
+| **#2202** PLT-3038 | `374981e` | ✅ | continent granularity → Jason |
+| **#2203** PLT-2999 | `aa9c0c0` | ✅ | which columns `commissioning_file_association` has → @DarminderA asked on-thread; plus the backend batch/RPC ticket |
+| **#2186** PLT-2968/2967/2966 | `edc1e3c` | — | actively taking correctness fixes to the task runner |
+
+Unchanged since 09-09 and still waiting on people: **PLT-2952** and **PLT-2972** clarifications, and
+the **#2190** question to Rishi.
