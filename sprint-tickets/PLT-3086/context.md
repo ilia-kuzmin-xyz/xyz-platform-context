@@ -31,3 +31,44 @@ follow-ups, each with a cited source in the description.
 
 **Blocks:** PLT-2989 (System Details — Activity Log) and PLT-2975 (Asset Details — Activity Log),
 both still `Open`.
+
+## 2026-09-15 — #2190 left draft overnight, and grew a lot
+
+**Not my PR** (Rishi's, `rishib-xyz`), but it delivers PLT-3086, so it is watched rather than worked.
+Head `f5f8712`, **out of draft**, CI **green** (build 07:22:39→07:41:24, Sonar ✅, Copilot ✅).
+
+Yesterday it had 2 unresolved findings dating from 08-27. It now has **19**, nearly all posted
+06:50–07:26 today, **none replied to**. The PR grew well past the original impact modal: rejoin /
+restore flows, an asset activity log, task dispositions (park / discard / archive).
+
+> **Green CI does not clear any of these.** Every one is a logic finding — orderings, races, a
+> membership-ending path that skips the new modal entirely. The build passing says the code compiles
+> and the existing tests pass, which is not the question these raise.
+
+The four worth a human's attention first, in severity order:
+
+1. **`system-asset-list.tsx:96` — a fail-open.** The task query defaults to `[]` while loading and is
+   excluded from `isLoading`, so Remove can run against an incomplete task list, conclude nothing is
+   affected, and end the membership **without ever showing the impact modal**. Same shape as the
+   family fixed all through #2203 yesterday: a decision taken over the wrong set.
+2. **`use-membership-impact.ts:69` — a door outside the modal.** `AssetSystemsSection` still calls
+   `useEndSystemMembership` directly, so removing a direct membership from the asset panel bypasses
+   the disposition, the activity log and the completed-work protection this whole PR exists to add.
+3. **`membership-impact.ts:119`** — `isInstanceComplete` means "readiness-acceptable", not "the
+   execution can be deleted". A **failed** functional test reads incomplete here but its execution is
+   closed, and `remove` refuses instances with completed runs — so Discard on a failed test throws
+   mid-disposition rather than applying it.
+4. **`use-membership-impact.ts:46` / `:74`** — the disposition and the membership end are two writes
+   with no atomicity, and the membership check is separate from the commit, so two clients can both
+   archive and log the same tasks before either is refused.
+
+**One finding checked and NOT repeated:** `r4012923864` claims the unused `NO_PRIOR_WORK` constant
+fails `tsc --noEmit --noUnusedLocals`. The build on this exact head ran *after* that comment and
+passed, so it is either already fixed or wrong. Same genre as yesterday's react-jhipster
+"can fail the type check" claim, which the build had likewise already disproved.
+
+> **Bot findings assert compile-time facts with the same confidence as logic facts, and the
+> compile-time ones are cheap to check against a build that has already run. Check them.**
+
+**Action taken: none on the PR.** It is not mine and I was not asked to drive it — so this goes to
+Ilia, not into Rishi's review threads.
