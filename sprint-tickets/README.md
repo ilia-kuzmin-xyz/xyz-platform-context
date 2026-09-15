@@ -5114,3 +5114,40 @@ checked directly with node instead.
 
 Branch was **behind master** (`e25753f5`); merged in cleanly (one workflow file, no conflicts) as part
 of the same push, so checkpoint 3 is satisfied too.
+
+### 19:28 — Copilot on #2202: my underscore fix broke search, and my comment claimed a bound the code never had
+
+Both findings are mine. Fixed in `374981e`.
+
+**1. The fix I pushed at 19:20 broke a behaviour the PR's own AC table claims.** MUI's default filter
+matches on `getOptionLabel`, so once the label said `America/Los Angeles`, typing
+`America/Los_Angeles` — the spelling in every config file and API payload, and the one an admin would
+paste — matched nothing. `timezoneFilterOptions` now stringifies **label and value**, so both
+spellings and the offset all match. `FormSelect` gains an optional `filterOptions`, spread only when
+supplied, leaving the other nine callers byte-identical.
+
+**This is the seventh instance of the pattern, and the first that is mine.** The tally I have been
+keeping on #2203 — per-owner dedup, `systemLabels()`, the hook-only archive filter,
+`owner::templateId`, `usagePermitsDelete()`, `attachedFiles` — is a list of fixes that each changed a
+shape something nearby depended on. I wrote it up at length on 09-13, put the rule in bold, and then
+did exactly the same thing three hours after writing the entry. Changing a label's spelling is
+changing the key a search runs on; I did not ask what else read that string.
+
+> **Knowing the pattern is not the same as applying it.** I could name it, tally it, and quote the
+> rule, and still not run it against my own one-line change — because mine felt like a display tweak
+> rather than a change of shape. That is precisely how each of the other six looked to whoever made
+> them.
+
+**2. `staleTime` never bounded the DST lag.** The comment said a label "can lag a DST transition by up
+to that long". It cannot: `staleTime` marks data stale and waits for something to ask again, and a
+Create modal sitting open never asks — the offsets would hold whatever they were when it opened,
+indefinitely. `refetchInterval` is what actually re-runs it, and it is now set.
+
+So the comment asserted a guarantee the code did not make. **That is the same defect I flagged twice
+this week in other people's work** — the delete dialog's copy promising assets lost their tasks, and
+the usage contract saying "counted by asset" while the code counted instances. Mine was in a doc
+comment rather than user-facing copy, which makes it cheaper, not different.
+
+Tests: four on the filter (shown spelling, pasted id, offset, no-match), typed against `SelectOption`
+explicitly to cut the risk of a TS failure I cannot catch locally — `npm ci` still 401s on the private
+registry, so CI remains the first real run.
