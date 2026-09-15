@@ -5068,3 +5068,10 @@ offered to write the SQL. It is blocked purely on where it can be landed.
 
 Recorded rather than notified — three pings had already gone out this morning and none of these is
 newly urgent. It belongs in the next scheduled run's summary.
+
+**08:10 amendment — make that four.** A fourth landed minutes later, same shape: does anything
+outside this app read `task_template.requires_sign_off` (#2186)? It is written from a client-side
+constant and read back by nothing here, so it is a stale echo rather than a contract — but it comes
+through `withOptionalColumn`, so it may be a bridge column api-v2 consumes, and that cannot be
+settled from this repo either. Strengthens the point rather than changing it: **four blockers, one
+person, and every one of them is "I can see the problem and cannot see across the boundary."**
