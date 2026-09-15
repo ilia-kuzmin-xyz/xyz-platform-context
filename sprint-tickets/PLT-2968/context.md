@@ -3085,3 +3085,35 @@ display time, and it needs a decision about existing rows.
 > run there was no SonarCloud check at all, for the same reason: the job exited at step 7.
 
 **Final state of this run: 9 threads open on #2186** (from 25), CI green, no conflict.
+
+### 2026-09-15, 08:39 — the red resolved itself, and the cancelled-build mechanism is now the story
+
+`f13ee2b` went red — **4 tests in `TaskInstanceModal.test.tsx`**, `task-runner-overall-note` absent
+after the passWithComments verdict was clicked (394 files / 4738 tests otherwise green). Green again
+on `78ac6d3`; the failures went with the two pushes that followed.
+
+**Bisect at the time:** `84fb6d1` ✅ → `26744e0` **cancelled** → `f13ee2b` ❌. Commented on the PR
+rather than pushing, because three pushes landed within minutes and a fourth would only have
+cancelled the build that answered the question.
+
+> **The mechanism worth keeping: `26744e0` reworked the verdict card and its build was CANCELLED by
+> the push after it.** So a commit that touched exactly the failing surface was never verified, and
+> the failure then surfaced attributed to the *next* commit. Third time in two days on this branch.
+> When bisecting here, a "cancelled" is not a neutral gap — it is the most likely place to look.
+
+**A hypothesis I formed and then killed, recorded because the killing is the useful part.** I thought
+the new `editMode` seeding had made tasks open read-only, disabling the verdict buttons so the click
+no-opped. Checked it:
+
+```
+old:  setEditMode(!isInstanceComplete(instance.status, type))
+new:  setEditMode(!isInstanceComplete(instance.status, type) || !isInstanceComplete(drift.status, type))
+```
+
+An OR of negations is **more** permissive — the new form is true wherever the old one was, and more
+besides. It can only make tasks *more* editable, so read-only could not be the cause. Dropped it and
+deliberately did **not** post a second, more confident-sounding comment on a guess.
+
+> Two days running, the thing that kept the record straight was checking a claim against evidence
+> that already existed — the build that had already run, the operator in the diff. **The cheap check
+> before the confident statement is the whole discipline.**
