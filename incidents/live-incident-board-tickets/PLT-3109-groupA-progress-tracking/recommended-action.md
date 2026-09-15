@@ -155,6 +155,11 @@ worth one direct question rather than inferring it (unposted; chat, not Jira):
 
 ---
 
+## 2026-09-15 (scheduled) — unchanged. Chase now 4 days overdue; nothing else changed.
+
+No Jira movement since 09-10 (see `context.md` § 2026-09-15). Both drafts below (chase to Yash,
+clarifier to Darminder) are unchanged and still unsent.
+
 ## 2026-09-14 — still class 1. Group B by this run's own rubric (see `context.md`). Chase now 3 days overdue; nothing else changed.
 
 Full diff against 09-11 in `context.md`. Live Jira: status, assignee (Pietro Desiato), comment count (7)

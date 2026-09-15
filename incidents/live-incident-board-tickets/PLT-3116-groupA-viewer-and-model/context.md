@@ -212,3 +212,11 @@ recording.
   "isolate selected," and checking whether isolation now works with the panel empty.
 - An active filter chip showing **and** the console table gives `app === 0` → both mechanisms may be
   layered; clear the filters first, then re-test the bridge-drop hypothesis on its own.
+
+## 2026-09-15 (scheduled) — confirmed unchanged, ticket now 6 days old with zero dev reply
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **Open**,
+assignee still Darminder Atker, still **2 comments**, newest still `111798` (09-09), same 3
+attachments (2 PNGs + the screen recording). Neither candidate mechanism (bridge-drop, filter-panel
+override) has been checked against a live session since 09-10/09-14 — the drafted console check in
+`recommended-action.md` is still unposted and unrun. No re-investigation performed.

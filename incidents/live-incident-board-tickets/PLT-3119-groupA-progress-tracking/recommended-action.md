@@ -1,5 +1,10 @@
 # PLT-3119 — recommended action (DRAFT ONLY — execute nothing)
 
+## 2026-09-15 (scheduled) — unchanged. The 09-14 draft below still stands, still unsent.
+
+No Jira movement since 09-10 (see `context.md` § 2026-09-15). Confidence, classification and the
+Darminder draft below are unchanged; restating only because a day passed with no action taken.
+
 ## ⚠️ 2026-09-14 — CURRENT recommendation. The 2026-09-10 draft below is superseded, not deleted.
 
 Both passes independently reached **action class 1** (internal fact-gathering owed by a named

@@ -929,3 +929,16 @@ the 1:1 checks, the 1.97× PEL inflation) is unaffected and still stands.
 603,844, 08-12) — 28 days old, never chased, and H1/H3/H4/H5/H6 are untouched by any of the above.
 Full code trace: `investigation-log.md` § 2026-09-09. Revised action and the 81-word chase draft:
 `recommended-action.md` § 2026-09-09.
+
+## 2026-09-15 (scheduled) — confirmed unchanged since 09-14; Ilia's own "today" reply is now 4 days overdue
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **In Analysis**,
+priority Minor, assignee Ilia Kuzmin, still **8 comments**, newest still `112017` (2026-09-11
+13:39, Ilia to Yash: "will get back to you with updates soon today"). No reply has followed. Read
+against today's date this is **4 days overdue** against Ilia's own word, up from 3 on 09-14.
+GitHub/code state not re-checked this run — nothing about the 09-14 confirmation (still PR #2084
+only, still the same call sites in `dashboard-color-service.ts`) had reason to have moved in one
+day. **Flagging for Ilia directly: this is the one ticket on the board where the outstanding reply
+is the assignee's own promise, not a third party's.** The combined draft to Yash+Gennaro at
+`recommended-action.md` § 2026-09-14 is still unposted and still answers both the promise and
+Gennaro's 34-day-old open question in one message.

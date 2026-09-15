@@ -210,6 +210,11 @@ because 23 unposted recommendations is past the point where repeating it in a fi
 re-reads is doing any good — a decision is needed on whether to post it, or to explain why not
 (e.g. if there's a reason it's being deliberately left open that isn't recorded here).
 
+## 2026-09-15 (scheduled) — unchanged, 29th consecutive run. The 09-09 chase-Yash draft stands as written.
+
+**Jira: 71 days stale, nothing new (see `context.md`).** No new investigation performed. Action
+class unchanged: **1 — stale, unresponded (on us)**.
+
 ## 2026-09-11 (scheduled) — unchanged, 27th consecutive run. The 09-09 chase-Yash draft stands as written.
 
 **Jira: 67 days stale, nothing new (see `context.md`).** The recommendation is not re-argued and not

@@ -1,5 +1,10 @@
 # PLT-3115 — recommended action (2026-09-10, first pass)
 
+## 2026-09-15 (scheduled) — unchanged. Still class 1, 5 days quiet since Darminder's ask.
+
+No Jira movement since 09-10 (see `context.md` § 2026-09-15). Ball is with the customer via
+Darminder's ask (video + browser); nothing here needs a fresh draft yet.
+
 ## Classification: **1, with a class-2 tail** — needs one clarifying fact before any fix, but a
 ## safe, no-risk hardening exists regardless of the answer
 

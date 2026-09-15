@@ -45,6 +45,78 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-15 (scheduled) — 8 in-scope tickets, zero drift from 09-11, zero Jira actions taken; backfilling the 09-14 run's missing README summary
+
+**Process note first:** a 09-14 run happened and did real per-ticket work — every one of the 8
+folders below carries its own 2026-09-14-dated entry, committed in five separate commits
+(`6723de3`, `ab20bb7`, `18ccb8e`, `a499612`+`b93596e`, `92b2ef1`) — but it never wrote its own
+`## Run:` summary here, and one of those commits (`a499612`) briefly overwrote PLT-3119's 09-11
+section before a same-day follow-up (`b93596e`) restored it additively. Both gaps are closed by this
+entry: the table below folds in everything 09-14 found, and PLT-3119's history is intact (verified
+directly, see its `context.md`).
+
+Board re-queried two ways per the 09-11 reliability note: `project = PLT AND issuetype = "Live
+Incident" ORDER BY created DESC` (top 100 of 210, `hasNextPage: true`) cross-checked against an
+explicit `status not in (...)` query (`searchResultMode: all`, `totalCount: 13`). Of those 13, 5 are
+old `ARCHIVED (NOT RELEASED)` tickets from 2024-2025 that the exclusion list's literal `"Archived"`
+string doesn't match (case/wording differs) — filtered out by hand, confirmed Done-equivalent by
+`statusCategory`. The remaining **8 are byte-for-byte the same 8 tickets as 09-11**: no new ticket,
+none left scope, no status change on any of them.
+
+Every ticket got a fresh `getJiraIssue` fetch (full fields incl. comments/attachments, not cached)
+and was diffed against its own folder's latest entry. **All 8 confirmed unchanged since 09-11** —
+same comment counts, same newest comment ids, same attachments, same status/assignee — so today's
+entries in each folder are short confirmations, not re-investigations; nothing here warranted fresh
+code-reading beyond the spot-checks noted per ticket below.
+
+**The one thing worth a human's attention this run: PLT-2874.** The 09-11 table row below (carried
+from that day) described "unchanged since Darminder's 08-17 comment" based on a 6-comment read —
+but two more comments landed later that same day (09-11 13:35-13:39), after that morning's sweep:
+Yash asking for a status update, and **Ilia replying "will get back to you with updates soon
+today."** Nobody has followed up since. As of today that promise is **4 days overdue**. This was
+first caught by the 09-14 run (see its `context.md` entry) but never surfaced in a README summary
+until now.
+
+### Group A (8)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | **Worth a look:** Ilia's own 09-11 "will get back to you today" reply to Yash is now 4 days overdue — the one ticket on the board where the outstanding reply is the assignee's own promise, not a third party's. Gennaro's Staging undercount (109457, 08-12) is 34 days unanswered. Combined draft to Yash+Gennaro ready, unposted | 1 |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08 (comment 111646). Board's only Critical, now **132 days** old. True-north correction to the customer now **7 days** unposted — every day it sits, the customer may act on guidance the 09-08 code read showed doesn't work in the Web Editor | 4 with a class-1 chase attached |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged since 07-06. **71 days stale, 29th consecutive run** recommending the identical unposted close-out | 1 — stale, unresponded (on us) |
+| [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-10. 09-14's code read (portfolio-weighting-guard.ts) still stands; the one-question draft to Darminder and attachment `64304` are both still unopened/unposted | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged since 09-10. Root cause was found and posted by Ilia on 09-08 (client-side Power BI query fix); 09-14's Group A/B call rates this **Group B in substance** (nothing technical blocks it, only an internal "what input does Pietro need" question). Chase to Yash now **4 days** past its intended send date | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk-automation only) | Unchanged since 09-08. Human silence now **21 days** (last human comment Mostafa's 08-25); 09-09 chase-Yash draft still unsent. Fourth consecutive confirmed-unchanged pass | 1 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other (Cloud Admin device page) | With Customer | Unchanged since 09-10. Darminder's ask for a video + browser (now via Yash) still open, **5 days** quiet | 1 (ball with customer via Yash) |
+| [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | Unchanged since 09-09. Ticket now **6 days old with zero developer reply**; 09-14 found a second candidate mechanism (Filters-panel override), the drafted console check that would decide between the two is still unposted | 3 (pending one check) |
+
+### Group B (0) — still empty
+
+No ticket on the board carries `Ready For Development` or `Dev In Progress` today.
+
+### Standing gaps (unopenable media) — not re-verified this run, unchanged from prior runs
+
+PLT-3119's 4 screenshots (`64304` still the one worth opening first); PLT-3115's 2 newer attachments
+(`64302`/`64303`); PLT-2651's 08-28 screenshot (`63521`); PLT-2815's 2 screenshots + 2 inline blobs;
+PLT-2874's original 07-07 screenshots; PLT-2918's 5 attachments; PLT-3109's 5 attachments; PLT-3116's
+3 attachments (2 PNGs + a screen recording). All still session-wide 403s, not retried this run.
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-2874** — send the combined draft to Yash+Gennaro (`recommended-action.md` § 2026-09-14).
+   It closes Ilia's own overdue promise and Gennaro's 34-day-old open question in one message.
+2. **PLT-2651** — send the true-north correction to the customer. Critical, 132 days, 7 days
+   unposted, drafted and ready.
+3. **PLT-2815** — execute the close-out. Purely administrative, 71 days / 29 runs unposted.
+4. **PLT-3119** — open attachment `64304` first, then send the one-question draft to Darminder.
+5. **PLT-3109** — send the overdue chase to Yash, and/or ask Darminder what "further input" Pietro
+   actually needs.
+6. **PLT-2918** — send the chase-to-Yash draft. 21 days of human silence.
+7. **PLT-3115** — nothing new to send; Darminder/Yash's ask to the customer already covers the gap.
+8. **PLT-3116** — run the drafted console check (needs a live session, only Ilia can do this).
+
+---
+
 ## Run: 2026-09-11 (scheduled) — 8 in-scope tickets, 1 brand-new (PLT-3119), 1 left scope (PLT-2890, Freshdesk auto-closed on timeout not on customer confirmation), 7 confirmed/refreshed unchanged-in-substance, zero Jira actions taken
 
 Board re-queried: `project = PLT AND issuetype = "Live Incident"`, filtered per the Scope rules

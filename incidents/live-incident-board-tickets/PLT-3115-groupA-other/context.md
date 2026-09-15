@@ -186,3 +186,10 @@ still unanswered); whether `data-lpignore` is honoured by the customer's specifi
 combination; whether the Freshdesk-6822/PLT-3115 relationship above matters operationally. **No
 longer unverified:** PLT-2940's scope — confirmed above as Devices + Software version pages only,
 DangerZone was never in it.
+
+## 2026-09-15 (scheduled) — confirmed unchanged, 5 days quiet since Darminder's ask
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, assignee now Yash Patel (as recorded 09-14), still **2 comments**, newest still `111941`
+(09-10, Darminder asking for a video + browser). Same 4 attachments (`64222`, `64223`, `64302`,
+`64303`). No reply from the customer since Darminder's ask. No re-investigation performed.

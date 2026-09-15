@@ -155,3 +155,11 @@ specifically").
    itself) is the single most decisive one and should be opened first.
 5. Whether anything beyond "waiting on customer" was actually said to the customer — lives in
    Freshdesk 7907, not read by either pass.
+
+## 2026-09-15 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, assignee still Darminder Atker, still **5 comments**, newest still `111943` (09-10,
+Freshdesk → "Waiting on customer"), same 4 attachments (`64299`-`64301`, `64304`). Nothing moved.
+The 09-14 draft to Darminder (§ above) is still unposted, and attachment `64304` is still unopened
+by this routine. No re-investigation performed — nothing new warranted one.

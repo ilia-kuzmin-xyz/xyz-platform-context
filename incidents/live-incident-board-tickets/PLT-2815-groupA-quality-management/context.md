@@ -534,3 +534,12 @@ same unposted close-out. Nothing re-derived on the diagnosis — none was warran
 
 **Nothing about the underlying incident changed.** This is administrative housekeeping, not an open
 investigation — see `recommended-action.md` for this run's note.
+
+## 2026-09-15 (scheduled) — confirmed unchanged, 71 days stale, 29th consecutive run
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, priority Major, assignee Yash Patel, `resolution`/`resolutiondate` still null, still
+**13 comments**, newest still `106553` (07-06, Freshdesk → "Closed"). Same 2 attachments. **71
+days** since the last Jira activity of any kind; **29th consecutive run** (07-30 → today)
+recommending the same unposted close-out. No re-investigation performed — the code side was
+re-verified live as recently as 09-14 and nothing has had reason to change in one day.

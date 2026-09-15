@@ -1,5 +1,12 @@
 # PLT-2651 — Recommended action
 
+## 2026-09-15 (scheduled) — unchanged again. The correction is now 7 days unposted, and the ticket has crossed 132 days old.
+
+Fresh `getJiraIssue` fetch this run: no new comment since 111646 (09-08), status still `With
+Customer`, no new attachment. Recommendation, draft and action class (4, with a class-1 chase
+attached) are unchanged from 09-14 — restating only because the clock has moved on the board's only
+Critical ticket.
+
 ## 2026-09-14 (scheduled) — unchanged again. The correction is now 6 days unposted, not 3. Recommendation and class unchanged; restating only because the clock has moved.
 
 Fresh `getJiraIssue` fetch this run: no new comment since 111646 (09-08, "Thanks for looking into

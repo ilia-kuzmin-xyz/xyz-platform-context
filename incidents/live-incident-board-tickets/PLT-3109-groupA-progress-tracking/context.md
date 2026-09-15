@@ -388,3 +388,11 @@ Per run-instructions step 0 ("read the folder before opening the ticket"), this 
 - Whether removing the two WHERE lines surfaces a null `ActualProgress` for zero-labour warehouse rows — still resolves in one refresh, still unrun.
 - The project's live `ProgressWeightingMethod` — still inferred from the 45% figure, never read directly.
 - Attachment bytes — still not fetchable from this routine (unchanged, not a blocker; Ilia already opened all 5 on 09-08).
+
+## 2026-09-15 (scheduled) — confirmed unchanged, chase now 4 days past its intended send date
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **Open**,
+assignee still Pietro Desiato, still **7 comments**, newest still `111944` (09-10, Darminder to
+Pietro), same 5 attachments. Nothing has moved in five days. The Group A/B call from 09-14 (this
+ticket behaves as Group B in substance — no technical unknown blocks it, only an internal "what
+input does Pietro need" question) stands unchanged. No re-investigation performed.

@@ -1,5 +1,12 @@
 # PLT-2874 — Recommended action
 
+## 2026-09-15 (scheduled) — CURRENT. Ilia's own "today" reply is now 4 days overdue.
+
+No Jira movement since 09-11 (see `context.md` § 2026-09-15). The combined draft to Yash below
+(§ 2026-09-14) is unchanged and still the recommended next step — it answers Ilia's own overdue
+promise and Gennaro's open question in one message. Restating only because the overdue count moved
+from 3 to 4 days.
+
 ## 2026-09-14 — CURRENT. Yash bumped the ticket and Ilia's own "will get back to you today" (09-11) is now unanswered — one combined reply does both jobs
 
 **Chosen action: (a) resolve through communication — one Jira comment that gives Yash the status

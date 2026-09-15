@@ -58,6 +58,11 @@ snippet itself would be premature since we have not run it ourselves first.
 
 ---
 
+## 2026-09-15 (scheduled) — unchanged. Console-check draft still unsent, ticket now 6 days old.
+
+No Jira movement since 09-09 (see `context.md` § 2026-09-15). Classification (3) and the drafted
+console check to Darminder are unchanged; restating only because the clock has moved.
+
 ## 2026-09-14 (scheduled run) — second mechanism found; a first draft is now warranted
 
 **Classification unchanged: 3 — resolvable in-session, needs visual debugging first.** context.md's

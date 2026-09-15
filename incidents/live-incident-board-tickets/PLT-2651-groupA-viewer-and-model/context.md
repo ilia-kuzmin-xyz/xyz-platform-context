@@ -1090,3 +1090,14 @@ memoisation rule; recorded in `live-incident-run-instructions.md`.
 - Blast radius of retiring the guess: how many projects currently rely on it (true north 0 + tilted
   building). **Still not counted** — needs an authenticated read this automated session does not have.
 - Attachment 63521 still unopened (403); no longer decisive, the mechanism is measured.
+
+## 2026-09-15 (scheduled) — confirmed unchanged, correction now 7 days unposted, ticket 132 days old
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, priority Critical, assignee still Yash Patel, still **33 comments**, newest still
+`111646` (09-08, "Thanks for looking into it."). Same 4 attachments. The true-north correction
+(`recommended-action.md` § 2026-09-14) is still unposted, now **7 days** since the 09-08 diagnosis
+that the customer's own true-north lever cannot work in the Web Editor — every day it stays
+unposted is a day the customer may act on outdated guidance. Board's only Critical, now **132
+days** old. No re-investigation performed; the mechanism was already measured on Prod (09-04, 09-08)
+and re-verified live on 09-14.
