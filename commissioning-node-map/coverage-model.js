@@ -17,9 +17,10 @@
  * map and this board never fall out of step. Load it between model.js and
  * app.js.
  *
- * Read from source on 15 Sep 2026: hc-frontend PRs #2186 (PLT-2968) and #2203
- * (PLT-2999), and the live dev schema in data/columns.json — which by then
- * carried xyz-supabase #35, #37 and #39.
+ * Read from source on 15 Sep 2026: hc-frontend PRs #2186 (PLT-2968), #2203
+ * (PLT-2999) and #2216 (PLT-2997), and the live dev schema in
+ * data/columns.json — which by then carried xyz-supabase #35, #37, #38, #39
+ * and #40. #41 is written and not merged; where a row depends on it, it says so.
  */
 
 LAYERS.push(
@@ -106,11 +107,17 @@ annotate('a-note-against-an-answer', {
 
 annotate('one-run-of-a-task', {
   landed: {
-    label: 'task_execution.outcome_note',
-    detail: '3 Sep, with the outcome set widened to passWithComments; abort added 10 Sep',
+    label: 'task_execution.outcome_note · failed_item_count',
+    detail: '3 Sep, with the outcome set widened to passWithComments; abort 10 Sep; preconditions stopped grading 15 Sep',
   },
 }, [
   { ux: 'Pass with comments', landed: 'Verdict and its comment both stored since 3 Sep' },
+  {
+    ux: 'A failed precondition',
+    bridge: 'task_execution.failed_item_count',
+    landed: '15 Sep — it warns, and stops being counted as a failure',
+    note: 'The ruling was made on 5 Aug and the schema disagreed with it for six weeks: one failed precondition forced the whole checklist to completeWithFailures, because the count that decides that swept up every failed item regardless of section. A precondition gates the work rather than being part of it, so the engineer may proceed — and now the record says so too. Answering them all is still required; only the grading changed.',
+  },
 ]);
 
 annotate('where-the-question-sits', {
@@ -169,6 +176,25 @@ annotate('task-definition', {
 ]);
 
 /* ──────────────────────────── what the screens offer and nothing carries yet */
+
+annotate('version-of-a-task', {
+  ahead: {
+    label: 'Impact review on a template edit',
+    detail: 'The modal ships; the thing it confirms does not reach the instances',
+  },
+}, [
+  {
+    ux: 'What this edit will hit',
+    ahead: 'Counted in the browser, not in the database',
+    note: 'The review states its split of not started / in progress / completed from instances the page happens to have loaded. api-v2 answers the same question in the database (PAPI-3756). Ours is right while the page is fresh and quietly stale otherwise, and it cannot be asked without opening the editor.',
+  },
+  {
+    ux: 'Re-run everything on the new version',
+    bridge: 'task_instance.task_template_version_id',
+    ahead: 'The confirm button has nothing behind it on dev',
+    note: 'The modal takes a mandatory reason, asks twice, and calls an RPC that is not deployed: the template saves, the re-run does not, and the user is left on the form with an error. The RPC is written — xyz-supabase#41 — and api-v2 shipped its own half on 15 Sep. This is the shortest-lived entry on this board.',
+  },
+]);
 
 annotate('sign-off', {
   ahead: {

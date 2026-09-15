@@ -333,8 +333,10 @@ const STAGES = [
         { ux: 'Required signatures', bridge: 'signing_slots', api: 'ChecklistItem.Config', note: 'Both model this. Ours per version as signing_slots; theirs inside a signature item’s Config, as required and witnessRequired.' },
         { ux: 'Is current', bridge: 'task_template.current_version_id', api: 'IsCurrentVersion' },
         { ux: 'Description', bridge: 'task_template.description', api: 'Description' },
+        { ux: 'What this edit will hit', bridge: 'task_instance.status', api: 'AssetTask.Status', note: 'The impact review’s “16 not started · 9 in progress · 6 completed”. api-v2 answers it in the database (PAPI-3756, 10 Sep — one function per thing you can edit: a version, an asset type, a gate, a workflow). We count it in the browser, over instances already loaded, which is the same answer only while the page is fresh.' },
+        { ux: 'Promote, and carry work over', bridge: 'task_instance.task_template_version_id', api: 'AssetTaskExecution.CommissioningTaskVersionId', note: 'The other half, and the one that moves data. api-v2 migrates in-flight executions onto the promoted version, closing each and opening a successor linked back to it (PAPI-3752, 15 Sep). Ours is written and still open as xyz-supabase#41, so today the web app pins the review, takes the reason, saves the template — and nothing reaches the instances.' },
       ],
-      note: 'The reason re-wording a template never rewrites answered history.',
+      note: 'The reason re-wording a template never rewrites answered history. Both sides now also agree on what happens to work that is mid-flight when the wording changes: it is moved, not abandoned.',
     },
     
     {
@@ -349,7 +351,7 @@ const STAGES = [
       },
       fields: [
         { ux: 'Section name', bridge: 'task_item.label', api: 'HeaderTitle' },
-        { ux: 'Which section', bridge: 'task_item.section_type', api: 'SectionType', note: 'Same four values — PRECONDITIONS, TEST_STEPS, DETAILS, OVERVIEW. Ours is a column on a fake header row; theirs is a real table.' },
+        { ux: 'Which section', bridge: 'task_item.section_type', api: 'SectionType', note: 'Same four values — PRECONDITIONS, TEST_STEPS, DETAILS, OVERVIEW. Ours is a column on a fake header row; theirs is a real table, with a CHECK that only a top-level header may carry one. PRECONDITIONS stopped being cosmetic on 15 Sep: an item under that header must still be answered, but a failure there warns rather than grading the run.' },
         { ux: 'Order', bridge: 'task_item.position', api: 'SortOrder' },
         { ux: 'Nested under', bridge: 'task_item.parent_task_item_id', api: 'ParentCommissioningTaskVersionHeaderId' },
         { ux: 'Assigned to', bridge: 'task_item.assigned_to', api: 'AssignedTo' },
@@ -535,7 +537,7 @@ const STAGES = [
       sheets: {
         ux: { label: 'Task runner', detail: 'Preconditions, grouped items, readings, verdict' },
         bridge: { label: 'task_execution', table: 'task_execution', detail: 'Sequence, outcome, who, started, finished' },
-        api: { label: 'AssetTaskExecution', table: 'AssetTaskExecution', detail: 'IN_PROGRESS → PENDING_SIGN_OFF → COMPLETED / FAILED / BLOCKED' },
+        api: { label: 'AssetTaskExecution', table: 'AssetTaskExecution', detail: 'IN_PROGRESS → PENDING_SIGN_OFF → PASS / PASS_WITH_COMMENTS / FAILED / BLOCKED / ABORTED' },
       },
       fields: [
         { ux: 'Attempt', bridge: 'sequence', note: 'They order runs by InsertedOn instead.' },
@@ -546,10 +548,12 @@ const STAGES = [
         { ux: 'Abandoned', bridge: 'aborted_at / aborted_by', api: 'Status = ABORTED', note: 'Added 10 Sep. A run can now be abandoned and restarted rather than left open, which is what api-v2 already meant by ABORTED — a gap that closed itself.' },
         { ux: 'Overall comment', bridge: 'outcome_note', api: 'TaskExecutionComment.Comment' },
         { ux: 'Who ran it', bridge: 'executed_by', api: 'CreatedBy' },
-        { ux: 'Failed items', bridge: 'failed_item_count' },
+        { ux: 'Continues from', bridge: 'supersedes_run_id', api: 'PreviousAssetTaskExecutionId', note: 'api-v2 grew this on 15 Sep (PAPI-3752) and landed on the same shape we already had: the link lives on the NEW row pointing back, null when the attempt began on its own. Theirs is the stricter of the two — a composite foreign key routed through the asset task, so a predecessor belonging to a different task is unrepresentable, plus a CHECK that a row cannot name itself. Ours is a plain self-reference.' },
+        { ux: 'Why it restarted', api: 'StartReason', note: 'Theirs only. The user’s own words when a forced retest demanded one, a short system phrase when a version promotion caused it, null on a plain restart. We collect the same sentence — the impact review makes the reason mandatory — and have nowhere on the run to keep it, so it goes to the activity log instead and the run itself cannot say why it exists.' },
+        { ux: 'Failed items', bridge: 'failed_item_count', note: 'Preconditions stopped counting on 15 Sep. A failed precondition warns and the engineer may proceed, so counting it forced every such run to completeWithFailures and reported failures it never had. Section membership is the nearest preceding header in the run’s own snapshot — the same rule the evidence surface already used.' },
         { ux: 'Questions as answered', bridge: 'definition_snapshot / definition_sha256', note: 'We freeze the wording. They do not need to: a ChecklistItem is immutable, so editing one creates a new row.' },
       ],
-      note: 'A finished run is frozen; a re-run adds another. Both sides agree on this.',
+      note: 'A finished run is frozen; a re-run adds another, carrying a link back to the one it replaced. Both sides agree on this, and as of 15 Sep both enforce it.',
     },
     
     {

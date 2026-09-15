@@ -1636,6 +1636,13 @@
    },
    "LastModifiedBy": {
     "t": "text"
+   },
+   "PreviousAssetTaskExecutionId": {
+    "t": "uuid",
+    "fk": "AssetTaskExecution"
+   },
+   "StartReason": {
+    "t": "text"
    }
   },
   "AssetTaskStatusHistory": {

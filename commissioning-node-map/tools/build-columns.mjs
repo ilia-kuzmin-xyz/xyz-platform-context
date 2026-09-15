@@ -61,12 +61,46 @@ const API_CONSTRAINTS = [
   '088_xyz_asset_task_status_history',
   '101_xyz_commissioning_task_file_reference_mapping',
   '102_xyz_commissioning_task_version_file_reference_mapping',
+  // A SECOND constraints file for AssetTaskExecution, alongside 084 — api-v2's
+  // own note explains why 084 cannot be edited. Both have to be read or the
+  // execution-lineage foreign key is invisible here.
+  '103_xyz_asset_task_execution_lineage',
 ];
 
 /* ElementInstallationStatus predates commissioning, so it is created in the
    model-redesign migration alongside many unrelated tables. Only that one is
    wanted here. */
 const API_EXTRA = [{ file: '030_xyz_b_model_redesign', only: ['ElementInstallationStatus'] }];
+
+/* Constraints files in range that were looked at and left out. Only FOREIGN
+   KEYs are read out of this folder, so a file that adds none changes nothing
+   here however relevant its table is. */
+const API_CONSTRAINTS_IGNORED = {
+  '060_xyz_activity_progress_alter': 'progress, not commissioning',
+  '061_xyz_activity_progress_history_alter': 'progress, not commissioning',
+  '062_xyz_portfolio_alter': 'portfolio, not commissioning',
+  '063_xyz_exchange_rate_alter': 'exchange rates, not commissioning',
+  '080_xyz_model_element_asset': 'hangs ModelElement off Asset — the model side, which this map does not draw',
+  '081_xyz_commissioning_workflow_name_unique': 'a unique key; no foreign key to read',
+  '082_xyz_system_type_name_unique': 'a unique key; no foreign key to read',
+  '089_xyz_issue_comment': 'issues',
+  '090_xyz_check_list': 'the retired checklist tables',
+  '092_xyz_readiness_gate_metadata': 'drops two checks on ReadinessGate; no foreign key to read',
+  '093_xyz_readiness_gate_unique': 'a unique key; no foreign key to read',
+  '094_xyz_commissioning_task_unique': 'a unique key; no foreign key to read',
+  '095_xyz_asset_system_mapping_unique': 'a unique key; no foreign key to read',
+  // These two are the only place api-v2 states a commissioning value set in the
+  // database rather than in TypeScript. Both agree with API_VALUES below, which
+  // is why nothing is read from them — but they are the file to check first if
+  // a value set on the map ever looks wrong.
+  '095_xyz_commissioning_task_version_header_section_type_constraint':
+    'a CHECK on SectionType matching the set API_VALUES already carries',
+  '096_xyz_commissioning_task_type': 'a CHECK on CommissioningTaskType matching the set API_VALUES already carries',
+  '097_xyz_asset_name_case_insensitive': 'a unique key; no foreign key to read',
+  '098_xyz_asset_type_name_case_insensitive': 'a unique key; no foreign key to read',
+  '099_xyz_commissioning_system_name_case_insensitive': 'a unique key; no foreign key to read',
+  '100_xyz_system_type_name_case_insensitive': 'a unique key; no foreign key to read',
+};
 
 /* Files in the same numeric range that were looked at and left out. Recorded
    so the audit below stays quiet until something genuinely new appears — a
@@ -122,7 +156,7 @@ function apiFile(kind, name) {
 
 /**
  * Names every DDL file in the commissioning range that the lists above do not
- * mention.
+ * mention — in BOTH folders.
  *
  * The lists are curated on purpose — the same numeric range holds model,
  * issue and cleanup migrations that are not commissioning tables, so pulling
@@ -131,24 +165,43 @@ function apiFile(kind, name) {
  * and the map went on saying api-v2 had no file table at all, because nothing
  * looked. This looks, and refuses to be quiet about it.
  *
- * It reports rather than includes. Whether a new table belongs on the map is a
+ * Constraints are audited for the same reason, and because they failed the same
+ * way once already: PAPI-3752's lineage constraints arrived in their own file
+ * while this checked only Tables, so the new column was picked up and the
+ * foreign key that gives it its meaning was not. A table's constraints are not
+ * reliably one file per table — 084 and 103 both belong to AssetTaskExecution —
+ * so matching them up by name would go on missing exactly this case.
+ *
+ * It reports rather than includes. Whether a new file belongs on the map is a
  * judgement, and a generator should not be making it.
  */
 function unlisted() {
-  const inRange = /^1(1[5-9]|[2-4][0-9])_/;
-  const listed = new Set([
-    ...API_TABLES,
-    ...API_EXTRA.map(extra => extra.file),
-    ...Object.keys(API_IGNORED),
-  ]);
+  const RANGES = {
+    Tables: {
+      inRange: /^1(1[5-9]|[2-4][0-9])_/,
+      listed: new Set([...API_TABLES, ...API_EXTRA.map(extra => extra.file), ...Object.keys(API_IGNORED)]),
+    },
+    Constraints: {
+      inRange: /^(0[6-9][0-9]|1[0-9][0-9])_/,
+      // The lists hold the bare name; the folder's files carry a `_constraints`
+      // suffix that `apiFile` appends back on. Compared without it, so a file
+      // already being read is never reported as missed.
+      listed: new Set([...API_CONSTRAINTS, ...Object.keys(API_CONSTRAINTS_IGNORED)]),
+    },
+  };
 
-  const names = JSON.parse(execFileSync('gh',
-    ['api', `repos/${API_REPO}/contents/Database/xyz/Tables`, '--jq', '[.[].name]'],
-    { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }));
+  const missed = [];
+  for (const [folder, { inRange, listed }] of Object.entries(RANGES)) {
+    const names = JSON.parse(execFileSync('gh',
+      ['api', `repos/${API_REPO}/contents/Database/xyz/${folder}`, '--jq', '[.[].name]'],
+      { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }));
 
-  return names
-    .map(name => name.replace(/\.sql$/, ''))
-    .filter(name => inRange.test(name) && !listed.has(name));
+    for (const file of names) {
+      const name = file.replace(/\.sql$/, '').replace(/_constraints$/, '');
+      if (inRange.test(name) && !listed.has(name)) missed.push(`${folder}/${file}`);
+    }
+  }
+  return missed;
 }
 
 console.log(`  reading ${API_TABLES.length} api-v2 tables and ${API_CONSTRAINTS.length} constraint files…`);
