@@ -3024,3 +3024,52 @@ end to end showed **two independent mechanisms**, and only one is a gap:
 > parse of the i18n bundle. That catches the unbalanced-JSX class of error, which is the likely one
 > after bulk edits. It does not catch a type error or a failing assertion — CI remains the only
 > check for those.
+
+### 08:15 — CI caught a regression the local checks could not, and it was mine
+
+`f13ee2b` went red: **4 failures, all in "the overall verdict"**. Worth recording in full, because
+the cause is a general shape rather than a typo.
+
+Removing the re-seed-on-refetch meant `editMode` had to be correct on the **first** pass instead of
+settling after the heal's round-trip. I seeded it from the **corrected** status — and that is wrong
+in the direction the heal usually goes on a task someone is opening to work on:
+
+| stored | items | heal derives | old behaviour | my f13ee2b | correct |
+|---|---|---|---|---|---|
+| `completed` | unfinished | `notStarted` (demote) | read-only, editable after refetch | editable ✓ | editable |
+| `notStarted` | all answered | `pass` (promote) | **editable** | **read-only ✗** | editable |
+
+The second row is the one that broke: the modal opened read-only and locked the person out of the
+task they had just opened. The four failing tests answer an item and then reach for the verdict
+card, which is exactly that shape.
+
+Fix (`78ac6d3`): **editable unless the stored status AND the corrected one both say finished.**
+Read-only requires them to agree. Three tests, one per direction plus the agreement case, each
+failing against the corresponding single-value rule.
+
+> **The lesson, and it is the same one as 09-13's "gate that disables controls".** When you remove
+> a redundant second pass, the first pass inherits *every* case the second one was quietly
+> absorbing — not just the one you were thinking about. I checked the demote direction (it was the
+> regression I was explicitly guarding against, and I wrote a paragraph about it in the commit
+> message) and never asked what the heal does in the *other* direction, which is the far more
+> common one. **Enumerate the directions, not the case that prompted the change.**
+
+> **And the second-order lesson: the commit that fixed a bug introduced one, which is exactly why
+> holding the third push was right.** `d24870c` (the `mutateAsync` fix) was finished and committed
+> LOCALLY while the build ran, and deliberately not pushed — a third push would have cancelled the
+> in-flight run and the failure would have been attributed to the wrong commit, or not surfaced at
+> all until later. With local validation impossible in this environment, **one un-superseded CI run
+> per change is the only signal there is. Do not spend it.**
+
+### Where the run finished
+
+Pushed, in order: `26744e0` (i18n), `f13ee2b` (seeding), `d24870c` (failed-write messages),
+`78ac6d3` (the editMode correction). CI running on `78ac6d3`.
+
+**9 threads open on #2186**, down from 25. Six carry an answer and wait on a person (the four
+questions listed above, across six threads); three are unworked: `parent_task_item_id` on the
+builder payload, capability detection with no execution, and persisted English header labels at
+`ChecklistCreatePage.tsx:124` — which is **not** part of the i18n cluster that was closed: it is
+about English strings being WRITTEN INTO THE ROW as header labels, so the runner renders a stored
+English label rather than a translated one. The fix is to persist `sectionType` and translate at
+display time, and it needs a decision about existing rows.
