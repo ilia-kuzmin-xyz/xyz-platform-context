@@ -3073,3 +3073,15 @@ builder payload, capability detection with no execution, and persisted English h
 about English strings being WRITTEN INTO THE ROW as header labels, so the runner renders a stored
 English label rather than a translated one. The fix is to persist `sectionType` and translate at
 display time, and it needs a decision about existing rows.
+
+### 08:37 — green on `78ac6d3`
+
+`build` **success**, SonarCloud **success**, 0 behind master. The editMode correction holds.
+
+> Useful signal to remember: **SonarCloud reporting success is proof the test step passed**, because
+> it is step 12 of the same sequential job and `Lint & Run Tests` is step 7. It landed at 08:30,
+> seven minutes before the job itself finished its image build and parity check — so the question
+> "did my fix work" was answerable well before the build's own conclusion appeared. On the failed
+> run there was no SonarCloud check at all, for the same reason: the job exited at step 7.
+
+**Final state of this run: 9 threads open on #2186** (from 25), CI green, no conflict.
