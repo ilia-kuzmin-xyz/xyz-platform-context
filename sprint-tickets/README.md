@@ -5280,3 +5280,31 @@ was cosmetic. The common thread every time: I treated a display change as if it 
 **Still open on #2202:** the continent granularity question for Jason, and Copilot's point that my
 hook tests mock `serviceProvider` against this repo's documented MSW preference — raised with the user
 as a scope call rather than actioned.
+
+### 17:15 — the crash thread got resolved as "not reproducible". It was reproducible; the guard is the fix.
+
+A parallel session resolved Copilot's crash finding on #2202, quoting
+`formatTimeZoneName = zone ? zone.replace(/_/g, ' ') : ''` as proof it never threw.
+
+That guard is `00fe38c` — **my fix for that exact finding**, pushed an hour earlier. Verified both
+sides rather than arguing from memory:
+
+```
+4cbb35c (the head Copilot reviewed)  export const formatTimeZoneName = (zone: string): string => zone.replace(/_/g, ' ')
+00fe38c (the fix)                    export const formatTimeZoneName = (zone: string | null | undefined): string =>
+                                       zone ? zone.replace(/_/g, ' ') : ''
+```
+
+Posted a correction on the thread. Left it resolved — it *is* fixed — but said plainly that it was
+fixed rather than never broken.
+
+> **Reading the current file to judge a review comment tells you whether the bug is there NOW, not
+> whether the reviewer was right.** On a branch taking several pushes an hour, a finding and its fix
+> can land between the review and the reading, and the fix then looks like proof the finding was
+> wrong. Check the commit the reviewer actually saw.
+
+The concrete risk in leaving it: with `strictNullChecks` off, that guard is the *only* thing standing
+between an optional `timezone` and a render crash, and nothing in the build would catch its removal.
+A thread saying "not reproducible" makes it read as gratuitous defensiveness — precisely the kind of
+thing a later tidy-up removes. Given this PR has already produced four commits each fixing what the
+last one broke, that is not a hypothetical.
