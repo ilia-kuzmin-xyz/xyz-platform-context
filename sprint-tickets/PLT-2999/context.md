@@ -443,3 +443,86 @@ colour map still defaulted `notStarted`, `pendingSignOff` and `signedOff` to gre
 flight, so the window only exists between iterations, and every deterministic test for it asserted a
 fake rather than the real race. Said so on the thread. Given I turned this PR red today with a
 timing-sensitive test of my own, a flaky test here would be worse than none.
+
+## 2026-09-16 (12:55) — Rishi found a real scale bug: the usage probe 400s at ~585 instances
+
+**The best review finding on this PR so far, and the first from a human rather than a bot.** Rishi
+tested the delete path against the dev Supabase branch (`ohmzwpcilvxpozljllle`) with real data and hit
+a folder with **594 task instances** behind it: the usage read returns **400**, so `DeleteTaskDialog`
+refuses to offer a delete at all.
+
+### The defect
+
+`Range` pages the **response**. **Nothing paged the filter.**
+
+`filterParam` (`postgrest-client.ts:61`) joins every value of an `in` filter into one query string,
+and `select()` never chunks it. `usage()` passes instance ids straight through
+(`checklist-library-service.ts:636`). Each quoted, URL-encoded uuid costs ~43 bytes, so the request
+line grows linearly until the edge proxy rejects it.
+
+His measured threshold, replayed against dev with real ids:
+
+| ids | URL bytes | status |
+|---|---|---|
+| 575 | 24,943 | 200 |
+| 580 | 25,158 | 200 |
+| **585** | **25,373** | **400** |
+| 594 | 25,760 | 400 |
+
+### Three things he established that are worth keeping
+
+1. **It is not PostgREST.** The body is plain-text `Bad Request`, not PostgREST's JSON envelope — the
+   gateway rejects the request line before Postgres or PostgREST sees it. So `errorCode()` calls
+   `response.json()`, that throws, and the caller gets a **bare 400 with no SQLSTATE**. That is
+   precisely why this surfaced as *a delete the dialog quietly declined to offer* rather than an
+   error that explained itself.
+2. **Not file-specific.** `task_execution` takes the same unchunked list and 400s at the same size.
+   The `commissioning_file_association` read just fires first, which makes it *look* file-specific.
+3. **A malformed uuid is a different 400** — `22P02 invalid input syntax for type uuid`, *with* a
+   JSON body. Worth distinguishing when triaging the next one.
+
+### Fixed in `0040714`
+
+Chunked inside `select()`, **not** inside `usage()` — the limit is a property of the transport, not
+of one caller, so every table reached through the client (`task_instance`, `task_execution`,
+`task_execution_item`, `commissioning_file_association`) gets it at once and no caller has to know
+the limit exists. Split at **200** values (~8.6KB).
+
+Two things that fell out of implementing it:
+
+- **Only the longest `in` list is chunked.** Two would need the cross product of their chunks, and no
+  caller passes two long ones — it is always a set of ids alongside short `eq`/`is` filters, which
+  are repeated on every batch.
+- **Chunking silently breaks ordering, and I nearly shipped that.** Each batch comes back ordered but
+  the concatenation is not — a row from batch 2 can sort before one from batch 1. Added `sortRows()`
+  to re-apply the caller's order with the same `id` tie-break the query asks the server for, and a
+  test that drives 300 ids **reversed** so the batches arrive deliberately out of order.
+
+> This is the same defect shape this tab keeps producing, one level down: **a rule applied to the
+> wrong set.** Paging was applied to the response and not to the filter. Five of the ten earlier
+> findings on this PR were that exact shape. When something here grows a rule, ask immediately which
+> *other* set the same rule has to cover.
+
+**Deliberately not fixed:** `update()` and `remove()` build the same query string and will hit the
+same wall. Chunking a mutation changes its atomicity, which is the subject of the six threads left
+open here about needing a server-side batch — so it belongs with that work, not quietly in this PR.
+Said so in the reply.
+
+### Also this pass
+
+- **24 of 30 unresolved review threads resolved.** All had my replies and pushed fixes; they were
+  just never marked resolved, which misrepresented the PR's state to human reviewers. Spot-checked
+  ten claimed fixes (`usagePermitsDelete`, `blockedTemplateIds`, `MENU_WIDTH`, `event.repeat`,
+  `systemLabels`, `wholeFolder`, `ownerKey`, `isLaterRun`, `usageError`, `liveDefinitionsById`) —
+  all present in the tree before resolving anything.
+- **Six left open on purpose**: the folder-delete / archive-all / `remove()` atomicity set (needs a
+  server-side batch), and the `commissioning_file_association` column question for Darminder.
+- **Merged master in** (`3a4a241`) — was 3 commits behind, zero conflicting regions.
+
+> **Still no local test runner.** `npm ci` fails here (`@xyzreality/dhtmlx-gantt` is on GitHub
+> Packages, session token has no `read:packages`), so there is no `node_modules` and CI is the only
+> runner. Everything above was hand-swept. Two places in the new code were rewritten specifically
+> because I could not typecheck them: a destructuring assignment that was an ASI hazard under
+> `semi: false`, and a `<` between two `string | number` values, which the compiler may reject. Both
+> replaced with forms that cannot fail rather than betting on them — this PR has already been burned
+> twice by "passes vitest, fails the webpack prod build".
