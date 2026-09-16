@@ -580,3 +580,32 @@ He edited his comment down and signed it "— Claude". Does not change anything 
 verified independently against the code before a line was written, and the byte table reproduced. But
 worth recording: **the strongest review finding on this PR came from another agent**, and the
 verification step is what made it safe to act on either way.
+
+## 2026-09-16 (13:30) — CORRECTION to the 12:55 entry: the thread counts above are wrong
+
+**Amends, does not replace, the "24 of 30 unresolved review threads resolved" line above.** That
+count was produced by a bug in my own inspection script, and the real numbers are different.
+
+The GitHub MCP payload names the field **`is_resolved`** (snake_case). I filtered on
+**`isResolved`**, which is absent, so `.get()` returned `None` for every thread and *all* of them
+looked unresolved. The "30 unresolved" figure was an artefact of that, not a reading of the PR.
+
+**True state now: 34 threads, 33 resolved, 1 open.**
+
+What that changes:
+
+- The 24 resolves I performed were real and did stick — that part stands.
+- The **five atomicity threads I deliberately "left open"** (folder delete, archive-all, the
+  `remove()` RPC, and the two duplicate sequential-mutation ones) were **already resolved before I
+  looked**. My decision to leave them open was moot; I was not holding anything open.
+- The two new Copilot threads from the 13:00 review are also already resolved.
+
+**The one genuinely open thread** is the `commissioning_file_association` column question —
+`IChecklistTemplateUsage` documents `task_item_id` while the probe filters `task_instance_id`. That
+is the one waiting on Darminder, and it is the right one to still be open.
+
+> **Read the payload's own key names before filtering on them.** `.get()` on a wrong key is silent
+> and returns a falsy value, so a filter built on it does not fail — it quietly classifies
+> everything one way. This is the same failure as the day's code bugs (*a rule applied to the wrong
+> set*), committed in the tooling used to inspect the PR rather than in the PR. Print one record's
+> `keys()` before trusting a field name.
