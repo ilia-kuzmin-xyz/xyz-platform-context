@@ -3166,3 +3166,56 @@ done, for three reasons:
 `76a26e7` (restoring the `requiresSignOff` assertions the de-dup stripped) is **in the tree** —
 `04258dd` carries it, all five assertions present. It has never been CI-verified, and **cannot be**
 while the PR is in this state.
+
+## 2026-09-16 (later, ~12:35) — amends the section above: CI resumed once the conflict was resolved
+
+**The "CI has stopped entirely" heading above is no longer true, and the inference under it turned
+out to be right.** Keeping the section rather than rewriting it, because the diagnosis is the useful
+part — but read it with this amendment.
+
+`2f9012a` — *"Merge remote-tracking branch 'origin/Task/PLT-2997-… into HEAD"* — resolved the
+conflict against the moved base. The moment it landed:
+
+| what | before | now |
+|---|---|---|
+| `mergeable` | `null` (unknown) | **`True`** |
+| `mergeable_state` | `unknown` / `blocked` | `unstable` |
+| workflow runs created | **none since 4721 (10:18)** | 4725 (12:07), 4727 (12:16), **4728 (12:31, in progress)** |
+| Sonar | silent | posted, success |
+
+So the mechanism stated as inference in the section above is **confirmed by the reversal**: while the
+PR conflicted, no run was created; the first push after the conflict was resolved produced one
+immediately. That is now a reusable fact for this repo, not a guess:
+
+> **An empty run list on a PR is not "CI is broken" and not "checks pending" — check `mergeable`
+> first.** A conflicted PR has no `refs/pull/N/merge` for a `pull_request` workflow to check out, so
+> GitHub creates **no run at all**. Silent, with nothing red to look at.
+>
+> Combined with the 09-14 lesson (a run QUEUED for 23 hours that never started, invisible because
+> `get_check_runs` returned zero), the rule for this repo is: **never diagnose CI from the check
+> list.** Read `list_workflow_runs` *and* the PR's `mergeable` field.
+
+**On reason 2 of "why this was NOT resolved here"** — the resolution was performed by the other
+writer roughly an hour after I declined it, and it stuck. My three reasons still hold as written, but
+the judgement call was wrong in outcome: the base had settled enough. **If the base is conflicted and
+the adjudication is already recorded in a merge commit message, redoing it is cheaper than it looks —
+prefer resolving.**
+
+**My fix survived the merge.** `76a26e7` is an ancestor of the current head and all five
+`requiresSignOff: false,` assertions are present in `ChecklistCreatePage.test.tsx`. Still not
+CI-verified on a *completed* run, for a different reason now — see below.
+
+### The new trap on this branch: every push cancels the previous build
+
+`pr-check.yaml` uses `concurrency: group: pr-<N>, cancel-in-progress: true`. The branch is in a
+rapid-push cycle (12:07, 12:16, 12:31), so 4725 and 4727 were both **cancelled**, not failed. A
+`cancelled` conclusion here says nothing about the code.
+
+> Do **not** wait for a stable green head on a branch someone else is actively pushing to. Read the
+> facts that are settled, report those, and name the sha each one applies to. This is the 09-15 rule
+> (*green does not extend forward to the commit pushed after it*) seen from the other side.
+
+### What still needs the user — unchanged by any of the above
+
+**#2186's base is still `Task/PLT-2997-…` (#2216), not `master`.** PLT-2968 / PLT-2967 / PLT-2966
+cannot reach master until #2216 lands. The stacking is a decision, and it is still open.
