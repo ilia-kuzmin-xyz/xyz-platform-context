@@ -396,3 +396,11 @@ assignee still Pietro Desiato, still **7 comments**, newest still `111944` (09-1
 Pietro), same 5 attachments. Nothing has moved in five days. The Group A/B call from 09-14 (this
 ticket behaves as Group B in substance — no technical unknown blocks it, only an internal "what
 input does Pietro need" question) stands unchanged. No re-investigation performed.
+
+## 2026-09-16 (scheduled) — confirmed unchanged, six days quiet
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **Open**,
+assignee still Pietro Desiato, still **7 comments**, newest still `111944` (09-10), same 5
+attachments. Nothing has moved in six days. The Group B-in-substance call stands unchanged. The
+chase to Yash (`recommended-action.md`) is now 5 days past its intended send date. No
+re-investigation performed.

@@ -220,3 +220,10 @@ assignee still Darminder Atker, still **2 comments**, newest still `111798` (09-
 attachments (2 PNGs + the screen recording). Neither candidate mechanism (bridge-drop, filter-panel
 override) has been checked against a live session since 09-10/09-14 — the drafted console check in
 `recommended-action.md` is still unposted and unrun. No re-investigation performed.
+
+## 2026-09-16 (scheduled) — confirmed unchanged, ticket now 7 days old with zero dev reply
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **Open**,
+assignee still Darminder Atker, still **2 comments**, newest still `111798` (09-09), same 3
+attachments. Neither candidate mechanism has been checked against a live session. The drafted
+console check is still unposted and unrun. No re-investigation performed.

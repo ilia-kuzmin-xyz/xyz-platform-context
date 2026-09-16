@@ -163,3 +163,10 @@ Customer**, assignee still Darminder Atker, still **5 comments**, newest still `
 Freshdesk → "Waiting on customer"), same 4 attachments (`64299`-`64301`, `64304`). Nothing moved.
 The 09-14 draft to Darminder (§ above) is still unposted, and attachment `64304` is still unopened
 by this routine. No re-investigation performed — nothing new warranted one.
+
+## 2026-09-16 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, assignee still Darminder Atker, still **5 comments**, newest still `111943` (09-10),
+same 4 attachments. The draft to Darminder is still unposted, attachment `64304` still unopened.
+No re-investigation performed.

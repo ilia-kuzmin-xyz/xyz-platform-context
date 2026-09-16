@@ -543,3 +543,10 @@ Customer**, priority Major, assignee Yash Patel, `resolution`/`resolutiondate` s
 days** since the last Jira activity of any kind; **29th consecutive run** (07-30 → today)
 recommending the same unposted close-out. No re-investigation performed — the code side was
 re-verified live as recently as 09-14 and nothing has had reason to change in one day.
+
+## 2026-09-16 (scheduled) — confirmed unchanged, 72 days stale, 30th consecutive run
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, priority Major, assignee Yash Patel, still **13 comments**, newest still `106553`
+(07-06). Same 2 attachments. **72 days** since the last Jira activity; **30th consecutive run**
+recommending the same unposted close-out. No re-investigation performed.

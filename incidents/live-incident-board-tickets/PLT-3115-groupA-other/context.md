@@ -193,3 +193,9 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 Customer**, assignee now Yash Patel (as recorded 09-14), still **2 comments**, newest still `111941`
 (09-10, Darminder asking for a video + browser). Same 4 attachments (`64222`, `64223`, `64302`,
 `64303`). No reply from the customer since Darminder's ask. No re-investigation performed.
+
+## 2026-09-16 (scheduled) — confirmed unchanged, 6 days quiet since Darminder's ask
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, assignee still Yash Patel, still **2 comments**, newest still `111941` (09-10). Same 4
+attachments. No reply from the customer since Darminder's ask. No re-investigation performed.

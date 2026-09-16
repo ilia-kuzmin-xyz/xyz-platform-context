@@ -942,3 +942,11 @@ day. **Flagging for Ilia directly: this is the one ticket on the board where the
 is the assignee's own promise, not a third party's.** The combined draft to Yash+Gennaro at
 `recommended-action.md` § 2026-09-14 is still unposted and still answers both the promise and
 Gennaro's 34-day-old open question in one message.
+
+## 2026-09-16 (scheduled) — confirmed unchanged; Ilia's own "today" reply now 5 days overdue
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **In Analysis**,
+priority Minor, assignee Ilia Kuzmin, still **8 comments**, newest still `112017` (2026-09-11
+13:39). No reply has followed — **5 days overdue** against Ilia's own "today" word, up from 4 on
+09-15. No re-investigation performed; nothing in the 09-15 confirmation had reason to move in one
+day. The combined draft to Yash+Gennaro (`recommended-action.md` § 2026-09-14) is still unposted.

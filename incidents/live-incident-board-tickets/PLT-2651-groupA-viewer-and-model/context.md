@@ -1101,3 +1101,11 @@ that the customer's own true-north lever cannot work in the Web Editor — every
 unposted is a day the customer may act on outdated guidance. Board's only Critical, now **132
 days** old. No re-investigation performed; the mechanism was already measured on Prod (09-04, 09-08)
 and re-verified live on 09-14.
+
+## 2026-09-16 (scheduled) — confirmed unchanged, correction now 8 days unposted, ticket 133 days old
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, priority Critical, assignee still Yash Patel, still **33 comments**, newest still
+`111646` (09-08). Same 4 attachments. The true-north correction is now **8 days** unposted since
+the 09-08 diagnosis. Board's only Critical, now **133 days** old. No re-investigation performed —
+nothing had reason to move in one day.

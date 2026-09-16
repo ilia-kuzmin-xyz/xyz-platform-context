@@ -418,3 +418,10 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 newest still `111659` (09-08, Freshdesk → "Waiting on customer"). Last human comment remains
 Mostafa's `110385` (08-25) — **21 days** of human silence, up from 20 on 09-14. The 09-09 chase-Yash
 draft is still unsent. No re-investigation performed; fourth consecutive confirmed-unchanged pass.
+
+## 2026-09-16 (scheduled) — confirmed unchanged, human silence now 22 days
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **Open**
+(Freshdesk-automation-only), assignee still Ilia Kuzmin, still **17 comments**, newest still
+`111659` (09-08). Last human comment remains Mostafa's `110385` (08-25) — **22 days** of human
+silence. The 09-09 chase-Yash draft is still unsent. Fifth consecutive confirmed-unchanged pass.

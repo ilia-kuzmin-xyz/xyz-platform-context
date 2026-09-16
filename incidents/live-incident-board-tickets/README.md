@@ -45,6 +45,66 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-16 (scheduled) — 8 in-scope tickets, zero drift from 09-15, zero Jira actions taken
+
+Board re-queried two ways per the 09-11 reliability note: `project = PLT AND issuetype = "Live
+Incident" AND status not in (...) ORDER BY status ASC, created DESC` (`searchResultMode: all`,
+`totalCount: 17`) cross-checked against `project = PLT AND issuetype = "Live Incident" ORDER BY
+created DESC` (top 30, `hasNextPage: true`). Of the 17, 5 are the same old `ARCHIVED (NOT RELEASED)`
+tickets (2024-2025) excluded by hand as before, and 4 more (`PLT-3060`, `PLT-3040`: READY FOR
+RELEASE; `PLT-3097`, `PLT-2917`: Customer Release Check) are excluded per this folder's established
+precedent — release-pipeline stages, not evaluation/dev-clarification stages. The remaining **8 are
+byte-for-byte the same 8 tickets as every run since 09-11**: no new ticket, none left scope, no
+status change. The created-DESC query independently confirms no `Live Incident` ticket has been
+created since PLT-3119 (09-10).
+
+Every one of the 8 got a fresh `getJiraIssue` fetch (full fields incl. comments/attachments) and was
+diffed against its 09-15 entry. **All 8 confirmed unchanged**: same comment counts, same newest
+comment ids, same attachments, same status/assignee on every ticket. A dated 2026-09-16 confirmation
+entry was appended to each ticket's `context.md` (additive, per this repo's branch-policy doc); no
+`recommended-action.md` needed a new entry since none of the drafted next steps changed. No Jira
+comment, transition, or assignment was made by this run, matching the standing brief that this
+routine only drafts.
+
+### Group A (8) — day/age counters bumped by one day each; drafted actions unchanged from 09-15
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Ilia's own 09-11 "will get back to you today" reply to Yash is now **5 days** overdue. Gennaro's Staging undercount (109457, 08-12) is 38 days unanswered. Combined draft to Yash+Gennaro ready, unposted | 1 |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08. Board's only Critical, now **133 days** old. True-north correction to the customer now **8 days** unposted | 4 with a class-1 chase attached |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged since 07-06. **72 days stale, 30th consecutive run** recommending the identical unposted close-out | 1 — stale, unresponded (on us) |
+| [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-10. One-question draft to Darminder and attachment `64304` both still unopened/unposted | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged since 09-10. Group B in substance (root cause found and posted 09-08). Chase to Yash now **5 days** past its intended send date | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk-automation only) | Unchanged since 09-08. Human silence now **22 days** (last human comment Mostafa's 08-25); chase-Yash draft still unsent. Fifth consecutive confirmed-unchanged pass | 1 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other (Cloud Admin device page) | With Customer | Unchanged since 09-10. Darminder's ask for a video + browser (via Yash) still open, **6 days** quiet | 1 (ball with customer via Yash) |
+| [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | Unchanged since 09-09. Ticket now **7 days old with zero developer reply**; drafted console check that would decide between the two candidate mechanisms still unposted | 3 (pending one check) |
+
+### Group B (0) — still empty
+
+No ticket on the board carries `Ready For Development` or `Dev In Progress` today.
+
+### Standing gaps (unopenable media) — not re-verified this run, unchanged from prior runs
+
+Same list as 09-15: PLT-3119's `64304`; PLT-3115's `64302`/`64303`; PLT-2651's `63521`; PLT-2815's 2
+screenshots + 2 inline blobs; PLT-2874's original 07-07 screenshots; PLT-2918's 5 attachments;
+PLT-3109's 5 attachments; PLT-3116's 3 attachments (2 PNGs + a screen recording). All still
+session-wide 403s, not retried this run.
+
+### This run's recommended next actions (drafted only — none executed; identical list to 09-15, one day older)
+
+1. **PLT-2874** — send the combined draft to Yash+Gennaro. Closes Ilia's own 5-days-overdue promise
+   and Gennaro's 38-day-old open question in one message.
+2. **PLT-2651** — send the true-north correction to the customer. Critical, 133 days, 8 days unposted.
+3. **PLT-2815** — execute the close-out. Purely administrative, 72 days / 30 runs unposted.
+4. **PLT-3119** — open attachment `64304` first, then send the one-question draft to Darminder.
+5. **PLT-3109** — send the overdue chase to Yash, and/or ask Darminder what "further input" Pietro
+   actually needs.
+6. **PLT-2918** — send the chase-to-Yash draft. 22 days of human silence.
+7. **PLT-3115** — nothing new to send; Darminder/Yash's ask to the customer already covers the gap.
+8. **PLT-3116** — run the drafted console check (needs a live session, only Ilia can do this).
+
+---
+
 ## Run: 2026-09-15 (scheduled) — 8 in-scope tickets, zero drift from 09-11, zero Jira actions taken; backfilling the 09-14 run's missing README summary
 
 **Process note first:** a 09-14 run happened and did real per-ticket work — every one of the 8
