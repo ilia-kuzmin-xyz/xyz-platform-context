@@ -5232,3 +5232,51 @@ Recorded because the holding decision is now testable against its outcome:
   **zero conflicting regions** — the three commits touch the assets panel and a deploy workflow, this
   branch touches the task library. Merged and pushed as `3a4a241`. Checkpoint 3 of the run brief.
 - **#2186 correction sent** — see `PLT-2968/context.md`, the 12:35 amendment.
+
+## 2026-09-16 — #2202: the underscore fix needed three more commits, one of them a crash I introduced
+
+The user asked whether Darminder's feedback was resolved, attaching his screenshot
+(`America/Los_Angeles (GMT-7)` — offset present, underscore present, i.e. the state between my two
+09-15 commits). Checking properly rather than answering from the screenshot turned up two more things.
+
+**`4cbb35c` — a path the label fix never covered.** `GeneralTabEdit` looks the label up in the list and
+falls back to `project.timezone`, the raw id. Reached while the query loads, and permanently for a
+stored zone the backend list no longer offers. The create modal in the screenshot was genuinely fine —
+`FormSelect` derives its closed display from the decorated options (`form-select.tsx:67`), which I
+verified rather than assumed.
+
+**`00fe38c` — and that fallback was a render crash.** `IProject.timezone` is `timezone?: string`, and
+`formatTimeZoneName` called `.replace` unconditionally. A legacy project without a timezone would have
+thrown mid-render and taken General Settings down.
+
+> **`strictNullChecks` is OFF in this repo** (`strict` unset in `tsconfig.json`, so it defaults false).
+> TypeScript compiles `string | undefined` into a `(zone: string)` parameter without a word, and the
+> build goes **green shipping the crash**. CI could not have caught this. Copilot did.
+>
+> Practical rule for this codebase: **an optional field passed to a helper that dereferences it is a
+> runtime bug the compiler will not flag.** Guard in the helper — `formatDateTime` in the same file
+> already takes `string | null | undefined`, which is the convention I should have followed first time.
+
+Also restored the offset on that fallback: a zone missing from the backend list can still be one
+`Intl` resolves, and dropping to a bare name made Settings inconsistent with the selector for nothing.
+
+CI green on `00fe38c`: build ✅ 16:18:13, Sonar ✅ 0 new issues, Copilot ✅.
+
+### The uncomfortable count
+
+Three commits since Darminder's review, and **each fixed something the previous one broke**:
+
+| Commit | Fixed | Broke |
+|--------|-------|-------|
+| `8600ee7` | the underscore | search on the raw id |
+| `374981e` | search | — (but missed the Settings fallback) |
+| `4cbb35c` | the Settings fallback | **a render crash on a missing timezone** |
+| `00fe38c` | the crash | — |
+
+This is the same pattern I spent the week tallying on #2203 and wrote up in bold on 09-13. Naming it
+did not stop me producing three more instances of it inside 24 hours, on a change whose entire scope
+was cosmetic. The common thread every time: I treated a display change as if it had no dependents.
+
+**Still open on #2202:** the continent granularity question for Jason, and Copilot's point that my
+hook tests mock `serviceProvider` against this repo's documented MSW preference — raised with the user
+as a scope call rather than actioned.
