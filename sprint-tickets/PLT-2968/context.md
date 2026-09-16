@@ -3117,3 +3117,52 @@ deliberately did **not** post a second, more confident-sounding comment on a gue
 > Two days running, the thing that kept the record straight was checking a claim against evidence
 > that already existed — the build that had already run, the operator in the diff. **The cheap check
 > before the confident statement is the whole discipline.**
+
+## 2026-09-16 — #2186 was re-based onto PLT-2997's branch, and CI has stopped entirely
+
+**The PR's base is no longer `master`.** At **09:34:39** it was retargeted to
+`Task/PLT-2997-_Task_library_view_Task_and_Edit` (#2216). The branch was then force-pushed at
+**10:18:23**.
+
+**Since 10:18 no workflow run has been created for this PR at all.** Not cancelled, not queued —
+**not created**:
+
+| sha | pushed | run |
+|---|---|---|
+| `4ba7157` | 10:18 | 4721 → failure (last run that exists) |
+| `76a26e7` | ~10:35 (my fix) | **none** |
+| `04258dd` | 10:46 | **none** |
+
+Actions is **healthy repo-wide** — runs 4722/4723/4724 fired and passed on the PLT-2997 branch
+between 10:22 and 11:32 — so this is specific to #2186.
+
+**The cause, as far as it can be established from here:** the PR now **conflicts with its new base**.
+`git merge-tree` against the merge-base (`dc3600b`) reports **6 conflicting regions**, and the API
+gives `mergeable: null` / `mergeable_state: unknown`. A `pull_request` workflow checks out
+`refs/pull/2186/merge`, which cannot be computed for a conflicted PR — so GitHub creates no run.
+The timing fits: the base moved on at ~10:22 (`0d80cb5`) and nothing has run since.
+
+> **Stated as inference, not proof:** the no-runs and the conflict are both verified; "conflict is
+> why no run is created" is the mechanism that fits and is standard GitHub behaviour, but it is not
+> something the API states outright.
+
+### Why this was NOT resolved here
+
+Rule 1 of the PR work order is "merge conflict → merge the base in and resolve". Deliberately not
+done, for three reasons:
+
+1. **The conflicting files are the ones the 09-16 merge already adjudicated.** That merge commit's
+   own message records nine conflicting files, both sides having rebuilt the task runner and the
+   template builder, and a per-file decision with written rationale for each. Redoing it against a
+   moved base re-opens exactly that.
+2. **The base is moving every ~30 minutes** (10:22, 11:05, 11:32). A resolution now is likely stale
+   before it lands.
+3. **The stacking itself is a decision, not a given.** Basing #2186 on #2216 means three sprint
+   tickets cannot reach master until #2216 does. If the right answer is to retarget back to `master`,
+   then resolving against PLT-2997 is wasted work and possibly harmful. That is the user's call.
+
+### State of my own fix
+
+`76a26e7` (restoring the `requiresSignOff` assertions the de-dup stripped) is **in the tree** —
+`04258dd` carries it, all five assertions present. It has never been CI-verified, and **cannot be**
+while the PR is in this state.
