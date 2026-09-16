@@ -5182,3 +5182,53 @@ comment and the two new commits; noting the gap rather than claiming the re-requ
 
 Unchanged since 09-09 and still waiting on people: **PLT-2952** and **PLT-2972** clarifications, and
 the **#2190** question to Rishi.
+
+## 2026-09-16 (12:40) — the board has no pickable ticket left, and both held tickets cleared without me
+
+**Sprint query re-run** (`project = PLT AND sprint in openSprints() AND assignee = currentUser()`) —
+nine tickets, and by the run's own selection rule (*take on only what is neither blocked, in progress,
+nor in code review*) **none of them is pickable**:
+
+| ticket | status | note |
+|---|---|---|
+| PLT-2524 | **Blocked** | parquet freshness; untouched since 09-11 |
+| PLT-2999 | In Code Review | mine, PR #2203 |
+| PLT-2968 / 2967 / 2966 | In Code Review | mine, PR #2186 |
+| PLT-3086 | In Code Review | delivered by Rishi's #2190, not mine to drive |
+| PLT-3038 | In Code Review | GMT offset in the timezone selector |
+| PLT-2972 | In Code Review | **moved today 08:40** — see below |
+| PLT-3117 | Dev In Progress | Infinity Canvas lineage inspector |
+
+**This is the 09-15 bottleneck note, confirmed and now total.** The constraint on this board is not
+dev capacity, it is review throughput: every single item is either waiting on a reviewer or waiting on
+somebody else. There is no ticket to start. A run that finds nothing to pick up has not failed — but
+it should say so plainly rather than manufacture work, and it should spend its time on the PRs that
+*are* blocked, which is what this one did.
+
+### Both tickets I was holding resolved themselves — neither by me
+
+Recorded because the holding decision is now testable against its outcome:
+
+- **PLT-2952** (*Asset List — enter linking mode*) — **gone from my board entirely.** Now **Ready For
+  QA**, reassigned to **Gennaro Boccia**, delivered as **#2215** and merged to master (`d74ca0d`).
+  Ilia posted the how-to-test at 09:56 today. The 09-05 clarification I was waiting on was never
+  answered here; the work simply went to someone with the context.
+- **PLT-2972** (*Asset Details — Affects System Tag interaction*) — moved to **In Code Review** at
+  08:40 today, still assigned to me. Its comment thread now reads **zero comments**, so the 09-05
+  clarification I logged is no longer on the ticket.
+
+> **The holding decision was right, and this is the evidence.** Both tickets sat unanswered for
+> eleven days and I declined to guess the product intent on either. Neither needed me to guess — one
+> was reassigned to someone who knew, the other moved on. Had I implemented against an assumption on
+> 09-05, PLT-2952 would now be a wasted branch competing with #2215.
+>
+> The cost of holding was **zero**. The cost of guessing would have been a conflicting PR. Keep
+> holding tickets whose product question is genuinely unanswered, and keep **not** re-asking every
+> pass — one clear question, then dated silence.
+
+### What was actually done this pass
+
+- **#2203 brought up to date with master.** It was 3 commits behind (`ed60719` → `d74ca0d`) with
+  **zero conflicting regions** — the three commits touch the assets panel and a deploy workflow, this
+  branch touches the task library. Merged and pushed as `3a4a241`. Checkpoint 3 of the run brief.
+- **#2186 correction sent** — see `PLT-2968/context.md`, the 12:35 amendment.
