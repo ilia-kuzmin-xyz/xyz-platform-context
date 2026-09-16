@@ -526,3 +526,57 @@ Said so in the reply.
 > `semi: false`, and a `<` between two `string | number` values, which the compiler may reject. Both
 > replaced with forms that cannot fail rather than betting on them — this PR has already been burned
 > twice by "passes vitest, fails the webpack prod build".
+
+## 2026-09-16 (13:10) — the chunking commit shipped two bugs of its own, both the same shape
+
+Copilot reviewed `0040714` within minutes and found **two defects in the fix itself**, plus one older
+one. All three were real. Fixed in `54cc8bc`.
+
+### The two I introduced, an hour after writing an essay about this exact failure mode
+
+1. **Chunked reads lost the DEFAULT order.** `select()` sends `order=id.asc` whether or not the
+   caller names a column — so an unordered read is still a promise of id order. My re-sort only ran
+   `if (options.order)`. A caller who asked for nothing got **chunk order** back, silently, and only
+   once a list crossed 200.
+2. **Nulls jumped to the front on a descending order.** The comparator put nulls last, then the
+   result was multiplied by `direction`, which flipped them. `{ ascending: false }` returned nulls
+   **first** — contradicting PostgREST's `NULLS LAST`, the server's own answer to the same query,
+   and *the doc comment directly above the line*.
+
+> Both are **a rule applied to the wrong set** — the ninth and tenth instance of that shape on this
+> PR, and I wrote the paragraph naming it as the recurring defect *in the commit these two shipped
+> in*. Recognising a pattern is not the same as checking for it. The check has to be mechanical:
+> after writing a rule, enumerate every set it must cover and walk them one at a time. Here the sets
+> were "caller named a column" / "caller did not", and "values" / "nulls".
+
+The direction now applies to the **values only** — a null is a row with nothing to sort on, not a
+small value that descending floats to the top. Both have regression tests, the descending one with a
+third of the rows null across a chunk boundary.
+
+### The third: a second confirm could start a second folder loop
+
+`isBusy` is a disjunction of the individual `isPending` flags, and every one drops between
+iterations — so **Confirm went live in exactly the gap Cancel does**. The per-iteration guard added
+on 09-14 cannot catch it: a second confirm leaves `folderPendingDelete` untouched, so both loops
+agree they are working on the right folder.
+
+Fixed with a loop-level claim held for the whole run (a **ref**, because state lags by a render and
+that render *is* the gap being closed), released in a `finally`.
+
+> **Copilot's suggested fix was wrong, and taking it would have broken a feature.** It said to fold
+> the flag into `isBusy`. But `isBusy` also gates **Cancel** (`DeleteTaskDialog.tsx:199`) — so that
+> would disable the only control that can stop a folder delete once it is running, and would make
+> the withdrawal check added on 09-14 **unreachable dead code**, since that check only ever fires
+> when a cancel lands between iterations.
+>
+> They are separate props now: `operationRunning` locks what *starts* work, `isBusy` gates
+> everything including Cancel. **Re-entry and withdrawal are opposite answers to the same gap, and
+> one flag cannot serve both.** A correct finding does not come with a correct fix attached — verify
+> the remedy against the code the same way you verify the bug.
+
+### Rishi's finding was itself Claude-authored
+
+He edited his comment down and signed it "— Claude". Does not change anything — the defect was
+verified independently against the code before a line was written, and the byte table reproduced. But
+worth recording: **the strongest review finding on this PR came from another agent**, and the
+verification step is what made it safe to act on either way.
