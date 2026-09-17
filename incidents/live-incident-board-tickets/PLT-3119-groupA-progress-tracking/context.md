@@ -170,3 +170,10 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 Customer**, assignee still Darminder Atker, still **5 comments**, newest still `111943` (09-10),
 same 4 attachments. The draft to Darminder is still unposted, attachment `64304` still unopened.
 No re-investigation performed.
+
+## 2026-09-17 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, assignee still Darminder Atker, still **5 comments**, newest still `111943` (09-10),
+same 4 attachments. The draft to Darminder is still unposted, attachment `64304` still unopened.
+No re-investigation performed.

@@ -404,3 +404,10 @@ assignee still Pietro Desiato, still **7 comments**, newest still `111944` (09-1
 attachments. Nothing has moved in six days. The Group B-in-substance call stands unchanged. The
 chase to Yash (`recommended-action.md`) is now 5 days past its intended send date. No
 re-investigation performed.
+
+## 2026-09-17 (scheduled) — confirmed unchanged, seven days quiet
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **Open**,
+assignee still Pietro Desiato, still **7 comments**, newest still `111944` (09-10), same 5
+attachments. Nothing has moved in seven days. The Group B-in-substance call stands unchanged. The
+chase to Yash is now 6 days past its intended send date. No re-investigation performed.

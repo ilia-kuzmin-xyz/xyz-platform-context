@@ -199,3 +199,46 @@ Customer**, assignee now Yash Patel (as recorded 09-14), still **2 comments**, n
 Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
 Customer**, assignee still Yash Patel, still **2 comments**, newest still `111941` (09-10). Same 4
 attachments. No reply from the customer since Darminder's ask. No re-investigation performed.
+
+**Superseded within hours by the entry below** — the customer's reply landed at 11:56 the same day,
+after (or not caught by) this run's fetch. Nothing wrong with the 09-16 note at the time it was
+written; it is simply stale as of a few hours later. Kept here rather than deleted, per this repo's
+"never silently delete a prior run's finding" rule.
+
+## 2026-09-17 (scheduled) — resolved on the customer's side; folder retagged `groupA` → `resolved`
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments) surfaced **one new comment**
+that the 09-16 run's fetch did not catch:
+
+> `112316`, Yash Patel, 2026-09-16 11:56 — *"Update from user, 'Hi, I don't see anything attached.
+> But, the issue was resolved after updating the browsers. It was happening in Brave and Edge but
+> after manually checking for updates and updating them they're working now, and I found Brave even
+> had an open support ticket about LastPass for months and only just was resolved, so it must have
+> been a Chromium issue for some devices, specifically the LastPass+Chromium combo (NordPass hasn't
+> ever had these issues).' we can close the ticket now."*
+
+**This resolves the ticket's central puzzle** without ever answering which of the two fields
+(`DevicePage.tsx`'s main form vs. `DangerZone.tsx`'s delete-confirm) the customer meant — it turns
+out not to matter. The root cause was outdated Brave/Edge (Chromium) builds mishandling
+`autoComplete='off'`/`data-lpignore='true'` for LastPass specifically; NordPass never showed the
+symptom on the same page, and updating the browser resolved it client-side. **Hypothesis 2 from
+09-10 ("data-lpignore no longer reliably honoured by some browser+extension version combos") is
+the one that was right** — not a code regression, not a stale bundle, not the DangerZone field.
+
+**Status unchanged in Jira** — still `With Customer` as of this fetch; Yash's comment says "we can
+close the ticket now" but no transition has been made yet. That's the one action left, and it's
+Yash's to do (see `recommended-action.md`).
+
+**Still no attachments openable** (`64222`/`64223`/`64302`/`64303`, same session-wide 403) — no
+longer load-bearing now the ticket is resolved by other means, so not worth a human's time to
+retrieve unless the DangerZone hardening gap (below) is ever revisited.
+
+**One real, low-cost improvement this ticket surfaced and which nothing above depends on:**
+`DangerZone.tsx:69-76`'s confirm-delete field still has none of `DevicePage.tsx`'s autofill
+hardening (`autoComplete`, `data-lpignore`, explicit `type`). Harmless to leave as is — it was never
+the mechanism here — but still a one-file, two-line hardening if anyone wants to close the gap
+opportunistically. Not filed as a separate ticket by this run (drafts only, per standing rule).
+
+**Folder retagged `PLT-3115-groupA-other` → `PLT-3115-resolved-other`** this run, per the README's
+"rename on group change" rule — root cause is now resolved-elsewhere (customer's own browser), not
+something needing further evaluation from us.

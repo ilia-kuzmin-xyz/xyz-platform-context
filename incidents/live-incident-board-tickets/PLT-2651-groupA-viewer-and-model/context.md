@@ -1109,3 +1109,10 @@ Customer**, priority Critical, assignee still Yash Patel, still **33 comments**,
 `111646` (09-08). Same 4 attachments. The true-north correction is now **8 days** unposted since
 the 09-08 diagnosis. Board's only Critical, now **133 days** old. No re-investigation performed —
 nothing had reason to move in one day.
+
+## 2026-09-17 (scheduled) — confirmed unchanged, correction now 9 days unposted, ticket 134 days old
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, priority Critical, assignee still Yash Patel, still **33 comments**, newest still
+`111646` (09-08). Same 4 attachments. Correction now **9 days** unposted. Board's only Critical,
+now **134 days** old. No re-investigation performed.

@@ -107,3 +107,26 @@ or email thread) — this session can only see the Jira record.
 
 No Jira comment, transition, or assignment. No code changed. The `DangerZone.tsx` hardening is still
 available and still not applied.
+
+---
+
+## 2026-09-17 (scheduled) — resolved on the customer's side; no draft needed, one Jira transition left for a human
+
+## Classification: **closed out** — the customer independently resolved it (outdated Brave/Edge build
+## mishandling LastPass autofill blocking; fixed by their own browser update) and Yash's comment
+## already says "we can close the ticket now." Nothing left for us to investigate or draft.
+
+See `context.md` § 2026-09-17 for the comment and mechanism. The only outstanding action is a Jira
+status transition (e.g. to Done/Closed, whatever this board's "closed" state is) — that's Yash's own
+statement of intent, not a drafted suggestion from this routine, so there is no message to hand over.
+**A human should just perform the transition Yash already called for.** No comment needs drafting;
+posting one now would be noise on a ticket the customer and Yash have already settled between them.
+
+The `DangerZone.tsx` hardening described on 2026-09-10 (`autoComplete='off'`, `data-lpignore='true'`,
+explicit `type='text'`) is still a safe, zero-risk two-line diff if anyone wants it, but it is no
+longer motivated by this ticket — the actual mechanism was the customer's outdated browser, not this
+field. Leaving it undone.
+
+## What this pass did NOT do
+
+No Jira comment, transition, or assignment. No code changed.

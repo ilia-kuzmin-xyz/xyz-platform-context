@@ -950,3 +950,11 @@ priority Minor, assignee Ilia Kuzmin, still **8 comments**, newest still `112017
 13:39). No reply has followed — **5 days overdue** against Ilia's own "today" word, up from 4 on
 09-15. No re-investigation performed; nothing in the 09-15 confirmation had reason to move in one
 day. The combined draft to Yash+Gennaro (`recommended-action.md` § 2026-09-14) is still unposted.
+
+## 2026-09-17 (scheduled) — confirmed unchanged; Ilia's own "today" reply now 6 days overdue
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **In Analysis**,
+priority Minor, assignee Ilia Kuzmin, still **8 comments**, newest still `112017` (2026-09-11
+13:39). Still no reply — **6 days overdue** against Ilia's own "today" word. Same 2 attachments,
+still unopenable. No re-investigation performed; nothing had reason to move in one day. The combined
+draft to Yash+Gennaro is still unposted.

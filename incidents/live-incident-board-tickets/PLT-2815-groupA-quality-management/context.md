@@ -550,3 +550,10 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 Customer**, priority Major, assignee Yash Patel, still **13 comments**, newest still `106553`
 (07-06). Same 2 attachments. **72 days** since the last Jira activity; **30th consecutive run**
 recommending the same unposted close-out. No re-investigation performed.
+
+## 2026-09-17 (scheduled) — confirmed unchanged, 73 days stale, 31st consecutive run
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **With
+Customer**, priority Major, assignee Yash Patel, still **13 comments**, newest still `106553`
+(07-06). Same 2 attachments. **73 days** since the last Jira activity; **31st consecutive run**
+recommending the same unposted close-out. No re-investigation performed.
