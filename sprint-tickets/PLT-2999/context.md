@@ -609,3 +609,67 @@ is the one waiting on Darminder, and it is the right one to still be open.
 > everything one way. This is the same failure as the day's code bugs (*a rule applied to the wrong
 > set*), committed in the tooling used to inspect the PR rather than in the PR. Print one record's
 > `keys()` before trusting a field name.
+
+## 2026-09-17 (08:00) — #2216 landed on master; merging it into #2203 was NOT a clean merge
+
+**The stacking question is closed.** #2216 (PLT-2997) merged to master as `69576da`, and **#2186 has
+been retargeted from `Task/PLT-2997-…` back to `master`**. PLT-2968 / 2967 / 2966 are no longer
+blocked behind another PR. Nothing further needed from the user on that.
+
+#2203 was 2 commits behind (`69576da` #2216, `53431f1` #2194). `git merge-tree` reported **zero
+conflicting regions** — and that was misleading. The real merge produced **four conflicted files**,
+plus two semantic problems a clean textual merge would have hidden.
+
+> `merge-tree` against the merge-base is not the merge git will actually perform. Treat a zero from
+> it as "probably small", never as "no conflicts". **Eleven of this branch's files were also touched
+> by #2216.**
+
+### The four conflicts, all resolved by keeping BOTH sides
+
+`commissioningTheme.ts`, `checklistLibraryService/index.ts`,
+`checklistLibraryService/checklist-library-service.ts` (imports), `hooks/useChecklistLibrary.ts` —
+every one was two independent additions at the same spot, not a contested decision. Verified after
+merging that both sides' features are present in the service (`usage`, `setArchived`, `ownerKey`,
+`isLaterRun`, `blockedTemplateIds` from here; `draftItemRows`, `linkNestedItems`, `value_fields`,
+`table_columns` from #2216) and in `TaskLibraryTab.tsx`.
+
+One naming overlap left deliberately: `destructive`/`red` and `success`/`green` are the same brand
+colour under two names — this branch named by meaning, #2216 by appearance. Both kept, with a
+comment. Unifying them is a rename across two feature areas and does not belong in a merge commit
+where nobody can review it as its own change.
+
+### Two things the merge would have broken silently
+
+1. **A missing closing brace.** Keeping both sides of the `useChecklistLibrary` conflict left
+   `useChecklistDefinitionDelete` unterminated — git had put the shared trailing `}` *after* the
+   `>>>>>>>` marker, so it closed whichever side won. Keeping both meant two functions needed two
+   braces and only one existed.
+
+   > **When a conflict's two sides are both additive, check what sits immediately after the
+   > `>>>>>>>` marker.** Shared trailing punctuation belongs to exactly one side.
+
+   Caught by **prettier**, which failed to parse. With no `node_modules` and no typechecker,
+   `prettier --write` is the cheapest syntax check available in this container — a parse error is an
+   `[error]`, a formatting nit is a `[warn]`. Use it on every file touched by a hand-resolved merge.
+
+2. **`sortRows` re-sorted on a hardcoded `id`, and #2216 introduced a table with no `id`.**
+   #2216 added `tiebreakerColumn` precisely because `commissioning_project_file_scope` is keyed on
+   `project_id` and PostgREST 400s on `order=id.asc` there. My chunk re-sort still used `id`, so on
+   that one table every row would read `undefined`, every comparison would return equal, and the
+   rows would come back in **chunk order from the function whose only job is to undo chunk order**.
+   Silent, and only above 200 ids.
+
+   Fixed in `d74d79b`: the re-sort uses the same `tiebreaker` the query was built with, so the two
+   cannot drift apart again. Test added against `commissioning_project_file_scope` with 300 reversed
+   ids.
+
+   > Third time in two days for this exact shape, and the first where **neither side was wrong on
+   > its own** — my sort was correct before #2216 existed, and #2216's tiebreaker is correct
+   > independently. The defect was created by the merge. **After merging, re-read your own code
+   > against the assumptions the other side just changed**, not only for textual conflicts.
+
+### Also
+
+34 files arrive from master **already prettier-dirty**. Not reformatted — CI does not gate on
+format, and reformatting files this branch did not write would bury the real diff. Only the eight
+files this branch actually edits are kept clean.
