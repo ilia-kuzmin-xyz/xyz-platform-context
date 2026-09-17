@@ -673,3 +673,69 @@ where nobody can review it as its own change.
 34 files arrive from master **already prettier-dirty**. Not reformatted — CI does not gate on
 format, and reformatting files this branch did not write would bury the real diff. Only the eight
 files this branch actually edits are kept clean.
+
+## 2026-09-17 (08:20) — I implemented a bot's false premise, and it took a second bot to catch it
+
+**This supersedes the null-ordering claim in the 13:10 entry of 2026-09-16. That entry describes
+the change as a fix; it was a regression.** The original code was right.
+
+On 09-16 Copilot said, of `primary * direction`:
+
+> "The comparator puts nulls after non-null values, but multiplying `primary` by `direction` here
+> reverses that result for descending orders. A chunked `order: {ascending: false}` therefore
+> returns nulls first, **unlike the server query**."
+
+I verified the *mechanism* (yes, `* direction` flips null placement) and shipped the fix. **I did
+not verify the premise** — the claim about what the server actually does. On 09-17 Copilot said the
+opposite, and this time it is right:
+
+> PostgreSQL: *"By default, null values sort as if larger than any non-null value; that is, **NULLS
+> FIRST is the default for DESC order**, and NULLS LAST otherwise."*
+
+We send no `nullsfirst`/`nullslast` modifier, so Postgres's default is what an unchunked read
+returns — and reproducing an unchunked read is `sortRows`'s entire reason to exist. So nulls-last-
+in-both-directions, which reads as the tidier rule, made the chunked path disagree with the
+unchunked one on exactly the rows a nullable sort column exists to order.
+
+Fixed in `672b066`: direction applies to null placement as well as to the values, which is the
+single rule that produces both cases. The test asserting nulls-last-on-descending **was asserting
+the bug**; it now asserts nulls first.
+
+> **The lesson, and it is the sharpest one of the two days.** My standing rule was *verify a bot's
+> claim before acting on it*, and I thought I was following it — I checked the operator, traced the
+> flip, confirmed the behaviour changed. All true, and all beside the point. **I verified the
+> mechanism and took the premise on trust.**
+>
+> A finding has two halves: *"the code does X"* and *"X is wrong because the correct answer is Y."*
+> The first half is cheap to check and is where attention naturally goes. **The second half is the
+> one that decides whether a change is a fix or a regression**, and here it was a one-line lookup in
+> the Postgres docs that I never made.
+>
+> Ask explicitly: *what is this finding asserting about the outside world, and how would I know?*
+> Yesterday's answer was "Postgres orders NULLS LAST on DESC" — checkable in thirty seconds,
+> false, and load-bearing for the whole change.
+>
+> Corollary: **a test written from a false premise locks the bug in.** It passed CI, it looked like
+> coverage, and it would have defended the regression against the next person to notice.
+
+### Two more from the same review, both real
+
+- **Restore left a dead folder link.** When the original folder was deleted, restore cleared
+  `archived_at`, said "restored to root", and never cleared `folder_id`. It looked correct because
+  `groupChecklistsByFolder` renders an unknown folder id at the root — so the *display* agreed with
+  the toast while the *persisted row* disagreed with both.
+
+  Fixing it forced the `has()` vs `get()` distinction: `get()` returns `''` for a folder that exists
+  but was never named, so the old truthiness check read "unnamed" as "deleted". Harmless while the
+  branch only chose a toast string; the moment it performs a write it would have **moved a task out
+  of a real folder for having no name.** A latent bug that only becomes dangerous when a neighbouring
+  branch gains a side effect — worth watching for.
+
+- **`formatDateTime` had no test** despite feeding two surfaces. Three added. The valid case is
+  asserted by shape, not exact string: `toLocaleString` with no explicit locale or timezone would
+  otherwise test the CI runner's environment.
+
+### Standing
+
+- **#2186: green on `a5a94c3`, base back on `master`.** Unblocked.
+- **#2203: `672b066` building.** Yesterday's green was `54cc8bc`, before the master merge.
