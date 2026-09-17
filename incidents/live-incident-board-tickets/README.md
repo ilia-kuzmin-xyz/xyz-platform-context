@@ -45,6 +45,87 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-17 (scheduled) — 8 in-scope tickets, 1 brand-new (PLT-3133), 1 left scope (PLT-3115, customer self-resolved), 7 confirmed unchanged, zero Jira actions taken
+
+Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC` (top 100,
+cross-checked with a `statusCategory != Done` variant, 21 non-Done tickets total). Of those, the
+established exclusions hold: `With Technical Support` (1), `Ready For QA` (4), `In Code Review` (2),
+`READY FOR RELEASE` (2), `Customer Release Check` (2), `Blocked` (1) — release-pipeline/QA/support
+stages, none of them ours right now. **21 − 13 excluded = 8 in scope**, composed of the same 8 as
+09-16 minus PLT-3115 (now resolved, see below) plus one genuinely new ticket, **PLT-3133** (created
+2026-09-16 17:29, after the 09-16 run's fetch — that run's "no ticket created since PLT-3119" claim
+was correct at the time it was checked, not superseded).
+
+Every carried-over ticket got a fresh `getJiraIssue` fetch (full fields incl. comments/attachments)
+diffed against its 09-16 entry. **7 of 8 confirmed unchanged** (PLT-2874, PLT-2651, PLT-2815,
+PLT-3119, PLT-3109, PLT-2918, PLT-3116) — dated 2026-09-17 confirmation appended to each
+`context.md`, day/age counters bumped by one. **PLT-3115 had real drift**: the 09-16 run's fetch
+happened before an 11:56 same-day comment from Yash relaying the customer's own resolution (an
+outdated Brave/Edge build mishandling LastPass autofill; a browser update fixed it) and saying "we
+can close the ticket now." Folder retagged `groupA` → `resolved` and renamed
+(`PLT-3115-resolved-other`); no draft was written since there's nothing left to investigate, only a
+Jira transition for a human to make.
+
+**PLT-3133** (new): customer reports dashboard updates — both element status and "intangible %" —
+take hours up to a day to appear after an editor edit, and asks whether that's expected and whether
+a manual refresh exists. Two background research passes (one against `XYZPlatformApi`, one against
+`hc-frontend`) verified the mechanism precisely: element-status colouring **does** merge live data on
+every fresh load, but the merge window is capped at the last progress-recalculation timestamp
+(`calculatedOn`), so a same-day edit can be excluded until that advances; "intangible %"
+(`category_groups`/`project_progress`) has **no live merge at all** — its freshness is bounded
+entirely by an unidentified backend regeneration job not present in either accessible repo. Full
+detail and the durable architecture finding: `PLT-3133-groupA-data-pipeline/context.md` and
+`dashboard/data-pipeline.md` § 2026-09-17 addition (updated this run, since this is exactly the kind
+of durable cross-ticket behaviour that doc is for).
+
+### Group A (8) — PLT-3115 out, PLT-3133 in; day/age counters bumped on the 7 carried over
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **6 days** overdue; Gennaro's 08-12 question 39 days unanswered. Combined draft still unposted | 1 |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged. Board's only Critical, now **134 days** old; true-north correction now **9 days** unposted | 4 with a class-1 chase attached |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **73 days stale, 31st consecutive run** recommending the identical unposted close-out | 1 — stale, unresponded (on us) |
+| [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-10. One-question draft to Darminder and attachment `64304` both still unopened/unposted | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. Group B in substance. Chase to Yash now **6 days** past its intended send date | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk-automation only) | Unchanged. Human silence now **23 days**; chase-Yash draft still unsent | 1 |
+| [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | Unchanged. Ticket now **8 days old with zero developer reply**; drafted console check still unposted | 3 (pending one check) |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open | **New.** Mechanism fully diagnosed this run (see above) — one internal fact (backend parquet regen cadence) still missing before the customer can get a real number | 1 — fact owed by backend team, not customer |
+
+### Group B (0) — still empty
+
+No ticket on the board carries `Ready For Development` or `Dev In Progress` today.
+
+### Left scope this run
+
+**PLT-3115** — customer's own browser update fixed the LastPass autofill symptom; Yash's 09-16
+11:56 comment says the ticket can close. Retagged `resolved`, not deleted from the folder (per
+"never silently delete a prior run's finding").
+
+### Standing gaps (unopenable media) — not re-verified this run, unchanged from prior runs
+
+Same list as 09-16: PLT-3119's `64304`; PLT-2651's `63521`; PLT-2815's 2 screenshots + 2 inline
+blobs; PLT-2874's original 07-07 screenshots; PLT-2918's 5 attachments; PLT-3109's 5 attachments;
+PLT-3116's 3 attachments (2 PNGs + a screen recording). PLT-3115's 4 attachments no longer matter
+(ticket resolved by other means). PLT-3133 has no attachments. All still session-wide 403s where
+applicable, not retried this run.
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-2874** — send the combined draft to Yash+Gennaro. 6 days overdue, 39 days open.
+2. **PLT-2651** — send the true-north correction to the customer. Critical, 134 days, 9 days unposted.
+3. **PLT-2815** — execute the close-out. Purely administrative, 73 days / 31 runs unposted.
+4. **PLT-3119** — open attachment `64304` first, then send the one-question draft to Darminder.
+5. **PLT-3109** — send the overdue chase to Yash, and/or ask Darminder what "further input" Pietro
+   actually needs.
+6. **PLT-2918** — send the chase-to-Yash draft. 23 days of human silence.
+7. **PLT-3116** — run the drafted console check (needs a live session, only Ilia can do this).
+8. **PLT-3133** — send the draft to Darminder asking the backend team for the progress-outputs
+   parquet's regeneration cadence. Not urgent, but it's the one fact needed to close this out for
+   real rather than waiting on a video that won't distinguish "working as designed" from "broken."
+9. **PLT-3115** — no draft needed; just make the Jira transition Yash already called for.
+
+---
+
 ## Run: 2026-09-16 (scheduled) — 8 in-scope tickets, zero drift from 09-15, zero Jira actions taken
 
 Board re-queried two ways per the 09-11 reliability note: `project = PLT AND issuetype = "Live

@@ -106,6 +106,45 @@ The service maintains two maps:
 
 `getInstallationStatus()` reads from `installationStatuses` directly (not back-derived from the UI status). `calculateElementStatus()` always reads from `installationStatuses` and writes to `elementStatuses`, keeping the two maps in sync. This means `installationCheckDate` is always available for Installed Early classification — the previous design lost it by passing only `installationStatus` to the compute function.
 
+## 2026-09-17 addition — fresh-load freshness: element status has a capped live merge, Pipeline A has none
+
+Investigated for PLT-3133 (customer: dashboard updates take "hours up to a day" to show). Answers
+"what happens on a *fresh* page load, not the same open session" — the data-pipeline doc above only
+covered the same-session delta-sync case.
+
+**Element status (Pipeline B) does merge live data on every fresh load, not just within a session.**
+`DashboardProgressService._initialize()` (`dashboard-progress-service.ts:659-713`) chains, right
+after `ArtefactLoader.loadElementStatusParquet()`, into `ArtefactLoader.syncElementStatusDeltaFromAPI
+(endSyncDateTime)` (`:828-833` → `artefact-loader.ts:353-429`): it reads the parquet's own watermark
+(`ElementStore.getLastSyncTime('element_status')`, `duckdb-element-store.ts:295-305`), fetches
+`serviceProvider.Element.listElementStatuses(projectId, { lastSyncDateTime, endSyncDateTime })`
+(`element-api-service.ts:77-90`), and upserts the result (`_mergeElementStatusDelta`,
+`artefact-loader.ts:733-762`). This matches the backend's own documented contract for this artefact
+— `XYZPlatformApi/src/swagger.components.schemas.json:3708-3717` labels it a **"Nightly snapshot of
+`xyz.ElementInstallationStatus`"** and specifies exactly this merge-by-`lastModifiedOn` rule.
+
+**The catch: `endSyncDateTime` is capped at `this._v2Loader.getCalculatedOn()`**
+(`dashboard-progress-service.ts:674`, `:833`; in-code comment: *"capped at the progress `calculatedOn`
+so coloring never runs ahead of the figures"*). A status edit made after the last progress
+recalculation is excluded from the merge until `calculatedOn` advances again — so element-status
+freshness on a fresh load is bounded by the progress-recalculation cadence, not by how recently the
+edit itself was saved.
+
+**Pipeline A (`category_groups`, `project_progress` — "intangible %") has no merge step at all.**
+`ProgressOutputsV2Loader.loadProgressFiles()` (`progress-outputs-v2-loader.ts:113-205`) downloads the
+two parquet files straight from `cloudStoragePath` with no `lastSyncDateTime`/`since` parameter and
+no live-API reconciliation anywhere in that file or in `ProgressOutputsApiService`
+(`progress-outputs-api-service.ts:12`, whose only field is the read-only `calculatedOn`). So
+intangible-%/activity-progress freshness on a fresh load is bounded **entirely** by how often the
+backend regenerates that parquet — verified as an architectural absence, not inferred.
+
+**Still unknown, and worth closing if this recurs:** the actual regeneration schedule for the
+Pipeline A parquets. `XYZPlatformApi` only *reads* pre-computed rows via `reporting
+."fn_GetLatestProgressOutputs"` (`projects.service.ts:20,132-145`) — no cron, queue, or worker exists
+in that repo for writing them (checked `package.json` and top-level `src/` dirs). The write job must
+live in a separate pipeline repo not in this session's access. Full ticket detail:
+`incidents/live-incident-board-tickets/PLT-3133-groupA-data-pipeline/context.md`.
+
 ## Deep-dive
 
 - DuckDB table schemas: [`docs/dashboard/duckdb-tables/`](../../docs/dashboard/duckdb-tables/)
