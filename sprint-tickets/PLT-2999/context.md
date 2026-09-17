@@ -739,3 +739,49 @@ the bug**; it now asserts nulls first.
 
 - **#2186: green on `a5a94c3`, base back on `master`.** Unblocked.
 - **#2203: `672b066` building.** Yesterday's green was `54cc8bc`, before the master merge.
+
+## 2026-09-17 (08:35) — deleting a folder orphaned its archived tasks
+
+Copilot's best finding on this PR, and it lands on the same fault line as the restore fix fifteen
+minutes earlier.
+
+**The chain.** `allFolders` groups `liveDefinitions`, so `folder.checklists` never mentions archived
+tasks. Therefore:
+
+- a folder holding **only** archived tasks counts as **empty** → takes the silent, no-dialog delete;
+- a **mixed** folder deletes its live tasks and simply leaves the archived ones behind.
+
+Either way those rows keep a `folder_id` pointing at a folder that no longer exists. That id is not
+decoration — it is what *"Archived from …"* displays and what **Restore** uses. The FK clears it
+after the fact, silently, so an archive row quietly changes where it claims to have come from and
+Restore loses the destination it was advertising.
+
+**Fixed in `a7be5fa`:** archived tasks in the folder are moved to the root deliberately, before the
+folder goes, on both paths. *Moved, not deleted* — archiving is a decision to keep a task, and
+deleting the folder it happened to sit in does not reverse that. A failed move leaves the folder
+standing, because a folder that is still there can be deleted again whereas half-cleared archive
+rows cannot be put back. The empty path also takes the loop-level re-entry claim, since it has no
+dialog to disable the row's button and is now several writes rather than one.
+
+Kept it dialog-free: nothing live to warn about, and warning about rows the user cannot see inside
+that folder would be worse than the fix.
+
+> ### The shape, now confirmed four times on this one PR
+>
+> **The archive filter is correct for the library VIEW and wrong for every path that WRITES.**
+>
+> 1. `usage()` filtered archived instances out of the query, so the file probe never saw them → a
+>    delete proceeded over an upload (09-14).
+> 2. `useChecklistDefinitionList` did not filter archived, so an archived template could still be
+>    attached to a type and generated onto a new asset (09-14).
+> 3. Restore did not clear a stale `folder_id`, so "restored to root" was a claim the row
+>    contradicted (09-17, 08:20).
+> 4. Folder delete resolved against live definitions only, orphaning the archived ones (09-17,
+>    08:35).
+>
+> Two of those are "the filter was applied where it should not have been", two are "it was not
+> applied where it should have been". **The question to ask of any new rule in this tab is not
+> "is this correct?" but "which OTHER set does this rule also have to cover, and does it?"** Every
+> one of these passed review and CI on the first pass.
+
+**Standing:** `a7be5fa` building. #2186 green on `a5a94c3` with base back on `master`.
