@@ -1020,3 +1020,48 @@ Ran the check written down after the 09-17 merge — all four `ChecklistLibrary.
 `task-instance-sync.ts` still route through `liveDefinitionsById`, and #2186 added no new
 `ChecklistInstances.generate` callers. **The check earning a "nothing found" is the point**; it cost
 one grep.
+
+## 2026-09-18 (13:25) — a wrong finding that cited, as its evidence, the test that disproves it
+
+Copilot on `commissioningTheme.ts:36`: *"`CX.warning` and `CX.destructive` … do not populate
+`commissioningTheme.palette.warning` or `palette.error` … so these buttons can fail to render/style
+**(and the new theme test exercises that path)**."*
+
+Both halves are wrong, and the parenthetical is the giveaway.
+
+1. **Rendering** — `createTheme` fills in MUI's defaults for any palette key you omit, so
+   `palette.warning.main` exists on `commissioningTheme` whether or not it is named. There is no
+   missing-key path.
+2. **Styling** — these buttons never render under `commissioningTheme`. The tab wraps everything in
+   **`taskLibraryTheme`** (`createTheme(commissioningTheme, …)`), which carries explicit
+   `containedWarning` / `containedError` overrides setting fill, border, text colour and hover from
+   the CX tokens. The palette entry is not what paints them.
+3. **The cited test asserts exactly that.** `taskLibrary.theme.test.tsx` renders
+   `<Button variant='contained' color='warning'>` under `taskLibraryTheme` and checks the CSS MUI
+   actually emitted contains `background-color:{CX.warning}` and `border:1px solid {CX.warning}`.
+   Green on the current head. Were the palette entry load-bearing, that assertion would be finding
+   MUI's default orange.
+
+Replied with the evidence and **resolved** — confident disagreement, per the run brief.
+
+> ### Third wrong Copilot finding, and the same failure mode all three times
+>
+> 1. the folder-delete "race" — missed that the dialog is **modal**;
+> 2. `ArchiveSection` hidden by a search — missed that it sits **outside** the ternary;
+> 3. this one — missed that the buttons render under a **derived theme**.
+>
+> Every one is a misread of **what encloses the code**, not of the code. The diff hunk is all it
+> reliably sees: a wrapping `ThemeProvider`, a parent JSX branch, a modal backdrop, a theme built
+> `createTheme(base, …)` — none of that is in the hunk.
+>
+> **So the check for any Copilot finding is: what does this code sit inside, and did the finding
+> account for it?** That one question would have resolved all three in under a minute each. It is
+> also why the three real findings it got right this week were all *local* — a missing await, a
+> hardcoded value, an unfiltered map.
+>
+> Corollary worth keeping: **a finding that cites supporting evidence is not thereby better
+> supported.** This one named the test that refutes it. Open the evidence.
+
+**Thread state on #2203: 40 of 41 resolved.** The one left open is the
+`commissioning_file_association` column question (`task_item_id` vs `task_instance_id`) awaiting
+Darminder — plus his delete-cascade report, which is an issue comment rather than a review thread.
