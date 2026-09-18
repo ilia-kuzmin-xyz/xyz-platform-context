@@ -1157,3 +1157,44 @@ claim then shipped in the PR description and sat there a week.
 **Rule: before declaring something untestable/unseedable/unreachable, grep for the code that writes
 or reaches it, not just for its declaration.** A missing DDL in this repo means the schema is
 elsewhere, not that the column is inert.
+
+## 2026-09-18 — second sighting of the `calculatedOn` cap shape (PLT-3133). Not a promotion; a cross-reference and a cheaper recognition test.
+
+The candidate entry from **2026-08-13** ("Dashboard element-sync capped at the progress artefact's
+`calculatedOn`, editor's sync isn't", PLT-2874) and its **2026-08-14 amendment** both stand
+unchanged. This note adds a second, independent report with the same shape and one new diagnostic —
+it does **not** promote the entry, because PLT-3133 does not distinguish between PLT-2874's three
+competing hypotheses and so confirms none of them.
+
+**Second sighting: PLT-3133** (customer, Production, projects ATL05–ATL08, 2026-09-16 onward).
+Reported as *"updates take hours up to a day to appear in the Dashboard"* and, more tellingly,
+*"even though the Dashboard refreshed several hours later they still appear un-installed"* /
+*"Dashboard gets stuck and does not refresh normally"*. First sighting of this shape from a customer
+rather than from QA, and the first on Prod rather than Staging.
+
+**Recognition signature, sharpened:** *"the dashboard refreshed but my change still isn't there"* is
+a **cap** symptom, not a cache symptom. The distinguishing feature is that reloading does not help —
+at all, ever — because the delta merge is bounded by `calculatedOn`, not by page lifetime
+(`dashboard-progress-service.ts:670-674,690,833`). A cache problem gets better on reload; a cap
+problem does not. Reports that emphasise "I refreshed and it made no difference" should push toward
+the cap, not away from it.
+
+**New, much cheaper diagnostic than the three-query ladder in the 08-14 amendment:** `calculatedOn`
+is displayed to the user as the progress panel's **`Last updated`**
+(`progress-panel.tsx:277-288`, helper `:17`, via `use-progress-panel-data.tsx:23,363` ←
+`dashboard-progress-service.ts:744`) — the same value used as `endSyncDateTime` at `:674`. So the cap
+boundary can be read off a screenshot. `Last updated` older than the user's edit ⇒ capped merge,
+working as designed. `Last updated` newer than the edit and the change still missing ⇒ the cap is not
+the explanation and a real defect is in play. Run this before the three-query ladder; it needs
+nothing but the screen the user is already complaining about.
+
+**One asymmetry worth recording while it is fresh:** the element-status delta
+(`artefact-loader.ts:353-429`) has **no** watermark short-circuit, while the activity-links delta
+skips the API entirely when the parquet watermark is under five minutes old
+(`artefact-loader.ts:604-612`). The 08-14 amendment's observation that the skip "nullifies the cap
+entirely on a freshly-published artefact" therefore applies to **links only** — for element status
+the cap always bites. Do not generalise the amendment across both paths.
+
+Still a candidate, still unpromoted. Promote when a report of this shape is actually resolved by the
+cap (either by a `Last updated` comparison or by the ladder), and record here which one it was. Full
+findings: `live-incident-board-tickets/PLT-3133-groupA-data-pipeline/context.md` § 2026-09-18.
