@@ -890,3 +890,48 @@ restructure a working path on a race that cannot be constructed.
 
 > Both of the suppressed findings were correct and the unsuppressed one was not — **Copilot's own
 > confidence ranking was inverted here.** Verify each on its own; the label is not evidence.
+
+## 2026-09-18 (10:05) — a cancel during the evacuation could still delete the folder
+
+Fixed in `ea3eef2`. The destructive one of the round, and **entirely mine**: the rule was already
+written twice in this file and I did not apply it to the loop I added yesterday.
+
+`evacuateArchived` is several awaits. The withdrawal check sat only **before** it, so a cancel
+landing inside the evacuation fell straight through to removing the folder — after having already
+moved some of its archived tasks to the root.
+
+Worse than the reviewer said: **`moveTask.isPending` was never in `isBusy`.** Every other mutation
+the dialog can start was there. So Cancel was not merely reachable *between* moves the way it is
+between deletes — it was enabled *throughout* them.
+
+Two changes: the flag joins `isBusy`, and the withdrawal test is **passed into** the evacuation
+rather than repeated after it, so one check does both jobs (moves stop; `false` means the delete
+never runs). The empty-folder path passes no predicate — no dialog, nothing to withdraw.
+
+> **Every new await in a cancellable sequence needs the same guard the existing awaits have, and
+> every new mutation needs to join the flag that disables Cancel.** I added a loop and wired
+> neither. The tell was available without a reviewer: `isBusy` names four mutations, the handler
+> uses five.
+
+### The collation point — taken, with the claim corrected
+
+`<` on strings is code-point order (every uppercase before every lowercase; accents after `z`);
+Postgres uses the database's collation. Switched to `Intl.Collator` and **rewrote the comment to
+stop claiming parity** — the collation belongs to the database, not the browser, so this narrows
+the gap rather than closing it.
+
+Unreachable today, and worth recording why: the only two reads ordered by a text column
+(`asset_type.name`, `system.name`) filter on `eq`/`is` only and never chunk.
+
+### The `ArchiveSection` finding — WRONG, and checked before replying
+
+Claimed the archive is hidden when a search leaves `folders.length === 0`. It is not: the ternary
+closes on the line above and the archive renders as a **sibling**, guarded only by `!isEmpty`. The
+comment sitting on it describes that exact scenario as the reason it is placed there.
+
+> **Second wrong finding in two rounds, both about nesting/modality** — the folder-delete "race"
+> behind a modal dialog, and now this. Copilot reads the diff hunk, not the surrounding structure,
+> so its false positives cluster on *what encloses the code*. Cheap to check, and worth checking
+> every time rather than either trusting or dismissing by reflex.
+
+**Round tally across the two reviews: 5 findings, 3 real (all mine), 2 wrong (both structural).**
