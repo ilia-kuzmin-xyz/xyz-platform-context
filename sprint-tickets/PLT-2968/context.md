@@ -3327,3 +3327,49 @@ unknown, so the spinner still stands in. The test sets `hc:runner-override` to `
 comment says saving in a forced runner can pin a task to the wrong execution path permanently. It
 is marked TEMPORARY with removal instructions — **it must not merge.** Worth checking before this
 PR goes in.
+
+## 2026-09-18 (12:30) — Rishi APPROVED #2186, which makes the debug hotkey urgent
+
+`state: approved` — *"LGTM, thanks for those fixes!"* His changes-requested review is closed. Three
+of his four issues were fixed; the fourth (**"Could not save"**) was not, and he approved anyway
+having seen the comment saying so and asking for the rejection code. **That one is still unresolved
+and now has no review gate holding it** — worth remembering if it resurfaces in QA.
+
+### The merge hazard is now live
+
+`use-runner-override.ts` is **still on the branch and still wired into `TaskExecutionModal`** at
+head `04b3ca7`. Until now it was a debug aid on an unapproved PR. With an approval on it, it is a
+file that can reach master.
+
+Why it must not:
+
+- it defaults to **`managed`** and **bypasses `getExecutionMode`**;
+- its own comment: *"SAVING in a forced one can write a run of the wrong kind and pin that task to
+  it permanently."*
+
+That is precisely what `getExecutionMode` exists to prevent, and it is **not recoverable** — an
+instance's execution mode is fixed by the first run written for it.
+
+**Commented on the PR rather than deleting it.** It is the other writer's aid, they were pushing 30
+minutes earlier, and removing it from under an in-flight comparison would be unhelpful; the file
+carries a four-line removal recipe its author can run at the right moment. Escalated to the user
+too.
+
+> **An approval changes the risk profile of everything already on the branch.** A deliberate,
+> clearly-labelled temporary file is harmless while the PR cannot merge and becomes a hazard the
+> moment it can. Worth re-scanning a branch for TEMPORARY/debug/bypass markers *at approval*, not
+> only when they are added.
+
+### The PR has been substantially reworked since 09-17
+
+Now **60 files / 134 commits**, base `master`, and the description is rewritten: a tag now opens its
+tasks as a **page of the asset panel** rather than a modal, a tag with exactly one task opens it
+outright, and an overridden tag drops the "Overridden" word for an orange arrow. The "Not in this
+PR" list has grown two Supabase blockers worth knowing:
+
+- **Revert on a tag completed by its tasks** — `asset_readiness` has no column separating "reverted"
+  from "never set", so the reversal has nowhere to live.
+- **Running a task whose template has a signature item** — the execution RPC allowlist omits
+  `signature`, so the run is rejected with `UNSUPPORTED_DEFINITION`. Pre-existing.
+
+My own four changes (`99ff8b9`, `bd9e83c`) remain ancestors and present at head.
