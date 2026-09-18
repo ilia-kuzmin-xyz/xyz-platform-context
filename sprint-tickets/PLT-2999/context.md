@@ -843,3 +843,50 @@ added on the membership path mirroring the asset and system ones.
 `postgrest-client.ts` also overlapped: master added a `notNull` filter op. The chunking only
 inspects `in` filters and passes every other op through untouched, so there is no interaction. Four
 of the six overlapping files were test/type files with no behavioural overlap.
+
+## 2026-09-18 (09:55) — three more from Copilot: two mine and real, one I pushed back on
+
+Fixed in `b8f14e8`.
+
+### Restore announced itself before the move landed — MINE, and the same bug one step later
+
+Yesterday's 08:20 fix cleared the stale `folder_id` when the original folder was gone, then **fired
+`moveTask.mutate` and showed the success toast in the same breath**. A failed move left the task
+live again, still pointing at the deleted folder, with *"restored to root"* already on screen.
+
+> **That is the exact defect the fix was for — claim without the write — reintroduced by the fix
+> itself, displaced by one step.** Fixing a fail-open with a second unawaited write just moves where
+> the lie is told. When a fix adds a write, ask what the UI says if only *that* write fails.
+
+Both writes now sit in one awaited `try`; failure shows an error naming the task. Worst case stays
+recoverable and visible (live with its old link) rather than silently misreported.
+
+### A chunked `in` list could return a row twice — MINE, and a semantic change nobody asked for
+
+`in.("a","a")` matches a row **once**. The same value split across two chunks matches **once per
+request**, and the concatenation returns it twice. So crossing 200 values quietly changed what an
+`in` filter means.
+
+Deduplicated **on the way in** (`[...new Set(values)]`), not by filtering rows on the way out —
+the client has no row identity to dedupe by. A set gives exact parity with the unchunked query.
+Test: 250 distinct ids passed twice → two requests, 250 rows.
+
+> Third defect the chunking has produced (default order lost, nulls flipped, now duplicates). All
+> three are the same class: **an optimisation that changes the SHAPE of a query has to preserve
+> every guarantee the original had**, not just return the right set of rows. Ordering, null
+> placement and multiplicity were each a separate promise.
+
+### The folder-delete path at :1197 — DISAGREED, with a reason
+
+Copilot said the dialog path also releases the claim before `remove` settles, exposing the row
+kebab. Checked, and it does not: `DeleteTaskDialog` is a plain MUI `Dialog`, so it is **modal with
+a backdrop**, and it only closes inside that mutation's own `onSuccess`. While the request is in
+flight the dialog is up, its buttons are disabled by `isBusy` (which includes `remove.isPending`),
+and the backdrop blocks the menu underneath.
+
+The **empty-folder** path was genuinely exposed for the opposite reason — no dialog at all — which
+is why it needed the await. Offered symmetry if a reviewer prefers one mechanism, but did not
+restructure a working path on a race that cannot be constructed.
+
+> Both of the suppressed findings were correct and the unsuppressed one was not — **Copilot's own
+> confidence ranking was inverted here.** Verify each on its own; the label is not evidence.
