@@ -3219,3 +3219,76 @@ rapid-push cycle (12:07, 12:16, 12:31), so 4725 and 4727 were both **cancelled**
 
 **#2186's base is still `Task/PLT-2997-…` (#2216), not `master`.** PLT-2968 / PLT-2967 / PLT-2966
 cannot reach master until #2216 lands. The stacking is a decision, and it is still open.
+
+## 2026-09-18 (08:30) — Rishi's changes-requested review: 4 issues, 2 fixed, 1 answered, 1 undiagnosed
+
+First **human** review with findings on this PR (`changes_requested`, 4 items, two screenshots). Fixed
+in `99ff8b9`.
+
+### 1. Status did not refresh under readiness after working on a task — FIXED
+
+Both execution modals write straight through `serviceProvider`, so **React Query never learns the
+run changed**. The ladder and the step list keep rendering the status they last fetched. Neither
+`TaskInstanceModal` nor `ManagedTaskInstanceModal` invalidated anything, and neither call site
+(`readiness-ladder.tsx:536`, `AssetWorkflowStepTasks.tsx:160`) did it for them — `onClose` was just
+`setOpenInstanceId(null)`. So this was **every** execution path, not a managed-only bug.
+
+Invalidated in `TaskExecutionModal` on close: the one component both call sites already route
+through. **On close, not on save** — an evidence upload writes without going through Save, so even a
+Cancel can follow a real change. Same "fix it at the shared seam, not per caller" call as chunking
+`in.()` inside `select()`.
+
+### 2. A larger modal flashed before the task editor — FIXED, and the cause is exact
+
+While the mode check was in flight the code rendered the **legacy modal with a null instance** as a
+placeholder. Nothing editable, which was the point — but:
+
+| | `maxWidth` | rendered width |
+|---|---|---|
+| `TaskInstanceModal` (legacy) | `maxWidth={false}` | **680** (`paperSx`) |
+| `ManagedTaskInstanceModal` | not set → MUI default `sm` | **600** |
+
+So opening a managed task showed a genuinely wider dialog that then shrank. Replaced with a plain
+spinner carrying the managed modal's geometry.
+
+> A loading placeholder that borrows a *different real component* inherits its layout too. The
+> comment justifying it reasoned only about editability and never about size.
+
+### 3. `Override readiness level` still offered when overridden — ANSWERED, not changed
+
+Intentional: an override writes the level **and every level beneath it**, so re-overriding at a
+*different* level is how you raise or lower where the override sits. That is why it is unconditional
+while `Clear override` is conditional (`readiness-ladder.tsx:469`).
+
+But on the level **already** overridden it is a no-op, which is what his screenshot shows. Offered to
+hide it on a step that is itself overridden and left the decision with him — it came from the
+designs, so not quietly changing it.
+
+### 4. "Could not save" after setting a value — NOT diagnosed, and deliberately not guessed
+
+**Ruled out: it is not a stale revision.** `STALE_REVISION` has its own mapped sentence, so a bare
+`Could not save.` proves the code had **no entry** in `RUN_ERROR_MESSAGES` — whose own comment claims
+unmapped codes are "invariant violations a user can't trigger through this UI". A user triggered one.
+
+Two hypotheses formed and both left unshipped because each rests on a premise I cannot check from
+here (the `apply_execution` SQL lives in xyz-supabase):
+
+- the revision carried from `getExecutionMode` is `managedRun.revision ?? 0`, so a null column would
+  send `expectedRunRevision: 0` forever — **disproved** by the STALE_REVISION reasoning above;
+- `buildItemsPayload` hardcodes `value: null` for every answer, including `inputField`/`table` —
+  which fits "after initially setting a value" almost too well, except the code's own comment says
+  the RPC accepts a verdict-only answer for those types.
+
+> **Yesterday's lesson, applied.** Both hypotheses are mechanism-checks; neither premise is verified.
+> Having shipped a regression on exactly that error the day before, the right move was to make the
+> bug *nameable* rather than to guess at it.
+
+So: `friendlyRunError` now appends an unmapped code — `Could not save. (SOME_CODE)`. Asked Rishi for
+the bracketed code and the item type next time it happens.
+
+### Note on this branch's formatting
+
+`TaskExecutionModal.tsx`, its test, and `ManagedTaskInstanceModal.tsx` are **all prettier-dirty at
+baseline**. Checked with `git stash` before touching them and did NOT reformat — `prettier --check`
+was used purely as a parse check (`[warn]` = formatting, `[error]` = syntax). CI does not gate on
+format here, and reformatting files this change did not write would bury the real diff.
