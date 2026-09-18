@@ -785,3 +785,61 @@ that folder would be worse than the fix.
 > one of these passed review and CI on the first pass.
 
 **Standing:** `a7be5fa` building. #2186 green on `a5a94c3` with base back on `master`.
+
+## 2026-09-18 (09:45) — merging master in reintroduced the archive bug through a door that did not exist
+
+Master moved 3 (#2213 PLT-3086, #2218, #2220). Merged into #2203 as `0197d90` — **clean this time**,
+no conflicts. But the semantic check afterwards found a real regression, and **no reviewer would
+have caught it, because neither side was wrong.**
+
+### What happened
+
+**#2213 added membership reconciliation** to `task-instance-sync.ts`. Both of its new paths build
+their own definition map before generating:
+
+```ts
+const definitionById = new Map(definitions.map(def => [def.id, def]))
+```
+
+The two pre-existing generating paths (lines 144, 361) use `liveDefinitionsById`, which drops
+`archivedAt` rows. So after the merge an archived template could be generated onto:
+
+- a **newly joined member** (`reconcileMemberships`), and
+- a **rejoining** one whose owner chose "fresh" over restore.
+
+That is exactly what the archive filter exists to prevent. The filter was in place, correct, and
+**simply not reached**.
+
+Fixed in `6817fcc`: both go through `liveDefinitionsById`, so an archived template behaves as a
+deleted one already does — resolves to nothing, and the existing `!definition` guard skips it. Test
+added on the membership path mirroring the asset and system ones.
+
+> ### Fifth instance, and the first that arrived from someone else's merge
+>
+> The running tally of *a rule applied to the wrong set* on this PR:
+>
+> 1. `usage()` filtered archived instances out of the query → file probe blind to them (09-14)
+> 2. `useChecklistDefinitionList` did not filter → archived template attachable to a type (09-14)
+> 3. Restore did not clear a stale `folder_id` (09-17)
+> 4. Folder delete resolved against live definitions only → orphaned archived tasks (09-17)
+> 5. **#2213's two new generation paths bypassed the filter (09-18)**
+>
+> The first four were mine. The fifth is nobody's fault: **#2213 could not respect an invariant it
+> had never heard of, and my filter could not cover a call site that did not exist.** The merge is
+> the only place the two meet.
+>
+> **So a clean merge is not a safe merge, and "did my code survive?" is the wrong question.** The
+> right one is: *what new code did the other side add that my invariant is supposed to govern?*
+> For this branch, concretely — **on every merge, grep for new `ChecklistLibrary.list` callers and
+> new `ChecklistInstances.generate` callers, and check each goes through `liveDefinitionsById`.**
+> An invariant enforced by a helper only holds where somebody remembers to call the helper.
+>
+> (The stronger fix is to make it unbypassable — have the service never hand out archived
+> definitions to the reconciler at all, rather than asking four call sites to filter. Worth raising
+> once this PR lands; too broad to do inside it.)
+
+### Also verified, and clean
+
+`postgrest-client.ts` also overlapped: master added a `notNull` filter op. The chunking only
+inspects `in` filters and passes every other op through untouched, so there is no interaction. Four
+of the six overlapping files were test/type files with no behavioural overlap.
