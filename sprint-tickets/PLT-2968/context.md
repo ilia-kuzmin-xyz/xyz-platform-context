@@ -3292,3 +3292,38 @@ the bracketed code and the item type next time it happens.
 baseline**. Checked with `git stash` before touching them and did NOT reformat — `prettier --check`
 was used purely as a parse check (`[warn]` = formatting, `[error]` = syntax). CI does not gate on
 format here, and reformatting files this change did not write would bury the real diff.
+
+## 2026-09-18 (09:15) — my placeholder change turned #2186 red; fixed in `bd9e83c`
+
+`ba2fed7` failed: **1 test of 5253**, and it was mine.
+
+`TaskExecutionModal.test.tsx > drops a check that resolves after the modal has closed` asserted
+`getByTestId('legacy-modal')` was present. Swapping the in-flight placeholder from the legacy modal
+to a real MUI `Dialog` broke it — **a stub renders regardless of `open`; a real Dialog renders
+nothing at all while closed.**
+
+> **The mistake was narrow and avoidable: I read the first ~160 lines of the test file, updated the
+> one case I saw, and did not read the rest.** When you change what a component renders in some
+> state, grep the whole suite for every assertion about that state before deciding you have updated
+> it. `grep -n "legacy-modal\|managed-modal"` over the file — which is what found it afterwards —
+> would have taken ten seconds.
+>
+> Note the shape: **a stub that ignores a prop the real component honours.** The old assertion was
+> only ever a proxy for "no runner is mounted", and it held for the wrong reason. That is now what
+> it says.
+
+Also added a microtask flush before the assertion: an assertion on **absence passes instantly**, so
+the test would have passed even with the cancellation guard deleted. It was testing nothing.
+
+### The other writer integrated my changes rather than colliding with them
+
+Worth recording, because it is the opposite of the 09-16 conflict. `ba2fed7` adds a **temporary
+runner-override hotkey** (`use-runner-override.ts`, Ctrl+Shift+A) on top of my spinner and
+`handleClose` — both kept, and the hotkey deliberately does **not** override while routing is
+unknown, so the spinner still stands in. The test sets `hc:runner-override` to `auto` in
+`beforeEach` so routing is honoured.
+
+⚠ That hook defaults to **`managed`**, bypassing `getExecutionMode` in the running app. Its own
+comment says saving in a forced runner can pin a task to the wrong execution path permanently. It
+is marked TEMPORARY with removal instructions — **it must not merge.** Worth checking before this
+PR goes in.
