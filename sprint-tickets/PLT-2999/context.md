@@ -988,3 +988,35 @@ Thread left **open**, not resolved.
 **APIs that exist if the cascade is approved:** `TypeTasks.unlinkAssetType(...)` and
 `ChecklistInstances.removeInstances(projectId, instanceIds)` — so the change is bounded, just not
 mine to make unasked.
+
+## 2026-09-18 (13:20) — merging the #2186 merge in produced a duplicate i18n key
+
+#2203 brought master in again after #2186 landed (`015bf5e`). One textual conflict — both sides had
+added an import to `checklist-library-service.ts`, kept both.
+
+**The real find was in `main.json`: a duplicated `preconditions` block.** Both sides had added an
+identical block to `hc.pages.ChecklistCreatePage`, at different points in the file, so git took both
+and produced a valid-looking JSON object with the key twice.
+
+> **Same class as the `requiresSignOff` duplicate that broke the build on 09-16, in a different
+> language.** In TS a duplicate key is TS1117 and webpack refuses it; in JSON it is *legal* — the
+> parser silently keeps the last one. So it would not have failed a build, a test or Sonar. It would
+> simply have sat there, with one of two identical blocks winning, until someone edited the "wrong"
+> one and wondered why nothing changed.
+>
+> **The check is cheap and worth running on every merge that touches a translations file:**
+> ```
+> python3 -c "import json,collections; json.load(open('src/main/webapp/i18n/en/main.json'),
+>   object_pairs_hook=lambda p: (print([k for k,n in collections.Counter(k for k,_ in p).items() if n>1] or ''), dict(p))[1])"
+> ```
+> `json.load` alone will NOT tell you — it has to be `object_pairs_hook`.
+
+Blocks were byte-identical, so dropping either was safe; kept the one sitting with the other builder
+strings.
+
+### The post-merge invariant check passed this time
+
+Ran the check written down after the 09-17 merge — all four `ChecklistLibrary.list` call sites in
+`task-instance-sync.ts` still route through `liveDefinitionsById`, and #2186 added no new
+`ChecklistInstances.generate` callers. **The check earning a "nothing found" is the point**; it cost
+one grep.
