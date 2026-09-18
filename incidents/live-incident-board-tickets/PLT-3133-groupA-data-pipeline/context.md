@@ -130,3 +130,120 @@ multi-hour gap is the expected, current behaviour, not evidence of an outage.
   no evidence yet of an actual regression, as distinct from a documented-but-unfamiliar cadence.
 - Darminder's requested video/repro has not yet been supplied (comment 112350 is 1 day old as of
   this fetch — status is Freshdesk "Waiting on customer").
+
+## 2026-09-18 — the customer's concrete example landed, and it is checkable from inside the app. Four new screenshots (unopenable here). "Atom" appears as a second edit path.
+
+**The 09-17 entry above was written from a fetch taken before 09:16 BST that day and is therefore
+incomplete, not wrong** — it recorded 3 comments and `attachment: []`. The live ticket now has
+**6 comments and 4 PNG attachments**, all added 2026-09-17 09:06–09:17. Nothing above is superseded;
+this section adds what arrived after that fetch.
+
+Live fields this pass: status **Open** (unchanged), priority Medium, assignee **Darminder Atker**
+(unchanged — unlike PLT-3033, no automation reassignment has fired here), reporter Yash Patel,
+`updated` `2026-09-17T09:17:03+0100`, resolution `null`.
+
+### New comments
+
+- `112385` (09-17 09:06) — Freshdesk 7989 → **Open** (automation).
+- `112387` (09-17 09:16, Yash → Darminder) — the substantive one. Customer supplies a specific
+  example and widens the report in two ways that matter:
+  - **The edits are made through the Web Viewer *and Atom*** ("updated through both the Web Viewer
+    and Atom on a daily basis"). The 09-17 entry only reasoned about the Web Viewer.
+  - Customer's own words: *"I installed these elements yesterday, however even though the Dashboard
+    refreshed several hours later they still appear un-installed."* Plus: *"It seems Dashboard gets
+    stuck and does not refresh normally."*
+  - Four screenshots attached (see below): the elements marked installed, and the same elements
+    still reading uninstalled in the Dashboard hours later.
+- `112388` (09-17 09:17) — Freshdesk 7989 → **Waiting on 3rd line**. The ball is explicitly ours now;
+  it is no longer parked on the customer.
+
+### Why this example fits the documented cap rather than contradicting it
+
+The customer's framing is "the Dashboard refreshed but the elements didn't change", which sounds
+like a stuck cache. Under the mechanism verified on 09-17 it is the expected output, because
+**"refreshed" and "merged my edit" are two different events**:
+
+- Re-verified this pass, unchanged: `endSyncDateTime` is `this._v2Loader.getCalculatedOn()` and is
+  only set when the progress-outputs prefetch succeeds —
+  `dashboard-progress-service.ts:670-674` (`const endSyncDateTime = outputs ? (this._v2Loader
+  .getCalculatedOn() ?? undefined) : undefined`), with the in-code comment at `:666-668` stating
+  that on prefetch failure "delta syncs run uncapped". Passed through to
+  `syncElementStatusDeltaFromAPI` at `:690` → `:833`.
+- **New this pass — the element-status delta path has no freshness short-circuit.**
+  `artefact-loader.ts:353-429` runs the delta unconditionally on every fresh load. Its sibling,
+  `syncActivityLinksDeltaFromAPI`, *does* skip the API call when the parquet watermark is under five
+  minutes old (`artefact-loader.ts:604-612`). So for element status the `calculatedOn` cap is the
+  **only** gate, and it is a hard one: a page reload does not and cannot pull in an edit made after
+  `calculatedOn`, no matter how many times the customer reloads. That is exactly the "refreshed but
+  nothing changed" signature they describe.
+
+### New this pass, and the reason this is now a checkable ticket: `calculatedOn` is shown in the UI
+
+The progress panel renders **`Last updated: <calculatedOn>`** — `progress-panel.tsx:277-288`, using
+the `formatCalculatedOn` helper defined at `progress-panel.tsx:17`, fed from
+`use-progress-panel-data.tsx:23,363`, which is the same value emitted by
+`dashboard-progress-service.ts:744` and the same one used as `endSyncDateTime` at `:674`.
+
+**This means the cut-off is already visible to the customer, on the screen they are complaining
+about.** The diagnostic is therefore free and needs no backend access, no logs and no new build:
+
+- If `Last updated` is **older** than the time the elements were marked installed → this is the
+  documented cap behaving as designed, and the only real question left is the regeneration cadence
+  (still unknown, see 09-17 entry).
+- If `Last updated` is **newer** than the edit and the elements still read uninstalled → the cap is
+  *not* the explanation and something genuinely is stuck. That would be a new defect, and the next
+  place to look is whether the backend's `listElementStatuses` delta
+  (`element-api-service.ts:77-90`) is actually returning those rows for the window requested.
+
+Either answer moves the ticket. The screenshots the customer already sent may even contain it, if
+the progress panel is visible in either one — unverifiable here, see below.
+
+### The Atom path qualifies Darminder's 09-16 comment further
+
+The 09-17 entry noted that Darminder's *"the status update should appear in dashboard once it is done
+in the editor"* holds only for the same open session, via the in-session delta-sync write
+(`InstallationStatusServiceV2.setElementStatus()`). **For edits made in Atom that consolation does
+not exist at all** — there is no browser session holding an open DuckDB table to write into, so an
+Atom edit is *only* ever visible to the Dashboard through the capped fresh-load merge. If a
+meaningful share of this customer's daily updates come from Atom, the "it should appear immediately"
+expectation was never achievable for those, independent of any cadence question. **Unverified:**
+that Atom writes land in the same `xyz.ElementInstallationStatus` table the artefact and the delta
+API read from — highly likely from the swagger contract quoted in the 09-17 entry, but the Atom
+client is not in either repo reachable from this session.
+
+### Pattern check (per routine step 4) — this is not novel
+
+`incidents/recurring-defect-patterns.md` already carries the `calculatedOn` cap as a **candidate**
+entry (2026-08-13, PLT-2874, § "Dashboard element-sync capped at the progress artefact's
+`calculatedOn`, editor's sync isn't", plus the 2026-08-14 amendment that narrows it). PLT-3133 is
+the **second independent report with the same shape** — and the first from a customer on Production
+rather than from QA on Staging. It is not yet a *confirmation* of PLT-2874's mechanism (that ticket
+had three live hypotheses and this one does not distinguish between them), so nothing there is
+promoted by this entry; a cross-reference has been added instead. Recognition signature worth
+carrying: **"the dashboard refreshed but my change still isn't there" is a cap symptom, not a cache
+symptom** — check the panel's own `Last updated` before assuming staleness.
+
+### New unopenable attachments (metadata only — 403 on content is a confirmed gap for this session, not re-tested)
+
+All four uploaded by Yash Patel, 2026-09-17 09:16, PNG:
+
+| id | filename | size | what it would settle |
+|---|---|---|---|
+| 64823 | `Screenshot 2026-09-17 134446.png` | 285 KB | largest of the "element details" pair — likely the Web Viewer/Atom side showing the elements marked installed, with timestamps |
+| 64824 | `Screenshot 2026-09-17 110534.png` | 176 KB | one of the two inline images in the customer quote — the Dashboard still showing them uninstalled |
+| 64825 | `Screenshot 2026-09-17 110458.png` | 137 KB | the other inline image — the installed-state evidence |
+| 64826 | `Screenshot 2026-09-17 134520.png` | 422 KB | second "element details" shot; **the most likely of the four to contain the progress panel's `Last updated` value**, which is the single fact that resolves this ticket |
+
+None of these can be read by this routine. A human opening **64826 and 64824 side by side** and
+reading `Last updated` against the installation timestamp would likely close the diagnosis without
+any further customer contact.
+
+### What remains unverified (carried forward plus new)
+
+- Everything under the 09-17 entry's "What remains unverified" still stands, in particular the
+  **Pipeline A parquet regeneration cadence** — still the one number that converts "up to a day"
+  into an answer for the customer.
+- Whether the four screenshots show the `Last updated` value (cannot open them).
+- Whether Atom's write path is the same `ElementInstallationStatus` table (Atom client not in scope).
+- Whether `calculatedOn` for ATL05–ATL08 is actually lagging, or advancing normally — this is the
+  crux and is a data question about those four projects, answerable only with app or DB access.

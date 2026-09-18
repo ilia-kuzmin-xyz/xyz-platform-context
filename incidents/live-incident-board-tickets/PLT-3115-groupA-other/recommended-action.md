@@ -130,3 +130,40 @@ field. Leaving it undone.
 ## What this pass did NOT do
 
 No Jira comment, transition, or assignment. No code changed.
+
+---
+
+## 2026-09-18 (scheduled) — no Jira change since 09-16. Reclassification recommended, and one short nudge now has a reason to exist.
+
+**Action class: 1 — stale/unresponded, on us.** Not 2, 3 or 4: there is nothing to build, nothing to
+reproduce in the app, and nobody disagrees about anything. The mechanism was settled by the customer
+themselves on 09-16 (outdated Brave/Edge Chromium mishandling LastPass autofill suppression — see
+`context.md` § 2026-09-17). **Who owes what: Yash Patel owes one board action** — the transition he
+himself called for. Two days old, so not yet urgent; flagged now because of the precedent next door.
+
+**This partly supersedes the 09-17 note above.** That note concluded "no draft needed, one Jira
+transition left for a human," and its *findings* stand in full. What it got wrong is the implicit
+assumption that an unexecuted transition will simply happen. On this board it demonstrably does not:
+PLT-2815 has sat settled-but-open for **74 days across 32 consecutive runs** recommending exactly such
+a transition, with the same assignee. So a short nudge is worth having ready here rather than waiting
+for this ticket to become the second 70-day orphan.
+
+**Folder tag:** recommend renaming `PLT-3115-resolved-other/` → `PLT-3115-groupA-other/` until the
+Jira status actually leaves `With Customer` (reasoning in `context.md` § 2026-09-18). Not renamed by
+this run — renames are executed centrally.
+
+### Draft nudge to Yash Patel — 59 words, UNPOSTED
+
+> Hi Yash, the customer's update on PLT-3115 says the autofill stopped after they updated their
+> browsers, and you noted we can close it. The ticket is still sitting in With Customer with no
+> resolution set. Nothing is outstanding on our side, and Darminder's question has been answered by
+> the customer's own findings. **Can you close it with a resolution?**
+
+If PLT-2815's chase (see that folder) is sent in the same pass, these two can be raised together —
+both are assigned to Yash and both need the same one-click close with a resolution set. Do not send a
+merged message that buries either ticket key.
+
+## What this pass did NOT do
+
+No Jira comment, transition, or assignment. No code changed. No folder renamed. The `DangerZone.tsx`
+hardening remains undone and still unmotivated by this ticket.

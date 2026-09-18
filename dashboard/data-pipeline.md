@@ -145,6 +145,36 @@ in that repo for writing them (checked `package.json` and top-level `src/` dirs)
 live in a separate pipeline repo not in this session's access. Full ticket detail:
 `incidents/live-incident-board-tickets/PLT-3133-groupA-data-pipeline/context.md`.
 
+## 2026-09-18 addition — the cap's timestamp is visible in the UI, and the element-status path has no freshness short-circuit
+
+Two refinements to the 09-17 section above (which stands unchanged — this adds to it, retracts
+nothing). Both came out of PLT-3133's second round of customer evidence.
+
+**1. `calculatedOn` is rendered to the user as the progress panel's "Last updated".**
+`progress-panel.tsx:277-288` prints `Last updated: ${formatCalculatedOn(calculatedOn)}` (helper at
+`progress-panel.tsx:17`), fed from `use-progress-panel-data.tsx:23,363` and ultimately from
+`dashboard-progress-service.ts:744` — the **same** value passed as `endSyncDateTime` at `:674`. So
+the boundary that decides which element-status edits are merged on a fresh load is already on screen.
+Practical consequence: for any "my change isn't showing on the dashboard" report, comparing the
+panel's `Last updated` against the time of the edit distinguishes *capped merge* (Last updated older
+than the edit — working as designed) from *a real defect* (Last updated newer and the change still
+missing) with no logs, no DB access and no repro build.
+
+**2. The element-status delta has no watermark skip; the activity-links delta does.**
+`syncElementStatusDeltaFromAPI` (`artefact-loader.ts:353-429`) runs unconditionally on every fresh
+load. `syncActivityLinksDeltaFromAPI` returns early when the parquet watermark is under five minutes
+old (`artefact-loader.ts:604-612`). For element status, therefore, the `calculatedOn` cap is the only
+gate — and it is absolute: reloading the page cannot pull in an edit made after `calculatedOn`,
+however many times the user tries. That is exactly the "the dashboard refreshed but nothing changed"
+signature customers report, and it should not be read as a stuck cache.
+
+Also worth carrying: edits made in **Atom** have no open browser session to receive the in-session
+`InstallationStatusServiceV2.setElementStatus()` write, so for those the capped fresh-load merge is
+the *only* route to the dashboard — the "it shows immediately in the editor" reassurance does not
+apply to them. (Unverified that Atom writes the same `ElementInstallationStatus` table; the Atom
+client is not in this repo.) Ticket detail:
+`incidents/live-incident-board-tickets/PLT-3133-groupA-data-pipeline/context.md` § 2026-09-18.
+
 ## Deep-dive
 
 - DuckDB table schemas: [`docs/dashboard/duckdb-tables/`](../../docs/dashboard/duckdb-tables/)

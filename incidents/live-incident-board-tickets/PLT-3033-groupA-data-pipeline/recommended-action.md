@@ -198,3 +198,40 @@ in `context.md` §4 (Path 1/Path 2), not confirmed against this specific file.
 **Not sent in this draft:** the previous-schedule ask. It only becomes necessary if the check above
 comes back negative (single project, no `proj_id` mismatch) — at that point H2 (parent-loss on
 re-ingest) becomes the lead hypothesis and a before/after diff is genuinely needed.
+
+## 2026-09-18 — SUPERSEDES every draft above. Nothing technical is owed; one confirmation is.
+
+All earlier drafts in this file (the 08-19/08-20/08-31 schedule-pair asks, and the 09-08 `proj_id`
+check to Darminder) are **superseded and should not be sent** — they were superseded on 09-10 by
+Darminder resolving the ticket from the XER directly, and nothing since has revived them. They are
+kept above for the record, per the additive rule.
+
+## Classification: **1** — stale, unresponded. The customer owes a confirmation; Yash owes the chase.
+
+Who owes what, plainly:
+- **Matthew (via Yash)** owes the answer to Darminder's 09-08 question — does the schedule look
+  right now that the correctly formatted one was uploaded? Asked on 09-08, unanswered **10 days**.
+- **Yash** owes the chase and then the close. He said on 09-08 he would come back with the customer's
+  reply; nothing since. The Freshdesk close-then-un-close on 09-17 is the only movement in ten days
+  and carries no information.
+- **Nobody on the engineering side owes anything.** There is no open technical question on this
+  ticket and no reason for it to stay on the incident board once the confirmation lands.
+
+### Draft to Yash — 68 words, UNPOSTED
+
+> The Freshdesk ticket for this flipped to Closed and back to Waiting on customer within two minutes
+> yesterday, so it's not clear where it landed. Darminder's read on 8 September was that re-uploading
+> the correctly formatted schedule fixed it and the ticket could be closed. Nothing has come back from
+> the customer since. **Did Matthew confirm the schedule now looks right, so we can close this one out?**
+
+**Assumption this rests on, one line:** that the 09-17 Freshdesk Closed → Waiting-on-customer pair
+was an operator correction rather than a real resolution being recorded and then reversed — inferred
+from the two-minute gap and the absence of any accompanying comment, not confirmed.
+
+### If the confirmation never comes
+
+This has now been the pattern on PLT-3033 for its whole life (see the 08-31 escalation note: a
+correct, ready question sitting unsent for two weeks). At ten days, the move is not another message
+into the same thread — it is a named owner and a date for the customer contact, or closing the Jira
+on Darminder's technical finding and letting the Freshdesk ticket carry any residual customer
+follow-up. Flagging only; this routine takes no live action.

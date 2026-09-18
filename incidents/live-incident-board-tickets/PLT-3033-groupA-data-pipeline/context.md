@@ -460,3 +460,32 @@ test this folder had queued since 08-19. **The two-line check was never run** �
 didn't need it. Yash asked the customer to confirm by re-checking on 09-08; no reply yet as of this
 run. Nothing left for this routine: the hand-off draft in `recommended-action.md` is superseded by
 Darminder's own resolution and should not be sent.
+
+## 2026-09-18 — small change, no technical content: Freshdesk closed and immediately un-closed. Jira status correction.
+
+Live re-fetch (13 comments, `updated` `2026-09-17T16:21:19+0100`). Two new comments since the 09-10
+entry, both Freshdesk automation, both on 2026-09-17:
+
+- `112443` (16:19:37) — Freshdesk 7615 → **Closed**.
+- `112444` (16:21:19) — Freshdesk 7615 → **Waiting on customer**, two minutes later.
+
+**No human comment since Yash's `111663` on 09-08 16:56** (*"I've asked user to check the same and
+will update as soon as they get back"*). So the customer has still not confirmed Darminder's 09-08
+read that the problem went away once the correctly formatted schedule was uploaded — that is now
+**ten days** without a reply, and the close/re-open pair suggests someone started to wrap the
+Freshdesk ticket up and then thought better of it, rather than a confirmation arriving.
+
+**Correction to the 09-10 entry, not a new change:** that entry recorded the Jira status as *"With
+Technical Support"*. The live `status` field this pass reads **`With Customer`** (id 10711), and
+`assignee` reads **Yash Patel**, consistent with the long-standing 08-26 correction about the
+automation rule that reassigns on status transitions. Darminder remains the substantive technical
+owner. Treating this as a mis-read in the 09-10 entry rather than a subsequent transition, since no
+status changelog entry was pulled this pass to distinguish the two — flagged rather than asserted.
+
+**Nothing technical re-derived, deliberately.** The mechanism question was closed out on 09-08 by
+Darminder reading the XER himself (malformed upload, not an ingest defect), and no new evidence has
+arrived since. The `proj_id` two-line check queued in this folder from 08-19 was never run and is now
+moot; it is kept in the record above for the pattern, not as an open action. The four 08-17 PNGs and
+the 27 MB XER (`64009`) remain unopenable from this session — unchanged, not re-tested.
+
+Confidence unchanged. This ticket is administratively open and technically finished.

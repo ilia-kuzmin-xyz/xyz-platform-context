@@ -299,3 +299,24 @@ its filter needs widening first (see `debug-instructions.md`, 2026-09-09 note). 
 the branch rather than leaving it to look like queued work. Either way it does not gate the close.
 
 **No Jira action was taken by this run.**
+
+---
+
+## 2026-09-18 (scheduled) — unchanged, 74 days stale, 32nd consecutive run. The 09-09 chase-Yash draft stands as written.
+
+Live re-fetch confirms zero movement (see `context.md` this date): status `With Customer`, priority
+Major, assignee Yash Patel, `resolution = null`, `updated` still `2026-07-06T10:18:45.272+0100`, 13
+comments, newest still `106553`. **Action class unchanged: 1 — stale, unresponded (on us).** Nobody is
+waiting on engineering, nobody is waiting on the customer, and Freshdesk #7126 has been Closed since
+07-06. No re-investigation performed and nothing re-drafted — the 2026-09-09 chase-to-Yash draft (83
+words) is still the right instrument, and re-writing it a 33rd time will not move it.
+
+**New this run, only as context for whoever acts:** PLT-3115 has just arrived at the same state — its
+customer said "we can close the ticket now" on 09-16 and its Jira is still `With Customer` with a null
+resolution. Both tickets are assigned to Yash and both need the identical one-click close with a
+resolution set, so the two chases can reasonably be raised in the same pass (keep both ticket keys
+visible; do not merge them into one vague message). See
+`PLT-3115-groupA-other/recommended-action.md` § 2026-09-18 (folder retagged back to `groupA` this
+same run — see that file for why).
+
+**No Jira action was taken by this run.**
