@@ -242,3 +242,46 @@ opportunistically. Not filed as a separate ticket by this run (drafts only, per 
 **Folder retagged `PLT-3115-groupA-other` → `PLT-3115-resolved-other`** this run, per the README's
 "rename on group change" rule — root cause is now resolved-elsewhere (customer's own browser), not
 something needing further evaluation from us.
+
+## 2026-09-18 (scheduled) — no Jira change since 09-16; but the `resolved` folder tag applied on 09-17 is ahead of the live status
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`, `status`, `assignee`, `priority`,
+`created`, `updated`, `resolution`). **Nothing has changed since the 09-17 entry above:** status still
+**With Customer**, `resolution = null`, assignee Yash Patel, priority Major,
+`updated = 2026-09-16T11:56:21.669+0100`, still **3 comments** — `111785` (Yash, 09-09), `111941`
+(Darminder, 09-10), `112316` (Yash, 09-16, the customer's self-resolution + "we can close the ticket
+now"). Same 4 attachments (`64222`, `64223`, `64302`, `64303`), unchanged. No transition has been
+made in the two days since Yash said the ticket can close.
+
+**Classification review (the point of this run's pass).** The 09-17 run retagged this folder
+`groupA-other` → `resolved-other`. That was a reasonable read of the *substance* — the README defines
+`resolved` as "fix identified/owned elsewhere … or root-caused to 'as designed' — still trackable but
+no longer needs our evaluation", and this ticket's root cause genuinely is owned elsewhere (the
+customer's outdated Brave/Edge Chromium builds mishandling LastPass autofill suppression). Nothing is
+left for us to evaluate, and that half of the call stands.
+
+**But it is ahead of the live record, and that has a cost.** The README's scope rules key group
+membership off Jira status: `Open` / `In Analysis` / `With Customer` → Group A, and the rename rule is
+"when a ticket's **status** changes group … rename the folder's group tag on the next run." **This
+ticket's status has not changed.** It is still `With Customer` with a null resolution, i.e. still
+in-scope by the routine's own definition. Tagging it `resolved` drops it off the in-scope list while
+Jira still reports it open, so the one remaining action — the transition Yash himself called for —
+loses its daily visibility on this board.
+
+That is not a hypothetical risk: it is precisely the failure mode **PLT-2815** has been demonstrating
+for 74 days and 32 consecutive runs (settled in substance since 2026-06-23, Freshdesk closed 07-06,
+Jira still `With Customer`, close-out never executed — same assignee, Yash Patel). A ticket that is
+"done except for the click" needs *more* visibility than a live one, not less.
+
+**Recommendation (for central execution — this run renamed nothing):** rename
+`PLT-3115-resolved-other/` → **`PLT-3115-groupA-other/`** and carry it as Group A with a
+one-line "awaiting transition" note, until the Jira status actually leaves `With Customer`. Retag it
+`resolved` on the first run after the transition lands. The 09-17 entry above is **not** superseded on
+its findings — the mechanism, the customer's own resolution and the "nothing left to investigate"
+conclusion are all correct and unchanged; only the folder tag is premature.
+
+**Attachments:** all 4 still unopenable (session-wide 403, not retried). None is load-bearing now the
+mechanism is known. **Code:** not re-read this run — nothing in the ticket changed, and the 09-14/09-17
+reads of `DevicePage.tsx` and `DangerZone.tsx` still stand. The `DangerZone.tsx:69-76` hardening gap
+noted on 09-10 remains open, remains unmotivated by this ticket, and remains a two-line diff for
+whoever wants it.

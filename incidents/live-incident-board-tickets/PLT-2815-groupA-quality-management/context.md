@@ -557,3 +557,21 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 Customer**, priority Major, assignee Yash Patel, still **13 comments**, newest still `106553`
 (07-06). Same 2 attachments. **73 days** since the last Jira activity; **31st consecutive run**
 recommending the same unposted close-out. No re-investigation performed.
+
+## 2026-09-18 (scheduled) — confirmed unchanged, 74 days stale, 32nd consecutive run
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`, `status`, `assignee`, `priority`,
+`created`, `updated`, `resolution`): status still **With Customer**, priority Major, assignee Yash
+Patel, `resolution = null`, `updated` still `2026-07-06T10:18:45.272+0100`, still **13 comments** —
+same 13 ids, newest still `106553` (Yash, "Freshdesk #7126 status changed to: Closed", 07-06). Same
+2 attachments (`59263`, `59262`, both Yash, 2026-06-17), unchanged filenames and authors. **74 days**
+since any Jira activity of any kind; **32nd consecutive run** recommending the same unposted
+close-out. No re-investigation performed — nothing has moved that would warrant it, and the diagnosis
+was verified at source (Confluence) on 08-14 and re-read live in code on 09-14.
+
+**Cross-ticket note (new this run, does not change the action):** PLT-3115 has now reached the same
+end state from the opposite direction — its customer explicitly said "we can close the ticket now" on
+09-16 and its Jira is still `With Customer` with `resolution = null` two days later. Two tickets on
+this board are now settled in substance and open only administratively, both assigned to Yash. That
+is worth naming as a pattern the next time a human is asked to act on either: the blocker is not
+diagnosis on either ticket, it is that nobody with Jira write access has executed a transition.
