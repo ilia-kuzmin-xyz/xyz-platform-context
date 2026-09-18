@@ -177,3 +177,13 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 Customer**, assignee still Darminder Atker, still **5 comments**, newest still `111943` (09-10),
 same 4 attachments. The draft to Darminder is still unposted, attachment `64304` still unopened.
 No re-investigation performed.
+
+## 2026-09-18 (scheduled) — correction: the assignee was Yash Patel, not Darminder, on every one of the last three passes
+
+The 09-15, 09-16 and 09-17 entries above all state "assignee still Darminder Atker". Live
+`getJiraIssue` this run shows assignee **Yash Patel**, and the file's own header agrees — the error
+was introduced once and then copied forward three times without checking against the header on the
+same page. Otherwise unchanged: status still **With Customer**, still 5 comments, newest still
+`111943` (09-10), same 4 attachments. The draft to Darminder and attachment `64304` are unaffected —
+Darminder is the drafted recipient, not the assignee, so no action changes. No re-investigation
+performed.

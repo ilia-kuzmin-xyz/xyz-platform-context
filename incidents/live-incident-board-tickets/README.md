@@ -45,6 +45,110 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-18 (scheduled) — 11 in-scope tickets (up from 8 on 09-17), 1 brand-new (PLT-3135), 1 folder-tag correction reversed (PLT-3115 back to groupA), 2 with real movement (PLT-3133, PLT-3033), 1 stale cache-copy error caught and fixed (PLT-3119 assignee), 7 confirmed unchanged, zero Jira actions taken
+
+Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, cross-checked
+with a `statusCategory != Done` variant: **22 non-Done tickets** (up from 21 on 09-17 — exactly one new
+ticket, PLT-3135, created since). Exclusions held: `Ready For QA` (4), `In Code Review` (2),
+`READY FOR RELEASE` (2), `Customer Release Check` (2), `Blocked` (1) — 11 excluded, none `With
+Technical Support` today. **22 − 11 = 11 in scope**: the same 8 as 09-17, plus **PLT-3135** (new,
+In Analysis) and **PLT-3115**, which re-enters scope this run (see below) — 8 + 1 + 1 = 10, plus
+PLT-3033 which was already in scope on 09-17 under the count but is called out here because it moved.
+(09-17's 8 were: PLT-2874, PLT-2651, PLT-2815, PLT-3119, PLT-3109, PLT-2918, PLT-3116, PLT-3133.)
+
+Five parallel research passes, one per domain group, each re-fetched its tickets live (`comment` +
+`attachment` in fields) and diffed against the folder before writing anything, per the "the folder is
+a cache" rule.
+
+**PLT-3135** (new): "Issue while adding Disciplines/Packages in web viewer" — adding a Discipline or
+Package silently lands under the wrong parent when a same-named first-level category exists under a
+*different* attribute (e.g. `Discipline > Zone 1` colliding with `Zone > Zone 1`). Darminder diagnosed
+the symptom in Jira on 09-17 and asked the backend whether sending `parentCategoryType` from the
+frontend would fix it — unanswered. Verified in source that the frontend does **not** send it today,
+and that the backend's `new_format: true` save path has no field for it even if it did, which also
+means the one hierarchy-validation guard that exists is a dead no-op on every new-format request.
+**Action class 2** — the open question is answerable from code, not from more evidence. New folder
+`PLT-3135-groupA-filter-system/`.
+
+**PLT-3115** re-enters Group A. 09-17 retagged it `resolved` on the customer's own "we can close the
+ticket now" comment — a correct call on substance, but the ticket's **Jira status never actually
+changed** (`With Customer`, `resolution: null`, unchanged since 09-16), and this routine's own scope
+rule keys group membership off status. Tagging it `resolved` while it is still open hid the one
+remaining action (a human transition) from the daily in-scope list — precisely the failure mode
+**PLT-2815** has been stuck in for 74 days / 32 runs, same assignee (Yash). Folder renamed back:
+`PLT-3115-resolved-other/` → `PLT-3115-groupA-other/`. The 09-17 findings are not superseded, only
+the tag was premature.
+
+**PLT-3133**: real drift since the 09-17 entry (which was taken before that day's 09:16 comment).
+The customer's own words — "even though the Dashboard refreshed several hours later they still appear
+un-installed" — are the `calculatedOn`-cap signature, not a cache symptom (see the new
+`recurring-defect-patterns.md` cross-reference below). New, useful finding: the cap's timestamp is
+already visible to the user as the progress panel's own **"Last updated"** field, so a human can
+settle "capped merge" vs "real defect" from one screenshot, no logs or DB access needed. Also: the
+customer edits via **Atom as well as the Web Viewer**, and Atom edits have no open browser session at
+all, so for those the capped fresh-load merge is the *only* path to the dashboard, ever.
+
+**PLT-3033**: administrative movement only — Freshdesk auto-flipped Closed → Waiting on customer two
+minutes apart on 09-17, no human comment since 09-08. The technical question was already answered
+then (Darminder: re-uploading the correctly-formatted schedule fixed it). All earlier drafts in the
+folder are marked superseded; the only thing owed now is the customer's confirmation and Yash's close.
+
+**PLT-2874, PLT-2651, PLT-2815, PLT-3119, PLT-3109, PLT-2918, PLT-3116**: all 7 confirmed unchanged
+against live Jira, dated confirmations appended, day/age counters bumped. One correction made in
+passing: **PLT-3119**'s folder had copied forward "assignee: Darminder Atker" for three consecutive
+runs (09-15/16/17); live Jira and the file's own header both say **Yash Patel**. Fixed in `context.md`
+this run — does not change the drafted recipient (Darminder), only the assignee-of-record line.
+
+### Group A (11)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | **New.** Wrong-parent bug on Discipline/Package add, root cause fully diagnosed in source | 2 |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's "today" reply now **7 days** overdue; Gennaro's question 37 days unanswered | 1 |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged. Board's only Critical, now **135 days** old; true-north correction **10 days** unposted | 4 with a class-1 chase attached |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **74 days stale, 32nd consecutive run**; cross-referenced against PLT-3115 as the same "done except the click" pattern | 1 |
+| [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged; assignee cache-error (Darminder→Yash) corrected | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. Chase to Yash now **7 days** past its intended send date | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. Human silence now **24 days** | 1 |
+| [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | Unchanged. **9 days old, zero developer reply** | 3 (pending one check) |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open | Real drift — customer detail + `Last updated`-on-screen finding | 3 |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Administrative drift only; all earlier drafts superseded | 1 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Re-entered scope; folder tag corrected back to groupA | 1 |
+
+### Group B (0) — still empty
+
+No ticket on the board carries `Ready For Development` or `Dev In Progress` today.
+
+### Standing gaps (unopenable media) — session-wide 403 on attachment content, not retried this run
+
+PLT-3135's 8 attachments (2 are the decisive ones: the POST-payload and GET-response screenshots);
+PLT-3133's 4 new screenshots (64826 most likely to show `Last updated`); PLT-3119's `64304`;
+PLT-2651's `63521`; PLT-2815's 2 screenshots + 2 inline blobs; PLT-2874's original screenshots;
+PLT-2918's 5 attachments; PLT-3109's 5 attachments; PLT-3116's 3 attachments; PLT-3115's 4 (no
+longer load-bearing — mechanism already known from the customer's own words).
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-3135** — reply to Darminder in-thread proposing sending `parentCategoryType`/id on both save
+   payload and backend new-format schema (97 words, drafted).
+2. **PLT-3115** — execute the rename-confirmed transition to close (Yash), same one-click gap as #3.
+3. **PLT-2815** — execute the close-out. Purely administrative, 74 days / 32 runs unposted.
+4. **PLT-2651** — send the true-north correction to the customer. Critical, 135 days, 10 days unposted.
+5. **PLT-2874** — send the combined draft to Yash+Gennaro. 7 days overdue, 37 days open.
+6. **PLT-3133** — send the `Last updated`-comparison ask to Darminder (94 words, drafted).
+7. **PLT-3033** — send the confirmation chase to Yash (68 words, drafted).
+8. **PLT-3109**, **PLT-2918**, **PLT-3116**, **PLT-3119** — send the existing unsent drafts; nothing new to add.
+
+### What could not be verified this run
+
+Attachment content (session-wide 403, all tickets); PLT-3135's real POST payload and DB-side parent
+resolution (`usp_InsertActivityCategoryV2` lives outside this session's repos); PLT-3133's backend
+parquet regeneration cadence and whether ATL05–08's `calculatedOn` is actually lagging; PLT-3033's
+09-10 status note (mis-read vs a real later transition, no changelog pulled); whether any assignee
+outside Jira (Slack/email) has already replied on any of the 7 "unchanged" tickets.
+
+---
+
 ## Run: 2026-09-17 (scheduled) — 8 in-scope tickets, 1 brand-new (PLT-3133), 1 left scope (PLT-3115, customer self-resolved), 7 confirmed unchanged, zero Jira actions taken
 
 Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC` (top 100,
