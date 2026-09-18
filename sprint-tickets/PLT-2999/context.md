@@ -935,3 +935,56 @@ comment sitting on it describes that exact scenario as the reason it is placed t
 > every time rather than either trusting or dismissing by reflex.
 
 **Round tally across the two reviews: 5 findings, 3 real (all mine), 2 wrong (both structural).**
+
+## 2026-09-18 (12:20) — Darminder: deleting a task leaves an unopenable row. A DESIGN decision, escalated not fixed
+
+`changes_requested` from **Darminder** (COLLABORATOR, with a video): delete a task that is assigned
+to a type, and *"the old task remains but nothing to show when you click on it. Maybe it should
+update the type and asset with the task removed?"*
+
+### Mechanism — verified, and it is deliberate
+
+`task_instance.task_template_id` is **`ON DELETE SET NULL`**, and the schema reference states the
+intent outright: *"instance survives template deletion"*
+(`docs/commissioning/PLT-2862-schema-reference.md:95`). The instance also carries a **denormalised
+`template_name`**. So after a delete the row keeps its name and loses its template — it renders, and
+there is nothing behind it to open.
+
+`ChecklistLibraryService.remove()` deletes the `task_template` row and nothing else; everything else
+is the FK. **Not a bug in this PR's code** — the PR's own test plan documents it ("check the asset
+still has its generated task").
+
+### Why the intent now looks wrong
+
+Keeping the instance was reasonable when delete was the only verb. **This PR adds Archive**, whose
+entire definition is *"take the task out of the library, leave everything already applied
+untouched"*. If Delete also leaves the instances, the two verbs differ only in whether the library
+row survives — and Delete's version leaves something strictly worse: a task nobody can open, run or
+clear.
+
+Delete is already refused outright when a task has **any** recorded work, so everything a cascade
+would remove is by definition a never-run instance. Nothing of value is lost.
+
+**Recommendation: Delete should cascade** (unlink type mappings, remove never-run instances) and
+Archive should be the verb that preserves.
+
+### Why it was NOT implemented
+
+- It **reverses a stated design decision** and changes what a destructive action does. That is the
+  author's call.
+- The user's own brief says a report backed by **video/images** → comment or leave open, and the
+  work order says a larger ask from a human reviewer → propose, the author decides.
+- `asset_type_task`'s FK behaviour is **not documented anywhere in the repo**, so whether the
+  type→task mapping survives or cascades could not be verified from here. Asked Darminder to confirm
+  what he saw on the type, since that would be a second cleanup rather than the same one.
+
+Thread left **open**, not resolved.
+
+> The tell that this is a design question and not a defect: the behaviour is **documented in three
+> places** (schema reference, the FK itself, the PR test plan). When the code, the schema and the
+> test plan all agree, a reviewer's "this seems wrong" is a challenge to the decision, not a report
+> of a deviation from it. Those go to the author.
+
+**APIs that exist if the cascade is approved:** `TypeTasks.unlinkAssetType(...)` and
+`ChecklistInstances.removeInstances(projectId, instanceIds)` — so the change is bounded, just not
+mine to make unasked.
