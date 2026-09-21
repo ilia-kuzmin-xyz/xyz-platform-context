@@ -411,3 +411,42 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 assignee still Pietro Desiato, still **7 comments**, newest still `111944` (09-10), same 5
 attachments. Nothing has moved in seven days. The Group B-in-substance call stands unchanged. The
 chase to Yash is now 6 days past its intended send date. No re-investigation performed.
+
+## 2026-09-21 (scheduled) — confirmed unchanged, eleven days quiet
+
+Live `getJiraIssue` re-fetch (full fields incl. `comment`, `attachment`, `status`, `assignee`,
+`updated`, `priority`), diffed against the 09-17 entry above: status still **Open**, assignee
+still **Pietro Desiato**, still **7 comments**, newest still `111944` (Darminder → Pietro, 09-10
+13:53), same 5 attachment ids (63983-63987, unchanged filenames/sizes). `updated` timestamp on
+the issue itself is still 2026-09-10T13:53:22 — i.e. genuinely nothing has touched the ticket,
+not just nothing new to us. No calendar entries exist in this folder for 09-18/09-19/09-20; this
+run's brief computed "7 days past" as of 09-18 from the dates alone, consistent with the table
+below.
+
+Attachment content re-tested this session (per run-instructions 09-08 note, not assumed stale):
+`GET .../attachment/content/63983` → still **HTTP 403**. Unchanged; not a blocker (Ilia already
+opened and transcribed all 5 on 09-08, see that entry above).
+
+Elapsed-time counters, recomputed from source dates (last comment `111944` 2026-09-10; chase
+hold-until date 2026-09-11), not carried forward by increment:
+
+| counter | value as of 2026-09-21 |
+|---|---|
+| Days since last ticket activity (`111944`, 09-10) | **11 days** |
+| Days past the chase-to-Yash's intended send date (09-11) | **10 days** |
+
+The Group B-in-substance call from 09-14 stands unchanged: assigned to Pietro (product, not
+Ilia), last comment is Darminder addressing Pietro rather than a question aimed at us, nothing
+outstanding requires code. No re-investigation performed — the 09-09/09-14 code predicate
+(`progress-queries-v2-api.ts` weight-column ternary) was already re-verified live and is not
+re-checked every run; nothing in the ticket's own state gives a reason to.
+
+**What remains unverified (unchanged from 09-14/09-15/09-16/09-17):**
+- Whether the client's Power Query is XYZ-supplied or client-authored — still nobody has asked.
+- What "further input" Darminder wants from Pietro — still not stated anywhere on the ticket.
+- Whether removing the two WHERE lines surfaces a null `ActualProgress` for zero-labour warehouse
+  rows — still resolves in one refresh, still unrun.
+- The project's live `ProgressWeightingMethod` — still inferred from the 45% figure, never read
+  directly.
+- Attachment bytes — re-confirmed 403 this session (not a blocker; Ilia already opened all 5 on
+  09-08).

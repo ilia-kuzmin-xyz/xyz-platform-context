@@ -195,3 +195,26 @@ the ambiguity.
   screenshot description, not the screenshot.
 - **Cohort.** Whether any other project has a name colliding across two category types. Nobody has
   asked, and it is a cheap query for whoever has DB access.
+
+## 2026-09-21 — re-check, unchanged
+
+Re-fetched the live issue (`getJiraIssue`, fields incl. `comment`, `attachment`). No change since
+09-17:
+
+- **Status:** still In Analysis. **Assignee:** still Darminder Atker. **`updated`:** still
+  `2026-09-17T13:04:33` — the timestamp of Darminder's workaround comment (112413), i.e. nothing has
+  touched the issue since.
+- **Comments:** still exactly 4, same ids (112393, 112407, 112412, 112413). Neither Sachin Badoni
+  nor Ali Seyedof has replied to the 13:02 question. **The open question is now 4 days unanswered**
+  (09-17 → 09-21).
+- **Attachments:** still exactly 8 (64829, 64830, 64833–64838), same filenames/sizes/authors as
+  recorded above.
+- **Attachments 64835 and 64834 re-tried directly** (`curl` against
+  `attachment/content/<id>`, per the 2026-09-08 standing rule): both still `403
+  {"errorMessages":["You do not have permission to view attachment with id: <id>"]}`. No change from
+  09-18. Per that rule's guidance, not retrying again next run unless something about session
+  credentials changes.
+
+No new information this run. `recommended-action.md`'s classification (2) and draft reply stand
+unchanged — see that file for whether it is still the right call to send now that the question has
+gone unanswered for 4 days.

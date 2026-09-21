@@ -575,3 +575,20 @@ end state from the opposite direction — its customer explicitly said "we can c
 this board are now settled in substance and open only administratively, both assigned to Yash. That
 is worth naming as a pattern the next time a human is asked to act on either: the blocker is not
 diagnosis on either ticket, it is that nobody with Jira write access has executed a transition.
+
+## 2026-09-21 (scheduled) — confirmed unchanged, 77 days stale, 33rd consecutive run
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`, `status`, `assignee`, `priority`,
+`created`, `updated`, `resolution`, `resolutiondate`): status still **With Customer**, priority Major,
+assignee Yash Patel, `resolution = null`, `resolutiondate = null`, `updated` still
+`2026-07-06T10:18:45.272+0100`, still **13 comments** — same 13 ids, newest still `106553` (Yash,
+"Freshdesk #7126 status changed to: Closed", 07-06). Same 2 attachments (`59263`, `59262`), unchanged
+filenames and author. **77 days** since any Jira activity of any kind; **33rd consecutive run**
+recommending the same unposted close-out. No re-investigation performed — nothing has moved that
+would warrant it.
+
+**Attachment 403 re-tested this run, still blocked.** Direct `curl` against
+`GET .../rest/api/3/attachment/content/59263` returned `HTTP 403`, body `{"errorMessages":["You do not
+have permission to view attachment with id: 59263"]}` — byte-identical error shape to the 2026-09-08
+finding. The session-wide attachment-content 403 still applies; not a ticket-specific block. Not
+load-bearing either way (both figures already reproduced to the cent from source).

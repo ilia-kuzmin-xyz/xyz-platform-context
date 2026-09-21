@@ -432,3 +432,40 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 (Freshdesk-automation-only), assignee still Ilia Kuzmin, still **17 comments**, newest still
 `111659` (09-08). Last human comment remains Mostafa's `110385` (08-25) — **23 days** of human
 silence. The 09-09 chase-Yash draft is still unsent. Sixth consecutive confirmed-unchanged pass.
+
+## 2026-09-21 (scheduled) — confirmed unchanged, human silence now 27 days; a third Freshdesk auto-cycle, still no free text
+
+Live `getJiraIssue` re-fetch (full fields incl. `comment`, `attachment`, `status`, `updated`,
+`labels`, `fixVersions`), diffed field by field against the 09-17 record rather than assumed.
+
+**19 comments (17 → 19):** two new, both Freshdesk-automation echoes, both **09-18**: `112514`
+("Freshdesk ticket status changed to: Open", 12:20) and `112535` ("... Waiting on customer",
+14:45) — no free text from Yash or anyone else, same shape as the 08-25/09-04/09-08 auto-cycles
+recorded under `§ 2026-09-09`. This is a **third** reopen/settle cycle with nobody writing a word
+in Jira about what the customer actually said. The Jira `status` field itself stayed **`Open`**
+through the whole 09-18 cycle — it did not swing to `With Customer`, consistent with the standing
+observation that a Freshdesk "Waiting on customer" echo alone does not flip the Jira status (it
+stayed `Open` the same way after the 09-08 echo).
+
+**Everything else matches 09-17 exactly:** assignee Ilia Kuzmin, labels `[not_testable]`,
+fixVersion `26.3.4`, priority Major, same **5 attachments** (`61116`–`61119`, `63303`), no new
+attachment id. Last human comment remains Mostafa's `110385` (2026-08-25T17:02) — **27 days** of
+human silence, up from 23 on 09-17. The 09-09 chase-Yash draft (`recommended-action.md`) is still
+unsent, now 12 days old.
+
+**Attachment-content check re-run this pass** (per this run's instructions, step 5): direct
+`curl` to `.../rest/api/3/attachment/content/63303` still returns a hard **403**. Consistent with
+the 2026-09-08 finding — the gap is the session's credentials, not the object; not retrying again
+per that note.
+
+Nothing re-investigated: no new comment or attachment carries a technical signal to chase (per
+run-instructions, re-investigate only on new comments/attachments). The three-hypothesis split
+((a) residual code gap — effectively ruled out, re-verified 09-09/09-14; (b) July AUS01 gap never
+backfilled — leading explanation, absence-of-record only; (c) Mostafa's Power BI theory —
+unsubstantiated since 08-25) is unchanged. Seventh consecutive confirmed-unchanged pass.
+
+**Flag:** this ticket is assigned to Ilia Kuzmin, has had no human Jira comment for 27 days, the
+customer has now auto-reopened Freshdesk #7461 three times in that window with zero human
+technical reply inside Jira, and the one-value chase draft to Yash (88 words, `recommended-action.md`
+§ 2026-09-09) has sat ready and unsent for 12 days. Needs human attention now — not a code or data
+task this routine can resolve further without that reply.

@@ -285,3 +285,29 @@ mechanism is known. **Code:** not re-read this run — nothing in the ticket cha
 reads of `DevicePage.tsx` and `DangerZone.tsx` still stand. The `DangerZone.tsx:69-76` hardening gap
 noted on 09-10 remains open, remains unmotivated by this ticket, and remains a two-line diff for
 whoever wants it.
+
+## 2026-09-21 (scheduled) — confirmed unchanged since 09-16; 5 days since Yash said "we can close it now"
+
+Live `getJiraIssue` re-fetch (fields incl. `status`, `assignee`, `priority`, `resolution`, `comment`,
+`attachment`, `updated`). **Nothing has changed since the 09-18 entry:** status still **With
+Customer**, `resolution = null`, assignee still Yash Patel, priority Major,
+`updated = 2026-09-16T11:56:21.669+0100` (unchanged, confirming no activity of any kind since then —
+not even a metadata touch). Still exactly **3 comments** — `111785` (Yash, 09-09), `111941`
+(Darminder, 09-10), `112316` (Yash, 09-16, the customer's self-resolution report + "we can close the
+ticket now"). Same 4 attachments (`64222`, `64223`, `64302`, `64303`), same content, still 403 on
+fetch (not retried, per the 2026-09-08 rule — the gap is session credentials, not the object; no
+longer load-bearing regardless, since the mechanism is already known from the customer's own words).
+
+**This ticket's folder tag is correct as of this run.** The 09-18 entry recommended keeping/renaming
+this folder `groupA-other` (not `resolved-other`) until the live status actually leaves `With
+Customer`, per the README's status-keyed grouping rule. It is still `With Customer`, so `groupA` is
+still the right tag — no rename needed this run.
+
+**What's new since 09-18 is purely administrative age, not substance.** The one remaining action — the
+transition Yash himself called for on 09-16 — is now **5 days old** with zero Jira movement of any
+kind in that window (comment count, `updated` timestamp, assignee, resolution: all identical to the
+09-18 read). This is the same shape as **PLT-2815** (settled-but-open, same assignee, same missing
+one-click close), and the concern raised on 09-18 — that this ticket could become PLT-2815's second
+case if nobody actions the close — stands and is now measurably closer to true (5 days in, vs.
+PLT-2815's 74). Not yet at a length that calls for anything beyond a routine nudge, but worth
+flagging again rather than letting the "no Jira change" framing read as "no action needed."

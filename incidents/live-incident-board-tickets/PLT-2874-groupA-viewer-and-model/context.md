@@ -958,3 +958,19 @@ priority Minor, assignee Ilia Kuzmin, still **8 comments**, newest still `112017
 13:39). Still no reply — **6 days overdue** against Ilia's own "today" word. Same 2 attachments,
 still unopenable. No re-investigation performed; nothing had reason to move in one day. The combined
 draft to Yash+Gennaro is still unposted.
+
+## 2026-09-21 (scheduled) — confirmed unchanged; Ilia's own "today" reply now 10 days overdue, Gennaro's question 40 days unanswered
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **In Analysis**,
+priority Minor, assignee Ilia Kuzmin, still **8 comments**, newest still `112017` (2026-09-11
+13:39:41, Ilia to Yash: "will get back to you with updates soon today"). No new comment since —
+**10 days overdue** against Ilia's own "today" word (up from 6 on 09-17; no scheduled runs logged
+09-18 through 09-20). Gennaro's 08-12 Staging-undercount finding (109457) is now **40 days**
+unanswered, still the single open technical item on this ticket. `updated` unchanged at
+2026-09-11T13:39:41+0100. Attachment content re-tried directly this run
+(`attachment/content/60327`): still `HTTP 403 {"errorMessages":["You do not have permission to view
+attachment with id: 60327"]}` — unchanged since the 09-08 finding, not a new gap. No
+re-investigation performed; nothing about the code or GitHub state had reason to move in four days
+with no ticket activity. The combined draft to Yash+Gennaro (`recommended-action.md` § 2026-09-14)
+is still unposted, still the right message, still needs a human to send it — and it is now Ilia's
+own overdue promise, not only a third party's question.

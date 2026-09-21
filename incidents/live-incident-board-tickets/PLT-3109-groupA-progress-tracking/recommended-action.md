@@ -192,3 +192,10 @@ Darminder what "further input" he wants from Pietro, since it is not stated anyw
 > query is one of our templates, I can just ask him that directly.
 >
 > **What's the open question you want his input on?**
+
+## 2026-09-21 (scheduled) — still class 1. Both drafts unchanged and unsent; chase now 10 days overdue.
+
+Live Jira confirmed unchanged (see `context.md`, 09-21 entry): status Open, assignee Pietro
+Desiato, 7 comments, newest still `111944` (09-10). Both drafts below are unchanged text from
+09-09/09-11/09-14 and remain ready to send as-is; nothing on the ticket has changed the content of
+either. No new draft needed.

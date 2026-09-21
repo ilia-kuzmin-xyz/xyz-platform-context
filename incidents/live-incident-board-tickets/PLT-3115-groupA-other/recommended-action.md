@@ -167,3 +167,35 @@ merged message that buries either ticket key.
 
 No Jira comment, transition, or assignment. No code changed. No folder renamed. The `DangerZone.tsx`
 hardening remains undone and still unmotivated by this ticket.
+
+---
+
+## 2026-09-21 (scheduled) — unchanged since 09-18. Still class 1; nudge now 5 days overdue, not yet urgent
+
+**Action class: 1 — stale/unresponded, administrative-only.** Same reasoning as 09-18: nothing to
+build, nothing to reproduce, nobody disagrees on the mechanism. **Who owes what: Yash Patel owes one
+board action** — the transition he called for himself on 09-16 (comment `112316`). Confirmed via live
+`getJiraIssue` this run: status still `With Customer`, `resolution = null`, `updated` timestamp
+unchanged since 09-16, still 3 comments, same 4 attachments. See `context.md` § 2026-09-21.
+
+**Folder tag: no change.** Still correctly `PLT-3115-groupA-other` per the 09-18 correction — status
+has not left `With Customer`, so it stays Group A until it does.
+
+The 09-18 nudge draft is unsent and still accurate; reusing it rather than drafting a new one (per
+the "don't re-draft an unchanged ask" spirit — the ask itself hasn't changed, only its age):
+
+### Draft nudge to Yash Patel — 59 words, UNPOSTED (unchanged from 09-18)
+
+> Hi Yash, the customer's update on PLT-3115 says the autofill stopped after they updated their
+> browsers, and you noted we can close it. The ticket is still sitting in With Customer with no
+> resolution set. Nothing is outstanding on our side, and Darminder's question has been answered by
+> the customer's own findings. **Can you close it with a resolution?**
+
+If PLT-2815's chase (see that folder) is sent in the same pass, these two can be raised together —
+both are assigned to Yash and both need the same one-click close with a resolution set. Do not send a
+merged message that buries either ticket key.
+
+## What this pass did NOT do
+
+No Jira comment, transition, or assignment. No code changed. No folder renamed. The `DangerZone.tsx`
+hardening remains undone and still unmotivated by this ticket.

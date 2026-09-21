@@ -1116,3 +1116,24 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 Customer**, priority Critical, assignee still Yash Patel, still **33 comments**, newest still
 `111646` (09-08). Same 4 attachments. Correction now **9 days** unposted. Board's only Critical,
 now **134 days** old. No re-investigation performed.
+
+## 2026-09-21 (scheduled) — confirmed unchanged in substance; one new Freshdesk sync comment (non-technical), correction now 13 days unposted, ticket 138 days old
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`): status still **With
+Customer**, priority Critical, assignee still **Yash Patel**. **Comment count moved 33 → 34** —
+the one new comment is **`112512`** (Yash, 2026-09-18T12:14:07+0100, *"Ticket ID: 6294 - Freshdesk
+ticket status changed to : Waiting on 3rd line"*), an automated Freshdesk status-echo with no
+technical content, the same shape as the status-sync comments already excluded from the
+substantive timeline in §2. **Newest substantive comment is still `111646`** (09-08, "Thanks for
+looking into it."). Same 4 attachments, same ids (`57467`, `57468`, `57277`, `63521`) — no new
+attachment.
+
+**Attachment re-test this run (per this run's explicit instruction to retry one):** direct `curl`
+to `https://api.atlassian.com/ex/jira/1ebfaaab-47dc-435c-b940-d025630b5ffd/rest/api/3/attachment/content/63521`
+→ **`HTTP_STATUS:403`**, unchanged from the 2026-09-08 confirmation in
+`live-incident-run-instructions.md`. Still a dead end for this routine's credentials.
+
+The true-north correction (`recommended-action.md`) is now **13 days** unposted since the 09-08
+diagnosis (comment 111642). Ticket is now **138 days** old (2026-05-06 → 2026-09-21), still the
+board's only Critical. No re-investigation performed — the one new comment carries no technical
+content, so nothing here changes the mechanism or the recommendation.

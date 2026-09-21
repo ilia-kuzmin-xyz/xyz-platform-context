@@ -489,3 +489,16 @@ moot; it is kept in the record above for the pattern, not as an open action. The
 the 27 MB XER (`64009`) remain unopenable from this session — unchanged, not re-tested.
 
 Confidence unchanged. This ticket is administratively open and technically finished.
+
+## 2026-09-21 — confirmed unchanged since 09-18
+
+Live re-fetch (`getJiraIssue`, fields incl. `comment`/`attachment`/`status`/`updated`): status
+`With Customer`, assignee Yash Patel, priority Major, resolution `null`, `updated`
+`2026-09-17T16:21:19+0100`, 13 comments — all byte-identical to the 09-18 snapshot. Newest comment
+still `112444` (Freshdesk auto: Closed → Waiting on customer, 09-17 16:21), and still no human
+comment since Yash's `111663` (09-08 16:56:54). That confirmation is now **13 days** cold. Nothing
+re-derived; the 09-18 assessment stands verbatim — administratively open, technically finished.
+Attachments unchanged (4 PNGs from 08-17, Darminder's own 09-08 screenshot `64115`, and the 27 MB
+XER `64009`); `64009`'s content is still 403 to this session (not re-tested this pass, no reason to
+expect it changed). The `recommended-action.md` draft to Yash (09-18, 68 words) remains correct and
+unposted.
