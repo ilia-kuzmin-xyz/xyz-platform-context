@@ -669,9 +669,15 @@ Full working: `live-incident-board-tickets/PLT-2649-groupA-360-captures/platform
 
 - **Viewable-name fallback vs on-device client** (PLT-2923). A model renders on the headset but
   not in the browser. The web viewer picks its viewable by name from a fallback chain, `Navis` then
-  `XYZ` then `EXPORT TO HOLOSITE` then `{3D}`, and renders nothing at all, with no error, if none
-  matches (`viewer-service.ts:1052-1065`, `:945-946`). Promote to a pattern if a second IFC-sourced
+  `XYZ` then `EXPORT TO HOLOSITE` then `{3D}`. Promote to a pattern if a second IFC-sourced
   model does the same.
+  **Correction, 2026-09-21 (PLT-3147 investigation):** "renders nothing at all, with no error, if
+  none matches" is out of date. The chain at `viewer-service.ts:1058-1071` now ends in
+  `viewables?.[0]` (*"Otherwise use the first viewable as a fallback. This is usually `3D` but is
+  not always the case."*) — a model with none of the four named viewables silently renders whichever
+  viewable came first, rather than nothing. That is a live candidate mechanism for "wrong appearance"
+  tickets on federated Navisworks models with no matching viewable name; not confirmed against any
+  specific ticket yet. See `incidents/live-incident-board-tickets/PLT-3147-groupA-viewer-and-model/context.md` § E.
 - **Same word, different unit** (PLT-2874, and LVN1/Freshdesk 7514 pending confirmation). Two
   surfaces both say "elements" and count different things. The editor counts distinct
   `modelElementId` (`ModelDetailsPanel.tsx:222`); the dashboard counts `objectId`s, because

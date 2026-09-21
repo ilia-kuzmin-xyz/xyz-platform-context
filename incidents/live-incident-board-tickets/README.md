@@ -45,6 +45,137 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-21 (scheduled) — 9 in-scope Group A tickets (down from 11 on 09-18), 1 brand-new Critical (PLT-3147, full root-cause this run), 2 left scope (PLT-3119 → Done, PLT-3133 → With Technical Support), 1 advanced to Group B (PLT-3116 → Dev In Progress), 8 confirmed unchanged in substance, zero Jira actions taken
+
+First run since 09-18 — 09-19/09-20 had no scheduled firing, so this run covers a 3-calendar-day gap
+(counters below are bumped by 3, not 1, except where noted). Board re-queried via `project = PLT AND
+issuetype = "Live Incident" ORDER BY created DESC`, cross-checked with a `statusCategory != Done`
+variant: **22 non-Done tickets**, same total as 09-18. Exclusions held: `With Technical Support` (1,
+now PLT-3133), `Ready For QA` (4), `In Code Review` (2), `READY FOR RELEASE` (2), `Customer Release
+Check` (2), `Blocked` (1) — 12 excluded (up one from 09-18's 11, since PLT-3133 moved into the
+With-Technical-Support exclusion). **22 − 12 excluded − 1 Group B (PLT-3116) = 9 in Group A.**
+
+Ten research passes ran in parallel, one per continuing ticket plus one for the new ticket plus one
+combined pass for the three status-transition tickets — the same "parallel research passes, one per
+ticket" approach as 09-18, just one pass per ticket instead of grouped by domain, since domains this
+run were mostly singletons. Every ticket got a live `getJiraIssue` re-fetch (fields incl.
+`comment`/`attachment`) diffed against its folder before anything was written, per "the folder is a
+cache, not the truth." Every attachment `curl`-tested directly against
+`attachment/content/<id>` this run returned **HTTP 403** — the session-wide credential gap first
+recorded 2026-09-08 is still in force, confirmed fresh on PLT-2815, PLT-2874, PLT-2651, PLT-3135 and
+all three of PLT-3147's attachments; not re-tested on the others (no reason to expect a change).
+
+**PLT-3147** (new, Critical): "Problem in Appearance of FED model in Web View as well as Dashboard
+for ADL2." The customer answered our question and asked their own — *"identify the name of the model
+which causing this effect"* — at 13:12 on 09-18; Freshdesk was set to **Waiting on customer**
+fourteen minutes later, and nothing has moved since. **The board's labelling is backwards: the
+customer is waiting on us, not the other way round**, which is the most likely reason a Critical
+ticket has sat silent for three days. Full investigation traced four independent, previously
+undocumented mutations the Web Viewer applies to any Navisworks model (grey-theming every node,
+hiding geometry with no element metadata, forced render profile, fixed load options — none of them
+gated or flag-controlled) and a separate, non-overlapping set of narrowings the Dashboard applies —
+meaning "wrong on both screens" is two candidate findings, not one, until proven otherwise. Also
+found: Darminder's 12:56 DEV-converter evidence is ambiguous between two of our own error codes with
+**opposite owners** (one implicates the customer's export, the other describes only his DEV project
+and says nothing about ADL2) — and this is the second time on this ticket alone that an unverified
+premise nearly cost the customer a wasted round (the first, at 10:58, asked them to check the PBP on
+the strength of a remembered past incident; they did, and it wasn't the cause). All three attachments
+are the decisive unblock and are 403 here. New folder `PLT-3147-groupA-viewer-and-model/`. Two
+durable additions made to `dashboard/viewer-and-model.md` (the four ViewerPage mutations; the
+PLT-2112→PLT-2250 history behind the dead `applyBasePointTransform` call site) and one correction to
+`recurring-defect-patterns.md`'s PLT-2923 entry (the viewable fallback now ends in `viewables?.[0]`,
+not "renders nothing").
+
+**PLT-3119** reached Done. Only new activity is a Freshdesk-automation "Closed" comment with no human
+confirmation of the 09-10 weighting-conflict explanation ever posted — the original technical
+questions were simply never answered before the ticket closed itself. Folder retagged
+`groupA` → `resolved`: `PLT-3119-groupA-progress-tracking/` → `PLT-3119-resolved-progress-tracking/`.
+
+**PLT-3133** moved to With Technical Support. Two new same-day comments (a customer update
+splitting the FED-model and intangible-progress symptoms, and Rishi's independent DB-level
+confirmation of the ~15-minute `calculatedOn`-cap cadence) corroborate rather than change the
+mechanism fully diagnosed on 09-17/09-18. Per the PLT-3033 precedent (a ticket that has itself
+cycled through With Technical Support twice without ever being renamed), the folder **keeps its
+`groupA` tag** rather than being retagged — a temporary hand-off is not the same as `resolved`.
+
+**PLT-3116** moved Open → Dev In Progress, assignee Darminder Atker → Rishi Bhugobaun. Folder
+renamed `groupA` → `groupB`: `PLT-3116-groupA-viewer-and-model/` → `PLT-3116-groupB-viewer-and-model/`.
+Checked against the two Group-A-treatment exceptions (assigned to Ilia; most recent comment is a
+question pointed at us) — **neither applies**, so per today's instruction this ticket gets one line
+only, no deep pass. Neither candidate mechanism from the original report has been confirmed by Rishi
+yet.
+
+**PLT-2651, PLT-2815, PLT-2874, PLT-2918, PLT-3033, PLT-3109, PLT-3115, PLT-3135**: all 8 confirmed
+unchanged in substance against live Jira. Two carried one cosmetic new comment each (PLT-2651's
+`112512` and part of PLT-2918's pair are bare Freshdesk status-echoes with zero technical content);
+none had a human reply. Dated confirmations appended to each `context.md`, day/staleness counters
+bumped correctly for the 3-day gap. Two of these are now extreme outliers on staleness: **PLT-2815**
+is 77 days stale / 33rd consecutive run recommending an identical unposted close-out, and **PLT-2651**
+(the board's only Critical until today) is 138 days old with its true-north correction 13 days
+unposted.
+
+### Group A (9)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | Open · Critical | **New.** Customer waiting on us 3 days, mislabelled "waiting on customer"; full mechanism trace, two domain-doc additions | 1, with a class-4 tail split off |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged (1 Freshdesk-echo comment). Board's only other Critical, now **138 days** old; correction **13 days** unposted | 4 with a class-1 chase attached |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **77 days stale, 33rd consecutive run** | 1 — stale, unresponded (on us) |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **10 days** overdue; Gennaro's question **40 days** unanswered | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged (2 Freshdesk-echo comments, 3rd auto-reopen cycle). Human silence now **27 days** | 1 |
+| [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged. No human reply since 09-08, now **13 days** cold | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. Chase to Yash now **10 days** past its intended send date | 1 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged. **5 days** since Yash's own "we can close it now" comment, still no transition | 1 |
+| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | Unchanged. Open question to Sachin/Ali now **4 days** unanswered | 2 — drafted reply ready, unposted |
+
+### Group B (1)
+
+| Ticket | Domain | Status | Note |
+|---|---|---|---|
+| [PLT-3116](PLT-3116-groupB-viewer-and-model/context.md) | viewer-and-model | Dev In Progress | Moved from Group A this run (assignee → Rishi). Neither Group-A exception applies. One line only, per today's instruction to skip Group B. |
+
+### Left scope this run
+
+**PLT-3119** — reached Done via Freshdesk automation; no human comment ever confirmed the technical
+explanation. Folder retagged `resolved`.
+**PLT-3133** — moved to With Technical Support; fully-diagnosed mechanism stands, folder keeps its
+`groupA` tag per the PLT-3033 precedent (a temporary hand-off, not a resolution).
+
+### Standing gaps (unopenable media) — session-wide 403 confirmed fresh this run, not merely assumed
+
+PLT-3147's 3 attachments (all three decisive — see its context.md § Media); PLT-3135's `64835`/`64834`
+(re-tested, unchanged); PLT-2651's `63521` (re-tested); PLT-2815's 2 screenshots + 2 inline blobs
+(re-tested via direct curl); PLT-2874's original screenshots (re-tested); PLT-2918's attachments
+(re-tested); PLT-3109's 5 attachments; PLT-3033's XER file and 4 PNGs; PLT-3115's 4 (still not
+load-bearing).
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-3147** — someone with Jira access opens attachments `64895`, `64889`, `64888` (settles
+   everything downstream) and posts the 95-word draft to Darminder asking which of two ambiguous
+   error codes DEV showed. Separately, Yash should correct Freshdesk 8021's "waiting on customer"
+   mislabel — the customer is waiting on us.
+2. **PLT-2815** — execute the close-out. 77 days / 33 runs unposted, purely administrative.
+3. **PLT-2651** — send the true-north correction to the customer. Critical, 138 days, 13 days
+   unposted.
+4. **PLT-2874** — send the combined draft to Yash+Gennaro. 10 days overdue, 40 days open.
+5. **PLT-3115** — execute the close transition Yash already called for on 09-16. 5 days quiet.
+6. **PLT-3135** — send the 97-word draft to Darminder; the open question to Sachin/Ali is now 4 days
+   unanswered.
+7. **PLT-2918**, **PLT-3033**, **PLT-3109** — send the existing unsent drafts; nothing new to add
+   beyond the day counters.
+
+### What could not be verified this run
+
+Attachment content on every ticket (session-wide 403, re-confirmed by direct `curl` rather than
+assumed carried-forward); which of the two ambiguous error codes PLT-3147's DEV test actually showed;
+whether PLT-3147's two customer screenshots are Web-Viewer-vs-NWD or Dashboard-vs-NWD; whether
+ADL2's `.nwd` contains a `Navis`/`XYZ` viewable; the Dagster ingest pipeline's severity handling for
+coordinate-fault codes (outside both accessible repos); whether any assignee has replied outside
+Jira (Slack/email) on any of the 8 "unchanged" tickets.
+
+---
+
 ## Run: 2026-09-18 (scheduled) — 11 in-scope tickets (up from 8 on 09-17), 1 brand-new (PLT-3135), 1 folder-tag correction reversed (PLT-3115 back to groupA), 2 with real movement (PLT-3133, PLT-3033), 1 stale cache-copy error caught and fixed (PLT-3119 assignee), 7 confirmed unchanged, zero Jira actions taken
 
 Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, cross-checked

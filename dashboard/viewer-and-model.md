@@ -123,6 +123,17 @@ rotation, `shouldApplyOrientationPatch` bows out at ≥0.5°
 export" genuinely disables our guess, while "fix the project setting" does not touch it. Detail:
 `incidents/live-incident-board-tickets/PLT-2651-groupA-viewer-and-model/context.md` § 2026-09-09.
 
+**2026-09-21 addition — the dead `applyBasePointTransform` call site has a name and a date.** It was
+introduced for **PLT-2112** *"Same model with different PBPs appears in same place"* (2025-11-04),
+and eight days after release it caused **PLT-2250** *"AMS1 — Editor — Models appear on different
+locations"* (2025-12-10, **Blocker**), which spread across AMS1, PA12, Hutto2, ELN03, ML8 and Roots
+BIM inside four hours. Darminder, PLT-2250 comment 90352: *"This issue occurs because of the change
+added in PLT-2112. Change is being reverted and a updated build is being added to Production"*, then
+*"updated build is on Production with change reverted"*. The comment block at `viewer-service.ts:974-983`
+**is that revert** — so the next person who reads "turned off due to a bug with misalignment of
+models" and wonders whether it's safe to re-enable now has the incident it caused. Source:
+`incidents/live-incident-board-tickets/PLT-3147-groupA-viewer-and-model/context.md` § A4.
+
 ### applyScaling
 `applyScaling: 'm'` tells Forge the model units are metres. Forge's internal unit is feet by default; without this, all coordinates are off by a factor of ~3.28.
 
@@ -136,6 +147,57 @@ Three navigation methods from `forge-viewer-augmentations.d.ts` let code overrid
 | `navigation.setZoomTowardsPivot(true)` | Dolly zoom moves toward the pivot rather than the cursor |
 
 These are used when the app needs to programmatically lock a camera orbit around a specific element (e.g. focusing on a selected room).
+
+---
+
+## The Web Viewer does not render a model as authored (2026-09-21 addition, from PLT-3147)
+
+A `.nwd`/`.nwc` opened on the ViewerPage is not a passive render of the Forge translation — four
+independent, unconditional mutations are applied on load, live and not flag-gated. Any one of them
+alone is enough to make our viewer look different from Navisworks on the same file. Source:
+`incidents/live-incident-board-tickets/PLT-3147-groupA-viewer-and-model/context.md` § A.
+
+1. **Every Navisworks node is painted flat grey.** `_getDbIdsForElementIds`
+   (`ViewerPage/services/model-loaders/model-mapping-service.ts:337-445`) themes each mapped dbId
+   `THREE.Vector4(0.5, 0.5, 0.5, 0.9)` (`:386-400`), then, gated on `isNavisworksModel` (`:405`,
+   `fileType === 'nwd' || fileType === 'nwc'`), themes **every other node in the instance tree** the
+   same grey (`:405-427`). Called from `applyMappings` (`:35-61`) → `viewer-service.ts:968`, inside
+   `if (!this._isDashboard)`. Status colours are painted over this afterwards
+   (`repaintElementStates`, `viewer-service.ts:996`).
+2. **Geometry with no element metadata is hidden outright, for Navisworks models only.**
+   `hideDisabledNodes` (`model-mapping-service.ts:68-171`) hides any leaf whose dbId has no
+   elementId and whose ancestors don't either (`:102-138`), then hides any parent all of whose
+   children were disabled (`:140-166`). The survivor set is `elementIds.has(externalId) &&
+   validDbIds.has(dbId)` (`:365-384`), where `elementIds` comes from the model's
+   **`client-element-metas`** parquet (`getSourceElementIds`, `viewer-service.ts:955`;
+   `model-entity.ts:216-229`). So a constituent sub-model of a federation whose elements never made
+   it into element metadata is invisible in our viewer while fully visible in the source `.nwd` —
+   this is the same parquet Pattern 1 (`recurring-defect-patterns.md`) already implicates for link
+   resolution, here driving viewer *visibility* instead.
+3. **Lines, points and the render profile.** `configureSceneAppearance()`
+   (`viewer-service.ts:608-633`) calls `hideLines(true)`/`hidePoints(true)` and forces a dark grey
+   background with no env map/ground reflection/ghosting. The `XYZ` profile (`viewer-y.tsx:215-238`)
+   additionally sets `lineRendering: false`, `edgeRendering: true`, `antialiasing: false`.
+4. **Load options are fixed.** `getCustomLoadOptions` returns `{ applyRefPoint: true, applyScaling:
+   'm' }` (`viewer-y.tsx:209-214`) on every load — see § "true north does NOT orient anything" above
+   for why the project's PBP/true-north is not part of this.
+
+**The Dashboard applies a different, non-overlapping set of narrowings** — see § "Model resolution"
+and § "Element colouring" below. `applyMappings` (mutations 1–2 above) is gated on
+`!this._isDashboard` (`viewer-service.ts:967`) and the dashboard's model entity returns empty
+disabled-id sets (`navisworks-model-entity.ts:37-43`), so the Dashboard skips both. It runs its own
+`configureViewerAppearance` (`dashboard-panels/viewer/use-model-loader.tsx:28-52`) with the same
+hideLines/hidePoints plus a 30fps cap, and shows only fragments carrying an installation status
+(`dashboard-color-service.ts:454-500`) rather than fragments with element metadata. **Practical
+consequence for triage:** when a "wrong appearance" ticket names both the Web Viewer and the
+Dashboard, treat that as two candidate findings, not one — the two surfaces are wrong (if they are)
+for structurally different reasons, and only a cause upstream of both (the translation itself)
+would explain the same symptom on both screens.
+
+**Also relevant:** the viewable-selection fallback chain (`viewer-service.ts:1058-1071`) is
+`Navis` → `XYZ` → `EXPORT TO HOLOSITE` → `{3D}` → `viewables?.[0]` — a model with none of the four
+named viewables now silently renders whichever viewable came first, rather than nothing. See the
+corrected `recurring-defect-patterns.md` PLT-2923 entry.
 
 ---
 
