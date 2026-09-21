@@ -75,3 +75,15 @@ may already have relayed, or hand them an unconfirmed mechanism.
 **Closing condition (still holds):** cause (portfolio weighting inconsistency) is asserted, not
 shown; trigger presumably "AEX01 added/enabled with different weighting than peers," unconfirmed;
 cohort entirely open. Do not close or downgrade until at least the join-date question is answered.
+
+---
+
+## 2026-09-21 (scheduled) — closing note: ticket reached Done, drafts below are now moot
+
+The ticket moved to Done/Closed on 2026-09-18 via a Freshdesk-automation comment only (`112525`),
+with no human comment confirming the weighting/join-date question this file's draft was built to
+ask. **The Darminder draft above was never sent and is now moot** — the ticket closed without it,
+so there is no live recipient-side reason to send it. Full detail in `context.md` § 2026-09-21.
+Not deleting the draft or the reasoning above; leaving it as the record of what a confirmatory check
+would have looked like, in case the same weighting-conflict mechanism resurfaces on another project
+(cross-check candidate for `recurring-defect-patterns.md` if it does).

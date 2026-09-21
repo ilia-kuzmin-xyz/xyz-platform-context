@@ -247,3 +247,46 @@ any further customer contact.
 - Whether Atom's write path is the same `ElementInstallationStatus` table (Atom client not in scope).
 - Whether `calculatedOn` for ATL05–ATL08 is actually lagging, or advancing normally — this is the
   crux and is a data question about those four projects, answerable only with app or DB access.
+
+## 2026-09-21 (scheduled) — LEFT SCOPE this run: status moved to With Technical Support
+
+Live `getJiraIssue` (`status`, `comment`, `updated`): status is now **With Technical Support**
+(statusCategory "To Do"), assignee still **Yash Patel** (Jira assignee field; Darminder remains the
+drafted recipient throughout this ticket's history). `updated` = `2026-09-18T17:01:57+0100`. Two new
+comments since the 09-18 entry above, both same-day:
+
+- `112500` (Yash, 09-18 10:27) relays a customer update: *"It seems the updated elements were not
+  part in the FED model, hence that might be the cause of the dashboard not refreshing. For ATL05
+  after installing an element the refresh took place after 5-10 minutes as expected. However when I
+  update intangible progress through the Web Viewer the dashboard does not refresh automatically."*
+  This is a **new, independent confirmation of the two-pipeline split already diagnosed on 09-17/18**
+  — element status *did* eventually refresh (consistent with the capped delta-merge path), intangible
+  progress did not (consistent with "no live merge path at all" for Pipeline A, § 09-18 above). The
+  FED-model remark is a new, not-yet-investigated wrinkle (whether an element outside the current FED
+  model is excluded from the delta sync entirely) — not evaluated this run, out of scope while parked
+  With Technical Support.
+- `112567` (Rishi Bhugobaun, 09-18 17:01) is the handoff comment that likely explains the status
+  move: asks Yash to clarify whether the customer expects live in-tab refresh vs. a reload, then
+  states *"Currently, values will only update when the page is reloaded. On this project at the
+  moment I can see the progress calculations have updated, and it appears to be ~15 mins after the
+  last change from checking the DB."* **This is independent, DB-level confirmation of the
+  `calculatedOn`-cap mechanism from a second engineer** — reload-only refresh, and a ~15-minute
+  cadence, matching the capped-merge model this ticket's own investigation traced through
+  `dashboard-progress-service.ts`/`artefact-loader.ts`. Nothing here contradicts the 09-17/09-18
+  diagnosis; it corroborates it from the DB side rather than the code side.
+
+**Why this reads as a handoff, not a resolution:** no comment states the ticket is fixed, closed, or
+"as designed" — Rishi is actively still asking a clarifying question of Yash (unanswered as of this
+fetch), and the ball is now explicitly with a technical engineer rather than with the customer or
+with us. Per this routine's established precedent (PLT-3033 stayed tagged `groupA` through its own
+earlier With-Technical-Support excursions rather than being renamed to `resolved`), **this folder is
+NOT renamed** — a temporary internal hand-off is not the same as a fix identified/owned elsewhere or
+an "as designed" close.
+
+**Status for hand-back:** the fully-diagnosed mechanism from 09-17/09-18 (element-status delta capped
+at `calculatedOn`; intangible % has no live merge path at all; the progress panel's own "Last
+updated" field is the free diagnostic) stands unchanged and is corroborated, not superseded, by
+today's two comments. It is ready to hand back to Group A evaluation, unchanged, if/when the ticket
+re-enters scope. The one open technical thread this run adds to the unverified list: whether an
+element being outside the "FED model" affects the delta-sync window independently of the
+`calculatedOn` cap (raised by Yash in `112500`, not investigated).

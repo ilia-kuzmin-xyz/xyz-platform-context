@@ -187,3 +187,30 @@ same page. Otherwise unchanged: status still **With Customer**, still 5 comments
 `111943` (09-10), same 4 attachments. The draft to Darminder and attachment `64304` are unaffected —
 Darminder is the drafted recipient, not the assignee, so no action changes. No re-investigation
 performed.
+
+## 2026-09-21 (scheduled) — LEFT SCOPE: ticket reached Done
+
+Live `getJiraIssue` this run (`status`, `comment`, `resolution`, `updated`): status is now **Done**
+(statusCategory `done`), `resolution` is still **`null`** — the field itself was never set, only the
+board column moved. Assignee unchanged, **Yash Patel**. `updated` = `2026-09-18T13:31:34+0100`.
+
+**What closed it, per the live comment thread:** exactly one new comment since the 09-18 entry above,
+`112525` (Yash, 2026-09-18 13:31): *"Ticket ID: 7907 - Freshdesk ticket status changed to: Closed"* —
+a Freshdesk-automation note, not a human explanation. **No comment states a root cause or a fix for
+why AEX01 was missing from the Project List**; the ticket closed on the Freshdesk side moving to
+Closed, which is consistent with the customer accepting the 09-10 verbal explanation (comment
+`111942`: portfolio weighting-logic conflict) and taking no further action, not with anyone having
+confirmed it. **The three open verification questions from the 09-11/09-14 passes were never
+answered in Jira**: AEX01's actual `progressWeightingMethod` vs. its portfolio siblings, whether it
+joined the portfolio before or after the 2026-08-14 guard ship date, and what the PowerBI Project
+List query actually filters on. Attachment `64304` (the likely-decisive weighting-field crop) was
+never opened by this routine (403, standing gap) and there is no indication anyone else read it
+either — no comment references its content.
+
+**Per the folder-tag convention (`README.md` § Layout):** this qualifies as `resolved` — "root-caused
+to 'as designed' ... still trackable but no longer needs our evaluation" — on the strength of the
+ticket reaching Done/Closed, not on the strength of a confirmed mechanism. That distinction is worth
+keeping: this is an administrative closure with an unconfirmed technical explanation, not a verified
+root cause. Folder renamed this run: `PLT-3119-groupA-progress-tracking/` →
+`PLT-3119-resolved-progress-tracking/`. **Leaving scope; no further re-investigation planned** unless
+the ticket reopens.

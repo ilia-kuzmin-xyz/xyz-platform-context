@@ -234,3 +234,14 @@ Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status st
 assignee still Darminder Atker, still **2 comments**, newest still `111798` (09-09), same 3
 attachments. Neither candidate mechanism has been checked against a live session. The drafted
 console check is still unposted and unrun. No re-investigation performed.
+
+## 2026-09-21 (scheduled) — moved to Group B: status now Dev In Progress
+
+Live `getJiraIssue` (`status`, `assignee`, `comment`, `updated`): status is now **Dev In Progress**
+(Open → Dev In Progress since 09-18), assignee is now **Rishi Bhugobaun** (changed from Darminder
+Atker). `updated` = `2026-09-18T17:30:52+0100`. Still exactly **2 comments** — no new comment since
+`111798` (09-09) — and same 3 attachments, still unopened (403, standing gap). One line of status per
+this run's instructions (Group B — detailed pass deferred): dev has picked this up and reassigned to
+Rishi; neither candidate mechanism (bridge-drop / filter-panel override, both above) has been
+confirmed or ruled out yet, and the drafted console check is still unrun. Folder renamed this run:
+`PLT-3116-groupA-viewer-and-model/` → `PLT-3116-groupB-viewer-and-model/`.
