@@ -175,6 +175,40 @@ apply to them. (Unverified that Atom writes the same `ElementInstallationStatus`
 client is not in this repo.) Ticket detail:
 `incidents/live-incident-board-tickets/PLT-3133-groupA-data-pipeline/context.md` § 2026-09-18.
 
+## 2026-09-22 addition — `calculatedOn` is per-output, and the activity-level one is dropped on the floor
+
+Found while picking up PLT-2524. Adds to (retracts nothing from) the 09-17 and 09-18 sections above,
+which established that `calculatedOn` is the cap on the element-status merge and is rendered as the
+progress panel's "Last updated".
+
+**`calculatedOn` is a property of each progress output, not of the project.**
+`ProgressOutputItem` (`app/services/progressOutputsService/progress-outputs-api-service.ts:7-13`)
+carries `outputType`, `outputHierarchyLevel` — `activity` | `category-groups` | `project` — and its
+own optional `calculatedOn`. The endpoint returns the whole array; params are advisory and the
+client filters (`:46`).
+
+**The loader keeps only two of the three.** `ProgressOutputsV2Loader.fetchOutputs()`
+(`.../dashboard-progress/loaders/progress-outputs-v2-loader.ts:80-82`) takes
+`max(projectLevel?.calculatedOn, categoryGroups?.calculatedOn)`. **The `activity`-level output's
+`calculatedOn` is never read anywhere.** That matters because:
+
+| Surface | Values shown | Parquet behind them |
+|---|---|---|
+| Progress panel overview | Actual / Planned / Variance / SPI (`progress-panel/hooks/use-progress-metrics.ts:19-34`) | `project_progress` / `category_groups` |
+| Gantt grid `Actual %` / `Planned %` columns (`dashboard-panels/gantt/scheduler-columns/scheduler-columns.tsx:76-107`) | per-activity percents off `activityItem` | `activity_progress`, joined onto activities — `use-dashboard-schedule-data.tsx:268` comments *"null when progress parquet unavailable → column shows '-'"* |
+
+So the single `calculatedOn$` the app exposes describes the **panel's** figures, not the schedule
+grid's. Any future "last updated" indicator on the Gantt columns should surface the activity-level
+timestamp rather than reusing `calculatedOn$`, or it will quietly claim a freshness the grid does
+not have.
+
+**Also worth carrying:** `hasProgressOutputs()` (`progress-outputs-v2-loader.ts:99-104`) already
+distinguishes *"progress has never been calculated for this project"* (a legitimate empty state,
+outputs list present but without the planned-and-actual pair) from a genuinely broken/partial
+calculation (exactly one of the pair missing → `loadProgressFiles()` throws). The "values not
+calculated yet" state a user-facing indicator would need is therefore already derivable client-side,
+with no API change. Ticket detail: `sprint-tickets/PLT-2524/context.md`.
+
 ## Deep-dive
 
 - DuckDB table schemas: [`docs/dashboard/duckdb-tables/`](../../docs/dashboard/duckdb-tables/)
