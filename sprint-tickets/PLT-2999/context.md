@@ -1121,3 +1121,44 @@ reading 230 lines and hoping.
 > node -e "...brace balance..." ; prettier --check FILE           # parses
 > ```
 > All three caught something here. None of them is a conflict marker.
+
+## 2026-09-22 (18:35) — five findings on the merge, all real, one of them a merge interaction
+
+Fixed in `02cdfa3`. Notable because **all five were correct** — the first round in a week with no
+false positive, and the reason is visible: every one is *local* to a few lines, which is the shape
+Copilot gets right (see the 09-18 note on its three structural misses).
+
+1. **`duplicate()` dropped `requiresSignOff`** — a MERGE INTERACTION. The flag and
+   `signingSlotsFor` arrived from master; `duplicate()` predates them and nothing forced the two to
+   meet. And it is worse than losing a flag: `create()` derives the version's **signing slots** from
+   it, so the copy had none — a run of it could never be signed off.
+
+   > The comment directly above already argued the general case for `type`: *"The kind locks at
+   > creation, so it has to be set HERE."* **A rule stated for one field and not applied to the
+   > next field with the same property** — the archive-filter shape again, in a new place.
+   >
+   > **Check after any merge that adds a field to a create path: does every OTHER caller of that
+   > create path pass it?** `duplicate()`, import, and any template-copying path all build drafts.
+
+2. **Chunk de-duplication was by JS identity, not wire value.** `Set` keeps `1` and `'1'` apart;
+   `quote()` renders them identically, so they land in different chunks and the row returns twice.
+   Keyed on `String(value)` now. The fix I made on 09-18 for duplicates was correct in intent and
+   incomplete in reach.
+
+3. **The confirm guards compared only the task id.** Cancel during the usage refetch, reopen the
+   **same** task, and the stale continuation matched on id and deleted without the new dialog being
+   confirmed. **An id says which task; it cannot say which asking.** Added a generation token bumped
+   on every open and cancel, checked after the await on both paths.
+
+4. **Restore treated an unreadable folder list as an empty one.** `taskFolders` defaults to `[]` on
+   error and only the definitions query's error was handled, so every real folder failed
+   `folderNameById.has()` and the task was moved to the root — placement lost because a transient
+   read failed. Now refuses, matching the rule the delete dialog already follows.
+
+   > Third time this exact fail-open has appeared on this PR (usage check, then the restore branch
+   > once it gained a write, now the folder list). **The pattern: a default value that stands in for
+   > "no data" is indistinguishable from "the read failed" — and becomes dangerous the moment the
+   > branch reading it performs a write.** `= []` and `?? 0` defaults are the places to look.
+
+5. **`resolveRejoin(..., 'fresh')` had no archived test** — the filter went in on 09-18, the
+   coverage did not. Added.
