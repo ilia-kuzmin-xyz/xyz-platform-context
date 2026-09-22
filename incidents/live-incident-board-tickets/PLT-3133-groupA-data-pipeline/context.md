@@ -290,3 +290,35 @@ today's two comments. It is ready to hand back to Group A evaluation, unchanged,
 re-enters scope. The one open technical thread this run adds to the unverified list: whether an
 element being outside the "FED model" affects the delta-sync window independently of the
 `calculatedOn` cap (raised by Yash in `112500`, not investigated).
+
+## 2026-09-22 (scheduled) — RE-ENTERED SCOPE: status back to With Customer. Rishi's DB spot-check finds no delay over 15 minutes; ball is now on the customer for a concrete repro.
+
+Live `getJiraIssue` re-fetch: status is now **With Customer** again (was With Technical Support as of
+09-21), assignee still Yash Patel. **11 comments, up from the ~9 recorded through `112567`** on
+09-21 — three new, all same-day (09-21):
+
+- `112603` (Yash, 09:41) — clarifies for Rishi what the customer actually means: not "the dashboard
+  page doesn't live-refresh while open" (Rishi's 09-18 question), but "the underlying data takes
+  hours/a day to appear in the Dashboard after a Web Viewer edit."
+- `112616` (Rishi, 11:13) — **concrete backend measurement**, a table of save-to-output timestamps
+  across four projects:
+
+  | Project | Saved | Output updated | Elapsed |
+  |---|---|---|---|
+  | ATL06 | 15 Sep 06:44:56 | 06:47:52 | 3m |
+  | ATL08 | 16 Sep 07:11:56 | 07:19:16 | 7m |
+  | ATL05 | 17 Sep 13:38:18 | 13:51:24 | 13m |
+  | ATL07 | 16 Sep 06:52:55 | 07:06:38 | 14m |
+
+  All four are inside the ~15-minute `calculatedOn`-cap cadence already diagnosed on 09-17/09-18 —
+  **none shows anything close to the customer's reported "hours, up to a full day."** Rishi asks for
+  concrete examples (activity/element ids, expected values, filter state) to investigate further.
+- `112621` — Freshdesk sync, "Waiting on customer."
+
+**Net effect: this corroborates, and now measures, the existing diagnosis — and shifts the open
+question from "is there a pipeline delay" to "why does the customer's experience not match four
+independent spot-checks."** Per the standing precedent (PLT-3033's own earlier With-Technical-Support
+excursions), this folder was never renamed away from `groupA` and stays that way now that the ticket
+is back with the customer. The FED-model wrinkle raised in `112500` (09-18, an element outside the
+current FED model possibly excluded from delta sync) is still unraised as its own thread and still
+not investigated.

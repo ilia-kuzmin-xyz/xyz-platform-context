@@ -136,3 +136,35 @@ No code was written in either repository, nothing was built or run, and no git c
 — this run was instructed to leave git to the orchestrator because several agents share this
 checkout. (`xyz-platform-context`'s own branch policy — commit straight to `main` — still applies to
 whoever commits this folder; it is not being overridden, only deferred.)
+
+---
+
+## 2026-09-22 (scheduled) — status/assignee moved with no comment; the blocker and the draft are both unchanged, but the board now actively misreports who owes what
+
+No new Jira comment since `112522` (09-18). What changed is administrative: status `Open` → `With
+Customer`, assignee Darminder → Yash, both on 09-21 with no accompanying comment (`context.md` this
+date). **This makes the standing recommendation more urgent, not less:** the board's own status field
+now says the ball is with the customer, while the customer's 09-18 question to us is still unanswered
+and now 4 days old. The three attachments (`64895`, `64889`, `64888`) are still unopened by anyone
+with access, and the draft to Darminder below is still unposted.
+
+**Revised proposed next action, in order:**
+1. Whoever reassigned this to Yash should confirm whether Darminder is actually done — the open
+   technical question (which of two error codes DEV showed) is his finding to clarify, not Yash's.
+2. Correct the Jira status. `With Customer` is now actively wrong in the same direction the 09-21
+   entry flagged for Freshdesk: the customer is waiting on us.
+3. Everything else in the 09-21 recommendation stands unchanged — open the three attachments, post
+   the draft to Darminder, do not send the customer another unverified instruction.
+
+### Draft — to Darminder, on PLT-3147 — DRAFT ONLY, not posted (95 words) — unchanged from 09-21
+
+Darminder, the customer answered three days ago and is still waiting, and the ticket is marked as
+waiting on them. Our error list has two different messages that both read as a base point problem:
+one means the model itself has no base point, the other means the model's base point does not match
+the project it was uploaded into. If it was the second, your DEV result describes that DEV project
+rather than ADL2, which is why the customer can honestly say their base points match. **Which of
+those two messages did DEV show?**
+
+*(Say the word and paste it.)*
+
+**No Jira action was taken by this run.**

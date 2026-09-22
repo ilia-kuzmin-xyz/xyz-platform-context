@@ -245,3 +245,15 @@ this run's instructions (Group B — detailed pass deferred): dev has picked thi
 Rishi; neither candidate mechanism (bridge-drop / filter-panel override, both above) has been
 confirmed or ruled out yet, and the drafted console check is still unrun. Folder renamed this run:
 `PLT-3116-groupA-viewer-and-model/` → `PLT-3116-groupB-viewer-and-model/`.
+
+## 2026-09-22 (scheduled) — LEFT SCOPE: advanced to In Code Review. Folder retagged `groupB` → `resolved`.
+
+Live `getJiraIssue` (`status`, `assignee`, `comment`, `updated`): status is now **In Code Review**
+(Dev In Progress → In Code Review since 09-21, `updated = 2026-09-21T09:23:59+0100`), assignee still
+**Rishi Bhugobaun**. Still exactly **2 comments** — no new comment since `111798` (09-09) — same 3
+attachments, still 403. Per this board's scope rules, In Code Review is explicitly excluded (a fix is
+now written and under review; nothing left for Group A/B evaluation). Folder retagged this run:
+`PLT-3116-groupB-viewer-and-model/` → `PLT-3116-resolved-viewer-and-model/`. Neither candidate
+mechanism from the original investigation (bridge-drop / filter-panel override, both in earlier
+sections of this file) was ever confirmed or ruled out on the ticket itself — worth a note for
+whoever reviews the PR, since the fix may address one candidate without the other having been checked.

@@ -450,3 +450,31 @@ with no error anywhere. Not checked against ADL2.
    it is the one that decides whether this can recur.
 10. **The ADL2 project id and the FED model/version id.** Absent from the ticket; needed before any
     live check.
+
+---
+
+## 2026-09-22 (scheduled) — status quietly moved Open → With Customer, assignee Darminder → Yash, with NO accompanying comment. The customer's question is still unanswered.
+
+Live `getJiraIssue` re-fetch: **comment thread is byte-identical to 09-18** — still exactly 10
+comments, same ids, newest still `112522` (09-18 13:26, Freshdesk "Waiting on customer"). But two
+fields changed: **status is now `With Customer`** (was `Open`) and **assignee is now Yash Patel**
+(was Darminder Atker), both stamped `updated = 2026-09-21T10:17:41+0100` — the same day as the prior
+run, but with no comment recorded at that timestamp anywhere in the thread. This looks like a board
+transition and reassignment done outside of a comment (e.g. via the board UI), not a reply to the
+customer.
+
+**Why this matters more than a routine status move.** The 09-21 pass's whole finding was that the
+Freshdesk/Jira board was mislabelling this ticket — the *customer* was waiting on *us* (they answered
+our question and asked their own, "identify the name of the model which is causing this effect," at
+13:12 on 09-18, and nothing has answered it since). Moving the Jira status to `With Customer` now
+makes that mislabelling **worse, not better**: it now says explicitly, in the board's own status
+field, that the ball is with the customer, when the unanswered question is still ours to answer. No
+one has opened attachments `64895`/`64889`/`64888` (still not retried this run, unopenable since
+09-18 per the standing 403), no one has posted the draft to Darminder from `recommended-action.md`,
+and the customer's 09-18 question is now **4 days** old with zero reply.
+
+**Assignee moving to Yash** (support) rather than staying with Darminder (the engineer who found the
+one piece of hard evidence, the DEV converter failure) is also worth flagging: the open technical
+question — which of two ambiguous error codes DEV showed — is not Yash's to answer. If the reassignment
+means "Darminder is done investigating," that should be stated somewhere; nothing on the ticket says
+so.

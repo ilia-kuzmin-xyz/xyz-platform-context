@@ -1137,3 +1137,12 @@ The true-north correction (`recommended-action.md`) is now **13 days** unposted 
 diagnosis (comment 111642). Ticket is now **138 days** old (2026-05-06 → 2026-09-21), still the
 board's only Critical. No re-investigation performed — the one new comment carries no technical
 content, so nothing here changes the mechanism or the recommendation.
+
+## 2026-09-22 (scheduled) — confirmed unchanged, correction now 14 days unposted, ticket 139 days old
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`): status still **With Customer**,
+priority Critical, assignee still **Yash Patel**, still **34 comments**, newest still `112512`
+(the 09-18 Freshdesk sync echo — no new comment since 09-21). Same 4 attachments, same ids. Correction
+now **14 days** unposted since the 09-08 diagnosis. Ticket is now **139 days** old
+(2026-05-06 → 2026-09-22), still the board's only Critical. No re-investigation performed — nothing
+had reason to move in one day.

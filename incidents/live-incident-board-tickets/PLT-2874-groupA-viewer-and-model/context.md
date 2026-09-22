@@ -974,3 +974,12 @@ re-investigation performed; nothing about the code or GitHub state had reason to
 with no ticket activity. The combined draft to Yash+Gennaro (`recommended-action.md` § 2026-09-14)
 is still unposted, still the right message, still needs a human to send it — and it is now Ilia's
 own overdue promise, not only a third party's question.
+
+## 2026-09-22 (scheduled) — confirmed unchanged; Ilia's own "today" reply now 11 days overdue, Gennaro's question 41 days unanswered
+
+Live `getJiraIssue` re-fetch (full fields incl. comments/attachments): status still **In Analysis**,
+priority Minor, assignee Ilia Kuzmin, still **8 comments**, newest still `112017` (2026-09-11, "will
+get back to you with updates soon today"). No new comment since — **11 days overdue** against Ilia's
+own "today" word. Gennaro's 08-12 Staging-undercount finding (109457) is now **41 days** unanswered.
+`updated` unchanged. No re-investigation performed — nothing had reason to move in one day. The
+combined draft to Yash+Gennaro is still unposted.

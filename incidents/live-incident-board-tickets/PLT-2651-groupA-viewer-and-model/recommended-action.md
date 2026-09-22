@@ -24,6 +24,26 @@ correction.
 
 ---
 
+## 2026-09-22 (scheduled) — unchanged again. Correction now 14 days unposted, ticket 139 days old.
+
+Fresh `getJiraIssue` fetch: status still `With Customer`, assignee still Yash Patel, no new comment
+since `112512` (09-18 Freshdesk echo). No new attachment. Recommendation, draft and action class (4,
+with a class-1 chase attached) are unchanged — restating only because the clock has moved on the
+board's only Critical ticket, now 139 days old and 14 days into an unposted correction.
+
+### Draft — to Yash Patel, on PLT-2651 — DRAFT ONLY, not posted (93 words)
+
+> Yash, quick correction before they act on my last message: changing the project's true north
+> setting won't change anything in the Web Editor's section box, that code path isn't active. What
+> actually fixes it is the model being re-exported from Revit with the right rotation in its
+> coordinates, not a settings change or a re-upload. We're double-checking the exact export ask with
+> our backend team so we give them one correct instruction instead of a second wrong one. **Can you
+> ask them to hold off on the true-north change until we confirm that?**
+
+**No Jira action taken by this run** — no comment, no transition, no assignment, no field edit.
+
+---
+
 ## 2026-09-15 (scheduled) — unchanged again. The correction is now 7 days unposted, and the ticket has crossed 132 days old.
 
 Fresh `getJiraIssue` fetch this run: no new comment since 111646 (09-08), status still `With

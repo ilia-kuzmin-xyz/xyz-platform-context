@@ -218,3 +218,10 @@ Re-fetched the live issue (`getJiraIssue`, fields incl. `comment`, `attachment`)
 No new information this run. `recommended-action.md`'s classification (2) and draft reply stand
 unchanged — see that file for whether it is still the right call to send now that the question has
 gone unanswered for 4 days.
+
+## 2026-09-22 — re-check, unchanged
+
+Re-fetched the live issue: status still **In Analysis**, assignee still Darminder Atker, still
+exactly **4 comments**, same ids. Neither Sachin Badoni nor Ali Seyedof has replied to the 09-17
+question — now **5 days** unanswered. Same 8 attachments, no new one. `recommended-action.md`'s
+draft reply (97 words, to Darminder) stands unchanged and unposted.

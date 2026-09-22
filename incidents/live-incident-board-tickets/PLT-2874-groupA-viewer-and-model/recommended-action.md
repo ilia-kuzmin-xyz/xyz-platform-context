@@ -552,3 +552,11 @@ independent live readings). **6/10 unchanged** on the Staging undercount — fiv
 excluded, all still needing environment state.
 
 **No Jira action was taken by this run.**
+
+---
+
+## 2026-09-22 (scheduled) — unchanged, 11 days overdue on Ilia's own "today" promise
+
+Live re-fetch confirms zero movement. The combined draft to Yash+Gennaro (§ 2026-09-14) is still the
+right message and still unposted. Confidence unchanged: 9/10 the 08-28 draft is unsafe to send, 6/10
+on the Staging undercount's operative hypothesis. **No Jira action was taken by this run.**

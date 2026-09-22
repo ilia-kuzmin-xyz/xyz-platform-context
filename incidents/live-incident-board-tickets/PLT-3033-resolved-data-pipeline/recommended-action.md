@@ -235,3 +235,16 @@ correct, ready question sitting unsent for two weeks). At ten days, the move is 
 into the same thread — it is a named owner and a date for the customer contact, or closing the Jira
 on Darminder's technical finding and letting the Freshdesk ticket carry any residual customer
 follow-up. Flagging only; this routine takes no live action.
+
+---
+
+## 2026-09-22 (scheduled) — LEFT SCOPE, folder retagged `resolved`. Draft below is now moot for board purposes but the underlying gap (nobody confirmed the fix) is unchanged.
+
+Status moved to Done via Freshdesk automation (Open → Closed, 09-21, no free text) — see `context.md`
+this date. The draft to Yash below no longer changes the ticket's board position (it has already left
+scope), but the substance it asks about — whether Matthew ever actually confirmed the re-uploaded
+schedule looks right — was never answered. Left here for the record rather than re-sent, since posting
+a "can we close this" question on an already-Done ticket would read oddly; if anyone reopens this
+ticket on a fresh customer report, start from that unanswered question, not from scratch.
+
+**No Jira action was taken by this run.**

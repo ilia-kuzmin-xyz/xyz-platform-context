@@ -502,3 +502,21 @@ Attachments unchanged (4 PNGs from 08-17, Darminder's own 09-08 screenshot `6411
 XER `64009`); `64009`'s content is still 403 to this session (not re-tested this pass, no reason to
 expect it changed). The `recommended-action.md` draft to Yash (09-18, 68 words) remains correct and
 unposted.
+
+## 2026-09-22 (scheduled) — LEFT SCOPE: reached Done via Freshdesk automation, no human technical confirmation ever posted. Folder retagged `groupA` → `resolved`.
+
+Live `getJiraIssue` re-fetch: **status is now `Done`**, `resolution = null` (Done with no resolution
+set is itself a small inconsistency, not investigated further). Two new comments since 09-21, both
+same-day Freshdesk auto-echoes: `112629` (09-21 13:16, "Open") then `112630` (09-21 14:06, "Closed")
+— a reopen/close cycle with **zero free text**, the same automation-only pattern flagged as unclear on
+09-21 itself. **No human ever answered Darminder's 09-08 question** ("this appears to be resolved by
+uploading the correctly formatted schedule and the ticket can be closed?") — Yash's only reply
+(`111663`, 09-08) was "I've asked user to check... will update," and nothing followed. The
+`recommended-action.md` draft to Yash asking for that confirmation was never posted.
+
+**This is the same shape as PLT-3119 on 09-21** (reached Done via Freshdesk automation, original
+technical question never answered by a human) — per that precedent, this folder is retagged
+`PLT-3033-groupA-data-pipeline/` → `PLT-3033-resolved-data-pipeline/` (rename already done this run).
+`resolved` here means "left scope via the board's own automation," not "root-caused and confirmed" —
+Darminder's technical read (re-uploading the correctly formatted schedule fixed it) is still only
+his own unconfirmed assessment, never verified against the customer's actual current schedule state.

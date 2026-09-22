@@ -95,3 +95,14 @@ see either way.
 
 No code was written or pushed, no branch created, and the draft above was not posted to Jira — per
 the standing hard rule, it is left here for a human to send if they choose.
+
+---
+
+## 2026-09-22 (scheduled) — LEFT SCOPE: In Code Review. Nothing to draft.
+
+Status advanced Dev In Progress → In Code Review, assignee still Rishi. No Jira comment accompanies
+the transition. Per scope rules this ticket is now excluded from Group A/B entirely — a human
+reviewer, not this routine, is the next checkpoint. Flagging only: neither of the two candidate
+mechanisms in `context.md` (bridge-drop vs. filter-panel override) was ever confirmed against a live
+session before the fix was written, so whoever reviews the PR may want to check which one it actually
+addresses. **No Jira action was taken by this run.**

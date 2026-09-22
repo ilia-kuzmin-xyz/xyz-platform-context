@@ -199,3 +199,40 @@ Live Jira confirmed unchanged (see `context.md`, 09-21 entry): status Open, assi
 Desiato, 7 comments, newest still `111944` (09-10). Both drafts below are unchanged text from
 09-09/09-11/09-14 and remain ready to send as-is; nothing on the ticket has changed the content of
 either. No new draft needed.
+
+---
+
+## 2026-09-22 (scheduled) — REVISED. Five comments the 09-21 pass missed change the picture: this is now a scope-clarification ask to Yash/Pietro/Mostafa, not a repeat of the old chase-to-Yash draft.
+
+**Classification: 4 — ambiguous, needs a product decision, not code.** The mechanism is still solved
+(Ilia's 09-08 query fix); what changed is that comment `112607` (Yash, 09-21) introduces "working on a
+way to automate the reports" without anyone deciding that is actually in scope, owned, or ticketed.
+The two prior drafts in this file (clarifier to Darminder, chase to Yash) are about a question that no
+longer matches where the ticket is — Darminder handed this to Pietro on 09-10, and Pietro has now
+weighed back in (09-21) — so both are **superseded**, not deleted; kept below for the record.
+
+### New draft — to Yash Patel, on PLT-3109 — DRAFT ONLY, not posted (76 words)
+
+> Yash, before this turns into a new automation build: did the client actually remove the two `WHERE`
+> lines from their Power BI query per my 09-08 comment? "Still an issue when exporting" could mean
+> either they tried it and it's still wrong, or they haven't touched the query yet — those need
+> different next steps. Also, is "automate the reports" a scoped ask from Pietro/Mostafa, or something
+> you're proposing? **If it's a real ask, it needs its own ticket — this one is a data-fix, not a
+> build.**
+
+### Why not just resend the old drafts
+
+Both assumed Darminder/Pietro needed a technical clarifier or that Yash needed a plain status chase.
+Neither is true anymore: Pietro has already re-engaged (`112606`), and the open question is now
+whether "automate the reports" is real scope or an ad-hoc idea forming in a Freshdesk thread. Sending
+either old draft as-is would talk past what actually happened this week.
+
+**No Jira action was taken by this run.**
+
+---
+
+### Superseded — clarifier to Darminder (09-11) and chase-to-Yash (09-09/09-14/…), kept for the record, do not send as-is
+
+The clarifier asked Darminder what he wanted Pietro's input on; Pietro has since answered that
+himself by re-engaging directly (`112606`). The chase-to-Yash asked only for a status update; today's
+draft above replaces it with the sharper question the new comments actually raise.

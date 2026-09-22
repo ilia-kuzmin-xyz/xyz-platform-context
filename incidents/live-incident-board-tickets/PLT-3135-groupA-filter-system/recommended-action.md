@@ -59,3 +59,10 @@ backend. **Shall we add the parent's type and id to both the payload and the new
 No Jira action of any kind — no comment, no transition, no assignment, no @-mention. The draft above
 is text for a human to send or discard. No code was written in either repository, nothing was built or
 run, and no git operation was performed.
+
+---
+
+## 2026-09-22 — unchanged, open question now 5 days unanswered
+
+Live re-fetch confirms zero movement. Draft reply above (97 words) still the right call, still
+unposted. **No Jira action was taken by this run.**

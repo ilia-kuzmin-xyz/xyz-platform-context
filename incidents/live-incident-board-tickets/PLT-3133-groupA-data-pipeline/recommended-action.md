@@ -105,3 +105,17 @@ them at all — do not repeat that reassurance unqualified. Detail in `context.m
 
 No code changed, no Jira comment, transition or assignment, no attachment content fetched (the 403
 is a known session gap, not re-tested). Nothing run or built.
+
+---
+
+## 2026-09-22 (scheduled) — no drafted action needed; Rishi already asked the right question live on the ticket
+
+Rishi's `112616` (09-21) already does what this file's prior drafts were building toward: a real
+backend measurement showing all four spot-checked projects update within 15 minutes, and a direct ask
+to Yash for concrete repro examples (ids, expected values, filter state) if the customer still sees
+multi-hour delays. Freshdesk is `Waiting on customer` as of `112621`. **Nothing to draft this run** —
+the ball is correctly with the customer, and the internal diagnosis (capped ~15-min merge cadence) is
+now measured, not just inferred from code. Re-open a deeper investigation only if the customer returns
+with a specific case that Rishi's own spot-check pattern doesn't cover (e.g. genuinely hours-long,
+reproducible, with ids). **No Jira action was taken by this run** — Rishi's comment was posted by him,
+not by this routine.

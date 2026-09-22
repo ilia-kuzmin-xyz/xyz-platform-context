@@ -311,3 +311,11 @@ one-click close), and the concern raised on 09-18 — that this ticket could bec
 case if nobody actions the close — stands and is now measurably closer to true (5 days in, vs.
 PLT-2815's 74). Not yet at a length that calls for anything beyond a routine nudge, but worth
 flagging again rather than letting the "no Jira change" framing read as "no action needed."
+
+## 2026-09-22 (scheduled) — confirmed unchanged since 09-16; 6 days since Yash said "we can close it now"
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still Yash Patel, priority
+Major, still **3 comments**, newest still `112316` (09-16). `updated` unchanged. Folder tag
+(`groupA`) still correct — status has not left `With Customer`. The close Yash called for on 09-16 is
+now **6 days** old with zero Jira movement since. Same shape as PLT-2815 (settled-but-open, same
+assignee, missing one-click close), now measurably closer to it (6 days in vs. PLT-2815's 78).

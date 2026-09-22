@@ -45,6 +45,151 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-22 (scheduled) — 10 in-scope Group A tickets (up from 9 on 09-21), 0 in Group B (down from 1), 1 brand-new (PLT-3156, full root-cause this run), 1 left scope to Done (PLT-3033 → resolved), 1 left scope forward (PLT-3116 → In Code Review → resolved), 1 re-entered scope (PLT-3133, With Technical Support → With Customer), 1 found with a same-day gap the prior run missed (PLT-3109 — 5 new comments, assignee Pietro → Yash), 1 status/assignee move with no comment on the board's only other Critical (PLT-3147, Open → With Customer, Darminder → Yash), 7 confirmed unchanged in substance, zero Jira actions taken
+
+Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`,
+cross-checked with a `statusCategory != Done` variant: **22 non-Done tickets**, same total as 09-21
+(PLT-3033 left via Done, PLT-3156 joined as new — net zero). Exclusions: `Ready For QA` (4:
+3104/3099/3096/3091), `In Code Review` (3: 3116/3112/3084 — up one, since PLT-3116 advanced into it
+this run), `READY FOR RELEASE` (2: 3060/3040), `Customer Release Check` (2: 3097/2917), `Blocked` (1:
+2660) — **12 excluded**. **22 − 12 = 10 in Group A**, all `Open`/`In Analysis`/`With Customer`.
+**Group B is empty** — no ticket on the board currently sits in `Ready For Development` or
+`Dev In Progress`.
+
+Every continuing ticket got a live `getJiraIssue` re-fetch (fields incl. `comment`/`attachment`)
+diffed against its folder before anything was written, per "the folder is a cache, not the truth."
+
+**PLT-3109** is the important catch this run: the 09-21 entry recorded "confirmed unchanged, 7
+comments, assignee Pietro Desiato" — live data today shows **12 comments and assignee Yash Patel**,
+with five new same-day (09-21) comments the prior pass's fetch missed entirely (timestamps 09:56
+through 10:13, all after whatever moment that pass actually queried). The new content matters: Pietro
+asked for a fix confirmation, Yash revealed the team is now "working on a way to automate the
+reports" — a scope change from "the client fixes their own Power BI query" (Ilia's already-correct
+09-08 diagnosis) to "we build and own client-facing automation" — without anyone framing that as a
+product decision or opening a ticket for it. The customer's "still an issue when exporting" doesn't
+say whether they ever applied the original fix. Both prior drafts in this ticket's
+`recommended-action.md` are now superseded by a sharper question to Yash (kept, not deleted, per the
+additive-writing rule). **Lesson for future runs:** a "confirmed unchanged" verdict is only as good
+as the fetch's timing — this is the first documented case on this board of a same-day miss, not a
+multi-day gap, and it argues for re-fetching late in the day rather than assuming morning-of parity
+with the previous evening's run.
+
+**PLT-3156** (new): "SIN02 - Webviewer showing 2 paths for the schedule." The customer's XER schedule
+export contains a second, orphaned WBS root ("Draft") alongside the main project's tree — both render
+as separate top-level paths. Rishi diagnosed this correctly and fast (within 8 minutes of the report):
+re-export without the DRAFT project, since the importer has no partial-branch delete and faithfully
+converts whatever `PROJWBS` rows it's given. This session's own code trace (a sub-agent read
+`hc-frontend`'s XER parser, `schedule-parser.ts`) independently confirms the mechanism file:line —
+any `PROJWBS` node with an unresolved parent becomes its own tree root, no name filtering exists
+anywhere, and the only delete operation in either repo is whole-revision
+(`XYZPlatformApi/services/schedules.service.ts:230-249`). Same mechanism family as
+**PLT-3033** (also reached its "DRAFT"-named resolution this run, see below) — likely what Yash meant
+by "similar to the Meta projects," except the closer precedent is PLT-3033, not any Meta ticket; the
+Meta tickets on this board (e.g. PLT-3109) are an unrelated Power BI query issue. New folder
+`PLT-3156-groupA-data-pipeline/`. Nothing left to do but wait on the customer's re-export; one
+optional one-liner drafted for Rishi correcting the Meta comparison, not urgent.
+
+**PLT-3033** reached Done via Freshdesk automation (Open → Closed, 09-21, zero free text) — same
+shape as PLT-3119 on 09-21: the original technical question (Darminder's "this appears to be
+resolved... can we close it?", 09-08) was never answered by a human before the ticket closed itself.
+Folder retagged `groupA` → `resolved`: `PLT-3033-groupA-data-pipeline/` →
+`PLT-3033-resolved-data-pipeline/`.
+
+**PLT-3116** advanced Dev In Progress → In Code Review (assignee still Rishi Bhugobaun), which the
+scope rules explicitly exclude. Folder retagged `groupB` → `resolved`:
+`PLT-3116-groupB-viewer-and-model/` → `PLT-3116-resolved-viewer-and-model/`. Flagged for whoever
+reviews the PR: neither of the two candidate mechanisms traced earlier on this ticket (a
+selection-bridge drop vs. a filter-panel override, both in the same 40-line function) was ever
+confirmed against a live session before the fix was written.
+
+**PLT-3133** moved back from `With Technical Support` (09-21) to **`With Customer`**. Per the
+PLT-3033 09-21 precedent, the folder was never renamed away from `groupA` during that excursion, so
+no rename is needed now either. Real content arrived while it was parked: Rishi posted a concrete
+DB-level measurement (a 4-project table, all updates landing inside the ~15-minute cadence already
+diagnosed) and asked Yash for a specific repro if the customer's "hours to a day" claim is still
+live. This corroborates and measures the existing diagnosis rather than changing it; nothing to
+draft this run, Rishi already asked the right question live on the ticket.
+
+**PLT-3147** (the board's other Critical): comment thread is byte-identical to 09-18 — the customer's
+09-18 question is still unanswered, now 4 days old, and none of the three decisive attachments has
+been opened by anyone with access. What changed is administrative and concerning: status moved
+**Open → With Customer** and assignee **Darminder → Yash**, both stamped 09-21 with **no
+accompanying comment anywhere in the thread**. This makes the 09-21 finding (the board mislabels who
+owes what) worse, not better — the status field now explicitly says the ball is with the customer,
+when the unanswered question is still ours. Recommendation escalated: someone should confirm whether
+Darminder is actually done investigating before this reads as closed-by-drift.
+
+**PLT-2651, PLT-2815, PLT-2874, PLT-2918, PLT-3109 (day-count only), PLT-3115, PLT-3135**: confirmed
+unchanged in substance against live Jira (PLT-3109's *comment content* was not unchanged — see above;
+only its day-count entry is routine). Dated confirmations appended to each `context.md`. PLT-2815 is
+now **78 days stale, 34th consecutive run** recommending an identical unposted close-out; PLT-2651
+(the board's only other Critical besides PLT-3147) is **139 days old**, its true-north correction now
+**14 days** unposted.
+
+### Group A (10)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer · Major | **New.** Full root-cause (orphan WBS root from a second XER project), independently code-verified. Waiting on customer's re-export. | 1 — correctly parked, nothing to draft |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Status/assignee moved with no comment, worsening the existing mislabel. Customer's question still unanswered, now 4 days. | 1, escalated — board now actively misreports who owes what |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged. **139 days** old; correction **14 days** unposted. | 4 with a class-1 chase attached |
+| [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **78 days stale, 34th consecutive run.** | 1 — stale, unresponded (on us) |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **11 days** overdue; Gennaro's question **41 days** unanswered. | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. Human silence now **28 days**. | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | **Real movement the 09-21 pass missed** — 5 new comments, assignee Pietro → Yash, scope quietly shifting toward "we build automation." Both prior drafts superseded. | 4 — new drafted question, unposted |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged. **6 days** since Yash's own "we can close it now" comment, still no transition. | 1 |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | **Re-entered scope** (was With Technical Support). Rishi's DB spot-check corroborates the existing diagnosis; correctly parked on the customer for a concrete repro. | 1 — already actioned live by Rishi |
+| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | Unchanged. Open question to Sachin/Ali now **5 days** unanswered. | 2 — drafted reply ready, unposted |
+
+### Group B (0)
+
+Empty this run — no board ticket currently sits in `Ready For Development` or `Dev In Progress`.
+PLT-3116, last run's sole Group B ticket, advanced past it into `In Code Review` (excluded) before
+this run.
+
+### Left scope this run
+
+**PLT-3033** — reached Done via Freshdesk automation; no human comment ever confirmed Darminder's
+09-08 technical question. Folder retagged `resolved`.
+**PLT-3116** — advanced to In Code Review; fix is written and under human review. Folder retagged
+`resolved`.
+
+### Standing gaps (unopenable media)
+
+PLT-3156's 3 attachments (screenshot + both XER files, none re-tested individually this run — assumed
+403 per session-wide pattern, consistent everywhere else this run); PLT-3147's 3 (still 403, still
+decisive, still unopened by anyone with access); PLT-2651's `63521`; PLT-2815's screenshots; PLT-2874's
+screenshots; PLT-2918's attachments; PLT-3109's 5 attachments; PLT-3115's 4; PLT-3135's `64835`/`64834`.
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-3147** — someone confirms whether Darminder is done investigating (the reassignment to Yash
+   implies it but no comment says so), corrects the `With Customer` status back to reflect that we
+   owe the customer an answer, and opens the three attachments (settles everything downstream).
+2. **PLT-3109** — send the new draft to Yash asking (a) whether the client ever applied the 09-08
+   query fix and (b) whether "automate the reports" is a real, scoped ask or should stay out of this
+   ticket.
+3. **PLT-2815** — execute the close-out. 78 days / 34 runs unposted, purely administrative.
+4. **PLT-2651** — send the true-north correction to the customer. Critical, 139 days, 14 days
+   unposted.
+5. **PLT-2874** — send the combined draft to Yash+Gennaro. 11 days overdue, 41 days open.
+6. **PLT-3115** — execute the close transition Yash already called for on 09-16.
+7. **PLT-3135** — send the 97-word draft to Darminder; open question to Sachin/Ali now 5 days
+   unanswered.
+8. **PLT-2918** — send the existing unsent draft; nothing new to add beyond the day counter.
+9. **PLT-3133**, **PLT-3156** — no action needed; both are correctly parked on the customer, and in
+   PLT-3133's case a human (Rishi) already asked the right question live on the ticket.
+
+### What could not be verified this run
+
+Attachment content on every ticket (session-wide 403, assumed consistent, not individually re-tested
+on every single ticket this run — spot-tested where a prior run had already established the pattern);
+whether the SIN02 customer has re-exported yet; whether Rishi's question to Pietro/Mostafa about the
+"Meta" precedent will get answered before the customer's own re-export makes it moot; whether any
+assignee has replied outside Jira (Slack/email) on any of the 7 "unchanged" tickets.
+
+---
+
 ## Run: 2026-09-21 (scheduled) — 9 in-scope Group A tickets (down from 11 on 09-18), 1 brand-new Critical (PLT-3147, full root-cause this run), 2 left scope (PLT-3119 → Done, PLT-3133 → With Technical Support), 1 advanced to Group B (PLT-3116 → Dev In Progress), 8 confirmed unchanged in substance, zero Jira actions taken
 
 First run since 09-18 — 09-19/09-20 had no scheduled firing, so this run covers a 3-calendar-day gap

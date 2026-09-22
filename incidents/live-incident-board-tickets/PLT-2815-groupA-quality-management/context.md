@@ -592,3 +592,12 @@ would warrant it.
 have permission to view attachment with id: 59263"]}` — byte-identical error shape to the 2026-09-08
 finding. The session-wide attachment-content 403 still applies; not a ticket-specific block. Not
 load-bearing either way (both figures already reproduced to the cent from source).
+
+## 2026-09-22 (scheduled) — confirmed unchanged, 78 days stale, 34th consecutive run
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `assignee`, `status`, `updated`): status still
+**With Customer**, priority Major, assignee Yash Patel, still **13 comments**, newest still `106553`
+(07-06, Freshdesk auto-close echo). `updated` unchanged. **78 days** since any Jira activity of any
+kind; **34th consecutive run** recommending the same unposted close-out. No re-investigation
+performed — nothing has moved that would warrant it. See `recommended-action.md` for the standing
+chase-to-Yash draft, still the right instrument, still unposted.

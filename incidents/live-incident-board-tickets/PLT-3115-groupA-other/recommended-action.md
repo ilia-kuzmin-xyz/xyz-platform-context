@@ -199,3 +199,11 @@ merged message that buries either ticket key.
 
 No Jira comment, transition, or assignment. No code changed. No folder renamed. The `DangerZone.tsx`
 hardening remains undone and still unmotivated by this ticket.
+
+---
+
+## 2026-09-22 (scheduled) — unchanged, 6 days since Yash's own close call. Same draft stands.
+
+Live re-fetch confirms zero movement. Draft nudge above (59 words) unchanged and unsent. Raise
+alongside PLT-2815's chase if a human is doing a pass on Yash's outstanding one-click closes — both
+tickets are now in the same shape. **No Jira action was taken by this run.**

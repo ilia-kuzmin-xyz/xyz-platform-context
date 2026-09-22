@@ -450,3 +450,39 @@ re-checked every run; nothing in the ticket's own state gives a reason to.
   directly.
 - Attachment bytes — re-confirmed 403 this session (not a blocker; Ilia already opened all 5 on
   09-08).
+
+## 2026-09-22 (scheduled) — REAL MOVEMENT the 09-21 pass missed: 5 new comments, assignee back to Yash, scope is quietly shifting from "client fixes their query" to "we build automation"
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`, `status`, `assignee`, `updated`,
+`priority`) came back with **12 comments, not 7** — the 09-21 entry's "confirmed unchanged, newest
+still `111944`" was stale at the moment it was written; all five new comments carry 09-21 timestamps
+*after* that pass's apparent fetch time (`112606` 09:56 through `112612` 10:13), so this is a same-day
+miss, not a multi-day gap. **Assignee is now Yash Patel, not Pietro Desiato** — moved back from
+product to support.
+
+New comments, in order:
+- `112606` (Pietro Desiato, 09:56) — *"can we please confirm if this is fixed?"*, addressed to Yash.
+- `112607` (Yash, 09:59) — *"We were suppose to have a meeting with Ashley on this for potential
+  solution. Mostafa Kamel Hussien confirmed that Ashley was on leave and we are working on a way to
+  automate the reports. Will check with user too."*
+- `112608`/`112609` — Freshdesk auto-cycle (Waiting on customer → Open).
+- `112612` (Yash, 10:13) — *"User quotes, 'This is still an issue for me when exporting.'"*
+
+**Why this needs a human decision, not more code-reading.** Ilia's 09-08 diagnosis (`111645`) was
+complete and actionable: the client's own Power BI query has `WHERE TotalPlannedLaborUnits IS NOT
+NULL AND TotalPlannedLaborUnits <> 0`, which drops ~15,600 of 19,600 activities before any percentage
+is computed — nothing on our side is wrong, the fix is the client removing two lines from their own
+query. That is still true; nothing in today's comments contradicts it or reopens the mechanism.
+
+But comment `112607` quietly changes what "resolving this" means, without anyone saying so out loud:
+Yash now describes "working on a way to **automate the reports**" — i.e. us building something for
+the client's export, not the client editing two lines. That is a scope change from "explain the
+client's own bug back to them" to "build and own a client-facing automation," and nobody has framed
+it as a product decision, scoped it, or opened a Ready-for-Dev ticket for it. It is also not clear
+whether "This is still an issue for me when exporting" (`112612`) means *the client tried Ilia's fix
+and it didn't work*, or *the client never touched their query and is still hitting the original
+symptom* — those have completely different next steps, and nobody has asked which.
+
+**What remains unverified:** whether the client ever removed the two `WHERE` lines Ilia specified;
+what "automate the reports" concretely means (a template we hand them vs. a platform-side export
+endpoint); whether Ashley (mentioned, on leave) is the client-side or XYZ-side owner of that meeting.

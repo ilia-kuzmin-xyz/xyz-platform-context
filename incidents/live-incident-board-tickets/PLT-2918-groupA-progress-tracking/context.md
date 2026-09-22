@@ -469,3 +469,10 @@ customer has now auto-reopened Freshdesk #7461 three times in that window with z
 technical reply inside Jira, and the one-value chase draft to Yash (88 words, `recommended-action.md`
 § 2026-09-09) has sat ready and unsent for 12 days. Needs human attention now — not a code or data
 task this routine can resolve further without that reply.
+
+## 2026-09-22 (scheduled) — confirmed unchanged, human silence now 28 days
+
+Live `getJiraIssue` re-fetch: status still **Open**, assignee Ilia Kuzmin, still **19 comments**,
+newest still `112535` (09-18, Freshdesk "Waiting on customer" echo — no free text). Last human
+comment remains Mostafa's `110385` (08-25) — **28 days** of human silence. Same 5 attachments. The
+09-09 chase-Yash draft is still unsent, now 13 days old. Eighth consecutive confirmed-unchanged pass.
