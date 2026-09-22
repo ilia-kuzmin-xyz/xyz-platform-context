@@ -1065,3 +1065,59 @@ Replied with the evidence and **resolved** — confident disagreement, per the r
 **Thread state on #2203: 40 of 41 resolved.** The one left open is the
 `commissioning_file_association` column question (`task_item_id` vs `task_instance_id`) awaiting
 Darminder — plus his delete-cascade report, which is an issue comment rather than a review thread.
+
+## 2026-09-22 — four days on: the fix PR is still unreviewed, and a seven-region merge
+
+### #2222 has sat unreviewed since 09-18, and the hotkey is still live on master
+
+`use-runner-override.ts` is **still on `master`** (`91adb63`). #2222 has had no review in four days.
+Merged master into it to keep it current — master has not touched any of the three files it removes
+from, so nothing was re-decided.
+
+> Worth stating plainly for the next run: **the escalation worked and the fix still has not landed.**
+> Flagging a risk and opening a fix does not retire it. Until #2222 merges, anyone testing
+> Commissioning on dev is opening the managed runner for every task regardless of its real mode.
+
+### Darminder's delete-cascade: agreed, and escalated to the designer
+
+He replied agreeing it is a design question and asked Ilia to confirm with **Jason**: *"it could be
+a bit confusing if you delete a task and the task still remains with no reference in the library."*
+
+Replied with the two framings for Jason, plus the point that makes the decision cheap: **delete is
+already refused when there is any recorded work**, so a cascade can only ever remove never-run
+instances. It is not "is it worth building" — the APIs exist — it is only "what should Delete mean
+now that Archive exists to preserve". Re-asked, unanswered so far, whether the **type mapping** also
+survived; `asset_type_task`'s FK is undocumented in the repo.
+
+### The #2225 merge: seven conflict regions, and git reported none of the three real problems
+
+`#2225` (task library import from file) rebuilt the import flow inside the same tab this branch
+restructured. Seven conflicting regions; **six took this branch's side because it is a strict
+superset** — the kebab wrappers merely indent master's content (folder row and task card are
+byte-identical inside), and the state and render halves contain nothing master has that this does
+not. Verified by **diffing the two halves** (`grep -vxF -f ours theirs` returned empty) rather than
+reading 230 lines and hoping.
+
+**The imports took the union, and that is where it bit.** Three errors, none of them a conflict:
+
+1. `ChecklistImportContent` and `SliderContent` became **unused** — #2225 replaced the slider import
+   flow with a modal, and the usage left via the *auto-merged* half. `noUnusedLocals` fails the build.
+2. The union imported `TeamSliders.styled`, `checklistLibraryService` and `commissioningTheme`
+   **twice each** — duplicate-identifier errors.
+3. `commissioningTheme` then had **no use left**, because the ThemeProvider here takes the derived
+   `taskLibraryTheme`.
+
+> ### The rule this yields
+>
+> **"Take the union" is safe for content and unsafe for imports.** Two sides that each added an
+> import block produce duplicate modules and orphaned bindings, and the orphans are created by the
+> *auto-merged* parts of the file — the half git resolved silently, which is the half you did not
+> read.
+>
+> So after resolving any merge that unions an import block, run three checks before committing:
+> ```
+> grep -oP "^import .* from '\K[^']+" FILE | sort | uniq -d      # duplicate modules
+> # every named binding: count occurrences; 1 means import-only
+> node -e "...brace balance..." ; prettier --check FILE           # parses
+> ```
+> All three caught something here. None of them is a conflict marker.
