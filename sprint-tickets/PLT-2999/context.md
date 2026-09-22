@@ -1162,3 +1162,25 @@ Copilot gets right (see the 09-18 note on its three structural misses).
 
 5. **`resolveRejoin(..., 'fresh')` had no archived test** — the filter went in on 09-18, the
    coverage did not. Added.
+
+## 2026-09-22 (later) — `02cdfa3` is fully green; one thread left open by design
+
+Build, SonarCloud (quality gate passed, 51.1% coverage on new code) and the Copilot re-review all
+came back **success** on head `02cdfa3` — the commit carrying the five fixes from the post-#2225
+merge review. #2203 is now green and mergeable-blocked only on human approvals.
+
+Copilot's re-review raised one finding, and it **crossed with the push**: it asked for a
+`resolveRejoin(..., 'fresh')` case asserting an archived library definition generates nothing. That
+test was already in `02cdfa3` (`task-instance-sync.test.ts:655-662`, *"fresh generates nothing when
+the template has since been archived"* — asserts `generate` not called and the archived set
+untouched). Verified against the file before answering, replied on the thread and resolved it.
+
+**Still open on the PR, deliberately: the `commissioning_file_association` column question**
+(`task_item_id` as documented on `IChecklistTemplateUsage` vs `task_instance_id` as queried). My
+reading — that the two columns answer different questions and the doc ran them together — is on the
+thread; it needs a human with the real FK to confirm. Do not resolve it on a re-read.
+
+Also still awaiting humans from earlier runs: Darminder on whether the **type mapping** survives a
+delete (`asset_type_task` FK undocumented), Ilia/Jason on the delete-cascade decision, and Rishi's
+rejection code for "Could not save". PLT-3140 (Delete Assets) landed on the board on 22 Sep and is
+downstream of that same cascade answer — see `sprint-tickets/PLT-3140/context.md`.
