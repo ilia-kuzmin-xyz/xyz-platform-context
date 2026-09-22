@@ -640,6 +640,7 @@ const STAGES = [
         { ux: 'Asset', bridge: 'asset_id', api: 'AssetId' },
         { ux: 'Rung', bridge: 'readiness_step_id', api: 'ReadinessGateId' },
         { api: 'AssetTypeId / CommissioningWorkflowId', note: 'Carried so a composite key proves the gate belongs to the type’s own workflow.' },
+        { ux: 'The same rung, on a system', bridge: 'system_readiness', api: 'SystemReadiness', note: 'Landed on their side 21 Sep, explicitly for “AssetReadiness parity”; ours has been there since the table was drawn. Column for column the same question asked of a system. Theirs adds a soft delete (IsDeleted / DeletedOn / DeletedBy) that the asset table does not have and we have nowhere.' },
       ],
       note: 'Neither side has a dedicated overridden-by or overridden-on: both stamp the last modifier (ours modified_by / modified_at, theirs LastModifiedBy / LastModifiedOn). Good enough for the date-time the design puts on the tag, as long as nothing else touches the row afterwards.',
     },
@@ -651,17 +652,19 @@ const STAGES = [
       sheets: {
         ux: { absent: 'No screen yet — written, never shown' },
         bridge: { label: 'activity_log_entry', table: 'activity_log_entry', detail: 'Actor, verb, subject, reason, detail. Append-only' },
-        api: { label: 'AssetTaskStatusHistory', table: 'AssetTaskStatusHistory', detail: 'Append-only record of every status a task moved through' },
+        api: { label: 'CommissioningAuditEvent', table: 'CommissioningAuditEvent', detail: 'Landed 22 Sep — a general audit log, where before there was only status history' },
       },
       fields: [
-        { ux: 'Who', bridge: 'actor', api: 'CreatedBy' },
-        { ux: 'What happened', bridge: 'verb', api: 'Status', note: 'Ours records any verb; theirs records the status moved to.' },
-        { ux: 'About what', bridge: 'subject_kind / subject_id', api: 'AssetTaskId', note: 'Ours any subject; theirs tasks only.' },
-        { ux: 'Reason', bridge: 'reason' },
-        { ux: 'Detail', bridge: 'detail' },
-        { ux: 'When', bridge: 'at', api: 'InsertedOn' },
+        { ux: 'Who', bridge: 'actor', api: 'CommissioningAuditEvent.CreatedBy' },
+        { ux: 'What happened', bridge: 'verb', api: 'EventType', note: 'Both free strings keyed by the writer. Ours is a verb; theirs a key whose payload shape is fixed per value.' },
+        { ux: 'About what', bridge: 'subject_kind / subject_id', api: 'EntityType / EntityId', note: 'The same pair, arrived at independently. Theirs also carries AssetId and CommissioningSystemId as their own columns, so an event can be found by asset without unpacking the subject.' },
+        { ux: 'Which tab it files under', api: 'Category', note: 'Theirs only, and the one thing on this row we do not have: it groups events for the filter tabs of a Cx Activity Log screen neither side has built yet. Cheap to add if that screen comes our way.' },
+        { ux: 'Reason', bridge: 'reason', note: 'Ours only. The sentence a destructive action demanded — the impact review’s mandatory reason ends up here. Theirs would have to put it in Payload.' },
+        { ux: 'Which operation it belonged to', bridge: 'transaction_id', note: 'Ours only, and what makes a bulk action readable: one re-apply writes an entry per instance, all sharing this id.' },
+        { ux: 'Detail', bridge: 'detail', api: 'Payload' },
+        { ux: 'When', bridge: 'at', api: 'CommissioningAuditEvent.InsertedOn' },
       ],
-      note: 'Ours logs any action; theirs logs status changes only. Ours is the broader shape.',
+      note: 'The map said for weeks that theirs logged status changes only and ours was the broader shape. That closed on 22 Sep: AssetTaskStatusHistory is still there for status, and this sits beside it as a general log. What is left is a straight swap of what each side kept — they can file an event under a Category, we can give it a reason and group it with the rest of its operation.',
     },
     
     {
@@ -689,7 +692,7 @@ const STAGES = [
       sheets: {
         ux: { label: 'Task runner → Evidence', detail: 'Mobile attaches; web only stores a reference' },
         bridge: { label: 'commissioning_file', table: 'commissioning_file', detail: 'A reference to a file held in XYZ Platform, never the bytes. Merged 8 Sep' },
-        api: { label: 'CommissioningTaskFileReferenceMapping · …VersionFileReferenceMapping', table: 'CommissioningTaskFileReferenceMapping', detail: 'Two tables: reference material on the task (11 Sep), media on the version (14 Sep)' },
+        api: { label: 'Four …FileReferenceMapping tables', table: 'CommissioningTaskFileReferenceMapping', detail: 'One per owner: task (11 Sep), version (14 Sep), asset and system (16 Sep)' },
         apiNext: { label: 'AssetDocument · CommissioningSystemDocument', detail: 'D11 — two of the three link tables are still named only' },
       },
       fields: [
@@ -699,7 +702,7 @@ const STAGES = [
         { ux: 'Checksum', bridge: 'sha256', apiNext: TBD },
         { ux: 'Checksum trusted from', bridge: 'sha256_provenance / size_provenance', apiNext: TBD, note: 'Whether the client confirmed the bytes or the platform merely reported them — the difference between evidence and hearsay.' },
         { ux: 'Discarded', bridge: 'discarded_at / discarded_by', apiNext: TBD, note: 'Added 10 Sep. A registration whose upload never completed can be discarded instead of lingering as a reference to nothing.' },
-        { ux: 'Attached to', bridge: 'commissioning_file_association', api: 'CommissioningTaskFileReferenceMapping.CommissioningTaskId', note: 'One table, six shapes: a run, an item, a signature, a reference document on an asset/system/version, a task instance’s fileUpload item (11 Sep), and a template’s reference documents (14 Sep). api-v2 splits the same idea across tables — one per owner — so every new owner costs them a table and costs us a branch in one CHECK.', apiNext: 'AssetDocument / …VersionDocument / …SystemDocument' },
+        { ux: 'Attached to', bridge: 'commissioning_file_association', api: 'CommissioningTaskFileReferenceMapping.CommissioningTaskId', note: 'One table, six shapes: a run, an item, a signature, a reference document on an asset/system/version, a task instance’s fileUpload item (11 Sep), and a template’s reference documents (14 Sep). api-v2 splits the same idea across tables — one per owner — so every new owner costs them a table and costs us a branch in one CHECK. On 16 Sep they added two more, for an asset and for a system, which our asset_id and system_id already carried: four tables against our one, and the plainest illustration on this map of how the two file models differ.', apiNext: 'AssetDocument / …VersionDocument / …SystemDocument' },
         { ux: 'Uploaded on a live task', bridge: 'commissioning_file_association.task_instance_id / commissioning_file_association.task_item_id', note: 'Merged 13 Sep. Scoped to the instance and the definition-level item rather than a run, because the web runner writes through plain PostgREST and so never produces a run the managed-write guard will accept. The cost is that it has no run provenance: a retest does not supersede it.' },
         { ux: 'Reference documents on a template', bridge: 'commissioning_file_association.task_template_id', api: 'CommissioningTaskFileReferenceMapping.CommissioningTaskId', note: 'Merged 14 Sep, and the one place the two sides now agree about files: both attach reference material to the task’s identity rather than to a version. api-v2 added a second, version-scoped table for media on the same day, which we do not mirror — our association carries both.' },
         { ux: 'Remove an upload', bridge: 'commissioning_file_association.removed_at / commissioning_file_association.removed_by', note: 'The single exception to association immutability, and only for the two upload types. A wrong file on a still-open task has to be undoable, so it is withdrawn rather than deleted: the row stays as history, stops counting as “in use”, and frees its slot for a replacement. Run evidence stays sealed.' },

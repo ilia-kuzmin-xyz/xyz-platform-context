@@ -120,3 +120,73 @@ export function readSupabase(project, token) {
 
   return tables;
 }
+
+/**
+ * The bridge half WITHOUT a personal access token, for the common case where
+ * only api-v2 has moved.
+ *
+ * The Management API is the only source that carries keys and value sets, so
+ * there is no way to regenerate this half without a token. What there IS, is a
+ * way to prove the stored half is still current: the Supabase CLI is logged in
+ * on a developer's machine already, and `gen types` reads the same live schema
+ * over that login. It reports every table and column and none of the keys, which
+ * is exactly enough to answer "has anything changed?" and not enough to rebuild.
+ *
+ * So this reuses the previously generated block only after checking it name for
+ * name against the live schema, and refuses if a single table or column differs.
+ * The block stays generated output; its currency is verified rather than assumed,
+ * which is the only property that matters for a file nothing hand-maintains.
+ */
+export function reuseVerifiedBridge(project, stored) {
+  /* Named candidates rather than `shell: true`: a shell would concatenate the
+     arguments into a command line instead of passing them (Node's DEP0190),
+     and `project` has no business being parsed by anything. Windows installs
+     put a different extension on the CLI depending on the installer — scoop an
+     .exe, npm a .cmd — so try them in turn rather than guessing one. */
+  const candidates = process.platform === 'win32'
+    ? ['supabase.exe', 'supabase.cmd', 'supabase']
+    : ['supabase'];
+  const args = ['gen', 'types', 'typescript', '--project-id', project];
+  const opts = { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 };
+
+  let types;
+  for (const cli of candidates) {
+    try {
+      types = execFileSync(cli, args, opts);
+      break;
+    } catch (error) {
+      /* Only "there is no such executable" is worth trying the next name for.
+         A CLI that ran and failed (not logged in, no such project) is the
+         answer, not a reason to try a different spelling of the same tool. */
+      if (error.code !== 'ENOENT') throw error;
+    }
+  }
+  if (types === undefined) {
+    throw new Error(`the Supabase CLI was not found (tried ${candidates.join(', ')}).`
+      + ' Install it, or set SUPABASE_ACCESS_TOKEN to read the schema over the Management API instead.');
+  }
+
+  const live = {};
+  const body = types.slice(types.indexOf('public: {'));
+  for (const m of body.matchAll(/\n {6}(\w+): \{\n {8}Row: \{\n([\s\S]*?)\n {8}\}/g)) {
+    live[m[1]] = new Set([...m[2].matchAll(/^ {10}(\w+)\??:/gm)].map(c => c[1]));
+  }
+  if (Object.keys(live).length === 0) {
+    throw new Error('`supabase gen types` returned no tables — is the CLI logged in?');
+  }
+
+  const differences = [];
+  for (const name of new Set([...Object.keys(live), ...Object.keys(stored)])) {
+    if (!live[name]) { differences.push(`${name}: gone from the database`); continue; }
+    if (!stored[name]) { differences.push(`${name}: new table`); continue; }
+    for (const col of live[name]) if (!stored[name][col]) differences.push(`${name}.${col}: new column`);
+    for (const col of Object.keys(stored[name])) if (!live[name].has(col)) differences.push(`${name}.${col}: gone`);
+  }
+  if (differences.length) {
+    throw new Error(
+      'the stored bridge schema is out of date, so it cannot be reused:\n    '
+      + differences.join('\n    ')
+      + '\n  Set SUPABASE_ACCESS_TOKEN and run again to regenerate it.');
+  }
+  return stored;
+}

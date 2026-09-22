@@ -1414,6 +1414,32 @@
     "t": "text"
    }
   },
+  "AssetFileReferenceMapping": {
+   "Id": {
+    "t": "int generated always as identity"
+   },
+   "AssetFileReferenceMappingId": {
+    "t": "uuid"
+   },
+   "AssetId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "Asset"
+   },
+   "FileReferenceId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "FileReference"
+   },
+   "ProjectShardId": {
+    "t": "int",
+    "pk": true,
+    "fk": "Project"
+   },
+   "InsertedOn": {
+    "t": "timestamptz"
+   }
+  },
   "AssetReadiness": {
    "Id": {
     "t": "bigint generated always as identity"
@@ -1832,6 +1858,49 @@
     "t": "text"
    }
   },
+  "CommissioningAuditEvent": {
+   "Id": {
+    "t": "bigint generated always as identity"
+   },
+   "InsertedOn": {
+    "t": "timestamptz"
+   },
+   "CommissioningAuditEventId": {
+    "t": "uuid",
+    "pk": true
+   },
+   "ProjectShardId": {
+    "t": "int",
+    "pk": true,
+    "fk": "Project"
+   },
+   "AssetId": {
+    "t": "uuid",
+    "fk": "Asset"
+   },
+   "CommissioningSystemId": {
+    "t": "uuid",
+    "fk": "CommissioningSystem"
+   },
+   "EventType": {
+    "t": "text"
+   },
+   "Category": {
+    "t": "text"
+   },
+   "EntityId": {
+    "t": "uuid"
+   },
+   "EntityType": {
+    "t": "text"
+   },
+   "Payload": {
+    "t": "jsonb"
+   },
+   "CreatedBy": {
+    "t": "text"
+   }
+  },
   "CommissioningSystem": {
    "Id": {
     "t": "int generated always as identity"
@@ -1879,6 +1948,32 @@
    },
    "IsCritical": {
     "t": "boolean"
+   }
+  },
+  "CommissioningSystemFileReferenceMapping": {
+   "Id": {
+    "t": "int generated always as identity"
+   },
+   "CommissioningSystemFileReferenceMappingId": {
+    "t": "uuid"
+   },
+   "CommissioningSystemId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "CommissioningSystem"
+   },
+   "FileReferenceId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "FileReference"
+   },
+   "ProjectShardId": {
+    "t": "int",
+    "pk": true,
+    "fk": "Project"
+   },
+   "InsertedOn": {
+    "t": "timestamptz"
    }
   },
   "CommissioningTask": {
@@ -2273,6 +2368,70 @@
     "t": "text"
    },
    "Colour": {
+    "t": "text"
+   }
+  },
+  "SystemReadiness": {
+   "Id": {
+    "t": "bigint generated always as identity"
+   },
+   "InsertedOn": {
+    "t": "timestamptz"
+   },
+   "SystemReadinessId": {
+    "t": "uuid"
+   },
+   "ProjectShardId": {
+    "t": "int",
+    "pk": true,
+    "fk": "Project"
+   },
+   "SystemId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "CommissioningSystem"
+   },
+   "SystemTypeId": {
+    "t": "uuid",
+    "fk": "CommissioningSystem"
+   },
+   "CommissioningWorkflowId": {
+    "t": "uuid",
+    "fk": "SystemType"
+   },
+   "ReadinessGateId": {
+    "t": "uuid",
+    "pk": true,
+    "fk": "ReadinessGate"
+   },
+   "IsAchieved": {
+    "t": "boolean"
+   },
+   "IsOverridden": {
+    "t": "boolean"
+   },
+   "OverrideReason": {
+    "t": "text"
+   },
+   "AchievedOn": {
+    "t": "timestamptz"
+   },
+   "CreatedBy": {
+    "t": "text"
+   },
+   "LastModifiedOn": {
+    "t": "timestamptz"
+   },
+   "LastModifiedBy": {
+    "t": "text"
+   },
+   "IsDeleted": {
+    "t": "boolean"
+   },
+   "DeletedOn": {
+    "t": "timestamptz"
+   },
+   "DeletedBy": {
     "t": "text"
    }
   },

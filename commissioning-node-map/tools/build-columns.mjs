@@ -20,7 +20,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { readSupabase } from './supabase-schema.mjs';
+import { readSupabase, reuseVerifiedBridge } from './supabase-schema.mjs';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/(?=[A-Za-z]:)/, ''));
 const ROOT = path.join(HERE, '..');
@@ -47,6 +47,17 @@ const API_TABLES = [
   // Version-scoped media, the counterpart to 143's task-level reference material:
   // api-v2 splits what our commissioning_file_association keeps in one table.
   '144_xyz_commissioning_task_version_file_reference_mapping',
+  // Two more owners, two more tables (16 Sep). Ours are the asset_id and
+  // system_id branches of the one association, so this pair costs us nothing
+  // and costs them a table each — the clearest illustration on the map of how
+  // the two file models diverge.
+  '145_xyz_asset_file_reference_mapping',
+  '146_xyz_commissioning_system_file_reference_mapping',
+  // Their activity log (22 Sep), against our activity_log_entry.
+  '147_xyz_commissioning_audit_event',
+  // Readiness for a system, "with AssetReadiness parity" (21 Sep) — the parity
+  // our system_readiness has had all along.
+  '147_xyz_system_readiness',
 ];
 const API_CONSTRAINTS = [
   '064_xyz_commissioning_workflow', '065_xyz_readiness_gate', '066_xyz_asset_type',
@@ -65,6 +76,10 @@ const API_CONSTRAINTS = [
   // own note explains why 084 cannot be edited. Both have to be read or the
   // execution-lineage foreign key is invisible here.
   '103_xyz_asset_task_execution_lineage',
+  '104_xyz_asset_file_reference_mapping',
+  '105_xyz_commissioning_system_file_reference_mapping',
+  '107_xyz_system_readiness',
+  '108_xyz_commissioning_audit_event',
 ];
 
 /* ElementInstallationStatus predates commissioning, so it is created in the
@@ -100,6 +115,7 @@ const API_CONSTRAINTS_IGNORED = {
   '098_xyz_asset_type_name_case_insensitive': 'a unique key; no foreign key to read',
   '099_xyz_commissioning_system_name_case_insensitive': 'a unique key; no foreign key to read',
   '100_xyz_system_type_name_case_insensitive': 'a unique key; no foreign key to read',
+  '106_xyz_commissioning_system': 'a unique key backing 105\'s file mapping; no foreign key to read',
 };
 
 /* Files in the same numeric range that were looked at and left out. Recorded
@@ -127,16 +143,26 @@ const API_VALUES = {
 const out = { bridge: {}, api: {} };
 
 /* ─────────────────────────────────────────────────────── ours: live schema */
-if (!TOKEN) {
-  console.error('\n  SUPABASE_ACCESS_TOKEN is not set.');
-  console.error('  Create one at supabase.com/dashboard/account/tokens and export it.');
-  console.error('  It reads the schema over the Management API — no database password,');
-  console.error('  and nothing to change in the database.\n');
-  process.exit(1);
+if (TOKEN) {
+  console.log(`  reading the live dev schema (project ${DEV_PROJECT})…`);
+  out.bridge = readSupabase(DEV_PROJECT, TOKEN);
+} else {
+  /* No token: reuse the stored bridge block, but only once `gen types` has
+     confirmed table for table and column for column that it still matches the
+     database. Refuses rather than guessing, so this can never quietly publish
+     a stale half. api-v2 moves on its own schedule and is read from `gh`, so
+     most refreshes need nothing from Supabase but this check. */
+  const previous = path.join(ROOT, 'data', 'columns.json');
+  if (!fs.existsSync(previous)) {
+    console.error('\n  SUPABASE_ACCESS_TOKEN is not set, and there is no previous');
+    console.error('  data/columns.json to verify and reuse. Create a token at');
+    console.error('  supabase.com/dashboard/account/tokens and export it.\n');
+    process.exit(1);
+  }
+  console.log('  no token — verifying the stored dev schema against the CLI…');
+  out.bridge = reuseVerifiedBridge(DEV_PROJECT, JSON.parse(fs.readFileSync(previous, 'utf8')).bridge);
+  console.log('  stored dev schema confirmed current; reused unchanged');
 }
-
-console.log(`  reading the live dev schema (project ${DEV_PROJECT})…`);
-out.bridge = readSupabase(DEV_PROJECT, TOKEN);
 
 /* ───────────────────────────────────────────── theirs: DDL and constraints */
 function apiFile(kind, name) {

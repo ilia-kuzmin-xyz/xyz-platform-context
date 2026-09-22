@@ -21,6 +21,12 @@
  * (PLT-2999) and #2216 (PLT-2997), and the live dev schema in
  * data/columns.json — which by then carried xyz-supabase #35, #37, #38, #39
  * and #40. #41 is written and not merged; where a row depends on it, it says so.
+ *
+ * Re-checked 22 Sep 2026 against both stores. The dev schema had not moved a
+ * column since, so nothing on this board changed; api-v2 had, and what it grew
+ * belongs on the map rather than here — every one of its four new tables is
+ * something the bridge already carries, so none of them opens a gap for this
+ * board to record.
  */
 
 LAYERS.push(
