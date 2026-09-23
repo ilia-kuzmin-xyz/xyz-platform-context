@@ -45,6 +45,111 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-23 (scheduled) — 9 in-scope Group A tickets (down from 10 on 09-22), 0 in Group B, 1 left scope to Done (PLT-2815 → resolved, Freshdesk automation, no human close-out — third occurrence of this pattern this month), 2 found with same-day gaps the 09-22 pass missed (PLT-2651 and PLT-2918 — third and fourth documented cases of this failure mode on this board), 6 confirmed unchanged in substance, zero Jira actions taken
+
+Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC` (paginated
+result, top 100 by `created` covers everything except tickets older than ~130 days; those — PLT-2651
+and PLT-2815 — were fetched directly by key since prior runs already track them). Cross-checked
+against the 09-22 run's own 10-ticket Group A table: 8 of those 10 tickets came back in the fresh
+`Open`/`In Analysis`/`With Customer` query unchanged; **PLT-2815 dropped out** (→ `Done`); **PLT-2651**
+came back but required a direct-key fetch, since its `created` date (2026-05-06) is outside the
+paginated query's first 100 results — a scope-completeness gap worth naming for future runs: the
+paginated JQL alone would have silently dropped this board's only Critical. **9 − nothing added = 9.**
+Group B remains empty — no ticket sits in `Ready For Development` or `Dev In Progress`; the full
+8-status distribution returned by the live query (`Open`, `In Analysis`, `With Customer`,
+`With Technical Support` absent this run, `Ready For QA`, `In Code Review`, `READY FOR RELEASE`,
+`Blocked`, `Done`) confirms this rather than assuming it.
+
+Every continuing ticket got a live `getJiraIssue` re-fetch before anything was written, per "the
+folder is a cache, not the truth." Two of nine came back with real, substantive same-day movement the
+09-22 pass could not have seen (both timestamped mid-to-late afternoon 09-22, after that pass's own
+fetch) — this is now a **recurring failure mode**, not a one-off: PLT-3109 was the first documented
+case (09-21 run), PLT-3147's silent status/assignee drift the same day was arguably a second, and
+today adds two more. **Lesson restated more forcefully this run:** a same-day "confirmed unchanged"
+verdict from a morning/midday fetch cannot be trusted for tickets with active human threads;
+afternoon re-fetches keep catching what morning ones miss.
+
+**PLT-2815** reached `Done` via Freshdesk automation (`updated` 09-22T15:55) with **zero accompanying
+comment** — the third instance of this exact pattern this month (after PLT-3033 and PLT-3119). The
+underlying diagnosis had been settled by product since 06-23 ("leave it as intended"); only the Jira
+bookkeeping was ever missing, and Freshdesk's sync closed the loop by proxy. Folder retagged
+`groupA` → `resolved`: `PLT-2815-groupA-quality-management/` → `PLT-2815-resolved-quality-management/`.
+The 34-consecutive-run chase-Yash recommendation is retired as moot.
+
+**PLT-2651** (the board's only Critical, now 140 days old) is this run's most consequential finding.
+The customer replied 09-22 (comment 112736) with project-settings and model-coordinate evidence in
+direct response to Ilia's 09-08 in-thread guidance ("set true north to ~17°") — guidance this folder's
+own 09-08→09-14 deep dive had already concluded, in code, cannot affect the Web Editor's section box
+(`viewer-service.ts:974-983` dead call site; `ignoreTrueNorthAngle: true` hard-coded on every upload,
+`projectModelsActions.ts:63,185`, both re-verified live this run). The correction to that guidance has
+sat drafted-but-unposted for 15 days, originally gated on an unanswered question to Ali (DPL) that
+still has no reply. The customer's reply is now the third independent confirmation the lever is dead
+(code, twice, plus field evidence) — this run's `recommended-action.md` escalates: **stop waiting on
+Ali, post the customer correction now, run the DPL question in parallel instead of as a gate.** Status
+also swung `With Customer` → `Open` and assignee `Yash Patel` → `Ilia Kuzmin`, both same-day,
+unexplained by any comment — the same "board moves, nobody narrates why" pattern already flagged on
+PLT-3147.
+
+**PLT-2918** had five substantive comments land 09-22 afternoon (16:06–17:25, ids 112737–112744),
+missed entirely by the 09-22 pass's own record ("19 comments, human silence 28 days"). The customer
+reported a new-looking symptom (WBS Location filterable in the dashboard dropdown but returns zero
+elements, while insisting the elements are "already mapped/linked" in the Web Viewer); Rishi
+live-checked the editor himself and found the opposite — the activities are **currently unmapped** —
+which is functionally the same live-broken-sample data point this ticket's 09-09 chase-Yash draft had
+been asking for since before the 34-run PLT-2815 backlog even started, just obtained a different way.
+Assignee moved `Ilia Kuzmin` → `Rishi Bhugobaun`, unexplained. The 09-09 chase draft is retired as
+moot; this run's `recommended-action.md` proposes a narrower interpretive question instead (does the
+customer's own "already mapped" phrasing mean they're *not* reporting a fresh loss — worth confirming
+directly rather than inferring). The shipped Save-bug fix (`category-mapping-service.ts:277-278`) was
+re-verified present and unregressed.
+
+**PLT-2874, PLT-3109, PLT-3115, PLT-3133, PLT-3135, PLT-3147, PLT-3156**: confirmed unchanged in
+substance against live Jira (no comment newer than each folder's last-recorded newest id). Dated
+confirmations not separately narrated here to avoid duplicating six near-identical "no drift"
+paragraphs; each folder's own dated entry (not added this run, since none had anything new to record)
+still reflects 09-22 as the last substantive state. PLT-2651's Critical age (140 days) and PLT-2815's
+now-closed 78-day/34-run backlog are this board's two headline numbers this run.
+
+### Group A (9)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | Open · Critical | **Customer field-confirmed the dead lever.** Status/assignee also swung, unexplained. Correction escalated — stop waiting on Ali, post now. | 1, escalated — 15 days unposted, now with field evidence |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open · Major | **Same-day miss caught.** Rishi live-confirmed the mapping gap himself; old chase draft retired for a narrower interpretive question. Assignee moved to Rishi. | 1 (narrower) — new drafted question, unposted |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer · Major | Unchanged. Waiting on customer's re-export. | 1 — correctly parked |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged since 09-22's unexplained status/assignee move. Customer's question still unanswered. | 1, escalated |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged since 09-22's catch-up. | 4 — new drafted question, unposted |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged. | 1 |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged. | 1 |
+| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | Unchanged. | 2 — drafted reply ready, unposted |
+
+### Group B (0)
+
+Empty this run — no board ticket currently sits in `Ready For Development` or `Dev In Progress`.
+
+### Left scope this run
+
+**PLT-2815** — reached `Done` via Freshdesk automation, no human comment. Folder retagged `resolved`.
+
+### Standing gaps (unopenable media)
+
+Same set as 09-22 (PLT-3156's 3, PLT-3147's 3, PLT-2651's `63521` plus 3 new Freshdesk-hosted inline
+images in comment 112736 — different host, not re-attempted, see that folder's NEEDS HUMAN — PLT-2918's
+8 (5 original + 3 new from 09-22), PLT-3109's 5, PLT-3115's 4, PLT-3135's `64835`/`64834`).
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-2651** — send the correction to Yash now (drafted, ~85 words): the true-north lever is dead,
+   ask for a Revit re-export with correct shared coordinates instead. Do not wait on Ali any longer.
+2. **PLT-2918** — send the narrower interpretive question to Rishi (drafted, ~70 words): confirm
+   whether the customer's own words mean this is the old never-backfilled gap, not a fresh loss.
+3. **PLT-2874, PLT-3109, PLT-3115, PLT-3135** — the previously-drafted, still-unposted messages from
+   prior runs remain the right next step; unchanged this run, not re-drafted.
+4. **PLT-3133, PLT-3147, PLT-3156** — no new action; correctly parked or already escalated.
+
+---
+
 ## Run: 2026-09-22 (scheduled) — 10 in-scope Group A tickets (up from 9 on 09-21), 0 in Group B (down from 1), 1 brand-new (PLT-3156, full root-cause this run), 1 left scope to Done (PLT-3033 → resolved), 1 left scope forward (PLT-3116 → In Code Review → resolved), 1 re-entered scope (PLT-3133, With Technical Support → With Customer), 1 found with a same-day gap the prior run missed (PLT-3109 — 5 new comments, assignee Pietro → Yash), 1 status/assignee move with no comment on the board's only other Critical (PLT-3147, Open → With Customer, Darminder → Yash), 7 confirmed unchanged in substance, zero Jira actions taken
 
 Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`,

@@ -329,3 +329,9 @@ Live re-fetch confirms zero movement (see `context.md` this date). **Action clas
 stale, unresponded (on us).** The 2026-09-09 chase-to-Yash draft (83 words) is still the right
 instrument; not re-drafted. PLT-3115 (see that folder) is in the identical state — both are one-click
 closes sitting on the same assignee. **No Jira action was taken by this run.**
+
+## 2026-09-23 (scheduled) — NO ACTION NEEDED. Ticket left scope via Freshdesk-automation `Done`, 09-22T15:55, no human comment.
+
+The 34-run chase draft is now moot — the board moved to `Done` on its own (see `context.md` §
+2026-09-23). **Nothing left to draft or send.** PLT-3115's identical one-click-close is still
+outstanding (unaffected by this ticket's closure) — see that folder.

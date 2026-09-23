@@ -218,3 +218,41 @@ closed question — still within the 100-word / six-sentence limit. No edit need
 Live re-fetch confirms zero technical movement (two Freshdesk-echo comments only, last on 09-18).
 Action class unchanged: 1 — stale, unresponded, on us. The 09-09 chase-Yash draft (88 words) stands
 as written. **No Jira action was taken by this run.**
+
+## 2026-09-23 (scheduled) — RETIRE the 09-09 chase draft (superseded by live events); new action is a scoping question to Rishi, not a chase.
+
+**Do not send the 09-09/09-11/09-14 chase-Yash draft.** It asked Yash to fetch one live-broken
+activity code from the customer to distinguish old-hole-never-backfilled from a fresh recurrence.
+Rishi did the equivalent check himself on 09-22 (`context.md` § 2026-09-23, comment `112743`) —
+opened the editor and confirmed the Precast activities are currently unmapped. Resending a request
+for something already independently obtained would read as not having read the ticket.
+
+**Action class:** still 1 (stale, unresponded, on us) for the *narrow* open question Rishi himself
+asked and nobody answered — but the shape of the ask has changed from "get us data" to "help us
+interpret data we already have."
+
+**What's actually still open:** Rishi's own question in comment `112743` — *"did the user report
+that the original issue of missing mappings had occurred? Or were they removed?"* — is unanswered
+in-thread. That is the one fact that decides old-hole vs. new-loss, and it is a question for
+**whoever now owns this** (assignee moved to Rishi 09-22 — see `context.md`) to either answer from
+the customer's own words already relayed in comment `112739` (they said "already mapped/linked,"
+which reads as *not* reporting fresh removal — the customer believes the mapping is fine and only
+the filter is broken) or to ask Yash for the customer's exact words if that inference is too thin.
+
+### Draft — to whoever now owns the ticket (Rishi, current assignee) — DRAFT ONLY, not posted (approx. 70 words)
+
+> Reading back through this: the customer's own words in 112739 say the elements are "already
+> mapped/linked in the Web Viewer" — they believe the mapping is fine and only the dashboard filter
+> is broken. What you found in the editor (112743) contradicts that belief, not their prior report.
+> That reads as the same never-backfilled Precast/AUS01 gap from July (see 107939), not a fresh
+> loss — but worth confirming with Paddy directly rather than inferring it from phrasing alone.
+
+**Why this and not a repeat chase:** the data this ticket has been missing for two months — a live,
+current confirmation that the mapping gap still exists — arrived organically on 09-22. Re-asking for
+it would waste the goodwill of someone (Rishi) who already did the work. The remaining gap is
+interpretive, not evidential, and is cheap to close with the message above or an equivalent.
+
+**Board move:** none recommended. `Open` remains correct; the ball is with us to close the
+interpretation loop, not with the customer.
+
+**No Jira action was taken by this run.**

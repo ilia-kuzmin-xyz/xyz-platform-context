@@ -476,3 +476,75 @@ Live `getJiraIssue` re-fetch: status still **Open**, assignee Ilia Kuzmin, still
 newest still `112535` (09-18, Freshdesk "Waiting on customer" echo — no free text). Last human
 comment remains Mostafa's `110385` (08-25) — **28 days** of human silence. Same 5 attachments. The
 09-09 chase-Yash draft is still unsent, now 13 days old. Eighth consecutive confirmed-unchanged pass.
+
+## 2026-09-23 (scheduled) — SAME-DAY MISS, again: the 28-day human-silence streak actually ended hours after the 09-22 fetch. Real engagement, mechanism partially self-answered, assignee moved off Ilia.
+
+**Second documented same-day-fetch-timing miss on this board** — same shape as PLT-3109's 09-21 entry
+(README, 2026-09-22 run log): the 09-22 pass's "28 days of human silence, 19 comments" was accurate
+*at the moment it queried*, but five real, substantive comments landed on this ticket **the same
+afternoon**, all after whatever timestamp that pass's fetch actually ran (16:06 through 17:27). This
+run's live fetch catches them because it queries fresh.
+
+**Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`, `assignee`, `priority`,
+`status`, `updated`):**
+- **26 comments** (19 → 26, seven new — five substantive + two Freshdesk status echoes).
+- **Status still `Open`** — unchanged, confirms the 09-09/09-11 board-move guidance ("leave it Open,
+  don't let Freshdesk carry it to Done") has held.
+- **Assignee moved `Ilia Kuzmin` → `Rishi Bhugobaun`**, `updated = 2026-09-22T17:27:57+0100`. No
+  comment names the reassignment; inferred reason below.
+- Two new attachments (`65073`, `65074`, both screenshots embedded in the comments below), plus one
+  from earlier the same afternoon (`65072`, in Yash's opening comment) — 8 attachments total now
+  (was 5). None fetched (session-wide Jira-attachment 403, unchanged).
+
+**The five substantive comments, in order (all 2026-09-22, ids `112737`–`112744`, two Freshdesk
+status echoes `112742`/`112745` interleaved and excluded below as usual):**
+
+1. **`112737` (16:06, Yash)** — fresh report: the WBS Location value is present and selectable in the
+   **dashboard filter dropdown**, but selecting it **returns zero elements**, even though the
+   customer says the elements are **"already mapped/linked in the Web Viewer."**
+2. **`112738` (16:31, Rishi)** — asks Yash to disambiguate: is this the *original* problem (Precast
+   WBS Location mapping gone) recurring, or a *new* dashboard/filter-only symptom (PowerBI vs. new
+   dashboard)?
+3. **`112739` (17:11, Yash)** — clarifies: customer insists the affected elements *are* mapped/linked
+   in the Web Viewer, yet the filter returns nothing for them.
+4. **`112743` (17:22, Rishi)** — **live-checked it himself** and reports the opposite of what the
+   customer believes: *"It seems now these activities are no longer mapped in editor, so that is why
+   the filter does not show anything."* Asks whether the customer is describing the original missing-
+   mapping issue recurring, or something newly removed.
+5. **`112744` (17:25, Yash)** — links back to comment `107939` (Ilia's original 07-22 diagnosis of
+   the Precast/AUS01 mapping loss) "to help understand the missing wbs mappings," and confirms he
+   will tell the customer the activities are **currently unmapped in the Web Viewer** — i.e. Yash is
+   now telling the customer their own belief ("it's mapped, just not filtering") is wrong, and the
+   mapping itself is genuinely absent, matching the original ticket's shape.
+
+**What this does and does not answer, against the three-hypothesis split this folder has carried
+since July:**
+
+- **Rishi's live check is functionally the same data point the 09-09 chase-Yash draft was asking
+  for** — "one activity showing the wrong WBS Location this week" — except Rishi produced it himself
+  by opening the editor, rather than the customer supplying an activity code through Yash. It
+  confirms the mapping is *currently* absent for at least some Precast activities, **today**, not
+  just historically in July.
+- **It does not yet distinguish old-hole-never-backfilled (hypothesis b, the leading explanation
+  since 09-09) from a fresh recurrence of the destructive-save mechanism (hypothesis a).** Rishi's
+  question in comment 4 ("did the user report the original issue had occurred, or were they
+  removed?") is exactly that open question, and nobody has answered it in-thread yet. The shipped fix
+  (`category-mapping-service.ts:277-278`, `editedTypeIds?.has(categoryTypeId)` gate) was re-verified
+  present and unchanged at the same line numbers this run (see Code section) — so hypothesis (a),
+  already "effectively ruled out" since 09-09/09-14, is not reopened by this.
+- **The 09-09 chase-Yash draft's core question is now largely moot as originally worded** — it asked
+  Yash to go get one activity code from the customer; Rishi has instead independently confirmed the
+  mapping gap exists right now, in the editor, without needing that round-trip. The draft should be
+  retired, not resent verbatim; see `recommended-action.md`.
+
+**Assignee change, inferred reason (not stated in any comment):** Rishi did the live investigation
+that produced the only new technical fact this round; the reassignment `Ilia → Rishi` likely follows
+that hands-on work rather than any explicit handoff decision. Flagged as inferred, not confirmed.
+
+**Code re-verified live this run:** `category-mapping-service.ts:277`
+(`editedTypeIds?.has(categoryTypeId)`) and `:278` (the "intentional clear" comment) both present at
+the same line numbers recorded since 09-14 — the shipped fix has not regressed on the current
+checkout.
+
+**Human silence counter retired.** The 28-day streak this folder tracked since 08-25 ended 09-22;
+today (09-23) is day 1 of a new, actively-engaged thread. Not carrying the day-counter forward.

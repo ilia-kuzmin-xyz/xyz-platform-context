@@ -1146,3 +1146,71 @@ priority Critical, assignee still **Yash Patel**, still **34 comments**, newest 
 now **14 days** unposted since the 09-08 diagnosis. Ticket is now **139 days** old
 (2026-05-06 → 2026-09-22), still the board's only Critical. No re-investigation performed — nothing
 had reason to move in one day.
+
+## 2026-09-23 (scheduled) — the customer came back with exactly the evidence that confirms our own unposted internal finding. Status/summary/assignee all moved same-day, no comment names any of it. Escalating.
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`, `status`, `assignee`, `priority`,
+`summary`, `updated`): **35 comments** (34 → 35, one new). **Status is `Open`** (moved from `With
+Customer` — a swing this folder has not recorded before). **Assignee is now `Ilia Kuzmin`** (was Yash
+Patel every prior run since 09-08). **Summary changed** from "Section box misaligned with BIM models
+for ATL08" (paraphrased in this folder's title) to **"Section box misaligned with BIM models"** — the
+project qualifier was dropped from the field itself; the ticket is still ATL08-specific in every
+comment. None of these three field moves (`updated = 2026-09-22T16:03:11+0100`) has an accompanying
+comment explaining it — the same "board moves, nobody narrates why" pattern flagged on PLT-3147 in the
+09-22 run.
+
+**The new comment (`112736`, Yash, 2026-09-22T16:03:02+0100) is substantive, not a Freshdesk echo.**
+Yash relayed the customer's direct response to the 08-28 ask (*"could we investigate whether newly
+imported models inherit incorrect section box orientation"*) and to Ilia's own 09-08 in-thread
+guidance (*"client should set the project's true north — ATL08 is at 0, should be about 17°"*,
+comment `111642`). The customer sent back three items: (1) a screenshot of "current XYZ Project
+settings," (2) the PBP (base-point) coordinates of an affected model —
+**`QA-ATL08 EVO DC AI ARCH-R23-Bld8.1-V260626`** — and (3) how that model's section box currently
+looks in the Web Viewer. All three are Freshdesk-hosted inline images (`eucattachment.freshdesk.com`,
+signed URL, not a Jira `attachment` object) — **not fetched this run** (this routine does not have
+authenticated Freshdesk access, and the signed tokens are single-purpose; noted for whoever has
+Freshdesk access, see NEEDS HUMAN below), so their exact pixel content is not verified here. But the
+fact pattern needs no pixel-reading: the customer went and checked/set true north on our own say-so
+and came back with *more* diagnostic detail on the *same unresolved complaint* — that is only
+consistent with the section box still being wrong after they looked at the setting.
+
+**This is exactly the outcome the 09-08→09-14 internal investigation already predicted and never told
+the customer.** Recapping the verified mechanism this folder has carried since 09-14 (unchanged,
+re-confirmed live in code this run — see below): the project's true-north field is **never applied**
+to a loaded model in the Web Editor (`applyBasePointTransform`'s only call site is commented out,
+`viewer-service.ts:974-983`), and every Web-Editor upload hard-codes `ignoreTrueNorthAngle: true`
+(`projectModelsActions.ts:63, 185`, re-verified live this run — see Code section). So whatever the
+customer's screenshot shows for the project's true-north field, **it cannot have changed the box**,
+and the model's actual lever is its own `refPointTransform` (baked in at Revit export /
+ingest, not editable from a project setting). The customer's reply is field evidence for a
+prediction we made and sat on for 15 days.
+
+**The uncomfortable part, stated plainly:** comment `111642` (Ilia, 09-08, still the newest
+*technical* comment before today) is the thing the customer appears to have acted on, and it told
+them to do something the code cannot honour. Nobody has corrected it since — not even after this
+routine's own 09-08/09-09/09-14 deep dive concluded the lever was dead. Today's reply is the second
+piece of direct customer-side evidence (after the section-box screenshot itself) that the advice did
+not help. Every day this stays unposted is a day the customer may spend further effort (re-uploading
+models, adjusting settings, re-exporting) chasing a lever this repo has independently proven inert.
+
+**Code re-verified live this run** (not assumed from the 09-14 entry): `ignoreTrueNorthAngle: true`
+confirmed present at `projectModelsActions.ts:63` and `:185`; `category-mapping-service.ts` is
+unrelated to this ticket (that grep was for PLT-2918, run in the same session) — for this ticket,
+`section-tool-orientation-math.ts:145-155`'s `shouldApplyOrientationPatch` gate and
+`section-tool-orientation.ts:95-102`'s `refPointTransform` read were **not** re-read line-by-line this
+run (no code changed on `hc-frontend` since 09-14 that would touch them — `git log` on this repo's
+shallow clone is unreliable per the 09-08 finding, so this is stated as "no reason to expect drift,"
+not as a fresh read).
+
+**Priority/status note:** despite moving to `Open`, this remains the board's only Critical
+(`priority` field unchanged) and is now **140 days old** (2026-05-06 → 2026-09-23).
+
+### NEEDS HUMAN (new this run)
+
+The three Freshdesk-hosted images in comment `112736` are the first attachments on this ticket that
+are *not* behind the confirmed Jira-attachment 403 — they are signed Freshdesk URLs, a different
+system. Whoever has Freshdesk/#6294 access should open them and confirm: does the "current XYZ
+Project settings" screenshot show true north still at 0°, or already changed to ~17°? That number
+decides whether the customer already tried the (inert) fix or is still deciding to. Not load-bearing
+for the correction itself — the correction is right either way — but it changes the tone of the reply
+(acknowledging wasted effort vs. heading it off).

@@ -367,3 +367,52 @@ cannot (no authenticated project read). Proposed: Ilia + Darminder + Pietro sett
 with that count on the table, before any code is written on these 40 lines for the fifth time.
 
 **No Jira action was taken by this run** — no comment, no transition, no assignment, no field edit.
+
+---
+
+## 2026-09-23 (scheduled) — ESCALATED. Stop waiting on Ali; the customer just field-verified the prediction. Post the correction now.
+
+**What changed:** the customer replied (comment `112736`, see `context.md` § 2026-09-23) with
+project-settings and model-coordinate evidence in direct response to Ilia's 09-08 true-north
+guidance. Status swung `With Customer` → `Open`, assignee `Yash Patel` → **`Ilia Kuzmin`**, all with
+no comment narrating the moves. Whatever the screenshots show, the code-verified mechanism says the
+true-north field cannot have fixed the box — so the customer is back, still stuck, on the thing we
+told them to try 15 days ago.
+
+**Superseding the 09-09 plan (asking Ali first, then correcting).** That plan's own reasoning was to
+avoid a *third* wrong statement to the customer by confirming with Ali before speaking again. Ali
+never answered (still true today — see `context.md` line ~248, grep confirms no reply). Waiting
+longer no longer serves that goal: the customer has now supplied field evidence consistent with the
+prediction independent of Ali's answer, and every additional day risks a *fourth* round of the
+customer trying something that cannot work. The Ali question is still worth asking (still drafted
+below, unposted, now stale) but should run **in parallel** with the customer correction, not gate it.
+
+**Chosen action:** post directly to the customer (via Yash, since he owns client comms and is still
+the Freshdesk-side contact even with Jira assignee moved to Ilia), acknowledging their reply and
+correcting the guidance — without waiting for Ali.
+
+### Draft — to **Yash Patel**, for him to relay to the customer — DRAFT ONLY, not posted (approx. 85 words)
+
+> Yash — following up on my 09-08 suggestion re: true north. I need to correct that: after digging
+> further, the Web Editor doesn't actually apply the project's true-north angle to a loaded model —
+> that setting won't change the section box, whatever value it's set to. Sorry for the wasted step.
+>
+> The real fix is at the model source: the section box follows the model's own orientation as
+> exported from Revit (shared coordinates), not a project setting. Can you ask them to re-export
+> the affected model(s) with the building's correct rotation baked into the shared-coordinate
+> origin, rather than adjusting true north or re-uploading the same file?
+
+**Why this and not "wait for Ali."** Ali's answer would only add confidence to a mechanism already
+verified two independent ways in code (`viewer-service.ts:974-983` dead call site;
+`section-tool-orientation-math.ts:145-155` / `:95-102` showing `refPointTransform` is the real lever)
+and now a third way, in the field, by the customer's own report. Three confirmations is enough to
+correct a piece of public guidance that is actively costing the customer time. The Ali question
+remains useful for the separate, non-blocking DPL question (does ingest honour
+`ignoreTrueNorthAngle`, relevant to whether re-upload-after-Revit-fix is sufficient or a full
+re-ingest is needed) — send both, but do not let one gate the other any longer.
+
+**Not drafted:** a board/status correction. `Open` is defensible right now (ball is genuinely back on
+us to reply) — no transition recommended beyond what a human posting the comment above would
+naturally trigger.
+
+**No Jira action was taken by this run** — no comment, no transition, no assignment, no field edit.

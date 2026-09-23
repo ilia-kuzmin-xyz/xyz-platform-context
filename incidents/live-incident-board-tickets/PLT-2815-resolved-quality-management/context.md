@@ -601,3 +601,22 @@ Live `getJiraIssue` re-fetch (fields incl. `comment`, `assignee`, `status`, `upd
 kind; **34th consecutive run** recommending the same unposted close-out. No re-investigation
 performed — nothing has moved that would warrant it. See `recommended-action.md` for the standing
 chase-to-Yash draft, still the right instrument, still unposted.
+
+## 2026-09-23 (scheduled) — LEFT SCOPE: status moved to Done, 09-22T15:55, no human comment. Folder retagged `groupA` → `resolved`.
+
+Live `getJiraIssue` re-fetch: **status is now `Done`** (`updated = 2026-09-22T15:55:20.383+0100`).
+**No new comment exists anywhere in the thread** — comment count is unchanged from every prior run
+(newest is still `106553`, the 07-06 Freshdesk "Closed" sync). The status field moved with zero
+accompanying text, in either Jira or the comment history this session can see.
+
+This is the **same shape already documented twice this month on this board** — PLT-3033 (09-21) and
+PLT-3119 — where a Freshdesk automation rule silently mirrors a long-closed support ticket's state
+onto the Jira `status` field, with no human ever writing the close-out this folder drafted. The
+34-consecutive-run recommendation (§ recommended-action.md) was never executed by a person; the
+board just caught up to a decision (Mostafa, 06-23, "leave it as intended") that was already final.
+**Nothing to correct or chase** — the diagnosis (10/10 confidence, verified at source 08-14) and the
+product decision both hold; only the Jira bookkeeping was ever missing, and Freshdesk's own
+sync has now done it by proxy, three months late.
+
+**Renamed** `PLT-2815-groupA-quality-management/` → `PLT-2815-resolved-quality-management/` this
+run. No further scheduled re-checks needed unless the customer reopens.
