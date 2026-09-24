@@ -45,6 +45,51 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-24 (scheduled) — 9 in-scope Group A tickets, 1 in Group B (up from 0), 1 brand-new Group A ticket deep-dived (PLT-3167, a 4th Pattern-1 instance and 2nd on FAR01 specifically), 1 brand-new Group B ticket (PLT-3165, not deep-dived per this run's scope), 2 found with real movement the 09-23 pass missed or couldn't have seen (PLT-2651 — a second, still-wrong true-north correction independently posted by Rishi; PLT-2918 — a silent same-day field touch), 1 overdue-promise flag (PLT-2874 — Ilia's own "will get back to you today" from 09-11 now 13 days overdue), 6 confirmed unchanged in substance, zero Jira actions taken
+
+Board re-queried with the routine's own scope rule (`status in (Open, In Analysis, With Customer,
+Ready For Development, Dev In Progress)`) rather than assumed from the prior run's list — this run's
+task brief initially misread "with tech support" as covering `With Customer`, which this file's own
+Scope rules section (line 34, unchanged) explicitly contradicts; corrected before any folder was
+written, no bad data went in.
+
+**PLT-3167** ("Ghost elements preventing 100% progress on activity ID", FAR01, Open, Rishi) —
+customer can't select all of an activity's linked elements (5,444 linked, 5,443 selectable; two more
+activities found the same afternoon). Yash cited PLT-2931 as precedent; the correct citation is
+**PLT-2882** — same project (FAR01), same `recurring-defect-patterns.md` Pattern 1 (dead activity
+links: metadata retains elements no longer in the model's translated geometry, so "Select All
+Linked" silently under-selects). FAR01 already had this defect once; this is a recurrence, not a
+new mechanism. Diagnostic recipe and remediation runbook both already exist from the prior three
+instances — no new tooling needed, just running the two standing DuckDB queries against this
+project's activities. Full triage: `PLT-3167-groupA-progress-tracking/`.
+
+**PLT-3165** ("Element gets linked even though Deselected on web viewer", Dev In Progress, Rishi) —
+Group B, appeared same day as PLT-3167. Not deep-dived this run per the standing Group A/B action
+split; context not yet captured.
+
+**PLT-2651** — Rishi independently posted (`112810`, 09-23 11:37) a correction that gets half the
+mechanism right (project settings don't affect Web Viewer orientation) and half wrong (points the
+customer at "rotate the project north," which this folder's own 09-09 code read already showed has
+no live call site in the Web Editor). The customer is now sitting on a *second* wrong lever from a
+*second* engineer. Status/assignee also moved (`Open`→`In Analysis`, Ilia→Rishi) with no comment
+explaining either. Updated draft now addressed to both Yash and Rishi, naming the actual lever
+(Revit re-export with correct shared-coordinate rotation). Still the board's only Critical, 141 days
+old, correction still unposted.
+
+**PLT-2874** — no new Jira comment, but flagging directly: assignee **Ilia Kuzmin**'s own 09-11 reply
+to Yash ("will get back to you with updates soon today") is now 13 days overdue with nothing posted
+on the ticket. This routine cannot see whether it was answered outside Jira. The underlying open
+item (Gennaro's 08-12 Staging-undercount finding) is now 43 days unanswered.
+
+**PLT-2918** — comment thread unchanged (26 comments) but `updated` moved ~20h after the last
+comment with nothing narrating the change — third instance this week of a silent board move
+(after PLT-2651, PLT-3147), noted as a pattern worth naming if a fourth turns up.
+
+Six tickets confirmed unchanged in substance with a fresh live fetch each (PLT-3109, PLT-3156,
+PLT-3147, PLT-3133, PLT-3115): see each folder's 2026-09-24 entry for the specific diff-against-last-run.
+
+---
+
 ## Run: 2026-09-23 (scheduled) — 9 in-scope Group A tickets (down from 10 on 09-22), 0 in Group B, 1 left scope to Done (PLT-2815 → resolved, Freshdesk automation, no human close-out — third occurrence of this pattern this month), 2 found with same-day gaps the 09-22 pass missed (PLT-2651 and PLT-2918 — third and fourth documented cases of this failure mode on this board), 6 confirmed unchanged in substance, zero Jira actions taken
 
 Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC` (paginated

@@ -322,3 +322,10 @@ excursions), this folder was never renamed away from `groupA` and stays that way
 is back with the customer. The FED-model wrinkle raised in `112500` (09-18, an element outside the
 current FED model possibly excluded from delta sync) is still unraised as its own thread and still
 not investigated.
+
+## 2026-09-24 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, still
+11 comments, newest still `112621` (09-21, Freshdesk "Waiting on customer"). Rishi's 09-21 ask for
+concrete activity/element examples with timestamps is still unanswered by the customer. No
+re-investigation performed.

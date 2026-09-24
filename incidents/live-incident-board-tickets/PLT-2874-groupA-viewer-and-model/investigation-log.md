@@ -4,6 +4,28 @@ FAR01 (`b28712bb-0691-4db2-a626-85c2f1f5ead6`). Editor federated file reported ~
 elements on 07-07; dashboard reported ~695,000 with the scrubber at the end. Yash linked LVN1
 (Freshdesk 7514) on 07-27 as a second project with the same symptom.
 
+## 2026-09-24 (scheduled) — confirmed unchanged; Ilia's "will get back to you today" (09-11) is now 13 days overdue, not answered outside this session either
+
+Live re-fetch (`getJiraIssue`, full fields incl. `comment`): status still **In Analysis**, priority
+Minor, assignee still **Ilia Kuzmin**, still **8 comments**, newest still `112017` (Ilia, 09-11
+13:39, "will get back to you with updates soon today"). `updated` unchanged at
+2026-09-11T13:39:41+0100. Nothing on the ticket has moved in 13 days.
+
+**Stated plainly, since this folder is Ilia's own assignment and the promise is Ilia's own words:**
+the single open item is still Gennaro's 08-12 Staging-undercount finding (comment `109457`, now 43
+days unanswered), and Ilia's own 09-11 reply to Yash's status check ("will get back to you ... soon
+today") has now gone 13 days past its own stated deadline with nothing posted. This routine cannot
+tell whether Ilia answered Yash outside Jira (Slack, in person) — that remains genuinely unknown
+from here, as every prior entry since 09-14 has noted — but the ticket itself shows no resolution.
+GitHub re-checked: `search_pull_requests query:"PLT-2874 in:title,body"` against `hc-frontend`
+still returns exactly one result, PR #2084 (merged 07-31) — no new fix in flight.
+
+**Action class: 1 — stale, unresponded.** No re-diagnosis performed; the 09-09 correction (the
+08-27 prod measurement used the wrong predicate for the tile's population) and the 09-07 finding
+(de-dup fix already shipped) both stand unchanged. See `recommended-action.md` for the combined
+draft to Yash/Gennaro, unchanged in content and now 10 days overdue on top of Ilia's own 13-day-old
+promise.
+
 ## 2026-09-11 — scheduled sweep, confirmed unchanged; no new code re-verification warranted
 
 Jira re-fetched fresh (full fields incl. `comment`, `attachment`): status **In Analysis**,

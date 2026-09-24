@@ -1,5 +1,67 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-24 (scheduled) — moved again since the 09-23 escalation: status `Open` → `In Analysis`, assignee `Ilia Kuzmin` → `Rishi Bhugobaun`, and one new comment the 09-23 pass could not have seen
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `status`, `assignee`, `priority`, `updated`).
+**One new comment since the 09-23 "ESCALATED" entry below: `112810` (Rishi Bhugobaun,
+2026-09-23T11:37:14+0100).** Timestamp-wise this landed the same morning as the 09-23 scheduled
+entry but is not mentioned in either `context.md`'s 09-23 entry or `recommended-action.md`'s 09-23
+draft — both describe only comment `112736` (the customer's reply) and the drafted, unposted
+correction to Yash. So `112810` is genuinely new to this repo, not a re-read.
+
+**What Rishi said, in full:**
+
+> @Yash Patel For clarification the XYZ Project Settings here do not affect model orientation in Web
+> Viewer.
+>
+> Ideally, if they want this to be consistent across Viewer and Holosite it seems they need to
+> rotate the project north so that it aligns with the buildings. If the Angle to true north is 0,
+> then as I understand it the models should be aligned to the world axis. From the ticket screenshot
+> it is not clear whether this is the case - could the user confirm this or provide a screenshot of
+> the building alignment?
+
+**Read against the 09-23 escalation, this is a partial, independent duplicate of the very
+correction that entry drafted — posted by someone else, on the ticket, before this routine's draft
+was ever sent.** Rishi's first sentence ("XYZ Project Settings ... do not affect model orientation
+in Web Viewer") is the same substance as the unposted draft's opening ("changing the project's true
+north setting won't change anything in the Web Editor's section box"). **What Rishi's comment does
+NOT do, that the drafted correction does:**
+- It does not name the actual lever (Revit re-export with correct shared-coordinate rotation,
+  `refPointTransform`) — it asks the customer to "rotate the project north," which per this folder's
+  own 09-09 code read (`viewer-service.ts:974-983`, `applyBasePointTransform`'s only call site
+  commented out) **cannot change the Web Editor box either**. Rishi's suggested fix is a second
+  wrong instruction, of the same shape as Ilia's original 09-08 one, even though his diagnostic
+  sentence (project settings don't affect the Viewer) is correct.
+- It does not correct the record on *why* the 09-08 true-north advice was itself wrong, so the
+  customer is not told to stop chasing that thread.
+- It asks the customer for a screenshot to confirm building alignment — a reasonable ask on its own,
+  but orthogonal to whether true north (project *or* model) is a live lever in the Web Editor at
+  all, which this folder settled in the negative six weeks of entries ago.
+
+**Board state now:**
+
+| field | 09-23 entry below | live, 09-24 |
+|---|---|---|
+| Status | `Open` | **`In Analysis`** |
+| Assignee | Ilia Kuzmin | **Rishi Bhugobaun** |
+| Comments | 35 (through `112736`) | **36** (adds `112810`) |
+| `updated` | 2026-09-22T16:03:11 | **2026-09-23T11:37:14** |
+
+No comment narrates either field move (same "board moves, nobody narrates why" shape this folder
+has now logged repeatedly — 09-22 on PLT-3147, 09-23 on this same ticket). Reading the sequence
+plainly: assignment moved to Ilia on 09-23 morning (per the prior entry), then Rishi answered on the
+ticket at 11:37 and picked it up as `In Analysis`, apparently without seeing (or without adopting)
+the drafted correction sitting unposted in this folder since escalation.
+
+**Consequence for the recommended action.** The 09-23 draft to Yash is not moot — it is now more
+urgent, because Rishi's message, sent in good faith, risks sending the customer down a *third*
+version of the same dead-end (settings-based) fix rather than the one this folder has held ready
+since 09-09 (Revit re-export). See `recommended-action.md` § 2026-09-24 for the restated ask: get
+the correct lever onto the ticket before the customer acts on Rishi's message the way they acted on
+Ilia's.
+
+**Priority/age:** still the board's only Critical, now **141 days old** (2026-05-06 → 2026-09-24).
+
 ## 2026-09-14 (scheduled) — unchanged again. Silence since 111646 is now 6 days; correction is now 6 days unposted. Nothing re-investigated that was already killed.
 
 **Fetched fresh via `getJiraIssue`** (fields incl. `comment`, `attachment`; cloudId

@@ -319,3 +319,12 @@ Major, still **3 comments**, newest still `112316` (09-16). `updated` unchanged.
 (`groupA`) still correct — status has not left `With Customer`. The close Yash called for on 09-16 is
 now **6 days** old with zero Jira movement since. Same shape as PLT-2815 (settled-but-open, same
 assignee, missing one-click close), now measurably closer to it (6 days in vs. PLT-2815's 78).
+
+## 2026-09-24 (scheduled) — confirmed unchanged; close Yash called for on 09-16 is now 8 days old
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, `resolution = null`, assignee still
+Yash Patel, priority Major, still 3 comments, newest still `112316` (09-16, customer's
+self-resolution report + "we can close the ticket now"). `updated` unchanged. Folder tag (`groupA`)
+still correct per the README's status-keyed rule. The one remaining action — the transition Yash
+himself called for — is now **8 days** old with zero Jira movement, the same settled-but-open shape
+as PLT-2815. No re-investigation performed.

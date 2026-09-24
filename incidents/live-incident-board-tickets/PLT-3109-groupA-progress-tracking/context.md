@@ -486,3 +486,11 @@ symptom* — those have completely different next steps, and nobody has asked wh
 **What remains unverified:** whether the client ever removed the two `WHERE` lines Ilia specified;
 what "automate the reports" concretely means (a template we hand them vs. a platform-side export
 endpoint); whether Ashley (mentioned, on leave) is the client-side or XYZ-side owner of that meeting.
+
+## 2026-09-24 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch (full fields incl. `comment`, `attachment`): status still **Open**,
+assignee still **Yash Patel**, still **12 comments**, newest still `112612` (09-21, "This is still
+an issue for me when exporting"). No movement since the 09-22 entry above. The open scope-clarity
+question from 09-22 (whether "automate the reports" is a real, scoped ask) remains unasked and
+unanswered. No re-investigation performed — nothing on the ticket changed to warrant it.

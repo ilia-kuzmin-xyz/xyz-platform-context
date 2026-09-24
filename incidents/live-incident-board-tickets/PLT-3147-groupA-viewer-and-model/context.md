@@ -478,3 +478,12 @@ one piece of hard evidence, the DEV converter failure) is also worth flagging: t
 question — which of two ambiguous error codes DEV showed — is not Yash's to answer. If the reassignment
 means "Darminder is done investigating," that should be stated somewhere; nothing on the ticket says
 so.
+
+## 2026-09-24 (scheduled) — confirmed unchanged; the 09-22 concern stands
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, comment
+thread unchanged since 09-18 (`updated` still 2026-09-21T10:17:41). The 09-22 finding stands
+unresolved: the customer's own 09-18 question ("identify the name of the model which is causing
+this effect") is still unanswered six days later, and the board's `With Customer` status still
+mislabels the ball as theirs when it is ours. No new attachment opened this run (session-wide 403,
+unchanged). No re-investigation performed.

@@ -548,3 +548,15 @@ checkout.
 
 **Human silence counter retired.** The 28-day streak this folder tracked since 08-25 ended 09-22;
 today (09-23) is day 1 of a new, actively-engaged thread. Not carrying the day-counter forward.
+
+## 2026-09-24 (scheduled) — no new comment, but a silent field touch on 09-23 with nothing narrating it
+
+Live `getJiraIssue` re-fetch (full fields incl. `comment`): status still **With Customer**, assignee
+still **Rishi Bhugobaun**, still **26 comments**, newest still `112745` (09-22 17:27, Freshdesk
+"Waiting on customer" echo) — same as the 09-23 entry recorded. But **`updated` has moved to
+2026-09-23T13:51:28+0100**, roughly 20 hours after that last comment, with no accompanying comment
+of any kind. Same "board moves, nobody narrates why" shape already logged on PLT-2651 and PLT-3147
+this week — flagging rather than guessing at the cause (a re-save with no field delta, a label/
+component touch, or similar). The open technical question from 09-22 — did the user report the
+*original* missing-mapping issue recurring, or something newly removed (Rishi's `112743`) — is still
+unanswered. No re-investigation performed.

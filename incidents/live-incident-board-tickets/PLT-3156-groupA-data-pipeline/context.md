@@ -142,3 +142,10 @@ model-layer context menu, category-mapping code).
 3. **Whether re-exporting without the DRAFT project actually clears both symptoms** (the extra WBS
    root and whatever "2 paths" specifically shows) — Rishi's fix is well-supported by the code trace
    but not yet confirmed against the customer's own result.
+
+## 2026-09-24 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch (full fields incl. `comment`): status still **With Customer**,
+assignee still **Yash Patel**, still **5 comments**, newest still `112651` (09-21 17:03, Freshdesk
+"Waiting on customer"). No reply from the SIN02 customer yet on the DRAFT-project re-export ask.
+No re-investigation performed.

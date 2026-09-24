@@ -1,5 +1,44 @@
 # PLT-2651 — Recommended action
 
+## 2026-09-24 (scheduled) — URGENT: Rishi independently posted a partial, still-wrong correction. Post the full one now, don't let a third wrong instruction stand.
+
+**What changed:** comment `112810` (Rishi, 09-23 11:37 — see `context.md` this date) tells the
+customer project settings don't affect Web Viewer orientation and asks them to "rotate the project
+north" — correct on the first half, but the second half is itself unworkable per this folder's own
+09-09 code read (`viewer-service.ts:974-983`, true-north has no live call site in the Web Editor).
+**The customer is now looking at a second engineer's message pointing at a lever this repo has
+already proven inert**, on top of Ilia's original one from 09-08 that started this.
+
+**This supersedes waiting for a "human review" pass of the escalation draft.** The 09-23 entry
+argued for posting without gating on Ali; that reasoning is now stronger, not weaker — every day
+without the correct lever on the ticket is a day the customer might act on *either* wrong
+instruction still sitting there, and now there are two.
+
+### Draft — to Yash Patel AND Rishi Bhugobaun, on PLT-2651 — DRAFT ONLY, not posted (approx. 95 words)
+
+> Rishi's right that project settings don't touch Web Viewer orientation — but "rotate the project
+> north" won't fix it either: `applyBasePointTransform` (the only code path that would apply a
+> project-level angle to a loaded model) has its call site commented out
+> (`viewer-service.ts:974-983`), so no project setting reaches the Web Editor's section box, full
+> stop.
+>
+> The actual lever is the **model's own shared-coordinate rotation**, set at Revit export, which
+> feeds `refPointTransform` directly. Once a model carries its real rotation there, our
+> orientation-guess patch switches itself off automatically and Forge orients the box correctly —
+> no further settings change needed.
+>
+> **Can we ask the customer for a Revit re-export with the building's correct rotation baked into
+> shared coordinates**, instead of any project-settings change? Happy to confirm the exact export
+> ask with backend first if useful.
+
+**Why send to both Yash and Rishi, not just Yash as the 09-23 draft had it:** Rishi is now the
+assignee and the most recent poster; a correction that reaches only Yash risks Rishi (or the
+customer, via Rishi) repeating the settings-based framing a third time.
+
+**No Jira action taken by this run** — no comment, no transition, no assignment, no field edit.
+
+---
+
 ## 2026-09-21 (scheduled) — unchanged again. The correction is now 13 days unposted, ticket 138 days old. One new comment, but it's Freshdesk sync noise.
 
 Fresh `getJiraIssue` fetch this run: status still `With Customer`, assignee still Yash Patel, no
