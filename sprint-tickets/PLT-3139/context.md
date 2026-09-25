@@ -116,3 +116,37 @@ kept. Worth doing every time — a test written after the fix can pass vacuously
 Commits: `4208212`, `971da9e`. Earlier in the run: `4c8a3d4`, `883497b` (a third fixture,
 `TypesTab.test.tsx`, also missing `getOtherForAssetType` — caught only by CI, because I had
 run the `AssetTypePage/` folder and not the suite).
+
+## 2026-09-25 (third round) — the regression test broke CI, and was right to
+
+The create/link retry test (`mockLink.mockRejectedValueOnce`) passed locally and **failed the
+CI build** — with all 5705 tests green. The step that failed was "Lint & Run Tests"; lint was
+clean and no test failed. The cause was one line in the vitest summary:
+
+```
+Errors  1 error
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯  Error: link is down
+```
+
+**Vitest exits non-zero on an unhandled rejection even when every test passes.** A local
+single-file run does not surface it the same way, so this is only visible on a full run.
+Worth remembering before writing any test that makes a component's promise reject.
+
+And the rejection was a real defect, not test noise: `save()` is called from an `onClick`
+(`void save()`), and its `try` had only a `finally`. So a failing link escaped as an unhandled
+rejection and **the user got nothing at all** — a Save button that appeared to do nothing.
+
+Fixed by catching it into the same partial-save shape the prerequisites already use
+(`sysReqSaveFailed` → now also `taskSaveFailed`): the type exists, the name field locks, the
+message says what happened, and Save resumes the links. Needed its own i18n key —
+`create.sysReqError` names prerequisites specifically, so reusing it would have lied.
+
+Commit `72a8d5a`.
+
+### Running tally of process lessons from this one ticket
+
+1. Run the **folder**, not the file (missed `use-asset-systems.test.ts` on PLT-2972).
+2. Run the **suite**, not the folder (missed `TypesTab.test.tsx`).
+3. Run **`tsc --noEmit`** too — a fake implementing a client interface passed vitest and failed tsc.
+4. Watch the **`Errors` line**, not just pass/fail counts — an unhandled rejection fails CI silently.
+5. Verify each regression test **fails without its fix** before keeping it.
