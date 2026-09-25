@@ -1,5 +1,25 @@
 # PLT-2651 — Recommended action
 
+## 2026-09-25 (scheduled) — unchanged draft, more urgent: Yash has now relayed Rishi's wrong-lever question to the customer
+
+**What changed:** comment `112955` (Yash, 09-24 12:01 — see `context.md` this date) is Yash asking
+the customer to confirm world-axis alignment, in service of Rishi's still-uncorrected "rotate the
+project north" guidance. **The customer is now doing homework for a lever this repo has held dead
+since 09-09.** The 09-24 draft below (to Yash AND Rishi) is unchanged in content and is still the
+right message — nothing about today's comment changes what it should say, only how overdue it is.
+
+**Action class: 4, with a class-1 chase attached (unchanged).** Board's only Critical, 142 days
+old, correction 17 days unposted.
+
+### Draft — unchanged from 09-24, reproduced by reference
+
+See "2026-09-24 (scheduled)" entry below for the full draft text (to Yash Patel AND Rishi
+Bhugobaun, ~95 words) — not retyped here to avoid drift between copies.
+
+**No Jira action was taken by this run.**
+
+---
+
 ## 2026-09-24 (scheduled) — URGENT: Rishi independently posted a partial, still-wrong correction. Post the full one now, don't let a third wrong instruction stand.
 
 **What changed:** comment `112810` (Rishi, 09-23 11:37 — see `context.md` this date) tells the

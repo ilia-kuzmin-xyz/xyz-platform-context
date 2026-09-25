@@ -328,3 +328,12 @@ self-resolution report + "we can close the ticket now"). `updated` unchanged. Fo
 still correct per the README's status-keyed rule. The one remaining action — the transition Yash
 himself called for — is now **8 days** old with zero Jira movement, the same settled-but-open shape
 as PLT-2815. No re-investigation performed.
+
+## 2026-09-25 (scheduled) — confirmed unchanged; close Yash called for on 09-16 is now 9 days old
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, `resolution = null`, assignee still
+Yash Patel, still 3 comments, newest still `112316`. **9 days** since the customer's self-resolution
+report and Yash's own "we can close the ticket now." This is the same settled-but-open shape the
+run-instructions file names as a recurring failure mode (PLT-2815 sat this way for 74 days across
+32 runs before a Freshdesk automation quietly closed it with no human comment). Worth surfacing
+before this one follows the same path. No re-investigation performed.

@@ -149,3 +149,8 @@ Live `getJiraIssue` re-fetch (full fields incl. `comment`): status still **With 
 assignee still **Yash Patel**, still **5 comments**, newest still `112651` (09-21 17:03, Freshdesk
 "Waiting on customer"). No reply from the SIN02 customer yet on the DRAFT-project re-export ask.
 No re-investigation performed.
+
+## 2026-09-25 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, still
+5 comments, newest still `112651`. No reply from the customer yet. No re-investigation performed.

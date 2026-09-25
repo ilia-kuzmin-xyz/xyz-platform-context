@@ -487,3 +487,11 @@ unresolved: the customer's own 09-18 question ("identify the name of the model w
 this effect") is still unanswered six days later, and the board's `With Customer` status still
 mislabels the ball as theirs when it is ours. No new attachment opened this run (session-wide 403,
 unchanged). No re-investigation performed.
+
+## 2026-09-25 (scheduled) — confirmed unchanged; the mislabelled-status concern is now 7 days old
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, comment
+thread unchanged since 09-18 (`112522`, Freshdesk "Waiting on customer"). The customer's own 09-18
+question is now **7 days** unanswered, on a **Critical** ticket, while the board still shows the
+ball as theirs. No new attachment opened (session-wide 403, unchanged). No re-investigation
+performed.

@@ -1,4 +1,13 @@
-# PLT-3109 — recommended action (2026-09-08, first pass)
+# PLT-3109 — recommended action
+
+## 2026-09-25 (scheduled) — assignee is back on Yash; the 09-22 draft now goes to its actual owner, unchanged in text
+
+Silent move Pietro → Yash (`context.md` this date) makes the 09-22 draft below (to Yash, 76 words,
+asking whether the WHERE-line fix was actually applied and whether "automate the reports" is scoped
+work) more directly on-target — no rewrite needed, reproduced by reference, not retyped. **Action
+class: 4** (unchanged — ambiguous scope question, not code). **No Jira action was taken by this
+run.**
+ (2026-09-08, first pass)
 
 ## Classification: **class 4 leaning class 1** — one five-minute check away from either closing itself
 or turning into a genuine cross-team (dashboard-setting vs export-feed) question

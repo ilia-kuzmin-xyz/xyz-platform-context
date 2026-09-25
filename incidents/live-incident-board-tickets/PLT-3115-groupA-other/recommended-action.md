@@ -207,3 +207,11 @@ hardening remains undone and still unmotivated by this ticket.
 Live re-fetch confirms zero movement. Draft nudge above (59 words) unchanged and unsent. Raise
 alongside PLT-2815's chase if a human is doing a pass on Yash's outstanding one-click closes — both
 tickets are now in the same shape. **No Jira action was taken by this run.**
+
+## 2026-09-25 (scheduled) — unchanged, 9 days since Yash's own close call. Same draft stands; growing risk of the PLT-2815 pattern.
+
+Live re-fetch confirms zero movement. Draft nudge (59 words, § 2026-09-18) unchanged and unsent.
+**Action class: 1, administrative-only** — nothing to investigate, nothing to build; the ticket is
+resolved in substance and needs one click. Flagging with rising urgency: PLT-2815 sat in this exact
+shape for 74 days and 32 runs before an automation closed it silently with no human comment — worth
+a human catching this one before it repeats that path. **No Jira action was taken by this run.**

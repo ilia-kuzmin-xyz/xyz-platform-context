@@ -45,6 +45,101 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-25 (scheduled) — 9 in-scope Group A tickets (same count as 09-24: PLT-3167 left scope to With Technical Support, PLT-3172 newly created and deep-dived), 0 in Group B, 1 new ticket deep-dived (PLT-3172 — "Select Linked Elements" no longer highlights blue, AEX01, Rishi already reproduced it independently), 1 new comment that compounds an existing problem (PLT-2651 — Yash relayed Rishi's still-uncorrected guidance to the customer), 1 silent board move newly caught (PLT-3109 — assignee swung back Pietro → Yash, 5th instance of this pattern), 1 growing risk of the PLT-2815 pattern (PLT-3115 — 9 days since the customer's own "we can close it now"), 6 confirmed unchanged in substance, zero Jira actions taken
+
+Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, then
+narrowed with a direct JQL `status NOT IN (...)` exclusion rather than eyeballing the full list, to
+avoid the kind of scope-completeness gap the 09-23 run flagged. Cross-checked against 09-24's own
+9-ticket table: **PLT-3167 dropped out** (`With Technical Support`, confirmed via the full-board
+fetch — its own 3rd-line Freshdesk status matches), **PLT-3172 is new** (created 2026-09-24T16:20,
+after 09-24's own fetch would have run). Net: still 9. Group B empty — **PLT-3165 also left scope**
+this run, to `Ready For QA` (was Group B's sole occupant on 09-24); no ticket currently sits in
+`Ready For Development` or `Dev In Progress`.
+
+Every continuing ticket got a live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`)
+before anything was written, per "the folder is a cache, not the truth."
+
+**PLT-3172** (new — "Select Linked Elements" no longer highlights blue on an activity, AEX01,
+Major, assignee Rishi) — customer reports the right-click "Select Linked Elements" action no
+longer highlights the linked elements in blue; **Yash independently reproduced it the same
+afternoon**, before assignment, ruling out a purely client-side cause. Code read
+(`use-linked-element-actions.ts:25-64`) confirms the object shape and API call match two other
+call sites presumed still working (`model-browser-service.ts`'s "select whole model",
+`selection-service.ts`'s drag-box selection), so neither is the differentiator. One timing-coincident
+lead, explicitly flagged as unconfirmed: `fe43628` (PLT-3165, merged 09-24 08:37, ~8 hours before
+the report) is the only file in the selection path touched in 30 days, but the removed code was
+Shift-gated and this is a programmatic call — the causal chain is not established, only coincident.
+One console check (log `aggregateSelection` before the `setAggregateSelection` call) would
+discriminate an empty-selection cause from a Forge-rendering-only one. Attachment `65180` (90 MB
+screen recording) is session-wide 403, unopened. Full triage: `PLT-3172-groupA-viewer-and-model/`.
+
+**PLT-2651** — one new comment (`112955`, Yash, 09-24 12:01) since the 09-24 snapshot: Yash asked
+the customer to confirm world-axis alignment, in service of **Rishi's own still-uncorrected**
+"rotate the project north" guidance from 09-23. The customer is now doing homework for a lever this
+folder's code trace has held dead since 09-09 — the correction (drafted, to Yash and Rishi) is
+still unposted, now **17 days** stale on the board's only Critical ticket, **142 days** old.
+
+**PLT-3109** — assignee silently swung back `Pietro Desiato` → `Yash Patel`, no comment narrating
+it. Fifth instance of the "board moves, nobody narrates why" pattern already named on PLT-2651,
+PLT-2918 and PLT-3147 across the 09-22 through 09-24 runs. The 09-22 draft (asking Yash whether the
+client actually applied the WHERE-line fix, and whether "automate the reports" is scoped work) is
+unchanged and now more directly on-target with Yash again the named owner.
+
+**PLT-3115** — still unresolved 9 days after the customer's own self-resolution report and Yash's
+"we can close the ticket now." Nothing left to investigate; this is a one-click close sitting idle
+in the same shape that let PLT-2815 sit for 74 days and 32 runs before a Freshdesk automation
+closed it silently, with no human comment. Flagging now, before it repeats that path.
+
+**PLT-2874** — no new comment; Ilia's own 09-11 "will get back to you today" is now **14 days**
+overdue (up from 13).
+
+**PLT-3147** — no new comment; the customer's 09-18 question is now **7 days** unanswered on a
+Critical ticket, while the board status still says the ball is theirs.
+
+**PLT-2918, PLT-3133, PLT-3156** confirmed unchanged in substance against a fresh live fetch each —
+see each folder's 2026-09-25 entry for the specific diff-against-last-run (all "no new comment").
+
+### Group A (9)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | New comment compounds the wrong-lever problem; customer now doing homework for a dead lever. Correction still unposted, 17 days, 142-day-old ticket. | 4, escalated |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own promise now 14 days overdue. | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged. | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Silent assignee move Pietro → Yash caught; draft now more on-target. | 4 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged; 9 days since customer's own close call — risk of the PLT-2815 pattern flagged. | 1, administrative |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged; correctly parked. | 1 |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged; customer question now 7 days unanswered. | 1 |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged; correctly parked. | 1 |
+| [PLT-3172](PLT-3172-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis · Major | New. Console check needed before a fix; video attachment unopened. | 3 |
+
+### Group B (0)
+
+Empty this run — PLT-3165 (09-24's sole occupant) left scope to `Ready For QA`.
+
+### Left scope this run
+
+**PLT-3167** — moved to `With Technical Support`.
+**PLT-3165** — moved to `Ready For QA` (was Group B).
+
+### Standing gaps (unopenable media)
+
+Same standing set as 09-24, plus **PLT-3172's new `65180`** (90 MB screen recording, 403,
+confirmed pattern not re-tested).
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-2651** — send the correction to Yash and Rishi now (unchanged draft, ~95 words): the
+   true-north lever is dead; the customer is currently acting on a second wrong instruction.
+2. **PLT-3172** — get Rishi (already has the repro) to run the one console check that discriminates
+   the two live hypotheses, or open the video attachment.
+3. **PLT-3115** — one-click close, sitting idle 9 days; flagged to avoid a second PLT-2815.
+4. **PLT-2874, PLT-3109, PLT-3147** — previously-drafted, still-unposted messages remain the right
+   next step; unchanged this run, not re-drafted.
+5. **PLT-2918, PLT-3133, PLT-3156** — no new action; correctly parked or already escalated.
+
+---
+
 ## Run: 2026-09-24 (scheduled) — 9 in-scope Group A tickets, 1 in Group B (up from 0), 1 brand-new Group A ticket deep-dived (PLT-3167, a 4th Pattern-1 instance and 2nd on FAR01 specifically), 1 brand-new Group B ticket (PLT-3165, not deep-dived per this run's scope), 2 found with real movement the 09-23 pass missed or couldn't have seen (PLT-2651 — a second, still-wrong true-north correction independently posted by Rishi; PLT-2918 — a silent same-day field touch), 1 overdue-promise flag (PLT-2874 — Ilia's own "will get back to you today" from 09-11 now 13 days overdue), 6 confirmed unchanged in substance, zero Jira actions taken
 
 Board re-queried with the routine's own scope rule (`status in (Open, In Analysis, With Customer,

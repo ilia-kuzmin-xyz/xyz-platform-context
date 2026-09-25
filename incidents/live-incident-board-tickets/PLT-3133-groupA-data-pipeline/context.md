@@ -329,3 +329,9 @@ Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Y
 11 comments, newest still `112621` (09-21, Freshdesk "Waiting on customer"). Rishi's 09-21 ask for
 concrete activity/element examples with timestamps is still unanswered by the customer. No
 re-investigation performed.
+
+## 2026-09-25 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, still
+11 comments, newest still `112621`. Rishi's 09-21 ask for concrete examples remains unanswered. No
+re-investigation performed.

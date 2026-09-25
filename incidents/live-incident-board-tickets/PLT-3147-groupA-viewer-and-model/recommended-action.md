@@ -168,3 +168,10 @@ those two messages did DEV show?**
 *(Say the word and paste it.)*
 
 **No Jira action was taken by this run.**
+
+## 2026-09-25 (scheduled) — unchanged; draft to Darminder now 7 days unsent on a Critical ticket
+
+Live re-fetch confirms zero movement since 09-18. The draft above (95 words) is unchanged and
+still the right next message. **Action class: 1, stale on Darminder** — the one open technical
+question (which of two DEV error codes) is his to answer, and the board's `With Customer` status
+still misreports who owes what. **No Jira action was taken by this run.**

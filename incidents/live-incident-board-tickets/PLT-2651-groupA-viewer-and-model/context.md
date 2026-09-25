@@ -1,5 +1,35 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-25 (scheduled) — one new comment, and it compounds the problem: Yash relayed Rishi's question to the customer instead of us posting the correction
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`). **Status `With Customer`, assignee `Yash
+Patel`** — both back to where they were before the 09-23 swing recorded below (the 09-23 entry
+had it `Open`/Rishi; this run's fetch does not explain when it swung back, only that it has).
+
+**One new comment since 09-24's snapshot: `112955` (Yash Patel, 2026-09-24T12:01:27+0100).**
+
+> @Rishi Bhugobaun Have asked user, will get back as soon as they reply. Thanks
+
+This is Yash relaying Rishi's 09-23 question (112810 — "could the user confirm [world-axis
+alignment] or provide a screenshot") to the customer, not a reply to anything from us. **The
+customer is now waiting on their own answer to a question that presupposes Rishi's "rotate the
+project north" framing** — the framing this folder's 09-09 code read (`viewer-service.ts:974-983`,
+dead call site) and every run since has held is unworkable in the Web Editor. Our drafted
+correction (`recommended-action.md`, "to Yash Patel AND Rishi Bhugobaun") is still unposted, now
+**142 days** since the ticket was opened (2026-05-06) and **17 days** since the correction was
+first drafted (09-08/09-09).
+
+**Verified this run:** ticket age 142 days (created 2026-05-06T12:11, today 2026-09-25). No new
+attachment. No code re-read this run — the 09-09/09-14 code citations (`viewer-service.ts:974-983`,
+`section-tool-orientation-math.ts:145-155`) were not re-verified today; flagging as unverified-this-run
+rather than re-asserting them as fresh.
+
+**Unverified / not re-checked this run:** whether Ali (DPL) ever answered the 09-09 draft question
+(still shows no reply in the fetched comment list); whether `hc-frontend` master has moved since
+09-14's last direct check.
+
+---
+
 ## 2026-09-24 (scheduled) — moved again since the 09-23 escalation: status `Open` → `In Analysis`, assignee `Ilia Kuzmin` → `Rishi Bhugobaun`, and one new comment the 09-23 pass could not have seen
 
 Live `getJiraIssue` re-fetch (fields incl. `comment`, `status`, `assignee`, `priority`, `updated`).

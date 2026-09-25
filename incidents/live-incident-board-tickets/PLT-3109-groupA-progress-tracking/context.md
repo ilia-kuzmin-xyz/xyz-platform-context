@@ -1,5 +1,18 @@
 # PLT-3109 — "Meta - LVN - BL1&2 Elements in exports from power bi not matching dashboard" — triage context
 
+## 2026-09-25 (scheduled) — silent board move: assignee swung back Pietro → Yash Patel, no comment. Fifth instance of this pattern on the board.
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`): status still **Open**, but **assignee is now
+`Yash Patel`**, not `Pietro Desiato` as recorded on 09-21/09-22. No comment narrates the change —
+same shape as the silent moves already flagged on PLT-2651, PLT-2918 and PLT-3147 (README, 09-23/
+09-24 runs). Newest comment unchanged: `112612` (Yash, 09-21 10:13, "This is still an issue for me
+when exporting"). No new comment since. The 09-22 draft (asking Yash whether the client actually
+removed the two `WHERE` lines, and whether "automate the reports" is scoped work) is unchanged and,
+if anything, more directly addressed now that Yash is again the named assignee rather than Pietro.
+
+**Verified:** assignee field via direct fetch, not inferred. **Not verified:** why or when the
+move happened — no changelog was fetched this run.
+
 - **Jira:** https://xyzreality.atlassian.net/browse/PLT-3109
 - **Issue type:** Live Incident · Software Area: Dashboard
 - **Status:** **Open** → Group A ("needs evaluation" — brand new, never triaged before)

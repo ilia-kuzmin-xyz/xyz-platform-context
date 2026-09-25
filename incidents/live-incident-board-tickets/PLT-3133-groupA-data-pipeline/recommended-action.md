@@ -119,3 +119,9 @@ now measured, not just inferred from code. Re-open a deeper investigation only i
 with a specific case that Rishi's own spot-check pattern doesn't cover (e.g. genuinely hours-long,
 reproducible, with ids). **No Jira action was taken by this run** — Rishi's comment was posted by him,
 not by this routine.
+
+## 2026-09-25 (scheduled) — unchanged; still correctly parked, still nothing to draft
+
+Live re-fetch confirms zero movement since 09-21. **Action class: 1, correctly parked** — ball is
+with the customer for a concrete repro; nothing here is stale-on-us. **No Jira action was taken by
+this run.**

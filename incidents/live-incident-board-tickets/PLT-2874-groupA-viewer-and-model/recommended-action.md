@@ -1,5 +1,11 @@
 # PLT-2874 — Recommended action
 
+## 2026-09-25 (scheduled) — CURRENT. Unchanged; overdue count moved from 13 to 14 days.
+
+No Jira movement since 09-11 (`context.md` § 2026-09-25). The combined draft to Yash (§ 2026-09-14
+below) is unchanged and still the recommended next step. **Action class: 1** — stale, unresponded,
+on us (Ilia). Restating only because the clock moved.
+
 ## 2026-09-15 (scheduled) — CURRENT. Ilia's own "today" reply is now 4 days overdue.
 
 No Jira movement since 09-11 (see `context.md` § 2026-09-15). The combined draft to Yash below
