@@ -72,3 +72,47 @@ separate ticket.
 **Worth raising:** that follow-up ticket does not exist yet.
 
 Commits: `4c8a3d4`. Also merged `origin/master` (was 2 behind, no conflicts).
+
+## 2026-09-25 (later the same run) — second Copilot round, two more real findings
+
+Copilot re-reviewed after the push and raised two more. Both were genuine.
+
+### 1. The exclusion had a *third* unresolved dependency
+
+I had gated the two mapping queries but missed that `onTypeIds` also walks
+`STATIC_READINESS_LEVELS` and resolves each rung's **name** → this type's step id via
+`useAssetTypeStepIds`, which is its own query. Unresolved, that map is empty, the walk yields
+nothing, and the Other picker offers a task already on a rung — the same duplicate, by a
+different route.
+
+**Rejected the obvious fix.** Disabling Edit until `stepIds` settles works, but it makes the
+button dead on every load for a dependency that only matters while staging, and it broke 13
+tests that click Edit immediately. Worse, it strands the page if that query never settles.
+
+**Took a better one: don't need the resolution at all.** `stepTaskIds` is *already* keyed by
+step id. The name → id map was only ever needed to line the ladder's rungs up with this
+session's staged *removals*. So `onTypeIds` now walks the mappings themselves and uses the
+name map only to attach removals. Unresolved, the worst case flips from "writes a second
+mapping" to "keeps offering a task staged for removal" — harmless. **16-line diff, no UI
+change, no test churn.** Generalisable: when a derived set must be complete, drive it from
+the data that is already in the right shape, not from the presentation's own vocabulary.
+
+### 2. Create-then-link was not retryable
+
+`createdTypeRef` was assigned only after `createWithStagedTasks()` returned in full, so a link
+failing threw with the type **already created** and the ref still null. The catalogue refetch
+had by then made `duplicate` true, so pressing Save again returned at
+`if (duplicate && !createdTypeRef.current) return` — type stranded without its tasks, no user
+recovery. The ref's own comment claims it survives exactly this; it just wasn't true for a
+failure inside the helper.
+
+Ref is now set the moment the row exists; the helper creates only when it has none, so a retry
+re-applies the links. No per-link bookkeeping needed — `linkAssetType` upserts on the mapping's
+own key, so re-applying a landed link is a no-op.
+
+**Both regression tests were verified to fail on the previous implementation** before being
+kept. Worth doing every time — a test written after the fix can pass vacuously.
+
+Commits: `4208212`, `971da9e`. Earlier in the run: `4c8a3d4`, `883497b` (a third fixture,
+`TypesTab.test.tsx`, also missing `getOtherForAssetType` — caught only by CI, because I had
+run the `AssetTypePage/` folder and not the suite).
