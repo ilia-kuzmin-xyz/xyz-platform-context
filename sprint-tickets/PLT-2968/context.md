@@ -3420,3 +3420,22 @@ exactly where QA creates runs.
 > Second-order: I correctly reasoned on 09-18 that *approval changes the risk profile*. That was the
 > right insight one step too late. The trigger should have been **"this must not merge"**, not
 > **"this can now merge"**.
+
+## 2026-09-25 — #2222 brought up to date with master and green; still unreviewed after 7 days
+
+#2222 (removing the runner-override hotkey) was **8 commits behind master**, so it was merged up
+(`a1b2d91`). Checked the premise before merging rather than after: `use-runner-override.ts` is still
+present on master, and master has changed **nothing** under `AssetWorkflowStepTasks/` since the merge
+base (`91adb63`) — so the merge was genuinely clean, not just conflict-free, and the removal survived
+it. Confirmed by diffing the merged branch against master: exactly the three files, 88 deletions, no
+dangling references to `useRunnerOverride` anywhere under `src/main/webapp`.
+
+All three checks green on the merged head: build, SonarCloud (**0 new issues, 100% coverage on new
+code**) and the Copilot review.
+
+**The risk is unchanged and still live.** The hotkey has been on master since 18 Sep, it defaults to
+`managed`, and nothing in the shipped app ever sets it — so with the Commissioning flag on, saving a
+task that `getExecutionMode` resolves to *legacy* pins it to a managed run permanently. The PR has
+been sitting with four requested reviewers (Tom, Darminder, Rishi, Sergiusz) for **seven days** with
+no review. Nothing further to push: it is green, mergeable and minimal. It needs a human to press
+approve, and that is the whole of what is blocking it.
