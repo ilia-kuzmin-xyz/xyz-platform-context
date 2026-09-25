@@ -1194,3 +1194,48 @@ so the PR is reviewed against current master. Re-ran TaskLibraryTab + checklistL
 No new review feedback since the last run. The one open thread is still the deliberate one
 (the `task_item_id` vs `task_instance_id` file-association question), last word mine —
 left open on purpose, as the PR description says.
+
+## 2026-09-25 — Copilot found the same id-only guard bug in the folder loops (`d1deabf`)
+
+Master was merged into the branch (`d9fddce`) and Copilot re-reviewed. One High finding, and it is
+correct: **the archive-all loop guarded on the folder id alone.**
+
+This is the *same* defect 02cdfa3 fixed for the single-task confirm path, in code that never learned
+the lesson. An id says WHICH folder; it cannot say WHICH asking. Cancel while a run is in flight,
+reopen the same folder, and the id matches again — so the withdrawn run carries on archiving the old
+selection under a dialog the user has just opened and never confirmed.
+
+Four holes, one shape (Copilot named three; the fourth came out of reading around it):
+
+1. `archivePendingFolderTasks` per-iteration guard — id only.
+2. **No check after the last await at all**, so `setFolderPendingDelete(null)` + the success toast
+   ran unconditionally. A cancel landing during the final archive closed whatever dialog was open by
+   then and claimed a count for a run the user abandoned. *(Not in the finding; found by reading.)*
+3. `confirmDeleteFolder` captured a `generation` but spent it **once** before the loop; the
+   per-iteration guard fell back to the id.
+4. The `evacuateArchived` abandoned-callback — id only.
+
+**Fix:** one `stillAsking(folder, generation)` closure used at every site in both loops. The point
+is not brevity. The guard had been written out by hand in five places and one drifted; a single
+predicate makes it impossible for a loop to check one half of the answer at one site and both at
+another. Both halves are load-bearing — the id alone misses cancel-and-reopen of the same folder,
+the generation alone misses a switch to a *different* folder inside one asking.
+
+Regression test added on the archive-all reopen race
+(`TaskLibraryTab.context-menu.test.tsx`, *"stops archive-all when the folder is cancelled and the
+SAME one reopened"*). It flushes a macrotask before asserting, deliberately: reaching the next task
+is all microtask work, so without the flush the assertions pass instantly **and would still pass
+with the guard deleted** — the #2186 trap, avoided this time by design rather than by luck.
+
+### Pitfall banked: `prettier --check` on a copy outside the repo silently uses default config
+
+Checking whether a file was already prettier-dirty at baseline, I wrote the committed version to the
+scratchpad and ran `prettier --check --parser typescript` on it. It said **clean**. It was not —
+prettier resolves `.prettierrc` **relative to the file being checked**, and the scratchpad is
+outside the repo, so it used stock defaults. Re-running via `git stash` *in place* showed the file
+was dirty at baseline all along.
+
+That wrong reading had already made me accept `prettier --write`, which reformatted **three
+unrelated lines** (`x ?? null` → `(x ?? null)` — a newer prettier major than the repo's, because
+`npm ci` fails here so `npx` fetches latest). Those were reverted; the pushed diff is only the guard
+change. **To test baseline formatting, stash and check in place — never a copy outside the repo.**
