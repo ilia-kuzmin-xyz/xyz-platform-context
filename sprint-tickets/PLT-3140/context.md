@@ -76,3 +76,33 @@ tables open while implying this one is safe. Replied and resolved as out of scop
 fix stays "tighten the policies or front it with api-v2 before real tenant data".
 
 Also merged `origin/master` in (was 4 behind, no conflicts). Commit `120bbf6`.
+
+## 2026-09-25 (second round) — three more from Copilot after the push
+
+**Fixed — dialog had no accessible name.** `DeleteAssetsDialog` carried `role="dialog"` with
+nothing naming it. The obvious fix does **not** work: `Modal` (`common/modal/modal.tsx`) takes a
+`title` prop but only sets `aria-labelledby={titleId}` from a `useId` that **nothing ever
+renders**, so passing `title` points the label at a non-existent element. Named with
+`aria-label` instead.
+
+> ⚠️ **That dangling `titleId` affects every dialog using `Modal`'s `title` prop**, not just
+> this one. Not fixed here (out of scope), flagged on the PR. Worth its own ticket.
+
+**Fixed — log level.** The missed activity-log write was `log.warn`. Once the toast told the
+user the audit trail had a hole, it became an operational failure someone must act on, so it is
+`log.error(message, cause)` now — note that signature takes a *cause*, not a data bag, so the
+count moved into the message.
+
+**Left OPEN deliberately — DELETE discards affected rows.** `CommissioningDataClient.remove()`
+is `Promise<void>` and PostgREST answers a DELETE matching nothing with a success. So two people
+deleting the same asset means the second gets a success toast and a **false `asset_deleted`
+entry** for work they did not do — the wrong kind of bug in a PR whose point is an honest audit
+trail.
+
+Not fixed because the honest fix is `Prefer: return=representation` plus a return type on the
+**shared** client's `remove`, which every commissioning service deletes through. Doing it for
+this one call site creates a second delete path with different semantics. It also only narrows
+the race rather than closing it. Put to the author on the PR as its-own-PR vs take-it-here;
+**needs a decision.**
+
+Commit `4774e0c`.
