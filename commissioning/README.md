@@ -270,3 +270,52 @@ Held rather than approved/changes-requested: 3.3k-line flag-gated feature, visua
 `.claude/commissioning-active` could not be created because **`.claude/` itself did not exist** in a
 fresh checkout. `mkdir -p .claude && touch .claude/commissioning-active` — without it, five of the
 six eligible sprint tickets are out of scope by the repo's own rule.
+
+## 2026-09-25 — scheduled review run over Rishi's six open PRs
+
+Scope filter (Rishi/Darminder/Tom, non-draft) matched six PRs, all Rishi's; Darminder's #2211
+(PLT-3112) is still draft, none by Tom. CI (build + Sonar) green and no merge conflict on all six
+heads. No prior review from Ilia's account on any of them.
+
+**Approved this run** (comment left on each):
+- **#2239 (PLT-3127, Blocker)** — one-line `disablePortal` removal on the asset-type FormSelect;
+  matches the system modals' portal-by-default selects; verified no other FormSelect caller passes
+  the prop.
+- **#2234 (PLT-3142)** — system dimming via per-fragment transparent material clones
+  (`system-ghost.ts`), deliberately off the visibility bit so filters/section box/isolate compose.
+  Darminder had approved after visual check. Noted (non-blocking): module-level `ghostByMaterialId`
+  outlives a viewer teardown — small leak, no collision risk.
+- **#2230 (PLT-3141)** — viewport context menu System actions. All threads carried real fixes or
+  reasoned reverts; Darminder approved at head after confirming multi-system element links with
+  Jason. Noted (non-blocking): an element already in a system via its asset's membership still
+  gains a redundant bare link (deliberate per `use-add-elements-to-system` docstring).
+
+**Held for Ilia** (no PR comments left, per the run's own rule):
+- **#2221 (PLT-3136, backend seam, 5.5k lines)** — no human review yet; **3 Copilot threads open
+  at head**: readiness-step `setOrder` validates ids against ALL workflows (medium, defensive), and
+  two `clear()` partial-failure findings that only affect test-reset paths (no production caller of
+  `clear()` — verified by grep). Manual api-v2 walkthrough in the PR body is the real gate.
+- **#2229 (PLT-2901, portfolio roles)** — code-level clean; all 6 Copilot threads resolved with
+  real fixes (403-only fallback in `usePortfolioAuthorities`, strongest-grant override compare,
+  new tests). Needs live IAM verification with two accounts (Admin + Editor/Viewer) — body-level
+  Copilot leftovers are medium/minor (order-dependent unrankable custom grants, missing
+  `project-authorities` invalidation after own-role change, raw portfolioId in the invite session
+  log, service contract tests).
+- **#2240 (PLT-3123/PLT-3171, feedback fixes)** — no human review yet, testing steps are heavily
+  visual across the shared Properties pane. Code itself reads well: asset/system details become
+  `lastSelectedEntity` types routed by `Properties`, shared System workflow via convergent
+  `ensureSystemWorkflow` (setOrder keeps foreign steps, so adopting a user workflow named "System"
+  is non-destructive). One unresolved Copilot thread (collapsed pane stays collapsed on new
+  selection) answered by Rishi as parity-with-master. PLT-3171 Issue 6 (slow notifications) is NOT
+  covered by this PR — the ticket can't close on it alone.
+
+### Cross-PR interlock found this run (the important one)
+
+**#2240 deletes `systemDetailId`/`assetDetailId` from `viewer-provider`, while #2230 (approved,
+likely to land first) adds `use-system-context-menu-actions.ts`, which reads `systemDetailId`.**
+`git merge-tree` of the two branches produces a CLEAN tree — no textual conflict — so whichever
+lands second silently carries a `useViewer()` destructure of a property that no longer exists.
+Runtime-wise the menu's "Add to selected system" would just never enable; the prod build's
+typecheck (fork-ts-checker, pitfalls §12) is what will actually catch it, at merge time. The
+context-menu hook needs rewiring to `lastSelectedEntity({type:'system'})` as part of the second
+merge. Flagged on #2230's approval comment.
