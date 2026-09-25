@@ -1239,3 +1239,10 @@ That wrong reading had already made me accept `prettier --write`, which reformat
 unrelated lines** (`x ?? null` → `(x ?? null)` — a newer prettier major than the repo's, because
 `npm ci` fails here so `npx` fetches latest). Those were reverted; the pushed diff is only the guard
 change. **To test baseline formatting, stash and check in place — never a copy outside the repo.**
+
+### Outcome of `d1deabf` — green, and Copilot raised nothing new
+
+Build, SonarCloud (gate passed, 50.7% on new code) and the Copilot re-review all **success**. The
+re-review posted no new findings: the thread count held at 47 and the only unresolved thread is
+still the `commissioning_file_association` one, open by design. The new archive-all reopen test ran
+in CI, so the guard is covered by a test that has actually executed — not just by local reasoning.
