@@ -1184,3 +1184,13 @@ Also still awaiting humans from earlier runs: Darminder on whether the **type ma
 delete (`asset_type_task` FK undocumented), Ilia/Jason on the delete-cascade decision, and Rishi's
 rejection code for "Could not save". PLT-3140 (Delete Assets) landed on the board on 22 Sep and is
 downstream of that same cascade answer — see `sprint-tickets/PLT-3140/context.md`.
+
+## 2026-09-25 — master merged (PR #2203)
+
+Branch was 8 commits behind `origin/master`, no conflicts. Merged and pushed (`d9fddce`)
+so the PR is reviewed against current master. Re-ran TaskLibraryTab + checklistLibraryService
++ typeTaskService suites after the merge: 269 passed, 1 skipped.
+
+No new review feedback since the last run. The one open thread is still the deliberate one
+(the `task_item_id` vs `task_instance_id` file-association question), last word mine —
+left open on purpose, as the PR description says.

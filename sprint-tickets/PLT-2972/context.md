@@ -110,3 +110,42 @@ Its CI had been silently stuck (a run queued 09-13 08:51 that never started, 23 
 pushed `4ae3062` to unstick it — a real fix, not a kick: the task modal was resetting the run's
 verdict to null on open, so reopening a `passWithComments` test and amending anything regraded it to
 plain `pass`. Two threads there remain open, both mid-discussion, neither touching `StepTasksModal`.
+
+## 2026-09-25 — master conflict resolved, both review threads fixed (PR #2217)
+
+PR was `mergeable_state: dirty`. Merged `origin/master` in and resolved three conflicts.
+
+**What master had moved underneath this branch** (worth carrying forward — the same three
+will bite any other branch off this file):
+
+- `#2186` (PLT-2968/2967/2966) renamed `IAssetSystemStep.workflowStepId` → **`readinessStepId`**.
+- `#2186` also replaced the bare membership end (`useEndSystemMembership` + toast) with
+  **`useMembershipRemoval`**, and dropped the `removeFromSystemFailed` i18n key with it.
+- `#2213` (PLT-3086) added **`AssetOtherTasks`** below the memberships, plus the
+  `destructiveLabelSx` / `taskStateSx` tokens.
+
+All three kept. The conflicting half was master's inline tag expansion (`StepTaskRow`),
+which is exactly what this ticket replaces with the modal — so that side was dropped.
+`taskStateSx` became unused in the file as a result and had to come out of the import or
+lint fails.
+
+**Two copilot threads, both real, both fixed:**
+
+1. **The runner was handed an itemless instance.** The rows come from
+   `useAllTaskInstances` → `listAll()`, which assembles every row with `items: []` on
+   purpose (loading all items blows the API row cap). `TaskInstanceModal` answers and saves
+   straight off `instance.items` — it does **not** fetch. So a legacy-mode task opened from
+   this modal rendered "This task has no items to complete" and saved nothing.
+   The sibling `readiness-ladder.tsx` already had the right shape: hold the **id**, fetch via
+   `useChecklistInstance`, gate the runner on `openInstance !== null`. Now matched.
+   `IAssetSystemTask.instance` removed — it was added by this PR, nothing else read it, and
+   its doc comment ("carried so opening the runner needs no second lookup") *was* the bug.
+2. **Modal clipping.** `StyledModal`'s paper is `overflowY: 'hidden'` and the list had no cap.
+   `maxHeight: 280 / overflowY: auto`, the same figure `add-asset-systems-modal` uses.
+
+**Process note — cost me a red build.** I validated by running only the two test files I had
+touched, then pushed. CI failed on `use-asset-systems.test.ts:217`, which asserted
+`one.id === one.instance.id`. Running the whole `assets-panel/` folder would have caught it;
+running two files did not. Fixed in `0a0684d`. **Run the folder, not the file.**
+
+Commits: `f8a5e0c` (merge + both fixes), `0a0684d` (test fix).

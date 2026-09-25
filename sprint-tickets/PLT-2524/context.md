@@ -91,3 +91,13 @@ have different `calculatedOn` values.
   Asked in comment 112746.
 - Someone with Jira attachment access should paste the design into the ticket body as text, or
   describe it, since the agent session cannot fetch attachments (403).
+
+## 2026-09-25 — still blocked, no answer yet
+
+Re-checked the ticket. **No reply to comment 112746** (posted 22 Sep). Last activity on the
+issue is still that comment. Left in **Analysis In Progress**; deliberately did not re-comment,
+since a second ping adds nothing the first did not already ask.
+
+Everything in the 09-22 entry above still stands — in particular that the API half is already
+done (`calculatedOn` per output) and the blocker is the unreadable design PNG plus the
+undefined staleness threshold. Nothing to implement without those.

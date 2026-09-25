@@ -62,3 +62,12 @@ Both are decisions, not code problems. Hence Analysis rather than a branch.
 - **Pietro / Darminder**: is the remaining scope just (a) a version-history view and (b) making
   cosmetic edits non-bumping, or is something in the current behaviour actually broken?
   Asked in comment 112748.
+
+## 2026-09-25 — still blocked, no answer yet
+
+**No reply to comment 112748** (posted 22 Sep); it is still the only comment on the ticket.
+Left in **Analysis In Progress**, no second ping.
+
+The 09-22 finding stands: the headline behaviour already ships, and what remains is two
+product decisions (a version-history view, and whether cosmetic edits should stop bumping).
+Neither is a code problem, so there is nothing to start.
