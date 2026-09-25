@@ -150,3 +150,24 @@ Commit `72a8d5a`.
 3. Run **`tsc --noEmit`** too — a fake implementing a client interface passed vitest and failed tsc.
 4. Watch the **`Errors` line**, not just pass/fail counts — an unhandled rejection fails CI silently.
 5. Verify each regression test **fails without its fix** before keeping it.
+
+## 2026-09-25 (fourth round) — my own fix had a bug, caught by the next review
+
+Copilot flagged that the `try/catch` I added around `createWithStagedTasks()` wrapped the
+**create** as well as the links. So a failed *create* reported *"The type was created, but its
+tasks could not all be saved"* and disabled the name field.
+
+The locking was the worse half: **a create can fail precisely because of the name** (duplicate,
+validation), so telling the user the type already exists and then locking the field left them
+unable to change the only thing that was wrong.
+
+`createdTypeRef` already distinguishes the two, because it is set the moment the row lands:
+set → the type exists and only links are outstanding (resumable, name locked); unset → nothing
+was created (own message, name editable). Added `create.createError` rather than reusing either
+partial-save string.
+
+**The lesson, and it is the recurring one on this ticket:** widening a `catch` without narrowing
+what it *concludes* turns one failure mode into a wrong diagnosis of another. Same shape as the
+`otherTaskIds = []` default — an absent value being read as a meaningful one.
+
+Commit `e02fa1a`. Test verified to fail on the previous commit.
