@@ -1314,3 +1314,51 @@ table name would have collapsed it. Type doc corrected in the same commit.
 ### Still open on #2203
 
 Nothing. All 47 threads resolved.
+
+## 2026-09-26 — two Copilot findings, one real one not; green on `16ef562`
+
+**Note for whoever reads this next: a second agent session was working this same PR concurrently.**
+It pushed `fb80438` (the reference-document fix that finally closed the `commissioning_file_association`
+thread) and a master merge `c0cda47`, under the same account, while this session was watching CI.
+That is how the unused import below got in, and it is a real coordination hazard — two sessions
+pushing to one branch. Fetch and compare the remote head immediately before every push here.
+
+### 1. Unused `createLogger` import — REAL, and build-breaking
+
+`checklist-library-service.ts:12` imported `createLogger` and nothing referenced it. `check-types`
+is `tsc --noEmit --noUnusedLocals --noUnusedParameters` (`package.json:72`), so the import alone
+fails the type-check.
+
+Checked whether a logger was *meant* to be wired before deleting: the reference-doc read it arrived
+with has **no catch block**, and the only `catch`es in the file are the pre-existing ones in
+`duplicate()` (`:769`, `:773`). So it was vestigial, not half-finished — removal is the fix, not
+inventing a use. `16ef562`.
+
+### 2. "Removing the `preconditions` object breaks ChecklistCreatePage" — WRONG
+
+Copilot read the diff hunk in isolation. What the diff removes is the **duplicate** `preconditions`
+key a master merge introduced; the file carried the object twice. That is legal JSON and the parser
+keeps the **last** occurrence, so the copy being deleted was the *shadowed* one — never the one the
+app resolved at runtime.
+
+Verified three ways before replying, because it is this session's own change and the standing lesson
+here is that a finding has two halves:
+
+1. parsed `main.json` with an `object_pairs_hook` counting repeats at every level — **zero**
+   duplicate keys anywhere in the file now;
+2. `hc.pages.ChecklistCreatePage.preconditions` present with all seven keys Copilot listed;
+3. the object is **identical to `origin/master`**, key for key.
+
+Then the build itself confirmed it: it runs the preconditions i18n tests Copilot said could no
+longer read those labels, and it passed.
+
+**Carry this:** a plain `json.load` cannot detect a duplicate key at all — it silently returns the
+survivor. Only `object_pairs_hook` sees it. That is both how the duplicate got in unnoticed and why
+the "it was deleted" reading looked plausible from a diff.
+
+### State
+
+`16ef562` green on build, SonarCloud (gate passed, 50.3% new code) and the Copilot review. **All 48
+review threads resolved** — including the `commissioning_file_association` one, closed by the other
+session with real evidence rather than left open. The PR is green, mergeable and waiting only on a
+human reviewer.
