@@ -1362,3 +1362,35 @@ the "it was deleted" reading looked plausible from a diff.
 review threads resolved** — including the `commissioning_file_association` one, closed by the other
 session with real evidence rather than left open. The PR is green, mergeable and waiting only on a
 human reviewer.
+
+### 2026-09-26, later — my conflict resolution broke the type-check. Read this before resolving another one.
+
+The master merge (`c0cda47`) resolved the import hunk by **keeping both sides**. That was right for
+`normalizeInstanceStatus` and **wrong for `createLogger`**, and the reason is the trap worth writing
+down:
+
+- On `d1deabf` (this branch, pre-merge) `createLogger` **was** used — `const log = createLogger(...)`
+  at :85, `log.warn(...)` at :114.
+- Master replaced that whole region with `withOptionalColumn`, deleting the only two consumers.
+- That region **auto-merged**, so it never appeared as a conflict. Only the import did.
+
+So the import survived into a file where nothing used it, and `check-types` runs
+`--noUnusedLocals`. Copilot caught it within minutes of the push (07:51); fixed in `16ef562`.
+
+> **The lesson:** a conflict hunk cannot be resolved by looking at the hunk. "Keep both sides" is a
+> judgement about the *merged file*, and the auto-merged hunks you never saw can delete the consumer
+> of the thing you just kept. After resolving, grep each symbol you chose to keep and confirm it
+> still has a use.
+
+`tsc --noEmit` would have caught this in seconds. It could not be run — see the npm-auth note in
+`sprint-tickets/README.md`. This is the concrete cost of that gap, not a hypothetical one.
+
+### Final state, 08:20
+
+`16ef562` is head. **Build green, Sonar green, Copilot green, 0 unresolved threads (49/49).**
+The reference-document fix and its three tests passed CI.
+
+**Note for the next run: a second session was active on this branch at the same time** (it pushed
+`16ef562` and answered two Copilot threads at 07:52 and 07:57 while this run was mid-sweep). Nothing
+was lost — my commits `fb80438`/`c0cda47` survived and `blockedByReference` is still on the branch —
+but check `git log origin/<branch>` before assuming your push is head.
