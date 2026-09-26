@@ -106,3 +106,43 @@ the race rather than closing it. Put to the author on the PR as its-own-PR vs ta
 **needs a decision.**
 
 Commit `4774e0c`.
+
+## 2026-09-26 — scheduled run: master catch-up, no new review work
+
+Checkpoint sweep only; no code change needed on this ticket.
+
+- **Checkpoint 1 (feedback):** all review threads on this PR are resolved. Nothing outstanding.
+- **Checkpoint 2 (build):** green on the previous head before the merge below.
+- **Checkpoint 3 (master drift):** the branch was **4 commits behind** master
+  (`e94611c` PLT-3141, `5bf2509` PLT-3142, `8bebb79` PLT-3127, `ff81032` PLT-3138).
+  Merged `origin/master` in — **no conflicts** — and pushed. CI re-running on the new head.
+
+Still in **In Code Review**; waiting on human reviewers, not on us.
+
+### The one thread deliberately left open — position sharpened, not dropped
+
+`asset-register-service.ts:356`: PostgREST answers a DELETE matching nothing with a success, so two
+people deleting the same asset gives the second one a toast and a false `asset_deleted` activity
+entry.
+
+**Correcting my own 09-25 reply.** I said the blast radius was "every service that calls `remove`".
+That is overstated *on the type side*: widening `CommissioningDataClient.remove()` from
+`Promise<void>` to `Promise<T[]>` breaks none of the **29 call sites across 12 services** — they
+simply keep ignoring the return.
+
+What does stand is the **behaviour**: putting `Prefer: return=representation` on the shared client
+makes every commissioning DELETE start returning a body, which is a runtime change across the whole
+feature and not something to slip into an asset-delete ticket.
+
+So the proposal now on the thread is opt-in rather than global:
+
+```ts
+remove<T = unknown>(table, filters, opts?: { returning?: boolean }): Promise<T[]>
+```
+
+— header only when asked for, other 28 call sites byte-identical. Small enough to sit in this PR.
+Ceiling is unchanged either way: the read-back narrows the race, it cannot close it (someone can
+still delete between the statement and the log write).
+
+**Left open on purpose**, asked of @DarminderA / @rishib-xyz: take the opt-in version here, or raise
+it across the client and its callers as its own PR. Not a blocker on the rest of the PR.

@@ -149,3 +149,15 @@ touched, then pushed. CI failed on `use-asset-systems.test.ts:217`, which assert
 running two files did not. Fixed in `0a0684d`. **Run the folder, not the file.**
 
 Commits: `f8a5e0c` (merge + both fixes), `0a0684d` (test fix).
+
+## 2026-09-26 — scheduled run: master catch-up, no new review work
+
+Checkpoint sweep only; no code change needed on this ticket.
+
+- **Checkpoint 1 (feedback):** all review threads on this PR are resolved. Nothing outstanding.
+- **Checkpoint 2 (build):** green on the previous head before the merge below.
+- **Checkpoint 3 (master drift):** the branch was **4 commits behind** master
+  (`e94611c` PLT-3141, `5bf2509` PLT-3142, `8bebb79` PLT-3127, `ff81032` PLT-3138).
+  Merged `origin/master` in — **no conflicts** — and pushed. CI re-running on the new head.
+
+Still in **In Code Review**; waiting on human reviewers, not on us.

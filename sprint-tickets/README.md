@@ -5308,3 +5308,64 @@ between an optional `timezone` and a render crash, and nothing in the build woul
 A thread saying "not reproducible" makes it read as gratuitous defensiveness — precisely the kind of
 thing a later tidy-up removes. Given this PR has already produced four commits each fixing what the
 last one broke, that is not a hypothetical.
+
+## 2026-09-26 — scheduled run
+
+**Sprint board (7 assigned to me):** 5 In Code Review, 2 Analysis In Progress. **No ticket was in a
+kick-off state** (Ready For Development / Backlog / Open), so no new branch was started this run —
+correct outcome, not a gap.
+
+### The two Analysis tickets are still blocked on humans, and were left alone
+
+| Ticket | Asked | Waiting since | Replies |
+|---|---|---|---|
+| PLT-2524 | placement of the "last updated" indicator, staleness threshold, mid-session scope | comment 112746, 22 Sep | **none** |
+| PLT-2799 | is the remaining scope the version-history view + non-bumping cosmetic edits | comment 112748, 22 Sep | **none** |
+
+No second ping. Both re-verified against Jira this run: comment 112746 is still the last activity on
+PLT-2524, and 112748 is still the only comment on PLT-2799.
+
+### PR sweep — checkpoints 1/2/3
+
+| PR | Ticket | Threads | Build before | Master drift | Action |
+|---|---|---|---|---|---|
+| #2203 | PLT-2999 | 46/47 resolved → **47/47** | green | 4 behind | **code fix pushed**, conflict resolved |
+| #2217 | PLT-2972 | all resolved | green | 4 behind | master merged clean |
+| #2235 | PLT-3140 | 1 open **by design** | green | 4 behind | master merged clean, thread sharpened |
+| #2236 | PLT-3139 | all resolved | green | 4 behind | master merged clean |
+| #2241 | PLT-2986 | none (draft) | green | 4 behind | master merged clean |
+
+Only #2203 conflicted — in `checklist-library-service.ts`, and it was **two additions at the same
+point**, not two versions of one thing: master's PLT-3138 assignee helpers vs this branch's usage-probe
+row interfaces. Kept both sides. Same for the import hunk.
+
+### The substantive find: see PLT-2999/context.md
+
+A thread parked 12 days ago as "needs a backend person" was answerable from this repo's own runbook
+in a minute, and answering it exposed a real delete-guard hole (`taskTemplateFile` reference
+documents invisible to the usage probe). Full write-up in `sprint-tickets/PLT-2999/context.md` and
+the schema census in `commissioning/data-layer.md`.
+
+> **Carry this forward:** before parking a schema question on a human, run the per-column probe in
+> `commissioning/data-layer.md` § *How to re-probe*. And `grep` the repo for the table name — the
+> claim "nothing else in this app reads it" was false and was what made the question look unanswerable.
+
+### ⚠️ Environment limitation this run — tests could NOT be run locally
+
+`npm ci` fails in the scheduled-session container:
+
+```
+npm error code E401
+npm error 401 Unauthorized - GET https://npm.pkg.github.com/download/@xyzreality/dhtmlx-gantt/8.0.8
+npm error   unauthenticated: User cannot be authenticated with the token provided.
+```
+
+`@xyzreality/dhtmlx-gantt` comes from the private GitHub Packages registry and the session has no
+token for it, so **`node_modules` cannot be installed and neither vitest nor `tsc --noEmit` can
+run.** The PLT-2999 fix was therefore pushed on static reasoning plus CI, not on a local green run.
+
+Worth fixing if these runs are to keep changing code — an `NPM_TOKEN` / `NODE_AUTH_TOKEN` with
+`read:packages` in the scheduled environment would close it.
+
+*(Also note: a bare `ls node_modules 2>/dev/null | head -2 && echo present` reports "present" even
+when the directory is absent, because `head` exits 0. Check with `ls -d node_modules` or a row count.)*
