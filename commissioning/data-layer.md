@@ -355,3 +355,41 @@ must be rewritten before merge. Until then: everything above 404s outside dev.
   verify workflow_step's standing, repoint step-order derivations. Bigger than PLT-2968.
 - [ ] PLT-2968 builds on `asset_readiness` as designed; sequence after/with the re-point.
 - [ ] `system_readiness.achieved_on` exists on the system side only — mirror-check when touching either.
+
+## 2026-09-26 — `commissioning_file_association` census (answers the 12-day-old PLT-2999 thread)
+
+Probed per column against `dev` with the committed anon key, per § *How to re-probe* above.
+Table exists, **72 rows**. Columns confirmed present (200) / absent (400):
+
+| column | dev |
+|---|---|
+| `id` · `project_id` · `file_id` · `asset_id` · `created_at` | ✅ 200 |
+| `task_item_id` | ✅ 200 |
+| `task_instance_id` | ✅ 200 |
+| `task_template_id` | ✅ 200 |
+| `task_template_version_id` | ✅ 200 |
+| `task_instance_item_id` | ❌ 400 — **negative control**, this is what makes the 200s meaningful |
+
+Also carries `association_type` and `removed_at` (soft delete), both read by shipped services.
+
+### Four association types, four different keys
+
+| `association_type` | keyed by | written by |
+|---|---|---|
+| `taskInstanceFile` | `task_instance_id` + `task_item_id` | `TaskInstanceFileService` |
+| `taskTemplateFile` | `task_template_id` | `ReferenceDocumentService` |
+| `runItemEvidence` | run / execution | runner |
+| `runSignature` | run / execution (+ `signature_id`) | runner |
+
+`task_item_id` is the FK that CASCADES (xyz-supabase#35, chaining up through
+`task_template_version` to `task_template`) — the *reason* a template delete strands a file, not a
+key any probe reads by. `task_template_version_id` is ON DELETE **RESTRICT**.
+
+**Unverified:** whether the `task_template_id` FK is CASCADE or RESTRICT. Row-data reads were not
+available to this session, only schema probes. Either way a delete offered without checking
+`taskTemplateFile` is wrong — CASCADE strands the file silently, RESTRICT throws a raw DB error
+after the user already confirmed — so the fix (PLT-2999, `fb80438`) does not depend on the answer.
+
+> **Method note.** This answered a question that had sat 12 days on a PR as "not checkable from
+> here, needs a backend person". The per-column probe in this file answers it in about a minute.
+> Reach for it before parking a schema question on a human.

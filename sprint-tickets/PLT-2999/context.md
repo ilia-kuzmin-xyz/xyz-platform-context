@@ -1246,3 +1246,71 @@ Build, SonarCloud (gate passed, 50.7% on new code) and the Copilot re-review all
 re-review posted no new findings: the thread count held at 47 and the only unresolved thread is
 still the `commissioning_file_association` one, open by design. The new archive-all reopen test ran
 in CI, so the guard is covered by a test that has actually executed — not just by local reasoning.
+
+## 2026-09-26 — the delete probe could not see a reference document (real bug, found off a Copilot thread)
+
+The one thread left open on #2203 since 09-14 — *which column does
+`commissioning_file_association` actually link by* — is **answered and resolved**. It did not need
+Darminder in the end, and chasing it turned up a genuine defect that neither side of the thread had
+named.
+
+### The schema question: answered by probe, not by waiting
+
+Ran the per-column probe from `commissioning/data-layer.md` § *How to re-probe* against `dev`
+(`?select=<col>&limit=1`, 200 = exists, 400 = no such column). `commissioning_file_association`
+exists, 72 rows, and **all** of these answer 200:
+
+```
+id · project_id · file_id · asset_id · created_at
+task_item_id · task_instance_id · task_template_version_id · task_template_id
+```
+
+`task_instance_item_id` answers **400** — keep that as the negative control, it is what makes the
+200s mean anything.
+
+So Copilot's premise ("if the documented schema is authoritative this query will fail or return
+zero") does not hold: both columns exist, and they answer different questions exactly as the
+09-14 reply argued.
+
+> **The lesson is about the waiting, not the columns.** That thread sat 12 days on "neither is
+> checkable from here". It was checkable the whole time — the runbook for it is in this repo.
+> Probe before you park something on a human.
+
+### The real bug it exposed
+
+`usage()` counted only `taskInstanceFile` associations, found by walking the templates' instances.
+**Reference documents do not arrive that way.** They are `taskTemplateFile` associations keyed by
+`task_template_id`, written by `ReferenceDocumentService` during create/edit — and
+`reference-document-service.ts` is **on master**, so this is shipped behaviour, not branch-local.
+
+Worst case is the likely case: a template never applied to an asset has no `task_instance` rows at
+all, so `usage()` returned at the `allInstanceRows.length === 0` guard **before the file query ran**.
+Library task + attached document + never applied → `attachedFiles: 0`, `usageBlocksDelete()` says
+no, plain confirmation offered for a delete that drops the association.
+
+Fix: the reference read is asked off the template ids directly and placed **before** that guard, so
+both exits account for it. Both routes feed the same `blockedTemplateIds` set (deduped), so a
+template blocked by an upload *and* a document is still named once. Commit `fb80438`.
+
+### Four association types live on that table — worth writing down
+
+| type | keyed by | blocks a template delete? |
+|---|---|---|
+| `taskInstanceFile` | `task_instance_id` + `task_item_id` | yes — counted via the instances |
+| `taskTemplateFile` | `task_template_id` (+ `removed_at` soft delete) | **yes — this is what was missed** |
+| `runItemEvidence` | run / execution | already blocked by the execution probe |
+| `runSignature` | run / execution | already blocked by the execution probe |
+
+`task_item_id` is a fourth thing again: the FK that CASCADES (xyz-supabase#35), i.e. the *reason*
+a delete strands the file, never a key the rule is read by.
+
+### Correction to a previous entry
+
+The 09-14 reply (and the type doc) said *"nothing else in this app reads the table"*. **That was
+wrong.** Two services do — `TaskInstanceFileService` and `ReferenceDocumentService` — and between
+them they pin both keys. The claim was what made the question look unanswerable; a `grep` for the
+table name would have collapsed it. Type doc corrected in the same commit.
+
+### Still open on #2203
+
+Nothing. All 47 threads resolved.
