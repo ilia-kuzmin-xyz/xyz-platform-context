@@ -101,3 +101,23 @@ since a second ping adds nothing the first did not already ask.
 Everything in the 09-22 entry above still stands — in particular that the API half is already
 done (`calculatedOn` per output) and the blocker is the unreadable design PNG plus the
 undefined staleness threshold. Nothing to implement without those.
+
+## 2026-09-27 — still blocked, but the design ticket has moved
+
+**No reply to comment 112746** (22 Sep). Left in **Analysis In Progress**, no second ping.
+
+**What did change:** the blocking design ticket **UX-1114 is now `Ready For QA`**, and its
+comments show Jason reviewed it and was happy (13 Aug). So the design half of the 09-22
+clarification may now be answerable — the remaining unknown is the *content* of the two PNGs
+(UX-1114 attachment 61259, and the same image on this ticket as 61260), which this run could
+not open either: Jira attachment content needs credentials the MCP tools do not expose.
+
+So the blocker is narrower than it was: it is no longer "is there a design?" but "what does the
+design say?". Someone with Jira access can answer it in one look. The three questions from
+09-22 stand otherwise — placement (tooltip on the schedule's Actual %/Planned % columns?),
+what threshold counts as stale, and whether the mid-session "it has been recalculated"
+notification is in scope here or a follow-up.
+
+The 09-22 code findings are unchanged and still the useful part: `calculatedOn` already
+ships per output, the frontend already reads it, and no new DPL/API work is needed for the
+"last updated" half.

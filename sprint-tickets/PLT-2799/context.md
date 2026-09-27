@@ -71,3 +71,13 @@ Left in **Analysis In Progress**, no second ping.
 The 09-22 finding stands: the headline behaviour already ships, and what remains is two
 product decisions (a version-history view, and whether cosmetic edits should stop bumping).
 Neither is a code problem, so there is nothing to start.
+
+## 2026-09-27 — still blocked, no answer (5 days)
+
+**Still no reply to comment 112748** (22 Sep); still the only comment on the ticket. Left in
+**Analysis In Progress**, no second ping — a third nudge on an unanswered product question is
+noise, not progress.
+
+Nothing has changed in the code or the ticket since 09-25. The two outstanding calls remain
+product decisions, not code problems: (a) whether a version-history view is in scope, and
+(b) whether cosmetic edits should stop cutting a version.

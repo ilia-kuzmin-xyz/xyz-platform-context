@@ -146,3 +146,54 @@ still delete between the statement and the log write).
 
 **Left open on purpose**, asked of @DarminderA / @rishib-xyz: take the opt-in version here, or raise
 it across the client and its callers as its own PR. Not a blocker on the rest of the PR.
+
+## 2026-09-27 — the last open thread closed: DELETE now reports what it removed
+
+**PR #2235, head `4c8e96d`.** The one thread left open on this PR (the `Prefer:
+return=representation` question, raised 25 Sep, escalated to Darminder/Rishi on 26 Sep) had gone
+unanswered for ~2 days. Took the opt-in version rather than leave a known false audit entry in the
+one change whose premise is an honest audit trail. Replied on the thread and resolved it, noting
+it is one commit and trivial to revert if they would rather it were its own PR.
+
+### The defect
+
+PostgREST answers a DELETE that matches **nothing** with a success and an empty body, so it is
+indistinguishable from one that removed everything asked for. `useDeleteAssets` wrote its
+activity-log entry off the *selection*, so two people deleting the same asset gave the second one
+a toast naming them and an `asset_deleted` entry for work they did not do.
+
+### The shape of the fix (carry this forward — it generalises)
+
+- `CommissioningDataClient.remove` is now
+  `remove<T>(table, filters, options?: { returning?: boolean }): Promise<T[]>`.
+  **Opt-in, deliberately.** Putting `Prefer: return=representation` on the shared client
+  unconditionally would hand all ~25 DELETE call sites a response shape they have never had —
+  a *runtime* change, not a type one. Without the flag the request goes out byte for byte as before.
+- `AssetRegisterService.remove` returns the ids the database actually deleted; the mutation logs
+  and toasts off those. Nothing deleted → no entry at all, and a new toast
+  (`assetDelete.alreadyGone{One,Many}`) saying the assets had already gone.
+
+### The trap that nearly turned CI red — worth knowing for ANY client-interface change
+
+The 09-26 reply on the thread claimed widening `Promise<void>` → `Promise<T[]>` "breaks none of
+the 29 call sites". That is true of **call** sites and false of **implementation** sites:
+**8 test doubles declare `implements CommissioningDataClient`** with `async remove(): Promise<void>`,
+and a void method does not satisfy the new signature, so `check-types` would have failed. They are
+updated to `return []`. Corrected on the thread rather than left standing.
+
+Files: `commissioning-execution-service.test.ts`, `task-instance-file-service.test.ts`,
+`reference-document-service.test.ts`, and the `*-wire-contract.test.ts` doubles for
+checklist-instance, checklist-library, readiness-step, system-readiness and workflow.
+
+### Not verified locally
+
+**`npm ci` cannot complete in the scheduled-run container**: `@xyzreality/dhtmlx-gantt` comes from
+`npm.pkg.github.com` and returns **401** without a token the environment does not carry. So no
+`tsc --noEmit` and no vitest run this session — the push leans on CI. Any future run hitting the
+same wall should expect this and say so rather than claim a green local suite.
+
+### Known ceiling
+
+The read-back narrows the race, it does not close it: someone can still delete between the
+statement and the log write. "Log what the database said it deleted" is as honest as this gets
+without a server-side transaction.
