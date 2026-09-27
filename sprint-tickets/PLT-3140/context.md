@@ -179,7 +179,7 @@ The 09-26 reply on the thread claimed widening `Promise<void>` → `Promise<T[]>
 the 29 call sites". That is true of **call** sites and false of **implementation** sites:
 **8 test doubles declare `implements CommissioningDataClient`** with `async remove(): Promise<void>`,
 and a void method does not satisfy the new signature, so `check-types` would have failed. They are
-updated to `return []`. Corrected on the thread rather than left standing.
+updated. **Corrected 546bc7d — `return []` was NOT enough:** see the amendment below.
 
 Files: `commissioning-execution-service.test.ts`, `task-instance-file-service.test.ts`,
 `reference-document-service.test.ts`, and the `*-wire-contract.test.ts` doubles for
@@ -197,3 +197,46 @@ same wall should expect this and say so rather than claim a green local suite.
 The read-back narrows the race, it does not close it: someone can still delete between the
 statement and the log write. "Log what the database said it deleted" is as honest as this gets
 without a server-side transaction.
+
+## 2026-09-27 (same run, later) — amendment: widening a client method needs the doubles to go GENERIC
+
+The 4c8e96d entry above said the eight `implements CommissioningDataClient` doubles were fixed by
+widening them from `Promise<void>` to `Promise<CommissioningRow[]>`. **That was wrong, and
+check-types would still have failed.** Copilot caught it on the push (8 High findings, all
+correct). Fixed in `546bc7d`.
+
+**The actual rule — worth keeping, it is not obvious.** Making an interface method generic
+(`remove<T = CommissioningRow>(...): Promise<T[]>`) means a *non-generic* implementation no longer
+satisfies it, whatever concrete type it returns. Relating the signatures leaves `CommissioningRow[]`
+checked against a **naked type parameter** `T`, and nothing except `never` is assignable to a naked
+type parameter. So the double must itself be generic:
+
+```ts
+async remove<T = CommissioningRow>(table: string, filters: CommissioningFilter[]): Promise<T[]> {
+  this.calls.push({ method: 'remove', table, filters })
+  return []            // fine: never[] IS assignable to any T[]
+}
+```
+
+The default (`= CommissioningRow`) does not rescue a non-generic implementation — defaults do not
+participate in assignability.
+
+**So the blast radius of "make a shared-client method generic" is three-layered**, and the first two
+are easy to miss:
+1. *call* sites — unaffected (they can keep ignoring the return);
+2. *implementation* sites — every `implements CommissioningDataClient` double must become generic;
+3. runtime — unchanged here only because the flag is opt-in.
+
+### One review finding that was wrong, and why the spot still mattered
+
+Copilot's ninth finding claimed the trailing comma after `adminsOnly` made `main.json` invalid
+JSON. It does not — that property is followed by two more, so the comma is required, and `json.load`
+parses the file clean. But it was pointing at a real defect two lines away: the two new
+`assetDelete.alreadyGone*` strings went in at **6 spaces where the block uses 8**, because the
+python anchor matched as a *substring* of the more-indented real line. Valid JSON, would have
+failed `format:check`. Fixed in the same commit.
+
+**Carry this forward:** when patching a file by string anchor, an under-indented anchor silently
+matches the correctly-indented line and leaves the insertion misaligned. `assert count == 1` does
+not catch it, because substring counting still finds exactly one. Anchor on the full line including
+its leading whitespace.
