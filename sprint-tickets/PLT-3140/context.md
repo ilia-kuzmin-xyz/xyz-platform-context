@@ -240,3 +240,16 @@ failed `format:check`. Fixed in the same commit.
 matches the correctly-indented line and leaves the insertion misaligned. `assert count == 1` does
 not catch it, because substring counting still finds exactly one. Anchor on the full line including
 its leading whitespace.
+
+### Outcome — `546bc7d` is green
+
+`build`, `SonarCloud Code Analysis` and `copilot-pull-request-reviewer` all **success** on
+`546bc7d`; Sonar's quality gate passed. All **16** review threads on #2235 are resolved. The PR
+sits on current master with no conflicts, `mergeable_state: blocked` only because the four
+requested human reviewers have not approved yet.
+
+**One precision, so the record is honest:** the build on `4c8e96d` (the non-generic doubles) was
+**cancelled**, not failed — the push of `546bc7d` superseded it. So nobody ever observed it go red.
+The claim that it would have is reasoning (a concrete return type checked against a naked type
+parameter) corroborated by the review's eight independent findings, not an observed CI failure.
+What IS observed is that the generic version passes.
