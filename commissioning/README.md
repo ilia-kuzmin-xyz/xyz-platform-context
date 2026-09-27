@@ -319,3 +319,71 @@ Runtime-wise the menu's "Add to selected system" would just never enable; the pr
 typecheck (fork-ts-checker, pitfalls §12) is what will actually catch it, at merge time. The
 context-menu hook needs rewiring to `lastSelectedEntity({type:'system'})` as part of the second
 merge. Flagged on #2230's approval comment.
+
+## 2026-09-27 — scheduled review run: six eligible PRs, nothing posted, three held
+
+Scope filter (Rishi/Darminder/Tom, non-draft) matched #2244 (Darminder), #2243, #2242, #2240,
+#2229, #2221 (Rishi); none by Tom; #2211 still draft. **No PR comments or reviews posted this
+run** — two PRs already carried Ilia's approval at head, the rest are held on gates only a human
+can clear, and no developer had acted on the previously-held three since the last run.
+
+**Already approved by Ilia at current head (respected, untouched):**
+- **#2243 (PLT-3126, Critical)** — the invisible discard-dialog Back button was `variant='outlined'`
+  with no `outlinedSecondary` override → text #1a1a1a on #1a1a1a. The one-line deletion falls back
+  to the theme's `containedSecondary` (light text). Covers all 4 dialog call sites; Darminder
+  verified visually. CI green, mergeable clean.
+- **#2244 (PLT-3150, Critical)** — all five AC delivered; 13 of 14 threads resolved with real
+  commits. **The one unresolved Copilot thread is a real medium defect**:
+  `checklist-library-service.ts:468`/`:550` wraps a multi-column item insert in
+  `withOptionalColumn('require_witness', …)`, but `missingColumnNamed` only matches the wrapper's
+  own column and `sign_off_role` precedes it in payload order — on an env missing the migration,
+  PGRST204 rethrows and template create/edit fails outright instead of falling back. Fix: guard all
+  four columns. Approval stands; worth a follow-up nudge to Darminder. Hard schema dependency on
+  xyz-supabase #46 (task_item columns, signing_slots, task_execution_signature, two RPCs) — dev
+  must carry it before merge, stable before flag promotion (pitfalls §3/§4 class).
+
+**Held for Ilia (recommendations, strongest first):**
+- **#2242 (PLT-3172, live incident, Major) — recommend APPROVE.** Root cause verified: NWC linked
+  dbIds are geometry-less containers; the editor-only simple-highlight patches
+  (`selection.patch.ts:21-39`, `:72-87`) suppress child descent, so highlight draws nothing. Fix
+  expands linked dbIds with descendants (Navis-gated on `isNavisworksModel`, Set-deduped), mirroring
+  `get-selectable-dbids-for-model.ts:43-56`; non-Navis path untouched; `_handleSelectionChange`
+  already maps unmapped children up to the elementId-bearing parent. New test on a 6k-line fixture
+  from the customer model. Both Copilot threads resolved; CI green; not behind master. Held only
+  because the ticket's acceptance is visual on a customer NWC and confidence (~90%) sits under the
+  run's 95% bar for waiving that.
+- **#2240 (PLT-3123/PLT-3171)** — PLT-3123 and PLT-3171 items 1-5 covered (item 6, slow
+  notifications, is NOT — ticket can't close on this PR). **The 09-25 interlock is RESOLVED
+  in-branch**: `use-system-context-menu-actions.ts` is rewired from `systemDetailId` to the new
+  `selectedSystemId`, tests updated (verified by diff; #2230 is in the PR's base). **Build is RED
+  on an unrelated Trivy scan** — image-size 1.2.1, CVE-2025-71329/-71330, lockfile untouched by
+  this PR; #2244's branch already carries the lockfile override for exactly this, so port that
+  bump. One medium to arbitrate: `ensureSystemWorkflow` adopts any workflow display-named
+  "System" and ends with an unconditional `setSteps(projectId, target.id, [blue, white])` — this
+  run's read says that can rewrite a user-authored "System" workflow's ladder; the 09-25 run read
+  setOrder as keeping foreign steps. The two claims conflict — check `setSteps`/`setOrder`
+  semantics once, authoritatively, before flagging to Rishi. Manual viewer QA per the PR's own
+  checklist remains the gate (isolation moved from material-swap ghosting to theming knock-back;
+  `system-ghost.ts` deleted).
+- **#2229 (PLT-2901)** — unchanged since the 09-25 hold (no push since 09-19, no author response).
+  Deepened findings this run, still medium: `ROLE_DEPENDENT_QUERY_KEYS` omits
+  `'project-authorities'` (stale project-team gating after a portfolio role change);
+  role-change/invite gated only on `PortfolioInvitePerson` so anyone with invite rights can assign
+  Admin — project side gates Admin behind `canChangeProjectAdmin`, no portfolio equivalent exists
+  in constants.ts (possible privilege escalation, needs IAM role-definition confirmation); the
+  unrankable-grant compare is order-dependent. Base ≥9 commits behind master (no overlap, low
+  conflict risk). Still needs the two-account IAM walkthrough.
+- **#2221 (PLT-3136)** — Ilia's 09-26 conditional review stands unanswered; head unchanged since
+  09-23; mergeable_state now **dirty** (3 content conflicts: checklist-instance-service,
+  checklist-library-service, commissioning-request-error). **New major-at-merge fact this run**:
+  master's PLT-3138 default-assignee fields (`assignee_id`/`assignee_type`,
+  `checklist-library-service.ts:89-129`, verified) have ZERO counterpart in the branch's
+  `checklist-library-api-service.ts` — under `CommissioningPlatformApi` a template's default
+  assignee is silently dropped on read and never written, and resolving the textual conflicts
+  won't surface it (the api-v2 file doesn't conflict). The interface + api-v2 port (and possibly
+  the backend contract) must gain the field during the master merge. Also confirms the ticket
+  can't close on this PR alone: `currentReadinessGateId` read model absent (blocked on PAPI-3998).
+
+**Open unresolved review threads across the six: 4** — 1 on #2244 (the withOptionalColumn defect),
+3 on #2221 (setOrder cross-workflow reassignment; two clear() partial-failure findings — no prod
+caller, test-reset only). #2229's leftovers are Copilot review-body items, not threads.
