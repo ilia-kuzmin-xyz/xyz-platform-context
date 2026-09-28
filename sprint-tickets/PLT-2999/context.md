@@ -1409,3 +1409,64 @@ PR **#2203**, head `16ef562`.
 All **49** review threads resolved. Still **In Code Review**, waiting on three requested
 human reviewers. Note the old-style commit-status API reports `pending` with zero statuses for
 this head — that is the wrong API to judge it by; the check run is green.
+
+## 2026-09-28 — two more from Copilot, both real, and the second is the biggest so far
+
+### 1. Restore held on one mutation while the operation spanned two (`3d1b377`, green)
+
+`restoreTask` awaits the un-archive and then, when the folder it was archived out of has since been
+deleted, a move to root. The row's Restore item is gated on `restoringId`, which was derived from
+`archiveTask.isPending` — so it went null the moment the first mutation resolved and the item was
+live again for the whole move.
+
+Checked the part that would have made it theoretical: `mutateAsync` resolves well before the
+invalidated definitions query refetches, so the row is still sitting in the archive section,
+rendered archived, while the move is in flight. Two round trips racing. Reachable.
+
+Fixed with a dedicated `beginRestore`/`endRestore` claim mirroring `beginFolderOp`. Deliberately
+**not** by widening the derivation to `moveTask` as well — `evacuateArchived` also moves archived
+tasks during a folder delete, so an id from that mutation would light up rows nobody is restoring.
+Single-flight, released in a `finally` covering the folders-error exit too.
+
+### 2. The archive filter was applied to a list doing TWO jobs (`ffb2dbd`)
+
+**The important one.** `useChecklistDefinitionList`'s live-only projection was feeding both the
+add-task pickers *and* the resolution of ids that are **already linked** to a type. Archiving sets
+`archived_at` and deliberately leaves `asset_type_task`/`system_type_task` standing, so a task
+archived after it was linked stopped resolving. Copilot named two sites; reading around it found
+**four**:
+
+| Site | Symptom |
+|---|---|
+| `ReadinessLevelsSection.tsx:117-121` | row dropped from the ladder AND from `effectiveCount` — the rung claimed fewer tasks than Save would keep |
+| `AssetTypeDetailContent.tsx:480,484,509` | `?? id` → raw uuid |
+| `SystemRequirementsSection.tsx:314` | `?? id` → raw uuid |
+| `SystemTypeDetail.tsx:262,266` | `?? id` → raw uuid |
+
+**This branch's regression, not pre-existing** — before archiving existed there was nothing to
+filter, so every link resolved. Worth stating plainly because it argues for fixing it here rather
+than deferring.
+
+Fix splits the two jobs everywhere they were conflated: resolution reads `includeArchived: true`,
+the picker reads a filtered projection of the same cached query (no extra request — the hook's own
+doc says only the projection differs). `AssetTypeDetailContent` needed only the first half; its
+`definitions` feeds no picker, the child sections own those. Tests: an archived-but-linked task
+resolves by name and counts, and is still absent from the picker.
+
+**Open product question, raised on the PR for @DarminderA, deliberately not decided here:** should
+an archived-but-still-linked task be *marked* as archived in the type editor, and be removable from
+there? Unlabelled, it appears in a type but cannot be found in the library. Resolution correctness
+was restored; no badge, no new affordance.
+
+### Process notes for the next run
+
+- **The parallel session is still active on this branch.** Fetch and compare the remote head
+  immediately before every push here.
+- **Held a finished commit back rather than pushing it.** CI was in flight on the restore fix when
+  the resolution fix was ready; pushing would have cancelled that run (`cancel-in-progress`) and
+  left two unrelated changes sharing one result. Committed locally, waited for green, then pushed.
+  Cheap, and it keeps failures attributable.
+- **A stop hook asks for commits to be re-authored to `Claude <noreply@anthropic.com>`.** Declined:
+  it contradicts the standing "commits on my behalf only" instruction, and it would not fix the
+  Unverified status anyway, which comes from the commits being *unsigned*. The hook only flags
+  *unpushed* commits, so it stops once the commit is pushed.
