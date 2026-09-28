@@ -253,3 +253,17 @@ requested human reviewers have not approved yet.
 The claim that it would have is reasoning (a concrete return type checked against a naked type
 parameter) corroborated by the review's eight independent findings, not an observed CI failure.
 What IS observed is that the generic version passes.
+
+## 2026-09-28 — scheduled run: checkpoint sweep, nothing to do
+
+PR **#2235**, head `546bc7d`.
+
+- **Checkpoint 1 (feedback):** every review thread resolved. Nothing outstanding.
+- **Checkpoint 2 (build):** `Build & Test - frontend service [PR Check]` **success** on the
+  current head.
+- **Checkpoint 3 (master drift):** none. `origin/master` is still `ff81032` (PLT-3138), the
+  same commit this branch was brought up to on 09-26 — master has not moved in two days, so no
+  merge was needed.
+
+Still **In Code Review**, `mergeable_state: blocked` purely on the four requested human
+reviewers. Waiting on people, not on us — no push can clear it.

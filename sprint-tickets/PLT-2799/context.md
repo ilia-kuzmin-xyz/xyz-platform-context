@@ -81,3 +81,24 @@ noise, not progress.
 Nothing has changed in the code or the ticket since 09-25. The two outstanding calls remain
 product decisions, not code problems: (a) whether a version-history view is in scope, and
 (b) whether cosmetic edits should stop cutting a version.
+
+## 2026-09-28 — scheduled run: still blocked, no ping
+
+**No reply** to comment 112748 (22 Sep). Left in **Analysis In Progress**.
+
+Deliberately did **not** bump this one, unlike PLT-2524 on the same run. The difference is
+proportionality, and it is worth writing down so the next run makes the same call consistently
+rather than re-deciding it:
+
+- PLT-2524 is **Critical**, and its blocker had narrowed to a question anyone can answer in one
+  look ("what does the signed-off design say"). Worth a nudge at six days.
+- PLT-2799 is **Minor**, and its blocker is a **product decision** that has not been made —
+  which edits are version-bumping vs cosmetic, and whether a version-history UI is wanted at all.
+  A second ping does not make a decision happen any sooner, it just adds noise to the ticket.
+
+The 09-22 finding stands: the stated acceptance criterion — *"editing a checklist in use never
+changes what a field engineer mid-completion sees"* — already holds in code.
+`ChecklistLibraryService.update()` inserts version n+1 and repoints `current_version_id`;
+instances and executions keep the version they were created against; rename is a narrow name
+patch that deliberately cuts no version. So the remaining scope is only the two things the
+description itself flags as undecided, and both need a human.

@@ -121,3 +121,37 @@ notification is in scope here or a follow-up.
 The 09-22 code findings are unchanged and still the useful part: `calculatedOn` already
 ships per output, the frontend already reads it, and no new DPL/API work is needed for the
 "last updated" half.
+
+## 2026-09-28 — scheduled run: bumped the clarification, and a path correction
+
+**Posted a nudge** (comment 113109) — the first re-ping since the original on 22 Sep. Two earlier
+runs (09-25, 09-27) deliberately declined to bump; at six days on a **Critical** with the blocker
+now narrowed to a one-look question, that balance flipped. Kept it short and pointed the three
+questions at Darminder / Mostafa by name. Still **Analysis In Progress** — not started.
+
+Re-confirmed this run that the attachment really is unreachable, rather than assuming it from the
+earlier note: `GET .../attachment/content/61259` returns **403** with no Atlassian credential in the
+session environment. So "someone paste what the design says" stays the ask.
+
+### Correction to the 09-22 entry — the loader path was wrong
+
+The 09-22 entry located `ProgressOutputsV2Loader` at
+`app/pages/organisation/DashboardPage/dashboard-progress/loaders/progress-outputs-v2-loader.ts`.
+**That path does not exist.** The file actually lives under the *ViewerPage* service tree:
+
+```
+src/main/webapp/app/pages/organisation/ViewerPage/components/services/dashboard-progress/loaders/progress-outputs-v2-loader.ts
+```
+
+Everything else in that entry verified first-hand against current master and is unchanged:
+
+- `fetchOutputs()` at **:69-88**;
+- the max-of-two resolution at **:81-82** — `[projectLevel?.calculatedOn, categoryGroups?.calculatedOn]`,
+  sorted descending, first taken. The **activity-level** output's own `calculatedOn` is still
+  dropped here, which is the extension point if the Gantt columns need their own timestamp;
+- `hasProgressOutputs()` at **:99-104`, whose doc comment still draws the "never calculated"
+  vs "partial/broken" distinction that scenario 1 needs.
+
+Worth carrying forward generally: **dashboard-progress lives under `ViewerPage/components/services/`,
+not under `DashboardPage/`.** That mis-location cost a wrong path in these notes for six days and
+would have sent the next run looking in the wrong tree.

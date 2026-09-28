@@ -11,3 +11,18 @@ PR **#2241** (draft) — *Remove a system from System details*.
 
 Left as a **draft** deliberately — the standing instruction for this workstream is that PRs stay in
 draft, so it is not promoted to ready just to attract a Copilot pass.
+
+## 2026-09-28 — scheduled run: checkpoint sweep, nothing to do
+
+PR **#2241**, head `2cacbcc`.
+
+- **Checkpoint 1 (feedback):** every review thread resolved. Nothing outstanding.
+- **Checkpoint 2 (build):** `Build & Test - frontend service [PR Check]` **success** on the
+  current head.
+- **Checkpoint 3 (master drift):** none. `origin/master` is still `ff81032` (PLT-3138), the
+  same commit this branch was brought up to on 09-26 — master has not moved in two days, so no
+  merge was needed.
+
+Kept as a **draft** deliberately, per the standing instruction for this workstream. No review
+threads at all, which is expected: Copilot only reviews on ready-for-review, so a draft attracts
+no pass. Waiting on a human decision to promote it.
