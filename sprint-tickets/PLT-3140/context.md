@@ -267,3 +267,39 @@ PR **#2235**, head `546bc7d`.
 
 Still **In Code Review**, `mergeable_state: blocked` purely on the four requested human
 reviewers. Waiting on people, not on us — no push can clear it.
+
+## 2026-09-28 — a master merge broke the branch; two stale assertions, fixed in `d31a058`
+
+Someone merged master into the PR branch (`70b087d`), bringing in #2240/#2244/#2246. The merge left
+`assets-panel.test.tsx` referencing **`mockSetAssetDetailId`**, which nothing declares — the
+selection store was renamed to `setLastSelectedEntity` upstream, the mock at the top of the file
+was renamed with it, and two assertions (lines 228 and 276) were not. An undeclared identifier, so
+the module does not compile and neither test can run. Copilot caught it; correct finding.
+
+- **228** — `not.toHaveBeenCalled()`, meaning unchanged (ctrl-click must not open the detail), so a
+  straight rename.
+- **276** — now asserts the entity payload the setter actually receives,
+  `{ type: 'asset', logId: 'a2' }`, matching the assertions ~10 lines below, not the bare id of the
+  old API.
+
+**Swept for the rest of the same half-finished rename** rather than fixing only the two flagged
+lines: the other `assetDetailId` names in `assets-panel.tsx` are a local derived from
+`lastSelectedEntity` (the merge's own correct adaptation), and `systemDetailId` is gone from the
+branch. Those two were the only leftovers.
+
+**Also re-verified this PR's own change against the merged tree:** all **ten**
+`implements CommissioningDataClient` doubles are generic, so the opt-in `remove()` signature still
+holds after master came in. Worth repeating on any future master merge — a newly-landed service
+double with a non-generic `remove` is the thing that would silently break it.
+
+`d31a058` is green (build, Sonar gate, Copilot reviewer). PR remains `blocked` only on the four
+requested human reviewers.
+
+### Pattern worth noting for the next run
+
+This is the second time on this PR that the *type-check* was the failing gate and the defect was
+invisible to a reading of the diff hunk alone (the first was the non-generic doubles; see the
+09-27 amendment). Both were caught by review rather than by a local run, because `npm ci` cannot
+complete in this container (private `@xyzreality/dhtmlx-gantt`, 401). Until that token exists,
+assume type-level breakage is the most likely way a push here goes red, and re-read renames and
+interface changes across *implementation* sites specifically.
