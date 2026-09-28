@@ -1470,3 +1470,17 @@ was restored; no badge, no new affordance.
   it contradicts the standing "commits on my behalf only" instruction, and it would not fix the
   Unverified status anyway, which comes from the commits being *unsigned*. The hook only flags
   *unpushed* commits, so it stops once the commit is pushed.
+
+### Outcome — `ffb2dbd` green, and the PR now has ZERO unresolved threads
+
+Build, SonarCloud (gate passed, 49.9% on new code) and the Copilot re-review all **success**. The
+re-review raised nothing on the four-component resolution split.
+
+**51 threads, 0 unresolved.** That includes the `commissioning_file_association` thread the other
+session closed with real evidence, so nothing on this PR is now waiting on us. It is green,
+mergeable, and blocked only on a human reviewer.
+
+The one thing still genuinely open is not a thread but a **product question**, asked of
+@DarminderA: should an archived-but-still-linked task be *marked* as archived in the type editor,
+and be removable from there? A "no" needs no code. A "yes" is a small follow-up, not a blocker on
+this PR.
