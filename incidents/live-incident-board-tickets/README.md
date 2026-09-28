@@ -45,6 +45,86 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-28 (scheduled) — 8 in-scope Group A tickets (down from 9 on 09-25: PLT-3172 left scope to In Code Review), 0 in Group B, 1 real update (PLT-3133 — status silently flipped With Customer → Open via Freshdesk sync noise, not a customer reply; Rishi's ask still unanswered, now one week), 7 confirmed unchanged in substance, zero Jira actions taken
+
+Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC` (218
+total Live Incidents), then narrowed with a direct JQL `status NOT IN (...)` exclusion (adding
+`ARCHIVED (NOT RELEASED)` to the exclusion list this run — five old 2024/2025 tickets in that
+status were otherwise showing up as "in scope" by the letter of the rule; they are resolved/shelved
+history, not live work, so excluded on the same basis as `Done`). Cross-checked against 09-25's own
+9-ticket table: **PLT-3172 dropped out** (now `In Code Review`, confirmed via the full-board fetch).
+No brand-new ticket entered scope. Net: 9 → 8.
+
+Every continuing ticket got a live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`)
+before anything was written, per "the folder is a cache, not the truth."
+
+**PLT-3133** — the only ticket with real movement. Status flipped **With Customer → Open**
+between 09-25 and today. The only new comment, `113055` (Yash, 2026-09-25T08:53:30), is Freshdesk's
+own automation echoing a status bounce on their side — *"Ticket ID: 7989 - Freshdesk ticket status
+changed to: Open"* — not a customer reply and not new content. Read literally, the status change
+could look like the ball is back with us; it is not. Rishi's 09-21 ask for concrete
+activity/element examples with timestamps (`112616`) remains unanswered, now **one week**. Same
+shape as the silent board moves already logged this month on PLT-2651, PLT-2918, PLT-3109 and
+PLT-3147 — a Jira field moves with no human comment narrating why. No re-investigation performed;
+action class unchanged (1, correctly parked).
+
+**PLT-2651, PLT-2874, PLT-2918, PLT-3109, PLT-3115, PLT-3147, PLT-3156** — confirmed unchanged in
+substance against a fresh live fetch each (same comment counts, same newest comment id on every
+one). Ages on the standing overdue items ticked up by three days each since 09-25: PLT-2651's
+correction now 20 days unposted (ticket 145 days old), PLT-2874's Ilia-owed promise now 17 days
+overdue, PLT-3115's one-click close now 12 days idle, PLT-3147's customer question now 10 days
+unanswered on a Critical ticket. None of these are new information — each has been surfaced on
+every run this week without a human action landing — so no notification was sent this run; see
+"Notification" policy above. PLT-2918's attachment count was recounted at 8 against the 09-25
+entry's 9; no new attachment appears in the fetched list, so this reads as a prior miscount, not
+something removed or added — not chased further.
+
+### Group A (8)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged. Correction still unposted, 20 days; ticket 145 days old. | 4, escalated |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own promise now 17 days overdue. | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged (attachment count recounted, no new attachment). | 1 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged; assignee stable at Yash since 09-25's catch. | 4 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged; 12 days since customer's own close call. | 1, administrative |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open (was With Customer) | Status flip is Freshdesk noise, not a reply; still correctly parked. | 1 |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged; customer question now 10 days unanswered. | 1 |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged; correctly parked. | 1 |
+
+### Group B (0)
+
+Empty this run, unchanged from 09-25.
+
+### Left scope this run
+
+**PLT-3172** — moved to `In Code Review`.
+
+### Standing gaps (unopenable media)
+
+Same standing set as 09-25 (session-wide attachment-content 403; see 2026-09-08 entry in
+`live-incident-run-instructions.md`). No new attachments this run.
+
+### This run's recommended next actions (drafted only — none executed)
+
+1. **PLT-2651** — send the correction to Yash and Rishi now (unchanged draft, ~95 words): the
+   true-north lever is dead; the customer acted on it on Rishi's say-so and needs to be told before
+   they act on it again.
+2. **PLT-3115** — one-click close, sitting idle 12 days; risk of repeating the PLT-2815 silent-close
+   pattern grows the longer this sits.
+3. **PLT-2874, PLT-3109, PLT-3147** — previously-drafted, still-unposted messages remain the right
+   next step; unchanged this run, not re-drafted.
+4. **PLT-2918, PLT-3133, PLT-3156** — no new action; correctly parked or already escalated. PLT-3133's
+   status flip is worth a one-line status-hygiene note to Yash only if this recurs enough to cause
+   real confusion about whose turn it is — not urgent enough to draft on its own this run.
+
+### Notification
+
+Board is unchanged in substance from 09-25 (one Freshdesk status-noise event, zero real customer or
+team replies, zero new tickets). Per policy, no notification sent this run.
+
+---
+
 ## Run: 2026-09-25 (scheduled) — 9 in-scope Group A tickets (same count as 09-24: PLT-3167 left scope to With Technical Support, PLT-3172 newly created and deep-dived), 0 in Group B, 1 new ticket deep-dived (PLT-3172 — "Select Linked Elements" no longer highlights blue, AEX01, Rishi already reproduced it independently), 1 new comment that compounds an existing problem (PLT-2651 — Yash relayed Rishi's still-uncorrected guidance to the customer), 1 silent board move newly caught (PLT-3109 — assignee swung back Pietro → Yash, 5th instance of this pattern), 1 growing risk of the PLT-2815 pattern (PLT-3115 — 9 days since the customer's own "we can close it now"), 6 confirmed unchanged in substance, zero Jira actions taken
 
 Board re-queried via `project = PLT AND issuetype = "Live Incident" ORDER BY created DESC`, then

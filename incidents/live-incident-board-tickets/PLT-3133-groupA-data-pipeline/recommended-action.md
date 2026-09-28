@@ -125,3 +125,11 @@ not by this routine.
 Live re-fetch confirms zero movement since 09-21. **Action class: 1, correctly parked** — ball is
 with the customer for a concrete repro; nothing here is stale-on-us. **No Jira action was taken by
 this run.**
+
+## 2026-09-28 (scheduled) — status field moved (Freshdesk sync noise, not a reply); classification unchanged
+
+Jira status flipped With Customer → Open on 09-25 via a Freshdesk automation comment (`113055`),
+not a customer answer. **Action class: still 1, correctly parked** — Rishi's 09-21 ask for concrete
+examples remains the open item, owed by the customer, now one week unanswered. Nothing to draft;
+worth a status-hygiene note to Yash only if this recurs enough to cause confusion about whose turn
+it is. **No Jira action was taken by this run.**

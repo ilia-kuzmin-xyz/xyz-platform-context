@@ -1,5 +1,15 @@
 # PLT-2651 — "Section box misaligned with BIM models" (ATL08) — triage context
 
+## 2026-09-28 (scheduled) — unchanged; correction still unposted, now 4 days since the last comment
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`). **Status `With Customer`, assignee `Yash
+Patel`, 37 comments, newest still `112955`** (2026-09-24T12:01) — byte-for-byte unchanged since
+09-25's own fetch. No customer reply has landed on the world-axis question Yash relayed on their
+behalf. Ticket age **145 days** (created 2026-05-06). Our drafted correction (to Yash and Rishi,
+still unposted) is now **20 days** stale. Not re-verified this run: the underlying
+`viewer-service.ts:974-983` / `section-tool-orientation-math.ts:145-155` code citations (last
+checked 09-09/09-14).
+
 ## 2026-09-25 (scheduled) — one new comment, and it compounds the problem: Yash relayed Rishi's question to the customer instead of us posting the correction
 
 Live `getJiraIssue` re-fetch (fields incl. `comment`). **Status `With Customer`, assignee `Yash

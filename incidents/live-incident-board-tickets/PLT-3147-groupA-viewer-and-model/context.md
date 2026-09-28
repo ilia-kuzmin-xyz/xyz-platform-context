@@ -495,3 +495,11 @@ thread unchanged since 09-18 (`112522`, Freshdesk "Waiting on customer"). The cu
 question is now **7 days** unanswered, on a **Critical** ticket, while the board still shows the
 ball as theirs. No new attachment opened (session-wide 403, unchanged). No re-investigation
 performed.
+
+## 2026-09-28 (scheduled) — confirmed unchanged; the mislabelled-status concern is now 10 days old
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**,
+10 comments, newest still `112522` (09-18 13:26). The customer's own 09-18 question — "could we
+please help us to identify the name of the model which is causing this effect" — is now **10
+days** unanswered on a **Critical** ticket, while the board still reads as though the ball is
+theirs. No new attachment. No re-investigation performed.

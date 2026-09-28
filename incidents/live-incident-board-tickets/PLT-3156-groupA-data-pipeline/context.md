@@ -154,3 +154,9 @@ No re-investigation performed.
 
 Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, still
 5 comments, newest still `112651`. No reply from the customer yet. No re-investigation performed.
+
+## 2026-09-28 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, still
+5 comments, newest still `112651` (09-21 17:03). No reply from the customer yet — still waiting on
+a re-export without the DRAFT sub-project. No re-investigation performed.

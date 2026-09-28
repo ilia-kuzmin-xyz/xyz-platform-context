@@ -1,5 +1,13 @@
 # PLT-2874 — "differences between fed file linked elements and dashboard elements number"
 
+## 2026-09-28 (scheduled) — confirmed unchanged. Ilia's own "today" promise is now 17 days overdue.
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`): status still **In Analysis**,
+assignee still **Ilia Kuzmin**, newest comment still `112017` (Ilia, 2026-09-11T13:39). No new
+comment, no new attachment. **17 days overdue** on Ilia's own "will get back to you today" promise
+(up from 14 on 09-25). Gennaro's 08-12 Staging-undercount finding is now 47 days unanswered. No
+code re-read this run.
+
 ## 2026-09-25 (scheduled) — confirmed unchanged. Ilia's own "today" promise is now 14 days overdue.
 
 Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`): status still **In Analysis**,

@@ -1,5 +1,12 @@
 # PLT-3109 — "Meta - LVN - BL1&2 Elements in exports from power bi not matching dashboard" — triage context
 
+## 2026-09-28 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`): status still **Open**, assignee still **Yash
+Patel** (no further silent move since 09-25), 12 comments, newest still `112612` (09-21 10:13). No
+customer reply to the "automate the reports" question. The 09-22 draft to Yash is unchanged and
+still the right next step.
+
 ## 2026-09-25 (scheduled) — silent board move: assignee swung back Pietro → Yash Patel, no comment. Fifth instance of this pattern on the board.
 
 Live `getJiraIssue` re-fetch (fields incl. `comment`): status still **Open**, but **assignee is now

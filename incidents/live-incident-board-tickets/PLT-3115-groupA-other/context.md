@@ -337,3 +337,10 @@ report and Yash's own "we can close the ticket now." This is the same settled-bu
 run-instructions file names as a recurring failure mode (PLT-2815 sat this way for 74 days across
 32 runs before a Freshdesk automation quietly closed it with no human comment). Worth surfacing
 before this one follows the same path. No re-investigation performed.
+
+## 2026-09-28 (scheduled) — confirmed unchanged; close Yash called for on 09-16 is now 12 days old
+
+Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still Yash Patel, still 3
+comments, newest still `112316`. **12 days** since the customer's self-resolution report and Yash's
+own "we can close the ticket now" — still a one-click close sitting idle. No re-investigation
+performed.

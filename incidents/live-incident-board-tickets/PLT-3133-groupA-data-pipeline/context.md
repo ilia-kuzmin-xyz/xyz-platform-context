@@ -335,3 +335,16 @@ re-investigation performed.
 Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, still
 11 comments, newest still `112621`. Rishi's 09-21 ask for concrete examples remains unanswered. No
 re-investigation performed.
+
+## 2026-09-28 (scheduled) — status silently flipped With Customer → Open via Freshdesk sync, not a real customer reply
+
+Live `getJiraIssue` re-fetch: status now **Open** (was **With Customer** on 09-25), assignee still
+**Yash Patel**, 12 comments, one new: `113055` (Yash, 2026-09-25T08:53:30) — *"Ticket ID: 7989 -
+Freshdesk ticket status changed to: Open"*. That is the whole comment; it is Freshdesk's own
+automation echoing a status bounce on their side, not a customer message and not new content. **Do
+not read the status change as "ball back with us"** — Rishi's 09-21 ask for concrete
+activity/element examples with timestamps (`112616`) is still unanswered, one week now. Same shape
+as the silent board moves already logged this week on PLT-2651, PLT-2918, PLT-3109 and PLT-3147:
+status/assignee fields move with no human comment narrating why. No re-investigation performed;
+`recommended-action.md`'s "correctly parked, nothing to draft" verdict is unchanged — if anything
+the Freshdesk noise makes it more important to state plainly that no real update has landed.

@@ -1,5 +1,14 @@
 # PLT-2918 — "HITT - AUS01 WBS Location Mapping Removed automatically on web viewer" — triage context
 
+## 2026-09-28 (scheduled) — confirmed unchanged
+
+Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`): status still **With Customer**,
+assignee still **Rishi Bhugobaun**, 26 comments, newest still `112745` (Yash, Freshdesk auto
+"Waiting on customer", 2026-09-22T17:27). Rishi's `112743` interpretive question remains unanswered
+in-thread, now 6 days. Attachment recount this run: **8**, not the 9 the 09-25 entry states — no new
+attachment in the fetched list, so this reads as a prior miscount rather than something removed; not
+chased further. The 09-23 draft (to Rishi, ~70 words) is unchanged and still the right next step.
+
 ## 2026-09-25 (scheduled) — confirmed unchanged
 
 Live `getJiraIssue` re-fetch (fields incl. `comment`, `attachment`): status still **With
