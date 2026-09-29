@@ -86,3 +86,70 @@ before touching any code: the job bundles lint, vitest, SonarCloud, the docker b
 scan, and only the middle two have anything to do with a feature diff. Twice today the useful
 signal was "Sonar passed, so the tests ran" — a cheap way to separate the JS half from the image
 half without reading the whole log.
+
+---
+
+## RESOLVED (same run) — it was a **Wolfi** migration, and `build-base` fixes it
+
+The first stopgap got the *manager* right and the *package names* wrong, and that failure is what
+actually identified the cause:
+
+```
+#12 0.124 fetch https://packages.wolfi.dev/os/x86_64/APKINDEX.tar.gz
+#12 1.228 ERROR: unable to select packages:
+#12 1.228   g++ (no such package):
+#12 1.228     required by: world[g++]
+```
+
+**`packages.wolfi.dev`.** `xyz-base-node` has not merely lost `apt-get` — it has moved from Debian
+to **Wolfi** (Chainguard's distro, the usual choice when chasing zero-CVE base images, which fits a
+repo that gates on Trivy). So this reads as a **deliberate upstream migration** that the app repos
+were never told about, not a broken rebuild. That changes who owns it.
+
+### The fix that is green
+
+```dockerfile
+RUN if command -v apk >/dev/null 2>&1; then \
+        apk add --no-cache build-base python3 git \
+        && { apk add --no-cache ca-certificates-bundle || apk add --no-cache ca-certificates; }; \
+    elif command -v apt-get >/dev/null 2>&1; then \
+        apt-get update && apt-get install -y --no-install-recommends \
+          python3 make g++ git ca-certificates \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*; \
+    else echo "...neither apk nor apt-get..." >&2; exit 1; fi
+```
+
+Two naming facts worth keeping, because they are the whole fix:
+
+- **There is no `g++` package on Wolfi or Alpine.** `build-base` is the meta package carrying gcc,
+  g++ and make — precisely the node-gyp toolchain.
+- **The CA bundle is named differently**: `ca-certificates-bundle` on Wolfi, `ca-certificates` on
+  Alpine and Debian. Hence the fallback rather than picking one.
+
+Verified **green** on #2249, then ported onto #2236 and #2217 (both red on it). #2203, #2235 and
+#2241 were deliberately left alone — still green from builds that predate the image change, so a
+Dockerfile commit would only have turned them red and back again. They inherit it from master.
+
+### Method note — let the error do the diagnosing
+
+Three failures, each one naming the next step, no guessing required:
+
+1. `apt-get: not found` → not Debian any more
+2. `packages.wolfi.dev` + `g++ (no such package)` → Wolfi, and it has no standalone `g++`
+3. `build-base` → green
+
+Each iteration cost ~13 minutes of CI. That is the right trade when the alternative is reasoning
+about a private image you cannot pull — but only because each failure was read properly rather than
+retried hopefully.
+
+### Still open for a human
+
+- **Was the Wolfi move intentional?** If yes, #2249 is roughly the app-side update it needed and
+  should be reviewed as such; if no, reverting the base upstream is the better fix and #2249 can be
+  closed. hc-infrastructure is outside the agent's repo scope either way.
+- **#2249 is a draft**, per the standing "keep PRs in draft" instruction — which means nobody can
+  merge it, while every fresh build in the repo stays red until someone does. Flagged plainly on
+  the PR and in the run's notification rather than overridden unilaterally.
+- **Pin the base images by digest.** A distro migration reached every branch and master with no PR,
+  no notice and no way to control the timing. That is the real defect; the Dockerfile change is
+  only the symptom being managed.
