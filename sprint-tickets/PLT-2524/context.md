@@ -155,3 +155,27 @@ Everything else in that entry verified first-hand against current master and is 
 Worth carrying forward generally: **dashboard-progress lives under `ViewerPage/components/services/`,
 not under `DashboardPage/`.** That mis-location cost a wrong path in these notes for six days and
 would have sent the next run looking in the wrong tree.
+
+## 2026-09-29 — scheduled run: still blocked, no ping (bumped yesterday)
+
+**No reply** to comment 113109 (the 28 Sep bump) or to the original 112746 (22 Sep). Left in
+**Analysis In Progress**. Deliberately did **not** ping again: a second nudge one day after the
+first, on the same unanswered question, is noise rather than progress. The 09-28 entry's
+proportionality reasoning applies in the other direction now — the bump has been made, it needs
+time to land.
+
+**One new angle checked and closed off this run.** Rather than re-assert "the attachment is
+unreachable", tried a different route to the design: the Atlassian MCP's `fetch` tool. It only
+resolves Jira issue / Confluence page ARIs, not attachment content, so it cannot reach the PNG
+either. Also re-read **UX-1114 in full** — its description and both comments — on the chance the
+design was described in text somewhere. It is not: the description restates the same open
+question this ticket is stuck on ("Consider whether the indicator lives at column header level,
+row level, or as a page-level notification and whether it should be persistent or dismissible"),
+and the only two comments are Darminder asking for Jason's review and confirming he was happy.
+
+So the design exists and is signed off, but it exists **only as an image**, and no agent session
+can read it. That is now verified from two directions rather than assumed. The ask is unchanged
+and still a one-look job for anyone with normal Jira access.
+
+Everything in the 09-22 / 09-28 entries stands, including the corrected loader path
+(`ViewerPage/components/services/dashboard-progress/loaders/progress-outputs-v2-loader.ts`).

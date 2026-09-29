@@ -102,3 +102,16 @@ changes what a field engineer mid-completion sees"* — already holds in code.
 instances and executions keep the version they were created against; rename is a narrow name
 patch that deliberately cuts no version. So the remaining scope is only the two things the
 description itself flags as undecided, and both need a human.
+
+## 2026-09-29 — scheduled run: still blocked, no ping
+
+**No reply** to comment 112748 (22 Sep); still the only comment on the ticket. Left in
+**Analysis In Progress**, and again deliberately **no** second ping — the 09-28 entry's
+reasoning is unchanged and worth keeping consistent rather than re-deciding each run: this is a
+**Minor** whose blocker is an unmade *product decision*, and pinging does not make a decision
+happen. (Contrast PLT-2524, which was bumped once at six days because it is Critical and its
+blocker had narrowed to a question anyone can answer in one look.)
+
+Nothing has changed in the code or on the ticket since 09-25. The 09-22 finding stands: the
+stated acceptance criterion already holds in `ChecklistLibraryService.update()`, and what is
+left is (a) a version-history view and (b) whether cosmetic edits should stop cutting a version.
