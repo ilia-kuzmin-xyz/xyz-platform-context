@@ -196,3 +196,83 @@ PR **#2236**, head `e4bf8c2`.
   merge was needed.
 
 Still **In Code Review**, waiting on the four requested human reviewers.
+
+## 2026-09-29 — the master merge broke the build, and it was hiding a real bug
+
+PR **#2236**. Arrived at this run **red**: `build` failed on `a3996bf` (the 28 Sep master merge),
+3 tests in `AssetTypeDetailContent.test.tsx`, all of them this ticket's Other-tasks save tests,
+all failing on `findByTestId('asset-type-changes-review')`.
+
+### What master changed, and why it hit this ticket
+
+`#2240` (PLT-3123/PLT-3171) introduced **`touchesLiveWork`** and rewired `requestSave`: the
+changes-review sheet now only opens when the draft reaches work already in flight; anything else
+saves straight through with a toast. Master's own new tests state the contract plainly —
+*"a draft that touches no live work saves without the review sheet and toasts"* and
+*"removing a template with no generated tasks saves without the review sheet"*.
+
+`touchesLiveWork` walks `STATIC_READINESS_LEVELS`. **Other tasks are staged under
+`OTHER_TASKS_KEY` ('other'), which is not a rung**, so the whole bucket was invisible to it.
+
+### The half that was a real bug, not just stale tests
+
+**Removing an Other task an asset already carried saved silently.** `deleteInstances` can only be
+set from the review sheet, and `applyStagedChanges` only calls `removeTaskInstances` when it is
+true — so with no sheet the user was never asked and the instances were left behind. That is
+precisely the case the sheet exists for.
+
+### The half that was stale tests
+
+The two Other **add** tests were asserting the *old universal-review* behaviour that master
+deliberately removed. Other tasks gate no step, so an add cannot un-achieve a rung — by master's
+own rule it touches no live work. Those two were rewritten to assert the direct save; the
+"review shows the other tag" assertion moved onto the removal test so the coverage was not lost.
+
+**The judgement worth carrying forward:** when a master merge breaks your tests, decide per
+assertion whether master changed the *contract* or broke the *code*. Here it was one of each, and
+bending the production code to keep all three tests green would have hidden the real bug.
+
+`10632e8` (fix) + `be325b9` (merge of today's master, `a4f6044`).
+
+### Then Copilot found a second, narrower hole in the fix — and was right
+
+`useAllTaskInstances` also returns **parked membership tasks**, which share the `other` bucket but
+each name the system they were parked from. `listTypeInstancesOnAsset` filters those out
+(`!instance.systemId`) when the delete collects what to remove; my live-work match did not.
+
+So an asset carrying *only* a parked copy opened the whole review sheet, offered delete-instances,
+and `collectTemplateInstancesOnType` then collected nothing — a decision put to the user that
+nothing acts on. Fixed in `dc6c2ce`, scoped to the null-step bucket so the rung matches are
+unchanged (rung instances carry a step; parked ones do not, so rungs were never exposed).
+
+**One correction to my own working notes while chasing this:** I first concluded
+`listTypeInstancesOnAsset` did not exist and that Copilot had invented it. It does — I had grepped
+the working tree while it was checked out on the **PLT-2986** branch. Check which branch the tree
+is on before concluding a symbol is missing.
+
+### The big process change this run: the test suite runs locally now
+
+Every previous entry on these PRs says the suite could not be run locally because `npm ci` 401s on
+the private `@xyzreality/dhtmlx-gantt`. **That is now worked around.** `GITHUB_TOKEN` does not carry
+`read:packages` either, so the token route is still dead — but the package is only imported by the
+ViewerPage gantt files, so a **local stub** satisfies everything else:
+
+```
+/tmp/.../gantt-stub/{package.json,index.js,index.d.ts,codebase/dhtmlxgantt.css}
+# package.json: name @xyzreality/dhtmlx-gantt, version 8.0.8
+# then point the dependency AND an override at file:<stub> and `npm install`
+```
+
+2175 packages install, and `npx vitest run --config vitest.config.ts` runs the full suite
+(~470 files, ~5800 tests, about 8 minutes) plus `tsc --noEmit` and `npm run lint`.
+
+**Restore `package.json` and `package-lock.json` before committing** — `git checkout --` both;
+`node_modules` survives it.
+
+This is what turned this run from "push and hope" into "reproduce, fix, verify". It reproduced the
+CI failure exactly (3 failed / 39 passed), and it caught a merge break on PLT-2986 *before* it was
+pushed. Every prior red build on these PRs was found by CI or a reviewer; this run found two itself.
+
+Caveat to be honest about: the stub types the gantt package as `any`, so `tsc` cannot see a type
+error *inside* the ViewerPage gantt files. Fine for diffs that do not touch them; not a substitute
+for CI if one does.
