@@ -194,3 +194,31 @@ the sibling branch PLT-2986, also 6 behind and also reported as a clean merge by
 which is the argument for running the suite per branch rather than reasoning about the drift once.
 
 Waiting on the three requested human reviewers.
+
+### Later the same day — Copilot re-reviewed the merge and found a real one
+
+The master merge triggered a fresh Copilot pass, which raised a genuine finding on
+`system-step-tasks-modal.tsx`: it read the opened task with `useChecklistInstance` directly, so a
+read that comes back **empty** (the task was deleted since the itemless list loaded) or fails left
+`openInstance` null, the runner never mounted, and **the click did nothing at all** — no runner, no
+message, the dead row still on screen.
+
+The fix was to stop hand-rolling it. `useOpenedTask`
+(`app/components/AssetWorkflowStepTasks/use-opened-task.ts`) is what the three sibling entry points
+already use — asset ladder, asset step tasks, system step tasks — and its own doc comment literally
+says *"Before, the click silently did nothing."* This modal predates the hook and was never moved
+across. `141ba71`.
+
+**A second bug the hook fixes that nobody named:** it gates on `isFetchedAfterMount`, so only a read
+made *after* the open counts. Reading the query directly, a copy still in cache from an earlier open
+(kept warm by a refetch in flight) could seed the runner with the answers from **before** a save —
+and the runner seeds once. So the direct read had a stale-answers hole as well as the silent one.
+
+Test added for the deleted-task case, verified to fail without the change. The existing mock needed
+`isSuccess` / `isLoadingError` / `isFetchedAfterMount` and `checklistInstanceQueries`, matching how
+`asset-step-tasks-view.test.tsx` already mocks it.
+
+**Worth generalising:** "a shared hook already exists for this and three siblings use it" is the
+cheapest kind of review finding to act on, and the giveaway was that the hook's doc described this
+exact symptom. When a bot names a hook you are not using, read that hook's doc comment before
+deciding whether the finding is real.
