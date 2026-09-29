@@ -133,3 +133,14 @@ task, not a blocker.
 (ids 62794-62797) remain unopened — no tool here can fetch authenticated helpdesk or Jira binary media.
 They would confirm the exact numbers displayed on each surface; they cannot change the mechanism, which is
 read end-to-end in code. Do not guess their contents.
+
+## 2026-09-29 — fix shipped; retagged groupB → resolved
+
+Live fetch: 6 comments, newest `111955` (09-10, Freshdesk "Closed"). Status `Customer Release Check`
+(09-28 16:00, assignee Gennaro), moved without a comment. Darminder's `110155` (08-21) describes the
+fix: `issueNumber` added to `IssueItem` (`format-input-data.ts`), mapped in `use-quality-data.ts`
+`convertIssueToIssueItem`, badge renders `#{issueNumber ?? index + 1}` in `issue-item.tsx`. **That is
+the mechanism the 08-18 pass of this folder diagnosed** (index+1 badge, mapper never carried
+issueNumber), so that diagnosis is confirmed by the author's own change. The "missing issues 155-158"
+half was resolved earlier per Yash `109849`. Gennaro: "Verified fixed on Staging 26.3.6" (`111419`,
+09-07). Release 26.3.6 went out 09-28. Freshdesk 7681 was already Closed on 09-10. Nothing owed by us.

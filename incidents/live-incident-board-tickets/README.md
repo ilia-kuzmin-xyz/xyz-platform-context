@@ -31,7 +31,7 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ## Scope rules (this routine)
 
-- **Included:** board tickets in `Open`, `In Analysis`, `With Customer` (→ Group A);
+- **Included:** board tickets in `Open`, `In Analysis`, `With Customer`, `Customer Release Check` (→ Group A, parked);
   `Ready For Development`, `Dev In Progress` (→ Group B).
 - **Excluded:** `With Technical Support`, `Ready For QA`, `In QA`, `In Code Review`,
   release/`Done`/`Archived`, `Blocked`.
@@ -42,6 +42,64 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
   are short (dev-readiness note + fix ownership), not full drafted actions.
 - Actions are **drafted only** — a human reviews `recommended-action.md` and
   executes any Jira comment / transition manually.
+
+---
+
+## Run: 2026-09-29 (scheduled) — 8 Group A tickets carried over, 1 with a real finding (PLT-3084: status says "released, customer checking" but the Select all fix, PR #2197, is still open and blocked by Darminder's CHANGES_REQUESTED), 2 tickets closed out as resolved (PLT-3063, PLT-3060), zero Jira actions taken
+
+Board re-queried (21 open Live Incidents). **New status seen on three tickets at 09-28 16:00-16:04:
+`Customer Release Check`** (PLT-3084, 3063, 3060). It is Freshdesk-driven automation (each moved the
+same minute as a Yash "Freshdesk status changed to: Waiting on customer" echo; same automation as the
+08-17 bounce in PLT-2874's folder), meaning the fix shipped in **26.3.6 (released 2026-09-28)** and the
+customer is verifying. Treated like `With Customer`: in scope, parked, class 1. Not treated as
+`In QA`-style exclusion, because the ball is with the customer and a previous run nearly dropped a
+`With Customer` ticket on the same reasoning.
+
+**PLT-3084 (the finding).** Ctrl+Z is fixed and released (PLT-2743, 26.3.6). The Select all fix (PR
+#2197) is not: open, blocked, Darminder requested changes on 09-15 and 09-22 because Select all and row
+clicks do not select in the viewer. Verified in code: row click calls only `ghostHighlight`
+(`activity-linking-list.tsx:86-89`), which is isolate + ghost by design. Ilia's 09-19 question to
+Darminder on the intended behaviour is unanswered 10 days. Risk: a customer or QA re-test of Select all on
+26.3.6 will fail a third time. Two drafts in the ticket folder (Yash, Darminder).
+Action class: split, 1 + 4 (2 after Darminder answers).
+
+**PLT-3063 and PLT-3060** got their fix-author comments compared with this folder's earlier diagnoses:
+both diagnoses match what Darminder shipped. Folders retagged `groupB` to `resolved`.
+
+**PLT-3133**: one new Freshdesk echo (`113113`), no content. **PLT-2651, PLT-2874, PLT-2918, PLT-3109,
+PLT-3115, PLT-3147, PLT-3156**: fresh fetch, newest comment id identical to the folder on every one.
+Standing ages tick up one day; not re-drafted.
+
+### Group A (9)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged. Correction unposted, 21 days. | 4, escalated |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's promise 18 days overdue. | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged. | 1 |
+| [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | **Select all fix unshipped, PR #2197 blocked.** | 1 + 4 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. | 4 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged. Customer's close call 13 days idle. | 1, administrative |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open | Freshdesk echo only. Rishi's ask 8 days unanswered. | 1 |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged. Customer question 11 days unanswered. | 1 |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged. | 1 |
+
+### Resolved this run (Customer Release Check, customer verifying 26.3.6)
+
+[PLT-3063](PLT-3063-resolved-quality-management/context.md), [PLT-3060](PLT-3060-resolved-viewer-and-model/context.md). Nothing owed by us.
+
+### Group B (0)
+
+### Standing gaps (unopenable media)
+
+Session-wide attachment-content 403. PLT-3084 added: Radu's video `63830`, Yash's `63148`/`63149`, and
+Darminder's two GitHub-hosted videos on #2197. None needed for the next step.
+
+### This run's recommended next actions (drafted only, none executed)
+
+1. **PLT-3084** send Yash draft 1 before the customer tests 26.3.6, and answer Darminder on #2197
+   (draft 2). See `PLT-3084-groupA-viewer-and-model/recommended-action.md`.
+2. Standing unposted items unchanged: PLT-2651 correction, PLT-2874, PLT-3109, PLT-3115 close, PLT-3147.
 
 ---
 

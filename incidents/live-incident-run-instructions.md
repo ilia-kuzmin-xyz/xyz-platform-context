@@ -814,3 +814,13 @@ ticket is wrong; six exchanges went into repro instructions for something that n
    at all. That check costs two greps and would have redirected the whole investigation on day one.
 5. **A code-read conclusion posted to a customer is a liability.** 111097 told the customer isolation
    was the cause. It has to be corrected. Mark such comments as inferred when posting, or verify first.
+
+## 2026-09-29 — `Customer Release Check` is a customer-side status; and "released" is not "the fix you care about shipped"
+
+A new board status, set by Freshdesk automation when Yash moves the support ticket to *Waiting on
+customer*. It means a release went out and the customer is verifying. Treat like `With Customer`
+(in scope, parked), not like the QA statuses. **Check what the release actually contains before
+believing it:** PLT-3084 read "released, customer checking", but 26.3.6 carried only the Ctrl+Z fix.
+The Select all fix (PR #2197) was still open with changes requested. Compare the ticket's fix links
+with the release's fixVersion (`PLT-2743` → 26.3.6) and the PR's `merged` flag before reporting a
+ticket as done.

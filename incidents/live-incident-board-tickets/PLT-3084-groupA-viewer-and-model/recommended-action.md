@@ -177,3 +177,26 @@ which the user did not ask for. The alternative leaves `unlinkSelected` broken a
 because react-arborist cannot hold a selection of collapsed rows — the trade-off is argued in the
 PR body. And defect 4 (stale selection across an activity switch) has no unit test; it needs the
 panel rendered with its providers, which no spec in that directory does.
+
+## 2026-09-29 — two drafts. Nothing sent, nothing posted.
+
+Assumption (one line): the customer only reported Ctrl+Z, and Select all came from QA. Unverified.
+
+**Draft 1, Jira, to Yash (class 1):**
+
+> Yash, 26.3.6 carries the Ctrl+Z fix but not the Select all fix, which is still in review. If the
+> customer tests Select all in the linked panel it will still look broken. Please ask them to check
+> Ctrl+Z only for now. **Did the customer ever report Select all, or did that come only from Radu?**
+
+(55 words)
+
+**Draft 2, GitHub PR #2197, to Darminder (class 4):**
+
+> Darminder, thanks for the review, understood: you want Select all and row clicks to select in the
+> viewer itself. Today a row click isolates and ghosts instead. **Should a row click select in the
+> viewer as well as ghost, or replace the ghosting?**
+
+(43 words)
+
+Do not move the Jira ticket. Its Customer Release Check status came from Freshdesk automation and is
+true for Ctrl+Z; moving it would add a second wrong signal.

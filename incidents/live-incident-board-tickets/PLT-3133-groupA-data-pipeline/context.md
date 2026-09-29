@@ -348,3 +348,10 @@ as the silent board moves already logged this week on PLT-2651, PLT-2918, PLT-31
 status/assignee fields move with no human comment narrating why. No re-investigation performed;
 `recommended-action.md`'s "correctly parked, nothing to draft" verdict is unchanged — if anything
 the Freshdesk noise makes it more important to state plainly that no real update has landed.
+
+## 2026-09-29 — one new comment, still Freshdesk noise
+
+Newest comment `113113` (Yash, 09-28 08:59): *"7989 … Waiting on customer"*. It landed ~40 minutes after
+the 09-28 run and Jira status is still `Open` (the Freshdesk echo did not move it back to With Customer
+this time). So the 09-28 reading holds: ball is with the customer, Rishi's ask `112616` (09-21) for
+concrete examples is unanswered, now 8 days. Status label is misleading, not the situation.

@@ -149,3 +149,13 @@ confirm the described fix precisely matches the mechanism recorded above versus 
 the same area. Not verified against the code (a PR/diff wasn't located; only Darminder's own prose
 description is on the ticket). Left scope (In Code Review is excluded from this board's sweep) —
 no further action needed from us unless it bounces back.
+
+## 2026-09-29 — fix shipped; retagged groupB → resolved
+
+Live fetch: 6 comments, newest `113152` (Yash, 09-28 16:04, Freshdesk "Waiting on customer"). Status
+`Customer Release Check`. Darminder's `109978` (08-19): `tree.tsx` now always keeps a model's row
+visible and only filters elements under it; `viewer-service.ts` re-applies active filters after a model
+finishes loading; `filter-service.ts` refreshes the cached element map on each recompute. That is the
+mechanism this folder traced (model row dropped because its root dbId was missing from
+`allowedDbIdsByModel`), fixed at the tree instead of the map, so the diagnosis holds. Gennaro verified
+on Staging 26.3.6 (`111421`, 09-07); released 09-28. Customer is verifying. Nothing owed by us.

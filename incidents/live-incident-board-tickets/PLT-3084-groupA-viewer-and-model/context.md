@@ -663,3 +663,50 @@ and type-only imports stubbed — this repo still cannot `npm ci` (`@xyzreality/
   have none. Defect 2's fix makes it moot in practice (the tree is open by then), but the
   non-recursive filter is deliberate and documented as such in `useContextMenu.ts:66-68` — making
   unlink recursive is a product decision, deliberately not touched.
+
+## 2026-09-29 — status moved to Customer Release Check, but the Select all fix has NOT shipped. Supersedes the "Customer is verifying a fixed ticket" reading.
+
+**Live fetch (comments + status):** 5 comments, newest `113150` (Yash, 09-28 16:03, Freshdesk echo
+*"7743 … Waiting on customer"*). Jira status moved `Ready For Development / In Code Review → Customer
+Release Check` at 09-28 16:03 by automation, same minute as that echo (same shape as the 08-17 bounce
+recorded in PLT-2874's folder; a Freshdesk-driven status, not a human decision). Assignee still Ilia.
+No human wrote in the ticket.
+
+**VERIFIED (Jira + GitHub, this run)**
+- PLT-2743 (the Ctrl+Z fix, Ilia's 08-25 comment `110366`) is `Closed`, fixVersion **26.3.6, released
+  2026-09-28**. So the Ctrl+Z half is released and the customer is being asked to check it.
+- **PR #2197 (the "Select all" fix, Radu's 09-03 reopen) is still OPEN, unmerged.** `mergeable_state:
+  blocked`, head `b162f42`, 263+/20-. **Darminder has `CHANGES_REQUESTED` twice**: 09-15 and 09-22
+  (`5281908646`), both saying the same thing: `...` menu "Select all" ticks the panel rows but nothing
+  is selected in the viewer, and clicking a model name / row selects in the panel but not the viewer.
+- Ilia's own PR comment (09-19, `5743894274`) asked Darminder whether Select all / row clicks should
+  select in the 3D model without the extra "Show selected in 3D view" step. Darminder's 09-22 review is
+  a de facto **yes**, but he never answered the question in words, and the question has sat 10 days.
+- Code, PR head `b162f42`: `activity-linking-list.tsx:86-89` `handleSelect` calls only
+  `ghostHighlight(nodes)`; `useGhostedHighlight.ts` (whole file) never calls `setSelection` /
+  `setAggregateSelection`, and its own doc says *"Not the same as viewer selection; uses aggregate
+  isolate + ghosting"*. `useActivityMenu.ts` `selectAllRows` = `openAll()` + next-frame `selectAll()`,
+  tree rows only. So Darminder's observation matches the code exactly. The only path to a blue viewer
+  selection is `selectElements` (`useElementSelection.ts` `setAggregateSelection`), reached from
+  "Show selected in 3D view" or the row context menu's "Select all".
+
+**What this means.** The ticket now reads "released, customer checking". That is true for Ctrl+Z and
+false for Select all. If the customer (or Radu) re-tests Select all on 26.3.6 it will fail again and
+the ticket will bounce a third time.
+
+**INFERRED, not verified:** that the customer ever reported Select all. The original customer report
+was "Select linked elements selects only a few" (closed as user error, 08-24) and Ctrl+Z. Select all
+was raised by Radu (QA) on 09-03, not by the customer. If that holds, the customer's verification of
+Ctrl+Z is unaffected, and the Select all gap is an internal QA reopen riding on a customer ticket.
+
+**Still unopenable:** Radu's video (attachment `63830`, 68 MB) and Yash's `63148` (142 MB), `63149`.
+Darminder's two GitHub-hosted videos are also unopenable here. Settles: whether Radu's "Select all" is
+the `...` menu one or the row one. Not needed to decide the next step (Darminder's review is explicit).
+
+**Behaviour question is a product choice, not a bug.** Row click currently isolates + ghosts on purpose
+(`useGhostedHighlight.ts`). Making it a viewer selection changes an existing interaction on every
+project. That is why this half is class 4, not a class 2 PR on a guess.
+
+**Action class: split.** Class 1 half (tell Yash the release only carries Ctrl+Z). Class 4 half
+(what "Select all" and row click should do in the viewer; Ilia has asked Darminder, unanswered).
+Class 2 opens once Darminder answers: wire `selectElements` into `handleSelect` / `selectAllRows`.
