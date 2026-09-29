@@ -59,3 +59,11 @@ Darminder).
 Comments were written casual but **not** with deliberate typos — omitting AI attribution is one
 thing (Ilia asked for it), fabricating a human fingerprint to mislead teammates is another and was
 declined.
+
+## Outcome (same run, ~17:55 UTC) — all three pushed PRs verified green
+
+- **#2250** — build + Sonar + copilot all green on the master-merge head `ce99521`. Wolfi build failure cleared. Waiting on human reviewers only.
+- **#2235** — green on merge head `1d07263` (Sonar 17 new issues but gate passed). Conflict resolution held. Waiting on human reviewers only.
+- **#2251** — green on `4b5f170` (Sonar 0 new issues). Copilot ran three review rounds on the pushes; each new finding was real and fixed in turn: tooltip pre-line → clear-stale-on-failure + warn-log → then the clear-on-failure exposed an out-of-order-poll race, fixed by switching the fixed setInterval to a self-scheduling setTimeout (at most one read in flight). All four resolved; only the optional "add polling-hook tests" nit left open. Waiting on human reviewers only.
+
+Lesson for next run: each push to a PR re-triggers Copilot, and a fix can legitimately surface the next finding (the clear-on-failure → race chain here). Worth knowing before starting a fix chain on a hook you can't run locally (no node_modules in a fresh checkout — Sonar was the only real validation signal).
