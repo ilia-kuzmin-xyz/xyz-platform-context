@@ -1515,3 +1515,34 @@ own PR if the team wants it — repo-wide change, not something to slip into thi
 Everything else on #2203 is resolved; the PR is otherwise green and waiting on a human reviewer.
 The open product question (should an archived-but-linked task be marked as archived in the type
 editor, and removable there?) is still with @DarminderA and is a follow-up, not a blocker.
+
+### `c53b47b` green; and the fail-closed finding was refuted, not fixed
+
+Build, SonarCloud (gate passed, 49.9%) and the Copilot review all **success**. **53 threads, 0
+unresolved.**
+
+The second finding of the day claimed `usageBlocksDelete` fails open when `attachedFiles` is
+missing (`undefined > 0` is false). **It does not**, and the check is worth recording because
+fail-closed is this branch's central rule:
+
+- `attachedFiles: number` on `IChecklistTemplateUsage` is **not optional** — no `?`.
+- Every producer sets it from an array length, so it cannot be missing or non-finite:
+  `checklist-library-service.ts:944` (the early no-instances return), `:969`, `:999`, `:1017`,
+  `:1133`.
+- The state Copilot actually described — *the check has not answered* — is real but handled one
+  level up, in **both** callers. `DeleteTaskDialog.tsx:127` computes
+  `unchecked = isLoadingUsage || usageError || !usage`, and the render chain at `:207` routes
+  `unchecked` to the retry branch, so neither Delete nor Archive mounts; `blocked` only feeds the
+  title/copy there. `TaskLibraryTab.tsx:1080-1083` returns false on `fresh.isError || !fresh.data`
+  before the predicate runs.
+
+Conceded on the thread, and worth carrying: **if anyone makes `attachedFiles` optional, that
+predicate is where it starts failing open silently.** Guarding at runtime for a state the type
+forbids would be noise; the two `unchecked` / `!fresh.data` checks are the real boundary.
+
+### Correction to the 2026-09-26 entry
+
+That entry (and the reply on the `createLogger` thread) said the unused import "would have failed
+the type-check", implying CI. **CI was never going to catch it** — see the § above. The removal was
+still correct; the stated justification was not. Left in place rather than edited, per the additive
+rule, but do not cite it as evidence that CI type-checks.
