@@ -303,3 +303,45 @@ invisible to a reading of the diff hunk alone (the first was the non-generic dou
 complete in this container (private `@xyzreality/dhtmlx-gantt`, 401). Until that token exists,
 assume type-level breakage is the most likely way a push here goes red, and re-read renames and
 interface changes across *implementation* sites specifically.
+
+## 2026-09-29 — two Medium review findings; one real bug, one split. `07ad926` green
+
+Another master merge landed on the branch (`a53f230`) — this one clean. Copilot then raised two
+Medium findings on the merged head. Both were verified against the source before acting.
+
+### 1. The admins-only gate could not tell "no" from "not yet" — REAL, fixed
+
+`projectAuthoritiesQueryConfig` (`hooks/useProjectAuthorities.ts`) sets **`placeholderData: []`**,
+and `selectHasProjectAuthorities` maps that to `[false]`. So while the request is in flight,
+`canDelete === false` is indistinguishable from a genuine refusal, and an admin clicking **Remove**
+on a cold load was shown *"Only admins can delete assets"* — a refusal a user would reasonably
+believe and stop at. The gate is code this ticket added, so the bug is this PR's.
+
+Fix: read the query directly (`useProjectAuthorities` + the exported selector) instead of
+`useHasProjectAuthorities`, because that helper discards `isPlaceholderData` — the one bit saying
+whether the answer is known. A click before it resolves now does nothing rather than refusing.
+
+**Deliberately did NOT disable the button**, which is what the finding asked for: **six** suites mock
+`useAssetDeletion` as `{ request, dialog }`, so a `disabled` driven off a new return field arrives
+`undefined`, disables the control in all of them and breaks every test that clicks Delete. Said so
+on the thread and offered it as a follow-up. *Generalise this:* adding a field to a widely-mocked
+hook's return is not free — check the mocks before wiring it into rendering.
+
+### 2. Multi-select accessibility — split; perceivability done, semantics left open
+
+The selection was only `data-in-selection`, invisible to assistive tech, so a screen-reader user
+could not tell which cards *Delete N* was about to take. Now carried in the accessible name
+(`View details for X, selected`).
+
+**Why not `aria-selected`:** the card is `role='listitem'`, and `aria-selected` is only valid on
+option/row/tab/gridcell/treeitem. Setting it on a listitem is ignored by AT while *looking* handled
+— worse than not doing it.
+
+The full ask (container → `role='listbox' aria-multiselectable`, cards → `role='option'`, plus a
+keyboard path for building a selection) was **not** done and the thread was **left unresolved on
+purpose**. It is a shared-component change carrying a real design question: this panel has two
+distinct states — the open card (`aria-current`) and the delete selection — and listbox semantics
+model only one cleanly. Worth its own ticket.
+
+`07ad926` is green (build, Sonar gate, reviewer). **One open thread by design** (the a11y keyboard
+half); everything else on #2235 is resolved.
