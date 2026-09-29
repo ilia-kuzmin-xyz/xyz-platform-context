@@ -175,3 +175,22 @@ PR **#2217**, head `711bd66`.
 
 `mergeable_state: **clean**` — the only one of the five with no blocker flag at all.
 Waiting on three requested human reviewers.
+
+## 2026-09-29 — scheduled run: master catch-up, nothing else outstanding
+
+PR **#2217**, head `f4edee2c`.
+
+- **Checkpoint 1 (feedback):** every review thread resolved; nothing outstanding. The PR had not
+  been touched since 09-26, so no new feedback had arrived.
+- **Checkpoint 2 (build):** green before the merge, and green again on `f4edee2c`.
+- **Checkpoint 3 (master drift):** was **6 behind** (`6d6fc1f` PLT-3150, `fad8c78` PLT-3172,
+  `f7f1cda` PLT-3126, `58befb6` PLT-3123/3171, `1b5bac6` PLT-3114, `a4f6044` PLT-2901).
+  Merged in — no conflicts — and pushed.
+
+Six commits of commissioning-heavy drift is the risky kind, so the merge was **verified locally
+before pushing**: full suite green (472 files / 5796 tests) plus `tsc --noEmit`. Worth noting that
+the sibling branch PLT-2986, also 6 behind and also reported as a clean merge by
+`git merge-tree`, was in fact **broken** by the same six commits. Same drift, different outcome —
+which is the argument for running the suite per branch rather than reasoning about the drift once.
+
+Waiting on the three requested human reviewers.

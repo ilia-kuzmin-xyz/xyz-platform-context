@@ -345,3 +345,20 @@ model only one cleanly. Worth its own ticket.
 
 `07ad926` is green (build, Sonar gate, reviewer). **One open thread by design** (the a11y keyboard
 half); everything else on #2235 is resolved.
+
+## 2026-09-29 — scheduled run: master catch-up, nothing else outstanding
+
+PR **#2235**, head `a53f2309`.
+
+- **Checkpoint 1 (feedback):** **17 threads, 0 unresolved.** Verified this run.
+- **Checkpoint 2 (build):** green before and after the merge (build, SonarCloud, Copilot all
+  success on the new head).
+- **Checkpoint 3 (master drift):** was **1 behind** (`a4f6044`). Merged in — no conflicts — and
+  pushed.
+
+Merge **verified locally before pushing** this time: full suite green (474 files / 5824 tests)
+plus `tsc --noEmit`. This is the branch whose 09-28 entry ends "assume type-level breakage is the
+most likely way a push here goes red, *until that token exists*" — the token still does not exist,
+but the constraint is gone: see PLT-3139's 09-29 entry for the stub that makes the suite runnable.
+
+Still `blocked` purely on the four requested human reviewers. Nothing here is waiting on us.

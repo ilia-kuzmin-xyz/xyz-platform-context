@@ -1546,3 +1546,22 @@ That entry (and the reply on the `createLogger` thread) said the unused import "
 the type-check", implying CI. **CI was never going to catch it** — see the § above. The removal was
 still correct; the stated justification was not. Left in place rather than edited, per the additive
 rule, but do not cite it as evidence that CI type-checks.
+
+## 2026-09-29 — scheduled run: master catch-up, nothing else outstanding
+
+PR **#2203**, head `c94992fe`.
+
+- **Checkpoint 1 (feedback):** **51 threads, 0 unresolved.** Verified this run, not carried over.
+- **Checkpoint 2 (build):** green on `ffb2dbd` before the merge, and green again on `c94992fe`
+  (build, SonarCloud, Copilot reviewer all success).
+- **Checkpoint 3 (master drift):** was **1 behind** (`a4f6044`, PLT-2901 portfolio role
+  management). Merged in — no conflicts — and pushed.
+
+Unlike previous runs the merge was **verified locally before pushing**: full suite green
+(474 files / 5884 tests) plus `tsc --noEmit`. See PLT-3139's 09-29 entry for how the suite is
+now runnable in-session. Worth doing here specifically because this branch is 52 commits ahead
+and has been merged with master repeatedly.
+
+Still waiting on human reviewers. The one genuinely open item remains a **product question**, not
+a thread: should an archived-but-still-linked task be marked as archived in the type editor, and
+be removable from there? Asked of @DarminderA; a "no" needs no code.
