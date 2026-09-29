@@ -1565,3 +1565,63 @@ and has been merged with master repeatedly.
 Still waiting on human reviewers. The one genuinely open item remains a **product question**, not
 a thread: should an archived-but-still-linked task be marked as archived in the type editor, and
 be removable from there? Asked of @DarminderA; a "no" needs no code.
+
+## 2026-09-29 (afternoon) — a real fail-open, and a repo-wide CI outage
+
+### 1. Runs on archived instances did not block the delete (`1c133a8`) — the worst bug found on this PR
+
+`usage()` asked for executions only against **live** instances. Archiving an instance withdraws the
+asset's obligation; it does not withdraw work already recorded against it. A template whose only
+runs sat on archived instances answered "no recorded work", and the dialog offered a plain Delete.
+
+Two things made it certain rather than arguable:
+
+- **The same function already gets it right for uploads**, with a comment spelling out why archived
+  rows must stay in the probe (`:902-912`). Executions never got the same treatment. One function,
+  two opposite answers to the same question, is a bug and not a decision.
+- **`remove()` leans on this probe having refused**, and says so at `:1243-1248`.
+  `removeGeneratedInstances` preserves an instance carrying a run, but the template and its versions
+  are deleted regardless, and an instance reads its items from `task_template_version`. So the
+  fail-open produced exactly the nameless, itemless orphan row that **`a15744f` had been written one
+  hour earlier to stop creating**. The two changes were pulling against each other.
+
+Fix: one `probeInstanceIds` (= every instance) feeds both the run and file probes; the
+"every instance archived" early return is **gone** (it answered `executions: []` without asking, and
+`allInstanceRows.length === 0` already covers the genuinely empty case); `instanceById` is built from
+all instances so a blocking run names its asset rather than falling back to the task's own name;
+`appliedCount` stays on the live set. Both pre-existing archived-instance tests were checked first —
+neither carries a run, so both still hold.
+
+### 2. Every build in the repo went red — `xyz-base-node:latest` moved Debian → Wolfi
+
+**Not this PR's, and worth recognising fast next time.** The `build` check died in the **Docker image
+build**, not the tests (`test-ci` passed in the same job):
+
+```
+#14 [builder 3/11] RUN apt-get update && apt-get install -y ... python3 make g++ git ca-certificates
+#14 0.112 /bin/sh: line 0: apt-get: not found
+ERROR: failed to build: ... exit code: 127
+```
+
+`xyz-base-node:latest` is a **mutable** tag rebuilt weekly by hc-infrastructure — the Dockerfile says
+so in its own header — and this week's rebuild moved the base to Wolfi, which has no `apt-get`.
+
+**How it was established as repo-wide rather than assumed:** the Dockerfile is untouched by this
+diff; **#2254** (Darminder's, different branch) failed identically four minutes earlier; **#2253**
+the same way before that. Three PRs, two authors, one step.
+
+**No re-run spent.** A re-run confirms a *flake*; this is deterministic. Cross-PR reproduction is
+strictly stronger evidence than a fourth identical failure, and that reasoning is on the PR.
+
+**#2249** ("unblock every build") already fixed it and had been open since 09:34 unmerged. Ported the
+hunk verbatim into this branch (`34c2228`) rather than wait — byte-identical, so it no-ops when
+#2249 lands. **Build then went green on `34c2228`**, which also empirically confirms #2249's approach
+against the image actually in the registry; commented that on #2249 to help it get merged.
+
+**Still unresolved and out of reach from here:** whether the Wolfi move was intended. If it was not,
+#2249 papers over an upstream regression, and `:latest` will move again next week. hc-infrastructure
+is not in this session's repo scope.
+
+### State
+
+`34c2228` green on build, SonarCloud (49.1% new code) and the Copilot review.
