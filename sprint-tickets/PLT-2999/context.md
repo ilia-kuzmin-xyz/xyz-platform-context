@@ -1649,3 +1649,15 @@ code, so Sonar's new-code window now spans everything rather than the last incre
 **Operational rule this confirms:** two sessions on one branch is the hazard already flagged on
 09-26, and force-push is its sharpest edge. Before every push here, fetch and compare; after any
 surprise, diff the *files* you changed against the remote rather than trusting the commit graph.
+
+### `43b8216` green — build and SonarCloud both success
+
+The squashed head passes. All of this session's work is carried in it, verified by file-level diff
+rather than by the commit graph. PR is green and waiting on a human reviewer.
+
+**Still open, and both need people rather than code:**
+- **#2249** (the Wolfi Dockerfile fix) is open and unmerged. This branch carries a port of it, so it
+  builds; every other PR in the repo stays red until #2249 lands.
+- Whether `xyz-base-node` was *meant* to move to Wolfi. hc-infrastructure is outside this session's
+  repo scope, and `:latest` is mutable, so it can move again next week.
+- The product question on marking an archived-but-still-linked task in the type editor (@DarminderA).
