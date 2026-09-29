@@ -1661,3 +1661,41 @@ rather than by the commit graph. PR is green and waiting on a human reviewer.
 - Whether `xyz-base-node` was *meant* to move to Wolfi. hc-infrastructure is outside this session's
   repo scope, and `:latest` is mutable, so it can move again next week.
 - The product question on marking an archived-but-still-linked task in the type editor (@DarminderA).
+
+## 2026-09-29 (evening) — APPROVED by Darminder; `mergeable_state: clean`
+
+@DarminderA approved on `43b8216`: *"Thanks for making those changes. Approved!"* The PR is green,
+conflict-free and ready to merge. Tom, Rishi and Sergiusz are still listed as requested reviewers but
+are evidently not required, since the state is clean.
+
+**Not merged, deliberately.** Merging was never asked for and is outside what this session may do.
+It needs a human to press the button.
+
+### Two things the approval did NOT settle
+
+1. **The product question is still unanswered.** Darminder approved without replying to whether an
+   archived-but-still-linked task should be *marked* as archived in the type editor, and whether it
+   should be removable from there. So the shipped behaviour is "shows unbadged", decided by silence
+   rather than by choice. Worth a follow-up ticket rather than a nudge on an approved PR.
+2. **#2249 is a DRAFT** — this is the real reason the repo-wide CI outage has not cleared, and it is
+   worth correcting the earlier entry: it is not sitting in a review queue, it *cannot be merged in
+   its current state*. Its own description says so: *"open as a draft, so it can't be merged as it
+   stands, and every fresh build in the repo stays red until it is. One click either way."*
+
+### What #2249 established that this session had not
+
+Its final diagnosis is sharper than the one recorded earlier today, and supersedes it on two points:
+
+- The sequence was three failures, not one: `apt-get: not found` → *not Debian*; then
+  `g++ (no such package)` against `packages.wolfi.dev` → *Wolfi, which ships no standalone g++*;
+  then `build-base` → green. My entry said "Debian → Wolfi, no apt-get" and stopped at step one.
+- It reads as a **deliberate upstream migration** (Wolfi is Chainguard's zero-CVE distro, which fits
+  a repo gating on Trivy) rather than a broken weekly rebuild. Still unconfirmed with
+  hc-infrastructure, which owns the image and is outside this session's repo access.
+- Its standing recommendation: **pin the base images by digest.** A distro migration reached every
+  branch and master with no PR, no notice and no control of timing. The Dockerfile change manages
+  the symptom; the mutable `:latest` is the defect.
+
+Note #2249 deliberately left #2203 alone, reasoning it was green from a build predating the image
+change. That reasoning stopped holding the moment `a15744f` triggered a fresh build, which went red —
+so porting the hunk here was right, and it is byte-identical, so nothing conflicts when #2249 lands.
