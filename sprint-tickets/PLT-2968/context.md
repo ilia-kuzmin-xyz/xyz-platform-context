@@ -3439,3 +3439,25 @@ task that `getExecutionMode` resolves to *legacy* pins it to a managed run perma
 been sitting with four requested reviewers (Tom, Darminder, Rishi, Sergiusz) for **seven days** with
 no review. Nothing further to push: it is green, mergeable and minimal. It needs a human to press
 approve, and that is the whole of what is blocking it.
+
+## 2026-09-29 — #2222 deliberately NOT refreshed, and why
+
+#2203 merged this evening, so master has moved well past #2222's base (`4f2496d`). Normally
+checkpoint 3 says merge master in. **Not this time**, and the reasoning is worth keeping so the next
+run does not undo it:
+
+- #2222 is **green today**, from a build that predates the `xyz-base-node` Debian→Wolfi migration.
+- Merging master in triggers a fresh build, which would hit the Wolfi break and go **red** — master
+  does not carry the fix, because **#2249 is still a draft**.
+- Getting it green again would mean porting the Dockerfile hunk into #2222 as well, which is a
+  commit that becomes a no-op the moment #2249 lands. #2249's own author left green PRs alone for
+  exactly this reason: *"a Dockerfile commit would only turn them red and back again."*
+- Staleness is not what blocks #2222 anyway. It has had **no review since 18 Sep**, four requested
+  reviewers, and 2 additions / 88 deletions. It needs a human, not a rebase.
+
+**So: leave it until #2249 merges**, then merge master in and let it rebuild clean. If #2222 somehow
+becomes urgent before that, port the Dockerfile hunk with it.
+
+The underlying risk is unchanged and still live on master: the hotkey defaults to `managed`, nothing
+ships a value for it, so with the Commissioning flag on a save against a legacy-resolved task pins it
+to a managed run permanently.

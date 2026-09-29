@@ -1699,3 +1699,31 @@ Its final diagnosis is sharper than the one recorded earlier today, and supersed
 Note #2249 deliberately left #2203 alone, reasoning it was green from a build predating the image
 change. That reasoning stopped holding the moment `a15744f` triggered a fresh build, which went red —
 so porting the hunk here was right, and it is byte-identical, so nothing conflicts when #2249 lands.
+
+## 2026-09-29 (20:51) — MERGED
+
+#2203 is merged. Session auto-unsubscribed. **Do not reopen it or raise a replacement** — any
+follow-up is new work on a fresh branch off master.
+
+Final shape of what this session contributed to the merged change:
+- the folder-loop guards (`stillAsking`) and the archive-all reopen race
+- `beginRestore`/`endRestore` holding Restore across both mutations
+- **runs on archived instances now block the delete** — the fail-open, and the most serious defect
+  found on the PR
+- the archived-but-linked resolution split across four components (resolution sees archived, pickers
+  do not)
+- the ported Wolfi Dockerfile hunk, which is what let the branch build at all this afternoon
+
+### Two things that shipped undecided — worth a follow-up ticket, not a reopen
+
+1. **An archived-but-still-linked task renders unbadged in the type editor**, and cannot be removed
+   from there. Raised for @DarminderA on the PR; he approved without answering. So the behaviour was
+   decided by silence. It is now on master.
+2. **The atomicity gap stands**, as the PR's own "Known gaps" says: folder delete, archive-all and
+   `remove()` are sequential client-side calls with no transaction, so a failure partway leaves a
+   partial result. Needs a server-side batch/RPC.
+
+### PLT-2999 the ticket is still "In Code Review"
+
+Not transitioned by this session — moving a ticket after merge was never part of the instruction,
+and it is a shared board. Someone should move it on to QA.
