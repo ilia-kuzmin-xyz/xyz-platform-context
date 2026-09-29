@@ -153,3 +153,25 @@ retried hopefully.
 - **Pin the base images by digest.** A distro migration reached every branch and master with no PR,
   no notice and no way to control the timing. That is the real defect; the Dockerfile change is
   only the symptom being managed.
+
+### Verified: both ported PRs green
+
+`4fe3472` (#2236) and `9aa125b` (#2217) both **completed success** after the port. So the fix
+holds on three independent branches, not just on its own.
+
+### One deliberate deviation from the checkpoint routine, recorded so the next run does not "correct" it
+
+Master moved again late in the run (`b235e2f`, PLT-2990 #2248), leaving all six branches **1 commit
+behind**. The routine says merge master in. **This run deliberately did not**, and the reason is
+specific to the outage rather than to any branch:
+
+- #2236 and #2217 carry the Wolfi fix, but both had builds **in flight** at that moment. Pushing
+  again cancels a run (`cancel-in-progress`) — it would have destroyed the very verification that
+  the port worked.
+- #2203, #2235 and #2241 do **not** carry the fix and are still green from builds that predate the
+  image change. Merging master into them would knowingly turn three green PRs red for a one-commit
+  drift, during an outage whose fix is already written.
+
+Once #2249 lands on master, a single master merge per branch resolves both the drift and the
+outage together. That is one push per PR instead of two, with no red in between. Deferring was the
+cheaper correct move, not an oversight.
