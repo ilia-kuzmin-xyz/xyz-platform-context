@@ -1484,3 +1484,34 @@ The one thing still genuinely open is not a thread but a **product question**, a
 @DarminderA: should an archived-but-still-linked task be *marked* as archived in the type editor,
 and be removable from there? A "no" needs no code. A "yes" is a small follow-up, not a blocker on
 this PR.
+
+## 2026-09-29 — unused import, and the finding that CI does not type-check at all
+
+Copilot flagged `ArrowCounterclockwise` as an unused import in `TaskLibraryTab.tsx` (the icon moved
+to `ArchiveSection`, which imports its own copy; this one was left behind). Correct — it appears
+exactly once in the file, on the import line. Removed in `c53b47b`.
+
+### The part worth carrying: `check-types` is NOT in CI
+
+Copilot said the import "makes the type-check fail". True of the *script*, false of *CI*, and the
+difference matters:
+
+- `.github/workflows/pr-check.yaml` runs **`npm run test-ci`** and **`npm run test:regression`**.
+  It never calls `check-types`.
+- Proven, not inferred: the import was already present on **`3d1b377`** and **`ffb2dbd`**, and
+  **both went fully green, build included**. It rode two clean builds.
+
+So `npm run check-types` (`tsc --noEmit --noUnusedLocals --noUnusedParameters`, `package.json:72`)
+is a local-only gate. **CI will not catch the next unused import either** — this is the second in a
+week, after `createLogger` on 26 Sep.
+
+Consequence for future runs: do not assume a green build means the branch type-checks. If a change
+adds or removes imports, run `npx tsc --noEmit --noUnusedLocals` locally, or at least grep the
+identifier count, before calling it clean. Offered on the PR to add the step to the workflow as its
+own PR if the team wants it — repo-wide change, not something to slip into this branch.
+
+### Standing state
+
+Everything else on #2203 is resolved; the PR is otherwise green and waiting on a human reviewer.
+The open product question (should an archived-but-linked task be marked as archived in the type
+editor, and removable there?) is still with @DarminderA and is a follow-up, not a blocker.
