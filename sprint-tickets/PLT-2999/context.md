@@ -1625,3 +1625,27 @@ is not in this session's repo scope.
 ### State
 
 `34c2228` green on build, SonarCloud (49.1% new code) and the Copilot review.
+
+### The branch was force-pushed and squashed (`43b8216`) — content preserved, history gone
+
+The other session squashed the whole branch into a single commit, `43b8216`, replacing the
+incremental history. **My commits `1c133a8` (the archived-run fail-open) and `34c2228` (the Dockerfile
+port) no longer exist as commits** — their content was folded in.
+
+**Verify by content, not by history, when this happens.** My first read was wrong:
+`git log 34c2228..origin/PLT-2999` returned exactly one commit, which I took as "additive, one commit
+on top". It is equally what a squash returns, because the range simply lists what is reachable from
+the remote and not from the old head. What actually settled it was `git merge --ff-only` refusing
+with *"Not possible to fast-forward"* — i.e. the old head is not an ancestor.
+
+The honest check is a file-level diff, which came back **byte-identical** on all five files
+(`checklist-library-service.ts`, its row-actions test, `Dockerfile`, `TaskLibraryTab.tsx`, its
+context-menu test). Nothing of this session's work was lost.
+
+**Sonar's "new issues" jumped 13 → 45 on the same commit, and that is an artefact, not a regression.**
+Coverage stayed at exactly 49.1% and duplication at 2.9%. A squash re-dates the whole branch as new
+code, so Sonar's new-code window now spans everything rather than the last increment. Do not chase it.
+
+**Operational rule this confirms:** two sessions on one branch is the hazard already flagged on
+09-26, and force-push is its sharpest edge. Before every push here, fetch and compare; after any
+surprise, diff the *files* you changed against the remote rather than trusting the commit graph.
