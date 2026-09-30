@@ -258,8 +258,8 @@ thread is how a human notices it. Needs a ticket — see the follow-ups list bel
 | #2255 | `ce9a96b` | **success** — Trivy green on the lockfile bump |
 | #2250 | `a3e6d46` | **success** — was red on Trivy, now green with the port |
 | #2235 | `a4606eb` | **success** |
-| #2236 | `b12dd79` | Sonar green (52.6% on new code); build still in its docker/Trivy stage |
-| #2251 | `7a1f58b` | pending |
+| #2236 | `b12dd79` | **success** |
+| #2251 | `7a1f58b` | **success** |
 
 So the port is not a hope — the same commit that turned #2255 green has cleared feature PRs that
 were red on the identical failure.
@@ -272,3 +272,12 @@ two pushes.
 
 **#2255 still needs merging.** master remains red on the CVE; cherry-picks into feature branches do
 not fix master, and every PR opened from now inherits it until #2255 lands.
+
+### All five green — final
+
+Every PR touched this run finished **build: success**: #2255 `ce9a96b`, #2250 `a3e6d46`,
+#2235 `a4606eb`, #2236 `b12dd79`, #2251 `7a1f58b`. Copilot's re-review of #2236's final head was
+clean, so the three-round fix chain on that PR is closed.
+
+Nothing on these five is waiting on us now — only on human reviewers, and on **#2255 being
+un-drafted and merged**, which is the only thing that clears master.
