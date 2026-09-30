@@ -160,3 +160,6 @@ Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Y
 Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Yash Patel**, still
 5 comments, newest still `112651` (09-21 17:03). No reply from the customer yet — still waiting on
 a re-export without the DRAFT sub-project. No re-investigation performed.
+
+## 2026-09-30 (scheduled) — unchanged
+Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.

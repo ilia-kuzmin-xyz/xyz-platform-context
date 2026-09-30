@@ -159,3 +159,6 @@ finishes loading; `filter-service.ts` refreshes the cached element map on each r
 mechanism this folder traced (model row dropped because its root dbId was missing from
 `allowedDbIdsByModel`), fixed at the tree instead of the map, so the diagnosis holds. Gennaro verified
 on Staging 26.3.6 (`111421`, 09-07); released 09-28. Customer is verifying. Nothing owed by us.
+
+## 2026-09-30 (scheduled) — unchanged
+Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.

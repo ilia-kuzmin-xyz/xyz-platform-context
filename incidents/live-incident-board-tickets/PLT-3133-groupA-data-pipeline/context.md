@@ -355,3 +355,6 @@ Newest comment `113113` (Yash, 09-28 08:59): *"7989 … Waiting on customer"*. I
 the 09-28 run and Jira status is still `Open` (the Freshdesk echo did not move it back to With Customer
 this time). So the 09-28 reading holds: ball is with the customer, Rishi's ask `112616` (09-21) for
 concrete examples is unanswered, now 8 days. Status label is misleading, not the situation.
+
+## 2026-09-30 (scheduled) — unchanged
+Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.

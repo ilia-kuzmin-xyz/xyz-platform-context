@@ -1316,3 +1316,6 @@ Project settings" screenshot show true north still at 0°, or already changed to
 decides whether the customer already tried the (inert) fix or is still deciding to. Not load-bearing
 for the correction itself — the correction is right either way — but it changes the tone of the reply
 (acknowledging wasted effort vs. heading it off).
+
+## 2026-09-30 (scheduled) — unchanged
+Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.

@@ -710,3 +710,6 @@ project. That is why this half is class 4, not a class 2 PR on a guess.
 **Action class: split.** Class 1 half (tell Yash the release only carries Ctrl+Z). Class 4 half
 (what "Select all" and row click should do in the viewer; Ilia has asked Darminder, unanswered).
 Class 2 opens once Darminder answers: wire `selectElements` into `handleSelect` / `selectAllRows`.
+
+## 2026-09-30 (scheduled) — unchanged
+Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.

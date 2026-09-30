@@ -1,0 +1,58 @@
+# PLT-3178 — RGN-PA18: activity dates blank, Installed Elements 0, progress dropped after baseline updates
+
+**First seen 2026-09-30 run** (created 09-29 09:52). Critical · reporter Yash Patel · assignee Yash · status
+**With Customer** (set 09-29 12:22 by Freshdesk "Waiting on customer" echo, `113284`). Freshdesk 8094.
+Project RGN-PA18, id `69cb9ec38c733c8ffc1bcbac`. Domain: `progress-tracking` (schedule upload / baseline →
+dashboard progress). Domain doc read: `dashboard/progress-tab.md`.
+
+## What the customer reported (description + comments 113266, 113271)
+1. Some activities show blank Start/Finish. Example A23610: XYZ % 41.16%, Planned 413, Installed 0.
+2. Progress for past weeks changed after they imported two baselines (new hours, then a new baseline, then
+   back to the previous config).
+3. Project start moved 06-Jan-2025 → 24-Oct-2024 after import; they reset it.
+4. One "forced" activity sits in Archived Activities; does it matter?
+5. Follow-up `113271`: A24360 says installed but XYZ % is 1.39%. Yash's own aside: **A12150 has elements
+   linked in the web viewer but does not appear on the dashboard at all.**
+
+## Answer already on the ticket — Rishi, `113276` (2026-09-29 11:43, edited 11:44)
+Same-day, structured, point-by-point. His mechanism, as stated (NOT re-verified here, see below):
+- Since 17-Sep 11:14 UTC the current schedule and baseline is `PA18.BL01ABWRE_pctfix.xer`, identical to the
+  customer's `3.Come back to BL01-Actual.xer`. That file has fewer actuals than `2.New Hours.xer` (442 vs 831
+  completed activities; 56,822 vs 105,332 actual hours). Dashboard recomputes every week, past weeks
+  included, from the **current** schedule, so history dropped. Fix: upload a schedule with current actuals and
+  set it as current (`2.New Hours.xer` is the fullest).
+- Blank dates are Actual Start/Finish: 521 activities have actuals in file 2, none in file 3. A23610 is one.
+- A23610 platform data is 170/413 = 41.16%; the customer's Power BI sheet says 160, so the export filters
+  are the suspect for "Installed 0".
+- Project start = earliest activity in any folder. `B18-DD-BS-7510` (WBS "Deleted Activities") is dated
+  24-Oct-2024 in file 2; no hours, so progress is unaffected, only the start date.
+- 23-Aug example: hours change moved it -0.14 pts, switching file on 17-Sep a further -2.20 pts.
+- A24360: % comes from linked elements when any exist, from P6 hours only when none. 647 elements were
+  linked 27-Sep 19:22-19:37 UTC, 9 installed → 9/647 = 1.39%.
+
+## Who is waiting on whom
+Ball is with the customer (upload a schedule with current actuals). Status correct. Nothing owed by them
+before the next working day. **One thing is owed by us and unanswered in Jira: A12150** (linked in viewer,
+absent from dashboard, Yash `113266`). Rishi's reply does not mention it. It may have been handled off-ticket.
+
+## Verified vs inferred
+- **Verified (from Jira):** status, dates, who said what, that A12150 is not addressed in `113276`.
+- **Inferred / taken on trust from Rishi, not reproduced by this run:** every number above (2,594
+  activities, 442/831, 170/413, 647/9), the "start = earliest activity in any folder" rule, and "recalculates
+  past weeks from the current schedule". None is computed in hc-frontend (grep of `pages/DashboardPage` and
+  `services` for project-start logic found nothing), so it lives in the backend pipeline and could not be
+  checked from here. Consistent with `dashboard/progress-tab.md` (parquets are backend-computed).
+- **Plausible but untested:** A12150 absent from dashboard because it is not in the current schedule
+  (file 3 has the same 2,594 activities as the 09-17 upload, so if it was added after, it would be missing).
+
+## Unopenable media (session-wide attachment 403, see run-instructions 2026-09-08)
+`1.Previous.xer` 65391, `2.New Hours.xer` 65394, `3.Come back to BL01-Actual.xer` 65392,
+`2026.09.20_RGN-PA18_Report data_analysis.xlsx` 65395, `A24360_example data.xlsx` 65398, screenshots
+65390, 65393, 65396, 65397, plus inline images in `113266`/`113271`. Nothing is needed for the next step;
+Rishi has already opened them. They would only settle whether A12150 is in file 3.
+
+## Open / unverified
+- Whether the customer has uploaded a fuller schedule since.
+- Whether A12150 is in the current schedule.
+- Trigger ("why now") is answered: 17-Sep upload of a schedule with fewer actuals.
+- Cohort: other projects whose current schedule was swapped to a file with fewer actuals: not asked.

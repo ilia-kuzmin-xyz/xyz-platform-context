@@ -45,6 +45,50 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-09-30 (scheduled) — 13 in scope (11 carried over unchanged, 2 new: PLT-3178, PLT-3182), zero Jira actions taken
+
+Board re-queried (23 open Live Incidents, statusCategory not Done). Every carried-over ticket re-fetched with
+comments; newest comment id and status match the folder on all 11. Standing items all tick up one day and are
+not re-drafted (PLT-2651 correction unposted ~22 days, PLT-2874 promise ~19 days overdue, PLT-3147 customer
+question ~12 days, PLT-3084 Darminder question ~11 days, PLT-3133 Rishi ask ~9 days, PLT-3115 close ~14 days).
+
+**PLT-3178 (new, Critical, With Customer, progress-tracking).** RGN-PA18: blank dates, Installed 0, progress
+dropped after baseline imports. Rishi answered point by point the same day (`113276`): the 17-Sep upload made a
+schedule with fewer actuals current and the dashboard recomputes history from the current schedule. Ball is
+with the customer. One loose end owed by us: Yash's aside that **A12150 is linked in the viewer but missing on
+the dashboard** is not addressed in Rishi's reply. Class 1. Draft to Rishi (32 words) in the folder. Rishi's
+numbers were not re-verified (backend pipeline, attachments 403).
+
+**PLT-3182 (new, Medium, Open, access-permissions).** Customer cannot remove 10 ex-employee user/project pairs
+(Eoin Manning x7, Fabio Bunger x2, Marta Sanchez x1) from dashboard projects. FE calls
+`DELETE ms/iam/api/contacts/{id}/projects` (`projectService.ts:142`) and throws the error detail away
+(`TeamContent.tsx:814,857`), so the real error is only in a screenshot (`65456`) we cannot open. Ex-employees
+keeping access makes this time-sensitive despite Medium. Class 1, probably 4 then 2. Draft to Sergey (41 words).
+Also noted: `ProjectInviteCompletePage.tsx:217` passes the two ids to the same function in swapped order.
+
+### Group A (11) · Customer-parked (2) · Resolved tag (2)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged | 4, escalated |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged | 1 |
+| [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged; Select all fix still unshipped | 1 + 4 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged | 4 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged | 1, administrative |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open | Unchanged | 1 |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged | 1 |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged | 1 |
+| [PLT-3178](PLT-3178-groupA-progress-tracking/context.md) | progress-tracking | With Customer · Critical | **New** | 1 |
+| [PLT-3182](PLT-3182-groupA-access-permissions/context.md) | access-permissions | Open | **New** | 1, then 4/2 |
+
+Resolved tag, customer verifying 26.3.6: PLT-3063, PLT-3060. Group B: 0.
+
+**Unopenable media:** PLT-3182 `65456` (error text of the failed removal). PLT-3178 XERs `65391/65392/65394`,
+xlsx `65395/65398`, screenshots `65390/65393/65396/65397` (not needed for the next step).
+
+---
+
 ## Run: 2026-09-29 (scheduled) — 8 Group A tickets carried over, 1 with a real finding (PLT-3084: status says "released, customer checking" but the Select all fix, PR #2197, is still open and blocked by Darminder's CHANGES_REQUESTED), 2 tickets closed out as resolved (PLT-3063, PLT-3060), zero Jira actions taken
 
 Board re-queried (21 open Live Incidents). **New status seen on three tickets at 09-28 16:00-16:04:

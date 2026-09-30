@@ -579,3 +579,6 @@ this week — flagging rather than guessing at the cause (a re-save with no fiel
 component touch, or similar). The open technical question from 09-22 — did the user report the
 *original* missing-mapping issue recurring, or something newly removed (Rishi's `112743`) — is still
 unanswered. No re-investigation performed.
+
+## 2026-09-30 (scheduled) — unchanged
+Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.

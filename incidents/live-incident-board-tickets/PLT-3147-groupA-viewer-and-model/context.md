@@ -503,3 +503,6 @@ Live `getJiraIssue` re-fetch: status still **With Customer**, assignee still **Y
 please help us to identify the name of the model which is causing this effect" — is now **10
 days** unanswered on a **Critical** ticket, while the board still reads as though the ball is
 theirs. No new attachment. No re-investigation performed.
+
+## 2026-09-30 (scheduled) — unchanged
+Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.
