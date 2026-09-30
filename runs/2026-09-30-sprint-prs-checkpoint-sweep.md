@@ -100,6 +100,9 @@ Plus 2 open product/design questions carried over: #2197 (Darminder, select-all 
 5. **`ReadinessLevelsSection`'s rung picker loses its exclusion while the step-id query is
    pending** — master's, verified byte-identical there; concrete patch on #2236
    (`discussion_r4142507877`). Raised 09-30.
+7. **Codebase-level: unsettled query data read as a meaningful value.** Five distinct instances
+   recorded on 2026-09-30 across two PRs and two features (table above). Not a type-page quirk;
+   worth a deliberate look at how query results are consumed rather than another per-site fix.
 6. **`ReadinessLevelsSection` drops a rung task whose template was deleted** — same
    `.filter(Boolean)` shape as the Other-list bug fixed in `2cb365a`, also master's and also newly
    reachable now that #2203 ships template deletion. Invisible, unremovable, still generating.
@@ -492,3 +495,33 @@ remembering, not the ten.
 4. **When a fix applies to "the create page" or "the type detail", check there are two.** Asset and
    system are near-identical surfaces; three separate findings this run were the un-carried half of
    a fix.
+
+## Cross-ticket confirmation: the same bug shape turned up on #2250
+
+Later the same day, two Copilot findings were fixed on **#2250 / PLT-2799** (`798e5e2`, by a
+parallel session — not this one). The first is worth recording here rather than only in that
+ticket's file:
+
+> while the pinned-version read is still in flight `data` is `undefined`, so it was briefly falling
+> back to the template's current text — the exact leak the pin exists to close
+
+That is the **same shape as every variant on #2236 today**: an in-flight query's absent value being
+read as a meaningful one. Different PR, different feature, different author — so this is not a
+quirk of the type pages, it is a **codebase-level pattern** in how query results are consumed.
+
+The instances now on record, all 2026-09-30:
+
+| Where | Absent value | Read as |
+|---|---|---|
+| `AssetTypeDetailContent` | unstubbed mapping query → `[]` | "this type maps nothing" |
+| `AssetTypeDetailContent` | unresolved `nameById` | "this type has no rung tasks" |
+| both type pages | cached-but-refetching mappings | "these mappings are current" |
+| `AssetTypeDetailContent` | template deleted from library | "this mapping does not exist" |
+| `TaskInstanceModal` (#2250) | pinned-version read in flight | "this version stored no description" |
+
+The fix is different each time (a gate, a reshaped memo, a later session end, a fallback, an
+`isSuccess` check), which is exactly why it keeps recurring — there is no single wrong line to
+find. **The generalisable rule: a query's `data` before it settles is not a value, and any code
+that treats "nothing came back" and "nothing exists" as the same case is wrong by default.**
+
+Worth raising as a codebase concern rather than five ticket-level fixes. Added to the follow-ups.
