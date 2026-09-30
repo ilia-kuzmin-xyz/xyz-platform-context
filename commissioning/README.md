@@ -387,3 +387,59 @@ can clear, and no developer had acted on the previously-held three since the las
 **Open unresolved review threads across the six: 4** — 1 on #2244 (the withOptionalColumn defect),
 3 on #2221 (setOrder cross-workflow reassignment; two clear() partial-failure findings — no prod
 caller, test-reset only). #2229's leftovers are Copilot review-body items, not threads.
+
+## 2026-09-30 — scheduled review run: three new PRs, all held for Ilia, nothing posted
+
+Scope filter (Rishi/Darminder/Tom, non-draft) matched #2254 (Darminder, PLT-3144), #2252 (Rishi,
+PLT-3093), #2247 (Rishi, PLT-3153) — all created 09-28/29 — plus the long-standing #2221. None by
+Tom; #2211 still draft. CI (build + Sonar) green on all three new heads; all three merge clean
+with master (#2254 is 0 behind, #2252 is 3, #2247 is 7). **No reviews or comments posted**: each
+new PR's own testing steps are visual/manual gates under the run's 95% bar, and #2221 had no
+developer action since the 09-27 hold.
+
+- **#2254 (PLT-3144, folder delete + first-upload fix) — cleanest of the three; recommend Ilia's
+  visual pass then approve.** All 8 Copilot threads resolved (real fixes or reasoned no-changes).
+  The branch's own unlink-and-archive folder flow (`useFolderDelete`/`RecordedWorkModal`) was
+  REMOVED in the master merge (d43b6165); head builds on master's PLT-2999 dialog with three folder
+  outs: move-to-Unassigned (FK `ON DELETE SET NULL`), archive-all-then-delete-folder, and
+  archive-N-delete-M (re-reads usage, unions with what the user saw, archives before deletes —
+  `TaskLibraryTab.tsx` `archiveAndDeletePendingFolder`). Archive semantics deliberately match
+  master: applied tasks stay applied (guarded by `liveDefinitionsById` + xyz-supabase #37 trigger).
+  Known gap, acknowledged in-thread as a follow-up: multi-call delete is not atomic (needs an RPC).
+  The upload fix is pitfall-clean: new `commissioningFiles/platform-environment.ts` resolves at
+  runtime (profile first: prod/preprod→null fail-closed, staging→staging, dev/local→dev; entrypoint
+  `COMMISSIONING_PLATFORM_ENVIRONMENT` only fills a profile gap, whitelisted to dev|staging), setter
+  runs after the profile dispatch, binding keyed by mongo id (refuses postgres ids) exactly as
+  mobile keys it. Held only for the manual dev-project first-upload check + destructive-flow QA the
+  PR itself asks for; the binding is permanent per project, so a wrong env write is uncorrectable.
+- **#2252 (PLT-3093, offline conflict handler) — hold.** 10 of 11 Copilot threads fixed same-day
+  (incl. the real ones: conflicted task openable with `paused=false` during lookup; readiness
+  projected from unloaded inputs; multi-challenger archive-unseen-runs). **1 thread open at head**,
+  posted after Rishi's last replies: `readValue` (`useConflictCases.utils.ts:181`) joins table cells
+  with `' | '`/`'; '`, so differing cell boundaries can render identical and unhighlighted. Display
+  fidelity only — flagging, `differing_item_count` and identical-answer auto-supersede are
+  server-side (`commissioning_conflict_case_v1`, xyz-supabase #53 RPC contract) — medium, worth a
+  nudge. Hard dependency: **xyz-supabase #53 must be applied to the env the FE points at**
+  (pitfall §3/§4 lockstep class; couldn't verify — that repo is outside this session's scope).
+  Testing needs two tabs + Admin/Editor roles; entirely manual.
+- **#2247 (PLT-3153, Issues from failed checklist items) — hold.** All 14 threads resolved; the
+  permission story took two rounds (render gating, then the `useTaskIssueLinks` query itself gated
+  on `PROJECT_ISSUES_VIEW`). Rishi browser-verified the disputed `isIssuePlaced` claim (Copilot's
+  "cannot save without pin" was wrong — position fields nest as one array). Copilot body leftovers,
+  both medium UX, unaddressed: chip click doesn't expand a collapsed Open Issues card (selected
+  card invisible), and Raised-from → Item is a no-op when the item is filtered/collapsed
+  (`use-task-issue-binding.tsx:97`). Link storage `task_execution_issue` (xyz-supabase #50, PR says
+  merged; unverifiable this session). Ticket AC is a page of visual detail + prototypes.
+- **Interlock found this run**: #2252 ↔ #2247 textually CONFLICT in all three runner modals
+  (`TaskInstanceModal`, `ManagedTaskInstanceModal`, `TaskExecutionModal`) + `i18n/en/main.json`.
+  Both are Rishi's; whichever lands second is a real merge, and the semantics interact (#2252 gates
+  runner opening on conflict lookup; #2247 rewires the same modals' layout/actions). #2254 merges
+  clean with both.
+- **#2221 (PLT-3136) — degrading.** Head unchanged since 09-23, Ilia's 09-26 conditional review
+  still unanswered, and the conflict set vs master has grown from 3 files (09-27) to 8+ (both
+  panels, `use-asset-detail-from-selection`, checklist services, `task-instance-file-service` —
+  the last now also collides with #2254's upload fix). The 09-27 findings (PLT-3138 assignee-field
+  gap in the api-v2 port) still stand.
+
+**Open unresolved review threads across the four: 4** — 1 on #2252 (readValue), 3 on #2221
+(unchanged). #2247's and #2254's leftovers are review-body items, not threads.
