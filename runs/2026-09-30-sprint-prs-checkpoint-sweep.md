@@ -100,6 +100,9 @@ Plus 2 open product/design questions carried over: #2197 (Darminder, select-all 
 5. **`ReadinessLevelsSection`'s rung picker loses its exclusion while the step-id query is
    pending** — master's, verified byte-identical there; concrete patch on #2236
    (`discussion_r4142507877`). Raised 09-30.
+6. **`ReadinessLevelsSection` drops a rung task whose template was deleted** — same
+   `.filter(Boolean)` shape as the Other-list bug fixed in `2cb365a`, also master's and also newly
+   reachable now that #2203 ships template deletion. Invisible, unremovable, still generating.
 
 ---
 
@@ -325,3 +328,55 @@ one ticket (empty default → unresolved name map → stale refetch), each one a
 value being read as a meaningful one.
 
 Both threads resolved. Open threads back to **3**.
+
+## Fifth round on #2236 — both findings were gaps in THIS RUN's own fixes
+
+Not new territory: both are places an earlier fix from today stopped one step short.
+
+### A deleted task template left an invisible-but-active Other mapping (`2cb365a`)
+
+`otherTasks` on the asset page used `flatMap` and **dropped** any id the library no longer
+returns. The row vanished so it could not be removed, `onTypeIds` kept hiding it from the picker
+(it is driven off `otherTaskIds`, not off the resolved list), and reconciliation kept generating
+its instances off the mapping row. Invisible, unremovable, still doing work.
+
+**The tell was internal disagreement:** `SystemTypeDetail`'s Other list falls back to
+`link.taskTemplateId`; the asset one dropped. Both are new in this PR, so that was self-inflicted.
+Fixed the asset side to match.
+
+**Reachability changed this week and that is the point.** Archived templates resolve here —
+`definitions` is read with `includeArchived: true` exactly so an archived-after-linking task still
+shows. Only a **deleted** template hits this, and delete landed on master days ago in #2203. The
+branch did not change; what could happen to the data did.
+
+*Correction to Copilot's comment, which said the ladder keeps the raw id:* it does not.
+`ReadinessLevelsSection` has the same `.filter(Boolean)` drop and it is byte-identical on master.
+After this fix Other is the odd one out, in the better direction. Not changing the ladder from
+inside this ticket — added to the follow-ups.
+
+### System-type create staging was not frozen — the half of `b12dd79` I missed
+
+Fixed exactly this on the **asset** create page earlier today and did not carry it to the system
+one. Same bug, same page shape, one of two done.
+
+The system version is worse: its loop is `if (staged.length > 0)` per rung, so an **emptied** slice
+is skipped rather than written as an empty replace — the persisted mapping survives, and moving
+that task to Other writes a second mapping for the same template on top.
+
+Took the freeze over "replace every already-written rung including empty slices": the replace is
+more faithful in principle but needs bookkeeping of which rungs were written, on the error path,
+which by definition already went wrong once. Freezing makes the resumed save equal to the save the
+user confirmed.
+
+### The honest read on five rounds
+
+Every round since the first has been a **variant of one mistake**: a value that is absent, stale or
+unresolved being treated as meaningful. Empty default → unresolved name map → stale refetch →
+dropped-on-missing-definition. And twice now (the name lock, the create freeze) a fix landed on one
+of two symmetrical pages.
+
+Two process points worth carrying:
+1. **When a fix applies to "the create page", check there are not two.** Asset and system type
+   creation are near-identical flows; a fix to one is a hypothesis about the other.
+2. **A fix that makes two of my own components disagree is a bug in one of them.** The Other list
+   divergence was visible in my own diff before any reviewer saw it.
