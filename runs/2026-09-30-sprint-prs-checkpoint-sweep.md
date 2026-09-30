@@ -72,9 +72,18 @@ behaviour first. That is the predicted blast radius, and a red build there is no
 Master-merges were **not** pushed to #2222/#2197/#2212/#2245: all green or blocked on human input,
 and merging master into a PR that cannot be test-verified is exactly what broke #2236 on 09-29.
 
-## Open review threads across the 11 PRs: **2**
+## Open review threads across the 11 PRs: **3**
 1 on #2235 (a11y keyboard, parked for a ticket), 1 on #2251 (polling-hook tests, parked on the
-no-local-test-run constraint). Down from 9 on 09-29.
+no-local-test-run constraint), 1 on #2245 (discipline-package filter, parked by the author on
+09-28). Down from 9 on 09-29.
+
+**Corrects an earlier line in this file that said 2** — it counted only the two PRs worked this
+run and dropped #2245's, which was already open and is untouched.
+
+#2236 cleared **8** threads this run, not 6: the 6 that were open on arrival, plus 2 more Copilot
+raised on the first push (the name-lock hole my own retry-guard change opened, and the stale
+"create system type page is unchanged" line in the description). Both fixed/corrected in `f1aedef`
+and resolved.
 
 Plus 2 open product/design questions carried over: #2197 (Darminder, select-all scope) and the
 #2203 Delete-cascade question to Jason (now moot — #2203 merged).
@@ -147,3 +156,13 @@ repo-wide CI outage in two days (the Wolfi one on 09-29 was the first).
 Read the *whole* failing job log rather than the tail before concluding. The tail showed only the
 Trivy table; it took the fuller log to establish that lint/tests/docker all passed, which is the
 difference between "not this PR's failure" and a guess.
+
+## Final CI state at end of run
+
+Tests are **not** the problem anywhere. Sonar's quality gate passed on #2236 (52.1% coverage on
+new code), #2235 and #2250 — and Sonar consumes the test run's lcov, so the suite completed and
+passed on each. In particular **#2236's picker changes did not break the ~5,800-test suite**,
+which was the one thing static analysis could not settle.
+
+Every build then fails at the **Trivy step only**, on the `brace-expansion` CVEs, and stays that
+way until **#2255** is un-drafted and merged. That is the single human action this run needs.
