@@ -429,3 +429,34 @@ pushed today was either mechanical (a lockfile, a merge union) or provably local
 guard on a mutator, a fallback on a map lookup). This one changed when a control is usable, which
 is precisely the class that needs a render to verify. CI is an acceptable validator for the first
 kind and not for the second.
+
+## The stale-mapping window was fixed properly — by someone else, with a better design
+
+While this session was standing down on it, `fdf42ab` landed on the branch (plus `df57037`,
+prototype polish on the save toast / list shade / viewer note). My revert `cb9980a` is intact
+underneath both.
+
+**"PLT-3139: End a type's edit session only once its mappings have reloaded."** Save waits for the
+type-task queries to reload before it ends the edit session, so Edit only returns once the
+exclusion sets already include what was just saved. **No `isFetching` gate at all**, so the
+refetch-on-mount that broke my version cannot touch it. A test holds the reload open and asserts
+the page stays in edit mode until it lands, verified to fail without the fix.
+
+**This is a better design than what I proposed on the thread.** I was reaching for a flag armed on
+save-success and cleared when the mappings settle — extra state, plus the ordering race I flagged.
+The landed fix removes the window instead of policing re-entry into it: there is no interval during
+which the page is editable on stale data, so nothing needs to be disabled and nothing needs to know
+whether a refetch is a save's or a mount's.
+
+**Worth taking the general lesson, not just the fact:** I was treating "the data can be stale while
+the UI is usable" as a *guarding* problem and looking for the right predicate to block on. It was a
+*lifecycle* problem — the edit session was ending too early. When several attempts at a guard all
+founder on "which refetch is this", that is the signal the guard is in the wrong place.
+
+It also confirms the call to stop was right for the right reason. The blocker was never the
+difficulty; it was that this class of change needs a render to verify and this environment cannot
+provide one. Someone with a working install wrote a test that fails without the fix — which is the
+step I could not have done.
+
+Nothing here is this session's to resolve: the three open threads belong with whoever landed the
+fix. CI running on `fdf42ab`.
