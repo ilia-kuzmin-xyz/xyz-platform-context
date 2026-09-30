@@ -362,3 +362,22 @@ most likely way a push here goes red, *until that token exists*" — the token s
 but the constraint is gone: see PLT-3139's 09-29 entry for the stub that makes the suite runnable.
 
 Still `blocked` purely on the four requested human reviewers. Nothing here is waiting on us.
+
+## 2026-09-30 — master catch-up only, no review work
+
+PR **#2235**, green on arrival (`build`, Sonar, copilot all success on `1d07263`).
+
+- **Checkpoint 1:** one thread open, unchanged — the `asset-card.tsx` a11y one. The perceivable
+  half shipped in `07ad926` (selection rides the accessible name, since `aria-selected` is invalid
+  on `role='listitem'`); the **keyboard path + selectable-list semantics** half is deliberately
+  left open, because it turns the container into `role='listbox' aria-multiselectable` and has to
+  reconcile *two* distinct states (open card vs delete selection) that listbox only models one of.
+  That is a design call, not a review fix. **Still wants its own ticket.**
+- **Checkpoint 2:** green.
+- **Checkpoint 3:** was 2 behind (`45ae5d8` PLT-3181, `27a2f9a` PLT-2999). Merged master — **no
+  conflicts** — and pushed `ca1ebdc`.
+
+Verified by hand after the merge, because master and this branch both touch
+`commissioningApi/postgrest-client.ts`: the opt-in `remove(table, filters, { returning })`
+signature this PR introduced survived intact, and master's new 2-arg callers still satisfy it via
+the defaulted `options`. That was the one place the merge could have quietly broken something.

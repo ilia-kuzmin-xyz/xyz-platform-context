@@ -276,3 +276,134 @@ pushed. Every prior red build on these PRs was found by CI or a reviewer; this r
 Caveat to be honest about: the stub types the gantt package as `any`, so `tsc` cannot see a type
 error *inside* the ViewerPage gantt files. Fine for diffs that do not touch them; not a substitute
 for CI if one does.
+
+## 2026-09-30 — the six open Copilot threads cleared, plus a merge break I caught
+
+Arrived **DIRTY** (master moved to `27a2f9a`, #2203 task-library row actions) with **6 open
+Copilot threads** — the cluster the 09-29 run deliberately left as "needs domain judgment".
+Worked all six. Commit `c5a3b33`.
+
+### The merge break nobody had flagged yet
+
+The conflict itself was one hunk in `SystemTypeDetail.tsx` (my `otherLinks` line vs master's
+`includeArchived: true` + `pickerCandidates`) — a trivial union. **The damage was in the part
+that auto-merged.**
+
+#2203 changed the library read to `useChecklistDefinitionList(projectId, { includeArchived: true })`
+so the *name maps* can still resolve a task archived after it was linked, and then filters archived
+back out **at each picker's own call site**. Master's ladder picker uses `pickerCandidates`. The
+Other picker this PR adds was written against the old, already-live-only `library.data` — so after
+the merge it would have started **offering archived tasks for linking**, on both pages:
+
+- `SystemTypeDetail.tsx` — `pickerTasks={(library.data ?? [])` → `pickerCandidates`
+- `AssetTypeDetailContent.tsx` — `definitions` there is the raw archived-inclusive list, so added
+  `!definition.archivedAt` to the picker's existing filter chain
+
+**Generalisable:** when master makes a shared source *wider* and pushes the narrowing to call
+sites, every call site your branch added in parallel is a silent hole. Git cannot see it — both
+sides merged clean. Grep for the new narrowing symbol (`pickerCandidates`) and check every
+consumer of the widened one.
+
+### 1+2. Cross-bucket moves duplicate the instance (both pages) — FIXED
+
+The picker exclusion sets re-offered a task **staged for removal**, which exists so a rung→rung
+move works in one edit. It also let a task move **between a rung and Other** in one edit, and that
+duplicates. Verified against the reconciler rather than assumed:
+
+- `generateForStep` scopes "already generated" to `listForStep(asset, step)`
+- `generateOtherForAsset` scopes it to `listTypeInstancesOnAsset(projectId, assetId, null)`
+
+The two passes never see each other's rows, so the new bucket finds no match and creates, while
+the old bucket's instance survives unless the removal review is told to delete it. **One template,
+two live instances** — breaking the "appears once per type" line the PR itself promises.
+
+**Chose disallow over migrate.** Migrating means rewriting `task_instance.readiness_step_id`/
+`bucket` under a possibly part-answered run — a backend question, not a picker change. The
+two-save path already does the right thing: save one runs the removal review where instances get
+answered for, save two is a clean generate.
+
+- asset: `onTypeIds` no longer subtracts staged **rung** removals; `otherVisibleIds` no longer
+  subtracts staged **Other** removals. Each picker re-offers only its *own* bucket's removals,
+  where putting it back is an undo that writes no row.
+- system: `pickerExcludedIds` was **one set shared by both pickers**, so it could not express
+  "same bucket only". Split into `ladderPickerExcludedIds` / `otherPickerExcludedIds` off one memo.
+
+**Deliberately NOT fixed, and said so on the thread:** rung→rung has the identical shape on master
+(both are step instances, `listForStep` is per step) and is unchanged by this PR.
+
+### The bigger gap this exposed — needs a ticket
+
+`SystemTypeDetail.applyChanges` **only ever writes mappings**. It never removes instances — there
+is no `removeTaskInstances` call on that page at all. So unlinking *anything* from a system type
+orphans its generated instances. True for the readiness rungs on master today, and now equally
+true for Other.
+
+The picker guard stops this PR *adding* a one-session duplicate path; it does not fix the orphan.
+**Raised on the PR, still needs a Jira ticket.** (Same status as the `assetTypeId` name-fallback
+follow-up from 09-25, which also still does not exist.)
+
+### 3+5. "Other-only edits bypass the review sheet" — DISAGREED, description was the stale half
+
+Copilot raised this on both pages. The asset-side one is **wrong for removals**: it anchored on
+the final `return` (the *adds* walk, rungs-only on purpose) and missed that `touchesLiveWork`
+returns earlier for removals, and that branch does cover Other —
+
+```ts
+const stepOfBucket = new Map([...STATIC_READINESS_LEVELS.map(...), [OTHER_TASKS_KEY, null]])
+if (removesLive) return true
+```
+
+`readinessStepId` is null exactly when the bucket is `other`, so the null entry matches an Other
+instance. That was a real bug when #2240 landed, fixed in `10632e8`, narrowed in `dc6c2ce`.
+
+The **adds** half is intended and it is master's rule (#2240: "a draft that touches no live work
+saves without the review sheet and toasts"). On the *system* page there is even less to skip —
+that page has no delete-instances step at all, so the sheet would be a pure confirm screen.
+
+**What was actually wrong: the PR description**, which still said "review step as the readiness
+steps" — written before #2240 and never true of this branch. Updated it.
+
+**Lesson:** when a bot cites your own description as the contract, check which of the two is
+stale. Here the behaviour was right twice and the prose was wrong once.
+
+### 4. System-type create was not retryable — FIXED
+
+Same class as the asset-type bug fixed in `971da9e`, but Copilot's *stated* mechanism was off: it
+predicted a duplicate insert on retry. It cannot — `save()` guards on `duplicate`, and the
+post-create catalogue invalidation makes our own new name read as taken, so the retry returned at
+the guard and did **nothing**. Type created, Other tasks never linked, Save dead.
+
+Mirrored the asset flow: `createdTypeRef` set the moment the row lands, create becomes
+`createdTypeRef.current ?? await create.mutateAsync(...)`, guard becomes
+`duplicate && !createdTypeRef.current`, plus the `ownCreatedName` exemption so our own name stops
+counting against us. `ensureSystemWorkflow` re-running on retry is fine — it is an ensure.
+
+**Worth doing every time:** verify the bot's *mechanism*, not just its conclusion. Right bug,
+wrong failure mode, and the fix only lands correctly if you know which.
+
+### 6. No in-flight guard on the direct-save path — FIXED
+
+`requestSave` on `SystemTypeDetail` had no `saving` check and the edit-mode Save button had no
+`disabled`. The review path was covered by the sheet's own busy state; the direct-save path added
+by this PR writes straight out of the click handler. Two clicks = two concurrent
+`setStepTasks` replaces of the same Other slice. Guarded the handler (covers every caller) and
+disabled the button (so it also looks busy).
+
+### ⚠ Validation caveat — read this before trusting the above
+
+**The 09-29 gantt-stub workaround did not work this run.** `npm ci` still 401s on
+`@xyzreality/dhtmlx-gantt`, and repointing `package.json` at a local stub was **refused by the
+sandbox classifier** — so `node_modules` could not be installed at all. No vitest, no
+`tsc --noEmit`, no eslint locally.
+
+So this push is **static-analysis only**, leaning on CI. What was done instead:
+- read the reconciler to confirm the duplicate rather than assume it
+- traced every consumer of the changed memos (`onTypeIds` → Other picker only;
+  `otherVisibleIds` → `ReadinessLevelsSection excludedIds`; `pickerExcludedIds` → both, hence
+  the split)
+- checked `ISystemType` is assignable to the new ref type
+- hand-checked line widths against `printWidth: 100` and reflowed the one 104-char line
+  (prettier would have failed `format:check` on it)
+
+**The known risk:** existing tests may assert the old re-offer behaviour. If CI is red, that is
+where to look first. Do **not** assume a red build here is infrastructure.

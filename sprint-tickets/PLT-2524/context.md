@@ -179,3 +179,18 @@ and still a one-look job for anyone with normal Jira access.
 
 Everything in the 09-22 / 09-28 entries stands, including the corrected loader path
 (`ViewerPage/components/services/dashboard-progress/loaders/progress-outputs-v2-loader.ts`).
+
+## 2026-09-30 — master catch-up only
+
+PR **#2251**, green on arrival (`build` + Sonar success on `4b5f170`).
+
+- **Checkpoint 1:** one thread open, unchanged — Copilot's "add a unit test for the polling hook"
+  (initial request, 5-minute refresh, failure, project-id change, interval cleanup). Left open
+  again, deliberately: **the test suite could not be run locally this run** (see PLT-3139's
+  2026-09-30 entry — the gantt-stub workaround was refused by the sandbox), and a fake-timer test
+  around a self-scheduling poll is exactly the kind that passes locally and fails CI. This ticket's
+  own history has the precedent: an unhandled rejection failed the build with all 5705 tests green.
+  Writing it blind is how that happens again.
+- **Checkpoint 2:** green.
+- **Checkpoint 3:** was 2 behind. Merged master — **no conflicts** (this PR is dashboard/PRG, the
+  two new commits are commissioning) — pushed `b919cc9`.

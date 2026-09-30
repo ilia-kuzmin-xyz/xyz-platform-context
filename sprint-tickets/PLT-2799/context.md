@@ -115,3 +115,27 @@ blocker had narrowed to a question anyone can answer in one look.)
 Nothing has changed in the code or on the ticket since 09-25. The 09-22 finding stands: the
 stated acceptance criterion already holds in `ChecklistLibraryService.update()`, and what is
 left is (a) a version-history view and (b) whether cosmetic edits should stop cutting a version.
+
+## 2026-09-30 — master merge, one conflict, resolved as a union
+
+Arrived **DIRTY**. Master moved to `27a2f9a` (#2203, task-library row actions), which lands
+`remove()` on `checklistLibraryService` — the same service this ticket adds `versionDescription()`
+to, so a collision was expected.
+
+**One conflict**, in `checklist-library-service.wire-contract.test.ts`, and it was purely
+positional: both sides appended a new block at the end of the same `describe`. HEAD added
+`describe("a version's own description")` (5 tests), master added
+`it('removes one template…')` + `describe('the tasks a deleted template left on assets')` (4 tests).
+Kept **both** — closed HEAD's block explicitly and let master's keep the trailing closers.
+
+Checked the auto-merged **service** file for a semantic collision rather than trusting the clean
+merge: `remove()` (master, line ~1248) and `versionDescription()` (ours, ~1336) are both present
+and orthogonal — master's delete relies on the schema cascading `task_template_version`, ours adds
+a column to the version insert. No interaction. Both sides' `seedTemplate()` helpers are scoped to
+their own `describe`, so the duplicate name is fine.
+
+Pushed as `9c39a8a`. No code change beyond the merge.
+
+**Still blocked on the same thing as before:** XYZReality/xyz-supabase#51 (the
+`task_template_version.description` column). Safe to ship without it — the write retries without
+the column and the read falls back to the template.
