@@ -97,6 +97,9 @@ Plus 2 open product/design questions carried over: #2197 (Darminder, select-all 
 3. **`asset-card` selectable-list a11y** — from #2235.
 4. **The dangling `titleId` in `common/modal/modal.tsx`** — `title` sets `aria-labelledby` at an id
    nothing renders, so every dialog using that prop is unnamed. Flagged on #2235 09-25.
+5. **`ReadinessLevelsSection`'s rung picker loses its exclusion while the step-id query is
+   pending** — master's, verified byte-identical there; concrete patch on #2236
+   (`discussion_r4142507877`). Raised 09-30.
 
 ---
 
@@ -199,3 +202,51 @@ The failing step is `scan.__run_4` (Run Trivy). Lint passed, the **full test sui
 posted a green gate with 52.1% coverage on new code, and it consumes the test run's lcov — and the
 docker image built (`frontend:7f6e68f` tagged, then removed in cleanup). So the cross-bucket picker
 changes did **not** break the suite, which was this run's one unvalidated risk.
+
+## #2255 verified green — the CVE fix works
+
+`build` **success** on #2255 (completed 08:30), Sonar gate green with 0 new issues. The Trivy step
+that fails on every other head passes on the lockfile bump, so the fix is confirmed rather than
+assumed, and the four ported branches should follow.
+
+**#2255 still needs merging** — master is red on this and a port into feature branches does not
+fix master.
+
+## Third Copilot round on #2236 — two more HIGH findings, one fixed, one scoped out
+
+### Fixed: create-page staging stayed editable after a partial save (`b12dd79`)
+
+`createWithStagedTasks` is **link-only by design** — a create has no persisted baseline to diff
+against, so it never had reason to unlink. Fine while the draft could not change after Save; not
+fine once `971da9e` made Save retryable. Unstage a task that linked *before* the failure and the
+retry finishes with the type carrying a task the draft no longer shows.
+
+Froze staging from the moment the row exists — same precondition the name field already locks on,
+and the same fix shape as the system-type create page earlier in this run. `tasksFrozen` gates
+`stageOnStep` / `unstageFromStep`, so one choke point covers rungs and Other rather than threading
+a flag into two sections. Ref mirrored into state so it lands as the create resolves.
+
+*Known limitation, stated on the thread rather than glossed:* the controls go inert, not visibly
+disabled. Making them render read-only needs a new prop through `ReadinessLevelsSection` and
+`OtherTasksBlock` — wider than the bug warrants.
+
+### Scoped out: the rung picker's exclusion dies with an unresolved step-id query
+
+Mechanism verified, and it is real: `tasksByLevel` re-keys `mappedByStepId` through `nameById` and
+**drops any id whose rung does not resolve**, so with that query pending the rung picker's
+exclusion is empty and it will offer a task already mapped to another rung. Same shape as the
+`otherTaskIds = []` hole, one query further out.
+
+**But both memos are byte-for-byte identical on master** (checked with
+`git show origin/master:...ReadinessLevelsSection.tsx`). All this PR adds to that file is the
+`excludedIds` prop, which only feeds Other ids in. The cross-bucket version was fixed here because
+this PR introduces the Other bucket; this rung↔rung window is master's.
+
+Proposed patch left on the thread — drive the exclusion off `mappedByStepId` (already in the right
+shape) and use the rung-keyed map only to re-open staged removals. Unresolved, the worst case flips
+from "writes a second row" to "keeps offering a task staged for removal". No loading gate, so Edit
+does not go dead on load — which is why the gate was rejected when this came up on the Other side.
+
+**Thread left OPEN deliberately**, unlike the 09-25 `assetTypeId` decline which was resolved: a
+real scope question was put to the reviewer ("shout if you'd rather it rode this PR"), and an open
+thread is how a human notices it. Needs a ticket — see the follow-ups list below.
