@@ -72,7 +72,7 @@ behaviour first. That is the predicted blast radius, and a red build there is no
 Master-merges were **not** pushed to #2222/#2197/#2212/#2245: all green or blocked on human input,
 and merging master into a PR that cannot be test-verified is exactly what broke #2236 on 09-29.
 
-## Open review threads across the 10 PRs: **2**
+## Open review threads across the 11 PRs: **2**
 1 on #2235 (a11y keyboard, parked for a ticket), 1 on #2251 (polling-hook tests, parked on the
 no-local-test-run constraint). Down from 9 on 09-29.
 
@@ -88,3 +88,62 @@ Plus 2 open product/design questions carried over: #2197 (Darminder, select-all 
 3. **`asset-card` selectable-list a11y** — from #2235.
 4. **The dangling `titleId` in `common/modal/modal.tsx`** — `title` sets `aria-labelledby` at an id
    nothing renders, so every dialog using that prop is unnamed. Flagged on #2235 09-25.
+
+---
+
+## Late in the run: every build went red, repo-wide, and it was not any of these PRs
+
+#2250's build failed at 08:05 on `9c39a8a`. **Only the Trivy scan step failed** — lint, tests and
+the docker build all passed. Two CVEs published into the scanner DB this morning:
+
+```
+brace-expansion  CVE-2026-102276  HIGH  fixed  5.0.9  → 5.0.10, 3.0.7, 2.1.5, 1.1.19
+                 CVE-2026-102278  HIGH  fixed  5.0.9  → 5.0.11, 3.0.8, 2.1.6, 1.1.20
+```
+
+The scan runs `exit-code: 1`, `severity: CRITICAL,HIGH`, `ignore-unfixed: true` — and both are
+marked **fixed** upstream, so `ignore-unfixed` does not skip them. `brace-expansion` 5.0.9 is on
+**master**, and #2250 does not touch `package-lock.json`, so this is inherited and repo-wide:
+every open PR and master itself fail until the lockfile moves.
+
+### The fix — #2255, and why it is lockfile-only
+
+Checked before reaching for `overrides`, and no override was needed:
+
+- The only **non-dev** copy is `node_modules/brace-expansion`, reached via
+  `@swagger-api/apidom-reference` → `minimatch`, which **already declares `^5.0.2`**. The lockfile
+  was just pinned stale at 5.0.9. A refresh lands 5.0.12, past the 5.0.11 the later CVE needs.
+- Dev-only copies move inside their own ranges: `1.1.16 → 1.1.21` (`^1.1.7`),
+  `2.1.2 → 2.1.7` (`^2.0.1`). Trivy suppresses dev deps so these were not the failure, but same bug.
+
+`npm update brace-expansion --package-lock-only`. 34 lines, all `version`/`resolved`/`integrity`
+triples plus one `engines.node` line (5.0.12 wants `20 || >=22`; CI installs on Node 22 per
+`pr-check.yaml`, and there is no `engine-strict` in `.npmrc`).
+
+Deliberately **not** added to `.trivyignore` — that file's own comments reserve it for genuinely
+unfixable findings, and these are fixable in the lockfile.
+
+**#2255 is a DRAFT** (house default). It needs un-drafting and merging by a human; until it lands,
+every open PR stays red on the scan step alone.
+
+### ⚠ The important discovery for future runs: `npm install --package-lock-only` WORKS
+
+This run's earlier note says local validation was impossible. That is true for **running** the
+suite — `npm ci` still 401s on `@xyzreality/dhtmlx-gantt` and the stub workaround is refused by the
+sandbox. But **lockfile-only** npm operations succeed, because they resolve metadata rather than
+download the private tarball:
+
+```
+npm install --package-lock-only        # exit 0
+npm update <pkg> --package-lock-only   # exit 0, respects .npmrc min-release-age=7
+```
+
+So **dependency/CVE hotfixes are fully doable from a scheduled run** even though the test suite is
+not. Worth knowing before the next "every build is red on a CVE" morning — this is the second
+repo-wide CI outage in two days (the Wolfi one on 09-29 was the first).
+
+### Method note
+
+Read the *whole* failing job log rather than the tail before concluding. The tail showed only the
+Trivy table; it took the fuller log to establish that lint/tests/docker all passed, which is the
+difference between "not this PR's failure" and a guess.
