@@ -380,3 +380,52 @@ Two process points worth carrying:
    creation are near-identical flows; a fix to one is a hypothesis about the other.
 2. **A fix that makes two of my own components disagree is a bug in one of them.** The Other list
    divergence was visible in my own diff before any reviewer saw it.
+
+## ⛔ I broke the build, and the revert is the lesson
+
+`616df74` — the `isFetching` edit gate — **turned #2236 red: 32 failures in
+`AssetTypeDetailContent.test.tsx`**. Reverted in `cb9980a`. Both threads reopened rather than left
+resolved on a fix that no longer exists.
+
+### The reasoning error, precisely
+
+I argued on the thread that `isFetching` could only be true after an invalidation, *because* both
+mapping queries are in the loading gate, so content does not render until they have resolved once.
+That inference is wrong in one specific way: **`staleTime` is 0**, so React Query refetches on
+mount and cached data is stale immediately. `isLoading` false + `isFetching` true is the *ordinary*
+render, not the exceptional one. The gate disabled Edit in normal use.
+
+The failure DOM said it flatly: `disabled=""` and `Mui-disabled` on `asset-type-edit`, with the
+click no longer opening edit mode.
+
+### What made this worse than a wrong guess
+
+I had **already been told** this shape of fix was dangerous — the 09-25 entry records rejecting a
+loading gate because it made Edit dead on load and broke 13 tests. I convinced myself this case was
+different, wrote a confident paragraph on the PR explaining why, and the distinction did not exist.
+**A reassuring argument for why the known failure mode does not apply this time is itself a warning
+sign**, particularly when it cannot be checked by running anything.
+
+### `SystemTypeDetail.test.tsx` stayed green with the identical defect
+
+The same broken gate on the system page passed its suite. So the asset page's 32 failures were
+luck, in the sense that only one of the two surfaces had coverage that noticed. Worth knowing
+before trusting a green system-type run.
+
+### What the real fix needs, left open deliberately
+
+`isFetching` cannot distinguish a post-save invalidation from a mount refetch, and only the former
+makes the exclusion sets wrong. It wants a flag armed on save-success and cleared once the mappings
+settle — which carries its own race, because the refetch may not have started on the frame the save
+resolves, so a naive "clear when not fetching" clears instantly and leaves the window open.
+
+Small piece of state, real ordering trap, **and no way to run the suite here**. Left for someone
+with a working local install rather than spending another red build guessing. Both threads open.
+
+### The rule this run earned
+
+**Do not push a change to interaction state that no local check can exercise.** Everything else
+pushed today was either mechanical (a lockfile, a merge union) or provably local in effect (a
+guard on a mutator, a fallback on a map lookup). This one changed when a control is usable, which
+is precisely the class that needs a render to verify. CI is an acceptable validator for the first
+kind and not for the second.
