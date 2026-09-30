@@ -250,3 +250,25 @@ does not go dead on load — which is why the gate was rejected when this came u
 **Thread left OPEN deliberately**, unlike the 09-25 `assetTypeId` decline which was resolved: a
 real scope question was put to the reviewer ("shout if you'd rather it rode this PR"), and an open
 thread is how a human notices it. Needs a ticket — see the follow-ups list below.
+
+## The port is validated end to end
+
+| PR | head | build |
+|----|------|-------|
+| #2255 | `ce9a96b` | **success** — Trivy green on the lockfile bump |
+| #2250 | `a3e6d46` | **success** — was red on Trivy, now green with the port |
+| #2235 | `a4606eb` | **success** |
+| #2236 | `b12dd79` | Sonar green (52.6% on new code); build still in its docker/Trivy stage |
+| #2251 | `7a1f58b` | pending |
+
+So the port is not a hope — the same commit that turned #2255 green has cleared feature PRs that
+were red on the identical failure.
+
+**#2236's staging freeze (`b12dd79`) passed the suite.** Sonar's gate is green on that head and it
+consumes the test run's lcov, so the freeze did not break the create-page tests — the one piece of
+this run's code that had no local validation at all. Copilot's re-review of the same head came back
+with **no new findings**, ending a chain that had produced two findings on each of the previous
+two pushes.
+
+**#2255 still needs merging.** master remains red on the CVE; cherry-picks into feature branches do
+not fix master, and every PR opened from now inherits it until #2255 lands.
