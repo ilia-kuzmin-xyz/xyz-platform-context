@@ -281,3 +281,47 @@ clean, so the three-round fix chain on that PR is closed.
 
 Nothing on these five is waiting on us now — only on human reviewers, and on **#2255 being
 un-drafted and merged**, which is the only thing that clears master.
+
+---
+
+## 2026-09-30 afternoon — fourth Copilot round on #2236, and #2255 is now moot
+
+### #2255 is redundant: master got the fix another way
+
+`fb3863c` (#2256, "drop the dead rule that was hiding the viewer") **carried the same
+`brace-expansion` bump**, so `node_modules/brace-expansion` on master is 5.0.12 and the scan is
+clear without #2255. Master is now `c93c7d3`.
+
+So the "un-draft and merge #2255" ask from this morning **no longer applies**. Commented on it
+recommending closure rather than merging — its diff is an empty no-op against current master.
+Left it open rather than closing it unasked, same as #2249 was handled.
+
+The four cherry-picks were still the right call at the time: they got those PRs green hours before
+#2256 landed, and they collapse to nothing on the next master merge.
+
+### Two more HIGH findings — the stale-refetch window, and both were right
+
+`isLoading` was the wrong predicate for "the mappings are trustworthy". On
+`@tanstack/react-query` ^5.90, `isLoading` is `isPending && isFetching`, so a **cached query being
+refetched has `isLoading` false while `data` is still the previous value**. Saving invalidates both
+mapping queries, so there is a real window where Edit reopens on the pre-save exclusion sets and a
+rung picker will offer a task that was just added to Other.
+
+**That is the cross-bucket duplicate this run's own guard exists to prevent, reached through a
+different door** — the guard covers the staging path; this walks in through stale data.
+
+Fixed on both pages: Edit is disabled while either mapping query `isFetching` (`616df74`).
+
+**Why this does not reinstate the objection that killed the gate idea on 09-25:**
+`useAssetTypeStepIds` is *not* in the loading gate, so it can be pending while content renders —
+gating on it made Edit dead on every cold load and broke 13 tests. The two mapping queries **are**
+in the gate, so content only renders after they have resolved once, which means `isFetching` can
+only go true again on an invalidation or a refocus. Never dead on arrival.
+
+**The lesson worth keeping:** `isLoading` answers "have I ever had data", not "is my data current".
+For any set whose *correctness* depends on freshness — an exclusion set, a uniqueness check, a
+diff baseline — `isFetching` is the predicate. This is the third variant of the same bug on this
+one ticket (empty default → unresolved name map → stale refetch), each one an absent or outdated
+value being read as a meaningful one.
+
+Both threads resolved. Open threads back to **3**.
