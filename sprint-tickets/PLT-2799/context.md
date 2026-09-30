@@ -139,3 +139,49 @@ Pushed as `9c39a8a`. No code change beyond the merge.
 **Still blocked on the same thing as before:** XYZReality/xyz-supabase#51 (the
 `task_template_version.description` column). Safe to ship without it — the write retries without
 the column and the read falls back to the template.
+
+## 2026-09-30 (evening) — two findings left open, one verified, deliberately not fixed here
+
+A parallel session pushed `798e5e2` fixing two Copilot findings (the in-flight pinned read falling
+back to the template's current text; the version row storing an untrimmed description where the
+template stores a trimmed one). CI green on that head. Copilot then raised two more and went quiet.
+
+### HIGH — `versionDescription` drops its project scope. Verified, real.
+
+```ts
+this.assertProjectId(projectId)          // validated for presence…
+const [row] = await this.client.select<ChecklistVersionRow>(VERSION_TABLE, [
+  { column: 'id', op: 'eq', value: versionId },   // …and then never used
+])
+```
+
+`listVersions()` is the contrasting case — it resolves the parent template against `project_id`
+first. Commissioning's posture (`docs/commissioning/README.md`) is permissive RLS with client-side
+scoping as *the* boundary, so a read that carries no scope is a defect against the design.
+
+**Severity is bounded, and say so when sizing it:** the only caller passes
+`instance.templateVersionId` from an already project-scoped instance, so no cross-project id can
+reach it today. Defence-in-depth, not a reachable leak — but exactly the trap the next caller falls
+into.
+
+### Why this session did not fix it
+
+Three reasons, in order of weight:
+
+1. **The fix is a design call, not a mechanical one.** Scoping properly means resolving the
+   version's `task_template_id` and checking that template's project — a second round trip on every
+   description read. That should be chosen deliberately, not slipped in during a review round.
+2. **It breaks the wire-contract test** that pins the current single filter, so it needs a
+   replacement test written *blind* — and this session already turned #2236 red doing exactly that.
+3. **A parallel session was live on this PR**, having pushed 50 minutes earlier. Two agents editing
+   one branch is how today's #2251 picked up a commit mid-run; the collision risk outweighed the
+   benefit of grabbing a non-urgent finding.
+
+Analysis posted on the thread so whoever takes it is not starting cold. **Both findings still open.**
+
+### The general point about concurrent sessions
+
+This is the third time today another session touched a PR this one was working (#2251 mid-run,
+#2236's `fdf42ab`, #2250's `798e5e2`). **Check the head SHA before assuming a branch is yours**, and
+prefer a comment over a push when another agent is demonstrably active on it — a comment cannot
+conflict.
