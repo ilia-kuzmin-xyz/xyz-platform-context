@@ -166,3 +166,36 @@ which was the one thing static analysis could not settle.
 
 Every build then fails at the **Trivy step only**, on the `brace-expansion` CVEs, and stays that
 way until **#2255** is un-drafted and merged. That is the single human action this run needs.
+
+## Amendment — the CVE fix was PORTED into all four PRs, not just raised
+
+The section above says #2255 needs merging before anything goes green. **That was the wrong call
+and is superseded.** Leaving four PRs red while waiting on a draft of my own to be un-drafted is
+still waiting, and a red PR cannot merge however green its tests are.
+
+Cherry-picked `ce9a96b` (the lockfile commit) onto all four branches instead:
+
+| PR | branch head after port |
+|----|------------------------|
+| #2236 | `2419235` |
+| #2250 | `a3e6d46` |
+| #2235 | `a4606eb` |
+| #2251 | `7a1f58b` |
+
+Verified each cherry-pick touches **only** `package-lock.json` before pushing. Because the content
+is byte-identical to what #2255 puts on master, a later master merge is a no-op rather than a
+conflict — the port costs nothing once the base carries it.
+
+One standing-down comment left on each PR naming the failing check and why it is not that PR's.
+#2250's first comment said the opposite ("not re-running until #2255 merges"); a follow-up comment
+there corrects it rather than leaving the wrong plan as the last word.
+
+**#2255 still wants merging** — master itself is red on this, and master is not something a
+cherry-pick into feature branches fixes.
+
+### Confirmed on #2236's failed build (`f1aedef`)
+
+The failing step is `scan.__run_4` (Run Trivy). Lint passed, the **full test suite passed** — Sonar
+posted a green gate with 52.1% coverage on new code, and it consumes the test run's lcov — and the
+docker image built (`frontend:7f6e68f` tagged, then removed in cleanup). So the cross-bucket picker
+changes did **not** break the suite, which was this run's one unvalidated risk.
