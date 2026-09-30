@@ -460,3 +460,35 @@ step I could not have done.
 
 Nothing here is this session's to resolve: the three open threads belong with whoever landed the
 fix. CI running on `fdf42ab`.
+
+## Closing state of the run
+
+**#2236 green on `fdf42ab`** — build, Sonar and Copilot all success (14:34). The red build this
+session caused is cleared, by the revert plus the proper fix that landed on top.
+
+Branch history, in order: `2cb365a` (mine) → `cb9980a` (my revert) → `df57037` → `fdf42ab`.
+
+### Scoreboard for the whole day on #2236
+
+Five review rounds, **twelve findings**. Ten fixed, one disagreed with on evidence (the review-sheet
+contract — the description was stale, not the code), one scoped out to master with a patch on the
+thread (the rung picker's exclusion vs the step-id query). Three threads on the stale-mapping
+window are open and belong to whoever landed `fdf42ab`.
+
+Of the ten fixed, **four were gaps in this session's own earlier fixes**. That is the number worth
+remembering, not the ten.
+
+### What this run should change about the next one
+
+1. **`npm ci` cannot install here and the 09-29 stub workaround is now blocked by the sandbox.**
+   Everything this session pushed was validated by CI after the fact, which worked for mechanical
+   and locally-scoped changes and failed exactly once, on the one change that altered when a
+   control is usable. A `read:packages` token in the environment would remove this whole class of
+   risk; without it, decline interaction-state changes rather than reasoning about them.
+2. **`npm install --package-lock-only` DOES work**, so dependency and CVE hotfixes remain fully
+   doable even while the suite does not.
+3. **A confident argument for why a previously-rejected approach is safe this time is a warning
+   sign.** That is precisely what preceded the broken build.
+4. **When a fix applies to "the create page" or "the type detail", check there are two.** Asset and
+   system are near-identical surfaces; three separate findings this run were the un-carried half of
+   a fix.
