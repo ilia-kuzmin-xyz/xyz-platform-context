@@ -46,3 +46,40 @@ an access-control one. Worth treating as time-sensitive even if the mechanism is
 
 ## Unverified
 Everything under "Shape of the failure". Whether the users are still active in IAM. Whether Rishi has started.
+
+---
+
+## 2026-10-01 — what changed since 09-30 (supersedes "Shape of the failure" above)
+
+Fresh fetch with comments (9 comments, newest `113485`, 09-30 14:10). Four comments landed after the one
+the 09-30 run saw (`113427`); the folder had only the first.
+
+- `113433` Rishi (09-30 09:59): **these users are Organisation Admins; the API rejects removal requests from
+  Project Admins.** Fix is for an XYZ Organisation Admin to remove them. He will raise a ticket to improve the
+  error message.
+- `113477` Yash relays the customer: *who has Organisation Admin and can remove them? They have left the
+  business.* The customer cleared the same people from every other project, so the block is specific to these 10
+  pairs.
+- `113480` Rishi: they are **tenant-level** users, he has no access to those projects and cannot remove them;
+  tags Pietro, *"do you have the ability to do this?"*
+- `113485` Yash to Pietro (13:38, edited 14:10): can he remove them via tenant logins? **No answer yet.**
+
+**Mechanism is now named** (by Rishi, backend, taken on trust, not verified here): the removal is refused
+because the target is an organisation/tenant admin and the caller is only a project admin. The 09-30 candidate
+list (last admin, stale row, ...) is superseded by this; "contact tied to a role IAM refuses to detach" was the
+nearest guess. The 09-30 draft to Sergey is **superseded, do not send it.**
+
+**Ball:** Pietro (asked 09-30 ~13:38, about 20 h with no reply on 10-01). Not the customer, not Rishi.
+
+**Frontend check (this run).** The UI cannot tell an org admin from a project member before the click:
+`canRemovePerson` is the only gate (`TeamContent.tsx:218-223`), and the failure branch shows one generic toast
+and drops the server message (`TeamContent.tsx:857-861`). So Rishi's planned "improve the error message" ticket
+is **two changes, not one**: the IAM response needs a clear message, and the toast must show it. A backend-only
+fix would still show "Failed to remove ...". Not verified at runtime.
+
+**Unopenable media.** Attachment `65456` and the inline image in `113427` are now **not needed**: the mechanism
+is stated by Rishi. They would only confirm the exact HTTP status.
+
+**Still unverified:** that all 10 pairs are org admins (Rishi says "these users" but only Eoin on PA12 was
+actually tried); who can remove them (Pietro); whether the exposure matters (ex-employees keep dashboard access
+until someone acts).

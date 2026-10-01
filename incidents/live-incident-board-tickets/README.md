@@ -45,6 +45,53 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-01 (scheduled) — 12 in scope, all Group A, Group B empty. Two tickets moved (PLT-3182, PLT-3178), ten unchanged, zero Jira actions taken
+
+Board re-queried (24 open Live Incidents). Every in-scope ticket re-fetched with comments and the newest comment
+id compared with the folder.
+
+**PLT-3182 (access-permissions, Open).** Mechanism arrived: Rishi (`113433`, `113480`) says the 10 users are
+**tenant/Organisation Admins**, which a project admin cannot remove, and he cannot either. Ball is **Pietro**
+(asked by Yash `113485`, 09-30 13:38, no reply in about 20 h). Ex-employees keep dashboard access meanwhile.
+The 09-30 draft to Sergey is superseded. Frontend finding: the toast drops the server message
+(`TeamContent.tsx:857-861`), so Rishi's planned "better error message" ticket needs a front end half too.
+Class 1. Draft to Pietro (38 words).
+
+**PLT-3178 (progress-tracking, now Open).** The customer re-imported BL01 Rev 01 and progress is correct, which
+confirms Rishi's mechanism. What remains is an **export (Power BI) disagreeing with the dashboard** on two
+activities, which Rishi says is not ours to explain; Yash asked for an MCP export. The Freshdesk echo `113501`
+(18:42) says the customer replied again but the text is not in Jira. Same shape as PLT-3109. Class 1, Yash owes
+the customer a plain answer on "last 2 weeks/cumulative". A12150 still unanswered. Draft to Yash (53 words).
+
+**PLT-2651 left scope** (Ready For QA after PR #2257 merged 09-30). Folder annotated, draft superseded.
+
+**Unchanged, fresh fetch, same newest comment id:** PLT-2874 (Ilia's promise now 20 days overdue), PLT-2918 (9 days
+since Yash), PLT-3084 (Darminder's question 12 days, Select all fix still unshipped as of 09-29, not re-checked
+today), PLT-3109 (10 days), PLT-3115 (customer closed it 15 days ago, Yash to close), PLT-3133 (Rishi's ask 10 days),
+PLT-3147 (customer question 13 days), PLT-3156 (10 days waiting on customer), PLT-3063 and PLT-3060 (customer
+verifying 26.3.6). Not re-drafted.
+
+### Group A (12)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged | 1 |
+| [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged | 1 + 4 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged | 4 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged | 1, administrative |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open | Unchanged | 1 |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged | 1 |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged | 1 |
+| [PLT-3178](PLT-3178-groupA-progress-tracking/context.md) | progress-tracking | Open · Critical | **Customer replied, export question** | 1 |
+| [PLT-3182](PLT-3182-groupA-access-permissions/context.md) | access-permissions | Open | **Mechanism named, ball with Pietro** | 1 |
+
+Resolved tag, customer verifying 26.3.6: PLT-3063, PLT-3060. Out of scope now: PLT-2651 (Ready For QA). Group B: 0.
+
+**Unopenable media:** PLT-3182 `65456` (no longer needed). PLT-3178 attachments (not needed for the next step).
+
+---
+
 ## Run: 2026-09-30 (scheduled) — 13 in scope (11 carried over unchanged, 2 new: PLT-3178, PLT-3182), zero Jira actions taken
 
 Board re-queried (23 open Live Incidents, statusCategory not Done). Every carried-over ticket re-fetched with

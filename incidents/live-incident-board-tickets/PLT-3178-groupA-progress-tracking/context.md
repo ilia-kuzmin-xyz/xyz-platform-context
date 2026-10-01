@@ -56,3 +56,34 @@ Rishi has already opened them. They would only settle whether A12150 is in file 
 - Whether A12150 is in the current schedule.
 - Trigger ("why now") is answered: 17-Sep upload of a schedule with fewer actuals.
 - Cohort: other projects whose current schedule was swapped to a file with fewer actuals: not asked.
+
+---
+
+## 2026-10-01 — what changed since 09-30 (14 comments, newest `113501`, 09-30 18:42)
+
+Eight comments landed after `113284`, the last the 09-30 run recorded as "Waiting on customer".
+
+- `113436`/`113438` (09-30 10:36-10:40): the customer **re-imported BL01 Rev 01 and progress now looks correct**,
+  confirming Rishi's `113276` mechanism in practice (a fuller schedule as current restores history). Two
+  activities still disagree: in the customer's **export** they appear completed with future plan dates and a
+  negative hours variance, while the dashboard is right. They also ask what happened to the "last 2 weeks"
+  figure and to cumulative progress.
+- `113468` Rishi: where does the export come from? We do not maintain it (checked with Pietro), cannot infer
+  its values. `113475`/`113476`/`113479`: Yash thinks Power BI and asked the customer to export via the XYZ
+  MCP server instead; Rishi: if it is Power BI, differences are likely their filters or data sources.
+- `113501` (18:42): Freshdesk status back to **Open**, meaning the customer has replied again. **The content of
+  that reply is not in Jira.** Jira status moved With Customer to Open with it (automation), so the board now
+  reads "ours" while the real ball is Yash relaying/reading it.
+
+**What is settled:** trigger and mechanism (17-Sep schedule swap), blank dates, project start, A24360 arithmetic.
+All from Rishi, not re-verified here.
+**Same shape as PLT-3109:** a customer-side Power BI export disagreeing with the dashboard while the dashboard
+is right (see `PLT-3109-groupA-progress-tracking/`). Two independent customers, same conclusion so far: ask for
+the MCP export first, do not debug the Power BI model.
+**Their "last 2 weeks / cumulative" question** is answered by `113276` point 5 (history is recomputed from the
+current schedule); it was asked after reading that reply, so it likely needs the answer restated plainly.
+**Still unanswered in Jira:** A12150 (linked in viewer, absent from dashboard), 2 days.
+
+**Unverified:** content of the 18:42 reply; whether the two export mismatches survive an MCP export; A12150.
+**Unopenable media:** nothing new needed. XERs `65391/65392/65394`, xlsx `65395/65398` would only settle A12150
+and the two export rows.

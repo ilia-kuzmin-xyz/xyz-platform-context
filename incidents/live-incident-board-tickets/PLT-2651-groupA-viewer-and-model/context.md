@@ -1319,3 +1319,17 @@ for the correction itself — the correction is right either way — but it chan
 
 ## 2026-09-30 (scheduled) — unchanged
 Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.
+
+---
+
+## 2026-10-01 — out of scope now: Ready For QA, fix merged
+
+Fresh fetch: status **Ready For QA** (was With Customer · Critical). `113497` (Rishi, 09-30 17:32) posts the
+merged PR **#2257** "PLT-2651/PLT-3187: Align the section box to the building for combined models and add a
+flagged rotation gizmo", with testing steps (load `QA-ATL08 EVO DC AI ARCH-R23-Bld8.1-V260626` first, section
+box lines up; PC model first, still lines up; ATL07 and axis-aligned projects unchanged).
+Not read in code this run. **Supersedes** the 09-22 "correction to post" draft in `recommended-action.md`: that
+class-4 guidance (re-export with rotation baked in) was about the cause before the fix existed; do not post it
+as written. One thing is still worth checking by a human: the earlier customer-facing true-north suggestion
+(comment 111642) was never corrected on the ticket, and the customer may still be acting on it.
+Folder name keeps the `groupA` tag deliberately: other docs link to this path.
