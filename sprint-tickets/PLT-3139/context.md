@@ -407,3 +407,26 @@ So this push is **static-analysis only**, leaning on CI. What was done instead:
 
 **The known risk:** existing tests may assert the old re-offer behaviour. If CI is red, that is
 where to look first. Do **not** assume a red build here is infrastructure.
+
+## 2026-10-01 — MERGED
+
+**#2236 merged** (approved by rishib-xyz, "LGTM!"). PLT-3139 is done; nothing on this ticket is
+outstanding.
+
+Final shape of the day before it landed: five Copilot rounds, twelve findings — ten fixed, one
+disagreed with on evidence (the review-sheet contract; the description was stale, not the code),
+one scoped out to master with a patch on the thread. **Four of the ten were gaps in fixes made
+earlier the same day**, and one attempted fix turned the build red and was reverted.
+
+### What stays relevant now the ticket is closed
+
+Two of this ticket's findings were **master's**, not this PR's, and are now live on `master`
+with the Other-bucket half fixed and the rung half not:
+
+- `ReadinessLevelsSection`'s rung picker loses its exclusion while the step-id query is pending
+  (patch proposed on `discussion_r4142507877`)
+- `ReadinessLevelsSection` drops a rung task whose template was deleted — same `.filter(Boolean)`
+  shape fixed for Other in `2cb365a`, and newly reachable since #2203 shipped template deletion
+
+Both are in the run log's follow-up list and still have no ticket. The asymmetry is now **in the
+shipped product**: Other tasks survive a deleted template, rung tasks do not.
