@@ -443,3 +443,50 @@ developer action since the 09-27 hold.
 
 **Open unresolved review threads across the four: 4** — 1 on #2252 (readValue), 3 on #2221
 (unchanged). #2247's and #2254's leftovers are review-body items, not threads.
+
+## 2026-10-01 — scheduled review run: four eligible PRs, nothing posted, all four waiting on someone
+
+Scope filter (Rishi/Darminder/Tom, non-draft) matched #2252, #2247, #2221 (Rishi) and — for the
+first time — **#2211 (Darminder, PLT-3112), now out of draft**. None by Tom. No reviews or
+comments posted: the two live Rishi PRs stay under the 95% visual-gate bar, #2211 already carries
+Rishi's changes-requested (respected, not duplicated), #2221 has had no developer action since
+Ilia's 09-26 conditional review.
+
+- **#2252 (PLT-3093) — materially advanced since 09-30; now the closest to mergeable.** Rishi's
+  `4dc1350c8` fixed the last open thread (value items keep their pass/fail verdict in the
+  comparison, counted like the server does); all 14 threads now resolved, Copilot's final pass
+  lists zero findings, build+Sonar green, HoloSight 19/19 ACs. **New blocker: branch went dirty vs
+  master — verified by merge-tree to be a single trivial conflict in `i18n/en/main.json`** (7
+  commits behind; #2254 and PLT-2999 both touched that file). Remaining gates unchanged: two-tab
+  Admin/Editor manual walkthrough, xyz-supabase #53 applied to the target env. Semantic note for
+  the merge: master now carries PLT-3140 asset delete from the viewer — same assets-panel surface
+  as the conflict strip; conflict cases for a deleted asset are a server-side question (RPC
+  contract), nothing client-side guards it.
+- **#2247 (PLT-3153) — unchanged since 09-28 head `d2eb656`; hold stands.** Still merges clean
+  ("blocked" = approvals only). The two Copilot body mediums (chip click with collapsed Open
+  Issues card; Raised-from → Item no-op on filtered/collapsed items) remain unaddressed and remain
+  the right size for a follow-up rather than a block. Interlock with #2252 in all three runner
+  modals still live — whichever lands second is a real merge.
+- **#2221 (PLT-3136) — stale 8 days, degrading further.** Head still `0b45ea4` (09-23); Ilia's
+  09-26 conditional review unanswered; 3 threads open; conflict set keeps growing as master moves.
+  The 09-27 finding stands: the api-v2 port lacks master's PLT-3138 assignee fields, invisible to
+  textual conflict resolution. Needs a decision: Rishi rebases it or it gets re-scoped.
+- **#2211 (PLT-3112, live incident) — first review round done, ball with Darminder.** The fix
+  direction is right (bound DB-derived link counts by `getLoadedModelElementIdsForModel`), but the
+  loaded-set is captured once per effect run with no re-trigger on viewer load completion — which
+  is exactly what Rishi hit manually (counts don't refresh while the panel is open) and the root
+  of Copilot's 3 open threads (stale drill-down; loaded-empty-set vs not-loaded ambiguity — the
+  `!size ||` fallback treats a legitimately empty loaded model as "not loaded" and accepts every
+  stale link; no tests). **Build check is also red on the head** (Sep 9; Sonar green — likely the
+  Trivy/base-image era, re-push will tell). Jira repro (Yash, 09-08) notes total count drops
+  2,319/4,545 → 2,310/2,299 after load — the fix bounds the linked count but does not explain the
+  total-count drop; worth keeping the DPL ticket Rishi suggested.
+
+**Open unresolved review threads across the four: 6** — 3 on #2221 (unchanged), 3 on #2211 (all
+Copilot, 09-30). #2252 and #2247: zero.
+
+**Domain fact from master this run (supersedes the flag framing above for non-prod): PLT-3181
+(#2253, merged 09-30) stops gating Commissioning behind the flag outside production.** Dev/staging
+now expose commissioning surfaces without the cookie; the flag remains the gate in prod only. The
+"flag off = zero Supabase requests" safety line in this README's header now holds only in prod —
+the permissive-RLS blocker (§ Blockers) got more exposed, not less.
