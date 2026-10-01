@@ -185,3 +185,48 @@ This is the third time today another session touched a PR this one was working (
 #2236's `fdf42ab`, #2250's `798e5e2`). **Check the head SHA before assuming a branch is yours**, and
 prefer a comment over a push when another agent is demonstrably active on it — a comment cannot
 conflict.
+
+---
+
+## 2026-10-01 — scheduled sweep. No change pushed; one open thread advanced on paper
+
+PR **#2250** is green (run 5107 on `798e5e2`), 4 commits behind master, `blocked` only on human
+approval. **2 open Copilot threads.** Nothing pushed this run — see
+`runs/2026-10-01-sprint-prs-checkpoint-sweep.md` for the two environment blockers (no `NPM_TOKEN`,
+and commit authorship as Ilia now refused by the sandbox).
+
+### Thread 1 — `versionDescription` ignores `projectId` (open)
+
+The 09-30 reply stood this down as needing "a second round trip … a design call". Re-checked
+first-hand and the finding is real, but a **one-query fix exists and was not considered**:
+
+- `checklist-library-service.ts:1344-1358` — `assertProjectId(projectId)` runs, then the select
+  filters on `id` only. The argument is validated and dropped. Confirmed.
+- `ChecklistVersionRow` (`:243-257`) has `task_template_id`, **no `project_id`** — so simply adding
+  a `project_id` filter is not available. That much of the 09-30 reasoning holds.
+- `CommissioningDataClient.select()` hard-codes `select=*`, so PostgREST embedded filtering
+  (`task_template!inner(project_id)`) cannot be expressed without extending the client.
+
+**The option not yet on the thread:** the sole caller is the runner, which already holds
+`instance.templateId` as well as `instance.templateVersionId`. Widen to
+`versionDescription(projectId, templateId, versionId)` and filter
+`task_template_id = eq.templateId` alongside `id = eq.versionId`. One read, no client change, and a
+version id from another project cannot match. Strictly stronger than today. It does not prove the
+template is in the project — the instance's own project scoping did that upstream — so it is
+defence-in-depth of the same grade `listVersions()` has, at no extra round trip.
+
+Still **not an active leak**: the only id reaching this method comes off an already-project-scoped
+instance. Priority is "fix before the second caller appears", not "fix now".
+
+### Thread 2 — no service test pins the `templateVersionId` mapping (open)
+
+Unchanged and uncontested. `checklist-instance-service.ts:451` is the mapping that enables the whole
+pinned-description read, and only the modal tests cover it, by injecting the field directly. This is
+**the right first push once vitest can run** — small, in scope, nothing to design.
+
+### Stale resolution worth knowing about
+
+Copilot's JSDoc thread (`discussion_r4136326425`) is marked resolved and *not* outdated, but
+`checklist-library-service.ts:1321-1343` still stacks two doc blocks above `versionDescription`,
+leaving `listVersions` undocumented. The resolution is not backed by the tree. Cosmetic; fold it
+into the next commit that touches the file.
