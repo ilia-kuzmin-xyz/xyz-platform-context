@@ -525,3 +525,28 @@ find. **The generalisable rule: a query's `data` before it settles is not a valu
 that treats "nothing came back" and "nothing exists" as the same case is wrong by default.**
 
 Worth raising as a codebase concern rather than five ticket-level fixes. Added to the follow-ups.
+
+## 2026-10-01 — the pattern bit the fix for the pattern
+
+A sixth instance, and the sharpest one, because it was **created by a fix for the fifth**.
+
+`798e5e2` closed "pinned-description read in flight → falls back to the template's current text" by
+gating the card on `isSuccess`. Correct for the in-flight case. But `isSuccess` never becomes true
+once the query exhausts its retries, so a **terminal failure now hides the description for good**
+while the rest of the task stays answerable (`discussion_r4158418540`, MEDIUM).
+
+That text is where the engineer is told what state the unit must be in and when a No needs a
+comment. Hiding it indefinitely is worse than the bug it replaced.
+
+**The shape:** "unsettled read as meaningful" was fixed by introducing "terminal failure treated as
+unsettled". A three-state reality — *pending* / *failed* / *settled* — collapsed into a two-state
+predicate, which is the same error as the original, one state over.
+
+This is the strongest argument yet for follow-up #7 being a real codebase concern rather than a
+tidy observation. **Six instances, and the sixth was introduced while fixing the fifth.** Per-site
+fixes are not converging; each one just moves which pair of states gets conflated. What is needed
+is a shared way to consume a query that makes all three states explicit at the call site.
+
+Not actioned by this session: it is another session's code, that session was active on the PR
+minutes before the finding landed, and changing how a failure renders is UI state — the class this
+run already proved it cannot validate here.
