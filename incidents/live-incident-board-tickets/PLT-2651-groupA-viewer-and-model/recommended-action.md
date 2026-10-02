@@ -475,3 +475,20 @@ us to reply) — no transition recommended beyond what a human posting the comme
 naturally trigger.
 
 **No Jira action was taken by this run** — no comment, no transition, no assignment, no field edit.
+
+---
+
+# 2026-10-02 update — drafted only, nothing posted
+
+**Action class: 1** (a named person owes a clarification) with a possible 4 if the answer is "wait for the release".
+Status stays **With Customer** until it is clear what the customer is being asked to test.
+
+**Assumption (one line):** master is not deployed anywhere customer-reachable; this rests only on no release tag containing #2257 and is unchecked against the deploy pipeline.
+
+### Draft to Rishi (39 words)
+
+> Rishi, PLT-2651 is With Customer again, but PR 2257 is on master and in no release tag yet, so the customer cannot test it on prod. **Which environment should they use, or are we waiting for the next release?**
+
+If it is "next release": suggest moving back to Ready For QA / awaiting release so the board does not tell the customer's contact that the ball is theirs. Also still owed: a plain correction of the old true-north advice (`111642`).
+
+No Jira action of any kind was taken.

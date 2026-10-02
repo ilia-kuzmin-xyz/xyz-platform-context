@@ -83,3 +83,6 @@ is stated by Rishi. They would only confirm the exact HTTP status.
 **Still unverified:** that all 10 pairs are org admins (Rishi says "these users" but only Eoin on PA12 was
 actually tried); who can remove them (Pietro); whether the exposure matters (ex-employees keep dashboard access
 until someone acts).
+
+## 2026-10-02 (scheduled) — unchanged
+Fresh fetch with comments. Newest comment still `113485` (Yash, 09-30 13:38). Pietro has not replied, about 44 h; status Open. The 10-01 draft to Pietro stands, now a day more urgent because the ex-employees still hold access. No Jira action was taken.

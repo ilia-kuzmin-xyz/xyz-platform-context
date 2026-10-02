@@ -713,3 +713,6 @@ Class 2 opens once Darminder answers: wire `selectElements` into `handleSelect` 
 
 ## 2026-09-30 (scheduled) — unchanged
 Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.
+
+## 2026-10-02 (scheduled) — unchanged
+Fresh fetch with comments. Newest comment still `113150`. Status Customer Release Check. PR #2197 still open and blocked, Darminder's CHANGES_REQUESTED (09-15) stands, my 09-19 question to him on the PR is unanswered 13 days; the only new PR activity is a SonarCloud comment on 10-01. Select all is therefore still unshipped; 26.3.6 carried only Ctrl+Z. Not re-drafted. No Jira action was taken.

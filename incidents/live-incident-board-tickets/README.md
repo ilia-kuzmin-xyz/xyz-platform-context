@@ -45,6 +45,50 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-02 (scheduled) — 13 in scope, all Group A, Group B empty. Three tickets moved (PLT-3178, PLT-3133, PLT-2651), ten unchanged, zero Jira actions taken
+
+Board re-queried (24 open Live Incidents). Every in-scope ticket re-fetched with comments; newest comment id compared with
+the folder. Out of scope this run: Ready For QA (3172, 3165, 3116, 3104, 3099, 3096, 3091), In Code Review (3112),
+Blocked (3135, 2660). **PLT-3135 is now Blocked** (was in scope 10-01).
+
+**PLT-2651 (back in scope, With Customer, Critical).** Rishi moved Ready For QA to With Customer on 10-01 08:23 with no
+comment. PR #2257 is on master (`d212e1cea`) but `git tag --contains` finds it in **no release**; newest tag is
+v26.3.6. So the customer has nothing to test unless a non-prod build exists (unchecked). Class 1, draft to Rishi (39 words).
+The old true-north advice (`111642`) is still uncorrected.
+
+**PLT-3178 (With Customer).** The customer confirmed the MCP export is correct, so the export disagreement is closed.
+Rishi asked Yash to have her reframe the "last 2 weeks / cumulative" question. Ball is with the customer, parked.
+The 10-01 "relay point 5" draft is superseded. A12150 still unanswered.
+
+**PLT-3133 (With Customer).** Rishi moved it Open to With Customer on 10-01, no comment. Customer owes examples (11 days).
+
+**Unchanged, same newest comment id:** PLT-3182 (Pietro ~44 h, ex-employees keep access), PLT-2874 (Ilia's promise 21
+days overdue), PLT-3147 (Critical, customer question 14 days), PLT-3084 (Darminder 13 days; #2197 still blocked),
+PLT-3109, PLT-3156, PLT-3115, PLT-2918, PLT-3063, PLT-3060. Not re-drafted.
+
+### Group A (13)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | **Back in scope, fix unreleased** | 1 (maybe 4) |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
+| [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged | 1 |
+| [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged | 1 + 4 |
+| [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged | 4 |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged | 1, administrative |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | **Status moved by Rishi** | 1, parked |
+| [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged | 1 |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged | 1 |
+| [PLT-3178](PLT-3178-groupA-progress-tracking/context.md) | progress-tracking | With Customer · Critical | **Customer replied, ball back with her** | 1, parked |
+| [PLT-3182](PLT-3182-groupA-access-permissions/context.md) | access-permissions | Open | Unchanged | 1 |
+
+Resolved tag, customer verifying 26.3.6: PLT-3063, PLT-3060. Group B: 0.
+
+**Unopenable media:** PLT-3178 new `65492` (png) and `65493` (rev02 xlsx), 403 from this routine. The xlsx would settle where the customer's export came from.
+**Not verified:** whether master auto-deploys to an environment the customer can reach (PLT-2651); Rishi's PLT-3178 numbers.
+
+---
+
 ## Run: 2026-10-01 (scheduled) — 12 in scope, all Group A, Group B empty. Two tickets moved (PLT-3182, PLT-3178), ten unchanged, zero Jira actions taken
 
 Board re-queried (24 open Live Incidents). Every in-scope ticket re-fetched with comments and the newest comment

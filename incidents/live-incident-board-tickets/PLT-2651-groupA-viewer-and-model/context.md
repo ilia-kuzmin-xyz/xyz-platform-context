@@ -1333,3 +1333,10 @@ class-4 guidance (re-export with rotation baked in) was about the cause before t
 as written. One thing is still worth checking by a human: the earlier customer-facing true-north suggestion
 (comment 111642) was never corrected on the ticket, and the customer may still be acting on it.
 Folder name keeps the `groupA` tag deliberately: other docs link to this path.
+
+## 2026-10-02 (scheduled) — back IN scope: Ready For QA -> With Customer (Rishi, 10-01 08:23), no comment
+
+Fresh fetch: 20 comments, newest still `113497` (Rishi, 09-30 17:32, the PR #2257 testing steps). Changelog: Rishi moved **Ready For QA -> With Customer at 08:23 on 10-01** with no comment explaining it. **Supersedes** the 10-01 "out of scope now" heading: the ticket is on the board again, Critical, assignee Gennaro.
+
+Checked in `hc-frontend` (git, not Jira): PR #2257 is merge commit `d212e1cea` on `origin/master` (09-30 17:30). `git tag --contains d212e1cea` returns **nothing**; the newest tag is `v26.3.6` (tag commit 09-24), which predates it. So as far as tags show, the fix is **in no release**. Not verified: whether master is auto-deployed to a dev or staging environment the customer could use, and whether Rishi told the customer something by Freshdesk. This is the open question, and it is why a silent move to With Customer is not self-explanatory.
+Still unposted: the correction to the customer-facing true-north advice (`111642`). The 09-22 draft is superseded by the fix, but the correction of the advice itself is still owed.

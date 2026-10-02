@@ -32,3 +32,18 @@ If the MCP export still shows the two activities as completed, that is a real di
 with the two activity ids. If it matches the dashboard, close the export side as their Power BI filters.
 
 No Jira action of any kind was taken.
+
+---
+
+# 2026-10-02 update — drafted only, nothing posted. Supersedes the 10-01 "relay point 5" draft (do not send it)
+
+**Action class: 1, correctly parked.** The ball is with the customer: Yash owes her Rishi's reframe request
+(what she saw, where, what she expected) and then waits. Status stays **With Customer**. Do not chase Rishi, do not
+chase the customer yet (waiting since 10-01 09:58, one day).
+
+**Assumption (one line):** Yash has not already sent the reframe request outside Jira (Freshdesk went to Waiting on customer at 09:58, so he probably has).
+
+No new draft. If nothing comes back by 10-06, chase through Yash, one question: **which two activities, and what did she expect to see?**
+The A12150 question to Rishi (10-01 draft above) still stands.
+
+No Jira action of any kind was taken.

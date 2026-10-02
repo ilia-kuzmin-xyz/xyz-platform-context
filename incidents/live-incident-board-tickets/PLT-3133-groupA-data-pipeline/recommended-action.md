@@ -133,3 +133,7 @@ not a customer answer. **Action class: still 1, correctly parked** — Rishi's 0
 examples remains the open item, owed by the customer, now one week unanswered. Nothing to draft;
 worth a status-hygiene note to Yash only if this recurs enough to cause confusion about whose turn
 it is. **No Jira action was taken by this run.**
+
+## 2026-10-02 (scheduled) — no draft; class 1, parked correctly
+
+Status is now **With Customer** (Rishi, 10-01), which is where it belongs. The customer owes concrete examples (Rishi `112616`, 09-21), 11 days. A chase through Yash is reasonable after about two weeks, so it is due from 10-05. One question then: **can the customer send one project and one element or activity that was still stale after an hour?** No Jira action was taken.

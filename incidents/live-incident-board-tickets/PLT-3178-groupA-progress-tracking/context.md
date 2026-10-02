@@ -87,3 +87,17 @@ current schedule); it was asked after reading that reply, so it likely needs the
 **Unverified:** content of the 18:42 reply; whether the two export mismatches survive an MCP export; A12150.
 **Unopenable media:** nothing new needed. XERs `65391/65392/65394`, xlsx `65395/65398` would only settle A12150
 and the two export rows.
+
+## 2026-10-02 (scheduled) — customer answered; ball is back with the customer (status now With Customer)
+
+Fresh fetch, 20 comments, newest `113551` (Rishi, 10-01 10:18). New since the folder's last entry (`113501`):
+
+- `113542` (Yash, 10-01 08:56): customer says the MCP export is correct ("I cross-checked with MCP", a colleague ran it for her). So the **export-vs-dashboard disagreement is closed on the export side**. She still wants the "last 2 weeks / cumulative" fluctuation explained.
+- `113546` (Rishi): that reply is contradictory and does not say what the `rev02` xlsx came from. Restates the A24360 mechanism (no linked elements until 27-Sep 19:22 so 100% from P6 hours; 647 linked in 15 min, 9 installed, so 9/647 = 1.39%). Asks Yash to have the customer say **what they saw that is wrong, where, and what they expected**.
+- `113547` (Yash): explains the colleague, will go back to the customer. `113551` (Rishi): "gotcha".
+- Freshdesk echoes: `113543` Waiting on 3rd line, `113549` **Waiting on customer** (10-01 09:58). Status is With Customer, so this one is parked.
+
+**Supersedes** the 10-01 draft to Yash ("relay Rishi's point 5"): Rishi has since answered the same question again and asked for a reframe instead. Do not send it.
+New attachments `65492` (png) and `65493` (`2026.09.30_RGN-PA18_Report data_analysis_rev02.xlsx`) from 09-30: unopenable from this routine (403, confirmed 09-08). The xlsx is the one Rishi says he cannot trace; knowing who produced it and from what filter would settle whether any dashboard discrepancy remains.
+Still unanswered: A12150 (linked in viewer, missing on dashboard).
+Nothing verified by this run beyond the comment text; Rishi's numbers are his own measurement.

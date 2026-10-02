@@ -506,3 +506,6 @@ theirs. No new attachment. No re-investigation performed.
 
 ## 2026-09-30 (scheduled) — unchanged
 Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.
+
+## 2026-10-02 (scheduled) — unchanged
+Fresh fetch with comments. Newest comment still `112522` (09-18). Critical, customer question unanswered 14 days. Not re-drafted; standing item. No Jira action was taken.

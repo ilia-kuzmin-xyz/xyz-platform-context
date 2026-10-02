@@ -1005,3 +1005,6 @@ combined draft to Yash+Gennaro is still unposted.
 
 ## 2026-09-30 (scheduled) — unchanged
 Fresh fetch: newest comment and status identical to this folder (no new comment since the last entry). Standing ages are one day older; nothing re-drafted. No Jira action taken.
+
+## 2026-10-02 (scheduled) — unchanged
+Fresh fetch with comments. Newest comment still `112017` (Ilia, 09-11), In Analysis. Ilia's own promise is now 21 days overdue. The combined draft to Yash and Gennaro (09-14) is unposted; re-validate it against code before sending (the 09-09 rule), do not just re-count the days. No Jira action was taken.
