@@ -230,3 +230,40 @@ Copilot's JSDoc thread (`discussion_r4136326425`) is marked resolved and *not* o
 `checklist-library-service.ts:1321-1343` still stacks two doc blocks above `versionDescription`,
 leaving `listVersions` undocumented. The resolution is not backed by the tree. Cosmetic; fold it
 into the next commit that touches the file.
+
+## 2026-10-02 — all three parked findings resolved (`69fd8c11`), by a session that *could* run the suite
+
+Everything the 09-30 entry left open is now fixed and test-verified by a parallel session:
+
+- **`versionDescription` project scope** — resolves the version's `task_template_id` against
+  `project_id` before returning, same shape as `listVersions`. Took the second round trip, as the
+  analysis predicted, and broke the wire-contract test pinning the single filter, also as predicted.
+  Both tests now seed the parent template, plus a third asserting a version whose template belongs
+  to another project returns null.
+- **`templateVersionId` mapping test** — added in the `getInstance()` wire-contract block.
+- **Terminal read failure hiding the description** — fixed, and **with a better answer than the
+  obvious one**: it does *not* fall back to the template on error, because that is the since-edited
+  wording the pin exists to exclude — a naive fallback would have reintroduced this PR's own bug on
+  a rarer path. The card now states the description could not be loaded. The engineer sees the
+  requirements are **missing**, not that there are none.
+
+That last one is the proper close on the state-conflation thread: splitting *failed* out of
+*pending* is only half the job; what you render in the failed state has to not recreate the
+original defect. Three states, three distinct behaviours.
+
+## ⚠ "npm works now" does NOT apply to the scheduled sandbox — verified
+
+The fixing session said it "got npm working locally". **That is a different environment.** Checked
+directly from this sandbox on 2026-10-02:
+
+```
+npm view @xyzreality/dhtmlx-gantt version
+→ npm error code E401 ... unauthenticated: User cannot be authenticated with the token provided
+```
+
+So the constraint recorded on 09-30 **still stands for scheduled runs here**: no suite, no
+`tsc --noEmit`, no eslint. `npm install --package-lock-only` still works.
+
+**Do not read the PR comments and conclude the blocker is gone** — test the registry first, as
+above. It is a two-second check and the 09-30 run's one red build came from assuming something
+about the environment that was not true.
