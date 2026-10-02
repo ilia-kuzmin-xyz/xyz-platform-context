@@ -23,6 +23,14 @@ Aimed at **developers joining the project** and **AI copilots** that need archit
 
 > Add new domains as folders here. Each domain gets a `README.md` and topic files.
 
+## Running tests
+
+`hc-frontend`'s suite cannot be installed with the tokens a cloud agent session
+has — `npm ci` 401s on the private `@xyzreality/dhtmlx-gantt`. There is a working
+stub-and-install round it in
+[`running-tests-in-agent-sessions.md`](running-tests-in-agent-sessions.md).
+Read it before deferring any work with "can't run the tests here".
+
 ## Planning
 
 Cross-cutting ticket plans live in [`planning/`](planning/). One file per ticket, named `PLT-XXXX-slug.md`.
