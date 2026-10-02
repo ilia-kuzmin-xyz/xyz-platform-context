@@ -550,3 +550,58 @@ is a shared way to consume a query that makes all three states explicit at the c
 Not actioned by this session: it is another session's code, that session was active on the PR
 minutes before the finding landed, and changing how a failure renders is UI state — the class this
 run already proved it cannot validate here.
+
+---
+
+# 2026-10-02 — two corrections to this run's own record
+
+## 1. PLT-3139 merged RED. I did not know that, and reported otherwise.
+
+Master run **1195** — the #2236 merge commit — **failed**. `rishib-xyz` fixed it the next morning in
+**#2259**, "Fix the master build: type task test double and axios CVEs":
+
+- the `type-task-service.wire-contract.test.ts` double this run added did not match the client's
+  `remove()` signature **as merged**, because #2235 had landed the generic `remove<T>()` in between
+- plus axios HIGH CVEs the image scan flagged
+
+**This run reported #2236 as green and merged, and left it there.** Both halves were true of the PR
+branch and neither was true of master. The PR was green against *its* base; master had moved under
+it. Nobody told this session, because the subscription ends at merge — the harness unsubscribes on
+`pull_request.closed`, so the one event that mattered most was the last one it would never see.
+
+**The irony is exact.** This run caught this same class twice *inside* the PR — the archived-picker
+break and the brace-expansion lockfile — and wrote up the lesson as *"when master makes a shared
+source wider and pushes narrowing to call sites, every call site your branch added in parallel is a
+silent hole; git cannot see it."* The test double was that hole, one layer out: my branch added an
+implementation of an interface master then changed. I checked the direction I had been bitten by
+and not the mirror image.
+
+**Carry forward:** a green PR is evidence about the PR, not about master. Where two open PRs touch
+the same interface — here #2235's `remove()` and #2236's new double — the merge order decides
+whether either is still correct, and **neither PR's CI can tell you**. Before merging the second of
+a pair, re-run it against a base that includes the first.
+
+## 2. A third repo-wide CI outage in three days, and this one is not fixable from here
+
+Build red across the repo from this morning on the Trivy **image** scan:
+
+```
+frontend:f9fc30a (alpine 3.24.2)
+pcre2  CVE-2026-103111  HIGH  fixed  10.48-r0 → 10.49-r0
+```
+
+An **OS package in the alpine base image** — not `package-lock.json`. So unlike 09-30's
+brace-expansion, **the lockfile trick does not apply**: it needs `xyz-base-node` rebuilt on a
+patched alpine, or an explicit `apk upgrade pcre2` in the Dockerfile. The base image is in
+hc-infrastructure, outside this session's repo scope.
+
+Master was last green **2026-10-01 16:29** (run 1198), before the scanner DB picked this up. The
+next master build will fail the same way.
+
+Running tally: **Wolfi (29th) → brace-expansion (30th) → pcre2 (2nd)**. Three scanner-driven
+outages in four days, none caused by any PR. #2259 also had to bump axios "for the HIGH CVEs the
+image scan flags". That cadence is itself the finding: **the image scan fails open-endedly on
+whatever the DB learns overnight, and every branch pays for it.** Worth a standing answer —
+scheduled base-image rebuilds, or a triage path that is not "whoever's PR goes red first".
+
+Flagged on #2250 so the session working it does not re-diagnose its own fixes.
