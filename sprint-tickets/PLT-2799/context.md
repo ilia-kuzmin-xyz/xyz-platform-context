@@ -267,3 +267,23 @@ So the constraint recorded on 09-30 **still stands for scheduled runs here**: no
 **Do not read the PR comments and conclude the blocker is gone** — test the registry first, as
 above. It is a two-second check and the 09-30 run's one red build came from assuming something
 about the environment that was not true.
+
+## 2026-10-03 — merge conflict with master resolved, PR #2250 green again
+
+PLT-3153 (#2247) landed on master and restructured the task runner onto a new
+`TaskRunnerLayout`, moving the modal header and body under `header` / `footer` /
+`side` props. That collided with this branch's pinned-description work: the
+description block moved and was re-indented, so `TaskInstanceModal.tsx` conflicted.
+
+**Resolution:** took master's layout wholesale, then re-applied the pinned read
+into its body — the card renders `description` (the version's own text, falling
+back to the template only once the pinned read has *settled*) instead of master's
+`definition.description`, with the unavailable card after it. 406 tests green
+across `AssetWorkflowStepTasks/`, `checklistLibraryService/` and
+`checklistInstanceService/`.
+
+**Note for anyone resolving this file again:** master's `definition?.description`
+is the *mutable template* text. Re-taking it silently undoes this whole ticket —
+the conflict looks cosmetic (indentation) but the variable swap is the point.
+
+All six Copilot threads on #2250 were already resolved before this run.

@@ -77,3 +77,19 @@ services/clientReportService/
   `label` does not reliably name the input. Give the field its own `aria-label`.
 - Planner drafts live in `localStorage` — per browser, not shared, not on the
   server. Stated in the panel deliberately.
+
+## 2026-10-03 — QA 2/3/4 asked on the ticket; PR #2260 brought up to master
+
+Supersedes nothing above; the 10-02 entry stands.
+
+- Posted the clarification **on the Jira ticket** this time, not just in the PR
+  description. The 10-02 note said "Asked Radu which date he meant" — that ask
+  only ever existed in #2260's body, where QA does not read it. Comment now on
+  PLT-3152 asking for a screen share on **QA 2, 3 and 4**.
+- #2260 merged `master` (PLT-2986 + PLT-3153) in cleanly, no conflicts.
+  505 tests green across `ClientReportPage/` and `clientReportService/`.
+- Ticket stays **Analysis In Progress** — correct, it is waiting on QA input.
+
+Still open and unchanged: unticking a discipline drops its slide pair but leaves
+its packages in the other slides; the cover has no visible capture entry point
+since QA 9 removed the invisible one.
