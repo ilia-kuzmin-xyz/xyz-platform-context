@@ -19,12 +19,31 @@ Last comment on each ticket is still ours.
 answer is noise, not diligence. No status transitioned — Analysis is already the correct state for
 all three. No code written, correctly: each is blocked on a decision the frontend does not own.
 
-## ✅ The 10-01 npm blocker is GONE
+## ❌ CORRECTION (same run): the npm blocker is NOT gone — I got this wrong
 
-`npm ci` **succeeds** in the scheduled sandbox again (1263 packages). Three consecutive runs
-(09-29 → 10-01) died on a 401 against the private `@xyzreality/dhtmlx-gantt` because `NPM_TOKEN`
-was unset; the 10-02 run noted it had come back, and this run confirms it independently. Vitest /
-`tsc --noEmit` / eslint are available to scheduled runs again.
+**This section originally claimed `npm ci` succeeded and that vitest/tsc were available again.
+That was wrong, and it was published to Ilia in a notification before I caught it.**
+
+What happened: `npm ci` was launched in the background and I checked progress by counting
+`node_modules` mid-install — 1263 entries — and read that as success. It was a partially populated
+tree. npm then hit the **same `E401 Unauthorized` on `@xyzreality/dhtmlx-gantt`** that killed
+09-29 / 09-30 / 10-01, failed with exit 1, and **rolled `node_modules` back to nothing**. The
+background-task notification reported "exit code 0", which was the exit of the
+`timeout … | tail` pipeline, not npm's.
+
+So the real state is unchanged from 10-01: **`NPM_TOKEN` is still unset in the scheduled sandbox,
+`npm ci` still 401s, and a scheduled run still cannot run vitest, `tsc --noEmit` or eslint.**
+That is now **four consecutive runs** (09-29, 09-30, 10-01, 10-04).
+
+Note for whoever reads the 10-02 entry: its "got npm working locally since" refers to Ilia's own
+machine, **not** this sandbox. The two are not the same environment, and conflating them is what
+set up this mistake.
+
+Two lessons worth keeping:
+- **A populated `node_modules` is not proof of a successful install.** Check the installer's own
+  exit status; npm removes the tree on failure.
+- **A background task's "exit code 0" is the wrapper's**, when the command was piped. Read the
+  captured output before believing it.
 
 ## ⚠️ Commit authorship as Ilia is STILL blocked
 
@@ -80,4 +99,6 @@ Rishi). They are waiting on people, not on us.
    and PLT-3184's UI is "straightforward once those three are settled" per the 10-03 dig.
 2. If still unanswered by ~10-07, that is a *four day* stall on three sprint tickets and is worth
    escalating to Ilia as a sprint risk rather than quietly re-noting it.
-3. npm works now — a run that does get something to build can actually verify it.
+3. **Do not assume npm works.** It does not (see the correction above). Until `NPM_TOKEN`
+   is set in the scheduled environment, a scheduled run cannot verify any change it writes — which
+   is a standing argument against pushing unverified code from these runs.
