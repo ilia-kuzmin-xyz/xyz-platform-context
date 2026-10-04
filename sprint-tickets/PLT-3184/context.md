@@ -91,3 +91,11 @@ as recurring Pattern 3 ("check settings before data"). See also
 the portfolio weighting guard (`GeneralTab/portfolio-weighting-guard.ts`), which
 today requires a project's weighting to agree with its portfolio peers — a
 per-package quantity type interacts with that.
+
+## 2026-10-04 — no change; all three blockers still unanswered
+
+No reply from Jason on placement, nothing from BE on where Length/Area/Volume come from, and no
+definition of "Coverage". Last comment on the ticket is still the 10-03 one. Stays Analysis In
+Progress, no code written. The reuse shortlist and the `activityCategoryId`-not-name row-key
+warning above are the things to re-read when it unblocks — the UI itself is small once the three
+decisions land.

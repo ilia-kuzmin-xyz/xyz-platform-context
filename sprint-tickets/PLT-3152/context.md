@@ -93,3 +93,11 @@ Supersedes nothing above; the 10-02 entry stands.
 Still open and unchanged: unticking a discipline drops its slide pair but leaves
 its packages in the other slides; the cover has no visible capture entry point
 since QA 9 removed the invisible one.
+
+## 2026-10-04 — no change; QA has not replied
+
+Radu has not answered the 10-03 ask for a screen share on QA 2 / 3 / 4, so those three stay
+unstarted — all are geometry/repro questions that cannot be closed by reading code. PR #2260
+re-verified this run: **draft, CI green (run 5164), 0 commits behind master, 0 open review
+threads.** Checkpoints 1–3 are all no-ops on it. The two non-QA items from 10-02 are still true
+and still unowned (discipline untick leaves packages behind; cover has no visible capture entry).

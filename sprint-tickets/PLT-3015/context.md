@@ -80,3 +80,10 @@ and `CompanyDetailsSlider.tsx:65-69`; `PORTFOLIO_DELETE` in `usePortfolioAuthori
 - Open and unfixed, touching the same lines: `PLT-2879` — `ProjectPrivateRoute`
   gates on `[PROJECT_VIEW, PROJECT_EDIT]` with no `DASHBOARD_VIEW`, so a
   dashboard-only user is routed toward the dashboard then denied by the gate.
+
+## 2026-10-04 — no change; still waiting on the backend answer
+
+Checked, nothing moved. The 10-03 clarification is still the last comment on the ticket — no
+reply from BE on whether account authorities survive for tenant scope. Status correctly stays
+Analysis In Progress. Nothing re-asked (one working day old) and no code written: the ~76
+tenant-level guards make this unsafe to start on a guess, and that reasoning is unchanged.
