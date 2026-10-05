@@ -1008,3 +1008,12 @@ Fresh fetch: newest comment and status identical to this folder (no new comment 
 
 ## 2026-10-02 (scheduled) — unchanged
 Fresh fetch with comments. Newest comment still `112017` (Ilia, 09-11), In Analysis. Ilia's own promise is now 21 days overdue. The combined draft to Yash and Gennaro (09-14) is unposted; re-validate it against code before sending (the 09-09 rule), do not just re-count the days. No Jira action was taken.
+
+## 2026-10-05 (scheduled) — Yash chased again (`113731`, 10-02 14:35); Ilia's promise now 24 days overdue
+
+Fresh fetch with comments (9 comments, newest `113731`). Yash: *"just curious, any updates on this one?"* (second chase after `112016`, 09-11). Status still In Analysis, assignee Ilia. Gennaro's question (Staging project) is now 54 days old with no answer from him; he has not been tagged on it since 08-12.
+
+**Re-validated against code, per the 09-09 rule** (the 09-14 draft had gone unsent for over a week): `countDistinctElements` is still live at `dashboard-color-service.ts:700` and `:876` on master `7d77311`, and `element-count.test.ts` exists. So the claim "the July mismatch was fixed" still holds in code. **Not verified:** which release carries PR #2084 (this checkout is shallow, 10 commits; `git tag --contains` returns nothing for it) and that Prod still matches today (last reading: Gennaro's own Prod figures, 08-12, within 0.5%). Latest release tag is `v26.3.6` (09-24).
+
+**What changed in the picture:** the Staging reading (26.3.4, 08-12) is now two releases old, so asking "which project was that" is a weaker question than "re-check on the current release". Same owner, same single question, and the answer is two numbers.
+Class **1** (stale, unresponded, owed by Ilia). No Jira action was taken.

@@ -457,3 +457,23 @@ voice and attribute the decision, without the quote marks.
 drafted reply, state the decision in our own words and name whose decision it is. Both instructions
 were given within a minute of each other and they are not in tension — "mostly quote Mostafa" meant
 *lean on his substance, add no context of our own*, not *paste his sentence*.
+
+---
+
+# 2026-10-05 — CURRENT. The 09-02 close is SPENT: Mostafa reopened it (`113747`). One question to Darminder.
+
+**Action class: 4 (undefined ask, possibly a product decision) with a class 1 half (Darminder silent on `112960`).** Status stays **Open**; Darminder moves it to In Analysis when he picks it up.
+
+**Why this question and not the earlier ones:** the old drafts chased a decision that was made on 09-02 and is now being walked back. The cheapest fact that separates every outcome is whether the API ever fills Location. If yes, the original "configure rooms" answer was right and only the GUID display needs a PR. If no, the field is dead and Mostafa chooses between fixing the stamping, adding a selector (the form already registers the field), or removing it.
+
+**Assumption (one line):** `113747` means "find out why no issue has a Location"; Mostafa did not say so.
+
+### Draft to Darminder (42 words)
+
+> Darminder, Mostafa reopened this after finding that no QA issue on the customer's project has a Location filled in. **Does the API fill Location when an issue is created in the web viewer, and have you seen it filled on any project?**
+
+*Held back on purpose:* the front end facts (viewer sends `null` on create; no selector though the form registers the field), the GUID branch, and the "clarify what Mostafa wants" question. Sending two questions buries the one that unblocks. If Darminder answers "I don't know", the next owner is Sachin or Ali (api-v2), and the question is the same.
+
+**Do not tell the customer "set up rooms" again** until that answer exists. **Do not raise a PR from `PLT-2858-qa-issue-location-label` yet:** it fixes display only and is safe, but it is the class 2 half and should follow the answer, not precede it.
+
+No Jira action of any kind was taken.

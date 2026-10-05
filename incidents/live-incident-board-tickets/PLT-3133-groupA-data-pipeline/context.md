@@ -363,3 +363,6 @@ Fresh fetch: newest comment and status identical to this folder (no new comment 
 
 Fresh fetch: 13 comments, newest still `113113` (Yash, 09-28), same as the folder. Changelog: **Rishi moved it Open -> With Customer on 10-01 16:52** (the Open state was Freshdesk automation on 09-25, not a customer reply; see 09-28 entry). So Rishi is now explicitly treating the ball as with the customer, which matches his 09-21 ask (`112616`) for concrete ids / expected values. Customer has been silent since then (11 days). Folder tag unchanged.
 Not re-investigated; nothing verified beyond the fetch.
+
+## 2026-10-05 (scheduled) — unchanged
+Fresh fetch with comments: 13 comments, newest `113113` (Yash, 09-28), With Customer. Customer owes concrete examples (Rishi's three asks, `112616`); 14 days since the ask, 7 since Freshdesk went to Waiting on customer. Backend timing was measured by Rishi (3 to 14 minutes, `112616`). Class 1, parked. No Jira action was taken.

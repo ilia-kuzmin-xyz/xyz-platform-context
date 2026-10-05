@@ -101,3 +101,6 @@ Fresh fetch, 20 comments, newest `113551` (Rishi, 10-01 10:18). New since the fo
 New attachments `65492` (png) and `65493` (`2026.09.30_RGN-PA18_Report data_analysis_rev02.xlsx`) from 09-30: unopenable from this routine (403, confirmed 09-08). The xlsx is the one Rishi says he cannot trace; knowing who produced it and from what filter would settle whether any dashboard discrepancy remains.
 Still unanswered: A12150 (linked in viewer, missing on dashboard).
 Nothing verified by this run beyond the comment text; Rishi's numbers are his own measurement.
+
+## 2026-10-05 (scheduled) — unchanged
+Fresh fetch with comments: 20 comments, newest `113551` (Rishi, 10-01), With Customer. Customer owes the reframed question (what she saw, what she expected) via Yash; about 4 days. A12150 still unanswered. Attachments `65492` and `65493` (png, xlsx) remain 403 from this routine. Class 1, parked. No Jira action was taken.

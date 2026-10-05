@@ -18,3 +18,6 @@ today**, merged clean)
 - [ ] **Post the decision-request to Pietro (cc Mostafa).** Drafted, unchanged, still correct.
       This is the single highest-value unposted item on the board by tenure.
 - [ ] Nothing to debug in the browser. The blocker is a person, not a fact.
+
+## 2026-10-05 addendum
+Ticket reopened 10-02; this file's 08-27 "stale chase" framing is spent. Nothing to debug in the browser yet. If Darminder cannot answer, one SQL/MCP read settles it: count QA issues with non-null `issueLocationId` per project (needs prod access this routine lacks).

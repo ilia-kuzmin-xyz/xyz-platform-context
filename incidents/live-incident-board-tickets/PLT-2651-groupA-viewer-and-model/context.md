@@ -1340,3 +1340,6 @@ Fresh fetch: 20 comments, newest still `113497` (Rishi, 09-30 17:32, the PR #225
 
 Checked in `hc-frontend` (git, not Jira): PR #2257 is merge commit `d212e1cea` on `origin/master` (09-30 17:30). `git tag --contains d212e1cea` returns **nothing**; the newest tag is `v26.3.6` (tag commit 09-24), which predates it. So as far as tags show, the fix is **in no release**. Not verified: whether master is auto-deployed to a dev or staging environment the customer could use, and whether Rishi told the customer something by Freshdesk. This is the open question, and it is why a silent move to With Customer is not self-explanatory.
 Still unposted: the correction to the customer-facing true-north advice (`111642`). The 09-22 draft is superseded by the fix, but the correction of the advice itself is still owed.
+
+## 2026-10-05 (scheduled) — unchanged on Jira, release gap still open
+Fresh fetch with comments: 38 comments, newest `113497` (Rishi, 10-01), With Customer. PR #2257 (`d212e1cea`) is on master but `git tag --contains` finds no tag that holds it; newest tag is still `v26.3.6` (09-24). So the customer has nothing to test unless a non-prod build exists (unchecked). The old true-north advice (`111642`) is still uncorrected. Class 1 (maybe 4). No Jira action was taken.

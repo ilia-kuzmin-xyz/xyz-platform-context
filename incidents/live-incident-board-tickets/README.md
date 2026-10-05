@@ -45,6 +45,51 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-05 (scheduled) — 11 in scope, all Group A, Group B empty. Three tickets moved (PLT-3182, PLT-2874, PLT-2858), eight unchanged, zero Jira actions taken
+
+Board re-queried. Every in-scope ticket re-fetched with comments; newest comment id compared with the folder. Out of scope:
+Ready For QA, In Code Review (PLT-3112), Blocked (PLT-3135), and Done (PLT-3109, PLT-3147, PLT-2918 were in scope on 10-02 and
+are now Done). No new Live Incident since PLT-3182 (09-30).
+
+**PLT-2858 (Open, Critical, REOPENED 10-02).** Mostafa (`113747`) reopened it after finding on a 09-24 call that no issue has a
+Location (`112960`, never answered by Darminder or Pietro). The 09-02 "close, it auto-populates from BIM rooms" position is
+contested. New front end fact: the viewer sends `issueLocationId: null` on every create and has no selector, so everything
+hangs on whether the API fills it. Class 4 with a class 1 half. One question to Darminder (42 words), in `recommended-action.md`.
+
+**PLT-2874 (In Analysis).** Yash chased again (`113731`, 10-02). Ilia's promise 24 days overdue. Draft re-validated against
+code (`countDistinctElements` live) and re-pointed: ask Gennaro to re-check FAR01 on the current release rather than "which
+project". Class 1, owed by Ilia (59 words).
+
+**PLT-3182 (now With Customer).** Sergey removed the tenant-admin roles on 10-02 (`113717`) and the customer is retrying.
+Nothing owed by us; the 10-01 draft to Pietro is moot. Follow-up `PLT-3183` (Rishi, Team tab error message) exists.
+
+**Unchanged, same newest comment id:** PLT-3178, PLT-3156, PLT-3133, PLT-3115, PLT-2651, PLT-3084, PLT-3063, PLT-3060.
+PLT-2651: PR #2257 still in no release tag (newest `v26.3.6`). PLT-3084: PR #2197 still open and blocked; Darminder's
+changes-requested review stands and he is not among the requested reviewers.
+
+### Group A (11)
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | Open · Critical | **Reopened by Mostafa** | 4 + 1 |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Yash chased again | 1 |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged, fix unreleased | 1 (maybe 4) |
+| [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged, PR #2197 blocked | 1 + 4 |
+| [PLT-3063](PLT-3063-resolved-quality-management/context.md) | quality-management | Customer Release Check | Unchanged | none, close candidate |
+| [PLT-3060](PLT-3060-resolved-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged | none, customer verifying |
+| [PLT-3178](PLT-3178-groupA-progress-tracking/context.md) | progress-tracking | With Customer · Critical | Unchanged | 1, parked |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged | 1, parked |
+| [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged | 1, parked |
+| [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged | 1, administrative |
+| [PLT-3182](PLT-3182-groupA-access-permissions/context.md) | access-permissions | With Customer | **Sergey fixed, customer retrying** | 1, parked |
+
+Group B: 0.
+
+**Unopenable media:** nothing new that is needed. PLT-3178 `65492` and `65493` stay 403 (the xlsx would settle where the customer's export came from).
+**Not verified:** API behaviour on Location (PLT-2858); whether Prod still matches on PLT-2874 (last read 08-12); which release carries PR #2084; whether a non-prod build exists for PLT-2651; that the ten PLT-3182 removals work.
+
+---
+
 ## Run: 2026-10-02 (scheduled) — 13 in scope, all Group A, Group B empty. Three tickets moved (PLT-3178, PLT-3133, PLT-2651), ten unchanged, zero Jira actions taken
 
 Board re-queried (24 open Live Incidents). Every in-scope ticket re-fetched with comments; newest comment id compared with

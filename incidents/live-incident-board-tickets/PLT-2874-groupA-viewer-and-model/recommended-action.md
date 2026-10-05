@@ -566,3 +566,17 @@ excluded, all still needing environment state.
 Live re-fetch confirms zero movement. The combined draft to Yash+Gennaro (§ 2026-09-14) is still the
 right message and still unposted. Confidence unchanged: 9/10 the 08-28 draft is unsafe to send, 6/10
 on the Staging undercount's operative hypothesis. **No Jira action was taken by this run.**
+
+---
+
+## 2026-10-05 (scheduled) — CURRENT. Replaces the 09-14 wording; same job. Yash chased again on 10-02.
+
+**Class 1, owed by Ilia (24 days past "today").** One reply to Yash that gives the status he asked for twice and hands Gennaro a fresher question than the 08-12 "which project". The 09-14 draft is superseded but not wrong; use this one because Staging's 08-12 reading predates 26.3.6.
+
+**Assumption (one line):** Ilia has not answered Yash outside Jira; and Prod still agrees (last measured 08-12, not re-measured).
+
+### Draft to Yash, Gennaro tagged (59 words)
+
+> Yash, sorry for the wait. The July mismatch was fixed and Production has matched within half a percent since. What is left is one Staging reading from August that nobody has been able to reproduce. I am treating this as fixed on Production. **Gennaro, can you re-check FAR01 on the current release and send the editor and dashboard figures?**
+
+Do not close the ticket until Gennaro answers (the 08-13 close was wrong for the same reason). No Jira action was taken.

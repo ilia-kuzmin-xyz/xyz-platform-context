@@ -716,3 +716,6 @@ Fresh fetch: newest comment and status identical to this folder (no new comment 
 
 ## 2026-10-02 (scheduled) — unchanged
 Fresh fetch with comments. Newest comment still `113150`. Status Customer Release Check. PR #2197 still open and blocked, Darminder's CHANGES_REQUESTED (09-15) stands, my 09-19 question to him on the PR is unanswered 13 days; the only new PR activity is a SonarCloud comment on 10-01. Select all is therefore still unshipped; 26.3.6 carried only Ctrl+Z. Not re-drafted. No Jira action was taken.
+
+## 2026-10-05 (scheduled) — unchanged on Jira; PR #2197 re-checked
+Fresh fetch with comments: 5 comments, newest `113150` (Yash, 09-28), Customer Release Check. 26.3.6 carried only the Ctrl+Z fix (PLT-2743). **PR #2197 (Select all) is still open, not merged, mergeable_state blocked.** Darminder's CHANGES_REQUESTED review (09-22, on `b162f42`) still stands. Ilia pushed `ea8174c` on 10-03; Copilot's 10-03 review of that commit raised one finding (stale `hasSelection` state after tree filtering, `activity-linking-list.tsx:90`) and the earlier multi-activity finding is resolved. Darminder is **not** among the requested reviewers (they are TomMasdinXYZ, rishib-xyz, SergiuszXYZ), so a re-review from the person who requested changes has not been asked for. Class 1 plus 4 as before. No Jira action was taken.

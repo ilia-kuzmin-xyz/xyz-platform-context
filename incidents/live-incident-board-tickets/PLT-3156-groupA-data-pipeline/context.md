@@ -166,3 +166,6 @@ Fresh fetch: newest comment and status identical to this folder (no new comment 
 
 ## 2026-10-02 (scheduled) — unchanged
 Fresh fetch with comments. Newest comment still `112651`. With Customer since 09-21 (11 days). Not re-drafted. No Jira action was taken.
+
+## 2026-10-05 (scheduled) — unchanged
+Fresh fetch with comments: 5 comments, newest `112651` (Yash, 09-21), With Customer. Customer owes a re-exported XER without the DRAFT project; 14 days. Consider whether Yash should close or chase; the customer has not been asked again. Class 1, parked. No Jira action was taken.

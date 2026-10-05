@@ -117,3 +117,7 @@ supplies. The shipped table also carries two spellings of one package under `Ele
 apart. With plain `===` matching, the spelling a project uses decides the price quoted. Four package
 names legitimately appear under two disciplines each (`Busduct`, `Containment`, `Sprinkler`, `VESDA`);
 that is by design, since Discipline is part of every match.
+
+## 2026-10-05 — QA issue "Location" is never set by the web viewer (PLT-2858)
+
+Verified on hc-frontend master `7d77311`: the issue form has no control that writes `locationId` (only free-text `locationDescription`, `issue-form.tsx:555-561`), and every create sends `issueLocationId: null` (`format-issues.ts:138,145`). A project-level `issueLocations` list exists (`issue-api-service.types.ts:178-181`) and the form registers an optional `ISSUE_LOCATION` field when it is non-empty (`use-issue-form.ts:565-566`), but nothing renders it. The detail panel shows the raw id, not the name (`issue-details.tsx:149`). Whether the API fills Location on create is **unverified**; the earlier "auto-populated from BIM rooms" explanation is contested (product found no issue with a Location, 09-24). See `incidents/live-incident-board-tickets/PLT-2858-groupA-quality-management/`.

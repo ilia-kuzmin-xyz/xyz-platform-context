@@ -37,3 +37,13 @@ His "improve the error message" ticket needs a front end half as well: the toast
 (`TeamContent.tsx:857-861`). Mention it when he raises the ticket, or add it to the ticket he opens.
 
 No Jira action of any kind was taken.
+
+---
+
+# 2026-10-05 update — supersedes the 10-01 draft to Pietro (do NOT send it; Sergey fixed it on 10-02)
+
+**Action class: 1, parked with customer.** Nothing to send. Status is already With Customer. The only open item is the customer's retry outcome, which Yash is already waiting on. If nothing comes back by Wed 10-07, Yash chases the customer in Freshdesk (no draft needed from us). When the customer confirms, the ticket can be closed. `PLT-3183` carries the error-message work.
+
+**Assumption (one line):** Sergey's role removal took effect for all ten pairs; only the customer's retry will prove it.
+
+No Jira action of any kind was taken.

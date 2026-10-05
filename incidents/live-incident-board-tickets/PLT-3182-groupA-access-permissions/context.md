@@ -86,3 +86,18 @@ until someone acts).
 
 ## 2026-10-02 (scheduled) — unchanged
 Fresh fetch with comments. Newest comment still `113485` (Yash, 09-30 13:38). Pietro has not replied, about 44 h; status Open. The 10-01 draft to Pietro stands, now a day more urgent because the ex-employees still hold access. No Jira action was taken.
+
+## 2026-10-05 (scheduled) — Sergey (api-v1) confirmed the mechanism and removed the roles; ball is now with the customer
+
+Fresh fetch with comments (12 comments, newest `113728`, 10-02 14:22). Status moved **Open → With Customer**.
+Three comments after the folder's last read (`113485`):
+
+- `113717` Sergey (10-02 13:56): *all these users are tenant admins; I removed their global roles; try to delete them again.* That is the backend owner confirming Rishi's `113433/113480` mechanism **for all ten pairs** (the 10-01 note flagged "all 10 are org admins" as unverified; it is now verified by the api-v1 owner, not by us). Pietro was never needed; his 09-30 question is moot.
+- `113727` Yash: Freshdesk 8130 set to *Waiting on customer*. `113728` Yash to Sergey: customer asked to retry and report.
+
+**Ball:** the customer (Dario) retries; Yash relays. Nothing is owed by us. One working day elapsed (Fri 14:22 to Mon).
+**Follow-up that exists:** `PLT-3183` (Bug, Rishi, Open, created 09-30 10:03) "Team tab: show why removing an organisation admin from a project fails". Its title is front-end, so the toast half (`TeamContent.tsx:857-861`, server message dropped) has a home. Not verified that it also covers the IAM response text.
+**Class: 1, parked with customer.** Chase only if no outcome by Wed 10-07 (Yash's channel, no draft needed from us).
+**Unverified:** that the retry works for all ten (customer has not reported); whether any of the ten has a project-level (not global) role that would also block.
+**Process note worth a human decision (not ours to open):** ex-employees kept tenant admin roles after leaving. That is an offboarding gap, separate from this ticket.
+No Jira action was taken.

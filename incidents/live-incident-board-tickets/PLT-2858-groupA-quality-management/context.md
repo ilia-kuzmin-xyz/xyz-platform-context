@@ -592,3 +592,42 @@ for drafted replies was added to `live-incident-run-instructions.md` on **2026-0
 paragraphs with no bolded closed question). No run since 08-27 had reconciled them. Done this run:
 see `recommended-action.md` § 2026-08-31 for SHORT-compliant rewrites. **The diagnosis, routing,
 owners and recommendation are all unchanged** — only the posting form of the two messages.
+
+---
+
+## 2026-10-05 (scheduled) — REOPENED on 10-02. The "close, it auto-populates from BIM rooms" position (09-02) is now contested by product itself.
+
+**Supersedes the 09-02 "RESOLVED" framing in `recommended-action.md`.** The folder had not been touched since 09-01/09-02; two comments and a status change were missing.
+
+Fresh fetch with comments (34 comments, newest `113747`). Status **Open** (was Closed after Freshdesk 7286 closed on 09-03). Assignee Darminder. Priority Critical.
+
+| id | who | when | what |
+|---|---|---|---|
+| `111104` | Ilia | 09-02 | told Yash: Location is auto-populated from the BIM room location; Mostafa suggested closing (already in folder) |
+| `112960` | **Mostafa** to Darminder + Pietro | 09-24 | *"so I had a call with Stephen and we checked all issues to date and nothing had locations"* |
+| `112963` | Yash | 09-24 | asks Mostafa to say the word and he will assign it to the live-incident engineer |
+| `113747` | **Mostafa** to Darminder | 10-02 16:01 | *"lets reopen this"* |
+
+**What it means.** "Stephen" is not named elsewhere in this folder; read as a customer-side contact (unverified). Mostafa checked every issue on a call and none carried a Location. That is stronger than the original report (one project, ML9, rooms unconfigured): it says Location may be empty **everywhere**, which the 09-02 explanation ("fill in the rooms and it appears") does not cover. Neither Darminder nor Pietro replied to `112960` in 11 days. `113747` states no ask; the only reading consistent with `112960` is "find out why no issue has a Location". That is an inference.
+
+### Frontend facts (verified on master `7d77311`, 10-05)
+- **The web viewer never sets Location on create.** The form has no control that writes `locationId` (only `locationDescription`, `issue-form.tsx:555-561`). Default is `locationId: initialValues.locationId ?? ''` (`use-issue-form.ts:135`), and `toIssuePayload` turns `''` into an explicit `null` for `issueLocationId` (`format-issues.ts:145`, with the `''` to `null` conversion at `:138`). So every issue created in the viewer is sent with `issueLocationId: null`; the position (`xMeters/yMeters/zMeters`) and `modelElementId` go with it. Whether the API derives a Location from those is **the** open fact, and it lives in api-v2, not here.
+- On edit the existing value is sent back unchanged (`issue-edit.tsx:150, 188`).
+- **A project-level list of locations exists**: `IIssueParameters.issueLocations: {issueLocationId, location}[]` (`issue-api-service.types.ts:178-181, 218`). The form even registers an optional `ISSUE_LOCATION` field when that list is non-empty (`use-issue-form.ts:565-566`) and a required-rule for it (`:425`), but **no component renders a selector**. So a project can have locations configured and the viewer still gives no way to choose one.
+- **GUID defect unchanged on master**: the detail panel binds `compare('locationId')` (`issue-details.tsx:149`), i.e. the raw id, never the `location` name. Fix exists on remote branch `PLT-2858-qa-issue-location-label` (`156ff5ae7`, 08-27, no PR; GitHub search for a PR returns none). It only matters once something populates the field.
+- Dashboard side: the quality dashboard carries `issueLocationId` and `locationDetails` through (`quality-data-mappers.ts:59,75`; `quality-sql-queries.ts:204,272`); no location lookup or name resolution seen in those files (not exhaustively read).
+
+### Killed / reframed
+- The 07-01 claim "Location is based on the element's location from project-configured named zones" (Darminder `106250`) was **never verified by the API owner** (`§3 q4`, "corroborated in-thread only"). Mostafa's 09-24 finding is the first evidence against it. Do not repeat "rooms not configured" to the customer until the API behaviour is known.
+
+### The decisive fact, falsifiable by one query
+If the API stamps Location on create, then on **any project with locations configured** some issues created in the viewer have a non-null `issueLocationId`. If **no** issue on **any** project has one, nothing stamps it and the field is dead. This needs api-v2 (Sachin or Ali) or Darminder with DB/prod access. The prod MCP route needs per-session credentials and is not available to this routine.
+
+### Unverified
+Who Stephen is; whether the customer is ML9 (Mikel) or another; whether `112960` covers one project or many; API behaviour; whether `113747` means "investigate" or "implement a selector".
+
+### Unopenable media
+All attachments on this ticket are images (403 from this routine, per the 09-08 finding). Not needed now.
+
+**Class 4, with a class 1 half.** Class 1: Darminder owes a reply on `112960`/`113747` (11 and 3 days). Class 4: the ask is undefined and may be a product decision (stamp, selector, or remove field), not a bug.
+No Jira action was taken.
