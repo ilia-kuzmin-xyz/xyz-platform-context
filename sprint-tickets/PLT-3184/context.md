@@ -99,3 +99,10 @@ definition of "Coverage". Last comment on the ticket is still the 10-03 one. Sta
 Progress, no code written. The reuse shortlist and the `activityCategoryId`-not-name row-key
 warning above are the things to re-read when it unblocks — the UI itself is small once the three
 decisions land.
+
+## 2026-10-05 — no change; still blocked on all three
+
+Nothing moved over the weekend. Last comment on the ticket is still the 10-03 clarification —
+no answer from Jason on placement, nothing from BE on where Length/Area/Volume come from, no
+definition of "Coverage". Stays Analysis In Progress, no code written, and nothing re-asked:
+the ask is two calendar days and zero working days old, so chasing it again would just be noise.

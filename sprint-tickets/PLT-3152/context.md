@@ -101,3 +101,87 @@ unstarted — all are geometry/repro questions that cannot be closed by reading 
 re-verified this run: **draft, CI green (run 5164), 0 commits behind master, 0 open review
 threads.** Checkpoints 1–3 are all no-ops on it. The two non-QA items from 10-02 are still true
 and still unowned (discipline untick leaves packages behind; cover has no visible capture entry).
+
+## 2026-10-05 — discipline exclusion fixed end-to-end (the one unblocked item)
+
+QA 2/3/4 still unanswered (Radu has not replied to the 10-03 ask), so those remain
+unstarted — unchanged reasoning, they need a repro not a code read. But the
+"unticking a discipline leaves its packages behind" item logged on 10-02 needed
+**no** QA input, so it was done this run rather than logged a third time.
+
+**Shipped in `b89b52d` on `PLT-3152` (PR #2260, still draft).**
+
+### What it actually was
+
+`excludedDisciplines` only ever reached `buildDisciplines`, which set
+`reportSlide: false`. Only `selectDisciplineSlides` reads that flag, so the
+slide pair vanished and every table kept the rows — by-discipline rollup,
+at-risk packages, full breakdown, preview and pptx alike.
+
+The panel's own copy settles the intended semantic without asking anyone:
+**"Untick a discipline to leave it out of the report."** Not out of its slide pair.
+
+### The design, and why not the obvious one
+
+Filter **once at assembly**, not at the ~12 consumption sites across
+`PackagesSlide`, `PackageBreakdownSlide`, `DisciplineSlide`, `clientReportDeck.ts`
+and `clientReportPptx.ts`. Patching each is how preview and export drift apart —
+which is already QA defect 4 on this very ticket.
+
+### The trap that shaped it (re-read this before touching the picker)
+
+`report.disciplines` / `report.packages` **cannot** simply be filtered in place:
+
+- `ClientReportPage.tsx:147-155` sourced the picker's own options from
+  `report.disciplines` — an excluded discipline must stay listed to be re-ticked.
+- the same block derived `packageCount` from `report.packages`, and
+  `PlannerPanel` *disables* a row at `packageCount === 0`.
+
+So filtering alone makes unticking a **one-way door**. Hence new
+`ClientReportData.disciplineChoices`, built from the unfiltered sets, which the
+picker reads. There is now a page-level test that fails if anyone points the
+picker back at `report.disciplines`.
+
+### Deliberately out of scope, and why
+
+- **Groups** are contractor-keyed, **look-ahead** is phase/level/area-keyed —
+  neither carries discipline attribution, and a contractor can span disciplines.
+  Nothing to filter on, left whole.
+- **Project Overview gauge** stays project-level truth from `projectPoints`.
+  Excluding a discipline must not silently restate the project's own progress.
+- `reportSlide` kept: several tests use `reportSlide: true` as a seam to force a
+  slide pair for a package-less discipline. Its docstring now says explicitly
+  that it is *not* the exclusion mechanism — setting `false` would hide the
+  slides and leave the rows, i.e. recreate this exact bug.
+
+Both tables already took their denominator from their own set (`PackagesSlide`
+docstring), so shrinking membership recomputes totals **without** a new weighting
+basis — the thing PLT-3010 was burnt on.
+
+### Verification
+
+529 tests green (`ClientReportPage/`, `clientReportService/`, `useClientReport`),
+`tsc --noEmit` clean, eslint 0 errors. Three mutation checks run to prove the new
+tests are not vacuous: removing the package filter fails 4, building the choices
+from filtered sets fails 2, pointing the picker back at `report.disciplines`
+fails 1.
+
+### How the suite was run here at all — reusable
+
+`npm ci` 401s on the private `@xyzreality/dhtmlx-gantt` (no `NPM_TOKEN` in the
+remote session), which is why earlier runs pushed blind or declined to push.
+Workaround that worked: a local stub package exposing `gantt` / `Gantt`, the
+dependency repointed at it with `file:`, then `npm install --ignore-scripts`.
+`npm overrides` does **not** work — npm rejects an override that conflicts with a
+direct dependency (`EOVERRIDE`).
+
+Only the gantt *type* imports fail `tsc` afterwards (`GanttStatic`, `GridColumn`);
+filter those out and the rest of the check is trustworthy. **Restore
+`package.json` and `package-lock.json` from a backup before committing** — the
+stub must never reach a commit.
+
+### Still open on this ticket
+
+- QA 2, 3, 4 — waiting on Radu for a repro / screen share.
+- Cover has no visible capture entry point since QA 9 removed the invisible one.
+  Design call, still unowned.

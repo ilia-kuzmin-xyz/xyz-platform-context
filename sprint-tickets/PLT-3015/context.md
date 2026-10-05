@@ -87,3 +87,10 @@ Checked, nothing moved. The 10-03 clarification is still the last comment on the
 reply from BE on whether account authorities survive for tenant scope. Status correctly stays
 Analysis In Progress. Nothing re-asked (one working day old) and no code written: the ~76
 tenant-level guards make this unsafe to start on a guess, and that reasoning is unchanged.
+
+## 2026-10-05 — no change; still waiting on the backend answer
+
+Weekend, nothing moved. The 10-03 clarification is still the last comment — no reply on whether
+account authorities survive for tenant scope. Status correctly stays Analysis In Progress.
+Not re-asked (zero working days elapsed) and still no code written: the ~76 tenant-level guards
+make starting on a guess unsafe, and that reasoning is unchanged.
