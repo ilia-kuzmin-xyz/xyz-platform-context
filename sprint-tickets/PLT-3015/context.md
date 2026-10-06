@@ -94,3 +94,15 @@ Weekend, nothing moved. The 10-03 clarification is still the last comment — no
 account authorities survive for tenant scope. Status correctly stays Analysis In Progress.
 Not re-asked (zero working days elapsed) and still no code written: the ~76 tenant-level guards
 make starting on a guess unsafe, and that reasoning is unchanged.
+
+## 2026-10-06 — no change; still waiting on the backend authorities decision
+
+Last comment on the ticket is still the 10-03 clarification. No reply on whether the account
+response keeps tenant-scoped authorities or whether a tenant-authorities endpoint is coming — the
+answer that decides whether this is a week or a much larger piece.
+
+**Not re-asked this run, deliberately.** Unlike PLT-3184 there is no escalation on this ticket and
+no new evidence to add, so a second ping would be noise. The two traps recorded above
+(`private-route.tsx` preferring account authorities while the array is non-empty, and
+`useProjectAuthorities`' `placeholderData: []` flashing "no permission" mid-flight) are still the
+things to re-read when it unblocks.

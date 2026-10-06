@@ -106,3 +106,36 @@ Nothing moved over the weekend. Last comment on the ticket is still the 10-03 cl
 no answer from Jason on placement, nothing from BE on where Length/Area/Volume come from, no
 definition of "Coverage". Stays Analysis In Progress, no code written, and nothing re-asked:
 the ask is two calendar days and zero working days old, so chasing it again would just be noise.
+
+## 2026-10-06 — escalated by Pietro to top priority; blockers re-verified against the backend and still hold
+
+Pietro commented on 10-05: *"@Ilia Kuzmin this is top prioritity please"*. That is an escalation,
+**not an answer** — all three questions from 10-03 are still open and the ticket still cannot start.
+
+This run did **not** just re-note the stall. The second blocker was re-verified first-hand against
+`XYZPlatformApi` at `origin/master` (`e904547`), because a three-day-old "backend has nothing"
+claim is worth re-checking before repeating it to a product owner:
+
+- `quantityType` — **zero** occurrences in `src/`.
+- `packageType` — **zero** occurrences.
+- `coverage` — **zero** occurrences.
+- `Volume` — **zero** occurrences.
+- The only weighting concept is still `ProjectProgressWeightingMethod`
+  (`src/models/ingress.ts:44`) = `PLANNED_LABOUR_HOURS | LINKED_ELEMENT_COUNT`, exposed as
+  **GET-only** at `GET /:projectId/progress-weighting`
+  (`src/api/v2/projects/projects.routes.ts:754`), backed by `fn_GetProjectProgressWeighting`.
+  Project-level, one value, no write path.
+
+So the backend blocker is confirmed, not assumed: **there is no per-package mapping to save to and
+no Length/Area/Volume field to measure.** This ticket is backend-first; the FE panel cannot be
+built against anything today.
+
+A fresh comment was posted to PLT-3184 (comment `114045`) addressed to Pietro, carrying that
+verification and asking whether to raise the backend ticket plus 10 mins with Jason, or to size it
+backend-first and park the UI. Re-asking was justified this time where it was not on 10-04/10-05:
+the priority changed, three working days have passed, and the comment carries new evidence rather
+than a repeat of the question.
+
+**Deliberately did not start the UI.** A panel with a quantity selector that persists nowhere and a
+"Coverage" column whose number I invented is worse than no panel — it looks like progress, and
+every bit of it gets rewritten once the real contract lands.

@@ -185,3 +185,17 @@ stub must never reach a commit.
 - QA 2, 3, 4 — waiting on Radu for a repro / screen share.
 - Cover has no visible capture entry point since QA 9 removed the invisible one.
   Design call, still unowned.
+
+## 2026-10-06 — no change; QA items 2/3/4 still need Radu
+
+No reply from Radu on the screen-share ask from 10-03, so QA items 2 (Project Overview missing
+date), 3 (models behind invisible side panels on zoom out) and 4 (preview vs downloaded pptx
+layout) remain unverifiable from here — all three are geometry/behaviour I would be guessing at.
+
+PR **#2260** is unchanged and healthy: draft, CI green on `b89b52d` (build + SonarCloud both
+success), **zero** open review threads, and it merges cleanly against master (verified by
+`git merge-tree`, no conflicts) despite being 2 commits behind. Nothing to do on it this run
+beyond the master merge that identity-blocked below.
+
+Not re-asked: no escalation here, and chasing a QA screen-share again after three days adds
+nothing the 10-03 comment did not already ask for.
