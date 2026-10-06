@@ -490,3 +490,87 @@ Copilot, 09-30). #2252 and #2247: zero.
 now expose commissioning surfaces without the cookie; the flag remains the gate in prod only. The
 "flag off = zero Supabase requests" safety line in this README's header now holds only in prod —
 the permissive-RLS blocker (§ Blockers) got more exposed, not less.
+
+## 2026-10-06 — scheduled review run: five eligible PRs; #2265 approved, #2211 unchanged, three held
+
+Scope filter (Rishi/Darminder/Tom, non-draft) matched #2268 (Darminder, PLT-3111), #2267 (Rishi,
+PLT-2975/2989), #2266 (Rishi, PLT-3092), #2265 (Rishi, PLT-3172), #2211 (Darminder, PLT-3112).
+None by Tom.
+
+- **#2265 (PLT-3172, live incident) — APPROVED this run, comment left.** Extends the verified
+  #2242 fix to the Linked elements panel and select-all via a shared
+  `toHighlightableSelections`/`withDescendants` helper (`viewer-x/impl/selection/`); the schedule
+  path is a behaviour-preserving refactor onto the same helper. Copilot's duplicate-ids finding
+  fixed at head (`get-selectable-dbids-for-model.ts` pushes the expanded set once, no-tree fallback
+  kept); fixture tests cover nwc/revit/mixed/dedupe/fallback; CI+Sonar green; clean merge with
+  master; Darminder approved at head. Radu's 10-05 ticket comment (row click doesn't turn the
+  element blue) is by-design focus-only — Rishi answered on the ticket; the context-menu Select
+  path is what this PR fixes.
+- **#2211 (PLT-3112) — no action.** Ilia's 10-05 changes-requested review stands; head unchanged
+  since 09-09 (build still red from the trivy era). Darminder told Yash on the ticket (10-02) it
+  "should be actioned by Monday" — nothing pushed yet.
+- **#2268 (PLT-3111, Blocker bug, Darminder) — held for Ilia, nothing posted.** CONFLICTS with
+  master (TaskLibraryTab.tsx — master's PLT-2999/#2254 folder work — and assets-panel.tsx), 17
+  behind; the `build` workflow never reported on head `9d30bed` (commit status pending; only the
+  copilot check ran). Covers ticket issues 3/4/5 (+ issue 2 answered as edit-mode behaviour per
+  the #2147 read-only-view design); **issue 1 (409 upload-conflict error handling) is absent from
+  the diff** — partial fix of a Blocker ticket, coverage question for Darminder. Code-level: the
+  `use-asset-detail-from-selection` rework (an `openedByPick` identity-hold so a pick-opened asset
+  yields to the next pick, plus canvas empty-click close via `viewer.impl.hitTest`) reads correct
+  against the selection store — `clearSelectedElements` with an empty selection nulls the entity,
+  so the empty-space click does close the asset; assets-panel onOpen ordering (select element
+  first, asset last word) relies on the batched update and the early `type === 'asset'` return
+  covers it. `folder_id` insert is a conditional spread (no withOptionalColumn needed; root
+  creates unaffected). 4 Copilot threads open: 1 medium (focus restore / a11y on the builder
+  slide — partially addressed by the new builderBackRef focus) + 3 low (numCellSx width-120 vs PR
+  description; missing tests for the canvas effect and the folder_id wire contract).
+- **#2266 (PLT-3092, block/unblock, Major) — held for Ilia (visual gate); recommend approve after
+  the visual pass; nothing posted.** Full code pass found NO critical/major: block/unblock ride
+  the existing `commissioning_apply_operation_v1` RPC with `expectedTaskRevision` optimistic
+  concurrency and typed rejection codes; the only new column (`task_instance.blocked_reason`) is
+  read defensively (`?? null`, select=*) and never written by the FE; the block↔in-flight-save
+  race is closed by STALE_TASK_REVISION + cache invalidation (no stale cache found across ladder,
+  system cards, runner, activity log); read-only-while-blocked reuses the conflict `paused`
+  machinery and the legacy runner is unreachable for blocked tasks (lifecycle_revision > 0 routes
+  managed; DB `guard_lifecycle_task` refuses direct writes); blocked counts derive from the same
+  per-step lists as done/total (distinct instances per system, no double count). Minor: blocked
+  picker snapshots its list on open; transport failures toast raw error.message; blocking mid-edit
+  silently discards staged answers on close. The ladder and system-card files are heavily
+  re-nested for the colour-bar layout — the PR's own ATX CX DEMO walkthrough (and its two
+  UX-approved deviations from the design) is the real gate. Supabase-side TASK_BLOCKED behaviour
+  (revision bump on block, run-write refusal) asserted but only provable on an env.
+- **#2267 (PLT-2975/2989, activity log, 4.4k lines) — held for Ilia; two findings to arbitrate;
+  nothing posted.** PR body itself says merge after xyz-supabase#57; Sonar gate passed with 92 new
+  issues; no master-tip overlap.
+  1. **Major, env-dependent: `move_asset_membership` now effectively always carries `p_actor`**
+     (`useSystems.ts` useMoveSystemMembership → `system-service.ts` moveMembership; the spread is
+     conditional but email is always truthy signed-in). No PGRST202 fallback — on an env whose
+     Supabase lacks #57, PostgREST resolves functions by named args and the MOVE ITSELF fails,
+     not just the log row. The one non-graceful #57 touchpoint: every other new write goes through
+     `withOptionalColumn` (EVENT_COLUMNS), new-column reads fall back via `isMissingColumn → []`,
+     and the two new RPC loggers `.catch`. Pre-#57 signature (p_asset_id/p_from_system_id/
+     p_to_system_id per the glossary planning notes) unverifiable this session — xyz-supabase is
+     not attachable. Ask: an RPC retry-without-p_actor fallback, or verify deployed signatures per
+     env (pitfall §3 lockstep is per environment).
+  2. **Medium-major: blank actor rows.** Several new log call sites pass raw `email` (which is
+     `''` before the account loads) — `normaliseActor` defaults only nullish, so an early mutation
+     writes an append-only row with `actor: ''` / `actor_kind: 'user'` (logCriticalFlag,
+     logMembershipAdded, logTemplateApplied, logSystemTemplatesApplied, logElementLink). Siblings
+     already guard `email || undefined`; either guard these or make normaliseActor treat blank as
+     default.
+  - Verified clean: client-cursor pagination (occurredAt desc → seq → id, strictly-after; no dupes
+    or misses), fire-and-forget log writes cannot reject a primary flow (every awaited call site
+    traced), `readinessEligible ?? isInstanceComplete` falls back when the server field is absent
+    — and it comes from the pre-existing `commissioning_run_lifecycle_v1` view, NOT a #57
+    dependency; flag-off adds no Supabase traffic (installation-status logging is flag-gated);
+    moved rows appear in both systems' logs by design. Spec question: CONFIGURATION user events
+    (critical toggle, manual link, membership added, installed) carry no facet chip — visible only
+    under "All".
+- **Interlock: #2266 ↔ #2267 textually CONFLICT in 4 files** (asset-activity-log.tsx + test,
+  readiness-ladder.tsx, activityLogService/index.ts). Both Rishi's; whichever lands second is a
+  real merge, and semantically #2266's block/unblock history rows render through the OLD
+  asset-activity-log that #2267 replaces with the timeline — the block verbs need porting into
+  the timeline mapper at that merge.
+
+**Open unresolved review threads across the five: 7** — 4 on #2268 (Copilot: 1 medium + 3 low),
+3 on #2211 (Copilot 09-30, unchanged). #2265/#2266/#2267: zero.
