@@ -45,6 +45,27 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-06 (scheduled) — 11 in scope, all Group A, Group B empty. One new ticket (PLT-3231), ten unchanged, zero Jira actions taken
+
+Board re-queried. Newest comment id compared for the ten known tickets: all identical to the 10-05 run. PLT-2651 was touched
+10-05 15:29 only by an assignee change (Gennaro to Ozan), no comment. Out of scope: PLT-3223 and PLT-3172 (In Code Review),
+In QA (3165, 3116, 3104, 3099, 3096, 3091), Blocked (3135, 2660).
+
+**PLT-3231 (new, Open, FAR02).** Same symptom as PLT-3223 (past-date elements stuck on Planned in the editor). Fix for 3223 is
+PR #2264, merged to master 10-05 18:00, in no release tag yet. Class 1: Yash asks the FAR02 user whether re-selecting the
+schedule fixes it (59-word draft in its `recommended-action.md`).
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3231](PLT-3231-groupA-viewer-and-model/context.md) | viewer-and-model | Open | **New, probable dup of 3223** | 1 |
+
+The other ten rows are unchanged from the 10-05 table below.
+
+**Unopenable media:** Freshdesk `103353848476` (PLT-3231); PLT-3223 `65819`, `65820`, `65829`, `65830` (403).
+**Not verified:** that FAR02 is the same race; that #2264 fixes it end to end; which release carries it.
+
+---
+
 ## Run: 2026-10-05 (scheduled) — 11 in scope, all Group A, Group B empty. Three tickets moved (PLT-3182, PLT-2874, PLT-2858), eight unchanged, zero Jira actions taken
 
 Board re-queried. Every in-scope ticket re-fetched with comments; newest comment id compared with the folder. Out of scope:
