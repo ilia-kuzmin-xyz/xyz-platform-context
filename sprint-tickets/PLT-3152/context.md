@@ -219,3 +219,31 @@ workaround recorded on 10-05, and **511 tests pass** across `ClientReportPage/` 
 
 Checkpoints 1 and 2 were no-ops (no threads, CI green on the pre-merge head and re-running on the
 new one). Checkpoint 3 is now **done** rather than deferred.
+
+## 2026-10-07 — PR #2260 went red on a repo-wide CVE, not its own; green again, no action needed
+
+Logged so a future run does not re-investigate this red build.
+
+The `build` check failed on the 07-10 master-merge commit. **Trivy, not tests**: `source-map-js`
+1.2.1, HIGH `CVE-2026-93749` (fixed in 1.2.2), flagged out of `package-lock.json`.
+
+Not this PR's, and the evidence was cheap: the diff touches no dependencies, and sibling PRs
+#2250 / #2251 / #2263 failed in the same wave off the same master merge.
+
+Already fixed by the team while this was being diagnosed — #2273 bumped it on master (`5704bf8`),
+and the same bump was applied directly onto the `PLT-3152` branch as `0e1acdb`. Build green on
+that head at 08:23. **No hotfix PR was raised**: one was started and dropped on finding #2273 had
+landed, which is the duplicate the standing instruction warns against. Check master's lockfile
+before writing a CVE hotfix — these land fast.
+
+Deliberately *not* done: merging current master in to clear the 2-commit lag. Master now carries
+PLT-3233 ("Run type-checking in CI and take tsc and ESLint out of the image build"), which
+restructures CI, Dockerfile and webpack. Pulling that into a green draft that is blocked on QA
+buys nothing and risks owning someone else's infra failure. Being behind master is not a conflict
+and not red CI. Bring it in deliberately when the PR is actually moving toward merge.
+
+Standing pattern worth knowing: lockfile CVEs (brace-expansion, pcre2, now source-map-js) fail
+*every* build repo-wide until bumped. Three CI hotfix PRs (#2249, #2255, #2261) have sat green in
+draft for days unmerged — a recurring drag, flagged to Ilia on 10-05.
+
+Unchanged: QA 2 / 3 / 4 still waiting on Radu; cover still has no visible capture entry point.
