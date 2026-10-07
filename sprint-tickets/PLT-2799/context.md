@@ -287,3 +287,20 @@ is the *mutable template* text. Re-taking it silently undoes this whole ticket �
 the conflict looks cosmetic (indentation) but the variable swap is the point.
 
 All six Copilot threads on #2250 were already resolved before this run.
+
+## 2026-10-07 — master merged into the PR and pushed; all checkpoints clear
+
+Checkpoint 1: nothing to action — all 6 review threads on #2250 are resolved, including the two
+that earlier runs had deliberately left open (the `versionDescription` project-scoping finding and
+the missing `templateVersionId` service test). Both were closed out on 10-02 once npm was working.
+
+Checkpoint 2: CI was green on the previous head and is re-running on the merged one.
+
+Checkpoint 3: done. The branch had drifted 3 commits behind master (`b8e1da0` PLT-3172,
+`959f1ad` PLT-3223, `95e1003` PLT-2910). Merged and pushed as `34cb94a` on
+`PLT-2799-commissioning-version-description`.
+
+Verified rather than assumed — npm works this run, so **406 tests pass** (1 skipped) on the merged
+head across `checklistLibraryService/`, `checklistInstanceService/` and `AssetWorkflowStepTasks/`.
+`git merge-tree` reported no conflicts beforehand and file overlap with the three master commits
+was zero.

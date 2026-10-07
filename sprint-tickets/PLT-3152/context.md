@@ -199,3 +199,23 @@ beyond the master merge that identity-blocked below.
 
 Not re-asked: no escalation here, and chasing a QA screen-share again after three days adds
 nothing the 10-03 comment did not already ask for.
+
+## 2026-10-07 — master merged and pushed at last; QA 2/3/4 still need Radu
+
+No reply from Radu on the 10-03 screen-share ask, so QA items 2, 3 and 4 remain unstarted for the
+fourth run running. Reasoning unchanged and still correct: all three are geometry/behaviour
+questions that cannot be closed by reading code. Not re-asked — no escalation, no new evidence.
+
+**The thing that did change: the master merge finally landed.** The 10-06 run could not set
+`git config user.name/user.email` to Ilia's identity (sandbox classifier refusal) and chose not to
+push rather than author commits as Claude. **This run the identity set cleanly**, so the merge that
+had been pending since 10-04 is in: `9bbe0d6` on `PLT-3152`, merging `b8e1da0` (PLT-3172),
+`959f1ad` (PLT-3223) and `95e1003` (PLT-2910). Zero conflicts, zero file overlap with this PR's
+own diff.
+
+Verified rather than assumed, which earlier runs could not do: `npm` works this run via the stub
+workaround recorded on 10-05, and **511 tests pass** across `ClientReportPage/` and
+`clientReportService/` on the merged head. PR #2260 is still draft, still zero open review threads.
+
+Checkpoints 1 and 2 were no-ops (no threads, CI green on the pre-merge head and re-running on the
+new one). Checkpoint 3 is now **done** rather than deferred.

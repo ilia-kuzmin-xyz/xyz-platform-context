@@ -194,3 +194,24 @@ PR **#2251**, green on arrival (`build` + Sonar success on `4b5f170`).
 - **Checkpoint 2:** green.
 - **Checkpoint 3:** was 2 behind. Merged master — **no conflicts** (this PR is dashboard/PRG, the
   two new commits are commissioning) — pushed `b919cc9`.
+
+## 2026-10-07 — master merged into the PR and pushed; all checkpoints clear
+
+Checkpoint 1: nothing to action — every review thread on #2251 is resolved (8 of 8), and no new
+review or comment has arrived since the last run.
+
+Checkpoint 2: CI was green on the previous head and is re-running on the merged one.
+
+Checkpoint 3: done. The branch had drifted 3 commits behind master (`b8e1da0` PLT-3172,
+`959f1ad` PLT-3223, `95e1003` PLT-2910). Merged and pushed as `f1ff638` on
+`task/PLT-2524-progress-freshness-tooltip`.
+
+Verified rather than assumed — npm works this run (stub workaround per PLT-3152/context.md), so
+**22 tests pass** on the merged head across `gantt-x/scheduler/` and `progressOutputsService/`.
+`git merge-tree` reported no conflicts beforehand and file overlap with the three master commits
+was zero.
+
+The overlap worth having checked: PLT-3172 adds
+`gantt-x/scheduler/hooks/use-linked-element-actions.ts` — same directory as this PR's
+`use-progress-calculated-on.ts`. Different files, and both suites pass together on the merged
+head, so the adjacency is benign.

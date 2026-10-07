@@ -64,3 +64,20 @@ refusal is reachable and not retryable — a flat "please try again" would send
 someone round a loop. Same swallowed-message problem recorded in
 `incidents/live-incident-board-tickets/PLT-3182-groupA-access-permissions/context.md`,
 fixed here for this one path only.
+
+## 2026-10-07 — master merged into the PR and pushed; all checkpoints clear
+
+Checkpoint 1: nothing to action — #2263 has zero review threads (still draft, no reviewer has
+looked at it yet).
+
+Checkpoint 2: CI was green on the previous head and is re-running on the merged one.
+
+Checkpoint 3: done. The branch had drifted 3 commits behind master (`b8e1da0` PLT-3172,
+`959f1ad` PLT-3223, `95e1003` PLT-2910). Merged and pushed as `52aa646` on `PLT-2933`.
+
+Verified rather than assumed — npm works this run, so **409 tests pass** (2 skipped) on the merged
+head across `PortfolioPage/`. `git merge-tree` reported no conflicts beforehand and file overlap
+with the three master commits was zero.
+
+Note the PR is still a **draft** and has been since 10-03. It is complete and green; it is waiting
+on someone being asked to review it, not on more work.

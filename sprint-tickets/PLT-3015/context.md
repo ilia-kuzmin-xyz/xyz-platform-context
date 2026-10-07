@@ -106,3 +106,26 @@ no new evidence to add, so a second ping would be noise. The two traps recorded 
 (`private-route.tsx` preferring account authorities while the array is non-empty, and
 `useProjectAuthorities`' `placeholderData: []` flashing "no permission" mid-flight) are still the
 things to re-read when it unblocks.
+
+## 2026-10-07 — no change; still waiting on the backend authorities decision
+
+Checked, nothing moved. The 10-03 clarification is still the last comment on the ticket — four
+calendar days, two working days, and no reply on whether the account response keeps tenant-scoped
+authorities or whether a tenant-authorities endpoint is coming.
+
+**Not re-asked this run, deliberately** — same reasoning as 10-06, and it still holds: no
+escalation on this ticket, no new evidence to add, so a second ping is noise rather than pressure.
+Contrast PLT-3184, where re-asking was right because the priority changed *and* the comment
+carried first-hand evidence.
+
+No code written. The ~76 tenant-level route guards remain the reason starting on a guess is
+unsafe. The two traps to re-read when it unblocks are unchanged: `private-route.tsx:20` prefers
+account authorities while the array is non-empty (so that line dies first or the swap is a no-op),
+and `useProjectAuthorities`' `placeholderData: []` flashes "no permission" mid-flight.
+
+Worth noting a small adjacency found while working PLT-3201 this run: `listProjectAuthorities`
+(`accountService.ts:119-124`) already sets `skipGlobalErrorHandler: true`, with the comment
+"403 = removed from project; useProjectAccessGuard handles it". If this ticket ever moves the
+tenant-level guards onto a project-scoped read, that opt-out has to be re-examined — a 403 there
+would then mean "no such grant", not "removed from project", and silently swallowing it would hide
+a real failure.
