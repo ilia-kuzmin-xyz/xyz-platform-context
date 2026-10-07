@@ -950,3 +950,56 @@ above, and kept the comment claiming the discrimination — almost certainly swe
 since `.to.equal(WBS_ACTUAL_PROGRESS)` resembles the pattern but isn't a null assertion.
 Resolved by **merging** (never rebasing over a reviewer's commit), keeping all his style
 changes, restoring the one value, and saying so on the PR. He approved afterwards.
+
+## 2026-10-07 — QA says the dash is not visible on Staging 26.3.7; Sachin says the API is right; the ball is on Ilia
+
+**Supersedes** the 09-11 line "no frontend change was needed ... the ticket can come out of Blocked" only in the sense that the
+outcome is now contested. The API half of it stands.
+
+### What happened since 09-11 (fetched live, 24 comments, none missed)
+
+- `112028` (Ilia, 09-11): hotfix implemented on the API, expected in api 1.22.0, assigned to 26.3.7 on the platform side.
+- `114076` (Radu, 10-06 12:49): *"Occurs as reported on Staging 26.3.7: 0% is still displayed instead of -."* Screenshot is a `blob:`
+  URL, not fetchable.
+- `114105` (Darminder, 14:33): attributes it to PAPI-3936 and asks Sachin to look.
+- `114111` (Sachin, 15:15, edited 15:17): the JSON response is right and he pastes LS-24891 with `actualProgress: null`,
+  `validForProgressCalculations: false`, `activityType: TT_LOE`, `activityStatus: TK_Complete`. Asks Ilia to check the frontend
+  changes are in place. Also attaches `json-sch.txt` (not readable here, 403 like every Jira attachment).
+- Ticket status is **Open** (was Blocked on 09-09/09-10), assignee Ilia. Moved by someone else, not this routine.
+
+### Verified in hc-frontend (master `b8e1da0`), with call sites
+
+| claim | evidence |
+|---|---|
+| `null` prints `-` | `gantt-x/scheduler/utils/formatters.ts:1-3` (`value === null || undefined` returns `'-'`) |
+| Gantt Actual % cell uses it | `scheduler-columns.tsx:156-161` calls `progressToPercentage(task.activityItem?.actualProgress)`, live column |
+| Details panel uses it | `viewer-x/.../activity-properties/activity-progress.tsx:48-50`, same function |
+| API value is passed through untouched | `scheduler-service/utils.ts:60` `actualProgress: item.actualProgress` (no `?? 0`) |
+| Only caller of `getSchedule` for the viewer is a direct fetch, no client cache | `schedule-service.tsx:203`, `schedule-api-service.ts:52` |
+| Nothing rewrites it to 0 after load | grep: only `use-actual-progress-mutation.tsx:78` (user edit) and `schedule-entity.ts:945` (merge of mapping data) write the field |
+
+So with `null` in the response the viewer shows `-` on both surfaces. **Radu's 0% and Sachin's null cannot both describe the same
+response in the same browser.** Candidates, none verified:
+
+1. Radu's staging API is not running a build that contains #944 (Sachin's JSON could be from another environment).
+2. Radu read a different row. WBS parents get their Actual % from `createWeightedProgressAggregator`
+   (`schedule-entity-utils.ts:72-117`), which skips null children and returns a number otherwise, so a parent can show a
+   percentage that has nothing to do with LOE blanking. Only worth chasing if the screenshot shows a WBS row.
+3. A cached response between browser and API. No evidence either way.
+
+Candidate 3 and the "stale 26.3.7 build" idea are the weakest: the FE has no schedule cache and the API change needs no FE change.
+
+### Release facts (GitHub)
+
+PR #944 merged 2026-09-11 14:01 (`5c37ed8`). Tags on XYZPlatformApi: `1.22.0-rc1` (head commit dated 09-16, so after the merge),
+`1.22.1-rc1/rc2`, `1.23.0-rc1..rc3`. Inferred, not checked by ancestry, that `1.22.0-rc1` contains #944. Which tag staging
+runs is **not known**.
+
+### Killed / not to repeat
+
+- "The frontend needs a change to show a dash": no, killed 09-11 and re-confirmed above.
+- Do not ask Ilia or Sachin to re-verify the API JSON: Sachin pasted it.
+
+### Unverified
+
+What response Radu's browser received; whether his row is LS-24891; staging API version; the screenshot (`114076`, blob URL).

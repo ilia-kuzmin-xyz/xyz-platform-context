@@ -315,3 +315,21 @@ since 08-28. Unlike PLT-2815/PLT-2858 this isn't a chronic multi-week backlog ye
 enough that posting Draft 1 today would still read as a prompt reply. Surfaced in this run's
 notification so it gets posted before it becomes another PLT-2858. No Jira action was taken by
 this run.
+
+---
+
+# 2026-10-07 — current ask. Supersedes the "wait for release" posture of 09-11. NOT POSTED.
+
+**Class 1 (we owe a reply).** Sachin asked Ilia on 10-06 at 15:15 to confirm the frontend side; no answer yet, so Ilia owes it.
+Frontend side is confirmed (see `context.md` 2026-10-07): null prints `-`. The ticket stays **Open**; not Ready for Dev (nothing
+to build on current evidence), not With Technical Support (the customer is not involved), not Blocked.
+
+**Assumption, one line:** that Radu's row is LS-24891 and that Sachin's JSON came from the same environment as Radu's test.
+Neither is stated in the ticket.
+
+## Draft — reply on the ticket (author: Ilia; @ Radu, cc @ Sachin) (68 words)
+
+> Radu, could you open DevTools on staging 26.3.7, Network tab, find the request ending in /schedules/ followed by the revision id, search it for LS-24891 and read what actualProgress says? Sachin's copy of the response has null, and the viewer prints a dash for null in both the Gantt cell and the details panel, so a 0% means your browser received something different. **Is it 0 or null?**
+
+**Outcomes.** `null` and still 0% on screen: real FE defect, then ask for the screenshot row and look at the WBS aggregation path.
+`0`: staging API does not carry #944 yet, so the next question is to Sachin, which api tag staging runs. No Jira action was taken.

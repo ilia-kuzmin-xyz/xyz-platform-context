@@ -45,6 +45,35 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-07 (scheduled) — 12 in scope, all Group A, Group B empty. One ticket moved back into scope (PLT-3091), eleven unchanged, zero Jira actions taken
+
+Board re-queried; every in-scope ticket re-fetched with comments (full list, not the 20-comment cap) and the newest comment id
+compared with its folder. No new Live Incident since PLT-3231. Out of scope: PLT-3223 and PLT-3112 (In Code Review), PLT-3172
+(Ready For QA), READY FOR RELEASE (3165, 3116, 3104, 3099, 3096), Blocked (3135).
+
+**PLT-3091 (Open again, assignee Ilia).** Radu (QA, `114076`, 10-06 12:49) reports that on Staging 26.3.7 the LOE row still shows
+`0%`, not `-`. Darminder (`114105`) pointed at PAPI-3936. Sachin (`114111`, 15:15) answered that the API JSON is right
+(`actualProgress: null` for LS-24891) and asked Ilia to check the frontend. **Ball is on Ilia.** Frontend check done this run:
+`null` renders as `-` on both surfaces, nothing between fetch and render turns it into 0 (details in the ticket's `context.md`,
+2026-10-07). So the two reports cannot both be about the same response. Class 1 (we owe Sachin a reply), 59-68 word draft in
+`recommended-action.md`. PR #944 merged 09-11 and its commit predates tag `1.22.0-rc1` (09-16), so the API fix is in a tagged build.
+
+**Unchanged, same newest comment id:** PLT-3231 (`113957`), PLT-3182 (`113728`), PLT-3178 (`113551`), PLT-3133 (`113113`),
+PLT-3115 (`112316`), PLT-3084 (`113150`), PLT-3063 (`111955`), PLT-3060 (`113152`), PLT-2874 (`113731`), PLT-2858 (`113747`,
+Mostafa's reopen, still no answer on Location), PLT-2651 (`113497`; assignee is now Ozan, no comment).
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | Open | **Back from Blocked; QA says fix not visible** | 1 |
+
+The other eleven rows are unchanged from the 10-05 and 10-06 tables below.
+
+**Unopenable media:** Radu's screenshot on PLT-3091 (`blob:` URL in `114076`, not fetchable). It would show which row he read 0% on.
+**Not verified:** what the staging API actually returned to Radu's browser; whether staging runs api 1.22.x; whether the row he
+saw is LS-24891 or a WBS parent.
+
+---
+
 ## Run: 2026-10-06 (scheduled) — 11 in scope, all Group A, Group B empty. One new ticket (PLT-3231), ten unchanged, zero Jira actions taken
 
 Board re-queried. Newest comment id compared for the ten known tickets: all identical to the 10-05 run. PLT-2651 was touched
