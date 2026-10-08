@@ -333,3 +333,8 @@ Neither is stated in the ticket.
 
 **Outcomes.** `null` and still 0% on screen: real FE defect, then ask for the screenshot row and look at the WBS aggregation path.
 `0`: staging API does not carry #944 yet, so the next question is to Sachin, which api tag staging runs. No Jira action was taken.
+
+## 2026-10-08 — unchanged; the 10-07 draft (68 words) still stands, now ~2 days unanswered
+
+Freshdesk 8224 moved to Waiting on 3rd line on 10-07 15:26 (`114332`), so support is also waiting on us. Class 1, owed by Ilia. Nothing in the
+diagnosis changed, and the draft is under a week old, so no re-validation needed yet. No Jira action was taken.

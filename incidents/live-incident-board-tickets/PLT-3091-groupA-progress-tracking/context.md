@@ -1003,3 +1003,10 @@ runs is **not known**.
 ### Unverified
 
 What response Radu's browser received; whether his row is LS-24891; staging API version; the screenshot (`114076`, blob URL).
+
+## 2026-10-08 (scheduled) — one new comment, Freshdesk noise; the ball is still on Ilia
+
+Fetched live: 25 comments (was 24), status **In Analysis** (was Open on 10-07), assignee Ilia. New: `114332` (Yash, 10-07 15:26) *"Ticket ID:
+8224 - Freshdesk ticket status changed to : Waiting on 3rd line"*. No human text. Meaning: support is waiting on us, one day after
+Radu's `114076`. Sachin's `114111` question to Ilia (is the frontend side in place) is still unanswered on the ticket (~2 days). The 10-07
+analysis stands unchanged; nothing re-investigated. Not verified: Radu's row, staging API version, the screenshot.

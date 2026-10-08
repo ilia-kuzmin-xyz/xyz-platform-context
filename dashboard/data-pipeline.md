@@ -209,6 +209,22 @@ calculation (exactly one of the pair missing → `loadProgressFiles()` throws). 
 calculated yet" state a user-facing indicator would need is therefore already derivable client-side,
 with no API change. Ticket detail: `sprint-tickets/PLT-2524/context.md`.
 
+## 2026-10-08 addition — `Last updated` can look fresh over stale intangible progress (DPL-1707); corrects the 09-18 "free diagnostic"
+
+Source: Jira `DPL-1707` (read this run, linked to PLT-3133; claims are the ticket's, **not verified by us**, the pipeline repo is outside
+our access). The backend labour-hours progress asset fails whenever a project's progress date range crosses a calendar year (dtype
+mismatch in a diagonal concat). While it fails, `LaborHoursProgressLastCalculatedOn` stops advancing and no new activity- or
+project-level output is written, **but the category-groups output keeps running on its own trigger and gets a fresh `calculatedOn`
+over the stale activity data.** Prod was clear on 15-17 Sep; the ticket predicts failure for every project on 1 Jan 2027, earlier if a
+range already reaches 2027.
+
+Why it matters to the frontend: `calculatedOn$` is `max(project, category-groups)` (`progress-outputs-v2-loader.ts:80-82`), never the
+activity-level stamp, and it is both the progress panel's `Last updated` (`progress-panel.tsx:277-288`) and the element-status merge
+cap (`dashboard-progress-service.ts:674`, `:833`). **So under this failure the panel says "fresh" while intangible % is frozen.** The 09-18
+rule "Last updated older than the edit means cap, newer means a real defect" is therefore only safe when the activity output is also
+advancing. Use the backend's `LaborHoursProgressLastCalculatedOn` (or a run history) to tell the two apart. Ticket detail:
+`incidents/live-incident-board-tickets/PLT-3133-groupA-data-pipeline/context.md`.
+
 ## Deep-dive
 
 - DuckDB table schemas: [`docs/dashboard/duckdb-tables/`](../../docs/dashboard/duckdb-tables/)

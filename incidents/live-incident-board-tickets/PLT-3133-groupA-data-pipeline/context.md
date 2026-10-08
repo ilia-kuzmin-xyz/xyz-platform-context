@@ -366,3 +366,70 @@ Not re-investigated; nothing verified beyond the fetch.
 
 ## 2026-10-05 (scheduled) — unchanged
 Fresh fetch with comments: 13 comments, newest `113113` (Yash, 09-28), With Customer. Customer owes concrete examples (Rishi's three asks, `112616`); 14 days since the ask, 7 since Freshdesk went to Waiting on customer. Backend timing was measured by Rishi (3 to 14 minutes, `112616`). Class 1, parked. No Jira action was taken.
+
+## 2026-10-08 (scheduled) — customer replied 10-07 with a sharper symptom; a linked dashboard-pipeline bug (DPL-1707) fits it and was not in these notes
+
+**Supersedes** the 10-02 / 10-05 entries' "nothing new, parked with customer": 7 comments landed on 10-07 (`114184`..`114335`, 20 total).
+Status is still **Open** (Freshdesk echo: Open 11:01, Waiting on 3rd line 11:09, Waiting on customer 14:46, Open 15:21,
+Waiting on customer 15:32); assignee Rishi.
+
+### What the customer said (`114187`, 10-07 11:09, relayed by Yash)
+*"I have updated several intangibles and the dashboard won't refresh if I don't update the installation status of an element
+included in the FED."* Example project ATL06, one new screenshot (attachment `65932`, unopenable) and a session id
+(`platform-web-622ab899-076e-45bb-adff-333d03d71a67`). This is the same split as `112500` (09-18): element installs refresh in
+5-10 min, **intangible-only edits do not**.
+
+### Rishi's reply (`114221`, 10-07 12:16)
+Cannot see anything wrong; repeats the three asks from `112616` (activities + expected values, **last calculation time on the
+progress tab**, filters), plus "when they edited / reported / checked". Adds: *"From the DB I can see that the progress was
+updated several times this morning."* **Unverified which table he means** (raw input rows vs the calculated output). That is the
+whole question below.
+
+### New: issue link `DPL-1707` (Relates), "Actual progress calculation fails when the progress date range spans a calendar year
+boundary" — Backlog, assignee Kuba.Maruszczyk, reporter Rishi, created 09-21 10:49 (24 minutes before `112616`)
+Read in full this run. Its claims, **all taken from the ticket, none verified by us** (the pipeline repo is outside this session):
+- `activity_actual_progress_from_reported_labour_hours` throws on a `pl.concat(how="diagonal")` dtype mismatch (Decimal vs Float64)
+  whenever the progress date range crosses a calendar-year boundary (2+ yearly chunks). Fails every time, per project.
+- Effect: `ProjectChangelog.LaborHoursProgressLastCalculatedOn` never advances and **no new activity- or project-level
+  `planned-and-actual` output is produced. "User-entered (intangible) progress never reaches the Dashboard."** Each new edit triggers a
+  new run that fails identically.
+- Range = min(schedule start, earliest check date, earliest user-progress date) to max(schedule finish, latest check, latest
+  user-progress). Prod "unaffected only because ATL05-08 ranges sit inside 2026" (they calculated OK 15-17 Sep).
+- **Dated risk: fails automatically on 1 January 2027 (85 days from today) for every prod project, earlier for any project whose
+  range already reaches 2027** (a 2027 finish date, a 2025 revision, or out-of-year progress).
+- **Secondary effect, directly relevant here:** while the labour asset fails, `category_groups_planned_and_actual_progress` still runs
+  on its own trigger and re-stamps a **fresh `calculatedOn` over months-old activity data** (dev example: stamped 09-21 over 14 July data).
+
+This matches the customer's symptom point for point (intangible edits never show; element status does, because it is a different
+path). It is a **hypothesis, not a finding** for ATL06: DPL-1707 itself says ATL05-08 were fine on 15-17 Sep, and Rishi wrote
+`112616` the same morning he raised it, so he knows it and judged prod clear then. What has changed since is unknown.
+
+### Falsifiable prediction (one query, Rishi has the DB)
+*If DPL-1707 is the cause on ATL06:* `LaborHoursProgressLastCalculatedOn` is **older than this morning's intangible edits**, and the
+orchestrator shows a failed run for the ATL06 partition after them. *If it is not:* it advanced within ~15 min of the edits, and the
+cause lies elsewhere (candidates below). Check **before** asking the customer for more screenshots.
+
+### Correction to my own 09-18 diagnostic — SUPERSEDES "the panel's `Last updated` is a free yes/no"
+09-18 said `Last updated` older than the edit = cap working as designed, newer = real defect. **Under DPL-1707 that test is unsafe.**
+The FE's `calculatedOn` is `max(project-level, category-groups)` (`progress-outputs-v2-loader.ts:80-82`, re-read this run, live; used as
+the merge cap at `dashboard-progress-service.ts:674` and `:833`, also live) and **never reads the activity-level output's stamp** (09-22
+finding). If category-groups is re-stamped over stale activity data, `Last updated` looks fresh while intangible % is frozen. So
+Rishi's own ask #2 (read the progress tab's last calculation time) can return "fresh" in exactly the failing case. The reliable
+signal is the backend's `LaborHoursProgressLastCalculatedOn`, not the panel.
+
+### Other candidates if the DB check clears DPL-1707 (none verified)
+1. The element-status merge is capped at `calculatedOn` (`:674`), so an install after the last recalculation is hidden; unrelated to
+   intangibles but could be what the customer sees for installs.
+2. OPFS parquet cache serving an old file: not tested; `data-pipeline.md` says re-download is keyed on a hash, no such field was found on
+   the endpoint (09-17 note).
+3. "Not part of the FED model" (`112500`, 09-18): never investigated.
+
+### Verified vs inferred this run
+Verified: Jira comments/ids/timestamps above (fetched live, 20 of 20); DPL-1707 text; `getCalculatedOn` call sites live on
+hc-frontend `4f6464e`; `XYZPlatformApi` has no recalculation trigger on the activity-progress write path (grepped `src/`: only a read of
+`CalculatedOn`, `projects.service.ts:740`). Inferred: that DPL-1707 applies to ATL06 now. **Not verified:** ATL06's date range, the
+run history, which table Rishi meant, the contents of attachment `65932`.
+
+### Unopenable media (403, confirmed gap)
+`65932` `Screenshot 2026-10-07 130039-20261007-100846.png` (119 KB, Yash, 10-07 11:09): the customer's ATL06 example. Would show
+which activities were edited and whether their dashboard values moved. Older: `64823`-`64826` (09-17), `64906` (Rishi, 09-18).

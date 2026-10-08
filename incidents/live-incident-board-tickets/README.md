@@ -45,6 +45,39 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-08 (scheduled) — 10 in scope, all Group A, Group B empty. One ticket materially changed (PLT-3133), PLT-3091 got a Freshdesk echo, two left scope (Done), seven unchanged, zero Jira actions taken
+
+Board re-queried; all ten re-fetched with comments (the eight quiet ones by a read-only subagent, newest comment id compared with the folder).
+Out of scope: Done (3178, 3084 since last run), In Code Review (3223, 3112), Ready For QA (3172), READY FOR RELEASE, Blocked (3135).
+
+**PLT-3133 (Open, Rishi).** Customer answered 10-07 (`114187`): intangible edits on ATL06 do not show unless an element status changes. Rishi
+(`114221`) asked for more evidence again. The linked **DPL-1707** (Backlog, Kuba) describes a backend failure that stops user-entered progress
+reaching the dashboard when the date range crosses a calendar year, and predicts every prod project fails on **1 Jan 2027**. Fits the symptom,
+not shown to apply to ATL06. One closed question to Rishi (34 words). It also **corrects the 09-18 "Last updated" diagnostic** (see
+`dashboard/data-pipeline.md`). Class 1 with a class 4 half (DPL-1707 priority).
+
+**PLT-3091 (In Analysis, Ilia).** Only `114332`, a Freshdesk "Waiting on 3rd line" echo (10-07 15:26). Sachin's question to Ilia is ~2 days
+unanswered. Class 1, 10-07 draft stands.
+
+**PLT-3084 and PLT-3178 left scope**: both Done on 10-07 through Freshdesk Closed automation, no human comment, resolution empty. 3084's
+Select-all PR #2197 is **still open and unmerged**, so that half has no live ticket. Folders not renamed.
+
+**Unchanged, same newest comment id:** PLT-3231 (`113957`), PLT-3182 (`113728`), PLT-3115 (`112316`, 22 days With Customer, Yash's own close
+call still pending), PLT-3063 (`111955`), PLT-3060 (`113152`), PLT-2874 (`113731`), PLT-2858 (`113747`), PLT-2651 (`113497`, assignee Ozan).
+Standing drafts in each folder are unchanged. Release-tag status of PR #2257 (PLT-2651) and #2264 (PLT-3231) was **not re-checked** this run.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open | **New customer evidence + DPL-1707 link** | 1 (+4) |
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | Freshdesk echo only | 1 |
+
+The other eight rows are unchanged from the 10-05 to 10-07 tables below.
+
+**Unopenable media:** PLT-3133 `65932` (ATL06 example, would show which activities were edited and whether values moved).
+**Not verified:** whether DPL-1707 applies to ATL06; which table Rishi meant by "progress was updated"; why Freshdesk closed 3084 and 3178.
+
+---
+
 ## Run: 2026-10-07 (scheduled) — 12 in scope, all Group A, Group B empty. One ticket moved back into scope (PLT-3091), eleven unchanged, zero Jira actions taken
 
 Board re-queried; every in-scope ticket re-fetched with comments (full list, not the 20-comment cap) and the newest comment id

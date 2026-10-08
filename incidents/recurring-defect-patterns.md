@@ -1204,3 +1204,13 @@ the cap always bites. Do not generalise the amendment across both paths.
 Still a candidate, still unpromoted. Promote when a report of this shape is actually resolved by the
 cap (either by a `Last updated` comparison or by the ladder), and record here which one it was. Full
 findings: `live-incident-board-tickets/PLT-3133-groupA-data-pipeline/context.md` § 2026-09-18.
+
+## 2026-10-08 — amendment to the 09-18 `calculatedOn` cap entry (PLT-3133): `Last updated` is not a reliable freshness test
+
+The 09-18 entry above recommends reading the progress panel's `Last updated` to tell "cap working as designed" from "real defect". That
+is unsafe if the backend labour-hours asset is failing (Jira DPL-1707, calendar-year-crossing date ranges): category-groups is re-stamped
+fresh over stale activity data, and the FE takes `max(project, category-groups)` (`progress-outputs-v2-loader.ts:80-82`). The 09-18
+entry is **not retracted**, only narrowed: valid when the activity output is advancing, misleading when it is not. New recognition
+signature: *"element installs refresh but intangible/user-entered progress never does, and `Last updated` looks recent"*. Check the
+backend run for that project first. Candidate only for PLT-3133 on prod: not confirmed. Dated risk from the DPL ticket: all prod
+projects on 1 Jan 2027.

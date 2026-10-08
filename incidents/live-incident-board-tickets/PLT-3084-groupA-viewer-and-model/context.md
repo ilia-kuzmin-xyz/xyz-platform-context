@@ -719,3 +719,12 @@ Fresh fetch with comments. Newest comment still `113150`. Status Customer Releas
 
 ## 2026-10-05 (scheduled) — unchanged on Jira; PR #2197 re-checked
 Fresh fetch with comments: 5 comments, newest `113150` (Yash, 09-28), Customer Release Check. 26.3.6 carried only the Ctrl+Z fix (PLT-2743). **PR #2197 (Select all) is still open, not merged, mergeable_state blocked.** Darminder's CHANGES_REQUESTED review (09-22, on `b162f42`) still stands. Ilia pushed `ea8174c` on 10-03; Copilot's 10-03 review of that commit raised one finding (stale `hasSelection` state after tree filtering, `activity-linking-list.tsx:90`) and the earlier multi-activity finding is resolved. Darminder is **not** among the requested reviewers (they are TomMasdinXYZ, rishib-xyz, SergiuszXYZ), so a re-review from the person who requested changes has not been asked for. Class 1 plus 4 as before. No Jira action was taken.
+
+## 2026-10-08 (scheduled) — LEFT SCOPE: Done on 10-07 by Freshdesk automation, not by a fix. Folder not renamed.
+
+Changelog: 10-07 10:04 Customer Release Check -> Open, 10:06 Open -> Done, both by Automation for Jira, triggered by Yash's Freshdesk
+echoes `114164` (7743 -> Open) and `114168` (7743 -> **Closed**). Resolution empty. fixVersion 26.3.6 (the Ctrl+Z fix, PLT-2743).
+**The Select-all half is not shipped:** PR #2197 is still **open, not merged** (checked on GitHub, head `ea8174c`, last updated 10-03,
+reviewers requested: TomMasdinXYZ, rishib-xyz, SergiuszXYZ). So the support ticket was closed (most likely the customer stopped
+replying or accepted the Ctrl+Z fix) with a known open PR. If Select all still matters, it needs its own live ticket or a reopen; this
+ticket will no longer show it. Not verified: why Freshdesk closed, and whether the customer confirmed anything.

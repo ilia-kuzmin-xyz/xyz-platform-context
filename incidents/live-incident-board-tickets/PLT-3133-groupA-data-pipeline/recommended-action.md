@@ -137,3 +137,27 @@ it is. **No Jira action was taken by this run.**
 ## 2026-10-02 (scheduled) — no draft; class 1, parked correctly
 
 Status is now **With Customer** (Rishi, 10-01), which is where it belongs. The customer owes concrete examples (Rishi `112616`, 09-21), 11 days. A chase through Yash is reasonable after about two weeks, so it is due from 10-05. One question then: **can the customer send one project and one element or activity that was still stale after an hour?** No Jira action was taken.
+
+---
+
+# 2026-10-08 — CURRENT. Supersedes the 10-02 "parked, no draft". NOT POSTED.
+
+**Class 1 (owed by Rishi), with a class 4 half.** The ball is formally with the customer (Freshdesk "Waiting on customer", Rishi's
+`114221` asks for more evidence), but one DB check by Rishi may make that ask unnecessary and tells us whether the customer has hit a
+real pipeline failure. Class 4 half: DPL-1707 sits in Backlog with a hard date (1 Jan 2027, every prod project); whether and when it
+is scheduled is a priority call for Darminder, Mostafa and Pietro with Kuba, not something to settle on a ticket thread.
+
+**Assumption, one line:** that DPL-1707 can apply to ATL06 now; its own text says ATL05-08 were fine on 15-17 Sep, and Rishi may
+already have ruled it out.
+
+## Draft to Rishi, comment on PLT-3133 (34 words)
+
+> Rishi, the customer says intangible edits only show once an element status changes. That sounds like the DPL-1707 failure rather than a slow refresh. **On ATL06, is LaborHoursProgressLastCalculatedOn older than this morning's intangible edits?**
+
+**Outcomes.** Older and a failed run: DPL-1707 is live on prod today, escalate it (class 4) and tell Yash the customer needs nothing more.
+Advanced within 15 minutes: DPL-1707 is ruled out for ATL06, back to the three asks in `114221`.
+
+**Not a draft, for whoever speaks to Yash:** if Rishi confirms, the extra screenshots he asked for on 10-07 are moot. And do not rely
+on the progress tab's "Last updated" as the check (see context.md 2026-10-08).
+
+No Jira action of any kind was taken.

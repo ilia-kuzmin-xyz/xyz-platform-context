@@ -104,3 +104,9 @@ Nothing verified by this run beyond the comment text; Rishi's numbers are his ow
 
 ## 2026-10-05 (scheduled) — unchanged
 Fresh fetch with comments: 20 comments, newest `113551` (Rishi, 10-01), With Customer. Customer owes the reframed question (what she saw, what she expected) via Yash; about 4 days. A12150 still unanswered. Attachments `65492` and `65493` (png, xlsx) remain 403 from this routine. Class 1, parked. No Jira action was taken.
+
+## 2026-10-08 (scheduled) — LEFT SCOPE: Done on 10-07 by Freshdesk automation. Folder not renamed.
+
+Changelog: 10-07 11:14 With Customer -> Open -> Done (Automation for Jira) after Yash's Freshdesk echoes `114191` (8094 -> Open) and `114192`
+(8094 -> **Closed**). Resolution and fixVersions empty. The ticket bounced With Customer <-> Open four times 09-29 to 10-01 through the
+same automation. No human closing comment. Not verified: whether the customer confirmed the data matched.
