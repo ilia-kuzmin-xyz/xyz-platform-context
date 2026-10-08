@@ -139,3 +139,89 @@ than a repeat of the question.
 **Deliberately did not start the UI.** A panel with a quantity selector that persists nowhere and a
 "Coverage" column whose number I invented is worse than no panel — it looks like progress, and
 every bit of it gets rewritten once the real contract lands.
+
+## 2026-10-08 — the three 10-03 blockers were overtaken by events; PR #2277 unblocked from red + conflicted
+
+Supersedes the "deliberately did not start the UI" stance recorded on 10-06 — not because that
+reasoning was wrong, but because the ticket moved on without it: **PR #2277 exists** (created
+10-07 10:01, 22 files), the ticket is **In Code Review**, and the UI was built against a Supabase
+`package_measure` table (`xyz-supabase#60`) as a stopgap until API 2.0 has an endpoint. The three
+10-03 questions were answered by decision rather than by reply — placement went to a *third* toggle
+inside the Types tab (option 3 of the 10-03 shortlist, the one marked "not recommended"), gated on
+a new `PackageQuantities` flag rather than Commissioning. Worth knowing that the recommendation was
+overruled; the Types tab now shows with either flag on.
+
+Still true and still blocking the feature (not the PR): **PAPI-4185** — saving the new "Weighted
+labour units" weighting needs BE support that does not exist, and length/area/volume are still not
+extracted from models, so non-Count measures render "—".
+
+### What this run actually did
+
+The PR was **red and conflicted** at the start of the run — both now cleared.
+
+1. **Merge conflict (`mergeable_state: dirty`)**, from PLT-3247 landing on master: it added
+   `initialOpenType` (the viewer's "View type" deep-link) to the very props this branch had
+   extended with `showCommissioningTypes` / `showPackageTypes`. The two features are independent,
+   so both sides were kept. The one judgement call is the `kind` seed:
+
+   ```ts
+   const [kind, setKind] = useState<TypeKind>(
+     initialOpenType?.kind ?? (showCommissioningTypes ? 'assetTypes' : 'packageTypes'),
+   )
+   ```
+
+   A deep-link names the half it belongs to, so it has to win over the flag default — otherwise
+   the viewer asks for a type and the tab opens somewhere else. `ProjectSettingsTypeTarget.kind`
+   is `'assetTypes' | 'systemTypes'`, a subset of the branch's three-way `TypeKind`, so this
+   type-checks without widening anything.
+
+2. **Red build was the branch's own lint**, and master had already fixed it: PLT-3234 (#2283)
+   removed the `--max-warnings` cap. Verified rather than assumed — `npm run lint` on the merged
+   head **exits 0** (0 errors, 3166 warnings) where the 10-07 run failed at 3167 over a 3151 cap.
+   The dead `ReplaySubject` import came out too.
+
+   Left alone deliberately: `CategoryGroupsRow` / `ProjectProgressRow` in
+   `progress-queries-v2-api.ts` are both declared-and-unused, and are *documentation of the parquet
+   row shapes*, not dead code. With the cap gone they cost nothing, and deleting one of a matched
+   pair would be worse than keeping both.
+
+3. **Validated on the merged head before pushing**, which matters because this branch touches
+   progress weighting (PLT-3010 / recurring Pattern 3): `tsc --noEmit` clean apart from the known
+   gantt-stub artifacts, **421 tests pass** across 30 files (ProjectSettings, TypesTab,
+   usePackageMeasures, progress-weighting-types, dashboard-progress utils), lint exit 0.
+
+`mergeable_state` went `dirty` → `blocked`, i.e. the only thing left is approvals.
+
+### Review threads
+
+- **MED, dirty-form drafts (resolved, fixed in `4e53a0d`)** — switching catalogue halves unmounted
+  `PackageTypesPanel` and silently binned unsaved measure edits. Fixed by lifting the drafts into
+  `TypesTab` rather than by a confirm dialog: nothing to confirm if nothing is lost, and it is less
+  UI. **The trap when touching this:** the prop takes a `SetStateAction`, not a plain value —
+  `handleSave` must clear exactly what it sent against the *latest* drafts, or a measure changed
+  mid-save is dropped, which is the bug `c69e5050f` already fixed once. Passing a plain value
+  re-breaks it.
+- **HIGH, Supabase auth (left open, deliberately)** — see below.
+
+### The HIGH finding is a property of the whole bridge, not of this PR
+
+Checked rather than repeated: `commissioningApi/postgrest-client.ts` sends the *same* two headers
+off the *same* publishable key (`apikey` + `Authorization: Bearer`), and per
+`commissioning/data-layer.md` every commissioning table carries a permissive anon policy
+(`using (true) with check (true)`) with project separation done client-side. So `package_measure`
+is exactly as exposed as the other 21 tables — this PR widens the blast radius by one table, it
+does not create the hole, and there is no Supabase↔platform identity to derive `modified_by` from.
+
+Which is why no patch was attempted: half-fixing it (dropping `modified_by` from the body) would
+lose the audit trail without closing anything, since the key can still write any row. The exits are
+the two already on the roadmap — front it with api-v2 (PAPI-4185), or tighten all 22 policies at
+once. Left unresolved for a human security call, which is also the rule for security findings.
+
+### Testability gap worth recording
+
+There is **no regression test** for the draft-persistence fix, and this is not laziness: both
+`PackageTypesPanel` views render rows through `react-virtuoso` (`TableVirtuoso` and `VirtuosoGrid`),
+so under jsdom the header and footer render but **no row ever does** — the measure `Select` is
+unreachable from a test. Confirmed by building the test and watching it fail on an empty body.
+Covering it means shimming the virtualiser; until someone does, this panel's row-level behaviour
+cannot be tested at all. Recorded so the next run does not spend the same half hour rediscovering it.

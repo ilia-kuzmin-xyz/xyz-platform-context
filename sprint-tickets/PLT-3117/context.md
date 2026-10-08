@@ -55,3 +55,45 @@ Two behaviours worth not breaking:
 
 Re-binding from the sidebar, "Ask about this block", the inspector on dashboard-tab and library
 views, and backfill for already-published reports.
+
+## 2026-10-08 — the three findings the 10-07 PM sweep escalated were already fixed; two new ones closed
+
+Correction to `runs/2026-10-07-own-prs-checkpoint-sweep.md`, which listed #2212 as carrying an
+**unresolved HIGH** sandbox-frame finding and two MEDs needing Ilia. All three were in fact fixed
+and resolved in `1c832cc` at 23:07 on 10-07 — *after* that sweep ran, so the escalation was already
+stale when written. Do not re-raise it:
+
+- **HIGH `lib/sandboxFrame.ts`** — `isOwnFrame` now accepts only a direct child
+  (`source.parent === window`) and `isFrameIn` compares the iframe's `contentWindow` against the
+  source itself, so a frame nested inside a report is no longer answered. The descendant-trust gap
+  is closed.
+- **MED ×2 case-sensitivity** — `normaliseHierarchyLevel` was extracted into
+  `services/progressOutputsService/hierarchy-level.ts` (so the canvas does not import the parquet
+  reader) and both `outputType` and `level` go through it.
+
+### Two new findings from the 23:13 re-review, both fixed in `6defbde`
+
+1. **`lib/filterProgress.ts` cached its own failures.** `prepare(projectId).catch(() => false)`
+   stored `false` in the module-level `prepared` for the lifetime of the page, so a single transient
+   API / download / DuckDB failure meant filtered progress stayed permanently unavailable for that
+   project — no recovery short of a reload. The rejection handler now evicts the entry so the next
+   request retries; a *resolved* `false` ("this project genuinely has no activity-level progress")
+   still caches, because that is a real answer.
+
+   The eviction is guarded with `prepared === entry`: a slow failure can settle after the cache has
+   moved to a different project, and clearing unconditionally would throw away that project's good
+   work. Keep the guard if this is ever refactored.
+
+2. **`services/project-get.ts` shared requests across different timeouts.** The cache key was
+   `projectId + path + query` with no `timeoutMs`, so the schedule loader (short, retry-oriented
+   bound) and report-data (60s default) could share one in-flight request and whichever started
+   first dictated the other's deadline — a "bounded" load could silently wait a minute.
+
+   Fixed by putting the timeout in the key rather than standardising the callers, because the
+   differing bounds are deliberate: the schedule loader wants a short timeout *precisely so it can
+   retry*. Cost is slightly less sharing between callers that want the same path on different
+   deadlines; sharing that changes request semantics is worse.
+
+Validated on the branch: `tsc --noEmit` clean (bar the known gantt-stub artifacts), **319 CanvasPage
+tests pass**, lint exit 0. Both threads replied to and resolved. The branch is 5 behind master and
+merges clean — not merged, per the standing rule that being behind is neither a conflict nor red CI.
