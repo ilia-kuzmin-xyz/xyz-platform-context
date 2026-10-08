@@ -225,3 +225,35 @@ so under jsdom the header and footer render but **no row ever does** — the mea
 unreachable from a test. Confirmed by building the test and watching it fail on an empty body.
 Covering it means shimming the virtualiser; until someone does, this panel's row-level behaviour
 cannot be tested at all. Recorded so the next run does not spend the same half hour rediscovering it.
+
+### Addendum, same run — the draft lift created a save race, caught and fixed
+
+Copilot's re-review of `4e53a0d` found a real consequence of the fix above, and it is worth
+recording because it is non-obvious: once the drafts outlive `PackageTypesPanel`, switching
+catalogue halves mid-save and returning gives a **fresh, idle `useMutation`**. The user can then
+press Save again while the first request is still in flight, and if the older write lands last it
+silently overwrites the newer measure. Before the lift this was impossible, because the drafts died
+with the panel.
+
+Fixed in `65217bc` with a React Query **mutation scope** keyed per project:
+
+```ts
+scope: { id: `package-measures-save-${projectId}` },
+```
+
+The reason this works where component state would not: scopes live on the **mutation cache**, which
+hangs off the QueryClient, so the queueing survives the unmount. Scoped mutations run serially, so
+the later write lands last.
+
+The other half of the finding was already safe and does not need changing: `withoutSaved` deletes a
+draft only when it still equals what that save sent, so an earlier Area save completing leaves a
+newer Volume draft dirty and saveable (that was `c69e5050f`). **Ordering was the only real problem.**
+
+Known cosmetic leftover: on the remounted panel `isSaving` is false while a scoped save from the
+previous mount is pending, so Save looks enabled. Pressing it queues rather than races, so it is not
+a data-integrity issue; surfacing it needs `useMutationState`.
+
+**Still open on #2277 (2 threads):** the HIGH Supabase auth decision, and a request for MSW-backed
+save-lifecycle coverage — the latter left open deliberately, because the "assert the displayed
+measures" half of it is blocked by the virtuoso gap above and landing only the request-shape half is
+exactly what the reviewer objected to.
