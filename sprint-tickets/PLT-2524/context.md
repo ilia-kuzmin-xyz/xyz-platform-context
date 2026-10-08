@@ -215,3 +215,31 @@ The overlap worth having checked: PLT-3172 adds
 `gantt-x/scheduler/hooks/use-linked-element-actions.ts` — same directory as this PR's
 `use-progress-calculated-on.ts`. Different files, and both suites pass together on the merged
 head, so the adjacency is benign.
+
+## 2026-10-08 — unblocked and implemented by someone else; this file's "blocked" entries are superseded
+
+**Status is now `In Code Review`** (ticket last updated 2026-10-02T13:40:35). So between 29 Sep and
+2 Oct the question that blocked every run above got answered and the work got done — not by this
+agent, and not through the ticket, because:
+
+**The clarification comments are gone.** Every "Claude here —" comment this file records posting is
+no longer on the issue. PLT-2799 now has **zero** comments; PLT-2524 is back to the five that
+pre-date them. Both tickets were also updated within the same second of each other
+(`13:40:35.5` and `13:40:35.9` on 2 Oct), which is the signature of a bulk edit or a sprint-wide
+transition rather than two people working two tickets.
+
+**Do not re-raise these questions.** The repeated reasoning above — "no reply, left in Analysis,
+deliberately did not ping" — was correct at the time and is now spent. A fresh run arriving at
+these tickets should read the implementation, not re-litigate the clarification.
+
+**What stays useful** from the entries above is the code archaeology, which was verified first-hand
+and is independent of the ticket's state: for PLT-2524, that `calculatedOn` already ships per
+progress output and the frontend already reads it (no DPL/API work needed), plus the corrected
+loader path under `ViewerPage/components/services/`; for PLT-2799, that
+`ChecklistLibraryService.update()` already cuts version n+1 and repoints `current_version_id`,
+and that `rename()` deliberately cuts no version.
+
+**Worth noting as a pattern, not a grievance:** an agent's clarification comments are not durable.
+Twice now the record of *why* a ticket stalled has vanished from the ticket while surviving only
+here. That is an argument for this folder, not against commenting — but it means the context file
+is the system of record for an agent's reasoning, and the Jira comment is a best-effort copy.

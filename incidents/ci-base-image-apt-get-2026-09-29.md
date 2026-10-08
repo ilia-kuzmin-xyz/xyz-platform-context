@@ -175,3 +175,32 @@ specific to the outage rather than to any branch:
 Once #2249 lands on master, a single master merge per branch resolves both the drift and the
 outage together. That is one push per PR instead of two, with no red in between. Deferring was the
 cheaper correct move, not an oversight.
+
+---
+
+## 2026-10-08 — closed out. The fix reached master via a ported PR, not via #2249
+
+Recording the ending, because everything above reads as "unresolved, pending a merge" and that is
+no longer true.
+
+**#2249 was closed WITHOUT being merged** (8 Oct 09:19). That is the correct outcome, not a
+dropped ball: the fix had already reached `master` through **#2217**, squash-merged as `3dc9f031`
+on **29 Sep 15:41** — the earliest of the five sprint PRs to land, and one of the two the hunk was
+ported into. So the port did more than keep its own PR green; it is what actually delivered the
+fix. `master`'s Dockerfile today carries the `command -v apk` branch with
+`build-base python3 git` and the `ca-certificates-bundle → ca-certificates` fallback, apt-get
+branch intact.
+
+Confirmed against the live registry image before it landed, not just in principle: a parallel
+session hit the same breakage on #2203, ported the same hunk, and reported it green on `34c2228`
+(comment on #2249, 29 Sep 16:17).
+
+**Lesson that generalises:** the "port the fix rather than wait for your own fix PR to merge" rule
+earned its keep here. Waiting on #2249 would have left the repo red for days and the PR would have
+been closed as stale anyway. The port was the delivery mechanism; the hotfix PR was only the place
+the fix was proven.
+
+**Still unanswered, and now unlikely to be:** whether the Wolfi migration was intentional
+upstream, and whether the base images get pinned by digest. Nobody replied to either question on
+#2249 before it was closed. The Dockerfile change absorbs the next distro flip either way, so the
+pressure is off — but the mutable `:latest` is still there, and so is the next outage.
