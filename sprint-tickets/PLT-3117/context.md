@@ -97,3 +97,21 @@ stale when written. Do not re-raise it:
 Validated on the branch: `tsc --noEmit` clean (bar the known gantt-stub artifacts), **319 CanvasPage
 tests pass**, lint exit 0. Both threads replied to and resolved. The branch is 5 behind master and
 merges clean — not merged, per the standing rule that being behind is neither a conflict nor red CI.
+
+### Version-gate decision (2026-10-08) — kept the floor-only window, deliberately
+
+A later re-review asked for `reportVersion.ts` to also require `builtBy <= support.version`, so an
+older runtime refuses a report built by a newer pipeline. **Declined, and the test at
+`reportVersion.test.ts:16` pinning `opens(support, '2.4.0') === true` is deliberate, not an
+oversight.** Recording the reasoning so it is not re-argued from scratch:
+
+- `opensReportsFrom` is a **floor the pipeline declares**; the module comment and the user-facing
+  "opens reports from X on" message both state a one-sided window. A ceiling makes that copy wrong.
+- The real cost is **rolling deploys**: while two pipeline versions are live, anyone landing on the
+  older one would be refused every report the newer one built — broad transient breakage from
+  something that is usually not actually incompatible.
+- What a ceiling prevents is a report erroring on a missing module: visible and recoverable.
+- The lever for a genuine breaking change already exists — the pipeline bumps `opensReportsFrom`.
+
+The argument flips if reports start moving between environments routinely. Thread resolved with
+that reasoning and an explicit offer to reopen.
