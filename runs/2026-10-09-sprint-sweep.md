@@ -261,3 +261,29 @@ defensible, and it must say the reachable call site was fixed rather than claim 
 **Open question for Ilia:** who can set `logoContent` for a company? If that field is write-restricted
 server-side in a way the frontend cannot show, the severity drops. It does not drop to zero — the
 attribute-injection half needs only a `"` in the stored content type.
+
+## Close of run — all three PRs confirmed blocked on the one CVE, nothing else outstanding
+
+| PR | check-types | build + tests | Trivy | Review threads | Approval |
+|----|------------|---------------|-------|----------------|----------|
+| #2294 | **fixed** | passed | **red (CVE)** | 0 | **approved by rishib-xyz** |
+| #2287 | fixed (ported) | passed | **red (CVE)** | **0** (7 resolved today) | — |
+| #2277 | fixed (ported) | passed | **red (CVE)** | 2 (both deliberate) | — |
+
+Each of the three ran the **full ~21 minutes** and failed only at `scan.__run_4`, rather than dying
+at 44s in `check-types`. That is the useful signal: **the typecheck fix works and every one of my
+code changes passes CI's own typecheck, unit tests and docker build.** The sole remaining blocker on
+all three is the shared `react-jhipster` CVE in `package-lock.json` — a file none of them touches.
+
+Verified the CVE line directly in the #2294 and #2287 logs; #2277 is the same step, same duration and
+the same untouched lockfile.
+
+**#2294 is approved** (rishib-xyz, no comments) and `mergeable_state: unstable` — i.e. everything but
+CI is satisfied. It cannot self-merge, and an approval is not merge authority, so it waits.
+
+Stand-down comments posted once on #2287 and #2277 naming the Trivy failure, why it is not theirs,
+and pointing at #2294 for the analysis. No re-run spent: the failure is a deterministic CVE match,
+not a flake, so a re-run would cost 21 minutes for zero information.
+
+**Nothing further is mine to do on any of the three.** The next move is Ilia's: merge #2294, then the
+`CompanyLogo` allowlist, then the migration ticket.
