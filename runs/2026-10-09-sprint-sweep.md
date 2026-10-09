@@ -156,3 +156,44 @@ this time, so the `TypesTab` prop conflict did not recur.
 | #2294 | new, running | none | — | **CI hotfix, wants merging first** |
 | #2287 | re-running on merged head | none | **0** (5 answered + resolved this run) |
 | #2277 | re-running on merged head | none (was dirty, resolved) | 2 (both deliberate) |
+
+## Second addendum — master is red TWICE, and the second one needs a human
+
+#2294 cleared `check-types` (its build ran the full 21 min instead of dying at 44s) and then failed
+on the **Trivy scan**, which is new as of this morning and unrelated to anything in this run:
+
+```
+package-lock.json (npm)   Total: 1 (HIGH: 1, CRITICAL: 0)
+react-jhipster  CVE-2026-107303  HIGH  fixed
+  Installed 0.22.0  →  Fixed 1.1.0
+  JHipster: Generated Applications Allow Stored XSS via Unrestricted Blob ContentType
+```
+
+Trivy downloaded a fresh vulnerability DB on this run, so it has only just started firing. It scans
+`package-lock.json`, so **every open PR in the repo fails on it** — it failed on a one-line test
+fixture change.
+
+**Deliberately not acted on, and this is the one decision from today that genuinely needs Ilia:**
+
+1. **It is not a hotfix.** `react-jhipster` is pinned at exactly `0.22.0`; the fix is `1.1.0`, a
+   major. **337 files** import from it (`translate`, `Translate`, `TextFormat`). That is a migration
+   ticket.
+2. **Muting it is a security call.** `.trivyignore` already has 22 entries, each with a reachability
+   justification, so the pattern exists — but every existing entry covers a transitive DoS in a
+   package nothing loads (nanoid under tldraw, image-size under pptxgenjs). This one is a **stored
+   XSS in the UI layer the entire app renders through**. Suppressing that unattended would be
+   exactly the kind of thing that should never be found later as a surprise.
+
+Recorded on #2294 with the suggested order: merge the typecheck fix on its own merits, then take the
+CVE as its own ticket.
+
+**This is the third time the standing pattern has bitten** (brace-expansion, pcre2, source-map-js,
+now react-jhipster): a new CVE lands in the Trivy DB and every build in the repo goes red until
+someone bumps or suppresses it. Worth a standing policy rather than a scramble each time.
+
+### True final state
+
+- **master**: red on Trivy (`react-jhipster` CVE). The `check-types` break is fixed by #2294, pending merge.
+- **#2294**: typecheck fix verified green; build blocked by the CVE above. Needs merging + a CVE decision.
+- **#2287**: 7 Copilot findings answered and resolved this run; **0 open threads**; carries the typecheck fix.
+- **#2277**: conflict resolved, master merged clean, 1 new finding fixed; **2 open threads**, both deliberate.
