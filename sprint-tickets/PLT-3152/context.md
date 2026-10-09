@@ -317,3 +317,36 @@ Validated on the pushed head: 511 tests green across `ClientReportPage/` and `cl
 
 Unchanged: QA 2 / 3 / 4 still waiting on Radu (unanswered since 10-03); cover still has no visible
 capture entry point.
+
+### Later the same day — the fix that fixed nothing, and the column it should have fixed
+
+A second Copilot pass on the pushed head found something better than the placeholder bug, and it
+was right: **the `sumHoursBehind` change carried over from #2245 was invisible.**
+`WeightedTotalView.hours` is referenced **nowhere outside its own tests** — no slide and no
+PowerPoint table renders it. So the defect the PR claims to fix ("the weighted total disagreed with
+the column above it") was still live on screen and in the exported file.
+
+What was actually rendering in the Impact total cell was `total.variance`. Those are different
+numbers against **different denominators**:
+
+| | denominator |
+|---|---|
+| `variance` | weighted mean over rows carrying **both** a planned and an actual |
+| Impact (per row) | `hours / totalWeight` — the **whole** table's weight |
+
+They agree only when every row has data, which is why a single blank row broke it.
+
+Fixed in `51bdd7f`: new `WeightedTotalView.impact = sumHoursBehind(rows) / totalWeight`, used at
+**four** duplicated sites — `PackagesSlide`, `PackageBreakdownSlide`, `GroupsSlide`, and the
+discipline / breakdown / groups tables in `clientReportPptx.ts`. Copilot named three; `GroupsSlide`
+and the PowerPoint groups table had it too.
+
+**Left alone deliberately:** `DisciplineSlide.tsx:96` and `clientReportPptx.ts:903` render
+`disciplineDerived.impact` — the *category* discipline's impact against the whole package set, not
+the rollup's. That is intended, and the comment at `clientReportPptx.ts:866` records that emitting
+`total.variance` there had previously made the exported deck disagree with the screen. **Same bug,
+same table family, fixed once for one table and missed on the other four.** Worth remembering: when
+one of these total rows is wrong, check all five.
+
+Lesson for this file generally: a `WeightedTotalView` field that nothing renders is not a fix. Grep
+for the consumer before believing a total-row change does anything.

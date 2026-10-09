@@ -291,3 +291,31 @@ long as it sits. Either land it or expect to re-merge every couple of days.
 (cross-repo, needs a human), and the MSW save-lifecycle coverage request blocked by the
 `react-virtuoso` jsdom gap. Neither moved this run — no new evidence to add, so re-pinging would be
 noise.
+
+### Later the same day — same-named packages were indistinguishable in both views
+
+Copilot flagged the gallery card showing only `row.name` with the discipline in a hover `title`.
+Checked the table expecting it to be the safe one — **it isn't.** Its columns are Package type /
+Measure type / Quantity available, with **no discipline column**, and `packageName`
+(`PackageTypesPanel.tsx:513`) was also `row.name` + `title`. So both views had it.
+
+Package names genuinely repeat across disciplines — two "Access Control" rows, which the
+`toPackageRows` fixture already carries — and sorting by name puts them adjacent.
+
+Why this was worth fixing rather than noting: the panel's only job is assigning a measure per
+package. Picking the wrong one of two identical-looking rows raises no error; it silently weights
+the wrong package's progress, and the next sight of it is a dashboard number nobody can account
+for.
+
+Fixed in `1a83c1b` — table renders the discipline in muted text beside the name, gallery cards on
+their own caption line above the element counts. `labelOf` still backs the hover title and the
+aria-labels.
+
+**Note on how this was missed:** an earlier thread on this same PR asked for the discipline in the
+*accessible* labels, and that fix (`c69e5050f`) landed and was resolved. It covered screen readers
+only, and having "fixed the discipline problem" once made the visible half easy to overlook. An
+a11y label is not a visible label.
+
+**Flagged, not fixed:** `matches()` at line 80 searches `row.name` only, so searching a discipline
+name finds nothing even though it is now on screen. That is a behaviour change to the search box
+rather than part of the finding — left for a decision.
