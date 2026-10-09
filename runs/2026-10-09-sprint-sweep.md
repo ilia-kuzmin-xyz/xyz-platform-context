@@ -112,3 +112,47 @@ attribution footer (which cannot be dropped from a posted comment in any case). 
 5. **#2197 (PLT-3084) wants closing** — ticket Done, branch conflicted. Unchanged from 10-08.
 6. **#2263** has been a finished green draft since 10-03. Six days on a human.
 7. Expect **#2277 to conflict again** in `TypesTab.tsx` while it stays open.
+
+## Addendum — master went red mid-run, and it was not any one PR's fault
+
+Master moved twice during this run (`d45aeaf` → `67943d4` → `bd4e43e`) and ended up **red on
+`check-types`**, which fails every open PR in the repo:
+
+```
+src/main/webapp/app/pages/organisation/ViewerPage/components/viewer-x/components/blocks/
+  assets-panel/revert-readiness-modal.test.tsx(32,90): error TS2741:
+  Property 'blocked' is missing in type '{...}' but required in type 'LadderStep'.
+```
+
+**The shape is worth remembering, because no PR's own CI could have caught it:**
+
+- **#2266 (PLT-3092)** made `blocked: { id, name }[]` a **required** field on `LadderStep`.
+- **#2279 (PLT-3193)** merged afterwards carrying `revert-readiness-modal.test.tsx`, whose fixture
+  was written before that field existed.
+
+Each was green in isolation. The required field and the fixture that omits it only meet once both
+are on master — a merge-order break, invisible to both branches.
+
+Confirmed it was master and not my branch by running `tsc --noEmit` on a detached `origin/master`
+with no PR involved, and getting the identical error. Worth doing before claiming "not mine": the
+first read of the failure looked like it came from the PR, because CI builds the *merge* commit.
+
+**Raised as #2294** (one line, `blocked: []`, matching the sibling `asset-step-tasks-view.test.tsx`
+fixture). Verified: `tsc --noEmit` clean, eslint clean, 713 tests green across `assets-panel/`.
+
+**Opened ready for review, not draft** — a deliberate deviation from the standing "keep PRs in
+draft" instruction, flagged to Ilia. The reason is on the record in this repo: three earlier CI
+hotfixes (#2249, #2255, #2261) sat green *in draft* for days while every build kept failing. A
+draft cannot be merged, and this one blocks the whole repository.
+
+The same one-line fix was **ported into #2287 and #2277** so neither is parked behind #2294; it
+no-ops once #2294 lands. Both also took current master while I was there — #2277's merge was clean
+this time, so the `TypesTab` prop conflict did not recur.
+
+### Revised final state
+
+| PR | CI | Conflicts | Open threads |
+|----|----|-----------|--------------|
+| #2294 | new, running | none | — | **CI hotfix, wants merging first** |
+| #2287 | re-running on merged head | none | **0** (5 answered + resolved this run) |
+| #2277 | re-running on merged head | none (was dirty, resolved) | 2 (both deliberate) |
