@@ -45,6 +45,30 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-09 (scheduled) — 9 in scope. One ticket materially changed (PLT-2858), PLT-3133 changed status only, seven unchanged, zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 25 live incidents). In scope: PLT-3182, 3133, 3115, 3091, 3063, 3060, 2874, 2858, 2651. Out of scope: In Code Review (3231, 3223, 3112), READY FOR RELEASE (3172, 3165, 3116, 3104, 3099, 3096), Blocked (3135, 2660). All nine re-fetched with comments and diffed against the folders by newest comment id.
+
+**PLT-2858 (Dev In Progress, Darminder).** New `114576` (10-08 19:44): the get-issue endpoint returns an empty Location on a project that has room data, Darminder will ask the backend. First live reading of the API, so the 07-01 "rooms not configured" story is now doubly doubtful. New hypothesis for api-v2: the viewer sends an explicit null on create. Draft (57 words) in `recommended-action.md`; no chase yet, 1 day old. Class 1 with a class 4 half. Folder keeps its `groupA` tag: still a product plus API question, not dev-ready.
+
+**PLT-3133 (With Customer, Yash).** Status only; Rishi's three evidence asks went to the customer on 10-07. Class 1, ball with customer.
+
+**Owed by Ilia, unanswered:** PLT-3091 Sachin's question (`114105`/`114111`, 10-06, 3 days), draft (68 words) stands; PLT-2874 Yash's chase (`113731`, 10-02, 7 days), 10-05 draft (59 words) stands.
+
+**Unchanged, same newest comment id:** PLT-3182 (`113728`), PLT-3115 (`112316`, 23 days With Customer), PLT-3091 (`114332`), PLT-3063 (`111955`), PLT-3060 (`113152`), PLT-2874 (`113731`), PLT-2651 (`113497`). Standing drafts unchanged.
+
+**Unopenable media:** PLT-2858 `66039` (get-issue response, would show whether both location id and name are empty); PLT-3133 `65932` (carried).
+**Not verified:** whether PR #2257 (PLT-2651) is in a release (tags in this repo do not map to platform releases); what `66039` shows; whether the API derives Location at all.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | Dev In Progress | **Darminder's API finding, optional draft** | 1 (+4) |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | status only | 1 |
+
+The other seven rows are unchanged from the 10-05 to 10-08 tables below.
+
+---
+
 ## Run: 2026-10-08 (scheduled) — 10 in scope, all Group A, Group B empty. One ticket materially changed (PLT-3133), PLT-3091 got a Freshdesk echo, two left scope (Done), seven unchanged, zero Jira actions taken
 
 Board re-queried; all ten re-fetched with comments (the eight quiet ones by a read-only subagent, newest comment id compared with the folder).

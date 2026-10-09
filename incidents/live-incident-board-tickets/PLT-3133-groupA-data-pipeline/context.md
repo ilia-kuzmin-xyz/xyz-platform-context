@@ -433,3 +433,7 @@ run history, which table Rishi meant, the contents of attachment `65932`.
 ### Unopenable media (403, confirmed gap)
 `65932` `Screenshot 2026-10-07 130039-20261007-100846.png` (119 KB, Yash, 10-07 11:09): the customer's ATL06 example. Would show
 which activities were edited and whether their dashboard values moved. Older: `64823`-`64826` (09-17), `64906` (Rishi, 09-18).
+
+## 2026-10-09 (scheduled) — status Open to With Customer; nothing new from either side
+
+Fresh fetch (20 comments). Newest `114335` (10-07 15:32), a Freshdesk "Waiting on customer" echo, after `114323`/`114326` (more echoes). Jira status moved to **With Customer** on 10-08 (updated 14:16), so Yash has put Rishi's three asks (`114221`: when the activity changes were made, when reported, when checked; the last-calculation time on the progress tab; whether filters are applied) to the customer on 10-07. Ball: customer, 2 days. Nothing for us to chase. The DPL-1707 question to Rishi from the 10-08 draft stands and is still unanswered. Attachments unchanged (five screenshots, `65932` unopenable). **Class 1 (customer), with the class 4 half (DPL-1707 priority) unchanged.** No Jira action was taken.

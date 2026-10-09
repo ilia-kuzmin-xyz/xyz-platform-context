@@ -477,3 +477,15 @@ were given within a minute of each other and they are not in tension — "mostly
 **Do not tell the customer "set up rooms" again** until that answer exists. **Do not raise a PR from `PLT-2858-qa-issue-location-label` yet:** it fixes display only and is safe, but it is the class 2 half and should follow the answer, not precede it.
 
 No Jira action of any kind was taken.
+
+## 2026-10-09 — CURRENT. No chase yet; one optional addition that hands Darminder a fact he does not have
+
+Darminder said on 10-08 he will ask the backend. That is one day old, so do not chase. What he may not know is that the viewer sends the location as null on create, which changes the question he should ask. If useful, post this on the ticket (Ilia or Darminder).
+
+**Assumption (one line):** Darminder has not already asked Sachin or Ali outside Jira.
+
+### Draft (57 words)
+
+> Darminder, one fact for the backend check: the web viewer never sets Location. Every issue is created with the location sent as empty, so whatever shows there has to come from the API. Sachin, does the API fill Location from the issue's position and the model's rooms, or only return what was saved? **Which one is it?**
+
+If the answer is "only what was saved": nothing stamps it, the field is dead, and the next step is a product choice (selector or remove). If "derived": our explicit null may be suppressing it, and that is a small frontend change. No Jira action was taken.

@@ -631,3 +631,22 @@ All attachments on this ticket are images (403 from this routine, per the 09-08 
 
 **Class 4, with a class 1 half.** Class 1: Darminder owes a reply on `112960`/`113747` (11 and 3 days). Class 4: the ask is undefined and may be a product decision (stamp, selector, or remove field), not a bug.
 No Jira action was taken.
+
+## 2026-10-09 (scheduled) — Darminder's 10-08 comment is the first live reading of the API; status now Dev In Progress
+
+Fresh fetch with comments (35 comments, newest `114576`, 10-08 19:44, Darminder). Status **Dev In Progress** (was Open on 10-05). Assignee Darminder. Priority Critical. **Supersedes** the 10-05 line "Whether the API derives a Location ... is the open fact" only in part: it is now being tested, not answered.
+
+`114576`: Darminder will check with the backend team because the location comes from the get-issue-by-id endpoint, "and right now it seems to return empty even though we have room data on a model in the project". New attachment `66039` (image, 10-08 18:42) shows the response; not openable from this routine.
+
+**What it settles and what it does not.**
+- Settles: the empty Location is reproducible by a developer on an issue in a project that has room data, so it is no longer only a customer's unconfigured project (the 07-01 explanation).
+- Does not settle: whether the API is meant to derive a Location. Darminder's 07-01 claim (`106250`) is still unverified by the API owner.
+- Frontend facts re-checked on master `d45aeaf` (10-09), unchanged since 10-05: `toIssuePayload` emits `issueLocationId: null` for `''` (`format-issues.ts:138-145`), the form never writes it, and the details panel binds the raw id (`issue-details.tsx:149`). Display maps `locationId: v2.issueLocationId` (`format-issues.ts:86`), so the viewer can only show what the API returns.
+- **New hypothesis, unverified:** the viewer sends an explicit `null` on create. If the API derives a Location only when the field is absent, our explicit null would suppress it. This is one question for api-v2 (Sachin or Ali), not something the frontend can decide. No fix PR exists (GitHub search for PLT-2858 on hc-frontend returns none, 10-09); the label-fix branch `PLT-2858-qa-issue-location-label` is still unmerged.
+
+**Ownership.** Darminder owes the backend answer (1 day old, not yet late). The board group is now B by status, but it stays a detailed pass: the ticket is still a product plus API question, not dev-ready.
+
+**Unverified:** what `66039` shows; whether the room data Darminder means is the same zone data the API would read; who Stephen is (10-05 note).
+**Unopenable media:** `66039` (get-issue response, would show whether `issueLocationId` and the location name are both empty or only one).
+
+**Class 1 (Darminder to backend, not yet overdue) with a class 4 half (stamp, selector or remove the field).** No Jira action was taken.
