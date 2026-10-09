@@ -197,3 +197,67 @@ someone bumps or suppresses it. Worth a standing policy rather than a scramble e
 - **#2294**: typecheck fix verified green; build blocked by the CVE above. Needs merging + a CVE decision.
 - **#2287**: 7 Copilot findings answered and resolved this run; **0 open threads**; carries the typecheck fix.
 - **#2277**: conflict resolved, master merged clean, 1 new finding fixed; **2 open threads**, both deliberate.
+
+## Third addendum — the react-jhipster CVE is REACHABLE. Do not suppress it.
+
+Checked reachability rather than assuming, after floating `.trivyignore` as a quick unblock on #2294.
+**That advice was wrong and has been corrected on the PR.**
+
+### The function
+
+`node_modules/react-jhipster/src/util/data-utils.ts:17`, as installed at 0.22.0:
+
+```js
+export const openFile = (contentType: string, data: string) => () => {
+  const fileURL = `data:${contentType};base64,${data}`;
+  const win = window.open();
+  win.document.write('<iframe src="' + fileURL + '" frameborder="0" ... ></iframe>');
+};
+```
+
+`contentType` is unvalidated and reaches **two** injection points: the `data:` URL (`data:text/html;…`)
+and an **HTML attribute** via `document.write` — a `"` breaks out of `src` entirely. And
+`window.open()` with no URL gives an `about:blank` document that **inherits the opener's origin**, so
+the payload runs on the app's own origin.
+
+### Where this repo reaches it
+
+Of the 9 symbols imported from `react-jhipster` (337 files, overwhelmingly `translate` / `Translate`
+/ `TranslatorContext`), exactly **one** call site touches the vulnerable path:
+
+`components/CompanyLogo/CompanyLogo.tsx:89` → `openFile(logoData.contentType, logoData.content)`
+
+and `contentType` is taken off stored data by regex with **no allowlist** (`CompanyLogo.tsx:25-32`):
+
+```ts
+const contentTypeMatch = /data:([^;]+)/.exec(contentTypePart)
+```
+
+So a company logo stored as `data:text/html;base64,<payload>` yields `contentType = 'text/html'` and
+renders on click. The upload guard is react-jhipster's own `isAnImage` flag — the check the CVE says
+is insufficient — and a stored value need not have come through our form at all.
+
+### Why this matters beyond one CVE
+
+The existing 22 `.trivyignore` entries are all **transitive packages nothing loads** (nanoid under
+tldraw, image-size under pptxgenjs — the latter's note even proves pptxgenjs never imports it). That
+is a sound pattern. This one looks superficially similar (a dependency CVE blocking CI) and is
+categorically different: it is a **first-party call site passing attacker-influenced data into the
+vulnerable API.** The lesson for the next CVE: the existing entries earn their place by a reachability
+census, so do the census before adding to them — the file's own header already says exactly that and
+it would have been easy to skip under CI pressure.
+
+### Proposed, not applied
+
+A content-type allowlist at the `CompanyLogo` call site closes the path independently of the major
+bump. Deliberately not applied in this run: it is a security change in a component unrelated to the
+CI hotfix, it would not green Trivy anyway (Trivy matches the package version, not the call site),
+and the scheduled task authorises a *build* hotfix, which this is not.
+
+Order recorded on #2294: merge the typecheck fix → raise the `CompanyLogo` allowlist as its own
+security fix → `react-jhipster` 0.22→1.1 as a migration ticket → only then is a `.trivyignore` entry
+defensible, and it must say the reachable call site was fixed rather than claim non-applicability.
+
+**Open question for Ilia:** who can set `logoContent` for a company? If that field is write-restricted
+server-side in a way the frontend cannot show, the severity drops. It does not drop to zero — the
+attribute-injection half needs only a `"` in the stored content type.
