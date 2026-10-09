@@ -287,3 +287,33 @@ not a flake, so a re-run would cost 21 minutes for zero information.
 
 **Nothing further is mine to do on any of the three.** The next move is Ilia's: merge #2294, then the
 `CompanyLogo` allowlist, then the migration ticket.
+
+## Outcome — #2294 merged, master's typecheck break is closed
+
+`#2294` merged as **`5a83888`**. Verified rather than assumed: `tsc --noEmit` on a detached
+`origin/master` at that commit **exits 0** with no diagnostics, against the identical command that
+failed on `bd4e43e` this morning. The merge-order break between #2266 and #2279 is closed.
+
+Turnaround for the record: break reaches master ~08:30 → diagnosed and PR raised 08:38 → approved
+09:40 → merged 11:08. Roughly two and a half hours of every PR in the repo being red, of which the
+diagnosis-to-PR leg was eight minutes.
+
+**Opening it ready-for-review rather than draft was the right call** and is worth keeping as the
+pattern for CI hotfixes: it was approved and merged the same morning, where the three earlier CI
+hotfixes left in draft (#2249, #2255, #2261) sat for days. Noting that explicitly because the
+standing instruction is "keep PRs in draft" — the deviation earned its keep here, and the
+distinction is *CI hotfix that blocks the whole repo* vs *ticket work*.
+
+### What is NOT fixed
+
+The `react-jhipster` CVE is untouched and still fails every build repo-wide. #2287 and #2277 both
+pass typecheck, unit tests and the docker build, and fail only at the Trivy step. The decision
+sequence recorded on #2294 stands: `CompanyLogo` allowlist → `react-jhipster` 0.22→1.1 migration →
+only then a `.trivyignore` entry, and only one that says the reachable call site was fixed.
+
+### Deliberately not done
+
+Re-merging master into #2287 / #2277 now that they are 1–2 commits behind. Being behind is neither a
+conflict nor red CI, both merge clean, and each re-merge costs a 21-minute CI run that would still
+fail on Trivy. The duplicated `blocked: []` line they carry merges cleanly against master's copy —
+identical content on both sides.
