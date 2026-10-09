@@ -247,3 +247,73 @@ Standing pattern worth knowing: lockfile CVEs (brace-expansion, pcre2, now sourc
 draft for days unmerged — a recurring drag, flagged to Ilia on 10-05.
 
 Unchanged: QA 2 / 3 / 4 still waiting on Radu; cover still has no visible capture entry point.
+
+## 2026-10-09 — two open PRs for this ticket, and a real `undefined` in the client deck
+
+### The duplicate first, because it matters more than the bug
+
+**There are now two open PRs for PLT-3152 and they overlap heavily.** This needs Ilia's call; it
+was not resolved unattended.
+
+| PR | Head | State | Size | Content |
+|---|---|---|---|---|
+| #2260 | `PLT-3152` | **draft** | 27 files, +738 | All of #2245 re-landed, **plus** QA 7 (app date picker) and discipline exclusions, plus slide tests and `forgeCapture.test.ts` |
+| #2287 | `PLT-3152-qa-fixes-v2` | **open, reviewers requested** | 13 files, +369 | A **subset**: the #2245 re-land plus deck arrows and focus |
+
+Both branch off `master` at the same point and touch the same files, so whichever merges first
+leaves the other conflicted across `ClientReportPage/`, `clientReportPptx.ts`, `SlideStage.tsx`,
+`forgeCapture.ts` and `main.json`. #2287 is the one in review; #2260 is the fuller one and has been
+a finished draft since 10-02.
+
+Not a merge decision an unattended run should make — flagged, not acted on.
+
+### The bug: `Report notes: undefined` shipped to clients
+
+Copilot flagged one missing placeholder key on #2287. It was **three**, and the root cause was a
+type that could not catch any of them:
+
+```ts
+placeholders: Record<string, string>   // any key resolves to undefined, silently
+```
+
+`ClientReportPage.tsx` wired **9** keys. `clientReportPptx.ts` reaches **12**. `main.json` has had
+all 12 the whole time — only the wiring was short. So:
+
+- `scheduleNotes` → contents slide exported the literal text `Report notes: undefined`
+- `discipline` → by-discipline, at-risk and full-breakdown tables, via `nameCell`
+- `contractor` → groups table, via `nameCell`
+
+Fixed in `bf43952` by **naming the twelve keys on the interface**, not by adding the one key.
+Verified the type is the real guard: deleting the three wirings now fails `tsc --noEmit` with
+*"missing the following properties: scheduleNotes, discipline, contractor"*. Confirmed by mutation,
+not assumed.
+
+**Important: `ClientReportPage.test.tsx` cannot catch this class of bug** — it mocks
+`exportClientReportPptx`, so the production labels object never reaches the exporter. Removing the
+wiring leaves all 16 of its tests green. The compiler is the only guard for the wiring; the new
+tests guard the exporter's *behaviour* given complete labels. Worth knowing before anyone "adds a
+test instead of tightening a type" here.
+
+**#2260 has the same bug, partially.** It wires `scheduleNotes` but is still missing `discipline`
+and `contractor`, and still types the object `Record<string, string>`. If #2260 is the one that
+ships, that half must be carried across. Noted on #2287's thread too.
+
+### Tests added on #2287 (all mutation-checked)
+
+- `clientReportPptx.test.ts`: schedule-notes fallback, and a **deck-wide** guard that no slide text
+  contains `undefined` for any unset name — covers table cells via a new `allSlideText()` helper
+  that reads `addTable` rows as well as `addText` (a text-only sweep misses `nameCell` entirely).
+- `SlideStage.test.tsx`: focus-on-mount, and an arrow fired at `document.activeElement` with no
+  click first. Copilot was right that the existing tests bypass the regression — every one of them
+  fires at the stage directly. Removing the mount `useEffect` turns both red.
+- **New `forgeCapture.test.ts`, 11 tests**: `captureErrorMessage` mapping and pass-through, timeout
+  rejection under fake timers, timer cleanup on success, empty screenshot, synchronous LMV throw,
+  and both fallback hangs (FileReader read + Image decode). Dropping `reader.onerror` or
+  `image.onerror` makes the matching test **time out at 5s** rather than fail fast — which is
+  exactly the "Capturing…" with no error and no way back that QA 1 reported.
+
+Validated on the pushed head: 511 tests green across `ClientReportPage/` and `clientReportService/`,
+`tsc --noEmit` clean, eslint 0 errors. All three Copilot threads answered and resolved.
+
+Unchanged: QA 2 / 3 / 4 still waiting on Radu (unanswered since 10-03); cover still has no visible
+capture entry point.

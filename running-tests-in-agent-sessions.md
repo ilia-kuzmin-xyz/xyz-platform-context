@@ -75,3 +75,29 @@ and the stub is unnecessary.
 Cheap and worth it every time: break the thing the test covers, confirm the test
 goes red, restore. Caught nothing vacuous on 2026-10-02 but took about a minute
 per suite, and it is the difference between a test and a comment.
+
+## 2026-10-09 — procedure re-verified, plus a trap worth knowing
+
+The stub procedure above worked exactly as written, unchanged. Re-verified: 511 tests across
+`ClientReportPage/` + `clientReportService/`, 377 across `ProjectSettings/` + `DashboardPage/`,
+`tsc --noEmit` clean, `eslint` 0 errors. Manifests restored and `git status --short package.json
+package-lock.json` confirmed empty before committing.
+
+**New trap: `tsc --noEmit` reports success while checking nothing** when `node_modules` is absent.
+`tsconfig.json` sets `types: ["webpack-env", "forge-viewer"]`; with neither installed, tsc fails
+both entries with `TS2688` and exits *without type-checking a single file*:
+
+```
+error TS2688: Cannot find type definition file for 'forge-viewer'.
+error TS2688: Cannot find type definition file for 'webpack-env'.
+tsconfig.json(18,5): error TS5101: Option 'baseUrl' is deprecated ...
+```
+
+Three lines of config noise and no file diagnostics, which reads like a clean run if you only skim
+the tail. It is not: a genuinely broken type error in the diff produces the *same* output. This run
+nearly accepted a change on that basis. **Install first, then trust `tsc`** — and if its output
+mentions `TS2688`, the typecheck did not happen.
+
+Also note `npx tsc` and `npx vitest` will cheerfully download their own copies and appear to work.
+`npx vitest` then dies with `Cannot find package 'vite'`; `npx tsc` is the dangerous one, because it
+runs and "passes".

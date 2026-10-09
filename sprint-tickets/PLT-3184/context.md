@@ -257,3 +257,37 @@ a data-integrity issue; surfacing it needs `useMutationState`.
 save-lifecycle coverage — the latter left open deliberately, because the "assert the displayed
 measures" half of it is blocked by the virtuoso gap above and landing only the request-shape half is
 exactly what the reviewer objected to.
+
+## 2026-10-09 — conflicted again; resolved. Second conflict in two days, same file
+
+#2277 was `mergeable_state: dirty` again at the start of this run — the second conflict in two days,
+both in `TypesTab.tsx`, both because this branch widens that component's props while master keeps
+adding to them.
+
+**This time:** master's PLT-3192 (`aeb2213`, loading state for asset/system type updates) added
+`handleModalClose` to the prop destructure; this branch had added `showCommissioningTypes` and
+`showPackageTypes`. Git conflicted on the one destructuring block.
+
+Resolution was the **union of both sides** — and it was unambiguous, which is worth recording:
+
+- The `TypesTabProps` **interface merged automatically** and already declared all four props.
+- `ProjectSettings.tsx:184-190` already **passes all four**.
+- `handleModalClose` is consumed at `TypesTab.tsx:453` and `:475`.
+
+So the only resolution that leaves both features working was to keep all four. Nothing was dropped
+and no behaviour was chosen between.
+
+Merged in `5261f36`. `mergeable_state` `dirty` → `blocked`. Base is now `d45aeaf`.
+
+Validated on the merged head before pushing: `tsc --noEmit` clean, eslint clean on the resolved
+file, **377 tests** across `ProjectSettings/` and `DashboardPage/`.
+
+**Pattern worth acting on:** `TypesTab.tsx`'s prop list is a collision point. Two conflicts in two
+days, both trivial to resolve but both requiring a human-ish read. This branch has been open since
+10-07 and is blocked on PAPI-4185 plus the HIGH Supabase decision, so it will keep colliding for as
+long as it sits. Either land it or expect to re-merge every couple of days.
+
+**Still open on #2277 (2 threads, unchanged and both deliberate):** the HIGH Supabase auth decision
+(cross-repo, needs a human), and the MSW save-lifecycle coverage request blocked by the
+`react-virtuoso` jsdom gap. Neither moved this run — no new evidence to add, so re-pinging would be
+noise.
