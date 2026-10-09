@@ -350,3 +350,31 @@ one of these total rows is wrong, check all five.
 
 Lesson for this file generally: a `WeightedTotalView` field that nothing renders is not a fix. Grep
 for the consumer before believing a total-row change does anything.
+
+#### The follow-on: a sign that belonged to a different column
+
+Fixing the Impact total immediately produced a second, narrower bug, caught on the next Copilot
+pass and **genuinely mine**: the new value went into the cell but kept `total.sign`, which is
+derived from `variance`.
+
+They are not merely different magnitudes — they can have **opposite signs**, and the reason is
+structural:
+
+- `weightedMean` skips rows missing *the value it is averaging*, so the planned mean is taken over
+  one row set and the actual mean over another.
+- `sumHoursBehind` counts only rows carrying **both**.
+
+So a row with a planned and no actual is *in* the planned mean, *out* of the actual mean, and *out*
+of the impact. Worked example, verified by running it: `{100h, .9, null}` + `{100h, .1, .2}` gives
+`variance -30.00%` and `impact +5.00%` — a positive cell painted in the negative colour.
+
+Fixed in `19d1b4d` with `WeightedTotalView.impactSign`, used by the four Impact total cells;
+Variance cells keep `sign`. `DisciplineSlide` and its PowerPoint counterpart are unaffected: both
+take value and sign from the same single `deriveProgressRow` call.
+
+**Standing warning for this file:** `variance`, `hours` and `impact` on a total row are three
+different reductions over three different row subsets. Never share a sign or a value between them
+without checking which rows each one counted.
+
+Final state of #2287 this run: `bf43952`, `7e08ef2`, `51bdd7f`, `19d1b4d`. 514 tests green,
+`tsc --noEmit` clean, eslint 0 errors, **all 5 Copilot threads answered and resolved**.
