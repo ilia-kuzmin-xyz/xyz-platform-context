@@ -107,3 +107,42 @@ Comments this run are written plainly. Commits are authored `ilia-kuzmin-xyz
 
 Note for the record: two replies on #2277 dated 10-09 17:16 *were* written in that sloppy style, so
 the practice has not been fully consistent. Keeping to plain prose.
+
+## Addendum — the react-jhipster CVE is now actively red, correcting this log's earlier line
+
+Above I recorded the CVE as "master is green today, so it is not currently blocking". **That is no
+longer true and was already going stale when written.** #2298's build failed at 08:17 on the Trivy
+step, and on nothing else:
+
+```
+package-lock.json (npm)   Total: 1 (HIGH: 1, CRITICAL: 0)
+react-jhipster  CVE-2026-107303  HIGH  fixed   0.22.0 → 1.1.0
+```
+
+Checked rather than assumed that it is not the PR's:
+
+- #2298 changes two TypeScript files; `package.json` / `package-lock.json` are untouched.
+- **The PR and master workflows use identical Trivy settings** — `exit-code: "1"`,
+  `severity: "CRITICAL,HIGH"`, `ignore-unfixed: true`, `trivyignores: hc-frontend/.trivyignore`
+  (`pr-check.yaml:179-192` and `deployment-dev-master.yaml:160-172`). So master is not exempt; its
+  last green run was 10-09 12:57, before the DB picked this up. **Expect master to go red on its
+  next push.**
+- **No fix exists to port.** Searched: no open or merged PR in this repo touches `react-jhipster`,
+  and nothing open mentions the CVE. So there was nothing to carry into the branch.
+
+Stood down with one comment on #2298 per the standing rule, naming the check, why it is not this
+PR's, and that no fix exists. **Did not re-run the job**: a dependency scan is deterministic, so a
+re-run only re-downloads the same DB — and #2287 and #2277 were mid-build on unrelated diffs, which
+is a stronger and free control.
+
+### Neither route is a hotfix, which is why nothing was pushed
+
+- **Upgrade** `0.22.0 → 1.1.0` is a major across **337 importing files**. A migration ticket.
+- **Suppress** in `.trivyignore` is a security decision, and the 10-09 reachability work concluded
+  it should not be taken unattended: `openFile` puts an unvalidated `contentType` into both a
+  `data:` URL scheme and an HTML attribute via `document.write`, on an `about:blank` window that
+  inherits the opener's origin, reachable from `CompanyLogo`. Every existing `.trivyignore` entry
+  covers an unreachable transitive issue; this one is not comparable.
+
+Escalated to Ilia. **Fourth occurrence of this pattern** (brace-expansion, pcre2, source-map-js,
+react-jhipster) — the ask is a standing policy, not another one-off decision.
