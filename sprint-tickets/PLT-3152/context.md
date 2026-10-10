@@ -378,3 +378,28 @@ without checking which rows each one counted.
 
 Final state of #2287 this run: `bf43952`, `7e08ef2`, `51bdd7f`, `19d1b4d`. 514 tests green,
 `tsc --noEmit` clean, eslint 0 errors, **all 5 Copilot threads answered and resolved**.
+
+## 2026-10-10 — #2287 is clean; one summary-only finding parked for the next push
+
+Copilot's latest review on #2287 (10-09 08:23, commit `19d1b4d`) is **🟢 Approval recommended, 0 open
+findings**, and all 7 review threads are resolved. Master merged into it this run (it was 2 behind,
+and its last build predated the #2294 typecheck fix, so the red was never its own). 515 tests green
+on the merged head, `tsc --noEmit` clean.
+
+**Carry this into the next push that already touches these files — do not push it on its own.**
+Copilot listed it under "Previously missed", i.e. in its summary only, never posted as a thread, so
+by the standing rule it does not start a push. It is nevertheless correct, verified by reading:
+
+`forgeCapture.ts:144-155` uses `reader.onloadend`, and **`loadend` fires after a read error as well
+as a success**. So on an unreadable blob `reader.onerror` rejects, and then `onloadend` still runs,
+building `new Image()` with `src = String(reader.result)` — `"null"` — which costs a spurious
+decode/request after the capture has already failed.
+
+Harmless to the *outcome* (the promise is settled, so `done`/`fail` are no-ops), which is why it is
+hygiene rather than a bug: no hang, no wrong value. The fix is one word, `onloadend` → `onload`,
+which is success-only. The existing `forgeCapture.test.ts` read-failure test still passes either
+way, so if it is fixed it wants an assertion that no `Image` is constructed after a read error,
+otherwise the change is untested.
+
+Unchanged and still the main thing: **#2260 vs #2287 is a keep/close decision for Ilia** — fifth run
+asking — and #2260 still carries half the placeholder bug if it is the keeper.
