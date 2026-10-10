@@ -377,3 +377,44 @@ It now asserts the recorded `task_template` select carries
 behavioural assertion can never test a *scoping* property — only the recorded
 call can. Any "refuses another project's X" test in this file needs to assert
 the filter, not the return value. Worth auditing the others.
+
+### Second round, same day — the two that actually mattered
+
+`ffddf228d`. Both are the original bug reappearing through a door the first fix
+left open, which is the pattern worth remembering: *the pin is only as good as
+the weakest path that can still reach the template's text.*
+
+**A (HIGH) — the first edit after the column ships breaks every pre-column pin.**
+The PR's own justification was that falling back to the template is safe because
+"the template's text is what a pre-column version displayed anyway". True — until
+the first edit, which is the single moment that text is replaced. So every run
+pinned to a pre-column version would have had its instructions rewritten by the
+next save. Not a migration gap; the ticket's own bug, deferred by one edit.
+
+Fixed inside `update()` rather than by a migration, because at that point the
+template row **still holds the pre-edit text**, which is by definition what the
+superseded version displayed — the save can repair the row it is about to
+invalidate, with nothing to coordinate and no window. A migration would also have
+to guess at versions created between deploy and backfill. Writes `''` rather than
+leaving null when the template had none, so the row stops depending on the
+template from then on. Only where the superseded version recorded none of its own.
+
+**B (MEDIUM) — `null` was overloaded.** `versionDescription()` returned null for a
+missing row and an out-of-project parent as well as for "stored no description".
+Null is the caller's signal to fall back to the **mutable** template, so an
+unresolvable pin silently showed the since-edited wording. Both now throw
+`checklistVersionNotFound`; the runner renders "could not be loaded".
+
+They compose: as pre-column versions get repaired on their next edit, the
+legitimate-null case shrinks and the template fallback becomes the exception.
+
+### Test-infrastructure notes
+
+- `RecordingCommissioningClient` records an update's payload as **`patch`**, not
+  `values`. A `toMatchObject` against the wrong key reads as `undefined` and the
+  assertion fails loudly — but the *filters* assertion above it still passes, so
+  check both when a write assertion looks half-wrong.
+- Tests about rows written *before* a migration belong in their own describe, not
+  in `an environment the column-adding migration has not reached` — that block is
+  for an environment where the column is still absent, which is the opposite
+  situation.
