@@ -191,3 +191,17 @@ the package, not the cost of the fix; read the patch before calling a CVE unport
 The standing-policy ask to Ilia still stands and is unchanged in substance: this was the fourth
 scanner break in two weeks, and three of the four turned out to be portable one-liners. A policy on
 who may suppress, and when, would have saved most of the escalation each time.
+
+### 2026-10-10 09:27 — #2299 verified green
+
+`build` **passed** on `74618128f` (run `38040229000`, 09:06 → 09:27). That is the Trivy step clearing
+with the `.trivyignore` entry *and* lint, types, tests and the image build passing with the code
+change — so the fix is confirmed working rather than merely plausible. SonarCloud also passed:
+0 security hotspots, 0% duplication, 45.3% coverage on new code, 2 non-blocking new issues (their
+detail is not readable anonymously — the project is private — and the gate passed, so left for a
+reviewer).
+
+**#2299 is now the only thing standing between seven red PRs and green**: #2250, #2251, #2260,
+#2263, #2277, #2287, #2298 all fail on this one CVE and nothing else, and master carries it too.
+Left as a **draft** per the standing instruction to keep PRs in draft; it is complete and waiting on
+a reviewer, not on more work.
