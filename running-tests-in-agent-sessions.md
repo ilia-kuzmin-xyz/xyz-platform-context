@@ -101,3 +101,31 @@ mentions `TS2688`, the typecheck did not happen.
 Also note `npx tsc` and `npx vitest` will cheerfully download their own copies and appear to work.
 `npx vitest` then dies with `Cannot find package 'vite'`; `npx tsc` is the dangerous one, because it
 runs and "passes".
+
+## 2026-10-10 — procedure re-verified; and do NOT run Prettier over a whole file
+
+Stub procedure above worked unchanged. Re-verified across five branches: 328 tests (`CanvasPage/`),
+515 (`ClientReportPage/` + `clientReportService/`), 377 (`ProjectSettings/`), 409 (`PortfolioPage/`),
+2,214 (`progressOutputsService/` + `ViewerPage/`), 410 (`AssetWorkflowStepTasks/` + checklist
+services). `tsc --noEmit` clean on every merged head. Manifests restored and verified empty before
+each commit.
+
+**The `tsc` TS2688 trap was checked positively this time, not assumed.** After installing, append a
+deliberate type error to the file under change, run `tsc --noEmit`, and confirm it is *reported*:
+
+```bash
+printf '\nconst __probe: number = "nope"\n' >> path/to/file.ts
+npx tsc --noEmit -p tsconfig.json 2>&1 | grep -c "file.ts"   # must be >= 1
+```
+
+A clean exit means nothing on its own; a reported probe does. One line, ~40 s, and it is the
+difference between a typecheck and a no-op.
+
+**New trap: `npx prettier --write <file>` reformats the whole file.** `useCanvas.ts` is not
+Prettier-clean on master, so writing it produced **431 insertions / 220 deletions** across regions
+the change never touched — unreviewable noise that buries the actual diff. Caught on diff review,
+reverted, re-applied by hand.
+
+If a change needs re-indentation (wrapping a block in a `try`, for instance), indent it yourself and
+check the result with `git diff --stat`. Only `prettier --check` is safe to run across a legacy file
+here. The same caution applies to any whole-file formatter in this repo.
