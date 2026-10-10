@@ -146,3 +146,48 @@ is a stronger and free control.
 
 Escalated to Ilia. **Fourth occurrence of this pattern** (brace-expansion, pcre2, source-map-js,
 react-jhipster) — the ask is a standing policy, not another one-off decision.
+
+---
+
+## 2026-10-10, later — the react-jhipster CVE **is** fixable; #2299 raised
+
+**Supersedes the "No fix exists to port" and "Neither route is a hotfix" conclusions above.** Those
+were right that the *upgrade* is a migration ticket and right that a bare `.trivyignore` line would
+have been wrong — the 10-09 reachability work stands and was the key input. What was missed is a
+third route, found by unpacking the 1.1.0 tarball instead of reasoning from its version number.
+
+**Upstream's own fix is ~15 lines**, not a rewrite: a content-type allowlist
+(`toOpenableContentType` — images except `*+xml`, `text/plain`, `application/pdf` inline;
+everything else `application/octet-stream`) plus a Blob object URL in place of the `data:` URL. And
+1.1.0 marks its copy `@deprecated`, telling applications to generate the helper locally. Porting it
+is the vendor-recommended shape.
+
+So **hc-frontend #2299** (draft, `fix/react-jhipster-openfile-cve`):
+
+| File | Change |
+|---|---|
+| `app/shared/util/blob-open.ts` | new — upstream's rules, beside the existing `blob-download.ts` |
+| `app/components/CompanyLogo/CompanyLogo.tsx` | the single call site swapped |
+| `app/shared/util/blob-open.test.ts` | 25 cases, mutation-verified twice |
+| `.trivyignore` | `CVE-2026-107303` + full census, house style |
+
+The `.trivyignore` entry is **still needed after** the code fix — Trivy matches the lockfile
+version, not the call sites — but it can now honestly say nothing calls the vulnerable function.
+That resolves the objection recorded above: the suppression is no longer covering a reachable hole.
+
+**Worth carrying forward from the 10-09 work:** the hole was real and slightly worse than logged —
+the `onClick` fires in `mode='view'` too, so read-only viewers were exposed, not only company
+admins.
+
+**Not cherry-picked into the open PRs,** unlike `source-map-js` last week. That was a three-line
+lockfile bump with no review surface; this is a four-file security change, and six copies of it in
+six branches means nobody reviews it. #2251 and #2263 got a comment correcting the earlier
+"no safe fix" call and pointing at #2299; they go green when master picks it up.
+
+Full write-up, including the generalisable lesson — *"N majors away" bounds the cost of upgrading
+the package, not the cost of the fix; read the patch before calling a CVE unportable* — in
+[`incidents/ci-react-jhipster-openfile-cve-2026-10-10.md`](../incidents/ci-react-jhipster-openfile-cve-2026-10-10.md).
+
+The standing-policy ask to Ilia still stands and is unchanged in substance: this was the fourth
+scanner break in two weeks, and three of the four turned out to be portable one-liners. A policy on
+who may suppress, and when, would have saved most of the escalation each time.
