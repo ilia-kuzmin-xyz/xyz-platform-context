@@ -243,3 +243,54 @@ and that `rename()` deliberately cuts no version.
 Twice now the record of *why* a ticket stalled has vanished from the ticket while surviving only
 here. That is an argument for this folder, not against commenting — but it means the context file
 is the system of record for an agent's reasoning, and the Jira comment is a best-effort copy.
+
+## 2026-10-10 — the tooltip was reading the wrong run; Copilot caught it
+
+**This repo had already called it, and the implementation did it anyway.**
+`dashboard/data-pipeline.md:178` (written 09-22, *while picking up this ticket*) ends:
+
+> Any future "last updated" indicator on the Gantt columns should surface the
+> activity-level timestamp rather than reusing `calculatedOn$`, or it will quietly
+> claim a freshness the grid does not have.
+
+The first cut of this PR reused the aggregate rule anyway — `resolveCalculatedOn`
+took `max(project, category-groups)` for both the panel and the grid. Copilot
+flagged it on 10-10; fixed in `5acc3d9dd`.
+
+### Why it mattered more than a mismatch
+
+`calculatedOn` is per-output, and the runs genuinely diverge. Under **DPL-1707**
+(see `data-pipeline.md` 10-08 addition) a progress range crossing a calendar year
+kills the labour-hours asset: the activity output stops being written while
+category-groups keeps running on its own trigger and takes a **fresh** stamp over
+**stale** activity data. So the tooltip would have said "Last calculated <an hour
+ago>" over a column frozen for weeks — the exact misreading a freshness indicator
+exists to prevent, and worse than rendering no line.
+
+### Shape of the fix
+
+`resolveCalculatedOn(outputs, levels)` — each caller passes the levels its own
+figures come from:
+
+| Caller | Levels | Figures |
+|---|---|---|
+| `ProgressOutputsV2Loader` (panel) | `AGGREGATE_LEVELS` | project + category-groups parquet |
+| `useProgressCalculatedOn` (editor grid) | `ACTIVITY_LEVELS` | per-activity Actual % / Planned % |
+
+No activity timestamp ⇒ no line, rather than borrowing one from another run.
+
+### Correction to Copilot's mechanism, worth keeping straight
+
+It cited `scheduler-service/utils.ts` and the activity *parquet*. The **editor's**
+column actually reads `activityItem.actualProgress` off the **schedule API**
+(`scheduler-columns.tsx:160` ← `transformScheduleData`); it is the **dashboard's**
+Gantt that joins the activity parquet (`use-dashboard-schedule-data.tsx:268`). Two
+different grids. The conclusion survives either way — both are per-activity, and
+neither is described by the aggregate pair.
+
+### Carry-forward
+
+A documented pitfall in this repo is not a guardrail. This one was written down,
+in the file for this very domain, three weeks before the code that contradicted it.
+Worth grepping `dashboard/` for the surface you are touching *before* writing the
+read, not only when a reviewer asks.
