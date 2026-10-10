@@ -332,3 +332,48 @@ and that `rename()` deliberately cuts no version.
 Twice now the record of *why* a ticket stalled has vanished from the ticket while surviving only
 here. That is an argument for this folder, not against commenting — but it means the context file
 is the system of record for an agent's reasoning, and the Jira comment is a best-effort copy.
+
+## 2026-10-10 — two Copilot findings, both correct; one of them was a vacuous test
+
+Fixed in `7bde75577`.
+
+### 1. `isError` blanked a still-valid pinned description
+
+The unavailable card was gated on `isError`, which in React Query v5 covers a
+failed **background refetch** as well as a failed initial load — and a refetch
+keeps its cached data. So a network blip swapped a pinned description that was
+still exactly right for "could not be loaded". The version is immutable; the
+cached value cannot go stale.
+
+Now `isLoadingError` (a failure *with no data*). `pinnedReady` needed a second
+case too, because `isSuccess` goes back to false on a failed refetch — holding
+data from a read that succeeded also counts as settled. That turns on
+`undefined` (nothing back yet → template stays hidden) vs `null` (version stored
+none → fall back), which the modal already relied on.
+
+**The repo already knew this.** `ChecklistDetailPage/TaskVersionHistory.tsx:169`
+carries the comment *"isLoadingError, not isError: a failed background refetch
+keeps the history already on screen rather than swapping it for the error."*
+Second time in a week a documented in-repo pitfall was missed on the way past
+(see PLT-2524's 10-10 entry). Grep for the pattern before writing the read.
+
+**Test-mock trap:** `TaskInstanceModal.test.tsx` represented the loading window
+as `data: null`. React Query uses `undefined`. The mock was unfaithful on exactly
+the distinction the fix turns on, so it could not have caught this. Corrected.
+
+### 2. The project-scope wire-contract test proved nothing
+
+`RecordingCommissioningClient.select` records its filters and then returns
+`selectResults[table]` **regardless of them**. The test seeded an empty
+`task_template` and asserted null — which passes identically with the
+`project_id` filter deleted. It only showed that a missing parent reads as null,
+which the case above it already covered.
+
+It now asserts the recorded `task_template` select carries
+`[{id eq …}, {project_id eq …}]`. Verified by deleting the filter from
+`versionDescription`: red now, green before.
+
+**Carry-forward, and the general rule:** against a fake that ignores filters, a
+behavioural assertion can never test a *scoping* property — only the recorded
+call can. Any "refuses another project's X" test in this file needs to assert
+the filter, not the return value. Worth auditing the others.
