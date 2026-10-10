@@ -418,3 +418,26 @@ legitimate-null case shrinks and the template fallback becomes the exception.
   in `an environment the column-adding migration has not reached` — that block is
   for an environment where the column is still absent, which is the opposite
   situation.
+
+### Third round — the backfill was itself too narrow
+
+`31932171a`. Copilot came back on the fix from round two: it repaired only
+`existing.current_version_id`, so a run pinned to any **older** pre-column
+version still held `description = null` and still read the template, which the
+same edit overwrites. Those are the long-running runs most likely to still be
+open — the gap covered precisely the cases that matter most. A template with no
+`current_version_id` recorded repaired nothing at all.
+
+The framing that makes it obvious, and which I had missed: **every**
+null-description version is displaying `existing.description` *right now*,
+whatever its age — they all share the one fallback. So the repair value is the
+same for all of them and it is only a question of how many rows it reaches. Now
+a single `id in (…)` update over every version of the template with no
+description of its own, keyed off the rows rather than off the template's
+pointer.
+
+**Three rounds on one hole.** Each fix was correct as far as it went and each
+left the next layer: read live → pin it; pin it → the fallback breaks on first
+edit; fix the fallback → it only fixes one row. Worth remembering as a shape:
+when a fix introduces a *fallback*, the question is not "is the fallback right
+today" but "what invalidates it, and which rows does the repair reach".
