@@ -403,3 +403,53 @@ otherwise the change is untested.
 
 Unchanged and still the main thing: **#2260 vs #2287 is a keep/close decision for Ilia** — fifth run
 asking — and #2260 still carries half the placeholder bug if it is the keeper.
+
+## 2026-10-11 — two threads the 10-10 sweep missed; one fixed, one blocked on deps
+
+The 10-10 log recorded #2287 as "**0 open findings**, all 7 review threads resolved". That was true
+when it was checked and stale by the time it was written: Copilot posted a further review at
+**08:03 on 10-10**, two new threads, and the sweep's thread check had run before it landed. Both
+were still unanswered this morning, 24h later.
+
+**Lesson for the sweep order:** check review threads *after* the master-merge push, not before. The
+merge push triggers a fresh Copilot review, and anything it finds lands 5–20 minutes later — after
+the point where the sweep has already recorded "0 threads" and moved on. Two of the last three
+sweeps have now written a thread count that the same run's own push invalidated.
+
+### Fixed — the inline comment contradicted the interface doc (`878fd6f`)
+
+`client-report-metrics.ts:343` still said the weighted mean was "taken over only the rows that carry
+both values". Verified against the implementation rather than the earlier note: `weightedMean` is
+called twice from `deriveWeightedTotal` and skips a row when `isMissing(value)` for *the value it is
+currently averaging*, so planned and actual have separate denominators, and `sumHoursBehind` has a
+third (rows carrying both). The claim described none of the three.
+
+I had corrected the interface doc for exactly this two rounds earlier (`4442fb8`) and left this copy
+of the same sentence untouched — which is how the file ended up documenting two different contracts
+for one function. Comment-only change, no behaviour.
+
+### Written but NOT pushed — the abandonment-guard test
+
+Copilot is right that nothing reaches `DashboardCaptureModal`'s `isAbandoned` guard:
+`ClientReportPage.test.tsx:358` mocks the modal wholesale and `forgeCapture.test.ts` only tests the
+capture promise. Deleting both `if (isAbandoned.current) return` lines leaves the suite green.
+
+The test is written and parked at **`pending/DashboardCaptureModal.test.tsx`** in this folder. Drop
+it into `app/pages/ClientReportPage/components/` and run it — do not rewrite it from scratch.
+
+It is **unverified**, and that is why it did not ship. See the dependency note below.
+
+Two things it already accounts for, found by reading the component:
+- the Capture button only enables after a **400ms poll** finds the viewer (`VIEWER_POLL_MS`), so the
+  test must wait for the enable rather than click immediately;
+- fake timers deadlock against `waitFor` here (same trap as `use-progress-calculated-on`, 10-02) —
+  it drives the real timer instead.
+
+Residual risk to check when it is first run: the `vi.fn<[], T>()` generic form, which changed shape
+in recent Vitest majors, and whether `toBeEnabled` is registered in this suite's setup.
+
+### Still parked, unchanged: `forgeCapture.ts` `onloadend` → `onload`
+
+Carried forward from 10-10. Deliberately **not** bundled into this push: the standing rule is that
+it rides a push that already touches `forgeCapture.ts`, and this one touches
+`client-report-metrics.ts` only. Bundling it would have been widening the PR on my own initiative.
