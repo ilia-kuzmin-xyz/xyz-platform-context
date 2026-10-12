@@ -45,6 +45,29 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-12 (scheduled) — 8 in scope. One ticket materially changed (PLT-2858), seven unchanged, zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 22 live incidents). In scope: PLT-3182, 3133, 3115, 3091, 3063, 2874, 2858, 2651. Out of scope: With Technical Support (3275), In Code Review (3271, 3231, 3223, 3112), READY FOR RELEASE (3172, 3165, 3116, 3104, 3099, 3096), Blocked (3135, 2660). PLT-3060 is no longer on the open board. All eight re-fetched with comments; newest comment id compared with the folder.
+
+**PLT-2858 (Dev In Progress, Darminder, Critical).** Four comments since the last run (`114642` to `114681`, 10-09). Ali: location is optional at create, which application made the issue, and is the FE reading the right fields. Mostafa: users cannot edit it, so blank is frustrating. Code read answers Ali: the API carries four location-ish fields (`issueLocationId`, `location`, `locationDetails`, `modelRoomId`); the viewer maps only the first and third and never sends or shows the room, and never reads the name. `issueLocationId` points at a table fed by the Autodesk CDE sync, a third explanation next to "rooms not configured". The 10-09 draft is superseded by a 47-word question to Ali. Class 1 (+4). Details in the ticket folder.
+
+**Owed by Ilia, unanswered:** PLT-3091 Sachin's question (`114111`, 6 days; PAPI-3936 now Released); PLT-2874 Yash's chase (`113731`, 10 days). Drafts stand, see folders.
+
+**Unchanged, same newest comment id:** PLT-3182 (`113728`, With Customer 10 days after Sergey removed the global roles), PLT-3133 (`114335`, With Customer), PLT-3115 (`112316`, With Customer 26 days, Yash's own "we can close the ticket now" still not actioned), PLT-3091 (`114332`), PLT-3063 (`111955`, Customer Release Check), PLT-2874 (`113731`), PLT-2651 (`113497`, fix PR #2257 merged 09-30).
+
+**Unopenable media (403 from this routine, unchanged):** PLT-2858 `66039`, PLT-3133 `65932`.
+**Not verified:** what the API does with position on issue create (DB functions out of reach); whether PR #2257 (PLT-2651) is in a release; Production figures for PLT-2874 since 08-12; which api tag Staging runs (PLT-3091).
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | Dev In Progress | **Ali's questions; location fields mapped** | 1 (+4) |
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | PAPI-3936 Released, reply still owed | 1 |
+| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | unchanged, chase 10 days old | 1 |
+
+The other five rows are unchanged from the 10-05 to 10-09 tables below.
+
+---
+
 ## Run: 2026-10-09 (scheduled) — 9 in scope. One ticket materially changed (PLT-2858), PLT-3133 changed status only, seven unchanged, zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 25 live incidents). In scope: PLT-3182, 3133, 3115, 3091, 3063, 3060, 2874, 2858, 2651. Out of scope: In Code Review (3231, 3223, 3112), READY FOR RELEASE (3172, 3165, 3116, 3104, 3099, 3096), Blocked (3135, 2660). All nine re-fetched with comments and diffed against the folders by newest comment id.

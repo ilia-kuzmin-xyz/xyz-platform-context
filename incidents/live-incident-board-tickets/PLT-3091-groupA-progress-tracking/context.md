@@ -1010,3 +1010,7 @@ Fetched live: 25 comments (was 24), status **In Analysis** (was Open on 10-07), 
 8224 - Freshdesk ticket status changed to : Waiting on 3rd line"*. No human text. Meaning: support is waiting on us, one day after
 Radu's `114076`. Sachin's `114111` question to Ilia (is the frontend side in place) is still unanswered on the ticket (~2 days). The 10-07
 analysis stands unchanged; nothing re-investigated. Not verified: Radu's row, staging API version, the screenshot.
+
+## 2026-10-12 (scheduled) — unchanged since 10-07 (newest comment `114332`); PAPI-3936 now shows Released
+
+Fresh fetch with comments (25, newest `114332`). Status In Analysis, assignee Ilia. The only new fact: the linked **PAPI-3936** is now status *Released* (Done category), so the API fix is out. That does not explain Radu's 0% on Staging 26.3.7 (10-06): staging may run an older api build, or his row is not the one Sachin pasted. Frontend side unchanged: `null` renders `-` (see 2026-10-07). **Ilia still owes Sachin a reply (`114111`, 6 days).** Not verified: which api tag Staging runs.

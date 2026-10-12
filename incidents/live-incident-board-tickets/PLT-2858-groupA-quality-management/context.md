@@ -650,3 +650,35 @@ Fresh fetch with comments (35 comments, newest `114576`, 10-08 19:44, Darminder)
 **Unopenable media:** `66039` (get-issue response, would show whether `issueLocationId` and the location name are both empty or only one).
 
 **Class 1 (Darminder to backend, not yet overdue) with a class 4 half (stamp, selector or remove the field).** No Jira action was taken.
+
+## 2026-10-12 (scheduled) — four new comments (10-09); Ali's "which fields is the FE reading?" is answerable from code
+
+Fresh fetch with comments (39 comments, newest `114681`, 10-09 14:30, Mostafa). Status Dev In Progress, assignee Darminder, Critical. **Supersedes** the 10-09 "new hypothesis" (explicit null suppresses derivation) as the lead question: Ali's reply changes what to ask.
+
+| id | who | when | what |
+|---|---|---|---|
+| `114642` | Sachin to Yash, Darminder | 10-09 08:58 | "is this happening for test model?" |
+| `114677` | Darminder | 10-09 13:48 | "It appears with all models" |
+| `114680` | **Ali** to Sachin, Darminder | 10-09 14:25 | location fields are optional/nullable at create; asks **which app created the issue** (HoloSite, WebEditor, MobileApp); asks whether **the FE reads the right fields**, and says `/issue/parameters` is not the source of truth |
+| `114681` | Mostafa to Ali | 10-09 14:30 | users cannot edit Location, so an empty one is frustrating |
+
+**Reading.** Ali has effectively said the API stores what the client sends and does not insist on a value. He has not said whether anything derives it. Nobody has answered his "which application" question: it is the web viewer (`format-issues.ts`, below).
+
+### Verified from code (hc-frontend master `108e66b`, platform-api master `dd8d628`, 10-12)
+- **The API issue has four location-ish fields, not one:** `issueLocationId`, `location` (the name), `locationDetails` (free text) and `modelRoomId` (`platform-api src/models/ingress.ts:278-280` and the `clearFields` list at ~`:309`; response schema in `issues.routes.ts:~520-610`).
+- **`issueLocationId` points at `xyz."IssueLocation"`**, whose rows come from the Autodesk CDE sync (`src/api/v2/cde/cde.helper.ts:232-249`, `src/services/issue.location.ts` upsert with `importedFromCde = true`, flag also on the `IssueLocation` type, `ingress.ts:335-341`). So a project only has named issue locations if something imported or created them. This is a **third explanation** next to "rooms not configured" (07-01) and "nothing stamps it" (10-05).
+- **The room is a separate field, `modelRoomId`.** The frontend declares it on the type (`issue-api-service.types.ts:17`) but `toIssue` never maps it (`format-issues.ts:68-120`) and `toIssuePayload` never sends it (`:138-160`). Nothing in `issue-properties` or `services/issue` references `modelRoomId`.
+- **The frontend never reads the `location` name.** `IIssue` has `issueLocationId` (`issue-api-service.types.ts:79`) and `locationDetails` (`:96`), no `location`. `toIssue` maps `locationId: v2.issueLocationId` (`format-issues.ts:86`). So even if the API returns a name, the viewer cannot show it, and the panel binds the raw id (`issue-details.tsx:149`).
+- Create sends `issueLocationId: null` (`format-issues.ts:138-145`), unchanged since 10-05.
+
+### Inferred, not verified
+- That the customer's "Location" row in the QA panel is bound to `issueLocationId` and not to a room. Darminder's 07-01 "named zones (floors, areas and rooms)" explanation describes `modelRoomId`, which the viewer neither sends nor shows. If so, that explanation was about a different field.
+- Whether `fn_InsertIssue` / `fn_GetIssue` derive `modelRoomId` or `issueLocationId` from the position. **The DB functions live outside the repos this routine can reach.** This is the one fact that settles the ticket and it belongs to Ali or Sachin.
+
+### Killed / reframed
+- "Rooms not configured" (07-01) as the explanation: it describes `modelRoomId`; the field the panel shows is probably `issueLocationId`. Not proven, but do not repeat it to the customer.
+- The 10-09 "explicit null suppresses derivation" is demoted: Ali says the field is nullable at create, which is consistent with the API simply storing the null.
+
+**Class 1 (we owe Ali an answer to his two questions, 3 days) with a class 4 half (what should Location mean: CDE location, room, or free text; stamp, select, or remove).** No Jira action was taken.
+
+**Unopenable media:** `66039` (get-issue response). Would settle whether `location` and `modelRoomId` are both null on a project with room data, which is Ali's question in one glance.

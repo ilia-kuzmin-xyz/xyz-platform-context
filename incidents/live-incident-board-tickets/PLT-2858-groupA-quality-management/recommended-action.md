@@ -489,3 +489,17 @@ Darminder said on 10-08 he will ask the backend. That is one day old, so do not 
 > Darminder, one fact for the backend check: the web viewer never sets Location. Every issue is created with the location sent as empty, so whatever shows there has to come from the API. Sachin, does the API fill Location from the issue's position and the model's rooms, or only return what was saved? **Which one is it?**
 
 If the answer is "only what was saved": nothing stamps it, the field is dead, and the next step is a product choice (selector or remove). If "derived": our explicit null may be suppressing it, and that is a small frontend change. No Jira action was taken.
+
+## 2026-10-12 (scheduled) — CURRENT. Supersedes the 10-09 draft (Ali answered half of it). Reply to Ali, nothing else.
+
+**Class 1, owed (Ali asked two things on 10-09 and nobody has answered).** Author is Ilia or Darminder; Darminder is the assignee, so it is his to post if he is around.
+
+**Assumption (one line):** the issue Darminder tested was created in the web viewer. Not stated in the ticket.
+
+### Draft to Ali (47 words)
+
+> Ali, these issues are created in the web viewer. It sends no location and no room, only the position and the element. Does the API fill the room or the location from that position when they are missing? **Yes or no?**
+
+**Outcomes.** *No*: nothing fills them, the field is dead for viewer-created issues, and the decision is product's (selector for CDE locations, show the room, or remove the row). *Yes*: then the empty ones on Darminder's test project are a bug in that derivation, and the next ask is Sachin with that issue id.
+
+**Held back on purpose:** the finding that the frontend never reads the location name or the room (`context.md` 2026-10-12). It is a frontend gap that matters only after the answer. Do not tell the customer anything until Ali answers. The 10-09 draft to Darminder and Sachin is superseded, do not post it. No Jira action was taken.

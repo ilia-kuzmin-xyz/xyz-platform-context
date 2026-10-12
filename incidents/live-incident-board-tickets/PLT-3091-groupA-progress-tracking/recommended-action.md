@@ -338,3 +338,7 @@ Neither is stated in the ticket.
 
 Freshdesk 8224 moved to Waiting on 3rd line on 10-07 15:26 (`114332`), so support is also waiting on us. Class 1, owed by Ilia. Nothing in the
 diagnosis changed, and the draft is under a week old, so no re-validation needed yet. No Jira action was taken.
+
+## 2026-10-12 — unchanged; the 10-07 draft (68 words) still stands, now 6 days unanswered
+
+PAPI-3936 is now Released, which strengthens the second outcome (staging api older than the fix) without changing the question: Radu reading `0` or `null` still separates every case. Class 1, owed by Ilia. No Jira action was taken.

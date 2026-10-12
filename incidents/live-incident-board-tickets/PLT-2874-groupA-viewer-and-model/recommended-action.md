@@ -580,3 +580,7 @@ on the Staging undercount's operative hypothesis. **No Jira action was taken by 
 > Yash, sorry for the wait. The July mismatch was fixed and Production has matched within half a percent since. What is left is one Staging reading from August that nobody has been able to reproduce. I am treating this as fixed on Production. **Gennaro, can you re-check FAR01 on the current release and send the editor and dashboard figures?**
 
 Do not close the ticket until Gennaro answers (the 08-13 close was wrong for the same reason). No Jira action was taken.
+
+## 2026-10-12 (scheduled) — unchanged; Yash's 10-02 chase (`113731`) is 10 days unanswered, the 10-05 draft is 7 days old
+
+Nothing new on the ticket (newest comment `113731`). By the 09-09 rule a draft unsent for over a week is re-validated against code before it is re-recommended: the draft makes **no code claim**, only "Production has matched within half a percent since" (last measured 08-12, still not re-measured). Say that is a measurement from 08-12 if asked. Class 1, owed by Ilia. No Jira action was taken.
