@@ -294,3 +294,18 @@ A documented pitfall in this repo is not a guardrail. This one was written down,
 in the file for this very domain, three weeks before the code that contradicted it.
 Worth grepping `dashboard/` for the surface you are touching *before* writing the
 read, not only when a reviewer asks.
+
+## 2026-10-12 — approved by Rishi; waiting only on the CVE hotfix
+
+`#2251` **approved** ("LGTM!", no changes requested). Copilot and SonarCloud green. The `build`
+check is red on **one thing that is not this PR**: `react-jhipster` CVE-2026-107303, which fails
+Trivy on every PR in the repo. Already diagnosed and commented on the PR; the fix is **#2299**,
+which is itself approved and green but still a **draft**, so nothing has landed.
+
+**Deliberately not touched this run.** The branch is one commit behind master and `git merge-tree`
+reports no conflict, so there is no merge work to do. Merging master in now would burn a CI run
+that is guaranteed to fail on the same CVE and risk dismissing a fresh approval, for no gain. The
+right move is a single master merge **after #2299 lands** — that brings the fix and the drift in
+one go and should go straight to green.
+
+So: nothing is blocking this ticket except #2299 being marked ready and merged.
