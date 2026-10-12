@@ -3461,3 +3461,47 @@ becomes urgent before that, port the Dockerfile hunk with it.
 The underlying risk is unchanged and still live on master: the hotkey defaults to `managed`, nothing
 ships a value for it, so with the Commissioning flag on a save against a legacy-resolved task pins it
 to a managed run permanently.
+
+## 2026-10-12 — #2222 is OBSOLETE. Recommended for closing
+
+Rishi reviewed at last (two weeks after the four reviewers were requested) and asked two things:
+*"is this still active? Could we remove the legacy runner completely?"*
+
+### 1. The PR is dead — the hotkey is already gone from master
+
+Checked rather than assumed: **`useRunnerOverride` returns zero hits across the whole repo**, and
+master's `TaskExecutionModal` routes straight off `routing?.mode` with no `forced` line. Something
+else removed it during the fortnight this PR sat unreviewed. That also explains its
+`mergeable_state: dirty` — it deletes a file that no longer exists.
+
+**Recommended closing it on the thread; did not close it.** Closing was not asked for, and the
+thread is the better record. If a later run finds it still open, closing is the right outcome — do
+**not** try to revive or re-merge it.
+
+The risk it was opened for is therefore resolved: the hotkey no longer defaults every task to the
+managed runner. That standing warning in earlier entries is now **spent** — stop carrying it.
+
+### 2. "Remove the legacy runner completely" — answerable, and the answer is useful
+
+`TaskInstanceModal.tsx` is ~87KB with a ~66KB test. Size is not the blocker. **Two distinct paths
+route to legacy, and only one of them drains away** (`getExecutionMode`,
+`checklist-instance-service.ts`):
+
+```ts
+if ((instanceRow.lifecycle_revision ?? 0) === 0 && runs.some(run => run.write_protocol !== 1))
+  return { mode: 'legacy' }                       // (a) historical, fixed forever
+
+const items = await this.templateItems(instanceRow.task_template_version_id)
+if (items.length === 0) return { mode: 'legacy' } // (b) LIVE fallback
+```
+
+- **(a) Historical** — `lifecycle_revision = 0` plus a run at `write_protocol != 1`. An instance's
+  mode is fixed by its first run, so these never migrate. Deleting the modal makes them unopenable.
+  Countable: `task_execution?select=task_instance_id&write_protocol=neq.1`, then filter those
+  instances on `lifecycle_revision=eq.0`.
+- **(b) Empty template version** — falls back to legacy **today**, nothing historical about it. No
+  data cleanup retires this path. Needs its own decision first, and the legacy modal was arguably
+  never the right answer: an item-less task wants an explicit empty state, not a second runner.
+
+Suggested order on the thread: settle (b) first (small, deliberate), count (a) on prod, then delete
+the modal. Offered to take it as its own ticket. **It should not ride on #2222.**
