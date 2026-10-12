@@ -309,3 +309,21 @@ right move is a single master merge **after #2299 lands** — that brings the fi
 one go and should go straight to green.
 
 So: nothing is blocking this ticket except #2299 being marked ready and merged.
+
+## 2026-10-12 16:29 — MERGED
+
+`#2251` merged to master, red Trivy and all. **Ticket delivered.**
+
+This settles the question the entry above was hedging: the PR was never gated on the CVE hotfix
+#2299. It went in approved and red, three hours after the first approval, alongside three other PRs
+that merged the same afternoon with the same red check. The earlier reading — that everything was
+"blocked" behind #2299 — was wrong, and is corrected in
+`incidents/ci-react-jhipster-openfile-cve-2026-10-10.md` § 2026-10-12 16:30.
+
+**Vindicated by the outcome: not merging master in.** The branch was left alone at four commits
+behind rather than refreshed, on the reasoning that a refresh would burn a guaranteed-red CI run
+and risk dismissing a fresh approval for no gain. It merged cleanly without it.
+
+**Left for a human: the Jira transition.** PLT-2524 is still in Code Review. Moving it on is not
+done here — a merge is not the same as a status this team uses post-merge (QA may own the next
+step), and guessing the convention would just add noise to the board.
