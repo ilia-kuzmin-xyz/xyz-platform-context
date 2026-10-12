@@ -129,3 +129,17 @@ Worth noting a small adjacency found while working PLT-3201 this run: `listProje
 tenant-level guards onto a project-scoped read, that opt-out has to be re-examined — a 403 there
 would then mean "no such grant", not "removed from project", and silently swallowing it would hide
 a real failure.
+
+## 2026-10-12 — still waiting on the backend answer (9 days)
+
+No change. The question put on the ticket on 10-03 — *does the backend intend to keep account
+authorities for tenant-scoped things and only drop the project-derived ones, or is a tenant
+authorities endpoint coming?* — has had **no reply**. No new comments on the ticket at all.
+
+Status correctly sits at `Analysis In Progress`. Deliberately **not** re-commenting: the question is
+already on the ticket, unanswered, and a second copy of it adds noise rather than urgency.
+
+Restating the shape so the next run does not re-derive it: the default-project half is removable
+today; the authorities half cannot start until that answer lands, because ~76 tenant-level route
+guards have no project in scope and go dark if `authorities` leaves the account response. Nothing
+here is startable without the answer — this is not a ticket that can be part-delivered.

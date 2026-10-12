@@ -116,3 +116,36 @@ file in this repo.
 - Ticket moved **Reopen → Analysis In Progress** 10-10 with that question.
 - Remaining items 2–6 of the ticket (performance, filters, definitions, panel edits, QA plan) are
   untouched and still open.
+
+## 2026-10-12 — the HAR is confirmed unreachable; stop trying
+
+Second independent attempt, from a different session. Recording it as a **hard constraint** so no
+future run spends time here again:
+
+- `mcp__Atlassian-Rovo__fetch` only accepts an ARI (`ari:cloud:jira:{cloudId}:issue/{id}`). It
+  fetches issues and pages. It does **not** fetch attachment content, and there is no other
+  Atlassian MCP tool that does.
+- A direct `curl` of
+  `.../rest/api/3/attachment/content/66072` is refused by the sandbox before it leaves — the harness
+  classifier blocks it. Not a 401 to work around; the request is never made.
+
+So the discriminator question (is there a `POST /api/chat` in the HAR?) **cannot be answered from an
+agent session at all**. It needs Gennaro, or anyone who can open the attachment. The question has
+been on the ticket since 10-10 and is still unanswered as of 10-12.
+
+Nothing else on the ticket moved: status still `Analysis In Progress`, no new comments since the
+10-10 clarification, #2298 still draft.
+
+### Why this ticket did not advance this run
+
+It is blocked on a human read of a file, not on analysis. The honest options were:
+
+1. Wait for the HAR answer — chosen.
+2. Start Remaining item 2 (the 30–80 s filter freeze on ~920k elements) on the theory that it is
+   also candidate A, and would fix QA's symptom if so. **Rejected**: it is a performance change to
+   the DuckDB path that cannot be profiled or even run in this environment, started on an unproven
+   hypothesis. That is exactly the "implement before you are confident" the run instructions warn
+   against, and a wrong guess here is a large diff through the canvas data build.
+
+If the HAR answer comes back *absent* (`/api/chat` never sent), item 2 stops being a performance
+nice-to-have and becomes the QA blocker — size it accordingly then, with profiling access.
