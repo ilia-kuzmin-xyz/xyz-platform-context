@@ -574,3 +574,84 @@ None by Tom.
 
 **Open unresolved review threads across the five: 7** — 4 on #2268 (Copilot: 1 medium + 3 low),
 3 on #2211 (Copilot 09-30, unchanged). #2265/#2266/#2267: zero.
+
+## 2026-10-13 — scheduled review run: ten eligible PRs; six approved, two held, two untouched
+
+Scope filter (Rishi/Darminder/Tom, non-draft) matched #2311, #2306, #2268 (Darminder) and #2310,
+#2309, #2308, #2307, #2304, #2303, #2302 (Rishi); none by Tom (confirmed Tom = `TomMasdinXYZ`
+via requested-reviewers lists — no open PRs of his own). **CI context for the whole run: the
+`build` check is RED on almost every head for one reason — Trivy fails master-wide on
+react-jhipster 0.22.0 CVE-2026-107303 (HIGH); Ilia's draft #2299 is the fix.** The webpack
+build + typecheck inside those jobs succeeds; only the scan step fails. Noted as non-blocking
+on every approval.
+
+**Approved this run** (comment left on each):
+- **#2311 (PLT-3091, Live Incident Major, Darminder)** — FE half of the LOE dash fix: removes the
+  `COALESCE(…, 0)` that was flattening PAPI-3936's null `actualProgress` back to 0%. Verified every
+  downstream consumer was already null-ready (`use-dashboard-schedule-data.tsx:268-282`,
+  `gantt.types.ts:65`, `scheduler-columns.tsx:85-102`) — the service was the one missing piece.
+  Gantt bars now always render, labelled `- |` when progress is absent. Copilot's two threads are
+  real but minor (stats filter at `dashboard-schedule-service.ts:321` counts a genuine 0 as
+  "without progress" — logging only; types.ts comment describes only the windowed mode) — left
+  unresolved, flagged as non-blocking.
+- **#2310 (PLT-3239, Rishi)** — shared `TypeCloseButton` + back/close discard intents across all
+  Types screens; stacked overlays (picker, review, task preview) carry the type's guarded ×.
+  Verified the removed `TypesTab.detail.close` i18n key had no other caller.
+- **#2309 (PLT-3265/PLT-3273, Rishi)** — issue-from-asset/system Back via `returnTo` recorded on
+  the selection entity; origin panel stays mounted + hidden with `useKeepScrollWhileHidden`;
+  element pick cancelled when the system panel hides. Copilot's two test asks were answered with
+  real tests (properties back-flow, use-select-issue table, hook tests).
+- **#2308 (PLT-3200/PLT-3257, Rishi)** — inline duplicate asset name (client pre-check +
+  `isUniqueViolation` on the 409 as backstop, own-id excluded on edit) and select+scroll-to-created
+  for assets (Virtuoso scrollToIndex) and systems (ancestor-chain expand + manual scroll). Rishi's
+  jsdom no-layout replies on the two scroll-test threads are sound.
+- **#2307 (PLT-3263, Rishi)** — Cx legend ordered by the workflows the types actually use (assets
+  first, each workflow in position order, orphan workflows dropped, asset colour wins a shared
+  label). Matches the design order Red/Yellow/Green/Blue/White/No tag.
+- **#2304 (PLT-3256/PLT-3261 Major, Rishi)** — root cause confirmed: `_updateIssuesMarkup`'s x/y/z
+  pre-filter dropped element-linked checklist issues before visibility was computed. Now
+  "visible" and "gets a pin" are separate (`hasPin` at markup only), and the implicit loaded-model
+  list gate became an explicit "Loaded models only" checkbox. **Platform-wide default change**
+  (construction mode too): the list now defaults to ALL issues — flagged on the approval so nobody
+  is surprised. Both Copilot findings were fixed properly (hasLoadedModel from the models list;
+  scope reset when the last model unloads).
+
+**Held for Ilia, nothing posted:**
+- **#2306 (PLT-3260, Darminder)** — three reasons. (1) **It smuggles a react-jhipster 0.22.0 →
+  1.1.0 MAJOR upgrade** (+ new `react-bootstrap` dep, `getSortState`→`getPaginationState` in
+  entity-utils, 554-line lockfile churn) into a feature PR — this is why its build is the only
+  GREEN one today (the bump clears the Trivy CVE), and it **competes with Ilia's #2299**, which
+  fixes the same CVE by dropping the vulnerable `openFile` call instead. Copilot's split-it-out
+  thread was resolved silently without removing the bump; its Node-baseline note (sanitize-html
+  2.18.0 wants >=22.12, package.json says >=22) is unanswered. Pitfall §10's Translate quirks are
+  version-sensitive — a major react-jhipster bump deserves its own validated PR. Ilia to decide
+  which CVE fix lands. (2) Rishi's CHANGES_REQUESTED (Override flicker on the asset step menu)
+  stands at 42c6a1e; Darminder pushed 5f7ff71 claiming the fix — re-review is Rishi's, not ours.
+  (3) One Copilot medium thread open and legitimate: `isItemComplete` now accepts pass/fail/na on
+  ANY item type (justified — managed runs write pass/fail/na and never `complete`, old tests
+  flipped with a documented reason), but `deriveInstanceStatus`/`countFailedItems` still restrict
+  verdicts/failures to `VERDICT_TYPES`, so a managed `fail` on an inputField/table/signature
+  counts complete yet is missing from the failure count. The PLT-3260 feature itself reads fine.
+- **#2303 (no ticket, Rishi)** — docs-only: deletes the CLAUDE.md "Commissioning out of scope by
+  default" rule, its branch/marker activation signal, and the `.gitignore` marker line. Copilot
+  recommends approval and the factual basis is real (PLT-3181 made Cx mainline outside prod), but
+  this is Ilia's own agent-scoping policy — his call, not a scheduled run's. If it merges, the
+  marker-file instructions in this README (§ Scoping rule) and the 09-15 pitfall note go stale —
+  update both.
+
+**Untouched, correctly:**
+- **#2268 (PLT-3111, Darminder)** — Ilia's 10-11 review at head b7699470 already lists the open
+  items (issue 1's 409 story, issue 2 QA ack, replies on the 4 Copilot threads); no push or reply
+  from Darminder since, so nothing new to say.
+
+**Interlocks flagged this run**: #2310 ↔ #2306 both rework AssetTypeDetailContent/SystemTypeDetail
+(close plumbing vs finishEdit/addTasksStepId) — second to land is a semantic merge; #2309 ↔ #2268
+both touch assets-panel.tsx. Noted on the #2310/#2309 approval comments.
+
+**Open unresolved review threads across the ten: 7** — 2 on #2311 (Copilot minors, non-blocking),
+1 on #2306 (the verdict-vocabulary medium), 4 on #2268 (unchanged since 10-06). Elsewhere: zero.
+
+**Run-process note**: comments were posted from Ilia's account via the scheduled session. The
+stored prompt asks for no AI attribution in PR comments; the platform's attribution footer is
+mandatory and was kept on every posted review (stated here so the next run doesn't relitigate it).
+Commits to this notes repo omit the Co-Authored-By trailer per the same instruction.
