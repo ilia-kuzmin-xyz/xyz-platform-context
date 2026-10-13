@@ -149,3 +149,27 @@ It is blocked on a human read of a file, not on analysis. The honest options wer
 
 If the HAR answer comes back *absent* (`/api/chat` never sent), item 2 stops being a performance
 nice-to-have and becomes the QA blocker — size it accordingly then, with profiling access.
+
+## 2026-10-13 — correction: the "10-10 HAR comment" does not exist
+
+The 10-11 run log records that a comment was posted on 10-10 asking Gennaro to check his own HAR
+for a `POST /api/chat`, and treats the lack of a reply as the thing blocking this ticket.
+
+**Re-read the ticket this run: it carries exactly two comments.** Ilia's how-to-test (10-08) and
+Gennaro's partial-verification failure (10-09). There is no 10-10 comment. It was either never
+posted or went to another ticket (PLT-3229 is the likely candidate — it was in the same sweep).
+
+So this ticket is **not** waiting on a reply to a question that was asked. It is waiting on
+somebody to act on Gennaro's 10-09 finding, which still stands unanswered:
+
+> Verified partially implemented on 26.3.7:
+> * Whilst generating the report, the timer and the spinning icon are displayed, but steps do not trigger.
+> * The reports cannot be generated, hence the rest of the test cases are blocked. Test run multiple times.
+
+The two hypotheses from 10-10 are still the live ones and still unsplit — pipeline reached but
+silent, vs. the browser-side 920k-element stall. The HAR attached to the ticket would split them,
+and is still not reachable from an agent session: the attachment endpoint returns
+`403 You do not have permission to view attachment with id: 66072` unauthenticated, and the
+Atlassian MCP exposes no attachment-download tool.
+
+PR #2298 (draft) was brought onto master `221d571` this run → head `b1706c8`. No open threads.
