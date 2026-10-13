@@ -190,3 +190,50 @@ checkpoint rule this run does not call them. **Expectation, not a verified resul
 carries `react-jhipster` 0.22.0 *and* the vulnerable `openFile` call in `CompanyLogo.tsx`, so
 Trivy should still red every PR except #2299, which carries the suppression. If a later run finds
 a different failure on any of these heads, it is new and is not this one.
+
+## Addendum (08:10, PR-subscription wake) — checkpoint 2 concluded, and WHY master stays green
+
+The run above left checkpoint 2 open with an explicit expectation. **Confirmed, on evidence:**
+#2298's build completed `failure` at 08:00 on head `b1706c81`, on exactly one finding and nothing
+else:
+
+```
+package-lock.json (npm)   Total: 1 (HIGH: 1, CRITICAL: 0)
+react-jhipster  CVE-2026-107303  HIGH  fixed  0.22.0 → 1.1.0
+```
+
+Lint, types, tests and the image build all passed before the scan step. So the expectation holds
+and no new failure has appeared on these heads.
+
+### The part that was NOT understood before, and that resolves a standing contradiction
+
+Master has been **green through five consecutive runs** since 09 Oct (runs 1227–1231) while every
+PR goes red on this CVE. My 10-10 log asserted the two workflows "use identical Trivy settings" and
+predicted master would go red on its next push. **That was wrong**, and the reason is worth keeping:
+
+they use identical *options* but scan **different targets**.
+
+| workflow | step | target |
+|---|---|---|
+| `deployment-dev-master.yaml:160-172` | `Docker vulnerability scanner` | **`image-ref:`** — the built image |
+| `pr-check.yaml:178-192` | `Vulnerability scanner` | **`scan-type: "fs"`, `scan-ref: hc-frontend`** — the working tree |
+| `pr-check.yaml:195-203` | `Scan built image` | `image-ref:` — the built image |
+
+`react-jhipster` is found in `package-lock.json`. The built image contains the bundle, **not the
+lockfile**, so an image scan cannot see it. Only the PR workflow has a filesystem scan. That is the
+whole explanation — no Trivy DB change, nothing "resolving itself", and master will **not** go red
+on its next push.
+
+**Consequence worth remembering: a lockfile-only CVE is invisible to master's CI and visible to
+every PR.** So "is master green?" is not a valid control for whether a dependency finding is this
+PR's. Compare against another PR, or read the scan target, before concluding either way.
+
+### Action taken
+
+Ported #2299 into #2298 by merging `origin/fix/react-jhipster-openfile-cve` (clean, `eb194f26b`),
+per the standing rule that a fix which exists gets ported now rather than waited on; it no-ops once
+master carries it. Validated on the merged head before pushing: `tsc --noEmit` clean, eslint 0
+errors, **353 tests green** (328 `CanvasPage/` + the 25 `blob-open` allowlist cases).
+
+Two corrections posted on #2298 itself, since the earlier comment there asserted both "no fix
+exists to port" and "master will fail the same way" — neither is true now.
