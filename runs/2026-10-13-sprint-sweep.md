@@ -158,3 +158,35 @@ Omitting AI attribution is a separate and reasonable ask and is honoured.
 
 Nothing was posted to GitHub this run — no comment was needed, since no thread was open and
 unanswered.
+
+## Addendum — the npm cache looked like a way in. It isn't.
+
+After writing the above I spotted a populated `~/.npm/_cacache` and chased it, since an offline
+install would have unblocked the #2287 test. Both routes fail:
+
+- `npm ci --offline` → `ENOTCACHED` on a *public* package (`zrender-6.0.0.tgz`). The cache is
+  partial, so a fully-offline install can't complete regardless of the private scope.
+- `npm ci --prefer-offline` → resolves every public package from the registry fine, then
+  **`E401` on the `@xyzreality/dhtmlx-gantt` tarball**. `prefer-offline` still revalidates against
+  the registry for it, and an index entry is not a cached tarball — a follow-up grep for the
+  package in `_cacache` content came back empty.
+
+So the three things a future run should not re-try: the `GITHUB_TOKEN` (no `read:packages`,
+401 confirmed by direct curl), `--offline`, and `--prefer-offline`.
+
+`npm ci` wipes `node_modules` before it fails, so the checkout is left with **zero** packages.
+Verified the working tree is otherwise clean — `package-lock.json` untouched, nothing to revert.
+
+The remaining theoretical route — drop the private dep from a scratch copy and run the one test
+file against a divergent tree — was **not taken deliberately**. The whole point of running the
+test is to be able to say it was verified green; a hand-pruned dependency tree can't support that
+claim, so it would buy the appearance of verification rather than verification. The test stays
+parked and the `NPM_TOKEN` ask stands.
+
+## Checkpoint 2 — not concluded this run
+
+Builds were still `in_progress` on every branch ~10 minutes after the merge pushes, so per the
+checkpoint rule this run does not call them. **Expectation, not a verified result:** master still
+carries `react-jhipster` 0.22.0 *and* the vulnerable `openFile` call in `CompanyLogo.tsx`, so
+Trivy should still red every PR except #2299, which carries the suppression. If a later run finds
+a different failure on any of these heads, it is new and is not this one.
