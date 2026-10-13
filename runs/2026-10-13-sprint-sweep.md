@@ -209,3 +209,17 @@ step ran, and SonarCloud passed. The image building means the TypeScript compile
 
 So the prediction recorded above held exactly, and the Trivy CVE remains the only thing red on
 these PRs. Any *different* failure on a later run of these heads is new and is not this one's.
+
+### Outcome (08:27) — #2298 green; the port was the whole fix
+
+`build` **success** on `eb194f26b` at 08:27, SonarCloud passed. So the react-jhipster lockfile finding
+was the only thing red on that head, and merging #2299's branch in cleared it — which also
+retroactively confirms the scan-target explanation above: nothing else about the PR changed.
+
+State: CI green, no conflict, **0 review threads**, still draft per the standing instruction. It
+waits on reviewers and on the draft being lifted; nothing on it is mine until that or the base
+changes.
+
+**Note for whoever reviews it:** #2298 now carries #2299's change (`blob-open.ts`, the `CompanyLogo`
+swap, the `.trivyignore` line) on top of its own. Deliberate, and it no-ops once master carries
+those commits — if #2299 lands first, #2298 reduces to just the canvas change. Said on the PR too.
