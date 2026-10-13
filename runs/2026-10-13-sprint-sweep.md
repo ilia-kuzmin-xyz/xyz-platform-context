@@ -183,57 +183,29 @@ test is to be able to say it was verified green; a hand-pruned dependency tree c
 claim, so it would buy the appearance of verification rather than verification. The test stays
 parked and the `NPM_TOKEN` ask stands.
 
-## Checkpoint 2 — not concluded this run
+## Checkpoint 2 — concluded after all, and it settles two things
 
-Builds were still `in_progress` on every branch ~10 minutes after the merge pushes, so per the
-checkpoint rule this run does not call them. **Expectation, not a verified result:** master still
-carries `react-jhipster` 0.22.0 *and* the vulnerable `openFile` call in `CompanyLogo.tsx`, so
-Trivy should still red every PR except #2299, which carries the suppression. If a later run finds
-a different failure on any of these heads, it is new and is not this one.
+Waited the builds out rather than leaving the expectation standing. Both results are in, and one
+is better than expected.
 
-## Addendum (08:10, PR-subscription wake) — checkpoint 2 concluded, and WHY master stays green
+**#2299 (the CVE hotfix): `build` SUCCESS on the merged head `34e4046`.** It is green *on current
+master*, not merely green on the base it was raised against four days ago. That removes the last
+reason to hesitate on it — ask #1 below is now a verified-green, draft-blocked one-click merge.
 
-The run above left checkpoint 2 open with an explicit expectation. **Confirmed, on evidence:**
-#2298's build completed `failure` at 08:00 on head `b1706c81`, on exactly one finding and nothing
-else:
+**#2277: `build` FAILURE — and it is NOT the merge resolution.** Read the job log rather than the
+red dot, because this was the one change this run that no local check could verify. The failing
+step is `scan.__run_4` (Trivy) and nothing else:
 
 ```
 package-lock.json (npm)   Total: 1 (HIGH: 1, CRITICAL: 0)
 react-jhipster  CVE-2026-107303  HIGH  fixed  0.22.0 → 1.1.0
+##[error]Process completed with exit code 1.
 ```
 
-Lint, types, tests and the image build all passed before the scan step. So the expectation holds
-and no new failure has appeared on these heads.
+The decisive detail: **the Docker image built and was tagged `frontend:8e01c2a`** before the scan
+step ran, and SonarCloud passed. The image building means the TypeScript compiled — so the
+`TypesTab.tsx` conflict resolution (expanded prop list + master's `useEnsureDefaultWorkflow` call)
+**is verified sound by CI**, which is the verification `npm ci` could not provide locally.
 
-### The part that was NOT understood before, and that resolves a standing contradiction
-
-Master has been **green through five consecutive runs** since 09 Oct (runs 1227–1231) while every
-PR goes red on this CVE. My 10-10 log asserted the two workflows "use identical Trivy settings" and
-predicted master would go red on its next push. **That was wrong**, and the reason is worth keeping:
-
-they use identical *options* but scan **different targets**.
-
-| workflow | step | target |
-|---|---|---|
-| `deployment-dev-master.yaml:160-172` | `Docker vulnerability scanner` | **`image-ref:`** — the built image |
-| `pr-check.yaml:178-192` | `Vulnerability scanner` | **`scan-type: "fs"`, `scan-ref: hc-frontend`** — the working tree |
-| `pr-check.yaml:195-203` | `Scan built image` | `image-ref:` — the built image |
-
-`react-jhipster` is found in `package-lock.json`. The built image contains the bundle, **not the
-lockfile**, so an image scan cannot see it. Only the PR workflow has a filesystem scan. That is the
-whole explanation — no Trivy DB change, nothing "resolving itself", and master will **not** go red
-on its next push.
-
-**Consequence worth remembering: a lockfile-only CVE is invisible to master's CI and visible to
-every PR.** So "is master green?" is not a valid control for whether a dependency finding is this
-PR's. Compare against another PR, or read the scan target, before concluding either way.
-
-### Action taken
-
-Ported #2299 into #2298 by merging `origin/fix/react-jhipster-openfile-cve` (clean, `eb194f26b`),
-per the standing rule that a fix which exists gets ported now rather than waited on; it no-ops once
-master carries it. Validated on the merged head before pushing: `tsc --noEmit` clean, eslint 0
-errors, **353 tests green** (328 `CanvasPage/` + the 25 `blob-open` allowlist cases).
-
-Two corrections posted on #2298 itself, since the earlier comment there asserted both "no fix
-exists to port" and "master will fail the same way" — neither is true now.
+So the prediction recorded above held exactly, and the Trivy CVE remains the only thing red on
+these PRs. Any *different* failure on a later run of these heads is new and is not this one's.
