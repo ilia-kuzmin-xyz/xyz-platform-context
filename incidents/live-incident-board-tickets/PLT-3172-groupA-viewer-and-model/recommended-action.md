@@ -49,3 +49,9 @@ No Jira action of any kind — no comment, no transition, no assignment. Read-on
 (`getJiraIssue`) plus read-only source-code research in the local `hc-frontend` checkout. No code
 was written, nothing was built or run (this environment cannot build `hc-frontend` — `npm ci` 401s
 on the private `@xyzreality/dhtmlx-gantt` package).
+
+## 2026-10-13 — SUPERSEDES the 09-25 draft to Rishi (do not send): fixed, released in 26.3.7 for the reported case. Nothing to post.
+
+**Class 1, parked with the customer (Yash).** No draft: Yash already moved Freshdesk to Waiting on customer on 10-12. The one thing a human may want to
+know: PR #2265 (Linked elements panel, "Select element(s)") is merged but **not in any release tag**; it is the 26.4.1 fixVersion. If the customer
+comes back about the panel rather than the right-click menu, that is why. Follow-up is PLT-3264.

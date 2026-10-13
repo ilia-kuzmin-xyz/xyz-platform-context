@@ -824,3 +824,9 @@ believing it:** PLT-3084 read "released, customer checking", but 26.3.6 carried 
 The Select all fix (PR #2197) was still open with changes requested. Compare the ticket's fix links
 with the release's fixVersion (`PLT-2743` → 26.3.6) and the PR's `merged` flag before reporting a
 ticket as done.
+
+## 2026-10-13 — Release-containment claims: unshallow first; and "released" may cover only half of a ticket's PRs
+
+Two traps met in one run (PLT-3116, PLT-3172, PLT-2651). (1) The session's hc-frontend clone was shallow; `git tag --contains` was silently empty for a PR from three weeks ago.
+`git fetch --unshallow origin && git fetch --tags` first. (2) A ticket can list several merged PRs and one `fixVersion` while only some are tagged: PLT-3172's #2242 is in `v26.3.7`,
+its #2265 is not (it is the unreleased 26.4.1). Check each PR, not the ticket's fixVersion. Same lesson as the 09-29 PLT-3084 note.

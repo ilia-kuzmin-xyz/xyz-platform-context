@@ -1214,3 +1214,12 @@ entry is **not retracted**, only narrowed: valid when the activity output is adv
 signature: *"element installs refresh but intangible/user-entered progress never does, and `Last updated` looks recent"*. Check the
 backend run for that project first. Candidate only for PLT-3133 on prod: not confirmed. Dated risk from the DPL ticket: all prod
 projects on 1 Jan 2027.
+
+### 2026-10-13 — Pattern 6, third firing: PLT-3275 (project SIN02)
+
+Estimated Rework Cost blank on QA issue edit after choosing Category, Discipline and Package. Same table (`rework_reference.json`: 90 rows, still only `CSA`,
+`Electrical`, `Mechanical`; no row added since PLT-3061), same blank-field-plus-"mapping data is missing" outcome, now on a **second project**, so this is no longer a one-customer
+quirk. Mostafa's read in-thread (new project, new discipline/package lists) fits; the failing strings are not yet seen (screenshot is on Freshdesk). Two new facts:
+(1) the ticket text says the values go in "a configuration file on the backend": **there is none** in platform-api, the table ships inside the web app, so every fix is a
+frontend edit plus a release; (2) PLT-3061's eight values never landed in the JSON, so the table has two open gaps if SIN02 is a spelling variant. The structural fix (a Category-level
+default for unknown disciplines) is a product decision still unasked. Folder: `incidents/live-incident-board-tickets/PLT-3275-groupA-quality-management/`.

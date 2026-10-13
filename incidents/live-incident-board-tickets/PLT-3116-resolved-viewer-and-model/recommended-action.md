@@ -106,3 +106,5 @@ reviewer, not this routine, is the next checkpoint. Flagging only: neither of th
 mechanisms in `context.md` (bridge-drop vs. filter-panel override) was ever confirmed against a live
 session before the fix was written, so whoever reviews the PR may want to check which one it actually
 addresses. **No Jira action was taken by this run.**
+
+## 2026-10-13 — nothing to post. Fixed in 26.3.7 (released 10-12), QA-verified, Freshdesk Waiting on customer. Class 1, parked with Yash.

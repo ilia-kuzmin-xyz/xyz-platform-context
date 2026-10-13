@@ -342,3 +342,20 @@ diagnosis changed, and the draft is under a week old, so no re-validation needed
 ## 2026-10-12 — unchanged; the 10-07 draft (68 words) still stands, now 6 days unanswered
 
 PAPI-3936 is now Released, which strengthens the second outcome (staging api older than the fix) without changing the question: Radu reading `0` or `null` still separates every case. Class 1, owed by Ilia. No Jira action was taken.
+
+## 2026-10-13 — current ask. SUPERSEDES the 10-07 draft to Radu (do not send it). NOT POSTED.
+
+**Class 1 (owed by Ilia: Yash `114919` and Sachin `114111` both wait on us), turning into class 2 the moment one answer arrives.** Not class 2 yet:
+the failing screen has not been observed (09-09 rule: no fix before the failure is seen). Stay **Open**; not Ready for Dev, not With Technical Support
+(Yash already chased the customer), not Blocked.
+
+**Assumption, one line:** that the customer's 0% is on the Dashboard Schedule tab. If it is the Editor Gantt, the question below still settles it and
+the fallback is "the api build they hit does not carry #944".
+
+### Draft: reply on the ticket (author Ilia; @ Darminder, @ Yash) (57 words)
+
+> Darminder, the Editor Gantt prints a dash when the API sends null, so I think the 0% the customer still sees is on the Dashboard Schedule tab, which turns missing progress into 0 on its own. The API fix does not change that. Yash, **is the customer looking at the Editor Gantt or the Dashboard Schedule tab?**
+
+**Outcomes.** Dashboard tab: real frontend defect, class 2; the fix is to show a dash for Level of Effort activities (not for every missing row, which would hide a real 0)
+(small, in `dashboard-schedule-service.ts`), and Mostafa already agreed a dash is right for those activities (relayed in `111795`). Editor Gantt: the api
+build is older than the fix, so the next question is to Sachin: which api tag does prod run.

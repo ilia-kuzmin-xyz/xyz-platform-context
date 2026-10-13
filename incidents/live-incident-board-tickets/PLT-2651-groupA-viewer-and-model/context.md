@@ -1343,3 +1343,17 @@ Still unposted: the correction to the customer-facing true-north advice (`111642
 
 ## 2026-10-05 (scheduled) — unchanged on Jira, release gap still open
 Fresh fetch with comments: 38 comments, newest `113497` (Rishi, 10-01), With Customer. PR #2257 (`d212e1cea`) is on master but `git tag --contains` finds no tag that holds it; newest tag is still `v26.3.6` (09-24). So the customer has nothing to test unless a non-prod build exists (unchecked). The old true-north advice (`111642`) is still uncorrected. Class 1 (maybe 4). No Jira action was taken.
+
+## 2026-10-13 (scheduled) — the section box fix is in a release: Customer Release Check, Freshdesk Waiting on customer
+
+Fetched live: **39 comments** (was 38), newest `114906` (Yash, 10-12 11:16, Freshdesk 6294 **Waiting on customer**, noise). Status **Customer Release Check**,
+assignee Ozan Karslioglu, fixVersion **26.3.7 released 2026-10-12**. Links: PLT-3187 (the gizmo task, **Released**), PLT-2756 (Done), HS-407 (Open, the HoloSite twin).
+
+**Supersedes the 10-02 and 10-05 lines "git tag --contains finds no tag that holds #2257":** that was true then; `v26.3.7` (tag dated 10-08) now contains
+`d212e1cea` (#2257), checked on a full-history clone. The release gap those lines worried about is closed.
+
+**Still owed, and now time-sensitive:** the customer-facing true-north advice (`111642`, Ilia, 09-08: set ATL08's true north to about 17 degrees) was
+never corrected, and Rishi said on `112810` that project settings do not affect model orientation in the viewer. The customer is about to retest on the release,
+so a stale instruction is a live risk for the retest. Not verified: whether the customer ever changed the angle (nobody asked).
+
+Class 1 (a named person, Yash, owes the customer a short correction). No Jira action taken.

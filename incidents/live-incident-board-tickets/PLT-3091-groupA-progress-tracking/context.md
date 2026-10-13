@@ -1014,3 +1014,41 @@ analysis stands unchanged; nothing re-investigated. Not verified: Radu's row, st
 ## 2026-10-12 (scheduled) — unchanged since 10-07 (newest comment `114332`); PAPI-3936 now shows Released
 
 Fresh fetch with comments (25, newest `114332`). Status In Analysis, assignee Ilia. The only new fact: the linked **PAPI-3936** is now status *Released* (Done category), so the API fix is out. That does not explain Radu's 0% on Staging 26.3.7 (10-06): staging may run an older api build, or his row is not the one Sachin pasted. Frontend side unchanged: `null` renders `-` (see 2026-10-07). **Ilia still owes Sachin a reply (`114111`, 6 days).** Not verified: which api tag Staging runs.
+
+## 2026-10-13 (scheduled) — customer says the 0% survives the 26.3.7 release; a second surface found that the API fix cannot reach
+
+Fetched live: **31 comments** (was 25), status **Open** (was In Analysis), assignee Ilia. Nothing posted by this run.
+
+**New on the ticket (10-12).** `114904`/`114905`/`114914`/`114920`: Freshdesk 8224 and 7773 flip between Waiting on customer, Open and Waiting
+on 3rd line (noise). `114919` (Yash, 11:31): *"Issue still remains after the recent 26.3.7 release"*; the user asks when the release took place.
+`114925` (Darminder, 12:06): *"Will take a look at this I think it is a problem with frontend not processing the null value returned"*.
+So support is waiting on us, and Darminder has taken the look. Sachin's `114111` question to Ilia is still unanswered (7 days).
+
+**Release facts.** Jira marks 26.3.7 released **2026-10-12**; the `v26.3.7` tag in hc-frontend is dated 10-08. PAPI-3936 is Released (api side).
+Which api tag **prod** runs was not checked, so "prod API contains #944" is unverified, same as for staging in the 10-07 section.
+
+**What the 10-07 section missed (supersedes its claim "with `null` in the response the viewer shows `-` on both surfaces", which is
+true only for the Editor).** There is a second Actual % column, on the Dashboard Schedule tab, that does not read the schedule API value:
+
+| claim | evidence |
+|---|---|
+| The Dashboard Schedule Gantt is live | rendered at `dashboard-resizer/resizable-layout.tsx:555` (`<GanttWithProviders />`); data hook `dashboard-panels/gantt/hooks/use-dashboard-schedule-data.tsx:23` |
+| Its Actual % comes from the `activity_progress` parquet, not from `actualProgress` in the schedule response | `services/dashboard-schedule/dashboard-schedule-service.ts:488`: `COALESCE(p.ActualProgress, 0) as ActualPercent`, over `LEFT JOIN progress_delta p` (line 492), so **no progress row also becomes 0** |
+| The column then prints `0%` | `dashboard-panels/gantt/scheduler-columns/scheduler-columns.tsx:85-90` (dash only if `actualPercent` is null/undefined) |
+| It only shows a dash when the whole `activity_progress` table is absent | same service, the `hasProgress` false branch selects `NULL as ActualPercent` (line 520) |
+| The Editor Gantt and the details panel are the surfaces the API fix reaches | unchanged from 10-07: `formatters.ts:1-3`, `scheduler-columns.tsx:156-161`, `activity-progress.tsx:48-50` |
+
+So **PAPI-3936 cannot change what the Dashboard Schedule tab shows**, whatever prod's api version. Darminder's "frontend not processing the null" is
+probably right, but in this file, not in the Editor path the earlier runs checked.
+
+**Not known, and decisive:** which screen the customer (and Radu on staging, `114076`) is looking at. Radu's screenshot is a `blob:` URL
+(not fetchable). The customer's original report was the **Editor Progress** field (an editable cell), which argues for the Editor Gantt, where null
+already shows a dash. If it is the Editor, the remaining candidate is the one from 10-07: the responding api build does not carry #944.
+Also unknown: what `activity_progress` holds for an LOE activity (a stored 0, or no row). Either gives 0% through the coalesce.
+
+**Verified:** the five table rows above (read on master `221d571`, call sites included). **Inferred:** that the customer's screen is the Dashboard tab.
+**Killed this run:** nothing; the 10-07 "DevTools Network" ask to Radu is **superseded** by the one-question ask in `recommended-action.md` (do not send it).
+
+Also note, so it is not re-derived: Ilia's own 09-09 line (`111795`) said *"no frontend change needed"*. That was right for the Editor and wrong for
+the Dashboard tab, which nobody had read. The recurring shape: a fix is scoped to the surface that was reported, and a sibling surface computes the same number a
+different way (see `dashboard/pitfalls.md`, 2026-10-13).

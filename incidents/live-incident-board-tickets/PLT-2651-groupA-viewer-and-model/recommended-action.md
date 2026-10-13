@@ -492,3 +492,12 @@ Status stays **With Customer** until it is clear what the customer is being aske
 If it is "next release": suggest moving back to Ready For QA / awaiting release so the board does not tell the customer's contact that the ball is theirs. Also still owed: a plain correction of the old true-north advice (`111642`).
 
 No Jira action of any kind was taken.
+
+## 2026-10-13 — current ask (NOT POSTED). Fix released in 26.3.7; correct the true-north advice before the customer retests.
+
+**Class 1.** Stay in Customer Release Check; Freshdesk is already Waiting on customer. This supersedes the 09-22 and 10-05 "correction" drafts (they were about the cause before the fix existed).
+**Assumption, one line:** that the true-north angle was never needed for the fix (Rishi `112810`, and #2257 aligns the box from the model, not the project setting).
+
+### Draft: reply on the ticket (author Ilia; @ Yash) (54 words)
+
+> Yash, the section box fix is live in 26.3.7, so when you chase Kyriakos please also tell him to ignore my earlier advice to change the project's true north. It does not affect the section box, and changing it mid-project can shift alignment elsewhere. **Has he already changed the true north angle on ATL08?**

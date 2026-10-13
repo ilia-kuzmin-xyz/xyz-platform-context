@@ -257,3 +257,13 @@ now written and under review; nothing left for Group A/B evaluation). Folder ret
 mechanism from the original investigation (bridge-drop / filter-panel override, both in earlier
 sections of this file) was ever confirmed or ruled out on the ticket itself — worth a note for
 whoever reviews the PR, since the fix may address one candidate without the other having been checked.
+
+## 2026-10-13 (scheduled) — back on the board as Customer Release Check; fix is in the released 26.3.7. Folder name kept (links).
+
+Fetched live: 6 comments, status **Customer Release Check** (was In Code Review on 09-22, then out of the open list), assignee Yash, fixVersion **26.3.7
+released 2026-10-12**. `112787` (Rishi, 09-23): PR **#2223** merged, with testing steps. `114082` (Radu, 10-06): *"Verified fixed on Staging 26.3.7"*.
+`114096`/`114910` (Yash): Freshdesk 7908 Awaiting release (10-06) then **Waiting on customer** (10-12 11:18). Linked **PLT-3160** (Select same type selects only
+siblings inside one assembly; **Ready For QA**; its PR #2269 is on master but in **no release tag**, so not shipped).
+
+Verified in git: `45017e721` (#2223) is in `v26.3.7`. The 09-22 note that neither candidate mechanism was confirmed still stands; QA has verified the symptom gone,
+which is the evidence that matters. Parked with the customer, Yash owns it, nothing owed by us. No Jira action taken.

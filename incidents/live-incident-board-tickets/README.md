@@ -45,6 +45,32 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-13 (scheduled) — 11 in scope (was 8), all Group A. One ticket re-scoped with a new finding (PLT-3091), one new (PLT-3275), three released-and-parked (PLT-3172, 3116, 2651), six unchanged, zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 18 live incidents). In scope: PLT-3275, 3182, 3172, 3133, 3116, 3115, 3091, 3063, 2874, 2858, 2651. Out of scope: In Code Review (3271, 3231, 3223, 3112), Blocked (3135, 2660). PLT-3099, 3104, 3165, 3096 left the open list (Done) since 10-12. Five tickets changed (`updated` after the last run); the six others have an `updated` stamp identical to the last run, so they were not re-fetched.
+
+**PLT-3091 (Open, Ilia).** The customer says the 0% survives the 26.3.7 release (`114919`), Darminder suspects the frontend and null (`114925`). Code read finds a second Actual % column the earlier runs missed: the **Dashboard Schedule tab** turns missing progress into 0 itself (`dashboard-schedule-service.ts:488`), so the API fix (PAPI-3936) cannot reach it. Not yet known which screen the customer looks at. Draft: one question to Yash (57 words), replaces the 10-07 draft to Radu. Class 1, becoming 2. Sachin's `114111` is still owed by Ilia (7 days) and this draft closes that loop. Details in the folder and `dashboard/pitfalls.md`.
+
+**PLT-3275 (Open, Yash, new to scope).** Rework cost blank on SIN02. Pattern 6, third firing and second project; the figures are a static table in the web app, not a "backend configuration file" as the ticket says; table still has only three disciplines. Draft to Yash (65 words): correct that, widen the ask to every category for every discipline, ask for the exact names. Class 1 (Joshua owes values, 4 days) with a class 4 half.
+
+**PLT-2651, 3172, 3116 (all Customer Release Check, Freshdesk Waiting on customer 10-12).** 26.3.7 released 10-12. Git confirms the fixes are in `v26.3.7` (full-history clone), except PLT-3172's PR #2265 (panel "Select element(s)") which is in no tag (26.4.1). Only PLT-2651 needs words: the true-north advice Ilia gave on 09-08 (`111642`) was never corrected and the customer is about to retest. Draft to Yash (54 words). The other two: nothing to post.
+
+**Owed by Ilia, unanswered (unchanged):** PLT-2874 Yash's chase (`113731`, 11 days), PLT-2858 the question to Ali (draft in folder). **Standing, unchanged:** PLT-3182 (With Customer, 11 days), PLT-3133 (With Customer), PLT-3115 (With Customer since 09-16, 27 days; Yash's own "we can close the ticket now" still not actioned, so closing it is the cheapest win on the board), PLT-3063 (Customer Release Check, 15 days).
+
+**Unopenable media:** PLT-3275's screenshot (Freshdesk link, would settle which discipline/package strings failed); PLT-3091 Radu's `114076` screenshot (blob URL, would settle which screen shows 0%); PLT-2858 `66039`, PLT-3133 `65932` carried.
+**Not verified:** the customer's screen on PLT-3091; prod api version for PAPI-3936; the failing strings on PLT-3275; whether PLT-2651's customer changed the true-north angle.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | Open | **Dashboard tab coalesces to 0; one question to Yash** | 1 (becoming 2) |
+| [PLT-3275](PLT-3275-groupA-quality-management/context.md) | quality-management | Open | **new; Pattern 6; draft to Yash** | 1 (+4) |
+| [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | released; true-north correction owed | 1 |
+| [PLT-3172](PLT-3172-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | released; #2265 not shipped | 1, parked |
+| [PLT-3116](PLT-3116-resolved-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | released, QA-verified | 1, parked |
+| PLT-3182, 3133, 3115, 3063, 2874, 2858 | various | various | unchanged | see 10-12 table |
+
+---
+
 ## Run: 2026-10-12 (scheduled) — 8 in scope. One ticket materially changed (PLT-2858), seven unchanged, zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 22 live incidents). In scope: PLT-3182, 3133, 3115, 3091, 3063, 2874, 2858, 2651. Out of scope: With Technical Support (3275), In Code Review (3271, 3231, 3223, 3112), READY FOR RELEASE (3172, 3165, 3116, 3104, 3099, 3096), Blocked (3135, 2660). PLT-3060 is no longer on the open board. All eight re-fetched with comments; newest comment id compared with the folder.

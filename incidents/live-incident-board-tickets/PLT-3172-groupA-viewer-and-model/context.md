@@ -123,3 +123,21 @@ narrows the four-step mechanism; the actual on-screen behaviour in the video.
   environment cannot build or run `hc-frontend` (`npm ci` fails on the private
   `@xyzreality/dhtmlx-gantt` package, per the standing environment note in
   `live-incident-run-instructions.md`).
+
+## 2026-10-13 (scheduled) — SUPERSEDES the 09-25 "class 3, needs a console check" framing: the defect was fixed and is released (part of it)
+
+The 09-25 sections above are history. Fetched live: 7 comments, status **Customer Release Check** (Freshdesk 8087 Waiting on customer, `114900`, 10-12 11:12),
+assignee Gennaro, fixVersions **26.3.7 (released 2026-10-12)** and **26.4.1 (not released)**.
+
+- `113114` (Rishi): two PRs merged, **#2242** (activity right-click "Select linked elements" now highlights NWC elements) and **#2265** (the Linked
+  elements panel's "Select element(s)" and the context-menu items). So the cause was **NWC elements not being highlighted**, not the selection-path
+  commit this folder suspected on 09-25 (`fe43628`); that hypothesis was never needed. Superseded, not verified either way.
+- `113928`/`113938` (Radu, Rishi, 10-05): clicking a row in the Linked elements panel has always only focused the element; Rishi would extend the
+  fix to the context-menu "Select path". `114575` (Gennaro, 10-08): *"Verified fixed on Staging 26.3.7"*, and the extra case went to a new linked
+  ticket **PLT-3264** (Suggestion, Open, "The context menu Select path doesn't follow the logic for PLT-3172 fix").
+- **Release check (git, hc-frontend, full history fetched, not shallow):** `v26.3.7` contains #2242 (`fad8c78b2`). **#2265 (`b8e1da0`) is in no tag.**
+  That matches the unreleased fixVersion 26.4.1. So the customer's original symptom (right-click activity, Select linked elements, turns blue) is fixed in
+  what shipped; the panel "Select element(s)" half is not yet out. Same shape as PLT-3084 on 09-29: *released* is not *everything that was merged*.
+
+Class: parked with the customer, Yash owns the comms; nothing owed by us. Verified: PR/tag containment. Not verified: that the customer's own screen now
+works on prod (nobody has said); the 90 MB recording `65180` still unopened (403, not needed any more). No Jira action taken.

@@ -395,3 +395,19 @@ Consequences, both hit while writing PLT-3099 test steps:
   over-selection was silent: nothing on screen suggested those elements were in the selection.
 - The word "ghosted" in a PR description or a customer reply is misleading here. Say "hidden" or
   "switched off by the isolation".
+
+## 2026-10-13 — Two Actual % columns, two data sources: a fix to the schedule API does not reach the Dashboard Schedule tab (PLT-3091)
+
+The **Editor** Gantt and Activity-details panel read `actualProgress` from the schedule API response (`null` prints `-`, `gantt-x/scheduler/utils/formatters.ts:1-3`).
+The **Dashboard Schedule** Gantt ignores that field: its Actual % is `COALESCE(p.ActualProgress, 0)` over a `LEFT JOIN` on the `activity_progress` parquet
+(`services/dashboard-schedule/dashboard-schedule-service.ts:488,492`), and its column prints `0%` for any non-null value
+(`dashboard-panels/gantt/scheduler-columns/scheduler-columns.tsx:85-90`). So a Level of Effort activity, or any activity with no progress row, shows `0%` there
+by construction, and PAPI-3936 (API returns null for LOE) cannot change it. The dash only appears when the whole `activity_progress` table is missing (line 520).
+
+**Rule:** when a ticket is "this number is wrong in the viewer", find every column that prints that label (`grep -rn "Actual %"` finds both) and trace each to its own source
+before scoping a fix. Not yet observed on the customer's screen; see PLT-3091's folder.
+
+## 2026-10-13 — hc-frontend clones in these sessions are shallow (depth 50): `git tag --contains` returns nothing for older commits
+
+`git tag --contains <sha>` printed an empty line for a PR merged 09-23 because the clone held only the last ~50 commits of master (`git rev-parse --is-shallow-repository` was `true`).
+That reads exactly like "not in any release". Run `git fetch --unshallow origin` (about a minute) before any release-containment claim, and `git fetch --tags`.
