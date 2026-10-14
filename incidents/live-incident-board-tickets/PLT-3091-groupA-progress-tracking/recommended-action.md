@@ -359,3 +359,15 @@ the fallback is "the api build they hit does not carry #944".
 **Outcomes.** Dashboard tab: real frontend defect, class 2; the fix is to show a dash for Level of Effort activities (not for every missing row, which would hide a real 0)
 (small, in `dashboard-schedule-service.ts`), and Mostafa already agreed a dash is right for those activities (relayed in `111795`). Editor Gantt: the api
 build is older than the fix, so the next question is to Sachin: which api tag does prod run.
+
+## 2026-10-14 — SUPERSEDES the 10-13 question to Darminder/Yash (do not send it). NOT POSTED.
+
+**Class 1 (reply owed through Yash), small.** The 10-13 draft asked which screen shows the 0%. That question is moot for the fix: Darminder merged #2311 on 10-13, which removes the zero from the Dashboard Schedule tab and the Gantt label. The ticket is already **Done**, so do not move it. What is left is telling the customer, who asked on 10-12 when the release was and said the issue remains.
+
+**Assumption, one line:** that Freshdesk 8224 is still open and waiting on us; the last echo on the ticket is `114920` (Waiting on 3rd line).
+
+### Draft: reply on the ticket (author Ilia; @ Yash) (52 words)
+
+> Yash, 26.3.7 only carried the API half of this. The part that still shows 0% for the Level of Effort activities is a frontend fix, merged yesterday and going out in the next platform release. After that they should see a dash. **Can you tell the customer, and reopen the Jira ticket if their ticket is still open?**
+
+Optional second message, only if Sachin is still waiting: one line to Sachin that #2311 is the frontend change he asked about on 10-06. No new question needed.

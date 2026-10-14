@@ -45,6 +45,27 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-14 (scheduled) — 9 in scope (was 11), all Group A, Group B empty. Two tickets left scope as Done (PLT-3091, PLT-3133), seven unchanged, zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 15 live incidents; newest ticket still PLT-3275, nothing new since 10-09). In scope: PLT-3275, 3182, 3172, 3116, 3115, 3063, 2874, 2858, 2651. Out of scope: In Code Review (3271, 3231, 3223, 3112), Blocked (3135, 2660). The seven in-scope tickets carry the same `updated` stamp as the 10-13 run, so they were not re-fetched.
+
+**PLT-3091 went Done (10-13 13:42), and the customer is still owed an answer.** hc-frontend **#2311** merged 10-13 12:52 (Darminder): it removes the `COALESCE(..., 0)` on the Dashboard Schedule tab found on 10-13, so that finding was right and is now fixed on master. It is **in no tag** (newest `v26.3.7`, full-history clone), so the customer's "still remains after 26.3.7" (`114919`) is expected: 26.3.7 had only the API half. Freshdesk 7773 was closed (`115022`), but the follow-up ticket 8224 was last seen Waiting on 3rd line, and nobody has told the customer when the frontend half ships. Draft to Yash (52 words) in the folder. Class 1, residual.
+
+**PLT-3133 went Done (10-13 08:55) by Freshdesk closure** (7989 Closed, `115021`), no human comment. The symptom was never reproduced or explained; the linked **DPL-1707** (calendar-year progress bug, predicted to hit every prod project on **2027-01-01**, 79 days) is untouched. Class 4 half now lives on DPL-1707, not on a ticket we triage. Suggest Ilia asks Rishi or Kuba to confirm its priority.
+
+**Unchanged:** PLT-3275 (Open, Joshua owes values, 5 days; 10-13 draft stands), PLT-3182 (With Customer, 12 days), PLT-3115 (With Customer since 09-16, 28 days, Yash's own "we can close the ticket now" still not actioned), PLT-3063, PLT-3172, PLT-3116, PLT-2651 (Customer Release Check; the PLT-2651 true-north correction is still owed), PLT-2874 (Yash's chase `113731` now 12 days), PLT-2858 (question to Ali, draft in folder).
+
+**Unopenable media (403, unchanged):** PLT-3275's Freshdesk screenshot; PLT-3091 `114076` (blob URL); PLT-2858 `66039`; PLT-3133 `65932`.
+**Not verified:** the next release's version number for #2311; which screen the PLT-3091 customer looks at; whether Freshdesk 8224 is still open; whether DPL-1707 applies to ATL06.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | **Done** | #2311 merged unreleased; customer reply owed | 1, residual |
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | **Done** | Freshdesk closure; DPL-1707 open | 4 on DPL-1707 |
+| PLT-3275, 3182, 3172, 3116, 3115, 3063, 2874, 2858, 2651 | various | various | unchanged | see 10-13 table |
+
+---
+
 ## Run: 2026-10-13 (scheduled) — 11 in scope (was 8), all Group A. One ticket re-scoped with a new finding (PLT-3091), one new (PLT-3275), three released-and-parked (PLT-3172, 3116, 2651), six unchanged, zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 18 live incidents). In scope: PLT-3275, 3182, 3172, 3133, 3116, 3115, 3091, 3063, 2874, 2858, 2651. Out of scope: In Code Review (3271, 3231, 3223, 3112), Blocked (3135, 2660). PLT-3099, 3104, 3165, 3096 left the open list (Done) since 10-12. Five tickets changed (`updated` after the last run); the six others have an `updated` stamp identical to the last run, so they were not re-fetched.

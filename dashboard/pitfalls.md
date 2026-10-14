@@ -411,3 +411,7 @@ before scoping a fix. Not yet observed on the customer's screen; see PLT-3091's 
 
 `git tag --contains <sha>` printed an empty line for a PR merged 09-23 because the clone held only the last ~50 commits of master (`git rev-parse --is-shallow-repository` was `true`).
 That reads exactly like "not in any release". Run `git fetch --unshallow origin` (about a minute) before any release-containment claim, and `git fetch --tags`.
+
+## 2026-10-14 — the Dashboard Schedule `COALESCE(…, 0)` is fixed on master (hc-frontend #2311, unreleased); the 10-13 entry above is now history
+
+The 10-13 entry describes the zero-coalescing at `dashboard-schedule-service.ts:488,492`. **#2311 (`9298ef9`, merged 10-13, PLT-3091) removed it**: `ActualPercent` / `PlannedPercent` are now `number | null`, and the Gantt label prints `-` for null (`use-initialize-gantt-chart.tsx` `task_text`). Not in any tag (`v26.3.7`, 10-08, is the newest), so prod still shows the old behaviour until the next release. The *rule* in that entry stands: grep every surface that prints a label and trace each to its own source. **Also note:** the same PR removes the `hidden-bar` class, so Dashboard Gantt bars for activities without progress data are now drawn, where before they were hidden; a visible change that a reviewer or customer may notice. Not tested here (no build in this environment).

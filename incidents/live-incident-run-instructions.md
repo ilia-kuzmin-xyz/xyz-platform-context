@@ -830,3 +830,7 @@ ticket as done.
 Two traps met in one run (PLT-3116, PLT-3172, PLT-2651). (1) The session's hc-frontend clone was shallow; `git tag --contains` was silently empty for a PR from three weeks ago.
 `git fetch --unshallow origin && git fetch --tags` first. (2) A ticket can list several merged PRs and one `fixVersion` while only some are tagged: PLT-3172's #2242 is in `v26.3.7`,
 its #2265 is not (it is the unreleased 26.4.1). Check each PR, not the ticket's fixVersion. Same lesson as the 09-29 PLT-3084 note.
+
+## 2026-10-14 — a ticket going Done is not the customer being told
+
+PLT-3091 went Done the hour after its frontend PR merged, while the customer's "issue remains after 26.3.7" (10-12) had no reply and the fix was in no release tag. PLT-3133 went Done by Freshdesk closure with the symptom unexplained. When a ticket drops off the open list between runs, **fetch it with comments before dropping it from the summary**: check who closed it, whether the last customer message was answered, and whether the fix is in a tag (`git fetch --unshallow --tags`, then `git tag --contains <sha>`). Report the residual as its own line even though the ticket is out of scope.

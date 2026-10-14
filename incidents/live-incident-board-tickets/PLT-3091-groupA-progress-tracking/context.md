@@ -1052,3 +1052,20 @@ Also unknown: what `activity_progress` holds for an LOE activity (a stored 0, or
 Also note, so it is not re-derived: Ilia's own 09-09 line (`111795`) said *"no frontend change needed"*. That was right for the Editor and wrong for
 the Dashboard tab, which nobody had read. The recurring shape: a fix is scoped to the surface that was reported, and a sibling surface computes the same number a
 different way (see `dashboard/pitfalls.md`, 2026-10-13).
+
+## 2026-10-14 (scheduled) — Jira status Done (10-13 13:42) after hc-frontend #2311 merged; the customer's last question is still unanswered
+
+Fetched live: **33 comments** (was 31), status **Done** (was Open), resolution empty, nothing posted by this run. New comments: `115022` / `115023` (Yash, 10-13 08:56), Freshdesk **7773 Closed** (twice). Freshdesk **8224**, the follow-up the customer raised on 10-12 (`114919` *"issue still remains after 26.3.7"*), last showed **Waiting on 3rd line** (`114920`, 10-12 11:35). No Closed echo for 8224 exists on the ticket.
+
+**The frontend fix is on master, unreleased (verified).** hc-frontend `9298ef9`, **#2311** *"PLT-3091: ATL05 - Cannot update intangible progress in the Web Viewer"*, Darminder, merged **10-13 12:52**, 50 minutes before the Jira move (the link between the two is inferred, nobody commented). Diff, five files:
+- `dashboard-schedule-service.ts` (~485-490): `COALESCE(p.ActualProgress, 0)` and `COALESCE(p.PlannedProgress, 0)` dropped, so missing progress is now `null`. This is exactly the second surface found on 10-13 (see `dashboard/pitfalls.md` 2026-10-13); **that finding is now superseded as a defect, confirmed as the mechanism by the fact that Darminder fixed the same line.**
+- `dashboard-schedule/types.ts`: `ActualPercent` / `PlannedPercent` typed `number | null`.
+- `gantt/hooks/use-initialize-gantt-chart.tsx`: the Dashboard Gantt bar label prints `-` instead of nothing, and the `hidden-bar` class is removed, so a bar for an activity with no progress now shows.
+- `activity-properties/activity-progress.tsx`: the mixed-selection card shows the unlinked activities' own Actual %, not the editable draft.
+- `gantt.styled.tsx`: the `.hidden-bar` rule removed.
+
+**Not released (verified, full-history clone):** `git tag --contains 9298ef9` is empty; newest tag is `v26.3.7` (10-08). So **the customer's "still remains after 26.3.7" is expected**: 26.3.7 carried the API half only (PAPI-3936, Released). The frontend half ships in the next release (version not named anywhere I can see; the 10-13 notes call the next one 26.4.1, unverified for this PR).
+
+**What nobody has said to the customer:** the answer to *"when did the release take place"* and that the remaining 0% is a frontend fix that is merged but not yet out. The ticket is Done on our board; the customer's question sits behind a Freshdesk ticket that was last seen waiting on us. If Yash is not watching 8224 directly, nobody is. **Class 1 (reply owed to the customer through Yash), residual.** Short draft in `recommended-action.md`.
+
+**Still unverified:** which screen the customer looks at (Radu's `114076` screenshot is a `blob:` URL; 403 from this routine). #2311 covers both the Dashboard Schedule tab and the Editor details card, so the fix does not depend on the answer, but the *prediction* "the customer's 0% is the Dashboard tab" is unconfirmed. Whether Sachin's `114111` (is the frontend side in place) needs an answer: the fix having merged is the answer, and it has not been told to him either. No test of the fix was run here (this environment cannot build the app).

@@ -161,3 +161,7 @@ Advanced within 15 minutes: DPL-1707 is ruled out for ATL06, back to the three a
 on the progress tab's "Last updated" as the check (see context.md 2026-10-08).
 
 No Jira action of any kind was taken.
+
+## 2026-10-14 — ticket is Done; the 10-08 draft to Rishi (34 words) no longer belongs on this ticket
+
+Nothing to do on PLT-3133. If the DPL-1707 question is still wanted, send it to Rishi in chat, not as a comment on a closed ticket, and attach the date: DPL-1707 predicts every prod project fails on 2027-01-01. One owner, one question: **Does DPL-1707 explain the ATL06 intangible edits not appearing?** If the customer comes back, Yash reopens or raises a new ticket. No Jira action of any kind was taken.
