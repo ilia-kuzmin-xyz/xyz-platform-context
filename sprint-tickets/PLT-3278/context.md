@@ -232,3 +232,36 @@ repo's PR builds run on a pool named for something unrelated.
 Re-run (attempt 2) of `ac7c529` was at step 8 and had already passed Type check when this run
 ended. Attempt 1 proved the suite green on this exact commit, so only the Docker steps remain
 in question.
+
+### 08:16 UTC — second correction: the API was **not** stale either. I could not tell the time.
+
+**This supersedes the 13:20 entry above. Do not trust that entry's "stale API data" conclusion —
+the timestamps in its own table disprove it.** Keeping it rather than deleting it, because the
+mistake is more instructive than the fix.
+
+The real sequence, with an actual clock reading (`date -u` → `2026-10-14T08:16:17Z`):
+
+- Builds started 07:43–07:45. #2298 and #2263 completed **08:08** — about 22 minutes.
+- Every `get_check_runs` poll I made happened **before 08:08**, so `in_progress` was simply
+  **correct**. Nothing was cached, nothing was stale.
+- The re-run's step 8 had been running 12.6 minutes against a ~9–10 minute norm. Normal.
+
+So there was no congestion *and* no stale API — **CI behaved perfectly all morning.** I raised a
+false alarm, then "corrected" it with a second false explanation that happened to reach the right
+conclusion (builds are fine) by the wrong route.
+
+> **Root cause, and the thing to actually carry forward: I inferred wall-clock time from my own
+> `sleep` calls, and they were backgrounded, so several ran *concurrently*.** I added them up as
+> if they were serial — 780 + 900 + 900 + 840 + 600 ≈ 67 minutes — and concluded 2.5–3 hours had
+> passed. About 33 minutes had.
+>
+> **Never estimate elapsed time from your own waits. Run `date -u` and subtract.** It is one
+> command, and without it every duration-based judgement — "this is slow", "this is hung", "this
+> must be stale" — is built on nothing.
+>
+> The tell I ignored: when an API returns *byte-identical* data twice, "the server is stale" and
+> "almost no time has passed" look exactly the same. The second is far more likely and costs one
+> command to check.
+
+Net effect on the work: **none.** No commit, comment or merge this run depended on the timing
+claim; it only polluted two status reports to the user, both since retracted.
