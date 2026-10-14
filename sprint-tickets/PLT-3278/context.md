@@ -136,3 +136,35 @@ than glossed.
 An `NPM_TOKEN`/`NODE_AUTH_TOKEN` with `read:packages` in the scheduled environment would close
 this. Attempting to discover one is blocked by the harness (credential-exploration classifier) —
 it needs to be provisioned, not found.
+
+### 11:50 — a correction I had to make to my own thread reply: `stopStreaming` is wired to nothing
+
+After replying to thread 2 I checked where Stop is actually surfaced. **It isn't.**
+`stopStreaming` is returned from `useCanvas` but is **not destructured in `CanvasPage.tsx`**,
+and there is no Stop control anywhere in the canvas UI (`grep -rni "stop" --include=*.tsx` over
+`components/` and `CanvasPage.tsx` finds only `stopPropagation` and SVG gradient `<stop>` tags).
+
+So the bug Copilot found, and my fix for it, are both **unreachable by a user today**. I had
+written the thread reply as a live hang, and — worse — put "press Stop" in the PR's test steps,
+which no tester could have followed. Both corrected: a follow-up on the thread, and the PR body
+now carries the caveat explicitly.
+
+The fix itself stays. It is right for whoever wires Stop up, and **#2298 is working in exactly
+that area**, so the two will meet.
+
+> **Carry forward, and this is the third time this pattern has cost something on this repo:**
+> *verifying that a function is wrong is not the same as verifying that anyone can reach it.*
+> Before describing a finding as user-facing — in a thread, a PR body or a ticket — grep for the
+> call site, not just the definition. A hook can export a method that no component ever calls,
+> and nothing in the type system says so.
+>
+> The specific tell here: the fix was to a function whose name implies a UI affordance
+> ("stopStreaming" ⇒ a Stop button). Name-implied affordances are worth one grep.
+
+### Build queue note
+
+Both pushes (#2324 `ac7c529`, and the three master merges) sat **in_progress for 80+ minutes**,
+against a ~22-minute norm for this repo (`51d15b8` ran 22:59→23:21 the previous night). Five
+branches were pushed within two minutes of each other, so runner contention is the likely cause
+rather than anything in the diffs. Per the run brief, a build still in progress is skipped
+rather than chased.
