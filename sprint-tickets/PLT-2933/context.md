@@ -81,3 +81,47 @@ with the three master commits was zero.
 
 Note the PR is still a **draft** and has been since 10-03. It is complete and green; it is waiting
 on someone being asked to review it, not on more work.
+
+## 2026-10-14 — Ilia reworked the PR to spec; Copilot found 3, then a 4th in my fix
+
+Ilia took #2263 over directly: `3f491bb6c` moved Leave above Delete per DIGP-1414, took the spec's
+copy, added tests — **and added a client-side last-admin guard**, which the original deliberately
+did not have (the 10-03 note recorded that IAM has none). Verified his merge and edits left the
+authority gate, the mongo id and the `['projects']` invalidation intact.
+
+### What Copilot found, all verified before acting
+
+| Sev | Finding | Outcome |
+|---|---|---|
+| HIGH | last-admin precheck is TOCTOU and cannot enforce the invariant | **thread left open** — fix is in IAM, not this repo |
+| MEDIUM | `isAdmin` read only the flattened `userRoleCode` | fixed `fe863e211` |
+| LOW | mobile menu renders orphan dividers | fixed `fe863e211` |
+| MEDIUM | *(on my fix)* caller exempted from the active check | fixed `27d77beea` |
+
+**The flattened-role trap, worth keeping:** `IProjectContactInfo.userRoleCode` is only the FIRST
+grant and the direct one sorts first. `memberships` carries them all, each with its own
+`userRoleCode` and `userStatus`. Any role test that reads only the flattened field misses a grant
+held through a portfolio. This applies well beyond this dialog.
+
+**The divider trap:** pruning orphan dividers with a positional `filter` is subtly wrong — it judges
+each divider against its *unfiltered* neighbours, so `item/divider/divider` keeps the first and
+leaves it trailing. A fold (append a divider only after a real item, drop a trailing one) is correct.
+Both versions pass a naive "drops a trailing divider" test, which is why the extra cases matter.
+
+**Why the HIGH stays open:** the precheck reads contacts in one request and detaches in another, so
+two admins can both pass it. Only IAM refusing the last active admin in the same transaction holds
+it. `ContactService.detachProject` has no such guard today — pre-existing, and the Team tab's remove
+path can orphan a project the same way. Wants its own ticket.
+
+### Two mistakes of mine this run, both worth not repeating
+
+1. **I pushed 25 type errors.** All in the new test fixtures (`{key: string}` not satisfying the
+   helper's constraint; `userStatus: string` not `'ACTIVE' | 'PENDING'`). I ran `tsc` in the *same
+   compound command as the commit and push*, so the count scrolled past unread. **Run the
+   type-check as its own command and read it before committing** — CI type-checks since PLT-3233,
+   so this would have gone red. Fixed in `6b8e3f2de`.
+2. **I invented an asymmetry and documented it, which made it look deliberate.** Exempting the
+   caller from the active check conflated "active on the project" with "holds an active admin
+   grant". The fix was to delete the special case; the result is simpler than what it replaced,
+   which is usually the sign it was never earning anything. A comment justifying a special case is
+   not evidence the special case is right.
