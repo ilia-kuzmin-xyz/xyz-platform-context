@@ -198,3 +198,37 @@ that is the one re-run this failure is entitled to.
 > And the structural argument is available for free: **Actions steps are sequential and the job
 > stops at the first failure.** A failure at step N is proof that steps 1..N-1 passed. Sonar
 > running at all was already evidence the unit tests had gone green.
+
+### 13:20 — correcting the "builds queued 80+ minutes" claim: that was stale API data
+
+I reported CI congestion twice this run. It was wrong, and the mechanism is worth recording.
+
+`pull_request_read method=get_check_runs` **serves stale results**. It kept returning
+`status: "in_progress"` with no `completed_at` for jobs that had already finished:
+
+| PR | What get_check_runs kept saying | Actual |
+|----|--------------------------------|--------|
+| #2298 | in_progress since 07:45 | **success, completed 08:08:07** (~22 min) |
+| #2263 | in_progress since 07:45 | **success, completed 08:08:13** (~22 min) |
+
+So build duration was **entirely normal**. There was no congestion, and the buildkit 500 on
+`ac7c529` was an isolated registry blip rather than a symptom of a loaded CI.
+
+> **Use `actions_get method=get_workflow_job` with the job id when a job's state matters.** It
+> returns per-step status (`Set up job` → `Install dependencies` → `Type check` → `Lint & Run
+> Tests` → … → `Set up Buildx` → `Build image`), which is both fresher and far more useful: you
+> can see exactly which step is running rather than guessing from a job-level flag. The
+> PR-level check-runs list is fine for a glance and unreliable for a decision.
+
+Incidentally the step list from that call is the cheapest map of what this pipeline actually
+does, and it confirms the ordering argument used above: **`Type check` (7) and `Lint & Run
+Tests` (8) both run long before `Set up Buildx` (15)**, so a failure at 15 can never implicate
+the tests.
+
+Also visible there: the runner is self-hosted — `runner_name:
+xyz-prod-mongodb-backups-1000073537`, label `XYZ-Prod-MongoDB-Backups`. Worth knowing that this
+repo's PR builds run on a pool named for something unrelated.
+
+Re-run (attempt 2) of `ac7c529` was at step 8 and had already passed Type check when this run
+ended. Attempt 1 proved the suite green on this exact commit, so only the Docker steps remain
+in question.
