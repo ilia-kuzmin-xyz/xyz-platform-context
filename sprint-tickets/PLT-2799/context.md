@@ -441,3 +441,47 @@ left the next layer: read live → pin it; pin it → the fallback breaks on fir
 edit; fix the fallback → it only fixes one row. Worth remembering as a shape:
 when a fix introduces a *fallback*, the question is not "is the fallback right
 today" but "what invalidates it, and which rows does the repair reach".
+
+## 2026-10-14 — Copilot round 5 on #2250: both findings real, both fixed (`6f2fff6a6`)
+
+### HIGH — the widened backfill could make a template permanently uneditable
+
+The round-4 fix (every null-description version in one `id in (…)` update) introduced a new
+ceiling. `commissioningApi/postgrest-client.ts` sets `MAX_IN_FILTER_VALUES = 200`, its own comment
+states that a write which must stay one statement **cannot chunk** so callers have to check, and
+`update()` (`:374-388`) passes filters straight into the query string with no cap and no chunking.
+Past 200 ids the gateway answers a bare 400 with no SQLSTATE — and because the backfill runs
+*before* the template write, the template could never be edited again. Immediately after the column
+ships every existing version is null, so any template with 200+ revisions hits it on the first edit.
+
+Fixed by selecting server-side: `task_template_id eq` + `description is null`, no id list at all.
+No ceiling, still one statement (all-or-nothing kept), and a bonus — it closes the read-to-write
+window, since rows are chosen by what they hold when the PATCH lands rather than by what the earlier
+select saw. The version inserted moments before is excluded for free, carrying the draft's own text.
+
+### MEDIUM — a cached `null` description reopened the original hole
+
+`useChecklistDefinitionUpdate` invalidated only `checklistLibraryQueries.all()`. The descriptions
+live under `checklistVersionQueries.all()` → `'description'`. So: open a pre-column task (caches
+`null`) → someone edits → the stale `null` still reads as "this revision stored none" → `pinnedReady`
+true → the modal falls back to the template, which that edit just rewrote. **The pin silently stops
+pinning.** Fixed by also invalidating `checklistVersionQueries.all()`.
+
+Chose invalidation over caching the effective fallback text: a resolved-text cache has to be
+re-derived whenever the template changes, which puts the same staleness one level down.
+
+### The pattern on this PR, now five rounds deep
+
+Each round's fix has created the next round's bug, always in the same shape: **a change to the write
+side that nobody re-checked against the read side's assumptions.** Round 4 made `update()` backfill
+descriptions; that is precisely what stopped a cached `null` being immutable, which is round 5's
+MEDIUM. And round 4's own id list is round 5's HIGH.
+
+Worth stating as a rule: *when a fix makes something mutable that readers treated as fixed, the fix
+is not finished until every reader of that value has been re-read.* Caches and sentinels are the
+first places to look.
+
+Both regression tests mutation-verified (250-revision cap test; cached-null test). Pre-existing and
+unrelated in this checkout: `TaskExecutionModal.test.tsx` cannot collect (private
+`@xyzreality/dhtmlx-gantt` absent) and `use-asset-duplicate.test.tsx` has 4 tsc errors — both
+confirmed present without these changes.
