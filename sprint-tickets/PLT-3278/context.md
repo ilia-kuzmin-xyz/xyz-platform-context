@@ -54,3 +54,85 @@ Two minutes of reading the description saved re-implementing a finished 284/37-l
 
 Nothing on the code. It wants the four requested reviewers, and the build is red on the
 repo-wide Trivy CVE (see below), not on anything in this diff.
+
+## 2026-10-14 — scheduled run: #2305 is merged; the live PR is **#2324**, and its scope grew
+
+**Correction to the 10-13 entry above:** it describes PR #2305 as the live PR. #2305 has since
+merged into master. The open PR for this ticket is now **#2324**
+(`PLT-3278-panel-change-fixes`, non-draft, 4 reviewers requested), opened 10-13 18:22 as a
+follow-on for defects found testing #2305 on dev. It "Replaces #2323".
+
+Do not go looking for #2305's threads again — they are closed with it.
+
+### What #2324 actually contains (it is not what its title said)
+
+The PR opened as a one-paragraph `viewerConfig` fix and then took three more commits, the last
+of which (`51d15b8`, 10-13 22:58) added a whole feature set:
+
+| Commit | Scope |
+|---|---|
+| `29a54b4` | a panel change keeps `viewerConfig` (the viewer stopped drawing mid-change) |
+| `c8a61ea` | review fix: `keepsViewerConfig` extracted to `panelChange.ts` + tests |
+| `a41b378` | an **untagged** change keeps the report on screen too (`WHOLE_REPORT`) |
+| `51d15b8` | **undo** (`basedOn`/`onScreen`), survey **Cancel**, ask-answer notes, error-screen wording |
+
+The description was never updated past the first commit. A reviewer opening it would have been
+shown a viewer fix and found undo, session persistence and a new SSE field. **Rewritten this
+run**, title included, with all five areas and a per-area test script.
+
+> **Carry forward:** on a branch that takes several commits in an evening, the PR body is stale
+> by default. It is the thing reviewers are actually handed — re-read it against `get_commits`
+> before asking anyone to look.
+
+### The four open review threads — all four were right, all four closed this run
+
+Found open from 10-13 23:03. Each verified against the code rather than taken on trust:
+
+1. **`followUp` dropped for `explain` answers** (`useCanvas.ts` `formatAskAnswer`). Verified:
+   `executeAskSpec` returns `base` for `explain` with **no `value`** (`askExecutor.ts:118`), so
+   the `if (v == null) return label` early return fired. And `followUp` renders in exactly two
+   places — the dev overlay and the note this PR added. So for an explain answer the note was
+   **invisible to the user entirely**, which is backwards: those are the answers most likely to
+   carry a caveat worth reading. Fixed; checked `ExplainAnswer` never draws `followUp`, so the
+   append can't double up.
+2. **Stopping an ask left the question with no reply.** Wider than the comment said. Lifecycle:
+   `pending` → `ask_spec`→`spec_ready` → `artifact_data_complete`→`ready` → **`done` is what
+   attaches `askSnapshot` to a message**, and `ChatPanel:495` renders an answer *only* from
+   `msg.askSnapshot`. An aborted stream never sends `done`, so even a **`ready`** ask — answer
+   fully computed — has no way to reach the chat. Condition is now just `prev.ask`.
+   Deliberately did **not** commit the computed answer on stop: that means duplicating the whole
+   `done` path inside stop for a sub-second race, on a turn the user asked to stop.
+3. **Scope undocumented** — see above, body rewritten rather than split. Reason recorded on the
+   thread: undo/cancel/stop all pair with the *single* backend PR on
+   `XYZ_InfiniteCanvasAgentPipeline` branch `PLT-3278-panel-change-fixes`; splitting the FE in
+   two leaves one half unreviewable against it.
+4. **Undo transition untested.** Same remedy as thread 2 of #2305 and of `c8a61ea`: the decision
+   moved out of the `done` handler into `revertTarget` / `revertMessage` in `panelChange.ts`,
+   with four cases — the version a report was made from, a first report, a `basedOn` pointing at
+   a version **the session no longer holds**, and no report on screen. That third case is the one
+   that gets missed: `basedOn` is just an id and nothing guarantees the target survives.
+
+Fix commit: **`ac7c529`**. All four threads replied to and resolved.
+
+### ⚠️ Still cannot run vitest here — the 09-26 limitation stands, and a PR thread says otherwise
+
+`npm ci` **still 401s** on `@xyzreality/dhtmlx-gantt` from the private GitHub Packages registry.
+It leaves a partial `node_modules` (~784 packages, no `vitest`, no `@eslint/js`), so **neither
+vitest nor eslint can run**.
+
+Two traps worth recording:
+
+- **`npm ci ... | tail` reports exit 0.** The pipeline's exit status is `tail`'s. The install had
+  failed. Check with `grep "npm error"` on the output, or `set -o pipefail`.
+- **A PR thread on #2250 (10-02) claims "got npm working locally since".** That was a different
+  environment, not this one. Do not read it as evidence the scheduled container can run tests.
+
+What *was* verified: `tsc --noEmit` is clean (2 errors repo-wide, both environment artifacts —
+missing `forge-viewer` types from the partial install, and a pre-existing `baseUrl` deprecation),
+and `--listFiles` confirms `panelChange.test.ts` is in the program, so the new tests compile.
+The assertions themselves were first executed by CI, and that is stated on the thread rather
+than glossed.
+
+An `NPM_TOKEN`/`NODE_AUTH_TOKEN` with `read:packages` in the scheduled environment would close
+this. Attempting to discover one is blocked by the harness (credential-exploration classifier) —
+it needs to be provisioned, not found.

@@ -5369,3 +5369,54 @@ Worth fixing if these runs are to keep changing code — an `NPM_TOKEN` / `NODE_
 
 *(Also note: a bare `ls node_modules 2>/dev/null | head -2 && echo present` reports "present" even
 when the directory is absent, because `head` exits 0. Check with `ls -d node_modules` or a row count.)*
+
+## 2026-10-14 — scheduled run: 0 eligible for kick-off, one PR had 4 open threads
+
+JQL: `project = PLT AND sprint in openSprints() AND assignee = currentUser()`
+
+**Sprint is down to four tickets, none in a kick-off state** — so no new branch was started.
+Correct outcome, not a gap. (PLT-2524 and the other Analysis tickets tracked in earlier entries
+have left the sprint.)
+
+| Ticket | Summary | Status | PR | Eligible? |
+|--------|---------|--------|----|-----------|
+| PLT-2799 | Edit checklist — versioning behaviour | In Code Review | #2250 | ❌ |
+| PLT-2933 | Leave project option in Portfolio | In Code Review | #2263 (draft) | ❌ |
+| PLT-3232 | Infinity Canvas — remaining Beta work | Dev In Progress | #2298 (draft) | ❌ |
+| PLT-3278 | Infinity Canvas — panel changes / 3D model | In Code Review | **#2324** | ❌ |
+
+### Checkpoint 1 — review feedback
+
+Checked per PR, not inferred. **#2250 11/11 resolved, #2263 none, #2298 none.** All the open
+work was on **#2324: four Copilot threads from 10-13 23:03, all four correct, all four closed
+this run** (fix `ac7c529`, PR body rewritten). Full analysis in `PLT-3278/context.md` — including
+the one that matters beyond this PR:
+
+> An ask answer reaches the chat **only** via the `done` handler attaching `askSnapshot`
+> (`ChatPanel:495`). An aborted stream never sends `done`. So *any* interrupted ask — including
+> one whose executor already produced a value — leaves the question with no reply.
+
+### Checkpoint 2 — builds
+
+#2324 was green on `51d15b8` before the fix push. All four re-running after this run's pushes.
+
+### Checkpoint 3 — master drift
+
+`origin/master` moved to `3472170`. #2324 was already current; the other three were **17 commits
+behind** and were each merged and pushed:
+
+| PR | Branch | Overlap with the 17 commits | Result |
+|----|--------|------------------------------|--------|
+| #2298 | PLT-3232 | `useCanvas.ts` | clean, `tsc` clean → `58a13a6` |
+| #2263 | PLT-2933 | `i18n/en/main.json` | clean, JSON re-validated → `326ce05` |
+| #2250 | PLT-2799-… | `TaskInstanceModal.tsx` | clean, `tsc` clean → `8ec431d` |
+
+No conflicts. Each overlap was checked with `comm -12` on the two file lists *before* merging, so
+the risky files were known in advance rather than discovered in a conflict.
+
+### Environment: vitest still cannot run here
+
+The 2026-09-26 limitation is **unchanged** — `npm ci` 401s on the private
+`@xyzreality/dhtmlx-gantt`. New this run: **`npm ci … | tail` exits 0 regardless**, because the
+pipeline takes `tail`'s status. The install looked fine and had not run. Details and the
+countervailing (and misleading) PR-thread claim are in `PLT-3278/context.md`.
