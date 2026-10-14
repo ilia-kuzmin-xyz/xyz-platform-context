@@ -168,3 +168,33 @@ against a ~22-minute norm for this repo (`51d15b8` ran 22:59→23:21 the previou
 branches were pushed within two minutes of each other, so runner contention is the likely cause
 rather than anything in the diffs. Per the run brief, a build still in progress is skipped
 rather than chased.
+
+### 12:40 — CI on `ac7c529`: **the tests passed; the job died on a Docker registry 500**
+
+`build` came back **failure**, and the honest read of it matters, because the obvious conclusion
+(my unverifiable tests broke something) is the wrong one.
+
+What the log actually shows, in order:
+
+| Step | Result |
+|---|---|
+| unit suite | **543 files / 6553 tests passed**, 150 skipped, 4 todo — 0 failures |
+| `panelChange.test.ts` | **✓ 30 tests**, and `panelChange.ts` coverage **100/100/100/100** |
+| `test:regression` | ✓ 1 file / 8 tests |
+| SonarCloud | ✓ success |
+| `docker/setup-buildx-action@v3` | ❌ `pulling image moby/buildkit:buildx-stable-1` → `Error response from daemon: received unexpected HTTP status: 500 Internal Server Error` |
+
+So `revertTarget` / `revertMessage` are not just compiled but **fully covered and green on their
+first real execution**, and the failure is a registry 500 booting buildkit — infrastructure,
+after every test had already run. Re-run triggered (`rerun_failed_jobs` on run 38530202086);
+that is the one re-run this failure is entitled to.
+
+> **Method note worth keeping.** `get_job_logs` with a small `tail_lines` shows only the *end* of
+> the job, which here was the Docker step — it looks like a build failure with no test evidence
+> either way. The unit-suite summary was ~6 minutes earlier in the same log. Pull a large
+> `tail_lines` (it saves to a file past the token limit) and grep that file for `Test Files` and
+> the specific test name before concluding anything about whether tests ran.
+>
+> And the structural argument is available for free: **Actions steps are sequential and the job
+> stops at the first failure.** A failure at step N is proof that steps 1..N-1 passed. Sonar
+> running at all was already evidence the unit tests had gone green.
