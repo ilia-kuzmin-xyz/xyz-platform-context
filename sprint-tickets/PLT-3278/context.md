@@ -265,3 +265,26 @@ conclusion (builds are fine) by the wrong route.
 
 Net effect on the work: **none.** No commit, comment or merge this run depended on the timing
 claim; it only polluted two status reports to the user, both since retracted.
+
+### 08:28 UTC — re-run of `ac7c529` is **green end to end**. Run closed.
+
+Attempt 2 completed **08:24:09, conclusion `success`** — all 45 steps, including the two that
+mattered: `Set up Buildx` (08:18:00–08:18:08, the step that took the registry 500 on attempt 1)
+and `Build image` (08:18:08–08:22:50). The diagnosis holds: one transient registry failure, no
+code involvement.
+
+`Lint & Run Tests` ran 08:03:41 → 08:16:17 — **12.6 minutes**, the normal duration. The "is it
+stuck?" poll at 08:16 caught it in its final seconds, which is precisely why it had looked
+frozen across two reads.
+
+**Final state of all four sprint PRs:**
+
+| PR | Ticket | Threads | Build | Master |
+|----|--------|---------|-------|--------|
+| #2324 | PLT-3278 | 5/5 resolved | ✅ green (attempt 2) | current |
+| #2298 | PLT-3232 | none | ✅ green 08:08:07 | merged this run |
+| #2263 | PLT-2933 | none | ✅ green 08:08:13 | merged this run |
+| #2250 | PLT-2799 | 13/13 resolved | running on a parallel session's `6f2fff6a6` | merged this run (`8ec431d`, verified still an ancestor) |
+
+Zero open review threads across the sprint. No ticket was eligible for kick-off, so no new
+development was started — the correct outcome for this board.
