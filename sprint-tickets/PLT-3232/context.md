@@ -173,3 +173,35 @@ and is still not reachable from an agent session: the attachment endpoint return
 Atlassian MCP exposes no attachment-download tool.
 
 PR #2298 (draft) was brought onto master `221d571` this run → head `b1706c8`. No open threads.
+
+## 2026-10-14 — #2298 closed; the FE change now lives in #2324
+
+**Do not go looking for #2298 — it is closed without merging, and that is correct.** Ilia folded it
+into **#2324** ("one canvas PR in hc-frontend") as commit **`91a0f5520`**, and the react-jhipster
+build fix stays in **#2299** rather than riding along.
+
+Verified the fold rather than trusting the note, because stranded work is this repo's recurring
+failure mode. `91a0f5520` carries exactly the original change and nothing else:
+
+| file | status | lines |
+|---|---|---|
+| `CanvasPage/useCanvas.stream.test.ts` | added | +122 |
+| `CanvasPage/useCanvas.ts` | modified | +210 / −75 |
+
++332 / −75 total, matching the original commit, with the author date preserved from 10-10 — a clean
+cherry-pick. Nothing was lost and nothing needs redoing.
+
+Splitting the CVE fix back out is **better than what I had done**: #2298 had been carrying #2299's
+`blob-open.ts` / `CompanyLogo` / `.trivyignore` change only because porting it was the way to get CI
+green without waiting. Once the two are separate PRs again, each reviews on its own merits.
+
+Last CI state on #2298 before it closed: **green** (build success 08:08 on 10-14, SonarCloud
+passed), 0 review threads, no conflict. So it closed from a healthy state, not an abandoned one.
+
+### What is still open on this ticket
+
+Unchanged and still the real blocker: **why staging's canvas builder never answers.** The
+`/api/chat` question put to Gennaro on 10-10 is unanswered, the pipeline repo
+(`XYZ_InfiniteCanvasAgentPipeline`) remains outside this session's GitHub access, and the
+staging/prod hosts still cannot be probed from here. The timeout work only makes that failure
+legible; it does not fix it. Remaining items 2–6 of the ticket are untouched.
