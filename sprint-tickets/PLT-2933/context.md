@@ -125,3 +125,28 @@ path can orphan a project the same way. Wants its own ticket.
    grant". The fix was to delete the special case; the result is simpler than what it replaced,
    which is usually the sign it was never earning anything. A comment justifying a special case is
    not evidence the special case is right.
+
+### Round 3 — the finding with no thread
+
+Copilot's summary carries a **"Previously missed"** `<details>` block for findings in code that has
+not changed since the last review. Those are **not posted as inline threads**, so they are easy to
+scroll past and there is nowhere to reply. This one was real: the title's close button stayed
+enabled during the detach while `Back` was disabled, so a user could dismiss after confirming and
+leave the mutation running with no dialog to report a failure into. Fixed `494f4d0d6` —
+`ModalTitle` already takes `disabled` and both its close controls honour it.
+
+**Read the summary's collapsed sections, not just the threads.** The findings there get no
+notification of their own.
+
+### State at end of this run
+
+| Finding | Where |
+|---|---|
+| memberships not consulted | fixed `fe863e211` |
+| orphan dividers | fixed `fe863e211` |
+| caller exempt from active check (mine) | fixed `27d77beea` |
+| close button during detach | fixed `494f4d0d6` |
+| last-admin TOCTOU | **open** — needs an IAM ticket |
+
+429 tests, `tsc` clean on both files. Build running on `494f4d0d6`; the `fe863e211` red was the
+superseded run carrying my type errors.
