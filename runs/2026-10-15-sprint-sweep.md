@@ -283,3 +283,44 @@ fix: **read `running-tests-in-agent-sessions.md` before concluding a suite canno
 One thing deliberately **not** done with the new ability: PLT-3286's findings 2a and 3 are now
 verifiable, but the ticket is parked in Analysis on finding 1. Opening a PR for two of four
 findings on a ticket in Analysis would cut across the agreed flow. Offered to Ilia instead.
+
+---
+
+## Checkpoint 2 — concluded. All four builds green.
+
+Waited them out rather than leaving the expectation standing.
+
+| PR | `build` | SonarCloud | copilot re-review |
+|----|---------|------------|-------------------|
+| #2197 | **success** 08:08 | success | success, no new threads |
+| #2299 | **success** 08:17 | success | success |
+| #2287 | **success** 08:20 | success | success, no new threads |
+| #2263 | **success** on my merge head | success | success |
+
+**#2197 is the one that matters**: the `useElementSelection` conflict resolution is green in CI as
+well as locally, so the PR is now unconflicted, green, 0 open threads — and it carries a fix that
+is still missing from master. It is the most mergeable thing on the board and has been sitting
+since 4 September.
+
+**No PR in this repo is red.** The react-jhipster Trivy finding that reds everything in the 10-10
+through 10-13 logs is gone for good.
+
+## Final thread count — 1 open, down from 3
+
+A parallel session worked #2263 and #2299 alongside this one and closed two threads:
+
+| PR | Threads | Open |
+|----|---------|------|
+| #2299 | 4 | 0 — parallel session pushed `a145d87b8`, resolved |
+| #2287 | 11 | 0 — this run pushed `0aace292`, resolved |
+| #2263 | 6 | **1** — the hc-iam last-admin guard, awaiting Ilia |
+| #2250 / #2197 / #2222 / #2260 | 13 / 3 / 0 / 0 | 0 |
+
+The one open thread is not a defect to fix; it is a scoping question. `ContactService.detachProject`
+in **hc-iam** has no last-admin guard, the Team tab's existing remove path can orphan a project the
+same way, and the client-side precheck in `ProjectLeaveDialog` cannot hold the invariant across two
+requests. Does that block #2263 or follow it?
+
+Note for the next run: **#2263's head moved after my merge** (`41cafa30d`, parallel session) and a
+build on it was still running at 08:21. Not mine, its copilot came back clean, but re-check before
+assuming green.
