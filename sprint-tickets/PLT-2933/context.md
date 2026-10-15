@@ -150,3 +150,65 @@ notification of their own.
 
 429 tests, `tsc` clean on both files. Build running on `494f4d0d6`; the `fe863e211` red was the
 superseded run carrying my type errors.
+
+## 2026-10-15 — round 6: the IAM error body is not prose
+
+Two more Copilot findings, both real, both fixed in `41cafa30d`. Recording the *reason* they were
+real, because it is a fact about the platform rather than about this dialog, and the next person
+reading an IAM failure will need it.
+
+**`message` is always an i18n key.** `ProblemExceptionTranslator.enrich` (hc-iam,
+`config/exceptions/`) stamps `message: "error.http." + status` on every response that does not
+already carry a more specific one, and the specific ones are keys too (`error.validation`,
+`error.concurrencyFailure`, `error.<errorKey>` from `BaseProblemException`). There is no path on
+which `message` is a human sentence. Reading it for display puts `error.http.403` in front of a
+user. Confirmed in the IAM source, not inferred from the MSW fixture that first flagged it.
+
+**`detail` is prose, but often machine prose.** `handleAccessDeniedException` does
+`ProblemDetail.forStatusAndDetail(FORBIDDEN, ex.getMessage())`, and for a `@PreAuthorize` denial
+Spring's message is the literal `"Access Denied"`. An unhandled 500 goes through
+`createProblem(body, status)`, whose detail is `body.toString()` — a failure's own string, which
+should never reach a user.
+
+The consequence here was worse than the finding claimed: because `detail` is set on the plain 403
+and was read first, the dialog's carefully written permission copy was **dead code and had never
+rendered**. The raw-key case that was reported is actually the *tenant account admin* refusal —
+`ScopeNotValidException` is a `BaseProblemException`, which leaves `detail` null and puts
+`error.scopeNotValid` in `message`. That is the one case the function was written for.
+
+Resolution order now: specific key → translate via the existing `getTranslatedTextWithGuard`;
+generic `error.http.*` → ignore in favour of this dialog's copy (translating it gives "You are not
+authorized to access this page.", which is about pages); `detail` last.
+
+**Generalisable:** when displaying a failure from IAM anywhere in this app, prefer a translated
+specific key, then your own copy. Do not print `message`. Treat `detail` as a last resort.
+
+### Second finding: locally handled failures still raised the global modal
+
+Neither the detach nor the members read opted out, so a 403/500 opened the app-wide error modal
+*as well as* the dialog's inline alert — and closing the dialog does not clear the global one.
+Fixed with the existing `skipGlobalErrorHandler` status-list form (same shape as
+`PROJECT_COMPANIES_REQUEST` in `useCompanies.ts`), threaded as an optional third `config` argument
+on `detachContactFromProject` / `getProjectContacts` and a `requestConfig` on `useProjectContacts`,
+so the nine other detach call sites and the Team tab keep global handling.
+
+`skipGlobalErrorHandler: [400, 403, 404, 409, 500]` — **not** `true`, because `true` also
+suppresses the 401 sign-out.
+
+### Test environment note
+
+`translate` from react-jhipster has no `TranslatorContext` under vitest and returns `null` for
+every key, so `getTranslatedTextWithGuard` returns `null` too — its signature says `string`. A
+test that needs translated copy must stub the helper; registering translations would couple the
+test to the react-jhipster version, which differs between this checkout and CI.
+
+### State at end of this run
+
+| Finding | Where |
+|---|---|
+| raw i18n key / dead permission copy | fixed `41cafa30d` |
+| global modal on locally handled failures | fixed `41cafa30d` |
+| last-admin TOCTOU | **still open** — needs an IAM ticket, deliberately |
+
+450 tests green across `PortfolioPage/`, `tsc` identical to the branch baseline (11 pre-existing
+artefacts from the stale `node_modules`, none in changed files). PR description corrected to match.
