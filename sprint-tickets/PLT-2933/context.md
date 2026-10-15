@@ -271,3 +271,16 @@ the user. Good change — it finished something round 6 left half-done.
 | last-admin TOCTOU | **still open** — Copilot now frames it as needing human sign-off, which is right |
 
 27 tests in the dialog file, 452 across `PortfolioPage/`, `tsc` at the branch baseline.
+
+### 2026-10-15 — the last-admin TOCTOU now has a ticket: PAPI-4277
+
+Logged against IAM: refuse to remove the last active admin in the same transaction as the removal
+(`ContactService.detachProject`, which has no guard at all today). Decided as a **follow-up, not a
+blocker** for PLT-2933, which matches the reading in the round-5 thread: this PR makes the orphaning
+no more reachable than the Team tab's existing remove path already does, and the dialog check makes
+it less likely.
+
+So the dialog's check stays what its comment says it is — UX only. Do not re-raise it as a defect
+against this PR, and do not "fix" it in the frontend; a second client-side check cannot close a
+read-then-write race. The thread on #2263 is deliberately left **unresolved** as the visible marker
+for reviewers.
