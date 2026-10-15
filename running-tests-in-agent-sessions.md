@@ -130,6 +130,66 @@ If a change needs re-indentation (wrapping a block in a `try`, for instance), in
 check the result with `git diff --stat`. Only `prettier --check` is safe to run across a legacy file
 here. The same caution applies to any whole-file formatter in this repo.
 
+
+> **Two 2026-10-15 entries follow, from parallel sessions in different containers.** They do not
+> contradict each other: that run's container had a baked `node_modules`, this one's was empty
+> (`ls node_modules | wc -l` → 0), so one could run vitest immediately and the other had to install.
+> Read both — the order to try is *vitest first, stub second*.
+## 2026-10-15 — a *pre-populated* `node_modules` is the new trap, and the 401 pattern recurred
+
+Two things this run, both about trusting a checkout you did not install.
+
+**The container can start with `node_modules` already present — and stale.** No `npm ci` ran
+in this session, yet `npx vitest` worked straight away. That is pleasant and misleading: the
+tree was baked when the image was built, so it drifts from `package.json` as master moves.
+Concretely, `package.json` said `react-jhipster: 1.1.0` (upgraded in `347217067`, PLT-3260),
+while the installed copy was still **0.22.0**, and `@xyzreality/dhtmlx-gantt` was **not
+installed at all** — the 401 below means it never can be.
+
+What that produces is worse than an obvious failure: `tsc --noEmit` type-checks normally and
+reports **11 errors in files nobody touched** — six under `gantt-x/` + `dashboard-panels/gantt/`
+(the unresolvable private package), `entity-utils.ts(1,10): '"react-jhipster"' has no exported
+member named 'getPaginationState'` (the stale version), and some commissioning test files.
+None are real; CI runs `npm ci` and is green on all of them. But they look exactly like a
+branch that broke the build, and the temptation is either to "fix" them or to assume the whole
+run is untrustworthy.
+
+Telling artefact from real takes one command — compare installed against declared:
+
+```bash
+node -p "require('./node_modules/react-jhipster/package.json').version"   # 0.22.0
+grep '"react-jhipster"' package.json                                      # 1.1.0  → stale
+ls node_modules/@xyzreality/dhtmlx-gantt                                  # absent → the 401
+```
+
+An error naming a package whose installed version disagrees with `package.json`, or one of the
+7 files importing the private gantt package, is an artefact. An error in the files your diff
+touches is yours. This run checked that all 11 fell in the first group before pushing, and
+`git diff origin/master --stat` confirmed the diff was 3 files, none of them among the 11.
+
+This does **not** replace the TS2688 probe from 10-09/10-10 — that catches "tsc checked
+nothing". This catches "tsc checked a tree that isn't master's". Different failures, both
+silent.
+
+**The 401 recurred, and the predicted consequence with it.** `npm view @xyzreality/dhtmlx-gantt
+version` still returns `E401 ... unauthenticated` against `npm.pkg.github.com`, unchanged from
+10-02. A *parallel* session on PR #2299 the same morning declined to push a fix to a real
+Copilot finding, reasoning in the thread: *"`npm ci` still 401s on the private
+`@xyzreality/dhtmlx-gantt` in this checkout, so I can't run the suite — a test I haven't
+executed is not coverage."* The reasoning is sound in isolation; the conclusion was wrong,
+because this file has carried the way round it since 10-02 and the baked `node_modules` meant
+no install was needed at all. That is the 10-02 warning — *"I can't run tests" quietly becomes
+"I don't fix things"* — recurring verbatim, two weeks on, against a documented workaround.
+
+So, before concluding a suite cannot run: **try `npx vitest run <path>` first.** It may simply
+work. Only if it fails for a missing module is the stub procedure above needed.
+
+**Also: parallel sessions now collide on the same PR.** Two runs posted to the same review
+thread on #2299 within six minutes, one declining to fix and one pushing the fix. Nothing broke
+— the second reply supersedes the first and says so — but a human reading that thread sees the
+author argue both sides. If a thread already carries a reply from this morning, read it before
+writing: continue it, don't restate it.
+
 ## 2026-10-15 — procedure re-verified, and a correction to the 10-13 run log
 
 Stub procedure above worked unchanged, third re-verification. 517 tests across `ClientReportPage/`
