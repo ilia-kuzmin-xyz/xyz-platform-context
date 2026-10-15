@@ -212,3 +212,62 @@ test to the react-jhipster version, which differs between this checkout and CI.
 
 450 tests green across `PortfolioPage/`, `tsc` identical to the branch baseline (11 pre-existing
 artefacts from the stale `node_modules`, none in changed files). PR description corrected to match.
+
+## 2026-10-15 (evening) — round 7, and a correction to this morning's test-environment note
+
+### ⚠️ Supersedes the "Test environment note" in the round 6 section above — that note is WRONG
+
+That note said `translate` has no `TranslatorContext` under vitest, returns `null` for every key,
+and that a test needing translated copy "must stub the helper". Do not follow it.
+
+`createTestWrapper` (`app/test-utils.tsx`) registers the real translations in a `useEffect`:
+`TranslatorContext.registerTranslations('en', languageObj)` + `setDefaultLocale('en')`. So anything
+rendered through that wrapper resolves keys for real. The probe that produced the wrong conclusion
+called `getTranslatedTextWithGuard` from a bare test with no wrapper, which is the one case where it
+does return `null` — a true observation generalised to a false rule.
+
+The cost was a stub that made a passing test prove less than it looked like it proved. Removed; the
+`error.scopeNotValid` case now goes through the real lookup, which additionally pins that the key
+exists in `i18n/en/main.json` instead of resting on my having grepped it.
+
+**Generalisable:** a probe run outside the harness the real test uses measures the probe, not the
+test. Put the probe inside the same wrapper, or do not draw a rule from it.
+
+### Round 7 findings (both fixed in `ce6c3d84e`)
+
+**MEDIUM — the dialog had no accessible description.** Only `aria-labelledby` was set, so entering
+the confirmation announced "LEAVE PROJECT?" and nothing about what leaving costs. `Modal`
+(`.../common/modal/modal.tsx:28`) has always forwarded `aria-describedby` explicitly — nothing was
+passing one. The consequence paragraph now carries a `useId` and the dialog points at it. The
+last-admin and error lines are deliberately *not* in the description: they carry `role='alert'`, so
+they announce on appearance.
+
+Note the PR description had claimed "Screen readers announce the dialog by its title and read its
+messages out", which is how it read as covered. Claims in a PR body get believed.
+
+**LOW — the two gates on Leave were unasserted.** Leave is disabled while the members check runs
+and if it fails, because the last-admin warning cannot be trusted otherwise; no test proved either.
+The `confirm()` helper waits for the button to enable, which touches the loading gate but asserts
+nothing about why it was disabled. Two cases added, mutation-checked *separately* — one assertion
+covering both gates would hide a regression in either.
+
+Repo rule that settles the severity question: hc-frontend `CLAUDE.md` says **"Reviewer requests for
+a test on real logic are always honoured"**, so a LOW-labelled request for a test on a real gate is
+not optional.
+
+### Parallel session also pushed here
+
+`fef02e1e2` (another run, same morning) closed the 5xx-`detail` leak this file's comment had only
+described: `detail` is now read from 4xx only, so an unhandled IAM 500's `toString()` can't reach
+the user. Good change — it finished something round 6 left half-done.
+
+### State at end of this run
+
+| Finding | Where |
+|---|---|
+| no accessible description | fixed `ce6c3d84e` |
+| members-check gates unasserted | fixed `ce6c3d84e` |
+| 5xx detail leak | fixed `fef02e1e2` (parallel run) |
+| last-admin TOCTOU | **still open** — Copilot now frames it as needing human sign-off, which is right |
+
+27 tests in the dialog file, 452 across `PortfolioPage/`, `tsc` at the branch baseline.
