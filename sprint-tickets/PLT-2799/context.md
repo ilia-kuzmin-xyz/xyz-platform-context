@@ -485,3 +485,12 @@ Both regression tests mutation-verified (250-revision cap test; cached-null test
 unrelated in this checkout: `TaskExecutionModal.test.tsx` cannot collect (private
 `@xyzreality/dhtmlx-gantt` absent) and `use-asset-duplicate.test.tsx` has 4 tsc errors — both
 confirmed present without these changes.
+
+## 2026-10-15 — MERGED
+
+PR #2250 merged to master after DarminderA's approval. Final head carried the round-5 fixes
+(`hasUnversionedDescription` backfill, `checklistVersionQueries.all()` invalidation), the 5xx-detail
+guard, and the later revision-opening change. **Do not reopen this branch or re-raise its findings.**
+
+Jira left as-is deliberately: a merge is not automatically "Done" in this team's flow, and the same
+judgement was applied to PLT-2524 (#2251) when it merged. Transitioning the ticket is a human call.
