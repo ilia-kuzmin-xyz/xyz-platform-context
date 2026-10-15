@@ -1069,3 +1069,9 @@ Fetched live: **33 comments** (was 31), status **Done** (was Open), resolution e
 **What nobody has said to the customer:** the answer to *"when did the release take place"* and that the remaining 0% is a frontend fix that is merged but not yet out. The ticket is Done on our board; the customer's question sits behind a Freshdesk ticket that was last seen waiting on us. If Yash is not watching 8224 directly, nobody is. **Class 1 (reply owed to the customer through Yash), residual.** Short draft in `recommended-action.md`.
 
 **Still unverified:** which screen the customer looks at (Radu's `114076` screenshot is a `blob:` URL; 403 from this routine). #2311 covers both the Dashboard Schedule tab and the Editor details card, so the fix does not depend on the answer, but the *prediction* "the customer's 0% is the Dashboard tab" is unconfirmed. Whether Sachin's `114111` (is the frontend side in place) needs an answer: the fix having merged is the answer, and it has not been told to him either. No test of the fix was run here (this environment cannot build the app).
+
+## 2026-10-15 (scheduled) — Jira status is now In Code Review (10-14 22:32); out of scope, customer reply still owed
+
+Fetched live: **33 comments** (unchanged, newest `115023`), assignee Darminder, status **In Code Review** (was Done on 10-14). No comment explains the move back. PAPI-3936 still Released. GitHub search for `PLT-3091` in hc-frontend returns only #2311 (closed, merged 10-13), so **no follow-up PR is visible**: whether Darminder reopened it for a second change or just fixed a wrong transition is **not known**. Nothing posted by this run.
+
+Residual unchanged: the customer's 10-12 question (`114919`, "when did the release take place") has had no reply in 3 days, and #2311 is still in no tag (not re-checked today). Draft to Yash from 10-14 stands. Class 1, residual. Ask Darminder one thing: is there a second PR coming under this ticket.

@@ -45,6 +45,24 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-15 (scheduled) — 9 in scope (unchanged), all Group A, Group B empty. Nothing changed on any of them; PLT-3091 left scope into In Code Review. Zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 16 live incidents; newest ticket still PLT-3275, nothing new since 10-09). In scope: PLT-3275 (Open), 3182 and 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis), 2858 (Dev In Progress). Out of scope: In Code Review (3271, 3231, 3223, 3112, **3091**), Blocked (3135, 2660). The nine in-scope tickets carry the same `updated` stamp as the 10-14 run, so they were not re-fetched. hc-frontend's 12 most recently updated PRs touch none of them.
+
+**PLT-3091 moved Done to In Code Review (10-14 22:32), no comment, no new PR visible** (only #2311, merged 10-13). Cause not known. The customer's `114919` is 3 days unanswered and the fix is unreleased, so the 10-14 draft to Yash stands. One question for Darminder: is a second PR coming. Class 1, residual. Note appended to the ticket folder.
+
+**Owed by Ilia, unanswered (unchanged):** PLT-2874 Yash's chase (`113731`, ~12 days), PLT-2858 the question to Ali (draft in folder), PLT-3091 customer reply via Yash. **Standing:** PLT-3115 (With Customer since 09-16, 29 days; Yash's own "we can close the ticket now" still not actioned), PLT-3182 (With Customer, 13 days), PLT-3275 (Joshua owes values, 10-13 draft stands), PLT-2651 (true-north correction still owed), PLT-3063, 3172, 3116 (Customer Release Check, parked).
+
+**Unopenable media (403, unchanged):** PLT-3275 Freshdesk screenshot; PLT-3091 `114076` (blob URL); PLT-2858 `66039`; PLT-3133 `65932`.
+**Not verified:** why PLT-3091 went back to code review; whether #2311 is in a tag since 10-14; whether any in-scope ticket got a comment without moving `updated` (not expected).
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | In Code Review | left scope; customer reply owed | 1, residual |
+| PLT-3275, 3182, 3172, 3116, 3115, 3063, 2874, 2858, 2651 | various | various | unchanged | see 10-13 table |
+
+---
+
 ## Run: 2026-10-14 (scheduled) — 9 in scope (was 11), all Group A, Group B empty. Two tickets left scope as Done (PLT-3091, PLT-3133), seven unchanged, zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 15 live incidents; newest ticket still PLT-3275, nothing new since 10-09). In scope: PLT-3275, 3182, 3172, 3116, 3115, 3063, 2874, 2858, 2651. Out of scope: In Code Review (3271, 3231, 3223, 3112), Blocked (3135, 2660). The seven in-scope tickets carry the same `updated` stamp as the 10-13 run, so they were not re-fetched.
