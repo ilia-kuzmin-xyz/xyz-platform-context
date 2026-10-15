@@ -195,3 +195,91 @@ is honoured; the Jira comment names Claude because the prompt asks it to.
 5. **#2263's open thread** needs your call: does the hc-iam last-admin guard block this PR or follow
    it?
 6. **#2250 and #2263 are finished green PRs waiting on reviewers.**
+
+---
+
+## Addendum — the `npm ci` blocker was never a blocker, and the oldest open thread is closed
+
+Written after the above. **It supersedes this run's own "no vitest, no tsc" paragraph and the
+10-13 log's "don't spend another run trying".**
+
+While waiting on CI I opened `running-tests-in-agent-sessions.md` for an unrelated reason and
+found a **documented, three-times-verified workaround sitting at the top of it since 2 Oct.**
+
+The distinction five runs missed: **the blocker is `npm ci`, not the dependency.** `npm ci` must
+satisfy the lockfile exactly, so it always reaches for the private registry and always 401s.
+`npm install` with `@xyzreality/dhtmlx-gantt` repointed at a local `file:` stub never asks for it.
+That is also why `--prefer-offline` failed and the stub doesn't.
+
+The 10-13 log rejected this route on principle — *"a hand-pruned dependency tree … would buy the
+appearance of verification rather than verification."* That does not survive contact with what the
+stub is: the named imports are **types, erased at runtime**, only 7 files import the package, none
+in the suites being run, and the other 1,712 packages are the real ones at locked versions.
+
+Ran it. 1,712 packages in 1m. Manifests restored and verified empty.
+
+### #2287's open thread is closed — and the parked test would have gone red
+
+The abandonment-guard test has been parked since 10-11 at
+`sprint-tickets/PLT-3152/pending/DashboardCaptureModal.test.tsx`. Landed in `0aace292`, thread
+replied to and **resolved**.
+
+The vindication for not pushing it blind is concrete:
+
+```ts
+const getDashboardViewer = vi.fn<[], CapturableViewer | null>()     // Vitest 3 — what was parked
+const getDashboardViewer = vi.fn<() => CapturableViewer | null>()   // Vitest 4 — what shipped
+```
+
+The repo is on Vitest 4. The old form resolves parameters to `never` — **six `tsc` errors**. And
+**vitest ran it green anyway**, because vitest does not typecheck. So the parked file was green in
+the runner and red in CI, which is exactly the red build the caution was protecting against.
+
+Verified in order: vitest green → mutation-check (drop both `isAbandoned` guards: the abandonment
+test fails, the contrast test stays green) → TS2688 probe (confirmed `tsc` was *reporting*, not
+bailing) → `tsc --noEmit` clean → eslint 0 → full 517 across `ClientReportPage/` +
+`clientReportService/` → manifests clean. Step 4 is the one that caught it; step 1 alone would
+have landed the red build.
+
+### The two merges are now verified by running them, not by reading
+
+Both were pushed earlier on the strength of a careful read. Re-checked with a real suite:
+
+- **#2197 / PLT-3084** — 43 tests green across `activity-linking-list/`, `tsc --noEmit` clean. So
+  the `{ treeRef }` + `projectService` resolution holds, **and** the master test I rewrote from
+  `treeApi()` to `emptyRef()` passes.
+- **#2263 / PLT-2933** — 444 green (2 skipped) across `PortfolioPage/`.
+
+### #2299 — a parallel session fixed it six minutes after I declined to
+
+I answered the new blob-URL thread at 07:47 saying the behaviour point was right, the asked-for fix
+wasn't available, and I wasn't pushing because the PR is on a keep-or-close call and I couldn't run
+tests. **A parallel session pushed `a145d87b8` at 07:52** doing essentially what I'd said I would
+do if it were kept: no revoke after a successful open, and a fake tab that actually fires the load
+handler so the assertion can bite. It resolved the thread.
+
+Its reply also adds the fact I didn't have: upstream 1.1.0 does `win.onload = () =>
+URL.revokeObjectURL(fileURL)` in `data-utils.ts`, so the comment's citation was accurate and
+following it was still wrong — **and closing this PR in favour of upstream brings the quirk back.**
+
+So **#2299 is now at 0 open threads**, and a human reading that thread sees the author argue both
+sides within six minutes. Recorded in `running-tests-in-agent-sessions.md`: if a thread already
+carries a reply from this morning, read it before writing.
+
+### Revised tallies
+
+| | |
+|---|---|
+| Open review threads across all 7 PRs | **1** (#2263, awaiting Ilia's call on the hc-iam guard) |
+| Threads closed this run | 2 — #2287 by me, #2299 by the parallel session |
+
+### Revised asks
+
+Ask 4 — *"an `NPM_TOKEN` for agent sessions"* — **is withdrawn as a blocker.** A token would still
+be tidier than the stub, but it has not been stopping anything since 2 Oct. What was stopping
+things was not reading this repo's own notes, which is a different problem and a cheaper one to
+fix: **read `running-tests-in-agent-sessions.md` before concluding a suite cannot run.**
+
+One thing deliberately **not** done with the new ability: PLT-3286's findings 2a and 3 are now
+verifiable, but the ticket is parked in Analysis on finding 1. Opening a PR for two of four
+findings on a ticket in Analysis would cut across the agreed flow. Offered to Ilia instead.
