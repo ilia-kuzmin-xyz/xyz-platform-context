@@ -129,3 +129,61 @@ reverted, re-applied by hand.
 If a change needs re-indentation (wrapping a block in a `try`, for instance), indent it yourself and
 check the result with `git diff --stat`. Only `prettier --check` is safe to run across a legacy file
 here. The same caution applies to any whole-file formatter in this repo.
+
+## 2026-10-15 — procedure re-verified, and a correction to the 10-13 run log
+
+Stub procedure above worked unchanged, third re-verification. 517 tests across `ClientReportPage/`
++ `clientReportService/`, `tsc --noEmit` clean, eslint 0 errors, manifests restored and
+`git status --short package.json package-lock.json` confirmed empty before committing.
+
+**Correcting the record.** The 2026-10-13 run log concluded *"There is no workaround from inside
+the session… Don't spend another run trying"*, and listed `GITHUB_TOKEN`, `--offline` and
+`--prefer-offline` as the three dead ends. Those three findings are correct — and the conclusion
+drawn from them is wrong, because **this file already had the answer and the run did not read it.**
+
+The distinction the 10-13 run missed: the blocker is `npm ci`, not the dependency. `npm ci` must
+satisfy the lockfile exactly, so it will always reach for the private registry. `npm install` with
+the dependency repointed at a local `file:` stub never asks the registry for it at all. That is why
+the procedure at the top of this file works and `--prefer-offline` doesn't.
+
+It also rejected the stub route on principle — *"a hand-pruned dependency tree can't support that
+claim, so it would buy the appearance of verification rather than verification."* That reasoning
+does not survive contact with what the stub is: the named imports (`GanttStatic`, `GridColumn`) are
+**types, erased at runtime**, and only 7 files import the package, none of them in the suites being
+run. The other 1,712 packages are the real ones at their locked versions. It is not a pruned tree;
+it is the real tree with one unused leaf replaced.
+
+**The cost of that mistake was five runs and one open review thread** on #2287 — the capture-modal
+abandonment-guard test, written 10-11 and parked unexecuted until today.
+
+### And the parked test would have gone red
+
+Worth stating, because it is the strongest argument *for* running things and against both extremes
+("push it blind" and "never push it"):
+
+```ts
+const getDashboardViewer = vi.fn<[], CapturableViewer | null>()     // Vitest 3
+const getDashboardViewer = vi.fn<() => CapturableViewer | null>()   // Vitest 4 — correct
+```
+
+The repo is on **Vitest 4**, where `vi.fn` takes the whole function type rather than an args tuple
+plus a return. The old form resolves every parameter to `never`, so `mockReturnValue` and
+`mockResolvedValue` stop type-checking — **six `tsc` errors**.
+
+**Vitest does not typecheck, so it ran green anyway.** A test can be green in vitest and red in CI,
+and this one was. Only one typed `vi.fn<…>` exists elsewhere in the repo
+(`scene-properties.test.tsx:27`) and it already uses the v4 form — worth copying rather than
+writing from memory.
+
+### Checklist that caught it
+
+1. `npx vitest run …` — green, but proves only that it runs.
+2. **Mutation-check** — break the guarded behaviour, confirm the right test goes red and the
+   contrast one stays green, restore.
+3. **TS2688 probe** — append `const __probe: number = "nope"`, confirm `tsc` *reports* it, remove.
+   A clean `tsc` exit means nothing on its own.
+4. `npx tsc --noEmit -p tsconfig.json` — this is the step that found the `vi.fn` errors.
+5. `npx eslint <file>`.
+6. `git status --short package.json package-lock.json` — must be empty.
+
+Steps 2–4 are the ones that earn the push. Step 1 alone would have landed a red build.
