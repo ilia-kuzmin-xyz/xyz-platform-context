@@ -264,3 +264,6 @@ Live fetch: `updated` still `2026-07-31T13:51:53+01:00` — bit-for-bit identica
 Jira activity since 08-10 (any comment or field change bumps `updated`). **Yash's question to Ali is
 now 11 days unanswered.** No re-diagnosis performed. The drafted nudge in `recommended-action.md`
 (08-10) still hasn't been posted.
+
+## 2026-10-16 — DPL-1684 now shows Done, with no recorded root cause; new ATL08 ticket PLT-3291 has the same shape
+Read live: DPL-1684 status **Done** (Jira `updated` 10-14 22:02, assignee Pavithra Nagaraju). Its 16 comments end 09-04 with Yash's Freshdesk "Closed"; Ali's 08-17 "not sure about the root cause but will investigate" was never followed by a written answer, and Ilia's 07-23 cross-write question to Ali is not answered anywhere on it. 10-15: PLT-3291 (ATL08, activity MV-1350, 6,350 linked, models with none of its elements, same customer) opened. Read `PLT-3291-groupA-viewer-and-model/`. This folder stays `relocated`; the mechanism above (9/10) is unchanged and unfalsified.

@@ -682,3 +682,6 @@ Fresh fetch with comments (39 comments, newest `114681`, 10-09 14:30, Mostafa). 
 **Class 1 (we owe Ali an answer to his two questions, 3 days) with a class 4 half (what should Location mean: CDE location, room, or free text; stamp, select, or remove).** No Jira action was taken.
 
 **Unopenable media:** `66039` (get-issue response). Would settle whether `location` and `modelRoomId` are both null on a project with room data, which is Ali's question in one glance.
+
+## 2026-10-16 (scheduled) — unchanged
+Fresh fetch with comments: 39 comments, newest `114681` (Mostafa, 10-09 14:30), status Dev In Progress, assignee Darminder. Ali's two questions of 10-09 (`114680`) are 7 days unanswered; the 10-12 draft to Ali stands. Class 1. No Jira action was taken.

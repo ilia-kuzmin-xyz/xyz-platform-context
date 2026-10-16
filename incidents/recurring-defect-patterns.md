@@ -1223,3 +1223,20 @@ quirk. Mostafa's read in-thread (new project, new discipline/package lists) fits
 (1) the ticket text says the values go in "a configuration file on the backend": **there is none** in platform-api, the table ships inside the web app, so every fix is a
 frontend edit plus a release; (2) PLT-3061's eight values never landed in the JSON, so the table has two open gaps if SIN02 is a spelling variant. The structural fix (a Category-level
 default for unknown disciplines) is a product decision still unasked. Folder: `incidents/live-incident-board-tickets/PLT-3275-groupA-quality-management/`.
+
+## 2026-10-16 — Pattern 1, possible fifth sighting and second on ATL08: PLT-3291 (unmeasured), and the ticket that should have answered it reads Done with no cause
+
+PLT-3291 (ATL08, activity MV-1350): header says **6,350 linked elements**, the panel lists models that contain none of them. Same customer and project as PLT-2909/DPL-1684
+(ghost model from the PC-EXCEL cross-write). **DPL-1684 now reads Done with no root cause or fix recorded in its comments** (last comment 09-04, Freshdesk "Closed").
+New code fact: the activity header count is **backend-supplied** (`schedules.service.ts:443` to `scheduler-service/utils.ts:78` to `activity-properties.tsx:56`), so a frontend
+geometry filter cannot correct it; only the model list (`useGroupedLinks.ts:68`, `element-entity.ts:38-42`) is frontend-built from metadata. Whether the DB count includes
+soft-deleted links is unverified (PLT-3101 saw the `/links` endpoint do exactly that). Competing explanations (soft-deleted counted; a real bulk over-link) are listed in
+`PLT-3291-groupA-viewer-and-model/context.md` with the single prod read that separates them. **Not promoted: nothing has been measured.** Recognition addition: *"the count on the
+activity is large, and models in the panel hold none of its elements"* is the ghost-model signature even when no percentage is involved.
+Also: PR #2211 (PLT-3112, merged 10-07, untagged as of `v26.3.7`) bounds the Model Details panel's linked counts to loaded elements because "`project_element_list` can hold stale/extra rows", in-code confirmation of the same divergence on a different surface.
+
+## 2026-10-16 — Pattern 3 candidate, second face: PLT-3290 (ML5.4, "no data at all" on a new project), unmeasured
+
+A project that has only just started linking shows an empty dashboard. Two frontend states look alike and mean different things: **blank/empty panel** = progress outputs never produced
+(`use-progress-panel-data.tsx:33-38`, "nothing calculated"), **0.00% with an empty category list** = weighting gate (`AND weight > 0`, default Budgeted labour units, `progress-weighting-types.ts:23-28`)
+on a schedule with no labour units. The screenshot (blank vs 0.00%) is the cheapest fork; the first question to ask is the project's weighting setting. Candidate only; see `PLT-3290-groupA-progress-tracking/`.

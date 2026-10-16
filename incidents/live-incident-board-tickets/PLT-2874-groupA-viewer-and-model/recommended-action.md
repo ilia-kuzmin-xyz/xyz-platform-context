@@ -584,3 +584,6 @@ Do not close the ticket until Gennaro answers (the 08-13 close was wrong for the
 ## 2026-10-12 (scheduled) — unchanged; Yash's 10-02 chase (`113731`) is 10 days unanswered, the 10-05 draft is 7 days old
 
 Nothing new on the ticket (newest comment `113731`). By the 09-09 rule a draft unsent for over a week is re-validated against code before it is re-recommended: the draft makes **no code claim**, only "Production has matched within half a percent since" (last measured 08-12, still not re-measured). Say that is a measurement from 08-12 if asked. Class 1, owed by Ilia. No Jira action was taken.
+
+## 2026-10-16 (scheduled) — CURRENT. The 10-05 draft stands, unsent, 11 days old; its code-adjacent claim is now release-verified
+**Class 1, owed by Ilia** (Yash chased 09-11 and 10-02). The draft makes no code claim beyond "the July mismatch was fixed": #2084 is released since `v26.3.5.1` (09-01), verified 10-16. "Production has matched within half a percent since" is still the 08-12 measurement, not re-measured; say so if asked. Send the 10-05 draft as written (59 words). Do not close until Gennaro answers. No Jira action was taken.

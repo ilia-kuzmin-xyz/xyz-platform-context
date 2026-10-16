@@ -4780,3 +4780,17 @@ the time. A service-based fix would have marked all 819 installed. Rules now in
 - **PLT-3099 (#2194) open, green, awaiting review approvals** (`mergeable_state: blocked` = required
   reviews, not a conflict). Head `565d955f8`. Both Copilot findings from this morning fixed; PR
   description corrected today where it misstated the code.
+
+### 2026-10-16 (scheduled) — two new tickets; nine unchanged; DPL-1684 closed without a recorded cause
+
+Board (project = PLT, Live Incident, not Done): in scope **11**. Excluded by status: 3271 (Ready For QA), 3231, 3223, 3112, 3091 (In Code Review), 3135, 2660 (Blocked).
+
+| class | ticket | note |
+|---|---|---|
+| 1 (new) | **PLT-3290** ML5.4 dashboard shows no data | new folder; first question is the weighting setting, draft to Yash |
+| 1, class-3 shape | **PLT-3291** ATL08 MV-1350 shows 6,350 linked | new folder; Pattern 1 suspected; one prod read decides; draft to Ali; DPL-1684 reads Done with no cause |
+| 1 | PLT-2874 (Ilia, In Analysis) | 35 days past Ilia's own "today"; #2084 verified in `v26.3.5.1`; 10-05 draft stands |
+| 1 | PLT-3275, PLT-2858 | unchanged; waiting on Joshua / on Ali |
+| 1, parked | PLT-2651, 3172, 3116, 3063 (Customer Release Check), 3182, 3115 (With Customer) | unchanged; 3115 and 3063 are close candidates |
+
+Nothing posted or moved in Jira. Media not openable (403 / Freshdesk / SharePoint): 3290 attachment `66433`; 3291 screenshot and video.

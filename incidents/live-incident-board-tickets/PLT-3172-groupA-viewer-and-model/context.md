@@ -141,3 +141,6 @@ assignee Gennaro, fixVersions **26.3.7 (released 2026-10-12)** and **26.4.1 (not
 
 Class: parked with the customer, Yash owns the comms; nothing owed by us. Verified: PR/tag containment. Not verified: that the customer's own screen now
 works on prod (nobody has said); the 90 MB recording `65180` still unopened (403, not needed any more). No Jira action taken.
+
+## 2026-10-16 (scheduled) — unchanged
+`updated` still 10-12 11:12, Customer Release Check, Freshdesk Waiting on customer. Nothing owed by us. No Jira action was taken.

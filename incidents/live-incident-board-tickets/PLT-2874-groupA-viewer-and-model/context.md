@@ -1017,3 +1017,9 @@ Fresh fetch with comments (9 comments, newest `113731`). Yash: *"just curious, a
 
 **What changed in the picture:** the Staging reading (26.3.4, 08-12) is now two releases old, so asking "which project was that" is a weaker question than "re-check on the current release". Same owner, same single question, and the answer is two numbers.
 Class **1** (stale, unresponded, owed by Ilia). No Jira action was taken.
+
+## 2026-10-16 (scheduled) — unchanged on Jira; one open item from 10-05 is now verified
+Fresh fetch with comments: 9 comments, newest still `113731` (Yash, 10-02), In Analysis, assignee Ilia. Yash's second chase is 14 days unanswered; Ilia's own "today" (09-11) is 35 days overdue.
+**Verified this run (`git fetch --unshallow --tags`):** PR #2084 (`28e03c33c`, merged 07-31) is first in tag **`v26.3.5.1`** (09-01), then `v26.3.6` and `v26.3.7`. This closes the 10-05 "which release carries #2084" gap.
+Consequence for the draft: Gennaro's Staging reading (08-12, "26.3.4") may or may not have contained the fix, because there is **no `v26.3.4` tag** in this clone (26.3.x tags are `26.3.1`, `26.3.5.1`, `26.3.6`, `26.3.7`). Unverified whether that Staging build predated 07-31. Either way, every release since 09-01 carries the fix, so "re-check on the current release" is the right ask.
+Still unmeasured: that Production matches today (last reading 08-12). No Jira action was taken.

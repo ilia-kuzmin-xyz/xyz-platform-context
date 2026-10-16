@@ -101,3 +101,6 @@ Three comments after the folder's last read (`113485`):
 **Unverified:** that the retry works for all ten (customer has not reported); whether any of the ten has a project-level (not global) role that would also block.
 **Process note worth a human decision (not ours to open):** ex-employees kept tenant admin roles after leaving. That is an offboarding gap, separate from this ticket.
 No Jira action was taken.
+
+## 2026-10-16 (scheduled) — unchanged; the 10-07 chase point is 9 days past
+`updated` still 10-02 14:22, With Customer. No customer outcome recorded since Sergey removed the roles and the customer was asked to retry (Freshdesk 8130 Waiting on customer). Class 1, parked with customer; a chase belongs in Yash's Freshdesk channel. PLT-3183 (Team tab error message) not re-checked. No Jira action was taken.

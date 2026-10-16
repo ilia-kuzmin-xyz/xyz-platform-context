@@ -267,3 +267,6 @@ siblings inside one assembly; **Ready For QA**; its PR #2269 is on master but in
 
 Verified in git: `45017e721` (#2223) is in `v26.3.7`. The 09-22 note that neither candidate mechanism was confirmed still stands; QA has verified the symptom gone,
 which is the evidence that matters. Parked with the customer, Yash owns it, nothing owed by us. No Jira action taken.
+
+## 2026-10-16 (scheduled) — unchanged
+`updated` still 10-12 11:18, Customer Release Check. Nothing owed by us. No Jira action was taken.

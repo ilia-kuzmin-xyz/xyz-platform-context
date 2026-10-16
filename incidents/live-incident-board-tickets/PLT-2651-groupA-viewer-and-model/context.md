@@ -1357,3 +1357,6 @@ never corrected, and Rishi said on `112810` that project settings do not affect 
 so a stale instruction is a live risk for the retest. Not verified: whether the customer ever changed the angle (nobody asked).
 
 Class 1 (a named person, Yash, owes the customer a short correction). No Jira action taken.
+
+## 2026-10-16 (scheduled) — unchanged
+Fresh fetch with comments: 39 comments, newest `114906` (Yash, 10-12 Freshdesk Waiting on customer), Customer Release Check, assignee Ozan. The 10-13 ask (correct the true-north advice, 54 words) is still unposted, 3 days; the customer may be acting on comment `111642` meanwhile. Class 1, parked with Yash. No Jira action was taken.
