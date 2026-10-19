@@ -685,3 +685,6 @@ Fresh fetch with comments (39 comments, newest `114681`, 10-09 14:30, Mostafa). 
 
 ## 2026-10-16 (scheduled) — unchanged
 Fresh fetch with comments: 39 comments, newest `114681` (Mostafa, 10-09 14:30), status Dev In Progress, assignee Darminder. Ali's two questions of 10-09 (`114680`) are 7 days unanswered; the 10-12 draft to Ali stands. Class 1. No Jira action was taken.
+
+## 2026-10-19 (scheduled) — left scope
+Board shows **In Code Review** since 10-16 14:25 BST (Darminder). Not re-fetched in this run (out of scope by status). The question drafted to Ali stays unsent as far as this run can see; check on the next run whether a PR exists and whether Ali's open questions were answered.

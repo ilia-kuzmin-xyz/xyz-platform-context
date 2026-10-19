@@ -620,3 +620,8 @@ sync has now done it by proxy, three months late.
 
 **Renamed** `PLT-2815-groupA-quality-management/` → `PLT-2815-resolved-quality-management/` this
 run. No further scheduled re-checks needed unless the customer reopens.
+
+## 2026-10-19 — the customer came back: re-reported as PLT-3300
+Jira shows PLT-2815 **Done** since 09-22 (resolution empty). The same customer (Paolo, ML9) raised the same figures (CAT3 €684.00, CAT4 €843.60) on 10-16 as **PLT-3300**,
+adding CSA / Precast CAT2 = €684.00 (a second `£600` row). The arithmetic above still reproduces exactly and neither the table nor the logic has changed. "Leave it as intended" did not end it.
+See `../PLT-3300-groupA-quality-management/`.

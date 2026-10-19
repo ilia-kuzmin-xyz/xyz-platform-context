@@ -57,3 +57,8 @@ role as described there).
 
 ## 2026-10-16 (scheduled) — unchanged
 Fresh fetch with comments: 5 comments, newest `114970` (10-12 Freshdesk Pending), status Open, assignee Yash. Nothing from Joshua or Mostafa on the ticket; waiting on Joshua is now 7 days (asked 10-09). `rework_reference.json` on hc-frontend master `049c25819` still has its only commit PLT-437 (`3b5989409`), so the table is unchanged. The 10-13 draft stands. No Jira action was taken.
+
+## 2026-10-19 (scheduled) — unchanged, plus a sibling
+Last fetch stamp still 10-12 17:18 (newest comment `114970`), so not re-fetched. Joshua's values now owed 10 days (asked 10-09). The 10-13 draft stands.
+New sibling **PLT-3300** (ML9, same table, a different symptom: wrong values, not a blank), see `../PLT-3300-groupA-quality-management/context.md`.
+If product edits `rework_reference.json` for PLT-3300 it is the same edit-and-release as this ticket, so the two can ride one change.

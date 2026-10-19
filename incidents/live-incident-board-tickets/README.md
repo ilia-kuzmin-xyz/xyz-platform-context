@@ -45,6 +45,27 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-19 (scheduled) — 11 in scope (was 11), all Group A, Group B empty. One new ticket (PLT-3300), one status-only change (PLT-3172), three tickets left scope to QA/code review, zero Jira actions taken
+
+(The 10-16 run's entry is at the bottom of this file, appended after the older July to October material.) Board re-queried (`statusCategory != Done`, 18 live incidents). In scope: PLT-3300 (Open, new), 3291, 3290, 3275 (Open), 3182, 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis). Out of scope: With Technical Support (3299), Ready For QA (3271, 3231, 3223, 3112, **3091**), In Code Review (**2858**), Blocked (3135, 2660). 3290 and 3291 carry the stamps the 10-16 run already covered, so were not re-fetched.
+
+**PLT-3300 (Open, Darminder, new, ML9).** Same customer and same figures as PLT-2815 (June, closed "leave as intended"), plus CSA Precast CAT2 €684.00. All three numbers reproduce to the cent from the table (600 x 1.14 twice, 740 x 1.14); table and logic unchanged. The two `£600` rows are the cheapest CSA package rows in the table, so this is a product question about two values, not a bug. Draft to Mostafa, one closed question (77 words). Class 4, with Darminder's reply to Yash owed one working day. Pattern 6, fourth firing.
+
+**PLT-3172** only changed sprint (Sprint 55, Darminder 10-16); #2265 still in no tag (26.4.1 unreleased). **PLT-2858** moved to In Code Review (10-16), **PLT-3091** to Ready For QA (10-16); both left scope without a visible comment. PLT-3091's customer reply to Yash (`114919`) is a week old, and #2311 is still in no tag.
+
+**Owed by Ilia, unanswered (unchanged):** PLT-2874 Yash's chase (`113731`, 17 days), PLT-3091 customer reply via Yash, PLT-2858 question to Ali (draft in folder; ticket now in code review). **Standing:** PLT-3115 (With Customer since 09-16, 33 days; Yash's own "we can close the ticket now" never actioned), PLT-3182 (With Customer since 10-02), PLT-3275 (Joshua owes values, 10 days), PLT-2651 (true-north correction still owed), PLT-3063, 3116, 3172 (parked).
+
+**Unopenable media (403, unchanged):** PLT-3275 Freshdesk screenshot; PLT-3290 attachment `66433`; PLT-3291 screenshot and video; PLT-2858 `66039`. PLT-3300 has no attachments.
+**Not verified:** how the two `£600` values were chosen; whether ML9's customer typed or auto-suggested the figures; whether PLT-2858/3091 got comments that did not move their stamp.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3300](PLT-3300-groupA-quality-management/context.md) | quality-management | Open | **new; Pattern 6 re-report; draft to Mostafa** | 4 (+1) |
+| [PLT-3172](PLT-3172-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | sprint only; #2265 unreleased | 1, parked |
+| PLT-3291, 3290, 3275, 3182, 3116, 3115, 3063, 2874, 2651 | various | various | unchanged | see 10-16 and 10-13 tables |
+
+---
+
 ## Run: 2026-10-15 (scheduled) — 9 in scope (unchanged), all Group A, Group B empty. Nothing changed on any of them; PLT-3091 left scope into In Code Review. Zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 16 live incidents; newest ticket still PLT-3275, nothing new since 10-09). In scope: PLT-3275 (Open), 3182 and 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis), 2858 (Dev In Progress). Out of scope: In Code Review (3271, 3231, 3223, 3112, **3091**), Blocked (3135, 2660). The nine in-scope tickets carry the same `updated` stamp as the 10-14 run, so they were not re-fetched. hc-frontend's 12 most recently updated PRs touch none of them.

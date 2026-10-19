@@ -1240,3 +1240,15 @@ Also: PR #2211 (PLT-3112, merged 10-07, untagged as of `v26.3.7`) bounds the Mod
 A project that has only just started linking shows an empty dashboard. Two frontend states look alike and mean different things: **blank/empty panel** = progress outputs never produced
 (`use-progress-panel-data.tsx:33-38`, "nothing calculated"), **0.00% with an empty category list** = weighting gate (`AND weight > 0`, default Budgeted labour units, `progress-weighting-types.ts:23-28`)
 on a schedule with no labour units. The screenshot (blank vs 0.00%) is the cheapest fork; the first question to ask is the project's weighting setting. Candidate only; see `PLT-3290-groupA-progress-tracking/`.
+
+## 2026-10-19 — amendment to **Pattern 6**: fourth firing (PLT-3300), and the first one the customer re-opened after "as intended"
+
+PLT-3300 (ML9, 10-16) is PLT-2815 (ML9, June) again: same customer, same CSA / Underground Services, same two figures (CAT3 €684.00, CAT4 €843.60), plus a second package, CSA / Precast CAT2 = €684.00.
+All three numbers reproduce to the cent from `rework_reference.json` at the current factor (600 x 1.14, 600 x 1.14, 740 x 1.14); table unchanged since `3b5989409` (2025-10-29), hook change since is a field rename only.
+
+What is new in kind:
+
+1. **"Leave it as intended" is not an end state for this pattern.** PLT-2815 closed on that answer (06-23, Done 09-22) and the customer re-raised it with a bigger scope four months later. When the same customer sends a ticket whose numbers match a closed one, the answer needs a product owner's *reason* for the values, not just their confirmation.
+2. **Recognition test for the 'cheap row' shape:** list rows in the table that are far below their own generic fallback. Here two rows equal exactly £600 (Precast Cat 2 vs generic CSA Cat 2 £7,871.72; Underground Services Cat 3 vs generic £2,003.33), the two cheapest CSA package rows in 90. Both customer complaints on this project landed on one. Inferred, not verified: placeholder or floor value, nobody has said how it was chosen.
+3. **The firing count is now four in 2.5 months (PLT-2815, PLT-3061, PLT-3275, PLT-3300) on three projects**, and a fifth sibling (PLT-3299, LVN, CAT 5 6.12k) is a different cause on the same screen (user-entered cost on Category 5 survives because the auto 0 only applies to an auto-filled field, `use-rework-cost-calculation.ts:63-73`; Void issues counted in the QA list's open number). Cheap triage: first check whether the figure was auto-suggested or typed.
+4. A decision that would end the pattern (fallback to a Category-level default for unknown disciplines; review of the two £600 values) is still not put to Pietro/Mostafa as one question. PLT-3300's draft asks only the £600 question.

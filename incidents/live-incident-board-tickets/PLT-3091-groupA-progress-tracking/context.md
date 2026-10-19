@@ -1075,3 +1075,6 @@ Fetched live: **33 comments** (was 31), status **Done** (was Open), resolution e
 Fetched live: **33 comments** (unchanged, newest `115023`), assignee Darminder, status **In Code Review** (was Done on 10-14). No comment explains the move back. PAPI-3936 still Released. GitHub search for `PLT-3091` in hc-frontend returns only #2311 (closed, merged 10-13), so **no follow-up PR is visible**: whether Darminder reopened it for a second change or just fixed a wrong transition is **not known**. Nothing posted by this run.
 
 Residual unchanged: the customer's 10-12 question (`114919`, "when did the release take place") has had no reply in 3 days, and #2311 is still in no tag (not re-checked today). Draft to Yash from 10-14 stands. Class 1, residual. Ask Darminder one thing: is there a second PR coming under this ticket.
+
+## 2026-10-19 (scheduled) — status moved to Ready For QA
+Board shows **Ready For QA**, updated 10-16 12:55 BST (it was In Code Review on 10-15). Out of scope by status; not re-fetched. Customer reply owed via Yash (`114919`, now a week unanswered) still stands unless someone posted it; verify on the next fetch, and check whether #2311 is in a tag (the newest tag is still `v26.3.7`, `git tag --contains` empty for #2311 as of today).
