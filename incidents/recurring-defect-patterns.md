@@ -1252,3 +1252,14 @@ What is new in kind:
 2. **Recognition test for the 'cheap row' shape:** list rows in the table that are far below their own generic fallback. Here two rows equal exactly £600 (Precast Cat 2 vs generic CSA Cat 2 £7,871.72; Underground Services Cat 3 vs generic £2,003.33), the two cheapest CSA package rows in 90. Both customer complaints on this project landed on one. Inferred, not verified: placeholder or floor value, nobody has said how it was chosen.
 3. **The firing count is now four in 2.5 months (PLT-2815, PLT-3061, PLT-3275, PLT-3300) on three projects**, and a fifth sibling (PLT-3299, LVN, CAT 5 6.12k) is a different cause on the same screen (user-entered cost on Category 5 survives because the auto 0 only applies to an auto-filled field, `use-rework-cost-calculation.ts:63-73`; Void issues counted in the QA list's open number). Cheap triage: first check whether the figure was auto-suggested or typed.
 4. A decision that would end the pattern (fallback to a Category-level default for unknown disciplines; review of the two £600 values) is still not put to Pietro/Mostafa as one question. PLT-3300's draft asks only the £600 question.
+
+## 2026-10-20 — two additions from PLT-3308 and PLT-3299 (candidates, one occurrence each)
+
+**Pattern 2 face: a headline weighted by links, dominated by activities that cannot carry progress (PLT-3308, TXE10).** A filtered dashboard headline reads about 1% while 83% of elements are installed, because the average is
+weighted by linked elements (`progress-queries-v2-api.ts:190-192, :454-464`) and almost all elements sit on Level of Effort activities, which arrive from the API as 0 actual and blank planned (`dashboard/progress-tab.md`, 2026-08-31).
+**The explanation is right in kind and its number did not reproduce:** the finding's own figures give about 0.2%, the panel shows 1.07%. Recognition test: when a headline disagrees with the status counts, group the filtered elements by *activity type* and compute `SUM(w x actual) / SUM(w)`
+before explaining; do not quote a figure until it reproduces the surface's own. Candidate, one occurrence.
+
+**Pattern 5 face: a Void issue is in the total and the cost but not in "open" (PLT-3299, LVN).** `quality-sql-queries.ts:15-24` excludes only `DRAFT`; Void adds to `issueCount` and `totalCost` and never to `openCount`, so a category can read 0 open with a non-zero cost.
+Compounding: the cost field auto-fills only when empty (`issue-cost-field.tsx:55-62`), so a cost entered under another category survives a re-categorise (Category 5's suggestion is 0, `use-rework-cost-calculation.ts:62-73`).
+Cheap triage: ask for status and cost of each issue in the category before explaining. Product decision pending (Mostafa). Candidate, one occurrence; **not Pattern 6** (the table is not the source).

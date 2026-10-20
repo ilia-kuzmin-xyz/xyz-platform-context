@@ -73,3 +73,15 @@ value survives. Not our ticket; recorded because it is the same screen and the s
 - Whether the customer entered those costs themselves (Darminder's PLT-3299 finding says manual entry is possible). The ticket has no screenshot, so which issue, which cost
   and whether the figure was auto-suggested or typed is unknown. The description says "suggested value", so auto-suggest is assumed.
 - Media: none attached to this ticket. Nothing unopenable.
+
+---
+
+## 2026-10-20 run — left scope: moved to With Technical Support after Ilia's reply (additive)
+
+Re-fetched, 3 comments, newest `115961` (Ilia, 10-19 19:27): costs come from the rework cost table and match it exactly; CSA / Precast / CAT2 is £600 (€684); **Underground Services has no CAT4 value so it falls
+back to the general CSA CAT4 cost (£740, €843.60)**; suggestion: update the table with the right values, "can we ask Joshua Rees for them?". Status is now **With Technical Support** (out of scope).
+
+**Supersedes the 10-19 draft to Mostafa** (the "review the two £600 values" question): Ilia took a different route, asking the customer's side (Joshua Rees) for the correct values instead of asking product. That is consistent with
+PLT-3275 (Joshua owes values since 10-13). Not wrong, but note the 06-23 PLT-2815 close ("leave as intended") rested on a product answer, and a customer-supplied value still needs product ownership of the table
+(`rework_reference.json` mirrors Pietro's Confluence page). Residual, one line, for the summary: **if Joshua's values arrive, who edits the table and ships it is undecided** (JSON edit plus release, same as PLT-3275).
+No action today. No Jira action was taken.

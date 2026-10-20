@@ -85,3 +85,12 @@ Inferred: that this is Pattern 1; that the DB count is not geometry-bounded.
 - Which of the three surfaces the customer's "6350" is read from (video).
 
 No Jira action was taken.
+
+---
+
+## 2026-10-20 run — left scope: moved to With Technical Support after Ilia's reply (additive)
+
+Re-fetched, 3 comments, newest `115960` (Ilia, 10-19 18:37): not a calculation error; **MV-1350 has 6,995 linked elements, most linked in April, only 851 on 14 Oct**; the models look empty because the same
+elements sit in several models and those are not loaded; suggestion: unlink the April links if the customer does not need them. Status is now **With Technical Support** (out of scope), so the customer owes the answer.
+**Not verified here:** the 6,995 / 851 figures (Ilia's prod read) and the "models not loaded" explanation. The customer's own claim was 6,350, so 6,995 is also a *higher* number than the customer reported;
+the reply explains the cause but not why the customer saw 6,350. Minor, worth one line if the customer pushes back. No Jira action was taken.

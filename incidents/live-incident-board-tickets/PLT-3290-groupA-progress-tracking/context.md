@@ -66,3 +66,31 @@ Inferred: everything about ML5.4's actual settings and backend state.
 - Whether the schedule on ML5.4 crosses a calendar year (H3).
 
 No Jira action was taken.
+
+---
+
+## 2026-10-20 run — Ilia replied on 10-19; the 10-16 hypotheses are re-ordered (additive; nothing above is deleted)
+
+Re-fetched live, 4 comments, newest `115958`.
+
+- `115957` Ilia (10-19 17:27): **not a dashboard error.** The progress parquet with **actual** progress was not generated properly for ML5.4, so the dashboard has nothing to show; **only the planned file exists (calculated 14 Oct)**.
+  Linking looks fine: **1,511 elements on 15 activities, 953 installed.** Asks **@Ali** why the planned-and-actual parquet files were not generated (project id `46f2f7f3-9904-421c-9029-d20f8ed677ca`).
+- `115958` Yash thanks him and asks Ali whether it needs to move to PAPI.
+- **Who waits on whom:** Ali owes an answer since 10-19 17:27 (under one working day). Nothing owed by the customer. Ticket stays In Analysis (Ilia).
+
+**Superseded by this:** the 10-16 draft (question to Yash about the weighting setting) is **dead**; do not post it. H1 (Pattern 3, weighting gate) is effectively ruled out by Ilia's finding that the actual file is missing:
+a Pattern 3 project has the files and shows 0.00%. **H2 is now the working hypothesis, from Ilia's read, which this session cannot repeat** (inferred, not measured here). H3 (DPL-1707) is the next question *after* Ali answers,
+not alongside it: one question per message.
+
+What the code predicts for H2, unchanged from 10-16: the blank panel (`use-progress-panel-data.tsx:33-38`). That fits "nothing at all" and does not fit 0.00%; the customer's screenshot (`66433`, still 403) would show which. It is now a cheap
+confirmation rather than the deciding fork.
+
+New unverified detail: "planned calculated 14 Oct" means the planned run succeeded on the day linking started, and the actual run did not. Why one succeeds and the other fails is the backend question; nothing frontend explains it.
+
+**Action class: 1** (Ali owes). Chase on 10-21 only if silent. Draft, only after Ali says the run failed and the DPL-1707 fork is next (one closed question, 14 words):
+
+> Ali, thanks. **Which error does the ML5.4 actual-progress run log show for 14 Oct?**
+
+(Wording assumes Ali can read the run log, not verified. Compare the error with DPL-1707's year-crossing date failure yourself; do not put the DPL ticket in the message. Do not send before Ali's first answer.)
+
+No Jira action was taken.

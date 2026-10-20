@@ -16,3 +16,11 @@
   happened or is failing (check DPL-1707 first, then the schedule's date range).
 - Ask Yash for the screenshot into the folder (blank panel vs 0.00% is the cheapest fork).
 - Do not tell the customer anything about a cause until one of those two answers is in.
+
+---
+
+## 2026-10-20 — SUPERSEDES the 2026-10-16 draft above. Do not post the weighting question.
+
+Ilia has answered in the ticket (`115957`): actual-progress parquet missing for ML5.4, only the planned one exists (14 Oct), and he asked Ali. Nothing to post today. Action class 1, **Ali owes** since 10-19 17:27;
+chase on 10-21 if silent (one line, same question, no new content). The DPL-1707 follow-up is drafted in context.md and is for after Ali's first answer. Yash's "move to PAPI?" is Ali's to answer; if Ali says yes, the ticket
+needs a PAPI ticket carrying the project id and the 14 Oct date, written by Ilia or Yash.

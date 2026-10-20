@@ -104,3 +104,12 @@ No Jira action was taken.
 
 ## 2026-10-16 (scheduled) — unchanged; the 10-07 chase point is 9 days past
 `updated` still 10-02 14:22, With Customer. No customer outcome recorded since Sergey removed the roles and the customer was asked to retry (Freshdesk 8130 Waiting on customer). Class 1, parked with customer; a chase belongs in Yash's Freshdesk channel. PLT-3183 (Team tab error message) not re-checked. No Jira action was taken.
+
+---
+
+## 2026-10-20 run — went Done on 10-19 by Freshdesk closure; residual, one line (additive)
+
+Fetched with comments before dropping it (rule of 10-14). Last comments: `115907` Freshdesk **Open** (10-19 12:49:37) then `115908` **Closed** (12:50:27), 50 seconds apart; Jira status Done at 12:50:29, resolution field empty.
+Freshdesk reopens a ticket on a customer reply, so the customer probably wrote back on 10-19 and Yash closed it at once; **the reply is not in Jira and was not read**. Sergey removed the global roles on 10-02 (`113717`), Yash asked
+the customer to retry; **nobody recorded that the ten users were actually removed**. Follow-up **PLT-3183** (Team tab: show why removing an organisation admin fails, Bug, Open, Medium) is the only open item and is not a live incident.
+Class 1, residual: Yash to confirm the customer's reply said the users are gone. No action from us. No Jira action was taken.

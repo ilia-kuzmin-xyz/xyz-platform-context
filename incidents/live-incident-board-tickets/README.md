@@ -45,6 +45,43 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-20 (scheduled) — 10 in scope (was 11), all Group A, Group B empty. Two new in scope (PLT-3308, PLT-3299), one re-ordered (PLT-3290), three left scope, one closed; one arithmetic gap found on PLT-3308; zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 21 live incidents). In scope: PLT-3308 (In Analysis, new, Ilia), 3290 (In Analysis, Ilia), 3275 (Open), 3299, 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis).
+Out of scope: With Technical Support (**3300, 3291**, both moved there on 10-19 after Ilia's replies), Ready For QA (**3306** new, 3271, 3231, 3223, 3112, 3091), In Code Review (2858), Blocked (3135, 2660). **PLT-3182 went Done** (10-19 12:50, Freshdesk closure).
+Unchanged `updated` stamps, not re-fetched: 3275 (10-12), 3115 (09-16), 3172 (10-16), 3116 and 2651 (10-12), 3063 (09-28), 2874 (10-02). Fetched with comments: 3308, 3299, 3290, 3182, and 3300, 3291, 3306 for residuals.
+
+**PLT-3308 (In Analysis, Ilia, TXE10).** Ilia's 10-19 analysis: the headline follows schedule-activity progress, 99.8% of the HP elements sit on 6 Level of Effort activities that carry no progress, so about 1%; asked Mostafa to confirm LOE is excluded on purpose (owes, one day).
+Code confirms the shape: element-count weighting, `SUM(w x actual) / SUM(w)`, no status predicate in the query. **But his own figures predict about 0.2% (346 x 0.95 / ~170k), not the 1.07% on the panel.** The explanation holds in kind and not yet to the number;
+details and four falsifiable candidates in the folder. One read by Ilia closes it. Do not let "about 1%" reach the customer before then. Class 1 plus a class 3 half. Chase draft to Mostafa (27 words) for 10-21.
+
+**PLT-3299 (With Customer, Yash, LVN, new to scope).** CAT 5 shows 6.12k rework cost and "0 open" against "3 open" in the QA list. Darminder: the cost is on the issues, and the three include Void. Code: the dashboard counts Void in totals and cost and not in open
+(`quality-sql-queries.ts:15-24, :125-140`); the CAT 5 auto-suggestion is 0, but it never overwrites an existing value (`issue-cost-field.tsx:55-62`), so a cost entered under another category survives a re-categorise. Yash asked Mostafa on 10-19 (owes, one day).
+Not Pattern 6. Two drafts: a 29-word question to Yash (status and cost of the three issues, the cheap falsifier) and a 42-word product question to Mostafa. Class 1 plus class 4; the "With Customer" status is only half true, the open item is internal.
+
+**PLT-3290 (In Analysis, Ilia, ML5.4).** Ilia replied: actual-progress parquet missing, only planned exists (14 Oct), 1,511 elements on 15 activities, 953 installed; asked Ali (owes since 10-19 17:27). **The 10-16 weighting question is dead, do not post it.** Class 1.
+
+**Left scope, residuals only.** PLT-3300 (With Technical Support): Ilia said the values match the table and suggested asking Joshua Rees for correct ones, which supersedes the 10-19 draft to Mostafa; who edits and ships the table is undecided. PLT-3291 (With Technical Support):
+Ilia explained 6,995 links, most from April; the customer saw 6,350, a minor gap the reply does not address. PLT-3182 (Done by Freshdesk closure): the customer's last reply is not in Jira and nobody recorded the users were removed; PLT-3183 is the follow-up bug. PLT-3306 (new, Ready For QA): Ilia's hotfix in 26.4.1; same project and filter as 3308, so re-read 3308's headline after 26.4.1.
+
+**Owed by Ilia, unanswered (unchanged):** PLT-2874 Yash's chase (`113731`, 18 days), PLT-3091 customer reply via Yash (now Ready For QA), PLT-2858 question to Ali (now In Code Review). **Standing:** PLT-3115 (With Customer since 09-16, 34 days; Yash's "we can close the ticket now" never actioned),
+PLT-3275 (Joshua owes values, 7 days), PLT-2651 (true-north correction still owed), PLT-3063, 3116, 3172 (parked).
+
+**Unopenable media (403):** PLT-3299 Jira `66491`, `66504`-`66508` and Freshdesk `103357050614`; PLT-3308 three Freshdesk screenshots `103357189841`-`103357189843` (no Jira attachments); PLT-3290 `66433`; PLT-3275 Freshdesk screenshot; PLT-3291 screenshot and video; PLT-2858 `66039`.
+**Not verified:** the 1.07% on PLT-3308; the three PLT-3299 issues' statuses; Ilia's prod figures on 3308, 3290 and 3291 (his reads, not repeated here); what Yash told the PLT-3299 customer; the customer's last message on PLT-3182.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3308](PLT-3308-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | **new; LOE explanation holds in kind, arithmetic gap (0.2% vs 1.07%); Mostafa owes** | 1 (+3) |
+| [PLT-3299](PLT-3299-groupA-quality-management/context.md) | quality-management | With Customer | **new to scope; Void counted in totals and cost; Mostafa owes** | 1 (+4) |
+| [PLT-3290](PLT-3290-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | Ilia replied; weighting draft superseded; Ali owes | 1 |
+| [PLT-3300](PLT-3300-groupA-quality-management/context.md) | quality-management | With Technical Support | left scope; 10-19 draft superseded | residual |
+| [PLT-3291](PLT-3291-groupA-viewer-and-model/context.md) | viewer-and-model | With Technical Support | left scope | residual |
+| [PLT-3182](PLT-3182-groupA-access-permissions/context.md) | access-permissions | Done | Freshdesk closure; reply unseen | residual |
+| PLT-3275, 3115, 3172, 3116, 3063, 2874, 2651 | various | various | unchanged | see 10-19 and 10-13 tables |
+
+---
+
 ## Run: 2026-10-19 (scheduled) — 11 in scope (was 11), all Group A, Group B empty. One new ticket (PLT-3300), one status-only change (PLT-3172), three tickets left scope to QA/code review, zero Jira actions taken
 
 (The 10-16 run's entry is at the bottom of this file, appended after the older July to October material.) Board re-queried (`statusCategory != Done`, 18 live incidents). In scope: PLT-3300 (Open, new), 3291, 3290, 3275 (Open), 3182, 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis). Out of scope: With Technical Support (3299), Ready For QA (3271, 3231, 3223, 3112, **3091**), In Code Review (**2858**), Blocked (3135, 2660). 3290 and 3291 carry the stamps the 10-16 run already covered, so were not re-fetched.
