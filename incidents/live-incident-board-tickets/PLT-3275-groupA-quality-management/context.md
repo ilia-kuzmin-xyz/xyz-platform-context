@@ -62,3 +62,15 @@ Fresh fetch with comments: 5 comments, newest `114970` (10-12 Freshdesk Pending)
 Last fetch stamp still 10-12 17:18 (newest comment `114970`), so not re-fetched. Joshua's values now owed 10 days (asked 10-09). The 10-13 draft stands.
 New sibling **PLT-3300** (ML9, same table, a different symptom: wrong values, not a blank), see `../PLT-3300-groupA-quality-management/context.md`.
 If product edits `rework_reference.json` for PLT-3300 it is the same edit-and-release as this ticket, so the two can ride one change.
+
+---
+
+## 2026-10-21 run — H1 confirmed by Ilia's read of the project; status With Customer (additive)
+
+Re-fetched, 7 comments, newest `115971`. Status is now **With Customer** (was Open), still assignee Yash.
+- `115966` Ilia, 10-20 10:03: the table only has CSA, Electrical and Mechanical; **SIN02 uses different disciplines (Civil, Structural, Architectural, Plumbing, Fire Protection, etc.), so 9 of its 11 disciplines have nothing to look up and the field stays blank; Electrical and Mechanical should still get a value.** Suggests adding SIN02's disciplines to the table and asking Joshua Rees. **This confirms H1** (Ilia's read of the project; not re-measured here). H2 stays dead.
+- `115971` Yash, 10-20 10:22: has asked Joshua for an updated rework file; will provide it when it arrives.
+
+**Supersedes the 10-13 draft to Yash** (asking for SIN02's exact discipline and package names): Ilia already has them. The 10-13 point about asking for the whole discipline, not one cell, is still the one open risk: Yash's ask to Joshua is "an updated rework file", which does not say it must cover every one of the 9 disciplines and their packages for Categories 1 to 4. If it comes back partial, the field stays blank for the rest (PLT-3061's lesson).
+Ball: Joshua, via Yash, since 10-20 (11 days since the first ask on 10-09). After the file arrives, Darminder edits `rework_reference.json` and it ships with a release (not verified that a release is scheduled; 26.4.1 is unreleased).
+Sibling PLT-3300 (ML9) waits on the same file. Class 1, parked. No Jira action was taken.

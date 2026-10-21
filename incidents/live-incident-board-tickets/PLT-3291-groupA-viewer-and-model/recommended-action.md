@@ -25,3 +25,6 @@ If the answer is "nothing changed", H1 is very likely and the cross-write is sti
 - Draft 1 deliberately does not ask Darminder anything: the ticket is his, but he has not replied and a pointed question to Ali is the faster route.
   If Ilia prefers, post it as a comment here tagging both.
 - Do **not** tell the customer anything yet. A cause posted before the measurement is the PLT-3099 / PLT-3101 failure.
+
+## 2026-10-21 — status housekeeping only (no message)
+Freshdesk says Waiting on customer but the Jira ticket sits at **Open**. Suggest Yash or Ilia moves it back to With Technical Support (or With Customer) so it stops reading as owed by us. Not urgent. If the customer replies that the 6,350 versus 6,995 gap matters, the one-line answer is that the count includes everything linked, and the customer's figure may have been read earlier or from another surface (unverified).

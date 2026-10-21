@@ -85,3 +85,10 @@ back to the general CSA CAT4 cost (£740, €843.60)**; suggestion: update the t
 PLT-3275 (Joshua owes values since 10-13). Not wrong, but note the 06-23 PLT-2815 close ("leave as intended") rested on a product answer, and a customer-supplied value still needs product ownership of the table
 (`rework_reference.json` mirrors Pietro's Confluence page). Residual, one line, for the summary: **if Joshua's values arrive, who edits the table and ships it is undecided** (JSON edit plus release, same as PLT-3275).
 No action today. No Jira action was taken.
+
+---
+
+## 2026-10-21 run — back in scope: status With Customer (additive)
+
+Re-fetched, 5 comments, newest `115970` (Yash, 10-20 10:19): "Have asked Joshua for an updated rework file." Freshdesk 8222 Pending (`115969`). Jira status is now **With Customer** (was With Technical Support on 10-20), which is in scope. Ball: Joshua, via Yash, since 10-20.
+Nothing new in kind. The residual from 10-20 stands: when Joshua's file arrives, who edits `rework_reference.json` and ships it is undecided (Darminder said on PLT-3275 he can update the frontend side). Same table, same edit as PLT-3275; see the combined-ask draft in `../PLT-3275-groupA-quality-management/recommended-action.md`. Class 1, parked. No Jira action was taken.

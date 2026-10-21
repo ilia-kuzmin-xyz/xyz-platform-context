@@ -94,3 +94,11 @@ Re-fetched, 3 comments, newest `115960` (Ilia, 10-19 18:37): not a calculation e
 elements sit in several models and those are not loaded; suggestion: unlink the April links if the customer does not need them. Status is now **With Technical Support** (out of scope), so the customer owes the answer.
 **Not verified here:** the 6,995 / 851 figures (Ilia's prod read) and the "models not loaded" explanation. The customer's own claim was 6,350, so 6,995 is also a *higher* number than the customer reported;
 the reply explains the cause but not why the customer saw 6,350. Minor, worth one line if the customer pushes back. No Jira action was taken.
+
+---
+
+## 2026-10-21 run — back in scope as Open, Freshdesk Waiting on customer (additive)
+
+Re-fetched, 6 comments, newest `115972` (Yash, 10-20 10:30). Freshdesk 8300 toggled Waiting on customer, Open, Waiting on customer (`115967`, `115968`, `115972`) between 10:14 and 10:30 on 10-20: Yash sent Ilia's explanation to the customer, who now owes a reply (unlinking the April links, or confirming they need them). **Jira status is Open again** (was With Technical Support on 10-20) although the ball is with the customer; it shows up in scope because of that.
+Nothing new in kind. The residual from 10-20 stands (the customer saw 6,350, Ilia measured 6,995; not explained). No code or master change touches this (`9699aa5`).
+Class 1, parked on the customer. See `recommended-action.md` 2026-10-21 note. No Jira action was taken.

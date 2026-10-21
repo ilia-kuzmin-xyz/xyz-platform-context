@@ -17,3 +17,14 @@ stop the ask being too narrow (PLT-3061's lesson: the customer names one cell, t
 - PLT-3061's eight values were never added to `rework_reference.json`. If SIN02 is also a spelling variant, the same table now has two open gaps.
 - Optional product question to Mostafa/Pietro, only after Joshua replies: should an unknown discipline fall back to a Category-level default
   instead of blank? That removes the pattern rather than patching rows. Not drafted as a message.
+
+## 2026-10-21 — the 10-13 draft is superseded; one optional combined ask
+
+Do not post the 10-13 draft: Ilia has the discipline names (`115966`) and Yash has asked Joshua (`115971`). The one gap left is that the ask to Joshua is generic, and PLT-3300 needs corrected values from the same person. One short message makes it a single, complete request.
+**Class 1**, parked, ball with Joshua. Optional, post only if you agree the ask needs tightening.
+
+### Draft: comment on PLT-3275, author Ilia, @Yash (40 words)
+
+> Yash, the SIN02 file and the two ML9 values on PLT-3300 are the same table. **Can you ask Joshua for one file that covers every SIN02 discipline and package for Categories 1 to 4, plus the corrected ML9 values?** Partial values would leave the field blank elsewhere.
+
+Chase Joshua via Yash if nothing by about 10-27. Optional product question to Mostafa or Pietro (fallback default for unknown disciplines, ends the pattern) is still not asked.

@@ -20,3 +20,6 @@ If "review": Yash tells Paolo the table is being reviewed and does not promise a
 - Do not offer the customer a code fix: there is none to make. Darminder's answer to Yash is "the file has these values, the calculation is correct".
 - PLT-3299 (With Technical Support) is the same family; it is Darminder's and already has an explanation. No action from us.
 - If product agrees to change the table, it is a JSON edit plus a release (same as PLT-3275), and PLT-3275/PLT-3061's open table gaps could ride the same change.
+
+## 2026-10-21 — nothing new to draft
+The 10-19 draft to Mostafa stays superseded (Ilia routed the question to Joshua on 10-19). Yash asked Joshua 10-20. Chase only if no file by about 10-27. See the combined ask under PLT-3275.

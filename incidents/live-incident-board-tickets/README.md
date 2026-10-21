@@ -45,6 +45,33 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-21 (scheduled) — 13 in scope (was 10), all Group A, Group B empty. One new ticket (PLT-3330), three tickets back in scope after status moves (PLT-3300, 3275, 3291), nothing changed on the other nine, zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 22 live incidents). In scope: **PLT-3330** (Open, Ilia, new), 3308, 3290, 2874 (In Analysis), **3291** (Open), 3300, 3299, 3275, 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check).
+Out of scope: Ready For QA (3306, 3231, 3223, 3112, 3091), **Ready For Release (3271, new status name this run, treated as released-and-out)**, In Code Review (2858), Blocked (3135, 2660).
+Unchanged `updated` stamps, not re-fetched: 3308, 3299, 3290 (10-19), 3172 (10-16), 3116 and 2651 (10-12), 3063 (09-28), 3115 (09-16), 2874 (10-02). Fetched with comments: 3330, 3300, 3291, 3275. hc-frontend origin/master still `9699aa5`, no relevant change.
+
+**PLT-3330 (Open, Ilia, SIN02, new).** Facade elements installed in the Editor, "not visible" in the Dashboard; Yash found one that is **orange**. Orange is Late Start: the dashboard's CASE says "not installed as of the reference date" (`installation-status-sql.ts:35-70`), so the dashboard's status copy is behind the editor or the date is earlier than the check date. Leading cause: the fresh-load status merge is capped at the progress `calculatedOn`, shown as the Progress panel's **"Last updated"**; that cap is the same one as PLT-3133. Not measured; screenshots 403.
+"Not visible at all" could also be links to a non-current schedule revision (SIN02 re-imported its schedule in September, PLT-3156). Draft to Yash (45 words, one question: what does Last updated say and when was it marked installed). Class 1 with a class-3 shape.
+
+**PLT-3275 (SIN02, With Customer).** Ilia's 10-20 reply confirms H1: 9 of SIN02's 11 disciplines are not in the table. **The 10-13 draft is superseded, do not post.** Yash asked Joshua (10-20). One optional 40-word combined ask to Yash (one complete file, SIN02 plus the ML9 values). **PLT-3300 (ML9, back to With Customer)** waits on the same file; the 10-19 draft to Mostafa stays superseded. Open residual: who edits the JSON and ships it (Darminder said he can).
+**PLT-3291 (ATL08)**: Freshdesk Waiting on customer, Jira back to Open; suggest moving it to With Technical Support or With Customer. Customer saw 6,350, Ilia measured 6,995: still unexplained.
+
+**Owed by Ilia, unanswered (unchanged):** PLT-2874 Yash's chase (`113731`, 19 days), PLT-3308 chase to Mostafa (draft in folder, owed one day on 10-20), PLT-3299 and PLT-3290 (Mostafa and Ali owe Ilia, not the other way). **Standing:** PLT-3115 (With Customer since 09-16, 35 days; Yash's "we can close the ticket now" never actioned), PLT-2651 (true-north correction still owed), PLT-3063, 3116, 3172 (parked).
+
+**Unopenable media (403):** PLT-3330 Jira `66651` to `66654`; plus all those listed on 10-20 (PLT-3299 `66491`, `66504` to `66508`, Freshdesk `103357050614`; PLT-3308 Freshdesk `103357189841` to `103357189843`; PLT-3290 `66433`; PLT-3275 Freshdesk screenshot; PLT-3291 screenshot and video; PLT-2858 `66039`).
+**Not verified:** every PLT-3330 hypothesis (Last updated value, date range, link currency, whether the facade V2 model changed ids); the 1.07% on PLT-3308 still open from 10-20; Ilia's prod figures on 3291 and 3290.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3330](PLT-3330-groupA-viewer-and-model/context.md) | viewer-and-model | Open | **new; orange = Late Start, capped status merge leading; Yash owed a reply** | 1 (+3) |
+| [PLT-3275](PLT-3275-groupA-quality-management/context.md) | quality-management | With Customer | H1 confirmed; 10-13 draft superseded; Joshua owes | 1 |
+| [PLT-3300](PLT-3300-groupA-quality-management/context.md) | quality-management | With Customer | back in scope; same file as 3275 | 1 |
+| [PLT-3291](PLT-3291-groupA-viewer-and-model/context.md) | viewer-and-model | Open | status housekeeping; customer owes | 1 |
+| PLT-3308, 3299, 3290, 3172, 3116, 3115, 3063, 2874, 2651 | various | various | unchanged | see 10-20 and 10-13 tables |
+
+---
+
 ## Run: 2026-10-20 (scheduled) — 10 in scope (was 11), all Group A, Group B empty. Two new in scope (PLT-3308, PLT-3299), one re-ordered (PLT-3290), three left scope, one closed; one arithmetic gap found on PLT-3308; zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 21 live incidents). In scope: PLT-3308 (In Analysis, new, Ilia), 3290 (In Analysis, Ilia), 3275 (Open), 3299, 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis).
