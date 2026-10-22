@@ -45,6 +45,29 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-22 (scheduled) — 12 in scope (was 13), all Group A, Group B empty. One real change (PLT-3290 handed to Sachin); PLT-3172 and PLT-3091 left scope to Ready For Release; no new tickets; zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 22 live incidents; newest still PLT-3330). In scope: PLT-3330 (Open, Ilia), 3291 (Open), 3308, 3290, 2874 (In Analysis), 3300, 3299, 3275, 3115 (With Customer), 3116, 3063, 2651 (Customer Release Check).
+Out of scope: Ready For Release (3271, **3172, 3091** both moved 10-21 after QA verified them on Staging 26.4.1), Ready For QA (3306, 3231, 3223, 3112), In Code Review (2858), Blocked (3135, 2660).
+Fetched with comments: 3290, 3091, 3172. Unchanged `updated` stamps, not re-fetched: 3330 (10-20), 3308 (10-19), 3300, 3291, 3275 (10-20), 3299 (10-19), 3116, 2651 (10-12), 3115 (09-16), 3063 (09-28), 2874 (10-02). hc-frontend master is now `cb87101e2`; nothing merged since 10-20 touches an in-scope ticket (PLT-3338 and PLT-3185 are weighting-flag work, noted on 3290).
+
+**PLT-3290 (In Analysis, Ilia, ML5.4).** Ali (10-21) routed Ilia's missing-actual-parquet question to **Sachin** and asked Yash to add him to the project; Yash confirmed Sachin is invited (11:39). Sachin owes, about one working day. Nothing to post; chase 10-23 if silent. Class 1.
+**PLT-3172, PLT-3091:** fixes verified on Staging 26.4.1 (Gennaro 10-21), Freshdesk "Awaiting release". 26.4.1 is unreleased: #2265 (3172) and #2311 (3091) are still in no tag (full history, fetched today). Residual: tell each customer the version when it ships; 3091's 10-12 question has no visible Jira reply (probably answered in Freshdesk, not verifiable).
+
+**Owed by Ilia, unanswered (unchanged, one day older):** PLT-2874 Yash's chase (`113731`, 20 days), PLT-3330 reply to Yash (draft in folder, owed since 10-21). **Owed to Ilia:** PLT-3308 (Mostafa, LOE question, 3 days), PLT-3299 (Mostafa), PLT-3290 (Sachin), PLT-3275/3300 (Joshua's file, via Yash, 2 days). **Standing:** PLT-3115 (With Customer since 09-16, 36 days; "we can close the ticket now" never actioned), PLT-2651 (true-north correction owed), PLT-3063, 3116 (parked).
+
+**Unopenable media (403, unchanged):** PLT-3330 `66651` to `66654`; PLT-3299 `66491`, `66504` to `66508`; PLT-3290 `66433`; PLT-3308, 3275, 3291 Freshdesk screenshots; PLT-2858 `66039`. Not re-tested; 09-08 note stands.
+**Not verified:** everything unchanged from 10-21, plus what Sachin finds for ML5.4, and whether 3091's customer was told the release timing.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3290](PLT-3290-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | Ali to Sachin, Sachin invited; Sachin owes | 1 |
+| [PLT-3172](PLT-3172-groupA-viewer-and-model/context.md) | viewer-and-model | Ready For Release | left scope; awaits 26.4.1 | residual |
+| [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | Ready For Release | left scope; awaits 26.4.1 | residual |
+| PLT-3330, 3308, 3300, 3299, 3291, 3275, 3116, 3115, 3063, 2874, 2651 | various | various | unchanged | see 10-21, 10-20, 10-13 tables |
+
+---
+
 ## Run: 2026-10-21 (scheduled) — 13 in scope (was 10), all Group A, Group B empty. One new ticket (PLT-3330), three tickets back in scope after status moves (PLT-3300, 3275, 3291), nothing changed on the other nine, zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 22 live incidents). In scope: **PLT-3330** (Open, Ilia, new), 3308, 3290, 2874 (In Analysis), **3291** (Open), 3300, 3299, 3275, 3115 (With Customer), 3172, 3116, 3063, 2651 (Customer Release Check).

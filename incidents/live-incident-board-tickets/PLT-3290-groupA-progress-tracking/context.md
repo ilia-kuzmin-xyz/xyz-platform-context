@@ -94,3 +94,15 @@ New unverified detail: "planned calculated 14 Oct" means the planned run succeed
 (Wording assumes Ali can read the run log, not verified. Compare the error with DPL-1707's year-crossing date failure yourself; do not put the DPL ticket in the message. Do not send before Ali's first answer.)
 
 No Jira action was taken.
+
+---
+
+## 2026-10-22 run — Ali handed it to Sachin; ball is with api-v2 (additive)
+
+Re-fetched live: 7 comments, newest `116063` (Yash, 10-21 11:39), still In Analysis, Ilia.
+- `116058` Ali (10-21 11:22) hands the parquet question to **Sachin** ("could you please check this?"). `116059` Ali asks Yash to invite him and Sachin to the project; `116063` Yash: Ali is already in, **Sachin has been invited**.
+- So the ML5.4 progress-file question has an owner (Sachin) and he has project access as of 10-21 11:39. Nothing owed by Ilia or the customer. Sachin owes since 10-21 11:22 (about one working day by tonight).
+- Yash's "move to PAPI?" (`115958`) was not answered in words; Ali routing it to Sachin inside PLT reads as "no PAPI ticket yet". If Sachin finds a run failure, the PAPI ticket needs project id `46f2f7f3-9904-421c-9029-d20f8ed677ca` and the 14 Oct planned-file date.
+- hc-frontend master moved (`cb87101e2`, 10-21): PLT-3338 (#2370, Weighted labour units offered at project creation) and PLT-3185 (#2352, quantity weighting in progress panel, behind the PackageQuantities flag) touch weighting but not the "no actual file" path. They do not change the hypothesis ordering. Not relevant unless ML5.4 was created with a non-default weighting (not checked).
+
+Action class 1 (Sachin owes). Chase 10-23 only if silent: one line, same question, no new content. The DPL-1707 follow-up draft above still applies after Sachin's first answer. No Jira action taken.

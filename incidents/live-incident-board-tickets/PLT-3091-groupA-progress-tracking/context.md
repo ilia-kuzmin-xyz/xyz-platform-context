@@ -1078,3 +1078,7 @@ Residual unchanged: the customer's 10-12 question (`114919`, "when did the relea
 
 ## 2026-10-19 (scheduled) — status moved to Ready For QA
 Board shows **Ready For QA**, updated 10-16 12:55 BST (it was In Code Review on 10-15). Out of scope by status; not re-fetched. Customer reply owed via Yash (`114919`, now a week unanswered) still stands unless someone posted it; verify on the next fetch, and check whether #2311 is in a tag (the newest tag is still `v26.3.7`, `git tag --contains` empty for #2311 as of today).
+
+## 2026-10-22 (scheduled) — Ready For Release; QA verified on Staging 26.4.1 (residual only)
+Fetched live: 37 comments, status **READY FOR RELEASE** (10-21 13:54), fixVersion **26.4.1 (not released)**. New: `116075` Gennaro (10-21 13:13) *"Verified fixed on Staging 26.4.1"*; `116085` Yash: Freshdesk **7773 Awaiting release**. Git (full history, fetched today): #2311 (`9298ef9`) is in **no tag**; newest tag still `v26.3.7`. So the fix is verified on staging and unreleased, as expected.
+Customer's 10-12 question (`114919`) still has no visible Jira reply; "Awaiting release" on the Freshdesk ticket suggests Yash updated the customer there (not verifiable from Jira). Nothing owed by us beyond telling the customer the version when 26.4.1 ships. Out of scope by status. No Jira action taken.

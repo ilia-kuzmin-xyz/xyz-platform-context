@@ -148,3 +148,6 @@ works on prod (nobody has said); the 90 MB recording `65180` still unopened (403
 ## 2026-10-19 (scheduled) — only a sprint change
 Updated stamp moved 10-16 13:39 BST: Darminder added **PLT Sprint 55** (changelog `1545949`). No new comment (newest `114900`, 10-12), status still Customer Release Check, fixVersions 26.3.7 (released 10-12) and **26.4.1 (not released)**.
 Git (full history, tags fetched): #2242 is in `v26.3.7`; **#2265 (`b8e1da094`) is in no tag**, newest tag is still `v26.3.7`. Nothing to post. Parked.
+
+## 2026-10-22 (scheduled) — Ready For Release; verified on Staging 26.4.1 (residual only)
+Fetched live: 9 comments, status **READY FOR RELEASE** (10-21 13:25), fixVersions 26.3.7 (released) and **26.4.1 (not released)**. `116074` Gennaro (10-21): *"Verified fixed on Staging 26.4.1"* (covers #2265, the panel half); `116084` Yash: Freshdesk 8087 **Awaiting release**. Git: #2265 (`b8e1da0`) still in no tag. Out of scope by status; customer to be told when 26.4.1 ships. No Jira action taken.
