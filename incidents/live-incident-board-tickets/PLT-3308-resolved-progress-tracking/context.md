@@ -76,3 +76,11 @@ Inferred: that TXE10 is on the package/project-level branch for this view; that 
 - What Mostafa decides.
 
 No Jira action was taken.
+
+---
+
+## 2026-10-23 run: LEFT SCOPE, In Code Review (10-22 17:33). Folder renamed `resolved` (additive)
+
+Re-fetched, 5 comments. New: `116157` Ilia (10-22 12:08): **a warning will be added when linking to Level of Effort activities (PLT-3355); until then the customer should link the HP elements to Task or Milestone activities.** `116158` Yash: will ask the user.
+**PLT-3355 is open PR #2378** in hc-frontend ("Warn when linking elements to Level of Effort activities", not draft, updated 10-22 17:17); not merged, in no tag. Mostafa never replied in the ticket; the LOE-excluded-on-purpose call was taken by Ilia (`116157`), so it is a decision recorded, not a product-owner confirmation.
+**Still unverified (carried from 10-20, unresolved by this exchange):** the panel showed 1.07% but Ilia's own figures predict about 0.2%. The ticket was closed out on the LOE explanation without that gap being measured, so the customer-facing number remains "about 1%, in kind". The warning does not change the headline for existing links; it only prevents new ones. Customer now owes the relinking to Task or Milestone activities. No Jira action was taken.

@@ -24,3 +24,8 @@
 Ilia has answered in the ticket (`115957`): actual-progress parquet missing for ML5.4, only the planned one exists (14 Oct), and he asked Ali. Nothing to post today. Action class 1, **Ali owes** since 10-19 17:27;
 chase on 10-21 if silent (one line, same question, no new content). The DPL-1707 follow-up is drafted in context.md and is for after Ali's first answer. Yash's "move to PAPI?" is Ali's to answer; if Ali says yes, the ticket
 needs a PAPI ticket carrying the project id and the 14 Oct date, written by Ilia or Yash.
+
+---
+
+## 2026-10-23: relocated to PAPI-4334, Sachin owns it. Nothing to post.
+Out of scope for this routine from now on (not a PLT Live Incident). Residual only: if Sachin is still silent on 10-27, one line to him on PAPI-4334 with the same question as before; no new content. Class 1 (Sachin owes). No Jira action was taken.

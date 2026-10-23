@@ -102,3 +102,9 @@ the reply explains the cause but not why the customer saw 6,350. Minor, worth on
 Re-fetched, 6 comments, newest `115972` (Yash, 10-20 10:30). Freshdesk 8300 toggled Waiting on customer, Open, Waiting on customer (`115967`, `115968`, `115972`) between 10:14 and 10:30 on 10-20: Yash sent Ilia's explanation to the customer, who now owes a reply (unlinking the April links, or confirming they need them). **Jira status is Open again** (was With Technical Support on 10-20) although the ball is with the customer; it shows up in scope because of that.
 Nothing new in kind. The residual from 10-20 stands (the customer saw 6,350, Ilia measured 6,995; not explained). No code or master change touches this (`9699aa5`).
 Class 1, parked on the customer. See `recommended-action.md` 2026-10-21 note. No Jira action was taken.
+
+---
+
+## 2026-10-23 run: status now With Customer; no new comments (additive)
+
+Re-fetched, 6 comments, newest `115972` (Yash, 10-20 10:30). Jira status moved to **With Customer** (`updated` 10-22 11:08), which is the housekeeping suggested on 10-21, so that note is done. Customer owes a reply to the "unlink the April links" suggestion; Freshdesk 8300 Waiting on customer for three days. The 6,350 versus 6,995 gap is still unexplained. Attachment list is empty in Jira (screenshot is a Freshdesk link, video is SharePoint; both unopenable). hc-frontend master `326e1f5`: #2369 (selection and link actions, 10-22) touches link query code (`use-link-queries.ts`) but not the activity header count; not read in depth and not relevant until the customer replies. Class 1, parked on the customer. No Jira action was taken.

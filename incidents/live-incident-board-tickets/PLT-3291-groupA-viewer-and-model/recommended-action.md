@@ -28,3 +28,5 @@ If the answer is "nothing changed", H1 is very likely and the cross-write is sti
 
 ## 2026-10-21 — status housekeeping only (no message)
 Freshdesk says Waiting on customer but the Jira ticket sits at **Open**. Suggest Yash or Ilia moves it back to With Technical Support (or With Customer) so it stops reading as owed by us. Not urgent. If the customer replies that the 6,350 versus 6,995 gap matters, the one-line answer is that the count includes everything linked, and the customer's figure may have been read earlier or from another surface (unverified).
+
+## 2026-10-23: housekeeping done (status is With Customer). Nothing to post; chase through Yash only if still silent on 10-27.

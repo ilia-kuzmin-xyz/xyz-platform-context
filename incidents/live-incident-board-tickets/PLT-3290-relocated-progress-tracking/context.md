@@ -106,3 +106,10 @@ Re-fetched live: 7 comments, newest `116063` (Yash, 10-21 11:39), still In Analy
 - hc-frontend master moved (`cb87101e2`, 10-21): PLT-3338 (#2370, Weighted labour units offered at project creation) and PLT-3185 (#2352, quantity weighting in progress panel, behind the PackageQuantities flag) touch weighting but not the "no actual file" path. They do not change the hypothesis ordering. Not relevant unless ML5.4 was created with a non-default weighting (not checked).
 
 Action class 1 (Sachin owes). Chase 10-23 only if silent: one line, same question, no new content. The DPL-1707 follow-up draft above still applies after Sachin's first answer. No Jira action taken.
+
+---
+
+## 2026-10-23 run: LEFT THE PLT BOARD. The key now resolves to PAPI-4334 (additive)
+
+Fetching `PLT-3290` returns issue **PAPI-4334** (same 7 comments, newest `116063`), status In Analysis, assignee **Sachin Badoni**, `updated` 10-22 10:13. So the ticket was moved to the PAPI board and handed to Sachin on 10-22; it is no longer a Live Incident on PLT. **Folder renamed `relocated`** (same convention as PLT-2884, 2891).
+No comment from Sachin yet (about two working days since Ali's hand-off on 10-21 11:22). The ML5.4 question is unchanged: why the actual-progress parquet was not generated (planned exists, calculated 14 Oct). The DPL-1707 follow-up draft in `recommended-action.md` still applies after his first answer. Nothing owed by Ilia or the customer. No Jira action was taken.

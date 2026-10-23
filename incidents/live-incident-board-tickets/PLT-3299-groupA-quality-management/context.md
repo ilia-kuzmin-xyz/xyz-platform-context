@@ -58,3 +58,9 @@ Inferred: that the three issues are Void; that the 6.12k is those three; whether
 - What Yash told the customer on 10-19 (Freshdesk side).
 
 No Jira action was taken.
+
+---
+
+## 2026-10-23 run: unchanged on Jira; one code note (additive)
+
+Jira stamp unchanged, not re-fetched. hc-frontend #2372 (`c73f491`, 10-22, PLT-2561) removed the 2-decimal rounding inside `use-rework-cost-calculation.ts` (about :105-135) so the calculated cost is now unrounded (`600 x 1.14` is `683.9999999999999`). It is harmless to what users see: the auto-fill writes `calculatedCost.toFixed(2)` (`issue-cost-field.tsx:55-62`) and the "suggest" comparison now compares `toFixed(2)` strings (`:68`). Does not change this ticket's hypotheses. Not released yet (no tag). No Jira action was taken.

@@ -1239,7 +1239,7 @@ Also: PR #2211 (PLT-3112, merged 10-07, untagged as of `v26.3.7`) bounds the Mod
 
 A project that has only just started linking shows an empty dashboard. Two frontend states look alike and mean different things: **blank/empty panel** = progress outputs never produced
 (`use-progress-panel-data.tsx:33-38`, "nothing calculated"), **0.00% with an empty category list** = weighting gate (`AND weight > 0`, default Budgeted labour units, `progress-weighting-types.ts:23-28`)
-on a schedule with no labour units. The screenshot (blank vs 0.00%) is the cheapest fork; the first question to ask is the project's weighting setting. Candidate only; see `PLT-3290-groupA-progress-tracking/`.
+on a schedule with no labour units. The screenshot (blank vs 0.00%) is the cheapest fork; the first question to ask is the project's weighting setting. Candidate only; see `PLT-3290-relocated-progress-tracking/`.
 
 ## 2026-10-19 — amendment to **Pattern 6**: fourth firing (PLT-3300), and the first one the customer re-opened after "as intended"
 

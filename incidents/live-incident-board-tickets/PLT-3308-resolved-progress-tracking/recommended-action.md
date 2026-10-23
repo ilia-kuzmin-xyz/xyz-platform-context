@@ -24,3 +24,8 @@ and the way to a meaningful figure is linking elements to Task or Milestone acti
 - Do not offer "exclude LOE" as a fix without saying what it does here: the headline would rest on 346 elements (about 0.2% of the slice) and read 91 to 100%. A later product question, worth asking only after the decision above: should the dashboard warn when most
   elements of a filtered view sit on activities that cannot carry progress.
 - Do not quote 1% or 0.2% to the customer until Step 1 is in.
+
+---
+
+## 2026-10-23: nothing to post. Residual only.
+Ticket is in code review behind PR #2378 (PLT-3355). The 10-20 chase to Mostafa is superseded: Ilia decided in the ticket. Residual for a human: after the customer relinks, re-read the headline; if it is still not 0.2% to 1% as predicted, that is the open arithmetic gap, not a new defect. Class 4 resolved into a dev PR. No Jira action was taken.

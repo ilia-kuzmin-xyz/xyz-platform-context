@@ -74,3 +74,9 @@ Re-fetched, 7 comments, newest `115971`. Status is now **With Customer** (was Op
 **Supersedes the 10-13 draft to Yash** (asking for SIN02's exact discipline and package names): Ilia already has them. The 10-13 point about asking for the whole discipline, not one cell, is still the one open risk: Yash's ask to Joshua is "an updated rework file", which does not say it must cover every one of the 9 disciplines and their packages for Categories 1 to 4. If it comes back partial, the field stays blank for the rest (PLT-3061's lesson).
 Ball: Joshua, via Yash, since 10-20 (11 days since the first ask on 10-09). After the file arrives, Darminder edits `rework_reference.json` and it ships with a release (not verified that a release is scheduled; 26.4.1 is unreleased).
 Sibling PLT-3300 (ML9) waits on the same file. Class 1, parked. No Jira action was taken.
+
+---
+
+## 2026-10-23 run: unchanged on Jira; one code note (additive)
+
+Jira stamp unchanged, not re-fetched. hc-frontend #2372 (`c73f491`, 10-22, PLT-2561) removed the 2-decimal rounding inside `use-rework-cost-calculation.ts` (about :105-135) so the calculated cost is now unrounded (`600 x 1.14` is `683.9999999999999`). It is harmless to what users see: the auto-fill writes `calculatedCost.toFixed(2)` (`issue-cost-field.tsx:55-62`) and the "suggest" comparison now compares `toFixed(2)` strings (`:68`). Does not change this ticket's hypotheses. Not released yet (no tag). No Jira action was taken.

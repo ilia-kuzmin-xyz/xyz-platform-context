@@ -45,6 +45,29 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-23 (scheduled) — 10 in scope (was 12), all Group A, Group B empty. PLT-3290 relocated to PAPI-4334 (Sachin), PLT-3308 to In Code Review (PR #2378), PLT-3291 back to With Customer; nothing else moved; zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`). In scope: PLT-3330 (Open, Ilia), 3291, 3300, 3299, 3275, 3115 (With Customer), 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis).
+Out of scope: Ready For Release (3306, 3271, 3231, 3223, 3172, 3112, 3091), In Code Review (**3308**, 2858), Blocked (3135, 2660). **PLT-3290 is gone from PLT**: the key resolves to PAPI-4334 (In Analysis, Sachin, 10-22).
+Fetched with comments: 3291, 3290 (as PAPI-4334), 3308. Unchanged `updated` stamps, not re-fetched: 3330, 3300, 3275 (10-20), 3299 (10-19), 3116, 2651 (10-12), 3115 (09-16), 3063 (09-28), 2874 (10-02). hc-frontend master is `326e1f5` (10-22 batch: #2372 rework-cost rounding removed, #2369 link/selection actions, #2374 portfolio quality widget); none changes an in-scope hypothesis. No new release tag.
+
+**PLT-3308:** Ilia (10-22) put the LOE explanation to the customer through Yash and opened PLT-3355 (open PR #2378, a warning when linking to LOE activities). Customer owes relinking to Task or Milestone activities. The 1.07% against predicted 0.2% gap was never measured, carried as unverified.
+**PLT-3291:** Jira status now With Customer (housekeeping done); customer owes a reply, 3 days. **PLT-3290/PAPI-4334:** Sachin has no comment yet, about two working days.
+
+**Owed by Ilia, unanswered (one day older):** PLT-2874 Yash's chase (`113731`, 21 days; 10-05 draft in folder), PLT-3330 reply to Yash (3 days; draft in folder). **Owed to Ilia or us by others:** Sachin (PAPI-4334), PLT-3299 (Mostafa), PLT-3275/3300 (Joshua's file via Yash), PLT-3291 and PLT-3308 (customer). **Standing:** PLT-3115 (With Customer since 09-16, 37 days; "we can close the ticket now" never actioned), PLT-2651 (true-north correction owed), PLT-3063, 3116 (parked).
+
+**Unopenable media (403, unchanged, not re-tested):** PLT-3330 `66651` to `66654`; PLT-3299 `66491`, `66504` to `66508`; PLT-3291 Freshdesk screenshot `103356286320` and SharePoint video; PLT-3308 and 3275 Freshdesk screenshots; PLT-2858 `66039`.
+**Not verified:** every PLT-3330 hypothesis; the PLT-3308 0.2% against 1.07%; whether Sachin finds a run failure for ML5.4; Ilia's prod figures on 3291.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3290](PLT-3290-relocated-progress-tracking/context.md) | progress-tracking | PAPI-4334 In Analysis | relocated to PAPI; Sachin owes | 1 (residual) |
+| [PLT-3308](PLT-3308-resolved-progress-tracking/context.md) | progress-tracking | In Code Review | left scope behind PR #2378; customer owes relink | residual |
+| [PLT-3291](PLT-3291-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | status housekeeping done; customer owes | 1 |
+| PLT-3330, 3300, 3299, 3275, 3116, 3115, 3063, 2874, 2651 | various | various | unchanged | see 10-22, 10-21, 10-20 tables |
+
+---
+
 ## Run: 2026-10-22 (scheduled) — 12 in scope (was 13), all Group A, Group B empty. One real change (PLT-3290 handed to Sachin); PLT-3172 and PLT-3091 left scope to Ready For Release; no new tickets; zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 22 live incidents; newest still PLT-3330). In scope: PLT-3330 (Open, Ilia), 3291 (Open), 3308, 3290, 2874 (In Analysis), 3300, 3299, 3275, 3115 (With Customer), 3116, 3063, 2651 (Customer Release Check).
@@ -61,7 +84,7 @@ Fetched with comments: 3290, 3091, 3172. Unchanged `updated` stamps, not re-fetc
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-3290](PLT-3290-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | Ali to Sachin, Sachin invited; Sachin owes | 1 |
+| [PLT-3290](PLT-3290-relocated-progress-tracking/context.md) | progress-tracking | In Analysis | Ali to Sachin, Sachin invited; Sachin owes | 1 |
 | [PLT-3172](PLT-3172-groupA-viewer-and-model/context.md) | viewer-and-model | Ready For Release | left scope; awaits 26.4.1 | residual |
 | [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | Ready For Release | left scope; awaits 26.4.1 | residual |
 | PLT-3330, 3308, 3300, 3299, 3291, 3275, 3116, 3115, 3063, 2874, 2651 | various | various | unchanged | see 10-21, 10-20, 10-13 tables |
@@ -122,9 +145,9 @@ PLT-3275 (Joshua owes values, 7 days), PLT-2651 (true-north correction still owe
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-3308](PLT-3308-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | **new; LOE explanation holds in kind, arithmetic gap (0.2% vs 1.07%); Mostafa owes** | 1 (+3) |
+| [PLT-3308](PLT-3308-resolved-progress-tracking/context.md) | progress-tracking | In Analysis | **new; LOE explanation holds in kind, arithmetic gap (0.2% vs 1.07%); Mostafa owes** | 1 (+3) |
 | [PLT-3299](PLT-3299-groupA-quality-management/context.md) | quality-management | With Customer | **new to scope; Void counted in totals and cost; Mostafa owes** | 1 (+4) |
-| [PLT-3290](PLT-3290-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | Ilia replied; weighting draft superseded; Ali owes | 1 |
+| [PLT-3290](PLT-3290-relocated-progress-tracking/context.md) | progress-tracking | In Analysis | Ilia replied; weighting draft superseded; Ali owes | 1 |
 | [PLT-3300](PLT-3300-groupA-quality-management/context.md) | quality-management | With Technical Support | left scope; 10-19 draft superseded | residual |
 | [PLT-3291](PLT-3291-groupA-viewer-and-model/context.md) | viewer-and-model | With Technical Support | left scope | residual |
 | [PLT-3182](PLT-3182-groupA-access-permissions/context.md) | access-permissions | Done | Freshdesk closure; reply unseen | residual |
