@@ -1023,3 +1023,9 @@ Fresh fetch with comments: 9 comments, newest still `113731` (Yash, 10-02), In A
 **Verified this run (`git fetch --unshallow --tags`):** PR #2084 (`28e03c33c`, merged 07-31) is first in tag **`v26.3.5.1`** (09-01), then `v26.3.6` and `v26.3.7`. This closes the 10-05 "which release carries #2084" gap.
 Consequence for the draft: Gennaro's Staging reading (08-12, "26.3.4") may or may not have contained the fix, because there is **no `v26.3.4` tag** in this clone (26.3.x tags are `26.3.1`, `26.3.5.1`, `26.3.6`, `26.3.7`). Unverified whether that Staging build predated 07-31. Either way, every release since 09-01 carries the fix, so "re-check on the current release" is the right ask.
 Still unmeasured: that Production matches today (last reading 08-12). No Jira action was taken.
+
+---
+
+## 2026-10-26 run: Yash chased a third time (`116328`, 10-23); 22 days since the previous chase (additive)
+
+Re-fetched, 10 comments, newest `116328` (Yash, 10-23 13:00): *"Any updates on this one?"* Chases so far: `112016` 09-11 (Ilia replied "today", `112017`), `113731` 10-02, `116328` 10-23. Status In Analysis, assignee Ilia, fixVersion 26.3.4. Nothing else changed; no new figures. Nobody has answered Gennaro's 08-12 Staging reading in writing. Still not re-measured: Prod "within half a percent" is the 08-12 figure.

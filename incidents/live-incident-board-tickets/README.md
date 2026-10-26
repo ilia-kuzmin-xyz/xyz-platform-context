@@ -45,6 +45,20 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-26 (scheduled) — 9 in scope (was 10), all Group A, Group B empty. Three tickets moved on 10-23: PLT-3291 customer replied (back at Open, Ilia owes), PLT-2874 third chase from Yash, PLT-2651 customer feedback on the rotating section box; PLT-3116 Done; zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`). In scope: PLT-3330, 3291 (Open, Ilia), 3300, 3299, 3275, 3115 (With Customer), 3063, 2651 (Customer Release Check), 2874 (In Analysis).
+Out of scope: Ready For Release (3306, 3271, 3231, 3223, 3172, 3112, 3091), In Code Review (3308), Ready For QA (2858), Blocked (3135, 2660). **PLT-3116 is Done** (Freshdesk closed 10-23, fix in 26.3.7, no customer confirmation on the ticket). PLT-3290 is PAPI-4334 (In Analysis, Ilia).
+hc-frontend master `16b41bb`; no merged PR since `326e1f5` changes an in-scope hypothesis.
+
+**PLT-3291:** customer accepts the count; the model list (security, data devices, containment listed with none of MV-1350's elements) is what is left. Code: every model an element belongs to is listed, no geometry check (`useGroupedLinks.ts:63-76`). Draft asks Yash one yes/no: were those models loaded. **PLT-2874:** Yash's third chase (10-23); the 10-05 draft stands, 21 days. **PLT-2651:** customer feedback to Rishi; the rings are default-off (`constants.ts:913`), the snap swallows rotations under 5 degrees (`section-box-rotation-math.ts:38-41`); draft to Rishi; the 10-13 true-north correction is still unposted. **PAPI-4334:** Yash asked Ilia (10-23) whether portfolio inclusion matters; draft to Sachin in the 3290 folder. **PLT-3330:** only an edit of Yash's comment, unchanged, 6 days unanswered. 3300, 3299, 3275, 3115, 3063 unchanged.
+
+**Owed by Ilia:** PLT-2874 (Yash, 3 chases), PLT-3291 (Yash, 3 days), PLT-3330 (Yash, 6 days), PLT-2651 (Rishi's question and the old correction), PAPI-4334 (Yash's question). **Standing:** PLT-3115 (With Customer since 09-16, 40 days, close with a resolution), PLT-3063 (Customer Release Check 28 days), 3299 (Mostafa), 3275/3300 (Joshua's file via Yash).
+**Unopenable media (403, unchanged):** PLT-3330 `66651` to `66654`; PLT-3291 Freshdesk screenshot and SharePoint video; PLT-3299 `66491`, `66504` to `66508`; 3308 and 3275 Freshdesk screenshots; PLT-2858 `66039`.
+**Not verified:** every PLT-3330 hypothesis; whether the PLT-3291 models are loaded; the customer's true-north gap and how the rings were switched on for him; whether portfolio matters to the actual-progress file.
+
+---
+
 ## Run: 2026-10-23 (scheduled) — 10 in scope (was 12), all Group A, Group B empty. PLT-3290 relocated to PAPI-4334 (Sachin), PLT-3308 to In Code Review (PR #2378), PLT-3291 back to With Customer; nothing else moved; zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`). In scope: PLT-3330 (Open, Ilia), 3291, 3300, 3299, 3275, 3115 (With Customer), 3116, 3063, 2651 (Customer Release Check), 2874 (In Analysis).

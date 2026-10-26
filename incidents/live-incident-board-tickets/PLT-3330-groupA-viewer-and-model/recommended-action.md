@@ -18,3 +18,6 @@ If Last updated is older than the install time, the answer for the customer is "
 3. Select the element in the dashboard viewer and open its linked activities: none, or an activity with no dates, means H3 (non-current schedule revision), remember SIN02 re-imported its schedule in September (PLT-3156).
 4. Outcome table: Last updated old = H1, working as designed, no code; range end early = H2, tell Yash how to reset the range; no or dateless link = H3, class 4 (known unfixed gap in `dashboard/pitfalls.md`, needs product decision and a fix on the dashboard CASE, plus the customer relinking or us re-linking); none of the three and element still orange = real defect, class 3, needs a repro branch.
 5. Drop the four Jira attachments (`66651` to `66654`) into this folder.
+
+## 2026-10-26: the 10-21 draft (45 words) stands, now 6 days unanswered
+Class 1 with a class-3 shape, owed by Ilia. Nothing changed on the ticket. Post the draft as written, or do the 5-minute look on SIN02 yourself (steps above). No Jira action was taken.

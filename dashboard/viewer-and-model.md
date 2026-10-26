@@ -370,3 +370,8 @@ Cuts rendered fragment count dramatically (e.g. 14M → 2M) — reduces load tim
 - First hover → DuckDB runs `read_parquet()` directly against the remote `client-element-metas` blob URL with HTTP range request predicate pushdown — only the matching row group (~1-2 KB) is downloaded
 - Result cached in-memory (`Map<modelElementId, name>`)
 - Background warm-up pre-fetches the parquet footer so the first hover is fast
+
+## 2026-10-26 addition: the section-box rotation rings (PLT-2651 / PLT-3187)
+
+`section-tool/section-box-rotation-gizmo.ts` adds three rotation arcs to the Web Editor's section box, built on LMV TransformControls. **Default off:** `SectionBoxRotation` is `value: false` in `config/constants.ts:913` (also in `v26.3.7`), shown at `section-tool-service.ts:357`. Flags resolve per browser from a cookie, so a customer sees the rings only if switched on for them.
+Behaviour worth knowing: drag angle is measured from the drag start and snapped to 90 degree steps within 5 degrees (`section-box-rotation-math.ts:5-7,38-41`, applied at `section-box-rotation-gizmo.ts:278`), so a rotation under 5 degrees cannot be made. The picker arc is 15 times thicker than the visible one (`:399`). First customer feedback 2026-10-23 (PLT-2651 `116299`): hard to click, cannot align finely, circles better outside the box. Only the snap point is explained by the code.

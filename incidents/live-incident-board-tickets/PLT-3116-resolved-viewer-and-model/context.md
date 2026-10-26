@@ -270,3 +270,9 @@ which is the evidence that matters. Parked with the customer, Yash owns it, noth
 
 ## 2026-10-16 (scheduled) — unchanged
 `updated` still 10-12 11:18, Customer Release Check. Nothing owed by us. No Jira action was taken.
+
+---
+
+## 2026-10-26 run: now Done (Freshdesk closed by Yash 10-23, `116316`); no customer confirmation on the ticket (additive)
+
+Re-fetched, 7 comments. Jira Done 10-23 12:07, fixVersion 26.3.7. Waiting on customer 10-12, Closed 10-23 (11 days, no reply on the ticket). Fix #2223 is in `v26.3.7` (verified 10-13), QA verified Staging 26.3.7 (`114082`). Residual, out of scope: the customer never confirmed; **PLT-3160** (Select same type selects only siblings inside one assembly, PR #2269) is still not in a release tag per the 10-13 note, not re-checked.

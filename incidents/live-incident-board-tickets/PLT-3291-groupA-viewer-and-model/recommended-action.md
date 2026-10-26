@@ -30,3 +30,12 @@ If the answer is "nothing changed", H1 is very likely and the cross-write is sti
 Freshdesk says Waiting on customer but the Jira ticket sits at **Open**. Suggest Yash or Ilia moves it back to With Technical Support (or With Customer) so it stops reading as owed by us. Not urgent. If the customer replies that the 6,350 versus 6,995 gap matters, the one-line answer is that the count includes everything linked, and the customer's figure may have been read earlier or from another surface (unverified).
 
 ## 2026-10-23: housekeeping done (status is With Customer). Nothing to post; chase through Yash only if still silent on 10-27.
+
+## 2026-10-26: SUPERSEDES the 10-23 "chase only if silent on 10-27". The customer replied; Ilia owes Yash.
+Class 1, owed by Ilia since 10-23. Assumption, one line: that the customer sees the list in the Linked Elements panel for MV-1350 (screenshot unopenable).
+
+### Draft: reply on PLT-3291, author Ilia, @Yash (54 words)
+
+> Yash, thanks, good that the count is confirmed. The model list shows every model that holds a copy of a linked element, whether or not that model is drawn in the viewer, which could explain the extra names. **When the customer saw security and data devices listed, were those models loaded in the viewer?**
+
+Why this question: yes means loaded and empty (ghost models, Pattern 1, then the DPL-1684 question to Ali from 10-16 matters again); no means the display is as designed and the answer is a one-line explanation. Do not tell the customer it is a defect. No Jira action was taken.

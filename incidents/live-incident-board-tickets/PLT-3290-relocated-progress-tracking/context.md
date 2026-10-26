@@ -113,3 +113,16 @@ Action class 1 (Sachin owes). Chase 10-23 only if silent: one line, same questio
 
 Fetching `PLT-3290` returns issue **PAPI-4334** (same 7 comments, newest `116063`), status In Analysis, assignee **Sachin Badoni**, `updated` 10-22 10:13. So the ticket was moved to the PAPI board and handed to Sachin on 10-22; it is no longer a Live Incident on PLT. **Folder renamed `relocated`** (same convention as PLT-2884, 2891).
 No comment from Sachin yet (about two working days since Ali's hand-off on 10-21 11:22). The ML5.4 question is unchanged: why the actual-progress parquet was not generated (planned exists, calculated 14 Oct). The DPL-1707 follow-up draft in `recommended-action.md` still applies after his first answer. Nothing owed by Ilia or the customer. No Jira action was taken.
+
+---
+
+## 2026-10-26 run: PAPI-4334 moved (additive)
+
+Re-fetched PAPI-4334 (In Analysis, assignee Ilia, 9 comments). `116353` (Sachin, 10-23 14:39): *"Seems like portfolio is not enabled for this project, can you please check and confirm."* `116359` (Yash, 10-23 14:49): ML5.4 is not in the portfolio (feature-flag thing) and asks Ali and **Ilia** *"does having this project portfolio enabled resolve this issue?"* So a question is pointed at Ilia, unanswered 3 days.
+Not verified: whether the backend generation of the actual-progress parquet depends on portfolio membership. Ilia's 10-19 finding is that the planned file exists (14 Oct) and the actual one does not. The frontend reads the Portfolio card as a Power BI link (`dashboard/README.md:118-122`), which does not suggest a dependency, but the backend job is not readable from here. Out of the PLT board; carried because Ilia is asked.
+
+### Draft: reply on PAPI-4334, author Ilia, @Sachin (40 words)
+
+> Sachin, thanks for looking at ML5.4. The planned file was generated on 14 October but the actual progress file never was, and the linking looks fine. **Does generating the actual progress file require the project to be in the portfolio?**
+
+No Jira action was taken.

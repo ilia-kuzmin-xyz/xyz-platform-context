@@ -501,3 +501,12 @@ No Jira action of any kind was taken.
 ### Draft: reply on the ticket (author Ilia; @ Yash) (54 words)
 
 > Yash, the section box fix is live in 26.3.7, so when you chase Kyriakos please also tell him to ignore my earlier advice to change the project's true north. It does not affect the section box, and changing it mid-project can shift alignment elsewhere. **Has he already changed the true north angle on ATL08?**
+
+## 2026-10-26: new ask to Rishi on the customer's section-box feedback; the 10-13 true-north correction still stands unposted (NOT POSTED)
+**Class 1 (Rishi), class 4 for the placement request (Jason).** Assumption, one line: that the customer's true-north gap is under 5 degrees; if it is large the snap is not his problem and point 1 matters more.
+
+### Draft: reply on PLT-2651, author Ilia, @Rishi (48 words)
+
+> Rishi, the customer tried the rotating section box and cannot align it fully. The rotation snaps to 90 degree steps within 5 degrees, so a correction smaller than 5 degrees from where you start dragging is swallowed. **Can we let people turn the snap off while holding Shift?**
+
+Not drafted, one question per message: circles outside the box (point 3) goes to Jason after Rishi answers; the click-on-circle report (point 1) needs a repro first, ask Yash for the browser and a short video. Post the 10-13 correction to Yash as well, it is the older debt. No Jira action was taken.

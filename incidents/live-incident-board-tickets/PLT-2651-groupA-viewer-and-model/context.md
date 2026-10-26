@@ -1360,3 +1360,18 @@ Class 1 (a named person, Yash, owes the customer a short correction). No Jira ac
 
 ## 2026-10-16 (scheduled) — unchanged
 Fresh fetch with comments: 39 comments, newest `114906` (Yash, 10-12 Freshdesk Waiting on customer), Customer Release Check, assignee Ozan. The 10-13 ask (correct the true-north advice, 54 words) is still unposted, 3 days; the customer may be acting on comment `111642` meanwhile. Class 1, parked with Yash. No Jira action was taken.
+
+---
+
+## 2026-10-26 run: customer feedback on the rotating section box (`116299`, 10-23); two stale asks still unposted (additive)
+
+Re-fetched, 40 comments, newest `116299` (Yash to **Rishi**, 10-23 10:55; status Customer Release Check, assignee Ozan, fixVersion 26.3.7). Customer's feedback on the rotating section box: (1) hovering *exactly* over the circles sometimes does not allow a click; (2) rotation seems to have predefined increments, so it cannot be fully aligned with the model's true north; (3) easier if the circles sat outside the box, like the XYZ axes.
+
+**Verified on hc-frontend master `16b41bb` (`section-tool/`):**
+- The rings are a live code path: `section-tool-service.ts:68` builds `SectionBoxRotationGizmo`, shown at `:357` **only if `getFeatureFlagValue('SectionBoxRotation')`**. The flag is **`value: false`** in `constants.ts:913` on master and in `v26.3.7`, so the customer can only see the rings if the flag was switched on in his browser (cookie, per the 09-04 note). Not verified who told him to; worth knowing because a per-browser flag means other users see nothing.
+- Point 2: `snapAngle` snaps to 90 degree steps within 5 degrees (`section-box-rotation-math.ts:5-7`, `:38-41`). It is applied to the **drag delta from the drag start** (`section-box-rotation-gizmo.ts:276-278`), so any drag within 5 degrees of zero produces **no rotation at all**, and a correction smaller than 5 degrees can never be made. That matches "cannot fully align" for small corrections. It does **not** explain a large angle being unreachable (outside the 5 degree windows the rotation is continuous). Whether his true-north gap is small is unknown.
+- Point 1: the visible arc is thin (`ARC_TUBE = 0.008`) but the invisible picker tube is 0.12 (`:399`), 15 times wider, so a tight hit area is not the cause on paper. Not reproduced; unverified.
+- Point 3: a design request, not a defect.
+**Not verified:** all three observations in the live app; the customer's true-north angle.
+
+**Still owed and now 13 days old:** the 10-13 correction of the earlier true-north advice (`111642`). The customer is clearly trying to align to true north, so the stale advice is more likely to have been acted on. Class 1 (Rishi owes a reply to Yash) with a class-4 part (point 3 is Jason's call). No Jira action was taken.

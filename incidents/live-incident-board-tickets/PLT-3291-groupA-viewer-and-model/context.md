@@ -108,3 +108,17 @@ Class 1, parked on the customer. See `recommended-action.md` 2026-10-21 note. No
 ## 2026-10-23 run: status now With Customer; no new comments (additive)
 
 Re-fetched, 6 comments, newest `115972` (Yash, 10-20 10:30). Jira status moved to **With Customer** (`updated` 10-22 11:08), which is the housekeeping suggested on 10-21, so that note is done. Customer owes a reply to the "unlink the April links" suggestion; Freshdesk 8300 Waiting on customer for three days. The 6,350 versus 6,995 gap is still unexplained. Attachment list is empty in Jira (screenshot is a Freshdesk link, video is SharePoint; both unopenable). hc-frontend master `326e1f5`: #2369 (selection and link actions, 10-22) touches link query code (`use-link-queries.ts`) but not the activity header count; not read in depth and not relevant until the customer replies. Class 1, parked on the customer. No Jira action was taken.
+
+---
+
+## 2026-10-26 run: customer replied 10-23, count accepted, model list is the remaining complaint; ticket back at Open with Ilia (additive)
+
+Re-fetched, 9 comments, newest `116307`. `116306` (Yash, 10-23 11:17): customer wrote *"Indeed the number of elements appears to be correct. However please have a look to the models that they appear once I click to linked elements. Several models such as, containment, security, data devices etc. appear even though there is no element in this model linked to the activity with ID: MV-1350."* Freshdesk 8300 reopened 10-23 11:14, then Waiting on 3rd line. **Jira status is Open again (the 10-22 With Customer was overwritten by the Freshdesk automation), so the ball is with us.** Supersedes the 10-23 note "parked on the customer".
+
+**What this changes.** The 6,350 vs 6,995 residual is closed by the customer himself ("number appears correct"); drop it. The open question is now only the **model list**.
+
+**Verified on master `16b41bb` (no change to these files since `326e1f5`):** `useGroupedLinks.ts:63-76` buckets each linked element under *every* model its entity belongs to (`element.getModels()`), with no geometry or loaded-model check; `element-entity.ts:38-42` resolves model ids from the element's metadata membership. So the list names a model whenever a linked element's metadata says it belongs there, whether or not that model draws it or is loaded.
+**Not verified:** that this is what the customer sees (screenshot and video unopenable); whether the models he names are loaded in his viewer; whether the elements really have geometry in those models. That is Pattern 1 (ghost models) against "working as designed, same element in several models", and one yes/no from the customer separates them: were those models loaded.
+Ilia's 10-19 explanation ("same elements sit in several models, those models are not loaded") predicts **not loaded**; Pattern 1 predicts **loaded and empty**.
+
+Class 1 (Ilia owes Yash), with a class-4 tail: if the models are loaded and empty, it is the PLT-2882 / DPL-1684 ghost-model family and needs a product call on hiding models the geometry cannot back. No Jira action was taken.

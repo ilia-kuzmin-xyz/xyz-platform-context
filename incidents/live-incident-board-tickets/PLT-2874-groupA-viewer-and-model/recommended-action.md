@@ -587,3 +587,6 @@ Nothing new on the ticket (newest comment `113731`). By the 09-09 rule a draft u
 
 ## 2026-10-16 (scheduled) — CURRENT. The 10-05 draft stands, unsent, 11 days old; its code-adjacent claim is now release-verified
 **Class 1, owed by Ilia** (Yash chased 09-11 and 10-02). The draft makes no code claim beyond "the July mismatch was fixed": #2084 is released since `v26.3.5.1` (09-01), verified 10-16. "Production has matched within half a percent since" is still the 08-12 measurement, not re-measured; say so if asked. Send the 10-05 draft as written (59 words). Do not close until Gennaro answers. No Jira action was taken.
+
+## 2026-10-26 (scheduled): CURRENT. Third chase from Yash; the 10-05 draft is now 21 days old and still the right message
+Class 1, owed by Ilia, and now the oldest unanswered ask on the board by a person (Yash, three times). The draft makes no code claim beyond "the July mismatch was fixed" (#2084, released since `v26.3.5.1`, verified 10-16); "Production has matched" is the 08-12 measurement. Send the 10-05 draft as written (59 words). Do not close until Gennaro answers. No Jira action was taken.

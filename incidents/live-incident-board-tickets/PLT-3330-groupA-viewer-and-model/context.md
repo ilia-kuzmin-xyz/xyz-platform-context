@@ -57,3 +57,9 @@ Inferred: that the customer's "not visible" and Yash's orange element are the sa
 - Whether SIN02's facade links point to the current schedule revision (DuckDB console on the page, query in H3).
 - Whether the facade model was re-uploaded as V2 recently and whether its element ids changed (status is keyed by `modelElementId`).
 No Jira action was taken.
+
+---
+
+## 2026-10-26 run: unchanged in substance; 6 days, nobody has answered Yash (additive)
+
+Re-fetched, 2 comments. `115992` shows `updated` 10-23 13:38 (Yash edited his own comment; text matches what is recorded above, nothing new that I can see, so the edit is not a new fact). Status Open, assignee Ilia, Freshdesk 8353 still Waiting on 3rd line. hc-frontend master `16b41bb`; commits since 326e1f5 (#2300 image markup, #2328, #2329 measure tool, #2382 quality sort, #2385 Linked/Un-linked filter on the Gantt) do not touch the status CASE or the capped merge. H1 to H4 untouched, still unmeasured. Attachments `66651` to `66654` still unopened (403). No Jira action was taken.
