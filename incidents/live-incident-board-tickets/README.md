@@ -45,6 +45,25 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-27 (scheduled) — 10 in scope (was 9), all Group A, Group B empty. One new ticket, PLT-3376 (Open, Ilia, 360 room names); the other nine have unchanged Jira stamps; zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 23 live incidents). In scope: **PLT-3376** (Open, Ilia, new), 3330, 3291 (Open), 3300, 3299, 3275, 3115 (With Customer), 3063, 2651 (Customer Release Check), 2874 (In Analysis).
+Out of scope, same as 10-26: Ready For Release (3306, 3271, 3231, 3223, 3172, 3112, 3091), In Code Review (3308), Ready For QA (2858, touched 10-25, still out), Blocked (3135, 2660).
+Fetched with comments: 3376 only. `updated` stamps identical to what the 10-26 run covered, so not re-fetched: 3330 and 3291 (10-23), 2874 (10-23), 2651 (10-23), 3300 and 3275 (10-20), 3299 (10-19), 3115 (09-16), 3063 (09-28). hc-frontend master `0da75a626` (was `16b41bb`): PLT-3373/3343 Packages widget and dependency bumps only, none touches an in-scope hypothesis. Latest tag still `v26.3.7`.
+
+**PLT-3376 (ML5.4, new, [folder](PLT-3376-groupA-360-captures/context.md)).** Customer says 360 tab and mobile app room names differ from the model's rooms; Yash asks us why (10-26). The card title is the capture point's own label, not the room name (`360-panel.tsx:65`), and nothing keeps the two in sync; PLT-2649 found system-generated labels of the form "<room> - Default Point" on PA12. Leading idea: ML5.4 labels are stale copies of room names from before a rename. Not observed. One observation separates three causes (which field is right in the Editor details panel). Draft to Yash, 53 words. Screenshots `66788` to `66790` 403. **Killed:** "PLT-2794 changed the title precedence in August"; the precedence was identical before #2082.
+
+**Owed by Ilia, one day older:** PLT-3376 (Yash, 1 day), PLT-2874 (Yash, third chase 10-23, 10-05 draft now 22 days), PLT-3291 (Yash, 4 days), PLT-3330 (Yash, about 7 days), PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing:** PLT-3115 (With Customer since 09-16, 41 days, close with a resolution), PLT-3063 (Customer Release Check 29 days), 3299 (Mostafa), 3275/3300 (Joshua's file via Yash).
+**Unopenable media (403, unchanged):** PLT-3376 `66788` to `66790` and three inline images; PLT-3330 `66651` to `66654`; PLT-3291 Freshdesk screenshot and SharePoint video; PLT-3299 `66491`, `66504` to `66508`; 3308 and 3275 Freshdesk screenshots; PLT-2858 `66039`.
+**Not verified:** every ML5.4 claim (no data read, no prod credentials in this session); what the mobile app displays for a capture point; all earlier open items as listed on 10-26.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3376](PLT-3376-groupA-360-captures/context.md) | 360-captures | Open | new; draft to Yash | 1/4 boundary |
+| PLT-3330, 3300, 3299, 3291, 3275, 3115, 3063, 2874, 2651 | various | various | unchanged | see 10-26 and earlier tables |
+
+---
+
 ## Run: 2026-10-26 (scheduled) — 9 in scope (was 10), all Group A, Group B empty. Three tickets moved on 10-23: PLT-3291 customer replied (back at Open, Ilia owes), PLT-2874 third chase from Yash, PLT-2651 customer feedback on the rotating section box; PLT-3116 Done; zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`). In scope: PLT-3330, 3291 (Open, Ilia), 3300, 3299, 3275, 3115 (With Customer), 3063, 2651 (Customer Release Check), 2874 (In Analysis).
