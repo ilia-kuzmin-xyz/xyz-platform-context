@@ -326,3 +326,21 @@ invariant is clean repo-wide and not just here. Mutation checked.
 and pass in isolation**. Confirmed pre-existing by stashing — identical counts (540 passed, 2
 failed) with and without the round-8 change. Not investigated; flagged on the PR. If you see these
 two red, do not assume your change caused it — run them alone first.
+
+### My PR comments are too long — the author has been trimming them
+
+Evidence: the 10-15 comment answering DarminderA's changes-requested was **edited on 10-28** down
+from ~15 paragraphs with headers and a numbered list to four sentences. `CLAUDE.md`'s conventions
+table already says it — *"Drafted replies to people are SHORT — max 4 short paragraphs, one bolded
+question, no tables/bullets/jargon"* — and I had been reading that as applying to Jira comments
+only. It applies to **replies to people on PRs too**. Replies to a review *bot* are a different
+case: the detail there is the evidence trail and nobody is reading it on a phone.
+
+One side effect worth knowing, and a reason to write short in the first place: compressing the
+reply changed a claim. The edited version says IAM's leave *"only removes a direct membership, so
+for anyone on a project through a portfolio it did nothing."* The code says otherwise —
+`deleteByUserIdAndProjectId` deletes **every** role on that project, portfolio-derived included,
+and the `ProjectContact` goes too. What survives is the portfolio membership, so re-materialisation
+puts them back. Same user-visible outcome, different mechanism, and the hiding fix is right either
+way — but don't build on "the detach does nothing for portfolio members", because it isn't true.
+The verified version is in the round-8 section above.
