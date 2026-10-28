@@ -344,3 +344,38 @@ and the `ProjectContact` goes too. What survives is the portfolio membership, so
 puts them back. Same user-visible outcome, different mechanism, and the hiding fix is right either
 way — but don't build on "the detach does nothing for portfolio members", because it isn't true.
 The verified version is in the round-8 section above.
+
+### The red build on `6e6e2c483` was a leaked request, not a test failure
+
+Green on a re-run of the **same commit**, so non-deterministic. Worth recording because the signature
+is misleading: the vitest summary said `659 passed`, `7778 passed`, and the job still exited 1. The
+only clue was one line — `Errors  1 error` — and the block above it:
+
+```
+ReferenceError: ProgressEvent is not defined
+  ❯ createEvent @mswjs/interceptors/.../XMLHttpRequest
+This error originated in "InviteToProjectSlider.test.tsx"
+```
+
+**Reading that correctly matters.** `ProgressEvent` is *not* missing from the environment — probed
+it, it is a function in both `globalThis` and `window` while a test runs. It is gone because the
+jsdom environment for that file had been **torn down with an XHR still in flight**, and MSW's
+interceptor then tried to build a progress event in a dead environment. So the fix is not a
+polyfill in `setup-tests.ts` — that runs inside the same environment that disappears.
+
+The leak looks like `still invites when the click blurs the field first`, which waits for the
+invitation to be *recorded by the handler* and then ends. The response, and the refetch the
+mutation triggers, are still in the air at teardown. Under parallel workers that lands too late.
+The file already has an `isSettled` / `waitForDataToLoad` helper that would drain it.
+
+**Diagnosing this from CI logs:** `get_job_logs` with a big `tail_lines` overflows and gets saved to
+a file — grep that file rather than paging the output, and **unescape `\n` first** (`s.replace('\\n',
+'\n')`) or every regex misses. The failure block sits *above* the coverage table, which is hundreds
+of lines, so a small tail shows only coverage and the bare `exit code 1`.
+
+**On attribution:** a re-run was the right call here and it is spent. The honest position before it
+was *unclear*, not *not mine* — the file is outside the diff, but this PR touches
+`useProjectContacts`, which feeds that component, and the round-8 fixture change alters what it
+reads (Carl is now an existing member, so the invitable list is shorter). Local runs were
+nondeterministic with *and* without the change, which is what made a re-run informative rather than
+lazy.
