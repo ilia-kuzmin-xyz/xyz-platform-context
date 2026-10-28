@@ -284,3 +284,45 @@ So the dialog's check stays what its comment says it is — UX only. Do not re-r
 against this PR, and do not "fix" it in the frontend; a second client-side check cannot close a
 read-then-write race. The thread on #2263 is deliberately left **unresolved** as the visible marker
 for reviewers.
+
+## 2026-10-28 — round 8, after a 13-day gap
+
+### The portfolio question from 10-15 was answered and shipped
+
+`54692b13a` "Hide Leave project for people on a project through a portfolio" — so of the three
+options put to DarminderA and Jason, **hide** won over grey-out-with-tooltip, which keeps the menu
+consistent with every other gate (viewer, tenant admin, V1 all hide). The analysis behind it stands
+and is worth keeping: the detach *does* remove a portfolio-derived role
+(`deleteByUserIdAndProjectId` deletes every role on the project), but the portfolio membership
+survives, so re-materialisation puts the person back. "Leave" would have meant "leave until the
+portfolio next syncs".
+
+### MSW: a second handler for one resource is invisible, not noisy
+
+Copilot caught that `handlers/project-members.ts` registered a GET for `project-all-users` that
+`handlers/project-team.ts:9` already served. It was my bug. **MSW serves the first matching
+handler**, and `projectMemberHandlers` sits 5th in `handlers/index.ts` while `projectTeamHandlers`
+is last — so the team handler was dead and its fixture went with it.
+
+**Why this is worth writing down: nothing went red.** The only thing that read Carl
+(`MultiEmailAutocomplete.test.tsx`) passes options as props and never touches MSW, so the wrong
+world had no test to break. A shadowed handler does not fail — it quietly serves a different
+backend than the file you are reading describes, and the next person to drive that flow through
+MSW inherits it with no reason to suspect the mocks.
+
+Fixed per the README's own rule ("never a second parallel set for the same resource"): the stateful
+set keeps the resource (it owns the detach, so write→read belongs together), `project-team.ts`
+gives it up, Carl moves into `defaultProjectMembers`, and `projectUsersFixture` is deleted rather
+than orphaned — a second copy of the member list is what let them drift.
+
+**Guard added:** `mocks/msw/handlers/handlers.test.ts` asserts no method+path in the base set is
+served twice. Verified zero duplicates across the whole base set once this was fixed, so the
+invariant is clean repo-wide and not just here. Mutation checked.
+
+### Known: cross-file test pollution in PortfolioPage (pre-existing)
+
+`InviteToProjectSlider.test.tsx > still invites when the click blurs the field first` and
+`TypesTab.removal.test.tsx > keeps archived types off the list...` **fail in a whole-directory run
+and pass in isolation**. Confirmed pre-existing by stashing — identical counts (540 passed, 2
+failed) with and without the round-8 change. Not investigated; flagged on the PR. If you see these
+two red, do not assume your change caused it — run them alone first.
