@@ -78,3 +78,18 @@ name. H2/H3: Capture point name correct, Room wrong.
 - H2/H3 are data fixes (re-point `modelRoomId`; refresh parquet), again not FE.
 
 hc-frontend master when read: `0da75a626`. Latest tag `v26.3.7` (2026-10-08); the 360 code above is in it.
+
+## 2026-10-28 (scheduled) — RELOCATED off the PLT board to DPL-1747; the cause is now stated by Kuba (inferred, not observed)
+
+Jira key is now **DPL-1747** (same issue, issue type still Live Incident, status **In Analysis**, assignee **Kuba.Maruszczyk**). It no longer appears under project PLT, so this folder is renamed `relocated` (PLT-2884 precedent). Fetched live, 13 comments. Supersedes the 10-27 "Open, owed by Ilia" state and the **10-27 draft to Yash in `recommended-action.md`: do not post it, the question was answered another way.**
+
+- `116621` (Ilia, 10-27 09:25): not a web-viewer error; the point name is saved at creation, web and mobile only display it, Room comes from the current rooms model. **None of the 173 names on ML5.4 match their room; 168 were created by the system, all with a "ROOF" prefix** (e.g. "ROOF DH-SOUTH" in "L0 Data Hall-R060-SOUTH"). Asked to move it to PAPI.
+- `116622` (Yash): moved to the PAPI board, tagged Ali Seyedof. `116633`: Yash attached the Room model (ML052-EQN-ZZ-ZZ-M3-A-ZZZZ-0003.rvt, SharePoint). Freshdesk 8427 now Waiting on 3rd line.
+- `116743` (Kuba, 10-27 15:39): if only the names differ this is **expected behaviour when room names changed after the points were created**; names are generated from Room and Level at creation and never auto-update. Room locations or boundaries may also have changed between revisions, to be investigated separately.
+- `116774` (Yash): "I guess" the points were not updated. `116778` asks Kuba whether to ask the user about model changes. `116788` (Kuba, 19:33): **yes; if changed, also get the old rooms model used at creation so they can do the mapping.**
+
+**What this does to our hypotheses.** H1 (stale copy of the room name) is now the working explanation on the backend side, but it is Kuba's statement, not an observation on ML5.4. Correction to my own H1: the generated form on ML5.4 is a **"ROOF <name>" prefix**, not `"<room> - Default Point"` as on PA12, so the two projects' generators differ (or the generator changed). H2 and H3 are not ruled out: Kuba's edit note concedes locations may have moved. Still **not observed**: which field is right on one wrong point in the Editor.
+
+**Who owes what now (no longer Ilia):** Yash owes the customer the question "were room names or boundaries changed after the capture points were created, and can you send the old rooms model". Kuba/Ali own the mapping once they have it. Nothing for Ilia unless pulled back in.
+Unopenable media unchanged: `66788` to `66790` and three inline images (403).
+Not verified: everything on ML5.4 (no data read), what the mobile app shows, who generated the "ROOF" prefix and when.

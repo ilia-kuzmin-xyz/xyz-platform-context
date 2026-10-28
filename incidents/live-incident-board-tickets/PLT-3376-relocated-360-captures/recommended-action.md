@@ -12,3 +12,7 @@ Draft to Yash, as a Jira comment on PLT-3376 (53 words):
 
 Status: leave Open for now. If the answer is "Room is correct", the likely route is renaming the capture
 points, no development, and the ticket can go With Technical Support so Yash can relay it.
+
+## 2026-10-28 — SUPERSEDES the draft above. Nothing to post; the ticket left the PLT board.
+
+Now DPL-1747 (Kuba, In Analysis). Ilia already told Yash it is not a viewer error (10-27), Yash moved it, Kuba explained the mechanism and asked for the old rooms model. **Class 1, owed by Yash to the customer** (room changes + old model), not by Ilia. No Jira action was taken.

@@ -834,3 +834,7 @@ its #2265 is not (it is the unreleased 26.4.1). Check each PR, not the ticket's 
 ## 2026-10-14 — a ticket going Done is not the customer being told
 
 PLT-3091 went Done the hour after its frontend PR merged, while the customer's "issue remains after 26.3.7" (10-12) had no reply and the fix was in no release tag. PLT-3133 went Done by Freshdesk closure with the symptom unexplained. When a ticket drops off the open list between runs, **fetch it with comments before dropping it from the summary**: check who closed it, whether the last customer message was answered, and whether the fix is in a tag (`git fetch --unshallow --tags`, then `git tag --contains <sha>`). Report the residual as its own line even though the ticket is out of scope.
+
+## 2026-10-28 — a release tag can hold a cherry-pick, not the master commit
+
+`git tag --contains <master sha>` was empty for PLT-3306's fix (`d3f17f7a5`) although the fix shipped: `v26.4.1` was cut from `Release/Platform26.4.1` with cherry-picks, so the tag holds `82ba54eff`, a different sha with the same subject. Check by subject (`git log v26.4.1 --grep=PLT-3306`) as well as by sha before calling a fix unreleased. Same run: a ticket that moved to another Jira project (PLT-3376 became DPL-1747) disappears from the PLT query without being Done; look it up by key before dropping its folder.

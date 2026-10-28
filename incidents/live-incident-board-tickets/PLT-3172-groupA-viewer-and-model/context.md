@@ -151,3 +151,6 @@ Git (full history, tags fetched): #2242 is in `v26.3.7`; **#2265 (`b8e1da094`) i
 
 ## 2026-10-22 (scheduled) — Ready For Release; verified on Staging 26.4.1 (residual only)
 Fetched live: 9 comments, status **READY FOR RELEASE** (10-21 13:25), fixVersions 26.3.7 (released) and **26.4.1 (not released)**. `116074` Gennaro (10-21): *"Verified fixed on Staging 26.4.1"* (covers #2265, the panel half); `116084` Yash: Freshdesk 8087 **Awaiting release**. Git: #2265 (`b8e1da0`) still in no tag. Out of scope by status; customer to be told when 26.4.1 ships. No Jira action taken.
+
+## 2026-10-28 (scheduled) — Customer Release Check since 10-27; both PRs verified in tags
+Status moved to Customer Release Check (Freshdesk 8087 Waiting on customer, 10-27 09:15 UTC). fixVersions 26.3.7 and 26.4.1, both released. Verified by tag: `fad8c78b2` (#2242) is in `v26.3.7` and `v26.4.1`; `b8e1da094` (#2265) is in `v26.4.1` (so the second half reached release, unlike the 10-13 position). Gennaro verified fixed on Staging 26.4.1 (10-21). Related suggestion PLT-3264 (context menu Select path) is still Open. Ball with the customer; nothing owed. Supersedes the "sprint-only / #2265 unreleased" notes from 10-13 to 10-19.

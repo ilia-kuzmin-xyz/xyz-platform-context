@@ -229,3 +229,7 @@ advancing. Use the backend's `LaborHoursProgressLastCalculatedOn` (or a run hist
 
 - DuckDB table schemas: [`docs/dashboard/duckdb-tables/`](../../docs/dashboard/duckdb-tables/)
 - Progress calculation modes: [`docs/dashboard/progress-calculation-modes.md`](../../docs/dashboard/progress-calculation-modes.md)
+
+## 2026-10-28 — PLT-3133 reopened; DPL-1707 Released; hc-frontend line refs moved
+
+The element-status delta merge cap is now at `dashboard-progress-service.ts:717` and `:890-891` (was `:674`/`:833`); `calculatedOn` comes from `progress-outputs-v2-loader.ts:86` (project and category-group outputs only). Behaviour unchanged. DPL-1707 (year-boundary failure, XYZDataPipelines#543) is **Released**, verified on dev only (Kuba 10-22); whether prod has it is unverified. The customer reported ATL05 intangible edits stale again on 10-27 (PLT-3133). Check `LaborHoursProgressLastCalculatedOn` against the edit time, never the panel's "Last updated".

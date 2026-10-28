@@ -445,3 +445,29 @@ Fetched live: **22 comments** (was 20), status **Done**, resolution empty. New: 
 **What was never resolved:** the customer's symptom (intangible progress edited in the web viewer does not reach the dashboard unless an element status also changes, `114187`) was neither reproduced nor explained, and **DPL-1707** (Backlog, Kuba: user-entered progress stops reaching the dashboard when the date range crosses a calendar year; predicted to hit every prod project on **1 Jan 2027**, 79 days from today) was linked to it and is still open. Closing this ticket does not touch DPL-1707. The 10-08 question to Rishi about whether DPL-1707 applies to ATL06 was never answered.
 
 **Class 4 half survives, on DPL-1707, not on this ticket.** The deadline is the thing worth a human decision: someone with backend access should confirm DPL-1707's priority before the year ends. Not verified here (DPL project is not read by this routine). Attachment `65932` still unopenable. Folder not renamed, per the 10-08 precedent for Freshdesk-closed tickets.
+
+## 2026-10-28 (scheduled) — REOPENED 10-27 and now assigned to Ilia; DPL-1707 is Released, so "is the fix on prod?" is the open question
+
+**Supersedes the 10-14 "Done, nothing to do".** Jira status **Open**, assignee **Ilia** (was Rishi/Darminder), `updated` 10-27 15:29 UTC. 30 comments (was 22). Fetched live.
+
+- `116680` to `116737` (10-27 13:47 to 15:29): Freshdesk 7989 reopened (Open, Waiting on customer, Open, Waiting on 3rd line, repeated).
+- **`116704` (Yash to Ilia, 10-27 14:35): the customer reports ATL05 again.** "Updated the intangible activity approx 2 hours from now but the dashboard is not updated for 21 hours now." Asks us to investigate why intangible updates are not consistently reflected and to confirm whether they should trigger a refresh independently of element installs. One screenshot of ATL05 intangibles (inline, unopenable). **The sentence is ambiguous**: it may mean an edit 2 hours ago with a dashboard last refreshed 21 hours ago, or two different edits. We do not have the edit time.
+- Nobody has replied. **Ball: Ilia, about 16 hours at fire time.**
+
+### What changed on the pipeline side since 10-08
+**DPL-1707 (calendar-year-boundary failure) is `Released` (Done category), updated 10-26.** Fixed by PR XYZDataPipelines#543 (Ryhor Kanoplich). Kuba verified on **dev** 10-22 (`116216`): a 2024 to 2028 range completes, outputs share `DerivedFromPlannedAndActualOutputId`, `LaborHoursProgressLastCalculatedOn` advanced to 2026-10-22 12:26 UTC. Ali asked Rishi on 10-14 for a schedule file that reproduces it. **"Released" does not say which environment.** Not verified: that the fix is on prod, or when.
+
+### Reading of the new report (inferred, nothing measured)
+Same shape as 10-07 (`114187`): element installs refresh within minutes, intangible-only edits do not. Two candidates, one DB read separates them:
+1. **ATL05's activity labour output is not advancing** (DPL-1707 if prod lacks the fix and ATL05's progress date range now crosses a year boundary, or another failed run). Prediction: `LaborHoursProgressLastCalculatedOn` is **older than the edit**.
+2. **The pipeline is fine and the dashboard shows an older file.** Prediction: it advanced within about 15 minutes of the edit (Rishi measured 3 to 14 minutes on 09-21), and the stale value is on our side of the parquet download.
+Either outcome of that one read removes half the options. DPL-1707 itself says ATL05-08 were fine on 15-17 Sep, so candidate 1 needs a changed range or a failed run since then, which nobody has checked.
+
+### Frontend facts re-read at hc-frontend `7630d15f0` (line numbers moved since 09-17, content did not)
+- The element-status delta merge is still capped at the progress `calculatedOn`: `dashboard-progress-service.ts:717` (`endSyncDateTime = outputs ? this._v2Loader.getCalculatedOn() ?? undefined : undefined`), passed to `_loadArtefactsAndBuildView` at `:733`, used at `:890-891` (`syncElementStatusDeltaFromAPI`). **Live call sites.**
+- `calculatedOn` is resolved from the project and category-group outputs only: `progress-outputs-v2-loader.ts:86` (`resolveCalculatedOn(outputs, AGGREGATE_LEVELS)`), exposed at `:221`, shown via `dashboard-progress-service.ts:792`. It does not read the activity-level output, so the panel's "Last updated" can look fresh while intangible % is frozen (the DPL-1707 secondary effect). **Do not use "Last updated" as the check.**
+- No file touching this path merged to master since 10-13 (the only recent hits are PLT-3373/3343/3185/3184 Packages work).
+
+### Unverified
+Whether prod has the DPL-1707 fix; ATL05's date range, last calculation time and run history; the exact edit time and activities; the content of the ATL05 screenshot; whether the earlier 10-13 closure was a customer timeout (still inferred).
+Unopenable media: the new inline ATL05 screenshot in `116704` (no attachment id surfaced in the comment body). Would settle which activities were edited and the dashboard value the customer saw.

@@ -165,3 +165,23 @@ No Jira action of any kind was taken.
 ## 2026-10-14 — ticket is Done; the 10-08 draft to Rishi (34 words) no longer belongs on this ticket
 
 Nothing to do on PLT-3133. If the DPL-1707 question is still wanted, send it to Rishi in chat, not as a comment on a closed ticket, and attach the date: DPL-1707 predicts every prod project fails on 2027-01-01. One owner, one question: **Does DPL-1707 explain the ATL06 intangible edits not appearing?** If the customer comes back, Yash reopens or raises a new ticket. No Jira action of any kind was taken.
+
+# 2026-10-28 — CURRENT. Supersedes the 10-14 "nothing to do". NOT POSTED.
+
+**Class 1, owed by Ilia to Yash (about 16 hours), with a class 4 half.** Yash reopened it to Ilia (`116704`) with a fresh ATL05 case. The deciding fact sits in the DB and Rishi can read it in a minute: is `LaborHoursProgressLastCalculatedOn` older than the edit? Class 4 half: whether the DPL-1707 fix is on prod and when (Kuba, Ryhor), which is a release fact, not something to settle on this thread.
+
+**Suggested ticket move:** status Open to In Analysis, so the board shows Ilia is on it.
+
+**Assumption, one line:** that DPL-1707 "Released" may not mean prod; if prod already has it, the first question below still decides between "pipeline stuck" and "pipeline fine".
+
+## Draft 1, comment on PLT-3133, @Rishi (36 words)
+
+> Rishi, the ATL05 customer says an intangible edit made today still isn't on the dashboard. DPL-1707 shows Released, but I can't tell whether prod has the fix yet. **Is ATL05's LaborHoursProgressLastCalculatedOn older than today's intangible edit?**
+
+## Draft 2, comment on PLT-3133, @Yash (32 words)
+
+> Yash, thanks. Intangible edits should refresh the dashboard without an element change. I'm checking ATL05's last calculation with Rishi and will update you today. **Which activity was edited, and at what time?**
+
+**Outcomes for draft 1.** Older: the labour calculation is not advancing on ATL05; ask Kuba whether the #543 fix is on prod and read the run history (class 4, escalate). Advanced within 15 minutes: pipeline fine; the stale number is on the download or cache side, back to the frontend candidates in `context.md` (class 3, needs a look at ATL05 in the app). If Rishi is unavailable, Kuba can read the same field.
+
+No Jira action of any kind was taken.

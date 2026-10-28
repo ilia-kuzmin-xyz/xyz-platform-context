@@ -45,6 +45,30 @@ Example: `PLT-2892-groupA-viewer-and-model/`. When a ticket's status changes gro
 
 ---
 
+## Run: 2026-10-28 (scheduled) — 11 in scope, all Group A, Group B empty. PLT-3376 left the PLT board (now DPL-1747), PLT-3133 reopened and is owed by Ilia, four tickets moved to Customer Release Check after 26.4.1 shipped; zero Jira actions taken
+
+Board re-queried (`statusCategory != Done`, 19 live incidents). In scope: **PLT-3133** (Open, Ilia, reopened 10-27), 3330 (In Analysis, Ilia), 3300, 3299, 3275, 3115 (With Customer), **3306, 3271, 3172, 3112** (Customer Release Check, since 10-27), 3063, 2651 (Customer Release Check), 2874 (In Analysis).
+Out of scope: With Technical Support (**3291**, Ilia answered Yash 10-27 and it moved), In Code Review (3308), Ready For QA (2858), Blocked (3135, 2660). **PLT-3376 is now DPL-1747** (Kuba, In Analysis), folder renamed `relocated`. Gone from the open list (Done): 3231, 3223, 3091.
+hc-frontend master `7630d15f0`; tag **`v26.4.1`** now exists (cut 10-20 with cherry-picks; released 10-27). Latest by date is `v26.3.7`.
+
+**PLT-3133 (new work for Ilia, [folder](PLT-3133-groupA-data-pipeline/context.md)).** Customer reopened (Freshdesk 7989) with ATL05: an intangible edit not on the dashboard for hours; Yash asked Ilia 10-27 14:35, 16 hours unanswered. DPL-1707 (the year-boundary pipeline failure linked on 10-08) is now **Released**, verified on dev only. One read separates "pipeline stuck" from "dashboard stale": ATL05's `LaborHoursProgressLastCalculatedOn` against the edit time. Drafts to Rishi (36 words) and Yash (32 words). The edit time is ambiguous in Yash's text. hc-frontend references moved: merge cap `dashboard-progress-service.ts:717`, `:890-891`.
+**PLT-3376 / DPL-1747.** Kuba says names are generated at creation and do not follow room renames (matches our H1, still inferred); ML5.4's 168 generated names have a "ROOF" prefix, unlike PA12's "<room> - Default Point". Yash owes the customer the question about room changes and the old rooms model. Nothing owed by Ilia. The 10-27 draft is superseded.
+**Customer Release Check x4.** 3306, 3271, 3112, 3172: fixes verified inside `v26.4.1` (3306 via cherry-pick `82ba54eff`; its master sha is not an ancestor of the tag). New short folders for 3306, 3271, 3112. Residuals: 3112's unloaded-model count is a known limit (DPL-1708/1720), 3271's own test did not cover an existing issue's video.
+**Unchanged (stamps identical):** 3330 (Yash waiting on Ilia, 8 days), 3300, 3299, 3275, 3115, 3063, 2651, 2874.
+
+**Owed by Ilia:** PLT-3133 (Yash, 16 hours), PLT-3330 (Yash, 8 days), PLT-2874 (Yash, third chase 10-23, 10-05 draft 23 days), PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing:** PLT-3115 (With Customer since 09-16, 42 days, close with a resolution), PLT-3063 (Customer Release Check 30 days), 3299 (Mostafa), 3275/3300 (Joshua's file via Yash).
+**Unopenable media (403, unchanged):** PLT-3133 inline ATL05 screenshot (`116704`) and older `65932`; DPL-1747 `66788` to `66790`; PLT-3330 `66651` to `66654`; PLT-3299 `66491`, `66504` to `66508`; 3308 and 3275 Freshdesk screenshots; PLT-2858 `66039`.
+**Not verified:** that the DPL-1707 fix is on prod; ATL05's run history; every ML5.4 claim; customer-side results for the four released fixes.
+
+| Ticket | Domain | Status | This run | Action class |
+|---|---|---|---|---|
+| [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | Open | reopened; drafts to Rishi and Yash | 1 (Ilia), class 4 half on DPL-1707 prod |
+| [DPL-1747](PLT-3376-relocated-360-captures/context.md) | 360-captures | In Analysis (DPL) | relocated | 1 (Yash to customer) |
+| PLT-3306, 3271, 3112, 3172 | various | Customer Release Check | verified in tag; parked | 1, parked |
+| PLT-3330, 3300, 3299, 3275, 3115, 3063, 2874, 2651 | various | various | unchanged | see 10-27 and earlier tables |
+
+---
+
 ## Run: 2026-10-27 (scheduled) — 10 in scope (was 9), all Group A, Group B empty. One new ticket, PLT-3376 (Open, Ilia, 360 room names); the other nine have unchanged Jira stamps; zero Jira actions taken
 
 Board re-queried (`statusCategory != Done`, 23 live incidents). In scope: **PLT-3376** (Open, Ilia, new), 3330, 3291 (Open), 3300, 3299, 3275, 3115 (With Customer), 3063, 2651 (Customer Release Check), 2874 (In Analysis).
