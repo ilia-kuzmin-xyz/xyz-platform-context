@@ -453,3 +453,50 @@ in recent Vitest majors, and whether `toBeEnabled` is registered in this suite's
 Carried forward from 10-10. Deliberately **not** bundled into this push: the standing rule is that
 it rides a push that already touches `forgeCapture.ts`, and this one touches
 `client-report-metrics.ts` only. Bundling it would have been widening the PR on my own initiative.
+
+## 2026-10-29 — ⚠️ #2260 closed WITHOUT merging; the discipline-exclusion fix is stranded again
+
+**This is the third occurrence of this ticket's signature failure mode.** The PR whose own title
+begins "Restore the stranded QA fixes" has itself now been closed unmerged with work on it.
+
+### What is and is not on master
+
+PR **#2260 closed 2026-10-29 14:30, not merged.** It was superseded by **#2287**
+("PLT-3152: QA fixes re-landed on master, plus deck keyboard focus", opened 08 Oct, **still
+open**) — so closing it was partly rational. But #2287 does **not** carry the
+discipline-exclusion work:
+
+- #2287 changes 18 files and touches **neither** `client-report-assembler.ts` **nor**
+  `client-report-types.ts`. No `disciplineChoices`, no `buildDisciplines` / `buildPackages` /
+  `reportSlide` changes. Its one `excludedDisciplines` hit is a pre-existing PlannerPanel comment.
+- `master` confirms it: `ClientReportData` has **no** `disciplineChoices`, and
+  `ClientReportDiscipline.reportSlide` still carries the *old* docstring.
+- `git merge-base --is-ancestor b89b52d origin/master` → **false**. The commit is reachable only
+  from `origin/PLT-3152`.
+
+Tellingly, master's `excludedDisciplines` docstring still asserts that an unticked discipline
+"drop[s] out of the deck entirely — no section divider, no packages slide, no contents entry."
+**That is the false claim the fix existed to make true.** On master today, unticking a discipline
+still leaves its packages in the at-risk table, the full breakdown and the by-discipline rollup,
+preview and exported `.pptx` alike.
+
+### Recovery (nothing was lost — yet)
+
+The branch survives: `origin/PLT-3152` @ `544971e`, carrying `b89b52d`. Last verified green
+(build + Sonar) on 08 Oct, after master including PLT-3233's CI type-checking was merged in.
+Re-landing is a cherry-pick of `b89b52d` onto a fresh branch off master, or a reopen of #2260.
+
+**Not done, deliberately:** neither the PR nor a replacement was reopened. Closing a PR is a
+human decision and it may well have been intentional — the discipline fix rode along in a PR
+whose headline purpose was the QA re-land, so it is equally likely nobody noticed it was in
+there. Flagged to Ilia rather than acted on.
+
+### The pattern, now worth naming
+
+Three times on one ticket, work has failed to reach master by being attached to a branch that
+stopped being the live one: #2245 onto an already-squash-merged base (24 Sep), then #2260 closed
+in favour of #2287 (29 Oct). **Check before closing or superseding a PR whether it carries
+anything the successor does not** — `git merge-base --is-ancestor <commit> origin/master` answers
+it in one call, and a file-level diff of the successor answers the rest.
+
+Unchanged: QA 2 / 3 / 4 still never answered by Radu; cover still has no visible capture entry.
