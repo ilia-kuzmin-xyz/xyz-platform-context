@@ -4982,3 +4982,16 @@ Board (project = PLT, Live Incident, not Done): in scope **11**. Excluded by sta
 | 1, parked | PLT-2651, 3172, 3116, 3063 (Customer Release Check), 3182, 3115 (With Customer) | unchanged; 3115 and 3063 are close candidates |
 
 Nothing posted or moved in Jira. Media not openable (403 / Freshdesk / SharePoint): 3290 attachment `66433`; 3291 screenshot and video.
+
+## Run 2026-10-29
+
+Board (project = PLT, Live Incident, not Done): 18 open. In scope **14**. Excluded by status: 3389, 3308 (In Code Review), 3291 (With Technical Support), 3135, 2660 (Blocked), 2858 (Ready For QA). Two tickets left the PLT list since 10-28: **PLT-3133 moved to DPL-1749** (Ali, Open) and **PLT-3271 is Done** (Freshdesk closed 10-28); folders renamed `relocated` / `resolved`. Nothing else on the board changed since the 10-28 run (every other ticket's `updated` stamp predates it).
+
+| class | ticket | note |
+|---|---|---|
+| 1, class-3 shape | **PLT-3401** TXE2 S-curve Baseline "does not make sense" (Blocker, Ilia, new) | 14 h unanswered; hypothesis H1: Baseline is hardcoded to the labour-weighted column, Planned follows the weighting setting; draft to Mostafa; both screenshots unreadable |
+| 1, parked | **PLT-3390** ML9 progress model "cloned" elements (new) | Ilia already diagnosed 10-28 (every element exists twice in the export); With Customer; nothing owed |
+| 1 | PLT-3330, PLT-2874 (Ilia, In Analysis) | unchanged; existing drafts stand |
+| 1, parked | PLT-3300, 3299, 3275, 3115 (With Customer); 3306, 3172, 3112, 3063, 2651 (Customer Release Check) | unchanged |
+
+Nothing posted or moved in Jira. Media not openable (403): 3401 attachments `66919`, `66920`; 3390 video `66889`.

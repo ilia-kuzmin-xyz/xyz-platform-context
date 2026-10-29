@@ -6,3 +6,6 @@ Yash reported the X on a video attachment errors when editing an existing issue 
 
 Release check (verified): `e737747d2` is inside `v26.4.1`.
 Ball with the customer. Nothing owed by us. Unopenable: two inline screenshots (403). Not verified: removal of an existing video on an existing issue on prod.
+
+## 2026-10-29 — supersedes "Customer Release Check, ball with the customer": ticket is Done
+Yash set Freshdesk 8266 to Open and then Closed on 10-28 (`116868`, `116872`, 13:56 UTC); Jira status **Done**, resolution Done. No customer message is recorded between "Waiting on customer" (10-27) and the closure, so closure looks like the customer confirming or timing out; **which of the two is not visible in Jira** (Freshdesk side). The fix (`e737747d2`, in `v26.4.1`, verified 10-28 above) is released. Residual: none owed by us. Folder renamed `resolved`.

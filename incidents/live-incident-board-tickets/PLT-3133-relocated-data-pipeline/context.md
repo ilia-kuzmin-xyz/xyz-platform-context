@@ -471,3 +471,6 @@ Either outcome of that one read removes half the options. DPL-1707 itself says A
 ### Unverified
 Whether prod has the DPL-1707 fix; ATL05's date range, last calculation time and run history; the exact edit time and activities; the content of the ATL05 screenshot; whether the earlier 10-13 closure was a customer timeout (still inferred).
 Unopenable media: the new inline ATL05 screenshot in `116704` (no attachment id surfaced in the comment body). Would settle which activities were edited and the dashboard value the customer saw.
+
+## 2026-10-29 — supersedes the "reopened, Group A" reading above: the ticket left PLT for DPL-1749
+Fetched by key. PLT-3133 is no longer a PLT issue: it is **DPL-1749** (Open, assignee Ali Seyedof, 34 comments, relates to DPL-1707 Released). Ilia told Yash on 10-28 (`116802`, `116821`) that intangible edits should already trigger the calculation within 15 minutes, that the trigger "isn't working on ATL05", and to move it to DPL; Yash moved it and tagged Ali (`116823`, 10:54 UTC). So the 10-28 candidates 1 and 2 above were reduced to "backend trigger not firing on ATL05", an inferred reading by Ilia, not a measured one. Folder renamed `relocated`. Nothing owed by us on PLT; follow DPL-1749 for the outcome. Not verified: whether Ali has replied on DPL-1749 (not fetched beyond the PLT comments).

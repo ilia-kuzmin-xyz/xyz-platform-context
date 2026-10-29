@@ -233,3 +233,6 @@ delayed."* (`activity-progress.tsx:174`; same copy in `gantt-tooltip.tsx:20`) â€
 never coming, on work that is already done. Live on `master` as of this date; the lock-reason fix
 named in the 08-27 section (`services/progress/progress-lock-reason.ts`) is **not** on `master` and
 never became a PR.
+
+## 2026-10-29 â€” Baseline series uses a fixed weighting column; Planned and Actual follow the setting (PLT-3401, unproven as the cause)
+`progress-queries-v2-api.ts:363` (trend) and `:143,:153,:162` (overview) read the baseline from `LaborWeightedBaselineProgress` regardless of the project's weighting method, while Planned and Actual use `config.plannedProgressColumnName` / `actualProgressColumnName` (`:361-362`). On a project weighted by element count or quantities, Baseline and Planned from one schedule are on different bases. Whether that explains TXE2 is **not verified**; see `incidents/live-incident-board-tickets/PLT-3401-groupA-progress-tracking/`. Package-level mode uses the planned weight column for baseline (`:235-255`, `:456-464`), so the two modes may disagree.
