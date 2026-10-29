@@ -379,3 +379,23 @@ was *unclear*, not *not mine* — the file is outside the diff, but this PR touc
 reads (Carl is now an existing member, so the invitable list is shorter). Local runs were
 nondeterministic with *and* without the change, which is what made a re-run informative rather than
 lazy.
+
+## 2026-10-29 — MERGED
+
+PR #2263 merged to master, with rishib's approval and Copilot reporting no open issues.
+**Do not reopen this branch or re-raise its findings.** Jira left untransitioned, same call as
+PLT-2799 and PLT-2524: a merge is not automatically "Done" in this team's flow.
+
+Three things outlive the merge and are nobody's yet:
+
+1. **PAPI-4277** — the IAM last-admin guard in `ContactService.detachProject`. Until it ships the
+   dialog's check is UX only, and the Team tab can orphan a project the same way. The review thread
+   for it was deliberately left unresolved at merge.
+2. **The leaked request in `InviteToProjectSlider.test.tsx`** — see the section above. It turned the
+   build red once on a commit that passes on re-run, so it will keep costing random red builds
+   across *other* people's PRs, not just this one. Asked on the PR whether it wants a ticket; no
+   answer before merge.
+3. **DarminderA's changes-requested review was never re-requested** after the portfolio fix landed,
+   so the PR merged with his review still showing as requesting changes. Worth knowing that this
+   repo's flow permits that; it is not evidence the concern was dismissed — it was fixed in
+   `54692b13a`.
