@@ -3505,3 +3505,25 @@ if (items.length === 0) return { mode: 'legacy' } // (b) LIVE fallback
 
 Suggested order on the thread: settle (b) first (small, deliberate), count (a) on prod, then delete
 the modal. Offered to take it as its own ticket. **It should not ride on #2222.**
+
+## 2026-10-29 — #2222 CLOSED without merging. Loop closed, nothing outstanding
+
+Closed, which is what the 12 Oct comment recommended. Session unsubscribed.
+
+**Do not reopen it and do not raise a replacement.** Its only purpose was removing the
+runner-override hotkey, and the hotkey had already gone from master independently — verified then by
+`useRunnerOverride` returning zero hits repo-wide and master's `TaskExecutionModal` routing straight
+off `routing?.mode`. There is nothing left for the change to do.
+
+Both PRs this session owned are now concluded: **#2203 merged** (29 Sep), **#2222 closed as
+obsolete** (29 Oct).
+
+### What survives this PR, for whoever picks it up
+
+The legacy-runner removal question Rishi raised is still open and still worth doing. The analysis is
+in the 12 Oct entry above and on the closed PR's thread; the short version is that **two paths route
+to legacy and only one drains away** — historical instances (`lifecycle_revision = 0` with a run at
+`write_protocol != 1`, fixed forever) and an **empty template version**, which falls back to legacy
+live and is therefore not retired by any data cleanup. Settle the empty-version case first.
+
+That wants its own ticket. It was offered on the thread and nobody has taken it up.
