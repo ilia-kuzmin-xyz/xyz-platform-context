@@ -4995,3 +4995,15 @@ Board (project = PLT, Live Incident, not Done): 18 open. In scope **14**. Exclud
 | 1, parked | PLT-3300, 3299, 3275, 3115 (With Customer); 3306, 3172, 3112, 3063, 2651 (Customer Release Check) | unchanged |
 
 Nothing posted or moved in Jira. Media not openable (403): 3401 attachments `66919`, `66920`; 3390 video `66889`.
+
+## Run 2026-10-30
+
+Board (project = PLT, Live Incident, not Done): in scope **13**. Excluded by status this run: 3401 (moved to In Code Review after the 10-29 run), 3389, 3308 (Ready For QA), 3291 (With Technical Support), 3135 (Blocked). No Ready to Dev or Dev In Progress tickets, so Group B is empty. Every in-scope ticket except the new one has an `updated` stamp that predates the 10-29 07:07 run, so they were not re-investigated.
+
+| class | ticket | note |
+|---|---|---|
+| 1 (new) | **PLT-3406** CLT-FRA03 "v1" project has no Open Editor (Medium, Ilia, In Analysis) | ~17 h unanswered. Missing Open Editor is by design: V1 = project name contains "v1" (`v1ProductionRules.tsx:2-3`). Real question is whether the customer's issue images load on the legacy dashboard. Draft to Yash, 61 words. Screenshot `66932` unopenable (403) |
+| 1 | PLT-3330, PLT-2874 (Ilia, In Analysis) | unchanged; existing drafts stand |
+| 1, parked | PLT-3390, 3300, 3299, 3275, 3115 (With Customer); 3306, 3172, 3112, 3063, 2651 (Customer Release Check) | unchanged. Folder `PLT-3063-resolved-quality-management` is misnamed: the ticket is Customer Release Check, not resolved |
+
+Nothing posted or moved in Jira.

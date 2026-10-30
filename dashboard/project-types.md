@@ -41,3 +41,13 @@ For quality-only projects, the color service is skipped entirely. Instead the lo
 ## Where this flag is set
 
 The `progressProject` field is set in the project creation modal ("Project controls" toggle in Step 2) and in project settings ("Progress Capture" toggle). The label differs between creation and settings but both write the same backend field.
+
+## 2026-10-30 — the name-based "V1" rule (from PLT-3406)
+
+Separate from `progressProject`: a project whose **name contains `v1`** (case-insensitive,
+`helpers/V1Rules/v1ProductionRules.tsx:2-3`) is treated as a legacy V1 project. It hides Open Editor,
+Edit, Copy, Leave and Archive on the portfolio card (`ProjectCardMenu.tsx:119-166`), opens the legacy
+PowerBI dashboard (`PortfolioPage.tsx:90-96`), redirects the new dashboard route there
+(`dashboard-project-provider.tsx:247`) and makes the user dashboard-only (`userAuthorityUtils.ts:42`).
+A missing Open Editor on such a project is by design; rename the project to undo it. Pitfall: support
+"turns the V1 flag on" by naming, so a rename silently changes menus, dashboard and authorities.
