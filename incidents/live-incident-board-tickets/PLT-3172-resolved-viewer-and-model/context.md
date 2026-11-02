@@ -154,3 +154,6 @@ Fetched live: 9 comments, status **READY FOR RELEASE** (10-21 13:25), fixVersion
 
 ## 2026-10-28 (scheduled) — Customer Release Check since 10-27; both PRs verified in tags
 Status moved to Customer Release Check (Freshdesk 8087 Waiting on customer, 10-27 09:15 UTC). fixVersions 26.3.7 and 26.4.1, both released. Verified by tag: `fad8c78b2` (#2242) is in `v26.3.7` and `v26.4.1`; `b8e1da094` (#2265) is in `v26.4.1` (so the second half reached release, unlike the 10-13 position). Gennaro verified fixed on Staging 26.4.1 (10-21). Related suggestion PLT-3264 (context menu Select path) is still Open. Ball with the customer; nothing owed. Supersedes the "sprint-only / #2265 unreleased" notes from 10-13 to 10-19.
+
+## 2026-11-02 — Done (Freshdesk closure 10-30 13:06 UTC). Folder renamed groupA to resolved.
+Gennaro verified on Staging 26.4.1 (10-21); released 10-27 (`v26.4.1`, #2265 per the 10-13 note); customer asked to check 10-27; Freshdesk 8087 closed 10-30 with no customer message in Jira. Residual: customer never confirmed. Nothing owed.

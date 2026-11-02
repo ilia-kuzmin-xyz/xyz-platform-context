@@ -4995,3 +4995,20 @@ Board (project = PLT, Live Incident, not Done): 18 open. In scope **14**. Exclud
 | 1, parked | PLT-3300, 3299, 3275, 3115 (With Customer); 3306, 3172, 3112, 3063, 2651 (Customer Release Check) | unchanged |
 
 Nothing posted or moved in Jira. Media not openable (403): 3401 attachments `66919`, `66920`; 3390 video `66889`.
+
+## Run 2026-11-02 (scheduled)
+
+Board (PLT, Live Incident, not Done): 16. In scope **10, all Group A, Group B empty**: PLT-3330 (In Analysis), 3300, 3299, 3291, 3275, 3115, 2874 (With Customer), 3306, 3063, 2651 (Customer Release Check). Out by status: 3406 (With Technical Support), 3401, 3389, 3308, 2858 (Ready For QA), 3135 (In Code Review). Left the open list since 10-29: **PLT-3390, 3172, 3112 Done by Freshdesk closure 10-30** (folders renamed `resolved`, none had a customer confirmation) and 2660 Done 10-30. hc-frontend master `182d9ee`; PLT-3401's fix #2418 is merged (out of scope, Ready For QA), nothing touched a hypothesis above.
+
+| class | ticket | change since 10-29 |
+|---|---|---|
+| 1, class-3 shape | PLT-3330 | **Rishi assigned himself 10-30**; still no reply to Yash's 10-20 question. Ilia no longer owes it |
+| 1, parked | PLT-2874 | Ilia answered 10-30 (date-range end explains the gap, FAR01 and LVN1); With Customer. 10-05 draft superseded |
+| 1, parked | PLT-3291 | Ilia answered 10-27; Yash parked it With Customer 10-30 |
+| 1, parked | 3306, 3063, 2651 | Customer Release Check, unchanged (6, 35, 10 days) |
+| 1, parked | 3300, 3299, 3275, 3115 | With Customer, unchanged (13, 14, 13, 47 days) |
+
+**Owed by Ilia:** nothing new. Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution (47 days), 3063 (35 days), 3299 (Mostafa), 3275 and 3300 (Joshua's file via Yash).
+**Unopenable media (403, unchanged):** 3330 `66651` to `66654`; 3291 Freshdesk screenshot and SharePoint video; 3299 `66491`, `66504` to `66508`; 3390 `66889`; 3308 and 3275 Freshdesk screenshots; 2858 `66039`.
+**Not verified:** that the 10-30 date-range explanation for 2874 reproduces on Staging; anything on 3330 (no one has run the checks); customer outcome for 3390, 3172, 3112.
+Nothing posted or moved in Jira.

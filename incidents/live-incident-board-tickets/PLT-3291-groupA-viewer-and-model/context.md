@@ -122,3 +122,6 @@ Re-fetched, 9 comments, newest `116307`. `116306` (Yash, 10-23 11:17): customer 
 Ilia's 10-19 explanation ("same elements sit in several models, those models are not loaded") predicts **not loaded**; Pattern 1 predicts **loaded and empty**.
 
 Class 1 (Ilia owes Yash), with a class-4 tail: if the models are loaded and empty, it is the PLT-2882 / DPL-1684 ghost-model family and needs a product call on hiding models the geometry cannot back. No Jira action was taken.
+
+## 2026-11-02 — parked With Customer (Yash, 10-30 14:01 UTC); nothing owed by Ilia
+Last Ilia comment `116628` (10-27): the models do contain the MV-1350 elements (Containments and Data Devices each hold the same 800 conduits and fittings as the conduit model, Security holds 4), so the link shows in every model that element is in; suggestion to re-export those models without the conduits. Yash then set Freshdesk 8300 to Waiting on customer and the Jira status moved With Technical Support to With Customer. 11 comments, none new from the customer. Screenshot and SharePoint video still not openable. The 10-27 claim is Ilia's own reading of the data, not re-measured this run.

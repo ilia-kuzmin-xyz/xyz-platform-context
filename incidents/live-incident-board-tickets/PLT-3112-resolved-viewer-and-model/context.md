@@ -7,3 +7,6 @@ Model PC-Rowan-Moriah_ARCH_R2-DoorsWindows-V1 showed Linked 2,319 of Total 4,545
 Release check (verified): `86d9be042` is inside `v26.4.1`.
 **Residual to expect:** the unloaded-model count can still look inflated; the customer may come back on that. Not a regression, a known limit.
 Ball with the customer. Unopenable: inline screenshots (403). Not verified: the customer's view after loading the model on prod; the status of DPL-1708/1720 beyond the link summary.
+
+## 2026-11-02 — Done (Freshdesk closure 10-30 15:21 UTC). Folder renamed groupA to resolved.
+Fix is Darminder's frontend filter in the model details panel (`116220`: Gennaro verified on Staging 26.4.1 with a tooltip added), released 10-27. Freshdesk 7870 closed 10-30, no customer reply in Jira. Known limit stays: an unloaded model still shows the unfiltered count; the long-term fix is DPL-1708 and DPL-1720 (`115592`). Nothing owed.

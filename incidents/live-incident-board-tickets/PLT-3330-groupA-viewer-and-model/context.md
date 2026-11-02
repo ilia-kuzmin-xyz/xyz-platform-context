@@ -66,3 +66,8 @@ Re-fetched, 2 comments. `115992` shows `updated` 10-23 13:38 (Yash edited his ow
 
 ## 2026-10-28 run: unchanged in substance; 7 days, nobody has answered Yash (additive)
 Comments still the two from 10-20 (`115992` Yash to Ilia, `115993` Freshdesk). `updated` moved to 10-27 10:50 with no new comment. Class 1 (owed by Ilia), draft in `recommended-action.md` stands, now 8 days since the 10-20 post. hc-frontend master `7630d15f0`: nothing touches this.
+
+## 2026-11-02 — ownership moved to Rishi (he took it himself, 10-30 16:59 UTC)
+Changelog: Rishi Bhugobaun changed the assignee from Ilia to Rishi; status is still In Analysis (Ilia moved it Open to In Analysis on 10-27). The ticket still has only Yash's two comments from 10-20. Nobody has answered the 10-20 question, and nothing in Jira says Rishi has started the checks.
+hc-frontend master (`182d9ee`, 14 commits since 10-29) does not touch `installation-status-sql.ts` or the colouring path, so the code reading above is current. Media `66651` to `66654` still 403.
+**Owed by Ilia: nothing now.** The checks in `recommended-action.md` (Last updated against install time, date range end, linked activities) are Rishi's if he wants them.

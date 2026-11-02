@@ -21,3 +21,6 @@ Attachment `66889` (video) and the inline screenshot in `116813`. Would settle: 
 
 ## Next
 Ball with the customer (Yash relays), one day old. Nothing owed by us. See `recommended-action.md`.
+
+## 2026-11-02 — Done (Freshdesk closure 10-30 14:37 UTC). Folder renamed groupA to resolved.
+Yash closed Freshdesk 8472 two days after Ilia's 10-28 comment (`116850`: every element exists twice in the export, as Generic Model and Structural Framing; suggestion to re-export without the Generic Model copies). No customer reply is recorded in Jira, so the closure is silence, not confirmation. Residual: nobody has seen the re-export. If the customer returns with the same model, start from `116850`, do not re-diagnose. Media `66889` still 403.

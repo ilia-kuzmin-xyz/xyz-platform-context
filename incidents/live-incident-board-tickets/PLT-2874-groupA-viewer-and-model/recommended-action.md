@@ -590,3 +590,6 @@ Nothing new on the ticket (newest comment `113731`). By the 09-09 rule a draft u
 
 ## 2026-10-26 (scheduled): CURRENT. Third chase from Yash; the 10-05 draft is now 21 days old and still the right message
 Class 1, owed by Ilia, and now the oldest unanswered ask on the board by a person (Yash, three times). The draft makes no code claim beyond "the July mismatch was fixed" (#2084, released since `v26.3.5.1`, verified 10-16); "Production has matched" is the 08-12 measurement. Send the 10-05 draft as written (59 words). Do not close until Gennaro answers. No Jira action was taken.
+
+## 2026-11-02: CURRENT. Answered and parked. Nothing owed by Ilia. Supersedes the 09-14 and 10-05 drafts: do not post them.
+Class 1, parked (customer). Wait for the customer. If they confirm, close; the only loose end is Gennaro's 08-12 Staging number, which a date-range check on Staging would explain or not.

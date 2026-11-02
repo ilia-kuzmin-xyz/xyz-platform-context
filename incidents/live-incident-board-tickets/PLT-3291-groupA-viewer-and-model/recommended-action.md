@@ -39,3 +39,6 @@ Class 1, owed by Ilia since 10-23. Assumption, one line: that the customer sees 
 > Yash, thanks, good that the count is confirmed. The model list shows every model that holds a copy of a linked element, whether or not that model is drawn in the viewer, which could explain the extra names. **When the customer saw security and data devices listed, were those models loaded in the viewer?**
 
 Why this question: yes means loaded and empty (ghost models, Pattern 1, then the DPL-1684 question to Ali from 10-16 matters again); no means the display is as designed and the answer is a one-line explanation. Do not tell the customer it is a defect. No Jira action was taken.
+
+## 2026-11-02: CURRENT. Parked with the customer, nothing to send. Class 1, parked (Yash owns the follow-up if the customer is silent).
+Supersedes every earlier draft in this file (they predate Ilia's 10-27 answer). If the customer pushes back on "re-export without the conduits", the next question is what those models are for; do not reopen the count.

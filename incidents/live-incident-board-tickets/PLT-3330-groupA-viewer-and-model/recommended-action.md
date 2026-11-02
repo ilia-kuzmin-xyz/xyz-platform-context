@@ -21,3 +21,10 @@ If Last updated is older than the install time, the answer for the customer is "
 
 ## 2026-10-26: the 10-21 draft (45 words) stands, now 6 days unanswered
 Class 1 with a class-3 shape, owed by Ilia. Nothing changed on the ticket. Post the draft as written, or do the 5-minute look on SIN02 yourself (steps above). No Jira action was taken.
+
+## 2026-11-02: CURRENT. Ilia no longer owes this; Rishi owns it. The 10-21 draft to Yash is superseded as "Ilia's to send".
+Class 1 with a class-3 shape, now owed by **Rishi** (assigned himself 10-30, 12 days after Yash's question, still no reply on the ticket). The checks list above is unchanged and still the fastest route. Optional hand-over, only if Ilia wants to offer help (29 words):
+
+> Rishi, I see you took PLT-3330. My notes on it, including the three checks to run on SIN02, are in the platform context repo. **Do you want me to look at SIN02 with you?**
+
+No Jira action was taken.
