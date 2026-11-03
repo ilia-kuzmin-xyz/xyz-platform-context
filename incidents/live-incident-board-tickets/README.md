@@ -5012,3 +5012,22 @@ Board (PLT, Live Incident, not Done): 16. In scope **10, all Group A, Group B em
 **Unopenable media (403, unchanged):** 3330 `66651` to `66654`; 3291 Freshdesk screenshot and SharePoint video; 3299 `66491`, `66504` to `66508`; 3390 `66889`; 3308 and 3275 Freshdesk screenshots; 2858 `66039`.
 **Not verified:** that the 10-30 date-range explanation for 2874 reproduces on Staging; anything on 3330 (no one has run the checks); customer outcome for 3390, 3172, 3112.
 Nothing posted or moved in Jira.
+
+## Run 2026-11-03 (scheduled)
+
+Board (PLT, Live Incident, not Done): 16. In scope **10: 9 Group A, 1 Group B**. Group A: PLT-3291 (In Analysis, Rishi), 3330, 3300, 3275, 3115, 2874 (With Customer), 3306, 3063, 2651 (Customer Release Check). **Group B: PLT-3415** (Dev In Progress, Rishi, new). Out by status: 3406 (With Technical Support), 3401, 3389, 3308, 2858 (Ready For QA), 3135 (In Code Review). **Left the open list: PLT-3299** Done 11-02 22:18 (Freshdesk closed). **PLT-3133 is DPL-1749** (Open, Ali, unchanged since 10-30). hc-frontend master `df10c33` (Vite migration, CI sharding, docs); nothing touches an in-scope hypothesis. Fetched with comments: 3415, 3330, 3291, 3299. Not re-fetched (stamps identical to the 11-02 run): 2874 (10-30), 3300, 3275 (10-20), 3115 (09-16), 3063 (09-28), 2651 (10-23), 3306 (10-27).
+
+| class | ticket | change since 11-02 |
+|---|---|---|
+| 1, Group B | **PLT-3415** AUS02 rework cost "missing mapping data" (new, Rishi) | Pattern 6 fifth firing: the table has no `Structural` discipline (`rework_reference.json`, three strings only). Rishi waits on Yash for a project invite. [folder](PLT-3415-groupB-quality-management/context.md); optional 46-word pointer to Rishi |
+| 1, parked | **PLT-3330** SIN02 | **Cause found by Rishi 11-02**: the 14/10 `SIN02.nwd` held an older Facade export, orphan links showed Late Start (orange); the 22/10 upload fixed it. Yash waits for the customer. Nothing owed by Ilia |
+| 1 (Rishi), class-4 tail | **PLT-3291** MV-1350 | Customer replied 11-02 with a new video: cannot see the elements in those models when isolating. Reassigned to Rishi, In Analysis. Membership (Ilia, 10-27) against geometry (customer); optional 60-word hand-off to Rishi |
+| residual | PLT-3299 | Done by Freshdesk closure 11-02, Mostafa never answered Yash's Void question; folder renamed `resolved` |
+| 1, parked | PLT-2874 | unchanged since Ilia's 10-30 answer; With Customer |
+| 1, parked | 3306, 3063, 2651 | Customer Release Check, unchanged (7, 36, 11 days) |
+| 1, parked | 3300, 3275, 3115 | With Customer, unchanged (14, 14, 48 days) |
+
+**Owed by Ilia:** nothing new. Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution (48 days), 3063 (36 days), 3275 and 3300 (Joshua's file via Yash), Mostafa's Void answer from 3299.
+**Unopenable media (403, unchanged, not retried):** 3330 `66651` to `66654` and new `66982` (no evidence value); 3291 Freshdesk screenshot and both SharePoint videos (10-15 and 11-02); 3415 Freshdesk screenshots (`support.xyzreality.com` attachments 103360473696, 103360473697) which would settle the exact Discipline string; 3300 and 3275 and 3308 Freshdesk screenshots; 2858 `66039`.
+**Not verified:** that AUS02's discipline is spelled `Structural`; Rishi's reading of the 14/10 NWD (not re-measured) and that the customer sees green; whether the 3291 models are loaded and have geometry; customer outcomes on 3306, 3063, 2651.
+Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.

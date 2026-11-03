@@ -64,3 +64,8 @@ No Jira action was taken.
 ## 2026-10-23 run: unchanged on Jira; one code note (additive)
 
 Jira stamp unchanged, not re-fetched. hc-frontend #2372 (`c73f491`, 10-22, PLT-2561) removed the 2-decimal rounding inside `use-rework-cost-calculation.ts` (about :105-135) so the calculated cost is now unrounded (`600 x 1.14` is `683.9999999999999`). It is harmless to what users see: the auto-fill writes `calculatedCost.toFixed(2)` (`issue-cost-field.tsx:55-62`) and the "suggest" comparison now compares `toFixed(2)` strings (`:68`). Does not change this ticket's hypotheses. Not released yet (no tag). No Jira action was taken.
+
+## 2026-11-03 — Done 11-02 22:18 UTC by Freshdesk closure (8325 Closed, `117354`); folder renamed `resolved`
+Fetched with comments (7). Last human text is still Yash's `115880` (10-19) asking Mostafa whether a Void issue should count as open; **nobody answered on the ticket**, and Freshdesk went Waiting on customer the same day, then Closed 14 days later. No resolution value set. So the ticket closed as customer silence, not on a product decision.
+**Residual (not ours to send, no owner named):** the product question "does Void belong in the dashboard's issue count and cost" is still open; Pattern 5 candidate in recurring-defect-patterns.md, 2026-10-20 stands. Darminder's offer to exclude Void ("we can do an update", `115643`) was never taken up.
+Nothing posted or moved in Jira.

@@ -28,3 +28,6 @@ Class 1 with a class-3 shape, now owed by **Rishi** (assigned himself 10-30, 12 
 > Rishi, I see you took PLT-3330. My notes on it, including the three checks to run on SIN02, are in the platform context repo. **Do you want me to look at SIN02 with you?**
 
 No Jira action was taken.
+
+## 2026-11-03: CURRENT. Nothing to send. Class 1, parked (Yash closes on customer confirmation).
+Supersedes every earlier draft in this file. If the customer says it is still wrong after the 22/10 upload, the next question is the element id and the dashboard "Last updated" time (the old H1 check), not another upload.

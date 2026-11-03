@@ -42,3 +42,11 @@ Why this question: yes means loaded and empty (ghost models, Pattern 1, then the
 
 ## 2026-11-02: CURRENT. Parked with the customer, nothing to send. Class 1, parked (Yash owns the follow-up if the customer is silent).
 Supersedes every earlier draft in this file (they predate Ilia's 10-27 answer). If the customer pushes back on "re-export without the conduits", the next question is what those models are for; do not reopen the count.
+
+## 2026-11-03: CURRENT. Rishi owns it; nothing owed by Ilia. Optional hand-off, only if Ilia wants to save Rishi the recount.
+Supersedes the 11-02 "parked, nothing to send" (the customer has now replied).
+Assumption: the 10-27 membership figures are Ilia's own and were not re-measured.
+
+### Draft to Rishi (60 words)
+
+> Rishi, so you do not redo it: the customer agreed the count is right, so only the model list is open. Containments, Data Devices and Security do hold copies of MV-1350's elements, so the list is right on paper. His new video says nothing shows in those models when he isolates. **Do those copies have any geometry in those models?**
