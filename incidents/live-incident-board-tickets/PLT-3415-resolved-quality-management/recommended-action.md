@@ -9,3 +9,5 @@ Class 1 (Yash owes Rishi the invite). Optional head start for Rishi, not require
 > Rishi, quick pointer on 3415: the rework table in the viewer only has three disciplines (CSA, Electrical, Mechanical), so a project whose discipline is named Structural gets no suggestion whatever the package. Same shape as 3275, 3300 and 3061. **Is the AUS02 discipline literally named Structural?**
 
 Assumption: that the discipline is spelled `Structural`; one look at issue #26 settles it. No Jira action was taken.
+
+## 2026-11-04: CURRENT. Nothing to send; supersedes the 11-03 pointer to Rishi (he has diagnosed it himself). Class 1, parked: ball with Project Delivery via Mostafa/Yash.

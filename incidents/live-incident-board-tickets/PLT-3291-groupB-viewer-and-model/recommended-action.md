@@ -50,3 +50,7 @@ Assumption: the 10-27 membership figures are Ilia's own and were not re-measured
 ### Draft to Rishi (60 words)
 
 > Rishi, so you do not redo it: the customer agreed the count is right, so only the model list is open. Containments, Data Devices and Security do hold copies of MV-1350's elements, so the list is right on paper. His new video says nothing shows in those models when he isolates. **Do those copies have any geometry in those models?**
+
+## 2026-11-04: CURRENT. Supersedes the 11-03 hand-off draft to Rishi (Rishi has answered; do not send it). Group B status line.
+**Status line:** Dev In Progress, Rishi. Cause is DPL-1708 (converter puts un-drawn conduits in three models' data); #2446 makes the panel say "Not in this model version" and fixes Select linked elements across models; CI green, awaiting review.
+**Owed by Ilia: review of hc-frontend #2446** (requested reviewer, none given). Nothing to send in Jira. If Ilia reviews, the two things worth checking are that Select linked elements on MV-1350 with only the conduit model loaded still selects, and that deleting `elementId2ModelId` / `elementId2DbId` left no other reader (the PR's own grep, not re-run here). No Jira action was taken.

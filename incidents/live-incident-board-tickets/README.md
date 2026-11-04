@@ -5031,3 +5031,19 @@ Board (PLT, Live Incident, not Done): 16. In scope **10: 9 Group A, 1 Group B**.
 **Unopenable media (403, unchanged, not retried):** 3330 `66651` to `66654` and new `66982` (no evidence value); 3291 Freshdesk screenshot and both SharePoint videos (10-15 and 11-02); 3415 Freshdesk screenshots (`support.xyzreality.com` attachments 103360473696, 103360473697) which would settle the exact Discipline string; 3300 and 3275 and 3308 Freshdesk screenshots; 2858 `66039`.
 **Not verified:** that AUS02's discipline is spelled `Structural`; Rishi's reading of the 14/10 NWD (not re-measured) and that the customer sees green; whether the 3291 models are loaded and have geometry; customer outcomes on 3306, 3063, 2651.
 Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-04 (scheduled)
+
+Board (PLT, Live Incident, not Done): 16. In scope **9: 8 Group A, 1 Group B**. Group A: PLT-3330 (Open, Yash), 3300, 3275, 3115, 2874 (With Customer), 3306, 3063, 2651 (Customer Release Check). **Group B: PLT-3291** (Dev In Progress, Rishi; moved up from Group A). **Left scope: PLT-3415** (With Technical Support since 11-03 13:10; was Group B). Out by status: 3406 (With Technical Support), 3401, 3389, 3308, 2858 (Ready For QA), 3135 (In Code Review). No new tickets since 11-03. hc-frontend master `e0620a3` (Task Library, Commissioning on api-v2, a CVE pin); none touches an in-scope hypothesis. Fetched with comments: 3291, 3330, 3415 (all three changed 11-03 after the previous run). Not re-fetched, stamps identical: 2874 (10-30), 3300, 3275 (10-20), 3115 (09-16), 3063 (09-28), 2651 (10-23), 3306 (10-27).
+
+| class | ticket | change since 11-03 |
+|---|---|---|
+| Group B, 1 | **PLT-3291** MV-1350 | Rishi answered 11-03: cause is converter DPL-1708 (un-drawn conduits in three models' data); PR #2446 open, CI green, **Ilia is a requested reviewer**. Status line only; the 11-03 hand-off draft is superseded |
+| 1, parked | **PLT-3330** SIN02 | Freshdesk 8353 back to Open 11-03 12:25, no text; customer probably replied, not visible. Nothing owed by Ilia |
+| 1, parked, left scope | **PLT-3415** AUS02 | Pattern 6 confirmed by Rishi; Mostafa: wait for a new cost reference table from Project Delivery. Folder renamed `resolved` |
+| 1, parked | PLT-2874, 3306, 3063, 2651, 3300, 3275, 3115 | unchanged (3115 now 49 days With Customer; 3063 37 days Customer Release Check) |
+
+**Owed by Ilia:** **review of hc-frontend #2446** (PLT-3291, GitHub). Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution, 3063, 3275 and 3300 (Joshua's file via Yash, and now PLT-3415's table: one owner for `rework_reference.json` edits is undecided).
+**Unopenable media (403, unchanged, not retried):** 3330 `66651` to `66654`, `66982`; 3291 Freshdesk screenshot and both SharePoint videos; 3415 Freshdesk screenshots; 3300, 3275, 3308 Freshdesk screenshots; 2858 `66039`.
+**Not verified:** #2446 was read, not run; DPL-1708 timing; what the PLT-3330 customer replied; whether Foundations is a package string in `rework_reference.json`; customer outcomes on 3306, 3063, 2651.
+Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
