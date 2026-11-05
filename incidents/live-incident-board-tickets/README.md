@@ -167,7 +167,7 @@ Unchanged `updated` stamps, not re-fetched: 3308, 3299, 3290 (10-19), 3172 (10-1
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-3330](PLT-3330-groupA-viewer-and-model/context.md) | viewer-and-model | Open | **new; orange = Late Start, capped status merge leading; Yash owed a reply** | 1 (+3) |
+| [PLT-3330](PLT-3330-resolved-viewer-and-model/context.md) | viewer-and-model | Open | **new; orange = Late Start, capped status merge leading; Yash owed a reply** | 1 (+3) |
 | [PLT-3275](PLT-3275-groupA-quality-management/context.md) | quality-management | With Customer | H1 confirmed; 10-13 draft superseded; Joshua owes | 1 |
 | [PLT-3300](PLT-3300-groupA-quality-management/context.md) | quality-management | With Customer | back in scope; same file as 3275 | 1 |
 | [PLT-3291](PLT-3291-groupA-viewer-and-model/context.md) | viewer-and-model | Open | status housekeeping; customer owes | 1 |
@@ -5047,3 +5047,19 @@ Board (PLT, Live Incident, not Done): 16. In scope **9: 8 Group A, 1 Group B**. 
 **Unopenable media (403, unchanged, not retried):** 3330 `66651` to `66654`, `66982`; 3291 Freshdesk screenshot and both SharePoint videos; 3415 Freshdesk screenshots; 3300, 3275, 3308 Freshdesk screenshots; 2858 `66039`.
 **Not verified:** #2446 was read, not run; DPL-1708 timing; what the PLT-3330 customer replied; whether Foundations is a package string in `rework_reference.json`; customer outcomes on 3306, 3063, 2651.
 Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-05 (scheduled)
+
+Board (PLT, Live Incident, not Done): 15. In scope **8, all Group A (parked), Group B empty**: PLT-3415 (With Customer, back in scope), 3300, 3275, 3115, 2874 (With Customer), 3306, 3063, 2651 (Customer Release Check). Nothing in Needs Evaluation or In Analysis. Out by status: 3406 (With Technical Support), 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135 (In Code Review). No new tickets since 11-03. hc-frontend master `af29e59`; none of the commits since `e0620a3` touches an in-scope hypothesis (checked rework calculation, section tool, dashboard progress service).
+
+| class | ticket | change since 11-04 |
+|---|---|---|
+| left scope | **PLT-3330** SIN02 | Freshdesk 8353 Closed 11-04 08:23, Jira Done. Folder renamed `resolved` |
+| left scope | **PLT-3291** MV-1350 | **#2446 merged 11-04 11:58** (Rishi), Jira Ready For QA. Ilia's "review #2446" item is void. Folder renamed `resolved` |
+| 1, parked | **PLT-3415** AUS02 | back to With Customer 11-04 09:38 (Freshdesk Pending). Same decision: wait for Project Delivery's new rework cost table. Folder renamed `groupA` |
+| 1, parked | PLT-2874, 3306, 3063, 2651, 3300, 3275, 3115 | unchanged, stamps identical to 11-04 (3115 now 50 days With Customer; 3063 38 days Customer Release Check) |
+
+**Owed by Ilia:** nothing new. Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution, 3063, 3275 and 3300 (Joshua's file via Yash) and 3415 (new table): one owner for `rework_reference.json` edits is still undecided.
+**Unopenable media (403, unchanged, not retried):** 3415 Freshdesk screenshots (not Jira attachments); 3300, 3275, 3308 Freshdesk screenshots; 2858 `66039`; 3291 SharePoint videos.
+**Not verified:** customer replies behind the Freshdesk status lines (3330, 3415); whether #2446 is in a release tag; customer outcomes on 3306, 3063, 2651.
+Fetched with comments: 3415 and 3330 (the two whose stamps changed); 3291's PR read from GitHub. Not re-fetched, stamps identical: the other seven. Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.

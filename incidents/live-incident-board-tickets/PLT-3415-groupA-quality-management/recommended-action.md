@@ -11,3 +11,5 @@ Class 1 (Yash owes Rishi the invite). Optional head start for Rishi, not require
 Assumption: that the discipline is spelled `Structural`; one look at issue #26 settles it. No Jira action was taken.
 
 ## 2026-11-04: CURRENT. Nothing to send; supersedes the 11-03 pointer to Rishi (he has diagnosed it himself). Class 1, parked: ball with Project Delivery via Mostafa/Yash.
+
+## 2026-11-05: CURRENT. Nothing to send. Parked With Customer; ball with Project Delivery (new rework cost table) via Mostafa and Yash. Class 1. Supersedes the 11-04 "left scope" label (it is in scope again, as parked Group A).

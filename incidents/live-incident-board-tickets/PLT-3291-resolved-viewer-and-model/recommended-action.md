@@ -54,3 +54,5 @@ Assumption: the 10-27 membership figures are Ilia's own and were not re-measured
 ## 2026-11-04: CURRENT. Supersedes the 11-03 hand-off draft to Rishi (Rishi has answered; do not send it). Group B status line.
 **Status line:** Dev In Progress, Rishi. Cause is DPL-1708 (converter puts un-drawn conduits in three models' data); #2446 makes the panel say "Not in this model version" and fixes Select linked elements across models; CI green, awaiting review.
 **Owed by Ilia: review of hc-frontend #2446** (requested reviewer, none given). Nothing to send in Jira. If Ilia reviews, the two things worth checking are that Select linked elements on MV-1350 with only the conduit model loaded still selects, and that deleting `elementId2ModelId` / `elementId2DbId` left no other reader (the PR's own grep, not re-run here). No Jira action was taken.
+
+## 2026-11-05: CURRENT. Nothing owed by Ilia. #2446 merged, ticket with QA (Gennaro). Supersedes the 11-04 "review #2446" line.
