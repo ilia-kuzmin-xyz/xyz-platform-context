@@ -23,3 +23,12 @@ If "review": Yash tells Paolo the table is being reviewed and does not promise a
 
 ## 2026-10-21 — nothing new to draft
 The 10-19 draft to Mostafa stays superseded (Ilia routed the question to Joshua on 10-19). Yash asked Joshua 10-20. Chase only if no file by about 10-27. See the combined ask under PLT-3275.
+
+## 2026-11-06: CURRENT. Optional chase to Yash; supersedes nothing (the 10-19 Mostafa draft stays superseded). Class 1.
+Assumption, one line: the Freshdesk Open then Pending on 11-05 may have been the customer sending the file; unknown.
+
+### Draft to Yash on PLT-3300 (author Ilia, @Yash) (39 words)
+
+> Yash, I saw 8222 go Open then back to Pending yesterday. **Has Joshua sent the updated rework file yet?** If so, please attach it here and I will pass it to Darminder to apply, same as the 3275 file.
+
+No Jira action was taken.

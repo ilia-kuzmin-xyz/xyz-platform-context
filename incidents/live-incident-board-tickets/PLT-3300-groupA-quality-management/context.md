@@ -92,3 +92,9 @@ No action today. No Jira action was taken.
 
 Re-fetched, 5 comments, newest `115970` (Yash, 10-20 10:19): "Have asked Joshua for an updated rework file." Freshdesk 8222 Pending (`115969`). Jira status is now **With Customer** (was With Technical Support on 10-20), which is in scope. Ball: Joshua, via Yash, since 10-20.
 Nothing new in kind. The residual from 10-20 stands: when Joshua's file arrives, who edits `rework_reference.json` and ships it is undecided (Darminder said on PLT-3275 he can update the frontend side). Same table, same edit as PLT-3275; see the combined-ask draft in `../PLT-3275-groupA-quality-management/recommended-action.md`. Class 1, parked. No Jira action was taken.
+
+## 2026-11-06 run: two Freshdesk status lines on 11-05, no text; still With Customer (additive)
+
+Re-fetched, 7 comments, newest `117698` (Yash, 11-05 11:53 UTC). `117696` (11:46) Freshdesk 8222 changed to **Open**, `117698` (11:53) changed back to **Pending**. Jira status unchanged, With Customer; assignee Yash. Nothing is addressed to us and no comment carries text.
+**What it means, inferred:** Open on Freshdesk usually follows a customer reply, and Yash re-pended it 7 minutes later, so something arrived or was handled. Whether it was Joshua's updated rework file (asked 10-20, now 17 days) is **not known**: the text is on Freshdesk, not readable here. Verified: the two comment ids, times and wording. Inferred: the cause of the Open.
+No code moved: hc-frontend master `1ebae59`, none of the six commits since `af29e59` touches `use-rework-cost-calculation.ts`, the reference JSON, the section tool or the dashboard progress service (checked by file diff). The standing residual is unchanged: when a corrected table arrives, who edits `rework_reference.json` and ships it is undecided (same as PLT-3275 and PLT-3415). Class 1, parked. No Jira action was taken.

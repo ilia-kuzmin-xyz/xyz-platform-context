@@ -5063,3 +5063,17 @@ Board (PLT, Live Incident, not Done): 15. In scope **8, all Group A (parked), Gr
 **Unopenable media (403, unchanged, not retried):** 3415 Freshdesk screenshots (not Jira attachments); 3300, 3275, 3308 Freshdesk screenshots; 2858 `66039`; 3291 SharePoint videos.
 **Not verified:** customer replies behind the Freshdesk status lines (3330, 3415); whether #2446 is in a release tag; customer outcomes on 3306, 3063, 2651.
 Fetched with comments: 3415 and 3330 (the two whose stamps changed); 3291's PR read from GitHub. Not re-fetched, stamps identical: the other seven. Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-06 (scheduled)
+
+Board (PLT, Live Incident, not Done): 15, same set as 11-05, no new tickets. In scope **8, all Group A (parked), Group B empty**: PLT-3415, 3300, 3275, 3115, 2874 (With Customer), 3306, 3063, 2651 (Customer Release Check). Out by status: 3406 (With Technical Support), 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135 (In Code Review). hc-frontend master `1ebae59`: six commits since `af29e59` (PLT-301, 3420, 3194, 3410, 3358, 2677), none touches rework, section tool or dashboard progress.
+
+| class | ticket | change since 11-05 |
+|---|---|---|
+| 1, parked | **PLT-3300** ML9 | Freshdesk 8222 went Open 11:46 then Pending 11:53 on 11-05, no text; Joshua's file (asked 10-20, 17 days) may or may not have arrived. Optional 39-word chase to Yash in its folder |
+| 1, parked | PLT-3415, 3275, 3115, 2874, 3306, 3063, 2651 | unchanged, stamps identical to 11-05 (3115 now 51 days With Customer; 3063 39 days Customer Release Check) |
+
+**Owed by Ilia:** nothing new. Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash) and 3415 (new table): one owner for `rework_reference.json` edits is still undecided.
+**Unopenable media (403, unchanged, not retried):** Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
+**Not verified:** what the 3300 Freshdesk reply contained; customer outcomes on 3306, 3063, 2651.
+Fetched with comments: 3300 (the only stamp that moved). Not re-fetched, stamps identical: the other seven. Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
