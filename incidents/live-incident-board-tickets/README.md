@@ -5080,7 +5080,7 @@ Fetched with comments: 3300 (the only stamp that moved). Not re-fetched, stamps 
 
 ## Run 2026-11-09 (scheduled)
 
-Board (PLT, Live Incident, not Done): 16. In scope **9, all Group A, Group B empty**: **PLT-3441** (Open, Rishi, new 11-06), 3415, 3300, 3275, 3115, 2874 (With Customer), 3063, 2651 (Customer Release Check). Wait, that is 8: 3441, 3415, 3300, 3275, 3115, 2874, 3063, 2651. **In scope is 8.** Out by status: 3439 and 3406 (With Technical Support; 3439 is new 11-06, Yash, "cannot add attributes in web viewer", ATL09/ATL10), 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135 (In Code Review). hc-frontend master `1ebae59`, unchanged since the 11-06 run.
+Board (PLT, Live Incident, not Done): 16. In scope **8, all Group A, Group B empty**: **PLT-3441** (Open, Rishi, new 11-06), 3415, 3300, 3275, 3115, 2874 (With Customer), 3063, 2651 (Customer Release Check). Out by status: 3439 and 3406 (With Technical Support; 3439 is new 11-06, Yash, "cannot add attributes in web viewer", ATL09/ATL10), 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135 (In Code Review). hc-frontend master `1ebae59`, unchanged since the 11-06 run.
 
 | class | ticket | change since 11-06 |
 |---|---|---|
