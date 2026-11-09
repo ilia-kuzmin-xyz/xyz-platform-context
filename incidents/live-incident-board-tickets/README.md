@@ -5077,3 +5077,17 @@ Board (PLT, Live Incident, not Done): 15, same set as 11-05, no new tickets. In 
 **Unopenable media (403, unchanged, not retried):** Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
 **Not verified:** what the 3300 Freshdesk reply contained; customer outcomes on 3306, 3063, 2651.
 Fetched with comments: 3300 (the only stamp that moved). Not re-fetched, stamps identical: the other seven. Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-09 (scheduled)
+
+Board (PLT, Live Incident, not Done): 16. In scope **9, all Group A, Group B empty**: **PLT-3441** (Open, Rishi, new 11-06), 3415, 3300, 3275, 3115, 2874 (With Customer), 3063, 2651 (Customer Release Check). Wait, that is 8: 3441, 3415, 3300, 3275, 3115, 2874, 3063, 2651. **In scope is 8.** Out by status: 3439 and 3406 (With Technical Support; 3439 is new 11-06, Yash, "cannot add attributes in web viewer", ATL09/ATL10), 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135 (In Code Review). hc-frontend master `1ebae59`, unchanged since the 11-06 run.
+
+| class | ticket | change since 11-06 |
+|---|---|---|
+| 1, class 3 shape | **PLT-3441** ELN04 "Section box selected" unreliable (new, Rishi) | handler traced: box helper counts only a node's own fragments (`section-box-helper-functions.ts:315-321`, `recursive = false`), so a parent node with no mesh gives an empty box that nothing guards. Inferred, not observed. [folder](PLT-3441-groupA-viewer-and-model/context.md); optional 62-word check to Rishi |
+| 1, parked | PLT-3415, 3300, 3275, 3115, 2874, 3063, 2651 | unchanged, `updated` stamps identical to 11-06 (3115 now 54 days With Customer; 3063 42 days Customer Release Check) |
+
+**Owed by Ilia:** nothing new. Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash) and 3415 (new table).
+**Unopenable media (403, not retried):** PLT-3441 `67081` (15 MB screen recording, filename dated 2026-10-06) would settle which node is selected on failure and which app version; Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
+**Not verified:** all four PLT-3441 hypotheses (never observed); the model; customer outcomes on 3063 and 2651. Fetched with comments: 3441 only; the other seven not re-fetched, stamps identical.
+Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
