@@ -5091,3 +5091,17 @@ Board (PLT, Live Incident, not Done): 16. In scope **8, all Group A, Group B emp
 **Unopenable media (403, not retried):** PLT-3441 `67081` (15 MB screen recording, filename dated 2026-10-06) would settle which node is selected on failure and which app version; Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
 **Not verified:** all four PLT-3441 hypotheses (never observed); the model; customer outcomes on 3063 and 2651. Fetched with comments: 3441 only; the other seven not re-fetched, stamps identical.
 Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-10 (scheduled)
+
+Board (PLT, Live Incident, not Done): 16. In scope **7, all Group A (parked), Group B empty**: PLT-3415, 3300, 3275, 3115, 2874 (With Customer), 3063, 2651 (Customer Release Check). Out by status: 3439 and 3406 (With Technical Support), 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135, **3441** (In Code Review). PLT-3306 is Done (11-06). hc-frontend master `3435541` (was `1ebae59`): six commits, one touches the rework-cost field (see below).
+
+| class | ticket | change since 11-09 |
+|---|---|---|
+| left scope | **PLT-3441** ELN04 section box | moved to In Code Review 11-09 12:05. Rishi's PR #2466 flips `enumNodeFragments(..., false)` to `true`, exactly the H1 prediction, plus an orientation sampling fix. **Darminder requested changes 11-09 18:09**: single-element selection includes unselected neighbours. Rishi owes the reply. 11-09 draft to Rishi void. Folder renamed `resolved`. [folder](PLT-3441-resolved-viewer-and-model/context.md) |
+| 1, parked | PLT-3415, 3300, 3275, 3115, 2874, 3063, 2651 | unchanged, `updated` stamps identical to 11-09 (3115 now 55 days With Customer; 3063 43 days Customer Release Check) |
+
+**Worth a glance:** #2459 (PLT-3262, Rishi, merged 11-09) changes the issue form's rework cost auto-fill in `issue-cost-field.tsx`: it now overwrites an earlier auto-filled value when categories change, never a typed one. It does not touch the reference table that 3415, 3300 and 3275 wait on. Whether it changes what those customers see is **not verified**; no action.
+**Owed by Ilia:** nothing new in Jira. Possible: review of PR #2466 (requested reviewer; Darminder already reviewed). Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash) and 3415 (new table).
+**Unopenable media (403, not retried):** PLT-3441 `67081` and Darminder's review video; Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
+**Not verified:** the cause of Darminder's overshoot; the customer's model; customer outcomes on 3063 and 2651. Fetched with comments: 3441 only; the other seven not re-fetched, stamps identical. Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
