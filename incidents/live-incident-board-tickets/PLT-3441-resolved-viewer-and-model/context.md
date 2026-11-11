@@ -54,3 +54,17 @@ Everything about the model (never loaded here), the video, which app version the
 
 **Superseded:** the 11-09 optional comment asking Rishi to run `getAggregateSelection()` (see recommended-action.md). Do not post it.
 **Not verified:** the model, Darminder's video, whether the overshoot is from `true` or from the orientation change, which app version the customer's October recording was made on (`67081` still 403, not retried).
+
+## 2026-11-11 (scheduled) — PR #2466 reworked; Darminder's first finding gone, second CHANGES_REQUESTED on drag-select
+
+**Jira:** unchanged (`updated` 11-09 12:05, still In Code Review). Not in scope; residual only.
+
+**PR #2466, head `94b99fe` (was `52d219a` on 11-10).** Rishi pushed two commits on 11-10 (10:09 "Fit the selection's section box in the section tool's frame", 10:32 "Re-read the section frame before refitting an active box"). The approach changed: the one-line `recursive = true` in `section-box-helper-functions.ts` is **gone**; `calculateBoundingBoxForAggregateSelection` is deleted. Instead `SectionToolOrientation.fitBoxToSelection` (new, `section-tool-orientation.ts`) walks descendants (`enumNodeFragments(..., true)`), fits every vertex in the frame SectionTool uses (rotation of the first 3D model's `refPointTransform`) and returns `null` on an empty box, so the 11-09 "no empty-box guard" note is now answered by the PR. `SectionToolService.sectionToSelection` replaces `setSectionBox` and calls `tool.activate()` before `setSectionBox` (H4 shape, Copilot's finding, resolved).
+
+**Darminder, CHANGES_REQUESTED 11-10 18:39:** single element plus Section box selected **now works**, but a group (drag) select made inside that box selects elements outside it, which show as selected on exiting the box. The 11-10 overshoot finding is therefore superseded by this one.
+
+**Inferred mechanism, not observed (code read only, master `72f1a7e`, unchanged by the PR):** drag select ends in `selection-service.ts:110` `_handleButtonUp`, which filters by the box at `:131` via `getElementsInsideSectionBox(..., strict = false)`. Non-strict uses `containsBox` (`section-box-helper-functions.ts:104`): an element is **kept unless all eight corners of its world-axis AABB lie beyond one single plane**. That is a conservative test: an element whose AABB crosses the box, or sits near a corner/edge, passes although its geometry is outside. Two things in the PR make it bite harder than before: the box is now fitted tightly to one element, and it is rotated into the building frame while element AABBs stay world-axis. The comment at `:129-130` says Forge would do this itself but `useGeometricIntersection` breaks it, so this test is the only cut filter.
+Falsifiable: if this is the cause, (a) every wrongly selected element's world bounding box intersects the section box, and (b) the same drag on master with a hand-sized box of the same size and rotation over-selects too (pre-existing, made visible by the PR). If (b) does not over-select on master, the cause is in the PR, not here.
+
+**Who owes:** Rishi (second round). Ilia still a requested reviewer. Class 1 (Rishi), class 3 shape. Nothing posted.
+**Not verified:** all of the above mechanism; Darminder's video (GitHub user-attachment, not opened); whether the strict path (`allInsideBox`) would be the right fix or too strict for partly-cut elements.

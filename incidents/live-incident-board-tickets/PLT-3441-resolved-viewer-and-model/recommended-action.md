@@ -13,3 +13,12 @@ On a single selected element the box should stop at that element. **Is the box s
 (31 words, one question)
 
 **Transition:** none. Stays In Code Review until Darminder's change request is cleared. After the merge, Yash should ask the customer to retest on the ELN04 East model once released.
+
+## 2026-11-11: optional pointer to Rishi (GitHub PR review thread, not Jira); supersedes nothing posted. Class 1 (Rishi).
+Assumption, one line: the mechanism is a code read, never observed.
+
+### Draft to Rishi on PR #2466 (author Ilia) (51 words)
+
+> Rishi, on Darminder's drag-select finding: the box filter in selection-service only drops an element when its whole world bounding box is past one plane, so with a tight rotated box neighbours whose bounds cross it still pass. **Does the same drag over-select on master with a box of the same size?**
+
+No Jira or GitHub action was taken.

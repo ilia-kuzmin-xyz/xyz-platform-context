@@ -5105,3 +5105,16 @@ Board (PLT, Live Incident, not Done): 16. In scope **7, all Group A (parked), Gr
 **Owed by Ilia:** nothing new in Jira. Possible: review of PR #2466 (requested reviewer; Darminder already reviewed). Still open from before: PLT-2651 (Rishi's question and the old true-north correction), PAPI-4334 (Yash's question). **Standing, not ours to send:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash) and 3415 (new table).
 **Unopenable media (403, not retried):** PLT-3441 `67081` and Darminder's review video; Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
 **Not verified:** the cause of Darminder's overshoot; the customer's model; customer outcomes on 3063 and 2651. Fetched with comments: 3441 only; the other seven not re-fetched, stamps identical. Nothing posted or moved in Jira. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-11 (scheduled)
+
+Board (PLT, Live Incident, not Done): 16, the same 16 as 11-10, every `updated` stamp identical (newest 11-09 12:05). In scope **7, all Group A (parked), Group B empty**: PLT-3415, 3300, 3275, 3115, 2874 (With Customer), 3063, 2651 (Customer Release Check). Out by status: 3439, 3406 (With Technical Support), 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135, 3441 (In Code Review). No new tickets, none closed. hc-frontend master `72f1a7e` (was `3435541`): #2422 (project access from authorities, PLT-3403/3180) and #2464 (sort labels); neither touches an in-scope hypothesis.
+
+| class | ticket | change since 11-10 |
+|---|---|---|
+| residual, out of scope | PLT-3441 ELN04 section box | PR #2466 reworked (head `94b99fe`): box now fitted in the section tool's frame with descendants, empty box returns null. Darminder's single-element finding is fixed; **second CHANGES_REQUESTED 11-10 18:39**: drag select inside the box picks elements outside it. Inferred cause: the drag filter keeps any element whose world AABB is not wholly past one plane (`selection-service.ts:131` → `containsBox`, `section-box-helper-functions.ts:104`), loose against a tight rotated box. Not observed. Optional 51-word pointer to Rishi in the folder. [folder](PLT-3441-resolved-viewer-and-model/context.md) |
+| 1, parked | PLT-3415, 3300, 3275, 3115, 2874, 3063, 2651 | unchanged (3115 56 days With Customer; 3063 44 days Customer Release Check) |
+
+**Owed by Ilia:** nothing new in Jira. Still open: PLT-2651 (Rishi's snap question and the 10-13 true-north correction, drafts in folder), PAPI-4334 (Yash's question), optional 11-06 chase to Yash on 3300, optional review of #2466. **Standing, not ours:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash); 3415 (new table, Project Delivery).
+**Unopenable media (403, not retried):** PLT-3441 `67081` and both Darminder review videos (not opened); Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
+**Not verified:** the drag-select mechanism on #2466; customer outcomes on 3063 and 2651. Fetched: board list only (stamps unchanged, so no ticket re-fetched with comments), PR #2466 reviews and diff. Nothing posted or moved in Jira or GitHub. No notification sent (board unchanged). Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
