@@ -68,3 +68,25 @@ Falsifiable: if this is the cause, (a) every wrongly selected element's world bo
 
 **Who owes:** Rishi (second round). Ilia still a requested reviewer. Class 1 (Rishi), class 3 shape. Nothing posted.
 **Not verified:** all of the above mechanism; Darminder's video (GitHub user-attachment, not opened); whether the strict path (`allInsideBox`) would be the right fix or too strict for partly-cut elements.
+
+## 2026-11-12 (scheduled) — PR #2466 APPROVED by Darminder 11-11, with one residual he flagged himself
+
+**Jira:** unchanged (`updated` 11-09 12:05, In Code Review). Residual only.
+
+**PR #2466, head `91df246` (was `94b99fe`).** Not merged yet (`mergeable_state: unstable`, open). The PR
+body now says the inside-box check for drag select / Select all "checks the element's vertices whenever
+its bounds only partly overlap the box". **That is the 11-11 inferred mechanism (world-axis AABB vs the
+rotated box in `containsBox`) confirmed by the author's fix**, read from the PR body, diff not re-read.
+Copilot (11-11 09:51, "needs a closer look", no open issue): the overlap check can still accept a
+triangle wholly outside a box corner (an incomplete triangle-box test), so a little over-selection
+near corners may remain.
+
+**Darminder APPROVED 11-11 18:03** with a note: single element plus Section box selected "brings in
+other containing elements", which he attributes to the child-node (descendant) traversal, and says it
+needs correcting if the video looks wrong. Same shape as his 11-09 finding. **Inferred:** on NWC-style
+models a clicked element may be a node whose descendants are other visible elements; fitting all
+descendants' vertices then widens the box. Not observed; video not opened.
+
+**Who owes:** Rishi (merge, or answer Darminder's note). Ilia still a requested reviewer, optional.
+The 11-11 optional pointer to Rishi is **void** (the fix it pointed at is in). Nothing posted.
+**Not verified:** Darminder's 11-11 video; whether the descendant widening is visible on ELN04.

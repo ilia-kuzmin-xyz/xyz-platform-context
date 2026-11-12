@@ -225,3 +225,27 @@ Re-fetched the live issue: status still **In Analysis**, assignee still Darminde
 exactly **4 comments**, same ids. Neither Sachin Badoni nor Ali Seyedof has replied to the 09-17
 question — now **5 days** unanswered. Same 8 attachments, no new one. `recommended-action.md`'s
 draft reply (97 words, to Darminder) stands unchanged and unposted.
+
+## 2026-11-12 (scheduled) — fix merged 11-04, Jira still In Code Review; a second customer (PLT-3439) was promised it
+
+Out of scope by status (In Code Review, assignee **Ilia**, `updated` 11-06 10:53). Residual only.
+This folder stopped at 09-22; the facts below are the first update since and supersede nothing above.
+
+- **Fix:** hc-frontend **#2424**, `af29e59` on master, merged **2026-11-04 17:08**: a new attribute
+  category now carries a client-generated `categoryId` and names its parent by `parentCategoryId`
+  instead of `parentCategoryName` (`AttributeTab/attributeSaveUtils.ts`, `collectNewCategories`).
+  Exactly the name-collision mechanism in this file's code trace.
+- **Not released:** the newest tag is `v26.4.2` (cut 10-29); `git log v26.4.2 --grep=PLT-3135` is empty
+  (checked by subject after `--unshallow`, per the 10-28 cherry-pick rule). It ships with the next
+  release cut from master.
+- **Jira lags the code by 8 days:** the PR merged but the ticket is still In Code Review, so QA has
+  no signal to pick it up. Owner of that click: Ilia (assignee).
+- **PLT-3439** (ATL09/ATL10, "cannot add attributes", Yash) was linked here 11-06. Rishi's diagnosis
+  there: saving a new package named "Preconstruction" under the discipline "Preconstruction" is
+  rejected, "Licenses & Permits" in the same batch fails with it, and the page shows no error. Rishi
+  told the customer the fix is in PLT-3135 and gave a workaround (save "Licenses & Permits" alone,
+  rename the package). Freshdesk 8593 **closed 11-11**, Jira Done.
+- **Not verified:** that #2424 lifts the PLT-3439 rejection. #2424 changes how the parent is named; if
+  the server rejects a child sharing its parent's name outright, id-keying does not help. That is
+  Rishi's claim, not traced. Also not addressed by #2424: the silent failure (no error shown on a
+  rejected save).
