@@ -5133,3 +5133,17 @@ Board (PLT, Live Incident, not Done): **15** (was 16). In scope **7, all Group A
 **Owed by Ilia:** move PLT-3135 to Ready For QA (new). Still open: PLT-2651 (Rishi's snap question and the 10-13 true-north correction, drafts in folder), PAPI-4334 (Yash's question), optional 11-06 chase to Yash on 3300. **Standing, not ours:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash); 3415 (new table, Project Delivery).
 **Unopenable media (403, not retried):** PLT-3439 `67075` and Freshdesk `103362187210`; Darminder's 11-11 review video on #2466; Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
 **Not verified:** #2424 on the PLT-3439 case; the #2466 descendant widening; customer outcomes on 3063 and 2651. Fetched with comments: 3439 only (the only stamp that moved); #2466 reviews read from GitHub. Nothing posted or moved in Jira or GitHub. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-13 (scheduled)
+
+Board (PLT, Live Incident, not Done): **15**, the same 15 as 11-12. In scope **7, all Group A (parked), Group B empty**: PLT-3415, 3300, 3275, 3115, 2874 (With Customer), 3063, 2651 (Customer Release Check). Nothing in Needs Evaluation, In Analysis, Ready For Development or Dev In Progress. Out by status: 3406 (With Technical Support), 3441, 3401, 3389, 3308, 3291, 2858 (Ready For QA), 3135 (In Code Review). No new tickets (none created since 11-11), none closed. The only stamp that moved since the last run is PLT-3441. hc-frontend master `7c535eb` (was `a4525bc`): ten commits; the only one in a watched area is #2466 (PLT-3441). #2442 (PLT-3130) changes `selection-service.ts` for commissioning system members, not the section box. No new release tag (newest `v26.4.2`, 10-29).
+
+| class | ticket | change since 11-12 |
+|---|---|---|
+| residual, out of scope | **PLT-3441** ELN04 section box | **#2466 merged 11-12 08:59** (`063f68a`), Jira Ready For QA 09:00, Gennaro. Darminder's descendant-widening note went in unchanged (`fitBoxToSelection` includes descendants, `section-tool-orientation.ts:109-124`); QA will see it if real. [folder](PLT-3441-resolved-viewer-and-model/context.md) |
+| residual, owed by Ilia | **PLT-3135** (Ilia, In Code Review) | unchanged, now 9 days after #2424 merged. Move to Ready For QA still owed |
+| 1, parked | PLT-3415, 3300, 3275, 3115, 2874, 3063, 2651 | unchanged, `updated` stamps identical (3115 58 days With Customer; 3063 46 days Customer Release Check) |
+
+**Owed by Ilia:** move PLT-3135 to Ready For QA (second day). Still open: PLT-2651 (Rishi's snap question and the 10-13 true-north correction, drafts in folder), PAPI-4334 (Yash's question), optional 11-06 chase to Yash on 3300 (now 7 days old; re-read before sending). **Standing, not ours:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash); 3415 (new table, Project Delivery).
+**Unopenable media (403, not retried):** Darminder's review videos on #2466; Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
+**Not verified:** the #2466 descendant widening on a real model; #2424 on the PLT-3439 case; customer outcomes on 3063 and 2651. Fetched: board list and an `updated >= 11-12` query; no in-scope ticket re-fetched with comments (stamps unchanged). Nothing posted or moved in Jira or GitHub. No notification sent (nothing new needs Ilia). Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.

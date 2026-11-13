@@ -249,3 +249,10 @@ This folder stopped at 09-22; the facts below are the first update since and sup
   the server rejects a child sharing its parent's name outright, id-keying does not help. That is
   Rishi's claim, not traced. Also not addressed by #2424: the silent failure (no error shown on a
   rejected save).
+
+## 2026-11-13 (scheduled) — still In Code Review, 9 days after #2424 merged
+
+Jira unchanged (`updated` 11-06 10:53, In Code Review, Ilia). #2424 merged 11-04; no new tag since
+`v26.4.2` (10-29), so not released. The 11-12 action stands: **move to Ready For QA** (a transition, no
+comment). PLT-3439 was closed 11-11 on the promise that this fix ships next release, so QA should see it
+before that release is cut.

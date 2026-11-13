@@ -90,3 +90,20 @@ descendants' vertices then widens the box. Not observed; video not opened.
 **Who owes:** Rishi (merge, or answer Darminder's note). Ilia still a requested reviewer, optional.
 The 11-11 optional pointer to Rishi is **void** (the fix it pointed at is in). Nothing posted.
 **Not verified:** Darminder's 11-11 video; whether the descendant widening is visible on ELN04.
+
+## 2026-11-13 (scheduled) — #2466 MERGED 11-12 08:59; Jira Ready For QA 09:00 (Gennaro)
+
+**Jira:** Ready For QA, assignee Gennaro, `resolutiondate` 11-12 09:00:48 (one minute after the merge, so
+the transition came with the merge). Out of scope; residual only.
+
+**Merged as `063f68a` on master** (squash of the five PR commits, last one "Only select elements whose
+geometry reaches into the section box"). Not in any release tag: newest is still `v26.4.2` (10-29).
+
+**Darminder's 11-11 residual went in unchanged (verified in code, effect not observed):**
+`fitBoxToSelection` in `section-tool-orientation.ts:109-124` documents and does "descendants included"
+(`tree.enumNodeFragments` at :124). So the single-element widening he flagged, if real on ELN04, ships
+with the fix. QA (Gennaro) is the next place it would show: one element selected, Section box selected,
+box should hug that element only.
+
+**Who owes:** Gennaro (QA), then a release. Nothing owed by Ilia (the optional review is moot). Nothing posted.
+**Not verified:** the descendant widening on a real model; Darminder's videos (not opened).
