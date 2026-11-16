@@ -22,7 +22,7 @@ Pattern-1 discriminator) is now largely moot — Rishi already established empir
 displayed percentages match the underlying element install/late counts, and attributed the one real
 discrepancy he found (installed-count vs. total-count-in-view) to the **object-vs-element counting
 defect this same board already tracks as PLT-2874** ("dashboard was counting geometry objects, the
-editor counts elements" — see `PLT-2874-groupA-viewer-and-model/context.md`). This is a **cousin
+editor counts elements" — see `PLT-2874-resolved-viewer-and-model/context.md`). This is a **cousin
 relationship worth stating plainly**: PLT-2946's "elements have multiple objects in the view" is the
 same object-vs-element unit mismatch PLT-2874 diagnosed and partially fixed (PR #2084, 07-31), just
 observed from the install-count side rather than the total-count side. **PLT-2874 itself is not

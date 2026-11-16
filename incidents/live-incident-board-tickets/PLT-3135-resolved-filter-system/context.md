@@ -256,3 +256,6 @@ Jira unchanged (`updated` 11-06 10:53, In Code Review, Ilia). #2424 merged 11-04
 `v26.4.2` (10-29), so not released. The 11-12 action stands: **move to Ready For QA** (a transition, no
 comment). PLT-3439 was closed 11-11 on the promise that this fix ships next release, so QA should see it
 before that release is cut.
+
+## 2026-11-16 (scheduled) — moved to Ready For QA by Ilia 11-13 13:27; folder renamed `groupA` → `resolved`
+Changelog: Ilia set fixVersion **26.4.3** and 2 story points (11-13 13:20), then In Code Review → Ready For QA (13:27:05); automation reassigned to Gennaro. This closes the "move to Ready For QA" item owed since 11-12. Still not in any tag: newest hc-frontend tags remain `v26.4.2` / `v26.3.7` (plus an unrelated `v59.0.0-rc3-prod`), master `480d3f5`. Whether #2424 fixes the PLT-3439 discipline-named package case is still not traced. No Jira action was taken.

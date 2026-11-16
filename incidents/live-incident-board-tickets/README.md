@@ -315,7 +315,7 @@ Board re-queried (`statusCategory != Done`, 22 live incidents). In scope: PLT-31
 |---|---|---|---|---|
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | Dev In Progress | **Ali's questions; location fields mapped** | 1 (+4) |
 | [PLT-3091](PLT-3091-groupA-progress-tracking/context.md) | progress-tracking | In Analysis | PAPI-3936 Released, reply still owed | 1 |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | unchanged, chase 10 days old | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | unchanged, chase 10 days old | 1 |
 
 The other five rows are unchanged from the 10-05 to 10-09 tables below.
 
@@ -455,7 +455,7 @@ changes-requested review stands and he is not among the requested reviewers.
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | Open · Critical | **Reopened by Mostafa** | 4 + 1 |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Yash chased again | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Yash chased again | 1 |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged, fix unreleased | 1 (maybe 4) |
 | [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged, PR #2197 blocked | 1 + 4 |
 | [PLT-3063](PLT-3063-resolved-quality-management/context.md) | quality-management | Customer Release Check | Unchanged | none, close candidate |
@@ -499,7 +499,7 @@ PLT-3109, PLT-3156, PLT-3115, PLT-2918, PLT-3063, PLT-3060. Not re-drafted.
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | **Back in scope, fix unreleased** | 1 (maybe 4) |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged | 1 |
 | [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged | 1 + 4 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged | 4 |
@@ -547,7 +547,7 @@ verifying 26.3.6). Not re-drafted.
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged | 1 |
 | [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged | 1 + 4 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged | 4 |
@@ -590,7 +590,7 @@ Also noted: `ProjectInviteCompletePage.tsx:217` passes the two ids to the same f
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged | 4, escalated |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged | 1 |
 | [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | Unchanged; Select all fix still unshipped | 1 + 4 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged | 4 |
@@ -638,7 +638,7 @@ Standing ages tick up one day; not re-drafted.
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged. Correction unposted, 21 days. | 4, escalated |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's promise 18 days overdue. | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's promise 18 days overdue. | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged. | 1 |
 | [PLT-3084](PLT-3084-groupA-viewer-and-model/context.md) | viewer-and-model | Customer Release Check | **Select all fix unshipped, PR #2197 blocked.** | 1 + 4 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. | 4 |
@@ -705,7 +705,7 @@ something removed or added — not chased further.
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged. Correction still unposted, 20 days; ticket 145 days old. | 4, escalated |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own promise now 17 days overdue. | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own promise now 17 days overdue. | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged (attachment count recounted, no new attachment). | 1 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged; assignee stable at Yash since 09-25's catch. | 4 |
 | [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged; 12 days since customer's own close call. | 1, administrative |
@@ -805,7 +805,7 @@ see each folder's 2026-09-25 entry for the specific diff-against-last-run (all "
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | New comment compounds the wrong-lever problem; customer now doing homework for a dead lever. Correction still unposted, 17 days, 142-day-old ticket. | 4, escalated |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own promise now 14 days overdue. | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own promise now 14 days overdue. | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged. | 1 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Silent assignee move Pietro → Yash caught; draft now more on-target. | 4 |
 | [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged; 9 days since customer's own close call — risk of the PLT-2815 pattern flagged. | 1, administrative |
@@ -959,11 +959,11 @@ now-closed 78-day/34-run backlog are this board's two headline numbers this run.
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open · Major | **Same-day miss caught.** Rishi live-confirmed the mapping gap himself; old chase draft retired for a narrower interpretive question. Assignee moved to Rishi. | 1 (narrower) — new drafted question, unposted |
 | [PLT-3156](PLT-3156-groupA-data-pipeline/context.md) | data-pipeline | With Customer · Major | Unchanged. Waiting on customer's re-export. | 1 — correctly parked |
 | [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged since 09-22's unexplained status/assignee move. Customer's question still unanswered. | 1, escalated |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. | 1 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged since 09-22's catch-up. | 4 — new drafted question, unposted |
 | [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged. | 1 |
 | [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged. | 1 |
-| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | Unchanged. | 2 — drafted reply ready, unposted |
+| [PLT-3135](PLT-3135-resolved-filter-system/context.md) | filter-system | In Analysis | Unchanged. | 2 — drafted reply ready, unposted |
 
 ### Group B (0)
 
@@ -1080,12 +1080,12 @@ now **78 days stale, 34th consecutive run** recommending an identical unposted c
 | [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Status/assignee moved with no comment, worsening the existing mislabel. Customer's question still unanswered, now 4 days. | 1, escalated — board now actively misreports who owes what |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer · Critical | Unchanged. **139 days** old; correction **14 days** unposted. | 4 with a class-1 chase attached |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **78 days stale, 34th consecutive run.** | 1 — stale, unresponded (on us) |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **11 days** overdue; Gennaro's question **41 days** unanswered. | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **11 days** overdue; Gennaro's question **41 days** unanswered. | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. Human silence now **28 days**. | 1 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | **Real movement the 09-21 pass missed** — 5 new comments, assignee Pietro → Yash, scope quietly shifting toward "we build automation." Both prior drafts superseded. | 4 — new drafted question, unposted |
 | [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged. **6 days** since Yash's own "we can close it now" comment, still no transition. | 1 |
 | [PLT-3133](PLT-3133-groupA-data-pipeline/context.md) | data-pipeline | With Customer | **Re-entered scope** (was With Technical Support). Rishi's DB spot-check corroborates the existing diagnosis; correctly parked on the customer for a concrete repro. | 1 — already actioned live by Rishi |
-| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | Unchanged. Open question to Sachin/Ali now **5 days** unanswered. | 2 — drafted reply ready, unposted |
+| [PLT-3135](PLT-3135-resolved-filter-system/context.md) | filter-system | In Analysis | Unchanged. Open question to Sachin/Ali now **5 days** unanswered. | 2 — drafted reply ready, unposted |
 
 ### Group B (0)
 
@@ -1212,12 +1212,12 @@ unposted.
 | [PLT-3147](PLT-3147-groupA-viewer-and-model/context.md) | viewer-and-model | Open · Critical | **New.** Customer waiting on us 3 days, mislabelled "waiting on customer"; full mechanism trace, two domain-doc additions | 1, with a class-4 tail split off |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged (1 Freshdesk-echo comment). Board's only other Critical, now **138 days** old; correction **13 days** unposted | 4 with a class-1 chase attached |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **77 days stale, 33rd consecutive run** | 1 — stale, unresponded (on us) |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **10 days** overdue; Gennaro's question **40 days** unanswered | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **10 days** overdue; Gennaro's question **40 days** unanswered | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged (2 Freshdesk-echo comments, 3rd auto-reopen cycle). Human silence now **27 days** | 1 |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged. No human reply since 09-08, now **13 days** cold | 1 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | Unchanged. Chase to Yash now **10 days** past its intended send date | 1 |
 | [PLT-3115](PLT-3115-groupA-other/context.md) | other | With Customer | Unchanged. **5 days** since Yash's own "we can close it now" comment, still no transition | 1 |
-| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | Unchanged. Open question to Sachin/Ali now **4 days** unanswered | 2 — drafted reply ready, unposted |
+| [PLT-3135](PLT-3135-resolved-filter-system/context.md) | filter-system | In Analysis | Unchanged. Open question to Sachin/Ali now **4 days** unanswered | 2 — drafted reply ready, unposted |
 
 ### Group B (1)
 
@@ -1290,7 +1290,7 @@ frontend would fix it — unanswered. Verified in source that the frontend does 
 and that the backend's `new_format: true` save path has no field for it even if it did, which also
 means the one hierarchy-validation guard that exists is a dead no-op on every new-format request.
 **Action class 2** — the open question is answerable from code, not from more evidence. New folder
-`PLT-3135-groupA-filter-system/`.
+`PLT-3135-resolved-filter-system/`.
 
 **PLT-3115** re-enters Group A. 09-17 retagged it `resolved` on the customer's own "we can close the
 ticket now" comment — a correct call on substance, but the ticket's **Jira status never actually
@@ -1325,8 +1325,8 @@ this run — does not change the drafted recipient (Darminder), only the assigne
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-3135](PLT-3135-groupA-filter-system/context.md) | filter-system | In Analysis | **New.** Wrong-parent bug on Discipline/Package add, root cause fully diagnosed in source | 2 |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's "today" reply now **7 days** overdue; Gennaro's question 37 days unanswered | 1 |
+| [PLT-3135](PLT-3135-resolved-filter-system/context.md) | filter-system | In Analysis | **New.** Wrong-parent bug on Discipline/Package add, root cause fully diagnosed in source | 2 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's "today" reply now **7 days** overdue; Gennaro's question 37 days unanswered | 1 |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged. Board's only Critical, now **135 days** old; true-north correction **10 days** unposted | 4 with a class-1 chase attached |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **74 days stale, 32nd consecutive run**; cross-referenced against PLT-3115 as the same "done except the click" pattern | 1 |
 | [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged; assignee cache-error (Darminder→Yash) corrected | 1 |
@@ -1408,7 +1408,7 @@ of durable cross-ticket behaviour that doc is for).
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **6 days** overdue; Gennaro's 08-12 question 39 days unanswered. Combined draft still unposted | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged. Ilia's own "today" reply now **6 days** overdue; Gennaro's 08-12 question 39 days unanswered. Combined draft still unposted | 1 |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged. Board's only Critical, now **134 days** old; true-north correction now **9 days** unposted | 4 with a class-1 chase attached |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. **73 days stale, 31st consecutive run** recommending the identical unposted close-out | 1 — stale, unresponded (on us) |
 | [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-10. One-question draft to Darminder and attachment `64304` both still unopened/unposted | 1 |
@@ -1477,7 +1477,7 @@ routine only drafts.
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Ilia's own 09-11 "will get back to you today" reply to Yash is now **5 days** overdue. Gennaro's Staging undercount (109457, 08-12) is 38 days unanswered. Combined draft to Yash+Gennaro ready, unposted | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Ilia's own 09-11 "will get back to you today" reply to Yash is now **5 days** overdue. Gennaro's Staging undercount (109457, 08-12) is 38 days unanswered. Combined draft to Yash+Gennaro ready, unposted | 1 |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08. Board's only Critical, now **133 days** old. True-north correction to the customer now **8 days** unposted | 4 with a class-1 chase attached |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged since 07-06. **72 days stale, 30th consecutive run** recommending the identical unposted close-out | 1 — stale, unresponded (on us) |
 | [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-10. One-question draft to Darminder and attachment `64304` both still unopened/unposted | 1 |
@@ -1548,7 +1548,7 @@ until now.
 
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | **Worth a look:** Ilia's own 09-11 "will get back to you today" reply to Yash is now 4 days overdue — the one ticket on the board where the outstanding reply is the assignee's own promise, not a third party's. Gennaro's Staging undercount (109457, 08-12) is 34 days unanswered. Combined draft to Yash+Gennaro ready, unposted | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | **Worth a look:** Ilia's own 09-11 "will get back to you today" reply to Yash is now 4 days overdue — the one ticket on the board where the outstanding reply is the assignee's own promise, not a third party's. Gennaro's Staging undercount (109457, 08-12) is 34 days unanswered. Combined draft to Yash+Gennaro ready, unposted | 1 |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08 (comment 111646). Board's only Critical, now **132 days** old. True-north correction to the customer now **7 days** unposted — every day it sits, the customer may act on guidance the 09-08 code read showed doesn't work in the Web Editor | 4 with a class-1 chase attached |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged since 07-06. **71 days stale, 29th consecutive run** recommending the identical unposted close-out | 1 — stale, unresponded (on us) |
 | [PLT-3119](PLT-3119-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-10. 09-14's code read (portfolio-weighting-guard.ts) still stands; the one-question draft to Darminder and attachment `64304` are both still unopened/unposted | 1 |
@@ -1616,7 +1616,7 @@ is the index, not the record.
 | [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | Unchanged since 09-10 — same 2 comments, same 3 attachments, no re-investigation needed. Mechanism (selection-bridge dbId→elementId gap on "select same type"→"isolate") still just a static-code hypothesis; the drafted console check hasn't been run | 3 (pending one check) |
 | [PLT-3115](PLT-3115-groupA-other/context.md) | other (Cloud Admin device page) | **With Customer** (moved from Open) | Darminder ran his own internal repro (Edge+Chrome, Cloud+Dev) and could **not** reproduce the autofill on the main Device Name field — a negative result, consistent with that field's existing `autoComplete='off'`/`data-lpignore='true'` hardening. He's asked Yash for a video + the customer's browser; still open which of the two candidate fields the customer actually means | 1 (ball with customer via Yash) |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08 (comment 111646, a thank-you) — **128 days old** (recomputed), board's only Critical. Code re-verified: the true-north call site is still commented out in `viewer-service.ts`, both named orientation defects still unfixed. The 09-09 correction (the setting the customer was told to change can't affect the Web Editor's section box) is **still not relayed** | 4 with a class-1 chase attached |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since Darminder's 08-17 comment, now **25 days**. Full 6-comment thread re-read end to end, GitHub re-checked for a new PR (none beyond the existing #2084). **Gennaro's Staging-undercount finding is now 30 days unanswered** — the one open item, and the only actionable draft | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since Darminder's 08-17 comment, now **25 days**. Full 6-comment thread re-read end to end, GitHub re-checked for a new PR (none beyond the existing #2084). **Gennaro's Staging-undercount finding is now 30 days unanswered** — the one open item, and the only actionable draft | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk-automation only) | Unchanged since 09-09, field-for-field identical fetch. Human silence now **17 days** (last human comment Mostafa's 08-25 Power BI redirect); the 09-09 chase-to-Yash draft stands, unposted | 1 |
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk auto-reopened) | New comment: Darminder reassigned the ticket **Yash → Pietro Desiato**, "waiting for further input following Ilia's comment" — an internal handoff, not an answer to the still-queued Power BI template-reuse question. What input Pietro needs is itself unclear; flagged rather than guessed | 1 |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged since 07-06. **67 days stale, 27th consecutive run** recommending the identical unposted close-out. Full thread re-read to confirm rather than assume nothing changed | 1 — stale, unresponded (on us) |
@@ -1677,7 +1677,7 @@ to this one). Every in-scope ticket's live comments/status were fetched fresh, n
 | [PLT-3116](PLT-3116-groupA-viewer-and-model/context.md) | viewer-and-model | Open | **Brand new** (created 09-09, 1 day old). "Select same type" → "Isolate" silently no-ops. Full code trace done; mechanism narrowed to a selection-bridge dbId→elementId gap, not the Pattern-1 linked-elements path. One console check (drafted) would confirm or redirect it | 3 (pending one check) |
 | [PLT-3115](PLT-3115-groupA-other/context.md) | other (Cloud Admin device page — no existing domain doc) | Open · Major | **Brand new** (created 09-09, 1 day old). Customer's literal mechanism doesn't match current code: the field that actually saves already has `autoComplete='off'` + `data-lpignore='true'`; a sibling delete-confirmation field has neither, but isn't the one that saves. Need to know which field the customer means before fixing anything | 1, with a no-risk class-2 hardening described but not applied |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-08 comment-wise (111646); the 09-09 interactive session's call-site correction (the true-north lever posted 09-08 has its only caller commented out) already lives in this folder, not yet relayed to the customer | 4 with a class-1 chase attached |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-17 (24 days). The 09-09 retraction of the 08-28 decision-request draft (numbers predated PR #2084) already lives in this folder; Gennaro's Staging undercount (now 29 days old) is the one open item | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-17 (24 days). The 09-09 retraction of the 08-28 decision-request draft (numbers predated PR #2084) already lives in this folder; Gennaro's Staging undercount (now 29 days old) is the one open item | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | Open (Freshdesk auto-reopen, no new human comment) | Unchanged in substance since 09-09; assigned to Ilia, 16 days of human silence, customer has reopened twice | 1 |
 | [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | Unchanged since 09-02 (8 days); the 09-09 close-out draft to Yash already lives in this folder, unposted | 1 (on us, but answered) |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged, now **66 days** stale (last human comment 07-06), **26th consecutive run** recommending the same close-out; the 09-09 pass reframed it as a direct chase to Yash and found a 4th Cat3→Cat4 inversion | 1 — stale, unresponded (on us) |
@@ -1711,7 +1711,7 @@ comment (110665, 08-28) is Yash's question to Ilia/Rishi. Folder name was never 
 | [PLT-3109](PLT-3109-groupA-progress-tracking/context.md) | progress-tracking | Open | **Brand new** (created 09-07 11:26, first run to touch it). Strong pattern match to PLT-3010/PLT-2941 (Pattern 3, progress-weighting basis mismatch) — customer's own words name the exact FE setting. One unverified fact (LVN's live weighting value) would confirm or redirect it | 1 (pending one check) |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | Open | **Real update.** The XER file offered 08-10, asked for by name 08-17, finally arrived 09-07 16:24 (28 days later) — but is a confirmed 403/unopenable from this session. One two-line text-search settles H1; drafted a hand-off to Darminder rather than another customer round trip | 3 |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | Dev In Progress | Reclassified back to Group A this run (see above). Unchanged since 08-28; no PR yet against the 09-04 named fix; still blocked on two console checks only Ilia can run in a live session | 3 |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-17 (comments) / 08-25 (status). Decision-request comment to Mostafa/Pietro still unposted (11 days) | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-17 (comments) / 08-25 (status). Decision-request comment to Mostafa/Pietro still unposted (11 days) | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 09-04 (Freshdesk automation only). Three-question draft to Yash/Mostafa still unposted | 1 |
 | [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | Unchanged since 09-02; Ilia's substantive answer already posted, only a one-line "can we close this?" nudge remains | 1 (on us, but answered) |
 | [PLT-3101](PLT-3101-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Unchanged since 09-04. 4 days since our reply — normal response latency, not yet a stall | resolved-pending-confirmation |
@@ -1756,7 +1756,7 @@ folder's last-recorded comment id/count, not just `updated`.
 | Ticket | Domain | Status | This run | Action class |
 |---|---|---|---|---|
 | [PLT-3101](PLT-3101-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | **Real update.** The 09-03 draft to Yash was sent (comment `111276`, 09-04 12:41): two elements marked installed, "16 dead links" corrected to "real elements with no geometry", residual 835-vs-819 mismatch routed to PLT-2874. Freshdesk auto-flipped to Waiting on customer. Nothing to action — ball is with the customer | resolved-pending-confirmation |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Jira unchanged since 08-25 (13 days). **Correction, not a chase:** checked the 08-28/08-31 "ship the de-dup fix" action item against current `hc-frontend` code — already shipped as part of PR #2084 (both `dashboard-color-service.ts` call sites use `countDistinctElements`). That bullet is retired. Only the decision-request comment to Mostafa/Pietro remains outstanding (10 days unposted) | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Jira unchanged since 08-25 (13 days). **Correction, not a chase:** checked the 08-28/08-31 "ship the de-dup fix" action item against current `hc-frontend` code — already shipped as part of PR #2084 (both `dashboard-color-service.ts` call sites use `countDistinctElements`). That bullet is retired. Only the decision-request comment to Mostafa/Pietro remains outstanding (10 days unposted) | 1 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` moved (09-04) but it's Freshdesk automation only (Closed→Waiting on customer flip), no human reply. Mostafa's 08-25 Power BI redirect still the last technical word. 10 days since a human touched it | 1 |
 | [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | With Customer | Unchanged since 09-02; Ilia's answer ("no way to sync, not planned") already posted and *is* the close-out — nothing further owed unless the customer replies | 1 (on us, but answered) |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged since 08-18 (20 days); customer's 08-10 XER-pair offer still never taken up | 1 |
@@ -1875,7 +1875,7 @@ own lesson that `updated` alone had already produced three false "unchanged" ver
 | [PLT-3101](PLT-3101-groupA-viewer-and-model/context.md) | viewer-and-model | Open | No new comments since 09-03 11:11 (already fully captured: customer found 1 of 3 missing elements themselves, 2 confirmed unlocatable, authorised remediation, Freshdesk now "Waiting on 3rd line" — ball is ours). 92-word draft to Yash from 09-03 still unposted | 2/3 split, unchanged |
 | [PLT-3095](PLT-3095-groupA-schedule-tab/context.md) | schedule-tab | With Customer | **Resolved outside this routine.** Ilia posted the join-collision explanation + rename workaround directly (`111180`, 09-03 15:12) — matches this folder's own drafted text almost verbatim — and Freshdesk flipped to "Waiting on customer" (`111183`). No outstanding draft; only follow-up is if the customer's re-upload doesn't fix it | resolved-pending-confirmation |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Unchanged. Board's longest-unposted item, now **60 days, 26th consecutive run** on the same close-out draft | 1 — stale, unresponded (on us) |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-25; decision-request to Mostafa/Pietro still unposted | 1 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 08-25; decision-request to Mostafa/Pietro still unposted | 1 |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Unchanged since 09-01; Critical, 120+ days; Ilia's own local-build verification of H1/H2 still the open action | 3 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | Unchanged since 08-25; three-hypothesis split still undistinguished | 1 |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Unchanged since 08-18 (comments); still waiting on the customer's XER pair | 1 |
@@ -2116,7 +2116,7 @@ each checked by reading the actual new comments rather than trusted on timestamp
 |---|---|---|---|
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | With Customer | **Resolved 09-02, not by us.** Status auto-flipped In Analysis → With Customer by the Freshdesk sync bot (`111106`) after Ilia posted Mostafa's close decision himself (`111104`, 09-02 18:24, no @-mention) — nothing left in our queue but watching for the customer's confirmation |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | Board's longest-unposted item: **59 days, 25th consecutive run** on the same close-out draft |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53; decision-request to Mostafa/Pietro still unposted |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53; decision-request to Mostafa/Pietro still unposted |
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 09-01 17:30; Critical, 119+ days; Ilia's own local-build verification of H1+H2 still the open action, no reply sent |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07; three-hypothesis split still undistinguished |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | `updated` unchanged since 08-18; still waiting on the customer's XER pair |
@@ -2290,7 +2290,7 @@ the 09-01 record — all match exactly, so none of these needed a fresh comment 
 |---|---|---|---|
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | Board's only Critical ticket; **50 days, 29th consecutive run** on the same 4 ready drafts |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | **58 days, 24th consecutive run** recommending the same close-out |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53; decision-request to Mostafa/Pietro still unposted |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53; decision-request to Mostafa/Pietro still unposted |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07; three-hypothesis split still undistinguished |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | `updated` unchanged since 08-18; still waiting on the customer's XER pair |
 | [PLT-3051](PLT-3051-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | `updated` unchanged since 08-27; fix shipped/QA-verified, still no customer confirmation |
@@ -2408,7 +2408,7 @@ unassigned, 18+ days) isn't touched by this closing either. Full detail: `contex
 | [PLT-2651](PLT-2651-groupA-viewer-and-model/context.md) | viewer-and-model | Open | No new comment since 08-28 14:53 |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | **57 days stale, 23rd consecutive run** recommending the same close-out; flagged below |
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | Board's only Critical ticket; **49 days, 28th consecutive run** on the same 4 ready drafts; flagged below |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Comments unchanged since 08-17; `updated` field itself moved to 08-25 for reasons not visible in the fields fetched — noted, not chased |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Comments unchanged since 08-17; `updated` field itself moved to 08-25 for reasons not visible in the fields fetched — noted, not chased |
 | [PLT-2890](PLT-2890-groupA-filter-system/context.md) | filter-system | In Analysis | No reply yet to the customer's two-contractor-filters question (110634, 08-28) |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | No reply since Mostafa's 08-25 PowerBI-export theory, which was never reconciled against Ilia's original Save-bug diagnosis — noted as an open gap |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | Still waiting on the customer for the previous/current XER pair Darminder asked for 08-17; possible link to PLT-3095, see above |
@@ -2527,7 +2527,7 @@ verbatim against the 08-28 record)
 | Ticket | Domain | Status | Note this run |
 |---|---|---|---|
 | [PLT-3051](PLT-3051-groupA-viewer-and-model/context.md) | viewer-and-model | With Customer | Fix shipped 26.3.5 (08-24), QA-verified; still no customer confirmation, 4 days silent — Yash's process, not ours |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | Decision-request draft (de-dup + relabel dashboard tile) still unposted to Mostafa/Pietro since 08-25 |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | Decision-request draft (de-dup + relabel dashboard tile) still unposted to Mostafa/Pietro since 08-25 |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07; 6 days since Freshdesk #7461 reopened, three-hypothesis split still undistinguished |
 | [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | Open | No change; Josh (owes 8 rework-cost values) still on leave, due back ~09-02 |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | 13 days cold; Darminder's schedule-pair ask relayed to nobody — now a process blocker, not a technical one |
@@ -2672,7 +2672,7 @@ dashboard 851,409 on FAR01, net −3.2%, decomposing into a −82,404 population
 dbId-expansion effect) into a concrete decision-request draft for Mostafa/Pietro — verdict: no
 arithmetic bug, but the dashboard tile should be de-duplicated **and** relabelled — plus a small
 de-dup FE fix flagged as shippable independent of the labelling decision. `updated` unchanged since
-08-25 09:53. Full detail: `PLT-2874-groupA-viewer-and-model/context.md` + `recommended-action.md`
+08-25 09:53. Full detail: `PLT-2874-resolved-viewer-and-model/context.md` + `recommended-action.md`
 § 2026-08-28.
 
 > **⚠️ Superseded 2026-09-09 — do not reuse the figures in the paragraph above.** The de-dup fix was
@@ -2680,7 +2680,7 @@ de-dup FE fix flagged as shippable independent of the labelling decision. `updat
 > wrong predicate, so `851,409` and the `−82,404` population term are both invalid. On Prod the two
 > surfaces agree to ~0.5%, measured twice. The decision-request draft to Mostafa/Pietro is **retracted
 > and must not be posted**; the open item is Gennaro's Staging undercount. See
-> `PLT-2874-groupA-viewer-and-model/investigation-log.md` § 2026-09-09.
+> `PLT-2874-resolved-viewer-and-model/investigation-log.md` § 2026-09-09.
 
 ### PLT-3061 and PLT-2858 — no change (handled earlier today, restated here for the board record)
 
@@ -2840,7 +2840,7 @@ sweep; noted here only because this is the first README entry since that happene
 | [PLT-3034](PLT-3034-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-19 |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | `updated` unchanged since 08-18; schedule-pair ask now 9 days cold |
 | [PLT-2918](PLT-2918-groupA-progress-tracking/context.md) | progress-tracking | With Customer | `updated` unchanged since 08-25 17:07 (already captured by the 08-26 sweep); 3-way hypothesis split still undistinguished |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53 (already captured); asks now 10 days unposted |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | In Analysis | `updated` unchanged since 08-25 09:53 (already captured); asks now 10 days unposted |
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | `updated` unchanged since 08-20; **25 consecutive runs / 44 days** unposted, board's only Critical, unchanged top priority |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | `updated` unchanged since 07-06; **52 days** stale, 20th run recommending close-out |
 
@@ -2945,7 +2945,7 @@ and newest-comment timestamp checked against each folder's own record — not a 
 | [PLT-3061](PLT-3061-groupA-quality-management/context.md) | quality-management | Open | 08-20 (customer's unprompted CSA-TCB/KGE confirmation) | 6 comments, unchanged; Darminder's tag of Mostafa/Pietro now **~6 days** silent, past the 24h stall line |
 | [PLT-3034](PLT-3034-groupA-progress-tracking/context.md) | progress-tracking | With Customer | 08-19 (customer's QA-model denial) | 19 comments, unchanged; Fork A/B still undecided, now blocking two tickets instead of one (see PLT-3059 above) |
 | [PLT-3033](PLT-3033-groupA-data-pipeline/context.md) | data-pipeline | With Customer | 08-17 (Darminder's schedule-pair ask) | 5 comments, unchanged; ask now **8 days** cold, still no evidence it reached the customer |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-17 (Darminder: "fix still ongoing") | 6 comments, unchanged; Gennaro ask + sanity-check line now **8 days** unposted |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | Open | 08-17 (Darminder: "fix still ongoing") | 6 comments, unchanged; Gennaro ask + sanity-check line now **8 days** unposted |
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments (fetched in full this run, not just counted), byte-identical; escalate-to-Pietro still unposted across **23 consecutive runs**, now **42 days** on Mostafa's own unanswered question; board's only Critical ticket |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **50 days stale**, close-out still unposted across **18 consecutive runs** |
 | [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, unchanged; **32 days** silence on a fix owned entirely by the client's project-delivery team |
@@ -3172,7 +3172,7 @@ progress-artefact `calculatedOn` watermark) stand exactly as recorded 08-13/08-1
 Gennaro ask is unchanged and now 6 days unsent; the Darminder line was re-pointed at something
 answerable with a link (*"where does the fix for this live — I can't find a branch or PR beyond the one
 that merged 31 July"*), since the reassignment means the two open drafts are now Ilia's own next action
-rather than a nudge to someone else. Full update: `PLT-2874-groupA-viewer-and-model/context.md`.
+rather than a nudge to someone else. Full update: `PLT-2874-resolved-viewer-and-model/context.md`.
 
 ### PLT-3034 — re-entered scope on a customer rebuttal, and a workaround already in circulation may be actively wrong
 
@@ -3396,7 +3396,7 @@ timestamps checked verbatim against the 08-18 record — not a rubber stamp)
 |---|---|---|---|---|
 | [PLT-3044](PLT-3044-groupA-filter-system/context.md) | filter-system | Open | 08-13 (Mostafa: "nothing from our side... close the ticket") | **new comment 08-18** (Yash posted a bare link to external support ticket #7628, no text) — flagged for whoever executes the close to check first; disposition unchanged, move-to-Done still unposted, now **5 consecutive runs** |
 | [PLT-2946](PLT-2946-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Rishi's PLT-2874 follow-up) | unchanged; customer-status-update draft still unposted, now **20 days** |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-17 (Darminder: "fix still ongoing") | unchanged; this is now the **second** unqualified "ongoing" claim with no ship date or named mechanism — added a separate sanity-check line to Darminder alongside the existing Gennaro ask |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | Open | 08-17 (Darminder: "fix still ongoing") | unchanged; this is now the **second** unqualified "ongoing" claim with no ship date or named mechanism — added a separate sanity-check line to Darminder alongside the existing Gennaro ask |
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro still unposted across **14 consecutive runs**, now **19 days** silent, board's only Critical ticket |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **44 days stale**, direct close-out still unposted across **14 consecutive runs**; now directly relevant to new ticket PLT-3061 (same subsystem, see Pattern 6) |
 | [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, unchanged; **26 days** silence on a fix that sits entirely with the client's project-delivery team |
@@ -3554,7 +3554,7 @@ landed 08-17: Yash asked Darminder if a fix shipped; Darminder said "fix still o
 testing." Neither names the project/model or the slider state this folder's open questions need.
 The 08-14 draft is unchanged and still the right message — now doubling as a sanity check on whatever
 Darminder's team is testing, in case the fix under test targets the wrong one of the five live
-hypotheses. Full update: `PLT-2874-groupA-viewer-and-model/context.md` § 2026-08-18.
+hypotheses. Full update: `PLT-2874-resolved-viewer-and-model/context.md` § 2026-08-18.
 
 ### Tickets confirmed unchanged (verified via live JQL fetch, `comment` field included, counts and
 timestamps checked verbatim against the 08-17/08-14 record — not a rubber stamp)
@@ -3653,7 +3653,7 @@ content checked verbatim against what the 08-14 run recorded — not a rubber st
 | [PLT-3044](PLT-3044-groupA-filter-system/context.md) | filter-system | Open | 08-13 (Mostafa: "nothing from our side... close the ticket") | 3 comments, unchanged; **recommended move-to-Done still unposted, now 3 consecutive runs** |
 | [PLT-3024](PLT-3024-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-06 (Rishi's federation question) | 10 comments, unchanged; question now **11 days** unanswered |
 | [PLT-2909](PLT-2909-groupA-progress-tracking/context.md) | progress-tracking | Open | 07-31 (Yash → Ali, "move to DPL?") | 11 comments, unchanged; **now 17 days unanswered**; the 08-10-drafted one-line nudge to Ali is still unsent |
-| [PLT-2874](PLT-2874-groupA-viewer-and-model/context.md) | viewer-and-model | Open | 08-12 (Gennaro's Staging undercount finding) | 4 comments, unchanged; the drafted ask to Gennaro (project/model name + date-slider screenshot) is still unsent, now **5 days** unanswered |
+| [PLT-2874](PLT-2874-resolved-viewer-and-model/context.md) | viewer-and-model | Open | 08-12 (Gennaro's Staging undercount finding) | 4 comments, unchanged; the drafted ask to Gennaro (project/model name + date-slider screenshot) is still unsent, now **5 days** unanswered |
 | [PLT-2858](PLT-2858-groupA-quality-management/context.md) | quality-management | In Analysis | 07-31 (Yash's 4th nudge to Mostafa) | 27 comments, unchanged; escalate-to-Pietro decision request still unposted across **12 consecutive runs** on the board's only Critical ticket, now **17 days** silent |
 | [PLT-2815](PLT-2815-groupA-quality-management/context.md) | quality-management | With Customer | 07-06 (Freshdesk closed) | 13 comments, unchanged; **42 days stale**, direct close-out still unposted across **12 consecutive runs** |
 | [PLT-2649](PLT-2649-groupA-360-captures/context.md) | 360-captures | With Customer | 07-24 (Ilia handed over the model/level/elevation fix) | 16 comments, unchanged; **24 days** silence on a fix that sits entirely with the client's project-delivery team; the "did the hand-off carry the detail" nudge to Yash is still unsent |
@@ -3800,7 +3800,7 @@ null-`modelElementId` drop in the new counting helper itself. **All five are fal
 Staging browser console and DuckDB panel in about five minutes, no code change needed** — two log
 lines plus three `COUNT(DISTINCT modelElementId)` queries at three points in the pipeline localise
 exactly where the ~52,000 elements disappear. Full findings, ranked hypotheses and the drafted
-comment to Gennaro: `PLT-2874-groupA-viewer-and-model/context.md` §"Reopened 2026-08-13" +
+comment to Gennaro: `PLT-2874-resolved-viewer-and-model/context.md` §"Reopened 2026-08-13" +
 `recommended-action.md`. New candidate defect pattern added to `recurring-defect-patterns.md`
 (single occurrence, unconfirmed — see below).
 
@@ -5125,7 +5125,7 @@ Board (PLT, Live Incident, not Done): **15** (was 16). In scope **7, all Group A
 
 | class | ticket | change since 11-11 |
 |---|---|---|
-| residual, owed by Ilia | **PLT-3135** (Ilia, In Code Review) | Fix #2424 **merged 11-04**, Jira still In Code Review 8 days later, so QA has no signal; not in any tag (newest `v26.4.2`, 10-29). Move to Ready For QA. [folder](PLT-3135-groupA-filter-system/context.md) |
+| residual, owed by Ilia | **PLT-3135** (Ilia, In Code Review) | Fix #2424 **merged 11-04**, Jira still In Code Review 8 days later, so QA has no signal; not in any tag (newest `v26.4.2`, 10-29). Move to Ready For QA. [folder](PLT-3135-resolved-filter-system/context.md) |
 | residual, out of scope | **PLT-3439** ATL09/ATL10 attributes | Done 11-11 on Rishi's workaround and a promise that PLT-3135 fixes it in the next release. Whether #2424 covers a package named like its discipline is not traced. [folder](PLT-3439-resolved-filter-system/context.md) |
 | residual, out of scope | PLT-3441 ELN04 section box | PR #2466 **approved by Darminder 11-11 18:03** (head `91df246`), vertex check for partial overlaps matches the 11-11 inference; he flagged a residual single-element widening from descendant traversal. Not merged. 11-11 pointer to Rishi void. [folder](PLT-3441-resolved-viewer-and-model/context.md) |
 | 1, parked | PLT-3415, 3300, 3275, 3115, 2874, 3063, 2651 | unchanged (3115 57 days With Customer; 3063 45 days Customer Release Check) |
@@ -5147,3 +5147,18 @@ Board (PLT, Live Incident, not Done): **15**, the same 15 as 11-12. In scope **7
 **Owed by Ilia:** move PLT-3135 to Ready For QA (second day). Still open: PLT-2651 (Rishi's snap question and the 10-13 true-north correction, drafts in folder), PAPI-4334 (Yash's question), optional 11-06 chase to Yash on 3300 (now 7 days old; re-read before sending). **Standing, not ours:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash); 3415 (new table, Project Delivery).
 **Unopenable media (403, not retried):** Darminder's review videos on #2466; Freshdesk screenshots on 3415, 3300, 3275; 2858 `66039`.
 **Not verified:** the #2466 descendant widening on a real model; #2424 on the PLT-3439 case; customer outcomes on 3063 and 2651. Fetched: board list and an `updated >= 11-12` query; no in-scope ticket re-fetched with comments (stamps unchanged). Nothing posted or moved in Jira or GitHub. No notification sent (nothing new needs Ilia). Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-16 (scheduled)
+
+Board (PLT, Live Incident, not Done): **14** (was 15). In scope **6, all Group A (parked), Group B empty**: PLT-3415, 3300, 3275, 3115 (With Customer), 3063, 2651 (Customer Release Check). Nothing in Needs Evaluation, In Analysis, Ready For Development or Dev In Progress. Out by status: 3406 (With Technical Support), 3441, 3401, 3389, 3308, 3291, 3135, 2858 (Ready For QA). No new tickets since 11-11. hc-frontend master `480d3f5` (was `7c535eb`): seven commits (PLT-3121, 2710, 3268, 3408, 3303, 3322, 3449); none touches the rework cost hook, its reference JSON, the section box or dashboard counts. No new release tag (newest `v26.4.2`).
+
+| class | ticket | change since 11-13 |
+|---|---|---|
+| left scope | **PLT-2874** fed file vs dashboard counts | **Done 11-14 01:18** by Freshdesk 7514 closure, resolution empty, no customer reply after Ilia's 10-30 answer (inferred auto-close). Residuals recorded, not owed: Gennaro's 08-12 Staging gap, Ali's 1,364 question. Folder renamed `resolved`. [folder](PLT-2874-resolved-viewer-and-model/context.md) |
+| closed obligation | **PLT-3135** | Ilia moved it to Ready For QA 11-13 13:27, fixVersion 26.4.3, now Gennaro. Not in a tag yet. Folder renamed `resolved`. [folder](PLT-3135-resolved-filter-system/context.md) |
+| 1, parked | PLT-3415 | sprint carry-over 56 → 57 by Darminder only; no comment. Still waiting on Project Delivery's table |
+| 1, parked | PLT-3300, 3275, 3115, 3063, 2651 | unchanged, `updated` stamps identical (3115 61 days With Customer; 3063 49 days Customer Release Check) |
+
+**Owed by Ilia:** nothing new. Still open: PLT-2651 (Rishi's snap question and the 10-13 true-north correction, drafts in folder), PAPI-4334 (Yash's question), optional chase to Yash on 3300 (11-06 draft, re-read before sending). **Standing, not ours:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash); 3415 (new table, Project Delivery).
+**Unopenable media (403, not retried):** Freshdesk screenshots on 3415 (`103360473696`, `103360473697`), 3300, 3275; 2858 `66039`.
+**Not verified:** whether the customer on 2874 actually confirmed (Freshdesk not readable); #2424 on the PLT-3439 case; customer outcomes on 3063 and 2651. Fetched with comments: 2874 and 3415 (the stamps that moved); 3135 changelog. Nothing posted or moved in Jira. No notification sent (nothing new needs Ilia). Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.

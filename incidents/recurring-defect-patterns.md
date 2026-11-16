@@ -776,7 +776,7 @@ Full working: `live-incident-board-tickets/PLT-2649-groupA-360-captures/platform
   `COUNT(DISTINCT modelElementId)` at each of `_visible_elements` / `element_base_data` /
   `activity_links` to localise which layer drops the count. Single occurrence, unconfirmed — promote
   only once one of the three hypotheses is actually verified against Staging, and note here which
-  one it was. Full findings: `live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/context.md`
+  one it was. Full findings: `live-incident-board-tickets/PLT-2874-resolved-viewer-and-model/context.md`
   §"Reopened 2026-08-13".
 
 ### 2026-08-14 additions to the candidate list
@@ -800,7 +800,7 @@ Full working: `live-incident-board-tickets/PLT-2649-groupA-360-captures/platform
   emission (`date-range.tsx:133-162`, fed by `dashboard-progress-service.ts:254-300`, emitted from
   both `:771` and `:876`), so *comparing the slider's start/end dates between the two environments*
   tests the date-window hypothesis from a screenshot. Still a single unconfirmed occurrence; still
-  not promotable. Details: `live-incident-board-tickets/PLT-2874-groupA-viewer-and-model/context.md`
+  not promotable. Details: `live-incident-board-tickets/PLT-2874-resolved-viewer-and-model/context.md`
   § 2026-08-14.
 
 - **Hardcoded display whitelist between a rich upstream source and the panel, 2026-08-14**

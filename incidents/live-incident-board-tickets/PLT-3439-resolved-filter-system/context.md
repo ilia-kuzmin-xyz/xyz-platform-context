@@ -15,7 +15,7 @@ straight to With Technical Support, then **Done 2026-11-11 11:19 by Freshdesk cl
 
 ## Residual (2026-11-12)
 - PLT-3135's fix is hc-frontend #2424 (`af29e59`, merged 11-04), **in no release tag** (newest `v26.4.2`,
-  10-29). See `../PLT-3135-groupA-filter-system/context.md` § 2026-11-12.
+  10-29). See `../PLT-3135-resolved-filter-system/context.md` § 2026-11-12.
 - **Not verified:** that #2424 fixes this case (it changes parent naming to ids; a server rule
   rejecting same-name parent/child would not be affected); the silent no-error save is not addressed
   by #2424.
