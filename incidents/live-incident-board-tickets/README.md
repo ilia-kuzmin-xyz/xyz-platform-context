@@ -5162,3 +5162,9 @@ Board (PLT, Live Incident, not Done): **14** (was 15). In scope **6, all Group A
 **Owed by Ilia:** nothing new. Still open: PLT-2651 (Rishi's snap question and the 10-13 true-north correction, drafts in folder), PAPI-4334 (Yash's question), optional chase to Yash on 3300 (11-06 draft, re-read before sending). **Standing, not ours:** 3115 close with a resolution; 3063; 3275, 3300 (Joshua's file via Yash); 3415 (new table, Project Delivery).
 **Unopenable media (403, not retried):** Freshdesk screenshots on 3415 (`103360473696`, `103360473697`), 3300, 3275; 2858 `66039`.
 **Not verified:** whether the customer on 2874 actually confirmed (Freshdesk not readable); #2424 on the PLT-3439 case; customer outcomes on 3063 and 2651. Fetched with comments: 2874 and 3415 (the stamps that moved); 3135 changelog. Nothing posted or moved in Jira. No notification sent (nothing new needs Ilia). Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-18 (scheduled) — did not run: Atlassian MCP unreachable
+
+The Atlassian-Rovo MCP server failed to connect for the whole session (4 attempts over ~2 min, each `404` / `CLIENT_HTTP_NOT_IMPLEMENTED` at the connector layer — the connector endpoint, not Jira auth). No board fetch, no ticket read, so **nothing in this file or any ticket folder was updated from Jira**. The 11-16 entry above is still the latest known board state; do not read this entry as "board unchanged".
+
+Not done as a fallback, deliberately: reconstructing statuses from the 11-16 notes, since those could be stale and would mislead the next run. Next run: compare against **11-16**, and query `updated >= 2026-11-16` so the 11-16 → 11-18 changes are caught. Owed items from 11-16 carry over unchanged. Notification sent to Ilia. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
