@@ -5196,3 +5196,11 @@ Same failure as 11-18, 11-19, 11-20 and 11-23. The Atlassian-Rovo MCP server wou
 No board fetch and no ticket reads, so **nothing was updated from Jira**. The latest known board state is still **11-16** (8 days old). Statuses were not reconstructed.
 
 **Needs Ilia (unchanged from 11-23):** remove the Atlassian connector from this routine and add it back (or disconnect and reconnect it in claude.ai connector settings), then trigger the routine by hand. Next working run: compare against **11-16**, query `updated >= 2026-11-16`, and carry over the 11-16 owed items (PLT-2651 drafts, PAPI-4334, optional 3300 chase). Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
+
+## Run 2026-11-25 (scheduled): did not run, Atlassian MCP unreachable (6th run running)
+
+Same failure as 11-18, 11-19, 11-20, 11-23 and 11-24. The Atlassian-Rovo MCP server would not connect: 4 attempts over about 2 minutes, each `404` / `CLIENT_HTTP_NOT_IMPLEMENTED` at the connector layer. The registry still shows "Atlassian MCP" as `installState: connected` but `enabledInChat: false` for this session, so the 11-23 diagnosis stands: the routine's connector binding is stale, not Jira auth. GitHub MCP connected normally.
+
+No board fetch and no ticket reads, so **nothing was updated from Jira**. The latest known board state is still **11-16** (9 days old). Statuses were not reconstructed.
+
+**Needs Ilia (unchanged since 11-23):** remove the Atlassian connector from this routine and add it back (or disconnect and reconnect it in claude.ai connector settings), then trigger the routine by hand. Next working run: compare against **11-16**, query `updated >= 2026-11-16`, and carry over the 11-16 owed items (PLT-2651 drafts, PAPI-4334, optional 3300 chase). Notification sent. Committed to `main` per the repo's branch policy, which overrides the session's branch instruction.
